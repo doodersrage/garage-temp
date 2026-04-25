@@ -3,14 +3,27 @@ const response = await fetch('https://garage.robmcd.name/');
 const temps = await response.json();
 ---
 
-<div>
-  <h1>Garage Temperatures</h1>
-  
-    <h3>Temp Probe 0:</h3>
-    <p></p>{temps.temp["0"].c}°C, {temps.temp["0"].f}°F, {temps.temp["0"].h}%</p>
-    <h3>Temp Probe 1:</h3>
-    <p></p>{temps.temp["1"].c}°C, {temps.temp["1"].f}°F, {temps.temp["1"].h}%</p>
-    <h3>Average:</h3>
-    <p></p>{temps.temp["avg"].c}°C, {temps.temp["avg"].f}°F, {temps.temp["avg"].h}%</p>
-  
+<div class="temps-wrap">
+  <div class="container">
+    <h1>Garage Temperatures</h1>
+    <div class="grid grid-cols-4 gap-4">
+      <div><h3>Temp Probe 0:</h3>
+      <p></p>{temps.temp["0"].c}°C, {temps.temp["0"].f}°F, {temps.temp["0"].h}%</p></div>
+      <div><h3>Temp Probe 1:</h3>
+      <p></p>{temps.temp["1"].c}°C, {temps.temp["1"].f}°F, {temps.temp["1"].h}%</p></div>
+      <div><h3>Average:</h3>
+      <p></p>{temps.temp["avg"].c}°C, {temps.temp["avg"].f}°F, {temps.temp["avg"].h}%</p></div>
+    </div>
+  </div>
 </div>
+<style>
+    .temps-wrap {
+        background: rgba(255, 255, 255, 0.2); /* Semi-transparent color */
+        backdrop-filter: blur(10px);          /* Blurs content behind */
+        -webkit-backdrop-filter: blur(10px);
+        margin: 20px;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #000;
+    }  
+</style>
