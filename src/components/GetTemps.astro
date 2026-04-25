@@ -1,0 +1,16 @@
+---
+const response = await fetch('https://garage.robmcd.name/');
+const temps = await response.json();
+---
+
+<div>
+  <h1>Garage Temperatures</h1>
+  
+    <p></p>Temp Probe 0: <br />
+    {temps.temp["0"].c}°C, {temps.temp["0"].f}°F, {temps.temp["0"].h}%</p>
+    <p></p>Temp Probe 1: <br />
+    {temps.temp["1"].c}°C, {temps.temp["1"].f}°F, {temps.temp["1"].h}%</p>
+    <p></p>Average: <br />
+    {temps.temp["avg"].c}°C, {temps.temp["avg"].f}°F, {temps.temp["avg"].h}%</p>
+  
+</div>
