@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css'
+const currentYear = new Date().getFullYear();
 ---   
 <!doctype html>
 <html lang="en">
@@ -9,13 +10,14 @@ import '../styles/global.css'
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
+		<link rel="sitemap" href="/sitemap-index.xml" />
 		<title>Garage Temperature Monitor</title>
 	</head>
 	<body>
 		<div class="flex flex-col min-h-screen">
 			<header class="bg-blue-600 text-white p-4">
 				<div class="container mx-auto flex justify-between items-center">
-				<h1 class="text-2xl font-bold">Logo</h1>
+				<h1 class="text-2xl font-bold"><a href="/">Garage Temperature Monitor</a></h1>
 				<nav class="flex gap-4">
 					<a href="/" class="hover:text-blue-200">Home</a>
 					<a href="/about" class="hover:text-blue-200">About</a>
@@ -23,19 +25,10 @@ import '../styles/global.css'
 				</nav>
 				</div>
 			</header>
-			<main class="flex-grow p-4">
+			<main class="flex-grow p-4 m-auto container">
 				<slot />
 			</main>
-			 <footer class="bg-gray-300 p-4">Copyright © 2026 Garage Temperature Monitor. All rights reserved.</footer>
+			 <footer class="bg-gray-300 flex items-center justify-center p-4">Copyright © {currentYear} Garage Temperature Monitor. All rights reserved.</footer>
 		</div>
 	</body>
 </html>
-
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>

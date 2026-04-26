@@ -1,8 +1,94 @@
 ---
+export const prerender = false;
 import Layout from '../layouts/Layout.astro';
----
+import { sendEmail } from '../lib/Nodemailer'; 
 
-<Layout>
-    <h1 class="text-3xl font-bold mb-4">Contact Us</h1>
-    <p class="mb-4">Feel free to reach out to us with any questions or feedback!</p>
-</Layout>
+let errors = { name: "", email: "", message: "" };
+if (Astro.request.method === "POST") {
+  errors = { name: "", email: "", message: "" };
+  try {
+    const data = await Astro.request.formData();
+    const name = data.get("name")
+    const email = data.get("email")
+    const message = data.get("message")
+
+    // Validation logic
+    const hasErrors = Object.values(errors).some(msg => msg)
+
+    if (!hasErrors) {
+      const payload = {
+        name: name,
+        email: email,
+        html: JSON.stringify(message),
+        subject: 'Contact Form Submission',
+      };
+      await sendEmail(payload);
+      console.log("Email sent successfully");
+    }
+
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
+  }
+}
+---
+<html>
+    <head>
+        <script is:inline src="https://www.google.com/recaptcha/api.js"></script>
+    </head>
+    <body>
+        <Layout>
+            <h1 class="text-3xl font-bold mb-4">Contact Us</h1>
+            <p class="mb-4">Feel free to reach out to us with any questions or feedback! (form is currently not functional)</p>
+            <form method="POST" class="max-w-md">
+            <div>
+                <label class="block text-black-700 text-sm font-bold mb-2" for="username">
+                Name<sup>*</sup>
+            </label>
+                <input class="bg-gray-200 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" placeholder="Name" />
+                <div>{errors.name}</div>
+            </div>
+            <div>
+                <label class="block text-black-700 text-sm font-bold mb-2" for="username">
+                Email<sup>*</sup>
+            </label>
+                <input class="bg-gray-200 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="email" name="email" placeholder="Email" />
+                <div>{errors.email}</div>  
+            </div>
+            <div>
+                <label class="block text-black-700 text-sm font-bold mb-2" for="username">
+                Message<sup>*</sup>
+            </label>
+                <textarea class="bg-gray-200 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" name="message" placeholder="Message"></textarea>
+                <div>{errors.message}</div>  
+            </div>
+            <div>
+                <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" value="Send" />
+            </div>
+            </form>
+        </Layout>
+
+        <button class="g-recaptcha"
+        data-sitekey="6LcxAswsAAAAAMGia7AwCffLGoOHIlV4q0ysEvyn"
+        data-callback="onSubmit"
+        data-action="submit"></button>
+
+        <script is:inline>
+        function onSubmit(token) {
+            fetch("/recaptcha", {
+            method: "POST",
+            body: JSON.stringify({ recaptcha: token })
+            })
+            .then((response) => response.json())
+            .then((gResponse) => {
+            if (gResponse.success) {
+                // Captcha verification was a success
+            } else {
+                // Captcha verification failed
+            }
+            })
+        }
+        </script>
+    </body>
+</html>

@@ -5,8 +5,12 @@ import node from '@astrojs/node';
 
 import tailwindcss from '@tailwindcss/vite';
 
+import sitemap from '@astrojs/sitemap';
+
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://garage-temp.robmcd.name',
+
   server: {
     host: true
   },
@@ -17,5 +21,12 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()]
-  }
+  },
+
+  security: {
+    checkOrigin: false
+  },
+
+  output: 'server',
+  integrations: [sitemap()]
 });
