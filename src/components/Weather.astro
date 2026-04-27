@@ -1,7 +1,7 @@
 ---
-export const prerender = false; // On-demand rendering
+//export const prerender = false; // On-demand rendering
 Astro.cache.set({
-  maxAge: 3600, // Cache for 1 hour
+  maxAge: 1300, // Cache for 1 hour
   swr: 600,     // Stale-while-revalidate for 10 minutes
 });
 import { fetchWeather } from '../lib/FetchWeather';
