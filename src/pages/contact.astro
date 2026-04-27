@@ -4,6 +4,8 @@ import Layout from '../layouts/Layout.astro';
 import { sendEmail } from '../lib/Nodemailer'; 
 
 const recaptchaSiteKey = import.meta.env.RECAPTCHA_SITE_KEY;
+let successSubmission = false;
+let errorMessage = '';
 
 let errors = { name: "", email: "", message: "" };
 if (Astro.request.method === "POST") {
@@ -25,12 +27,14 @@ if (Astro.request.method === "POST") {
         subject: 'Contact Form Submission',
       };
       await sendEmail(payload);
-      console.log("Email sent successfully");
+      successSubmission = true;
+
     }
 
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);
+      errorMessage = error.message;
     }
   }
 }
@@ -42,7 +46,9 @@ if (Astro.request.method === "POST") {
     <body>
         <Layout>
             <h1 class="text-3xl font-bold mb-4">Contact Us</h1>
-            <p class="mb-4">Feel free to reach out to us with any questions or feedback! (form is currently not functional)</p>
+            <p class="mb-4">Feel free to reach out to us with any questions or feedback!</p>
+            {errorMessage && (<p class="text-red-500 font-bold mb-4">{errorMessage}</p>)}
+            {!successSubmission && (     
             <form method="POST" class="max-w-md">
             <div>
                 <label class="block text-black-700 text-sm font-bold mb-2" for="username">
@@ -69,6 +75,7 @@ if (Astro.request.method === "POST") {
                 <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" value="Send" />
             </div>
             </form>
+            ) || (<p class="text-green-500 font-bold">Your message has been sent successfully!</p>)}
         </Layout>
 
         <button class="g-recaptcha"

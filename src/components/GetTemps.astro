@@ -1,4 +1,9 @@
 ---
+export const prerender = false; // On-demand rendering
+Astro.cache.set({
+  maxAge: 3600, // Cache for 1 hour
+  swr: 600,     // Stale-while-revalidate for 10 minutes
+});
 const response = await fetch('https://garage.robmcd.name/');
 const temps = await response.json();
 ---

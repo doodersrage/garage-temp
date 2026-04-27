@@ -1,9 +1,19 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { Image } from 'astro:assets';
+import tempProbeV1 from '../assets/temp-probe-v1.jpg';
+import tempProbeV2 from '../assets/temp-probe-v2.jpg';
+import JSONProbe from '../assets/json-temp.jpg';
 ---
 
 <Layout>
     <h1 class="text-3xl font-bold mb-4">About Us</h1>
+    <div class="grid grid-cols-4 gap-4">
+        <div><Image src={tempProbeV1} alt="version 1 of temperature problem Arduino board" /></div>
+        <div><Image src={tempProbeV2} alt="version 2 of temperature problem Arduino board" /></div>
+        <div><Image src={JSONProbe} alt="JSON temperature data output" /></div>
+        <div></div>
+    </div>
     <p class="mb-4">This is just a simnple website used to display temperature and humidity data using an Arduino sketch with a network shield outputting data into JSON format. The Arduino sketch can be found here: <a target="_blank" href="https://github.com/doodersrage/arduino-network-json-temperature-sever">https://github.com/doodersrage/arduino-network-json-temperature-sever</a></p>
     <p>Source for the front-end you're currently looking at can be found here: <a target="_blank" href="https://github.com/doodersrage/garage-temp">https://github.com/doodersrage/garage-temp</a></p>
 </Layout>
