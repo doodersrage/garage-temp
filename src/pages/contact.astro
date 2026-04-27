@@ -2,6 +2,7 @@
 export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import { sendEmail } from '../lib/Nodemailer'; 
+import { db } from '../lib/db';
 
 const recaptchaSiteKey = import.meta.env.RECAPTCHA_SITE_KEY;
 let successSubmission = false;
@@ -20,15 +21,17 @@ if (Astro.request.method === "POST") {
     const hasErrors = Object.values(errors).some(msg => msg)
 
     if (!hasErrors) {
-      const payload = {
-        name: name,
-        email: email,
-        html: JSON.stringify(message),
-        subject: 'Contact Form Submission',
-      };
-      await sendEmail(payload);
-      successSubmission = true;
-
+        const payload = {
+            name: name,
+            email: email,
+            html: JSON.stringify(message),
+            subject: 'Contact Form Submission',
+        };
+        await sendEmail(payload);
+        successSubmission = true;
+        const qry = 'INSERT INTO contacts (name, email, message) VALUES($1, $2, $3)';
+        const values = [name, email, JSON.stringify(message)];
+        const res = await db.query(qry, values);
     }
 
   } catch (error) {
