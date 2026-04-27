@@ -3,6 +3,8 @@ export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import { sendEmail } from '../lib/Nodemailer'; 
 
+const recaptchaSiteKey = import.meta.env.RECAPTCHA_SITE_KEY;
+
 let errors = { name: "", email: "", message: "" };
 if (Astro.request.method === "POST") {
   errors = { name: "", email: "", message: "" };
@@ -70,7 +72,7 @@ if (Astro.request.method === "POST") {
         </Layout>
 
         <button class="g-recaptcha"
-        data-sitekey="6LcxAswsAAAAAMGia7AwCffLGoOHIlV4q0ysEvyn"
+        data-sitekey={recaptchaSiteKey}
         data-callback="onSubmit"
         data-action="submit"></button>
 

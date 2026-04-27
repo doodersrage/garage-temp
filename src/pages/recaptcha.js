@@ -6,7 +6,7 @@ export async function POST({ request }) {
     'Content-Type': 'application/x-www-form-urlencoded'
   };
   const requestBody = new URLSearchParams({
-    secret: "6LcxAswsAAAAABk4s1FYNB-BTwFBdgbGigzIe3th",   // This can be an environment variable
+    secret: import.meta.env.RECAPTCHA_SECRET_KEY,   // This can be an environment variable
     response: data.recaptcha          // The token passed in from the client
   });
 
