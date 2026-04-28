@@ -1,0 +1,20 @@
+{
+	"compatibility_date": "2026-04-28",
+	"compatibility_flags": [
+		"global_fetch_strictly_public",
+		"nodejs_compat"
+	],
+	"name": "garage-temp",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"dev": {
+		"ip": "0.0.0.0",
+		"port": 8787
+	}
+}

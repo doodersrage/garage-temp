@@ -1,5 +1,3 @@
-import { defineMiddleware } from "astro:middleware";
-
 export async function fetchWeather(): Promise<any> {
   const apiKey = import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
   const city = import.meta.env.NEXT_PUBLIC_OPENWEATHER_CITY_ID;
@@ -8,7 +6,7 @@ export async function fetchWeather(): Promise<any> {
     const response = await fetch(url);
 
     if (!response.ok) {
-        throw new Error('Weather data not found');
+        throw new Error('Temp data not found');
     }
 
     const data = await response.json();

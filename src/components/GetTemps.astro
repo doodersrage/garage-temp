@@ -4,14 +4,8 @@ Astro.cache.set({
   maxAge: 1300, // Cache for 1 hour
   swr: 600,     // Stale-while-revalidate for 10 minutes
 });
-import { db } from '../lib/db';
-
-const response = await fetch('https://garage.robmcd.name/');
-const temps = await response.json();
-
-const qry = 'INSERT INTO garage_temps (tempc, tempf, humidity, timestamp) VALUES($1, $2, $3, $4)';
-const values = [temps.temp["avg"].c, temps.temp["avg"].f, temps.temp["avg"].h, new Date()];
-const res = await db.query(qry, values);
+import { fetchTemps } from '../lib/FetchTemps';
+const temps = await fetchTemps();
 ---
 
 <div class="temps-wrap">

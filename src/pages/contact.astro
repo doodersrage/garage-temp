@@ -1,8 +1,7 @@
 ---
 export const prerender = false;
 import Layout from '../layouts/Layout.astro';
-import { sendEmail } from '../lib/Nodemailer'; 
-import { db } from '../lib/db';
+import { procContact } from '../lib/procContact';
 
 const recaptchaSiteKey = import.meta.env.RECAPTCHA_SITE_KEY;
 let successSubmission = false;
@@ -10,36 +9,22 @@ let errorMessage = '';
 
 let errors = { name: "", email: "", message: "" };
 if (Astro.request.method === "POST") {
-  errors = { name: "", email: "", message: "" };
-  try {
+    
     const data = await Astro.request.formData();
-    const name = data.get("name")
-    const email = data.get("email")
-    const message = data.get("message")
+    let formData = {
+        name: data.get("name"),
+        email: data.get("email"),
+        message: data.get("message")
+    }
 
-    // Validation logic
-    const hasErrors = Object.values(errors).some(msg => msg)
+    const results = await procContact(formData);
 
-    if (!hasErrors) {
-        const payload = {
-            name: name,
-            email: email,
-            html: JSON.stringify(message),
-            subject: 'Contact Form Submission',
-        };
-        await sendEmail(payload);
+    if (results.success) {
         successSubmission = true;
-        const qry = 'INSERT INTO contacts (name, email, message) VALUES($1, $2, $3)';
-        const values = [name, email, JSON.stringify(message)];
-        const res = await db.query(qry, values);
+    } else {
+        errorMessage = results.error || 'An error occurred while processing your request.';
     }
-
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(error.message);
-      errorMessage = error.message;
-    }
-  }
+  
 }
 ---
 <html>

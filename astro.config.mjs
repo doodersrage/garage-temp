@@ -7,6 +7,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 import sitemap from '@astrojs/sitemap';
 
+import cloudflare from '@astrojs/cloudflare';
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://garage-temp.robmcd.name',
@@ -15,8 +17,9 @@ export default defineConfig({
     host: true
   },
 
-  adapter: node({
-    mode: 'standalone'
+  adapter: cloudflare({
+    imageService: { build: 'compile', runtime: 'cloudflare-binding' },
+    prerenderEnvironment: 'node',
   }),
 
   vite: {
@@ -35,4 +38,5 @@ export default defineConfig({
       provider: memoryCache(),
     },
   },
+  
 });
