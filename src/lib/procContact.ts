@@ -1,4 +1,5 @@
 import { EmailMessage } from "cloudflare:email";
+import { env } from 'cloudflare:workers';
 import { createMimeMessage } from "mimetext";
 import { initDb } from '../lib/db';
 
@@ -27,7 +28,7 @@ export async function procContact(data: { name: string; email: string; message: 
 
         try {
 
-            await import.meta.env.MAILER.send(message);
+            await env.MAILER.send(message);
 
             const db = await initDb();
             const qry = 'INSERT INTO contacts (name, email, message) VALUES($1, $2, $3)';
