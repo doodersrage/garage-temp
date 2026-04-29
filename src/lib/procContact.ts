@@ -12,8 +12,8 @@ export async function procContact(data: { name: string; email: string; message: 
     if (!hasErrors) {
 
         const msg = createMimeMessage();
-        msg.setSender({ name: "Sender", addr: data.email });
-        msg.setRecipient(import.meta.env.SMTP_MAIL_FROM);
+        msg.setSender({ name: "Sender", addr: import.meta.env.SMTP_MAIL_FROM });
+        msg.setRecipient(import.meta.env.SMTP_MAIL_TO);
         msg.setSubject('Contact Form Submission');
         msg.addMessage({
         contentType: "text/plain",
@@ -21,8 +21,8 @@ export async function procContact(data: { name: string; email: string; message: 
         });
 
         var message = new EmailMessage(
-        data.email,
         import.meta.env.SMTP_MAIL_FROM,
+        import.meta.env.SMTP_MAIL_TO,
         msg.asRaw(),
         );
 
