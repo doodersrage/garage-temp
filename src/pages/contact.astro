@@ -22,7 +22,7 @@ if (Astro.request.method === "POST") {
     if (results.success) {
         successSubmission = true;
     } else {
-        errorMessage = results.error || 'An error occurred while processing your request.';
+        errorMessage = results.message || 'An error occurred while processing your request.';
     }
   
 }
