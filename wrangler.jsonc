@@ -19,7 +19,7 @@
 	},
 	"send_email": [
 		{
-		"name": "Robert McDowell",
+		"name": "MAILER",
 		"destination_address": "doodersrage@gmail.com"
 		}
   	]
