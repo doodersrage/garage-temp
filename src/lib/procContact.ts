@@ -1,4 +1,5 @@
-import { sendEmail } from '../lib/Nodemailer'; 
+import { EmailMessage } from "cloudflare:email";
+import { createMimeMessage } from "mimetext";
 import { initDb } from '../lib/db';
 
 export async function procContact(data: { name: string; email: string; message: string }): Promise<any> {
@@ -11,24 +12,32 @@ export async function procContact(data: { name: string; email: string; message: 
         // Validation logic
         const hasErrors = Object.values(errors).some(msg => msg)
 
-    if (!hasErrors) {
-        const payload = {
-            name: data.name,
-            email: data.email,
-            html: JSON.stringify(data.message),
-            subject: 'Contact Form Submission',
-        };
-        await sendEmail(payload);
+        if (!hasErrors) {
 
-        successSubmission = true;
+            const msg = createMimeMessage();
+            msg.setSender({ name: "Sender", addr: data.email });
+            msg.setRecipient(import.meta.env.SMTP_MAIL_FROM);
+            msg.setSubject('Contact Form Submission');
+            msg.addMessage({
+            contentType: "text/plain",
+            data: 'Name: ' + data.name + '\nEmail: ' + data.email + '\nMessage: ' + data.message,
+            });
 
-        const db = await initDb();
-        const qry = 'INSERT INTO contacts (name, email, message) VALUES($1, $2, $3)';
-        const values = [data.name, data.email, JSON.stringify(data.message)];
-        await db.query(qry, values);
+            var message = new EmailMessage(
+            data.email,
+            import.meta.env.SMTP_MAIL_FROM,
+            msg.asRaw(),
+            );
 
-        return { success: successSubmission, errors, errorMessage };
-    }
+            successSubmission = true;
+
+            const db = await initDb();
+            const qry = 'INSERT INTO contacts (name, email, message) VALUES($1, $2, $3)';
+            const values = [data.name, data.email, JSON.stringify(data.message)];
+            await db.query(qry, values);
+
+            return { success: successSubmission, errors, errorMessage };
+        }
 
     } catch (error) {
         if (error instanceof Error) {

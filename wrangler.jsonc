@@ -16,5 +16,11 @@
 	"dev": {
 		"ip": "0.0.0.0",
 		"port": 8787
-	}
+	},
+	"send_email": [
+		{
+		"name": "Robert McDowell",
+		"destination_address": "doodersrage@gmail.com"
+		}
+  	]
 }
