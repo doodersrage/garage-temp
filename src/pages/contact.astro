@@ -7,24 +7,33 @@ const recaptchaSiteKey = import.meta.env.RECAPTCHA_SITE_KEY;
 let successSubmission = false;
 let errorMessage = '';
 
-let errors = { name: "", email: "", message: "" };
+const form = {
+    data: { name: '', email: '', message: '' },
+    errors: { name: 'Name required', email: 'Email required', message: 'Message required' }
+};
+
 if (Astro.request.method === "POST") {
     
     const data = await Astro.request.formData();
-    let formData = {
-        name: data.get("name"),
-        email: data.get("email"),
-        message: data.get("message")
-    }
+    form.data.name = data.get("name");
+    form.data.email = data.get("email");
+    form.data.message = data.get("message");
 
-    const results = await procContact(formData);
+    // Validation logic
+    const hasErrors = Object.values(form.data).some(err => err === '');
 
-    if (results.success) {
-        successSubmission = true;
+    if (!hasErrors) {
+        const results = await procContact(form.data);
+
+        if (results.success) {
+            successSubmission = true;
+        } else {
+            errorMessage = results.message || 'An error occurred while processing your request.';
+        }
     } else {
-        errorMessage = results.message || 'An error occurred while processing your request.';
+        errorMessage = 'Please correct the errors in the form.';
     }
-  
+
 }
 ---
 <html>
@@ -43,21 +52,21 @@ if (Astro.request.method === "POST") {
                 Name<sup>*</sup>
             </label>
                 <input class="bg-gray-200 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" placeholder="Name" />
-                <div>{errors.name}</div>
+                <div>{form.errors.name}</div>
             </div>
             <div>
                 <label class="block text-black-700 text-sm font-bold mb-2" for="username">
                 Email<sup>*</sup>
             </label>
                 <input class="bg-gray-200 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="email" name="email" placeholder="Email" />
-                <div>{errors.email}</div>  
+                <div>{form.errors.email}</div>  
             </div>
             <div>
                 <label class="block text-black-700 text-sm font-bold mb-2" for="username">
                 Message<sup>*</sup>
             </label>
                 <textarea class="bg-gray-200 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" name="message" placeholder="Message"></textarea>
-                <div>{errors.message}</div>  
+                <div>{form.errors.message}</div>  
             </div>
             <div>
                 <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" value="Send" />
