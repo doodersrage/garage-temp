@@ -9,6 +9,8 @@ import sitemap from '@astrojs/sitemap';
 
 import cloudflare from '@astrojs/cloudflare';
 
+import preact from '@astrojs/preact';
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://garage-temp.robmcd.name',
@@ -34,7 +36,7 @@ export default defineConfig({
   },
 
   output: 'server',
-  integrations: [sitemap()],
+  integrations: [sitemap(), preact()],
 
   experimental: {
     cache: {
