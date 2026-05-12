@@ -1,3 +1,4 @@
+// fetch garage temperature data from external API and store in database
 import { initDb } from '../lib/db';
 
 export async function fetchTemps(): Promise<any> {

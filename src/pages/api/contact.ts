@@ -1,3 +1,4 @@
+// API route for handling contact form submissions
 export const prerender = false; // Not needed in 'server' mode
 import type { APIRoute } from "astro";
 import { EmailMessage } from "cloudflare:email";
@@ -21,6 +22,7 @@ export const POST: APIRoute = async ({ request }) => {
         );
     }
 
+    // send email using Cloudflare's email service and mime message
     const msg = createMimeMessage();
     msg.setSender({ name: "Sender", addr: import.meta.env.SMTP_MAIL_FROM });
     msg.setRecipient(import.meta.env.SMTP_MAIL_TO);
@@ -40,11 +42,13 @@ export const POST: APIRoute = async ({ request }) => {
 
         await env.MAILER.send(mailMessage);
 
+        // store contact form submission in database
         const db = await initDb();
         const qry = 'INSERT INTO contacts (name, email, message) VALUES($1, $2, $3)';
         const values = [name, email, JSON.stringify(message)];
         await db.query(qry, values);
 
+        // return success response
         return new Response(
             JSON.stringify(
                 { success: true, message: "Contact form submitted successfully." }

@@ -1,3 +1,4 @@
+// Nodemailer email sending function for contact form submissions
 import nodemailer from "nodemailer";
 
 interface emailFunctionProps {

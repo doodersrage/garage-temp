@@ -1,3 +1,4 @@
+// fetch local weather data from OpenWeather API
 export async function fetchWeather(): Promise<any> {
   const apiKey = import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
   const city = import.meta.env.NEXT_PUBLIC_OPENWEATHER_CITY_ID;

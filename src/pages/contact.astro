@@ -2,8 +2,6 @@
 export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import ContactForm from "../components/ContactForm"
-
-const recaptchaSiteKey = import.meta.env.RECAPTCHA_SITE_KEY;
 ---
 <html>
     <head>
@@ -16,26 +14,5 @@ const recaptchaSiteKey = import.meta.env.RECAPTCHA_SITE_KEY;
             <ContactForm client:load />
         </Layout>
 
-        <button class="g-recaptcha"
-        data-sitekey={recaptchaSiteKey}
-        data-callback="onSubmit"
-        data-action="submit"></button>
-
-        <script is:inline>
-        function onSubmit(token) {
-            fetch("/recaptcha", {
-            method: "POST",
-            body: JSON.stringify({ recaptcha: token })
-            })
-            .then((response) => response.json())
-            .then((gResponse) => {
-            if (gResponse.success) {
-                // Captcha verification was a success
-            } else {
-                // Captcha verification failed
-            }
-            })
-        }
-        </script>
     </body>
 </html>
