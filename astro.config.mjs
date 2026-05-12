@@ -23,7 +23,7 @@ export default defineConfig({
     platformProxy: {
       enabled: true,
     },
-    //imageService: { build: 'compile', runtime: 'cloudflare-binding' },
+    imageService: { build: 'compile', runtime: 'cloudflare-binding' },
     prerenderEnvironment: 'node',
   }),
 
