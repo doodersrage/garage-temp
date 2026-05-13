@@ -1,5 +1,5 @@
 // fetch garage temperature data from external API and store in database
-import { initDb } from '../lib/db';
+import { createServerClient } from "../lib/supabase";
 
 export async function fetchTemps(): Promise<any> {
   const url = `https://garage.robmcd.name/`;
@@ -41,10 +41,10 @@ export async function fetchTemps(): Promise<any> {
       data.temp["avg"].h = (data.temp["0"].h ? data.temp["0"].h : (data.temp["1"].h ? data.temp["1"].h : 0));
     }
 
-    const db = await initDb();
-    const qry = 'INSERT INTO garage_temps (tempc, tempf, humidity, timestamp) VALUES($1, $2, $3, $4)';
-    const values = [data.temp["avg"].c, data.temp["avg"].f, data.temp["avg"].h, new Date()];
-    await db.query(qry, values);
+    const supabase = createServerClient();
+    const { error } = await supabase
+    .from('garage_temps')
+    .insert([{ tempc: data.temp["avg"].c, tempf: data.temp["avg"].f, humidity: data.temp["avg"].h, timestamp: new Date() }]);
 
     return data;
 

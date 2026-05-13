@@ -4,7 +4,7 @@ import type { APIRoute } from "astro";
 import { EmailMessage } from "cloudflare:email";
 import { env } from 'cloudflare:workers';
 import { createMimeMessage } from "mimetext";
-import { initDb } from '../../lib/db';
+import { createServerClient } from "../../lib/supabase";
 
 export const POST: APIRoute = async ({ request }) => {
     const data = await request.formData();
@@ -43,10 +43,10 @@ export const POST: APIRoute = async ({ request }) => {
         await env.MAILER.send(mailMessage);
 
         // store contact form submission in database
-        const db = await initDb();
-        const qry = 'INSERT INTO contacts (name, email, message) VALUES($1, $2, $3)';
-        const values = [name, email, JSON.stringify(message)];
-        await db.query(qry, values);
+        const supabase = createServerClient();
+        const { error } = await supabase
+        .from('contacts')
+        .insert([{ name: name, email: email, message: JSON.stringify(message) }]);
 
         // return success response
         return new Response(

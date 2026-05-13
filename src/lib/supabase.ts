@@ -9,3 +9,10 @@ export const supabase = createClient(
     },
   },
 );
+
+export function createServerClient() {
+  return createClient(
+    import.meta.env.SUPABASE_URL,
+    import.meta.env.SUPABASE_ANON_KEY
+  );
+}
