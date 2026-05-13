@@ -23,9 +23,15 @@ export default defineConfig({
     platformProxy: {
       enabled: true,
     },
-    imageService: { build: 'compile', runtime: 'cloudflare-binding' },
+    imageService: 'passthrough',
     prerenderEnvironment: 'node',
   }),
+  
+  image: {
+    service: {
+      entrypoint: '@astrojs/cloudflare/image-service',
+    },
+  },
 
   vite: {
     plugins: [tailwindcss()]
