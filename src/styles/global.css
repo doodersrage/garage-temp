@@ -80,3 +80,13 @@ body {
         transform: translateX(1);
     }
 }
+
+.copy-wrap {
+    background: rgba(255, 255, 255, 0.2); /* Semi-transparent color */
+    backdrop-filter: blur(10px);          /* Blurs content behind */
+    -webkit-backdrop-filter: blur(10px);
+    margin: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #000;
+}  
