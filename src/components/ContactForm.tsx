@@ -36,8 +36,8 @@ export default function Form() {
             </label>
                 <textarea class="bg-gray-200 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" name="message" placeholder="Message"></textarea>
             </div>
-            <div>
-                <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" value="Send" />
+            <div class="justify-center flex flex-col gap-2">
+                <input class="my-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" value="Send" />
             </div>
             {responseMessage && <p>{responseMessage}</p>}
         </form>
