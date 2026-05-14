@@ -12,14 +12,14 @@ const weatherData = await fetchWeather();
     <div class="container">
         {weatherData ? (
             <h1>Current Weather in Richmond, VA</h1>
-            <div class="grid grid-cols-4 gap-4">
-                <div><p>Temperature: {weatherData.main.temp}°F</p></div>
-                <div><p>Humidity: {weatherData.main.humidity}%</p></div>
-                <div><p>Feels Like: {weatherData.main.feels_like}°F</p></div>
-                <div><p>Wind Speed: {weatherData.wind.speed} mph</p></div>
-                <div><p>Wind Gusts: {weatherData.wind.gust} mph</p></div>
-                <div><p>Clouds: {weatherData.clouds.all}%</p></div>
-                <div><p>Condition: {weatherData.weather[0].description}</p></div>
+            <div class="grid grid-cols-4 gap-4 py-4">
+                <div><p><h3>Temperature:</h3> {weatherData.main.temp}°F</p></div>
+                <div><p><h3>Humidity:</h3> {weatherData.main.humidity}%</p></div>
+                <div><p><h3>Feels Like:</h3> {weatherData.main.feels_like}°F</p></div>
+                <div><p><h3>Wind Speed:</h3> {weatherData.wind.speed} mph</p></div>
+                <div><p><h3>Wind Gusts:</h3> {weatherData.wind.gust} mph</p></div>
+                <div><p><h3>Clouds:</h3> {weatherData.clouds.all}%</p></div>
+                <div><p><h3>Condition:</h3> {weatherData.weather[0].description}</p></div>
             </div>
         ) : (
             <p>Loading weather data...</p>

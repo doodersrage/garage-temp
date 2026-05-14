@@ -11,7 +11,7 @@ const temps = await fetchTemps();
 <div class="copy-wrap">
   <div class="container">
     <h1>Garage Temperatures</h1>
-    <div class="grid grid-cols-4 gap-4">
+    <div class="grid grid-cols-4 gap-4 py-4">
       <div><h3>Temp Probe 0:</h3>
       <p></p>{temps.temp["0"].c}°C, {temps.temp["0"].f}°F, {temps.temp["0"].h}%</p></div>
       <div><h3>Temp Probe 1:</h3>

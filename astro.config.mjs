@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig, memoryCache } from 'astro/config';
+import { defineConfig, memoryCache, fontProviders } from 'astro/config';
 
 import node from '@astrojs/node';
 
@@ -49,5 +49,20 @@ export default defineConfig({
       provider: memoryCache(),
     },
   },
+
+  fonts: [{
+    provider: fontProviders.google(),
+    name: 'Roboto',
+    cssVariable: "--font-roboto",
+    subsets: ['sans-serif'],
+    weights: ['400', '500', '700'],
+  },
+  {
+    provider: fontProviders.google(),
+    name: 'Playfair Display',
+    cssVariable: "--font-playfair",
+    subsets: ['latin'],
+    weights: ['400', '500', '700'],
+  }],
   
 });
