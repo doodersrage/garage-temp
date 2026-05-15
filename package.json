@@ -21,6 +21,7 @@
     "@supabase/supabase-js": "^2.105.4",
     "@tailwindcss/vite": "^4.2.4",
     "astro": "^6.1.9",
+    "astro-swiper": "^2.6.1",
     "mimetext": "^3.0.28",
     "nodemailer": "^8.0.6",
     "pg": "^8.20.0",
