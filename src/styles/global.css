@@ -107,3 +107,13 @@ header{
     border-radius: 8px;
     border: 1px solid #000;
 }  
+
+form{
+    border: #000 solid 1px;
+    padding: 20px;
+    border-radius: 15px;
+    background: rgba(0, 0, 0, 0.2); 
+    label{
+        color: #fff;
+    }
+}
