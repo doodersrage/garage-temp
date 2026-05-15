@@ -17,24 +17,27 @@ export default function Form() {
     }
 
     return (
-        <form onSubmit={submit}>
+        <form class="shadow-md" onSubmit={submit}>
             <div>
                 <label class="block text-black-700 text-sm font-bold mb-2" for="name">
                 Name<sup>*</sup>
-            </label>
+                </label>
                 <input class="bg-gray-200 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" placeholder="Name" />
             </div>
             <div>
                 <label class="block text-black-700 text-sm font-bold mb-2" for="email">
                 Email<sup>*</sup>
-            </label>
+                </label>
                 <input class="bg-gray-200 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="email" name="email" placeholder="Email" />
             </div>
             <div>
                 <label class="block text-black-700 text-sm font-bold mb-2" for="message">
                 Message<sup>*</sup>
-            </label>
+                </label>
                 <textarea class="bg-gray-200 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" name="message" placeholder="Message"></textarea>
+            </div>
+            <div>
+                <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
             </div>
             <div class="justify-center flex flex-col gap-2">
                 <input class="my-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" value="Send" />
