@@ -3,6 +3,36 @@ import { Image } from 'astro:assets';
 import '../styles/global.css'
 const currentYear = new Date().getFullYear();
 import logo from '../assets/gtm.svg';
+import { supabase } from "../lib/supabase";
+
+const accessToken = Astro.cookies.get("sb-access-token");
+const refreshToken = Astro.cookies.get("sb-refresh-token");
+
+let session;
+try {
+  session = await supabase.auth.setSession({
+    refresh_token: refreshToken.value,
+    access_token: accessToken.value,
+  });
+  if (session.error) {
+    Astro.cookies.delete("sb-access-token", {
+      path: "/",
+    });
+    Astro.cookies.delete("sb-refresh-token", {
+      path: "/",
+    });
+  }
+} catch (error) {
+  Astro.cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  Astro.cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+}
+
+const email = (session ? '(<a href="/api/auth/signout">Sign out</a>)' : '<a href="/signin" class="hover:text-blue-200">Sign in</a>');
+
 ---   
 <!doctype html>
 <html lang="en">
@@ -34,7 +64,7 @@ import logo from '../assets/gtm.svg';
 					<a href="/" class="hover:text-blue-200">Home</a>
 					<a href="/about" class="hover:text-blue-200">About</a>
 					<a href="/contact" class="hover:text-blue-200">Contact</a>
-					<a href="/signin" class="hover:text-blue-200">Sign in</a>
+					<span set:html={email} />
 				</nav>
 				</div>
 			</header>
