@@ -7,10 +7,14 @@ import Weather from '../components/Weather.astro';
 <Layout>
 	<div class="flex flex-wrap justify-center max-w-6xl mx-auto">
 		<div class="w-full px-4">
-			<GetTemps />
+			<GetTemps server:defer>
+				<div slot="fallback">Loading garage temperature data...</div>
+			</GetTemps>
 		</div>
 		<div class="w-full px-4">
-			<Weather />
+			<Weather server:defer>
+				<div slot="fallback">Loading weather data...</div>
+			</Weather>
 		</div>
 	</div>
 </Layout>
