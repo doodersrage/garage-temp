@@ -1,0 +1,24 @@
+---
+description: Enforce Astro best practices including static generation, component islands, and proper hydration.
+globs: **/*.{astro,mdx}
+---
+
+# Astro Best Practices
+
+You are an expert in Astro, Component Islands, and Static Site Generation (SSG).
+
+## Component Islands
+- Avoid unnecessary hydration. Default to static HTML unless interactivity is explicitly required.
+- Use `client:load` ONLY for immediately visible/critical interactivity.
+- Use `client:idle` for below-the-fold or non-critical interactivity.
+- Use `client:visible` for elements that only need to hydrate when scrolled into the viewport.
+
+## Architecture & Rendering
+- Prioritize static generation (SSG) for optimal performance and SEO.
+- If SSR is needed, use it selectively and implement `export const prerender = true;` where appropriate.
+- Keep components loosely coupled.
+
+## Syntax & Frameworks
+- Do not add standard HTML code fences (`---`) at the top of an `.astro` file if the AI is generating code, as this often causes markdown formatting errors.
+- Prefer TypeScript for all script blocks.
+- When passing data from Astro to UI frameworks (React, Vue, Svelte), ensure types are properly mapped.

@@ -2,19 +2,39 @@
 import Layout from '../layouts/Layout.astro';
 import GetTemps from '../components/GetTemps.astro';
 import Weather from '../components/Weather.astro';
+import DisplayPreferences from '../components/DisplayPreferences.astro';
+import { getAuthFromCookies } from '../lib/auth';
+import { getUserPreferences } from '../lib/userPreferences';
+
+const { user } = await getAuthFromCookies(Astro.cookies);
+const isAuthenticated = !!user;
+const preferences = isAuthenticated ? getUserPreferences(user) : null;
+
+const showGarageTemps = !isAuthenticated || preferences!.showGarageTemps;
+const showWeather = !isAuthenticated || preferences!.showWeather;
 ---
 
 <Layout>
-	<div class="flex flex-wrap justify-center max-w-6xl mx-auto">
-		<div class="w-full px-4">
-			<GetTemps server:defer>
-				<div slot="fallback">Loading garage temperature data...</div>
-			</GetTemps>
-		</div>
-		<div class="w-full px-4">
-			<Weather server:defer>
-				<div slot="fallback">Loading weather data...</div>
-			</Weather>
+	<div class="page-shell space-y-6">
+		{isAuthenticated && (
+			<DisplayPreferences preferences={preferences!} redirectTo="/" />
+		)}
+		<div class="grid gap-6">
+			{showGarageTemps && (
+				<GetTemps server:defer>
+					<div slot="fallback" class="loading-state">Loading garage temperature data...</div>
+				</GetTemps>
+			)}
+			{showWeather && (
+				<Weather server:defer>
+					<div slot="fallback" class="loading-state">Loading weather data...</div>
+				</Weather>
+			)}
+			{isAuthenticated && !showGarageTemps && !showWeather && (
+				<div class="empty-state">
+					<p>Both home page blocks are hidden. Use the display preferences above to show them again.</p>
+				</div>
+			)}
 		</div>
 	</div>
 </Layout>

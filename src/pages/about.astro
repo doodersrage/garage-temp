@@ -4,49 +4,65 @@ import { Image } from 'astro:assets';
 import tempProbeV1 from '../assets/temp-probe-v1.jpg';
 import tempProbeV2 from '../assets/temp-probe-v2.jpg';
 import JSONProbe from '../assets/json-temp.jpg';
-import { Swiper, SwiperWrapper, SwiperSlide, SwiperButtonPrev, SwiperButtonNext, SwiperPagination } from "astro-swiper";
+import { Swiper, SwiperWrapper, SwiperSlide } from "astro-swiper";
 ---
 
-<Layout>
-    <div class="flex flex-wrap justify-center max-w-6xl mx-auto">
+<Layout title="About">
+  <div class="page-shell page-grid items-start">
+    <section class="card overflow-hidden p-0">
+      <Swiper
+        options={{
+          loop: true,
+          autoplay: {
+            delay: 4000,
+            disableOnInteraction: false,
+          },
+        }}
+      >
+        <SwiperWrapper>
+          <SwiperSlide><Image src={tempProbeV1} alt="Version 1 of the temperature probe Arduino board" class="h-full w-full object-cover" /></SwiperSlide>
+          <SwiperSlide><Image src={tempProbeV2} alt="Version 2 of the temperature probe Arduino board" class="h-full w-full object-cover" /></SwiperSlide>
+          <SwiperSlide><Image src={JSONProbe} alt="JSON temperature data output" class="h-full w-full object-cover" /></SwiperSlide>
+        </SwiperWrapper>
+      </Swiper>
+    </section>
 
-        <div class="w-full sm:w-1/2 md:w-1/2 lg:w-1/2">
-            <Swiper
-                options={{
-                    loop: true,
-                    autoplay: {
-                    delay: 2000,
-                    disableOnInteraction: false,
-                    waitForTransition: false,
-                    navigation: {
-                        nextEl: '.swiper-button-next',
-                        prevEl: '.my-swiper-button-prev',
-                    },
-                    }
-                }}>
-                <SwiperWrapper>
-                    <!-- Slides -->
-                    <SwiperSlide><Image src={tempProbeV1} alt="version 1 of temperature problem Arduino board" /></SwiperSlide>
-                    <SwiperSlide><Image src={tempProbeV2} alt="version 2 of temperature problem Arduino board" /></SwiperSlide>
-                    <SwiperSlide><Image src={JSONProbe} alt="JSON temperature data output" /></SwiperSlide>
-                </SwiperWrapper>
-            </Swiper>
-        </div>
-        <div class="w-full sm:w-1/2 md:w-1/2 lg:w-1/2">
-            <div class="copy-wrap animate-slide-up-fade">
-                <h1 class="text-3xl font-bold mb-4">About</h1>
-                <p class="mb-4">This is just a simnple website used to display temperature and humidity data using an Arduino sketch with a network shield outputting data into JSON format. The Arduino sketch can be found here: <a  class="text-shadow-sm text-green-500 font-medium text-fg-brand hover:underline" target="_blank" href="https://github.com/doodersrage/arduino-network-json-temperature-sever">https://github.com/doodersrage/arduino-network-json-temperature-sever</a></p>
-                <p>Source for the front-end you're currently looking at can be found here: <a  class="text-shadow-sm text-green-500 font-medium text-fg-brand hover:underline" target="_blank" href="https://github.com/doodersrage/garage-temp">https://github.com/doodersrage/garage-temp</a></p>
-            </div>
-        </div>
-    </div>
+    <section class="card animate-slide-up-fade">
+      <h1 class="card-title">About this project</h1>
+      <p class="card-subtitle">A simple monitor for garage temperature and humidity.</p>
+      <div class="space-y-4">
+        <p>
+          This site displays temperature and humidity data from an Arduino sketch with a network shield,
+          outputting readings in JSON format.
+        </p>
+        <p>
+          Arduino sketch:
+          <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/arduino-network-json-temperature-sever">
+            github.com/doodersrage/arduino-network-json-temperature-sever
+          </a>
+        </p>
+        <p>
+          Front-end source:
+          <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/garage-temp">
+            github.com/doodersrage/garage-temp
+          </a>
+        </p>
+      </div>
+    </section>
+  </div>
 </Layout>
+
 <style>
   .swiper {
-    max-width: 455px;
+    width: 100%;
+    max-width: 100%;
   }
 
-  img {
+  .swiper-slide img {
+    display: block;
     width: 100%;
+    height: 100%;
+    min-height: 280px;
+    object-fit: cover;
   }
 </style>

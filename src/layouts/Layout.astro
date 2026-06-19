@@ -3,37 +3,24 @@ import { Image } from 'astro:assets';
 import '../styles/global.css'
 const currentYear = new Date().getFullYear();
 import logo from '../assets/gtm.svg';
-import { supabase } from "../lib/supabase";
+import { getAuthFromCookies } from "../lib/auth";
 
-const accessToken = Astro.cookies.get("sb-access-token");
-const refreshToken = Astro.cookies.get("sb-refresh-token");
-
-let session;
-try {
-  session = await supabase.auth.setSession({
-    refresh_token: refreshToken.value,
-    access_token: accessToken.value,
-  });
-  if (session.error) {
-    Astro.cookies.delete("sb-access-token", {
-      path: "/",
-    });
-    Astro.cookies.delete("sb-refresh-token", {
-      path: "/",
-    });
-  }
-} catch (error) {
-  Astro.cookies.delete("sb-access-token", {
-    path: "/",
-  });
-  Astro.cookies.delete("sb-refresh-token", {
-    path: "/",
-  });
+interface Props {
+  title?: string;
 }
 
-const email = (session ? '(<a href="/api/auth/signout">Sign out</a>)' : '<a href="/signin" class="hover:text-blue-200">Sign in</a>');
+const { title } = Astro.props;
+const pageTitle = title ? `${title} · Garage Temperature Monitor` : 'Garage Temperature Monitor';
 
----   
+const { user } = await getAuthFromCookies(Astro.cookies);
+
+const currentPath = Astro.url.pathname;
+const navItems = [
+  { href: '/', label: 'Home' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
+];
+---
 <!doctype html>
 <html lang="en">
 	<head>
@@ -43,8 +30,7 @@ const email = (session ? '(<a href="/api/auth/signout">Sign out</a>)' : '<a href
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
 		<link rel="sitemap" href="/sitemap-index.xml" />
-		<title>Garage Temperature Monitor</title>
-		<!-- Google tag (gtag.js) -->
+		<title>{pageTitle}</title>
 		<script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-YKDZ0787JG"></script>
 		<script is:inline>
 		window.dataLayer = window.dataLayer || [];
@@ -54,24 +40,40 @@ const email = (session ? '(<a href="/api/auth/signout">Sign out</a>)' : '<a href
 		</script>
 	</head>
 	<body>
-		<div class="flex flex-col min-h-screen">
-			<header class="bg-blue-600 text-white p-4">
-				<div class="container mx-auto flex justify-between items-center">
-				<h1 class="text-2xl font-bold"><a href="/">
-					<Image src={logo} height={75} alt="home temperature monitor logo" />
-				</a></h1>
-				<nav class="flex gap-4">
-					<a href="/" class="hover:text-blue-200">Home</a>
-					<a href="/about" class="hover:text-blue-200">About</a>
-					<a href="/contact" class="hover:text-blue-200">Contact</a>
-					<span set:html={email} />
-				</nav>
+		<div class="flex min-h-screen flex-col">
+			<header class="site-header">
+				<div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+					<a href="/" class="flex items-center gap-3">
+						<Image src={logo} height={48} alt="Garage Temperature Monitor logo" />
+					</a>
+					<nav class="flex flex-wrap items-center justify-end gap-1">
+						{navItems.map(({ href, label }) => (
+							<a
+								href={href}
+								class:list={["nav-link", currentPath === href && "nav-link-active"]}
+							>
+								{label}
+							</a>
+						))}
+						{user ? (
+							<>
+								<a href="/dashboard" class:list={["nav-link", currentPath === "/dashboard" && "nav-link-active"]}>Dashboard</a>
+								<a href="/api/auth/signout" class="nav-link">Sign out</a>
+							</>
+						) : (
+							<a href="/signin" class:list={["nav-link", currentPath === "/signin" && "nav-link-active"]}>Sign in</a>
+						)}
+					</nav>
 				</div>
 			</header>
-			<main class="flex-grow p-4 m-auto container">
+			<main class="flex-grow">
 				<slot />
 			</main>
-			 <footer class="bg-gray-300 flex items-center justify-center p-4">Copyright © {currentYear} Garage Temperature Monitor. All rights reserved.</footer>
+			<footer class="site-footer">
+				<div class="mx-auto flex w-full max-w-6xl items-center justify-center px-4 py-6 sm:px-6 lg:px-8">
+					Copyright © {currentYear} Garage Temperature Monitor. All rights reserved.
+				</div>
+			</footer>
 		</div>
 		<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline />
 	</body>

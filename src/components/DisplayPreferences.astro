@@ -1,0 +1,39 @@
+---
+import type { UserPreferences } from "../lib/userPreferences";
+
+interface Props {
+  preferences: UserPreferences;
+  redirectTo?: string;
+}
+
+const { preferences, redirectTo = "/" } = Astro.props;
+---
+
+<form action="/api/user/preferences" method="post" class="card animate-zoom-in">
+  <input type="hidden" name="redirect" value={redirectTo} />
+  <h2 class="card-title">Home page display</h2>
+  <p class="card-subtitle">Choose which blocks appear on the home page while you are signed in.</p>
+  <div class="mb-6 flex flex-col gap-3">
+    <label class="checkbox-row">
+      <input
+        type="checkbox"
+        name="show_garage_temps"
+        value="true"
+        checked={preferences.showGarageTemps}
+      />
+      <span>Show garage temperatures</span>
+    </label>
+    <label class="checkbox-row">
+      <input
+        type="checkbox"
+        name="show_weather"
+        value="true"
+        checked={preferences.showWeather}
+      />
+      <span>Show current weather</span>
+    </label>
+  </div>
+  <button type="submit" class="btn-primary">
+    Save display preferences
+  </button>
+</form>

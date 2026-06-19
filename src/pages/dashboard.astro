@@ -1,45 +1,30 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { supabase } from "../lib/supabase";
+import DisplayPreferences from "../components/DisplayPreferences.astro";
+import { getAuthFromCookies } from "../lib/auth";
+import { getUserPreferences } from "../lib/userPreferences";
 
-const accessToken = Astro.cookies.get("sb-access-token");
-const refreshToken = Astro.cookies.get("sb-refresh-token");
+const { session, user } = await getAuthFromCookies(Astro.cookies);
 
-if (!accessToken || !refreshToken) {
+if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-let session;
-try {
-  session = await supabase.auth.setSession({
-    refresh_token: refreshToken.value,
-    access_token: accessToken.value,
-  });
-  if (session.error) {
-    Astro.cookies.delete("sb-access-token", {
-      path: "/",
-    });
-    Astro.cookies.delete("sb-refresh-token", {
-      path: "/",
-    });
-    return Astro.redirect("/signin");
-  }
-} catch (error) {
-  Astro.cookies.delete("sb-access-token", {
-    path: "/",
-  });
-  Astro.cookies.delete("sb-refresh-token", {
-    path: "/",
-  });
-  return Astro.redirect("/signin");
-}
-
-const email = session.data.user?.email;
+const preferences = getUserPreferences(user);
+const email = user.email;
 ---
-<Layout title="dashboard">
-  <h1>Welcome {email}</h1>
-  <p>We are happy to see you here</p>
-  <form action="/api/auth/signout">
-    <button type="submit">Sign out</button>
-  </form>
+<Layout title="Dashboard">
+  <div class="page-shell page-grid">
+    <section class="card animate-slide-in-left">
+      <h1 class="card-title">Welcome back</h1>
+      <p class="card-subtitle">{email}</p>
+      <p class="mb-6">Manage what you see on the home page and sign out when you are finished.</p>
+      <form action="/api/auth/signout">
+        <button type="submit" class="btn-secondary">
+          Sign out
+        </button>
+      </form>
+    </section>
+    <DisplayPreferences preferences={preferences} redirectTo="/dashboard" />
+  </div>
 </Layout>

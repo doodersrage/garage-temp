@@ -1,23 +1,28 @@
 ---
-//export const prerender = false; // On-demand rendering
 Astro.cache.set({
-  maxAge: 1300, // Cache for 1 hour
-  swr: 600,     // Stale-while-revalidate for 10 minutes
+  maxAge: 1300,
+  swr: 600,
 });
 import { fetchTemps } from '../lib/FetchTemps';
 const temps = await fetchTemps();
+
+const probes = [
+  { label: 'Probe 0', data: temps.temp["0"] },
+  { label: 'Probe 1', data: temps.temp["1"] },
+  { label: 'Average', data: temps.temp["avg"] },
+];
 ---
 
-<div class="copy-wrap animate-slide-in-left">
-  <div class="container">
-    <h1>Garage Temperatures</h1>
-    <div class="grid grid-cols-4 gap-4 py-4">
-      <div><h3>Temp Probe 0:</h3>
-      <p></p>{temps.temp["0"].c}°C, {temps.temp["0"].f}°F, {temps.temp["0"].h}%</p></div>
-      <div><h3>Temp Probe 1:</h3>
-      <p></p>{temps.temp["1"].c}°C, {temps.temp["1"].f}°F, {temps.temp["1"].h}%</p></div>
-      <div><h3>Average:</h3>
-      <p></p>{temps.temp["avg"].c}°C, {temps.temp["avg"].f}°F, {temps.temp["avg"].h}%</p></div>
-    </div>
+<section class="card animate-slide-in-left">
+  <h2 class="card-title">Garage Temperatures</h2>
+  <p class="card-subtitle">Live readings from the garage temperature sensors.</p>
+  <div class="stat-grid">
+    {probes.map(({ label, data }) => (
+      <article class="stat-item">
+        <span class="stat-label">{label}</span>
+        <p class="stat-value">{data.f}°F</p>
+        <p class="stat-detail">{data.c}°C · {data.h}% humidity</p>
+      </article>
+    ))}
   </div>
-</div>
+</section>

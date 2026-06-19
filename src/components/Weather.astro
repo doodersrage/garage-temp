@@ -1,28 +1,47 @@
 ---
-//export const prerender = false; // On-demand rendering
 Astro.cache.set({
-  maxAge: 1300, // Cache for 1 hour
-  swr: 600,     // Stale-while-revalidate for 10 minutes
+  maxAge: 1300,
+  swr: 600,
 });
 import { fetchWeather } from '../lib/FetchWeather';
 const weatherData = await fetchWeather();
+
+const weatherStats = weatherData
+  ? [
+      { label: 'Temperature', value: `${weatherData.main.temp}°F` },
+      { label: 'Humidity', value: `${weatherData.main.humidity}%` },
+      { label: 'Feels Like', value: `${weatherData.main.feels_like}°F` },
+      { label: 'Wind Speed', value: `${weatherData.wind.speed} mph` },
+      { label: 'Wind Gusts', value: `${weatherData.wind.gust} mph` },
+      { label: 'Cloud Cover', value: `${weatherData.clouds.all}%` },
+      {
+        label: 'Condition',
+        value: weatherData.weather[0].description,
+        detail: true,
+      },
+    ]
+  : [];
 ---
 
-<div class="copy-wrap animate-slide-in-right">
-    <div class="container">
-        {weatherData ? (
-            <h1>Current Weather in Richmond, VA</h1>
-            <div class="grid grid-cols-4 gap-4 py-4">
-                <div><p><h3>Temperature:</h3> {weatherData.main.temp}°F</p></div>
-                <div><p><h3>Humidity:</h3> {weatherData.main.humidity}%</p></div>
-                <div><p><h3>Feels Like:</h3> {weatherData.main.feels_like}°F</p></div>
-                <div><p><h3>Wind Speed:</h3> {weatherData.wind.speed} mph</p></div>
-                <div><p><h3>Wind Gusts:</h3> {weatherData.wind.gust} mph</p></div>
-                <div><p><h3>Clouds:</h3> {weatherData.clouds.all}%</p></div>
-                <div><p><h3>Condition:</h3> {weatherData.weather[0].description}</p></div>
-            </div>
-        ) : (
-            <p>Loading weather data...</p>
-        )}
-    </div>
-</div>
+<section class="card animate-slide-in-right">
+  {weatherData ? (
+    <>
+      <h2 class="card-title">Current Weather</h2>
+      <p class="card-subtitle">Richmond, Virginia</p>
+      <div class="stat-grid">
+        {weatherStats.map(({ label, value, detail }) => (
+          <article class="stat-item">
+            <span class="stat-label">{label}</span>
+            {detail ? (
+              <p class="stat-value capitalize">{value}</p>
+            ) : (
+              <p class="stat-value">{value}</p>
+            )}
+          </article>
+        ))}
+      </div>
+    </>
+  ) : (
+    <p class="loading-state">Loading weather data...</p>
+  )}
+</section>
