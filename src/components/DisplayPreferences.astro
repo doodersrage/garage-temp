@@ -12,7 +12,8 @@ const { preferences, redirectTo = "/" } = Astro.props;
 <form action="/api/user/preferences" method="post" class="card animate-zoom-in">
   <input type="hidden" name="redirect" value={redirectTo} />
   <h2 class="card-title">Home page display</h2>
-  <p class="card-subtitle">Choose which blocks appear on the home page while you are signed in.</p>
+  <p class="card-subtitle">Choose which blocks and probes appear on the home page while you are signed in.</p>
+
   <div class="mb-6 flex flex-col gap-3">
     <label class="checkbox-row">
       <input
@@ -23,6 +24,38 @@ const { preferences, redirectTo = "/" } = Astro.props;
       />
       <span>Show garage temperatures</span>
     </label>
+
+    <fieldset class="checkbox-group-nested">
+      <legend class="checkbox-group-label">Garage probes</legend>
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          name="show_probe_0"
+          value="true"
+          checked={preferences.showProbe0}
+        />
+        <span>Probe 0</span>
+      </label>
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          name="show_probe_1"
+          value="true"
+          checked={preferences.showProbe1}
+        />
+        <span>Probe 1</span>
+      </label>
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          name="show_probe_avg"
+          value="true"
+          checked={preferences.showProbeAvg}
+        />
+        <span>Average</span>
+      </label>
+    </fieldset>
+
     <label class="checkbox-row">
       <input
         type="checkbox"
@@ -33,6 +66,7 @@ const { preferences, redirectTo = "/" } = Astro.props;
       <span>Show current weather</span>
     </label>
   </div>
+
   <button type="submit" class="btn-primary">
     Save display preferences
   </button>

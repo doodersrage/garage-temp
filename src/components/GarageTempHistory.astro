@@ -16,10 +16,19 @@ const nextPage = page < totalPages ? page + 1 : null;
 ---
 
 <section class="card">
-  <h2 class="card-title">Historic probe readings</h2>
-  <p class="card-subtitle">
-    Average temperature and humidity snapshots saved each time live garage data is fetched.
-  </p>
+  <div class="card-header-row">
+    <div>
+      <h2 class="card-title">Historic probe readings</h2>
+      <p class="card-subtitle">
+        Average temperature and humidity snapshots saved each time live garage data is fetched.
+      </p>
+    </div>
+    {!error && totalCount > 0 && (
+      <a class="btn-secondary" href="/api/garage-temps/export.csv" download>
+        Download CSV
+      </a>
+    )}
+  </div>
 
   {error ? (
     <div class="empty-state">

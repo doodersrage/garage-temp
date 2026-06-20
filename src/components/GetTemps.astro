@@ -4,25 +4,44 @@ Astro.cache.set({
   swr: 600,
 });
 import { fetchTemps } from '../lib/FetchTemps';
+
+interface Props {
+  showProbe0?: boolean;
+  showProbe1?: boolean;
+  showProbeAvg?: boolean;
+}
+
+const {
+  showProbe0 = true,
+  showProbe1 = true,
+  showProbeAvg = true,
+} = Astro.props;
+
 const temps = await fetchTemps();
 
 const probes = [
-  { label: 'Probe 0', data: temps.temp["0"] },
-  { label: 'Probe 1', data: temps.temp["1"] },
-  { label: 'Average', data: temps.temp["avg"] },
-];
+  { key: '0', label: 'Probe 0', data: temps.temp["0"], visible: showProbe0 },
+  { key: '1', label: 'Probe 1', data: temps.temp["1"], visible: showProbe1 },
+  { key: 'avg', label: 'Average', data: temps.temp["avg"], visible: showProbeAvg },
+].filter((probe) => probe.visible);
 ---
 
 <section class="card animate-slide-in-left">
   <h2 class="card-title">Garage Temperatures</h2>
   <p class="card-subtitle">Live readings from the garage temperature sensors.</p>
-  <div class="stat-grid">
-    {probes.map(({ label, data }) => (
-      <article class="stat-item">
-        <span class="stat-label">{label}</span>
-        <p class="stat-value">{data.f}°F</p>
-        <p class="stat-detail">{data.c}°C · {data.h}% humidity</p>
-      </article>
-    ))}
-  </div>
+  {probes.length === 0 ? (
+    <div class="empty-state">
+      <p>No garage probes are selected. Update your display preferences on the dashboard to show probe readings.</p>
+    </div>
+  ) : (
+    <div class="stat-grid">
+      {probes.map(({ label, data }) => (
+        <article class="stat-item">
+          <span class="stat-label">{label}</span>
+          <p class="stat-value">{data.f}°F</p>
+          <p class="stat-detail">{data.c}°C · {data.h}% humidity</p>
+        </article>
+      ))}
+    </div>
+  )}
 </section>

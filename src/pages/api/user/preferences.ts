@@ -19,6 +19,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const preferences = {
     showGarageTemps: formData.has("show_garage_temps"),
     showWeather: formData.has("show_weather"),
+    showProbe0: formData.has("show_probe_0"),
+    showProbe1: formData.has("show_probe_1"),
+    showProbeAvg: formData.has("show_probe_avg"),
   };
 
   const accessToken = cookies.get("sb-access-token")!.value;

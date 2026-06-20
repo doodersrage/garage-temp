@@ -4,11 +4,17 @@ import { supabase } from "./supabase";
 export type UserPreferences = {
   showGarageTemps: boolean;
   showWeather: boolean;
+  showProbe0: boolean;
+  showProbe1: boolean;
+  showProbeAvg: boolean;
 };
 
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
   showGarageTemps: true,
   showWeather: true,
+  showProbe0: true,
+  showProbe1: true,
+  showProbeAvg: true,
 };
 
 export function getUserPreferences(user: User | null | undefined): UserPreferences {
@@ -16,9 +22,14 @@ export function getUserPreferences(user: User | null | undefined): UserPreferenc
     return DEFAULT_USER_PREFERENCES;
   }
 
+  const metadata = user.user_metadata;
+
   return {
-    showGarageTemps: user.user_metadata.show_garage_temps !== false,
-    showWeather: user.user_metadata.show_weather !== false,
+    showGarageTemps: metadata.show_garage_temps !== false,
+    showWeather: metadata.show_weather !== false,
+    showProbe0: metadata.show_probe_0 !== false,
+    showProbe1: metadata.show_probe_1 !== false,
+    showProbeAvg: metadata.show_probe_avg !== false,
   };
 }
 
@@ -40,6 +51,9 @@ export async function updateUserPreferences(
     data: {
       show_garage_temps: preferences.showGarageTemps,
       show_weather: preferences.showWeather,
+      show_probe_0: preferences.showProbe0,
+      show_probe_1: preferences.showProbe1,
+      show_probe_avg: preferences.showProbeAvg,
     },
   });
 

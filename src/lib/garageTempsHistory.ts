@@ -63,3 +63,70 @@ export async function fetchGarageTempHistory(
     error: null,
   };
 }
+
+const EXPORT_BATCH_SIZE = 1000;
+
+export async function fetchAllGarageTempReadings(): Promise<{
+  readings: GarageTempReading[];
+  error: string | null;
+}> {
+  const supabase = createServerClient();
+  const readings: GarageTempReading[] = [];
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("garage_temps")
+      .select("tempc, tempf, humidity, timestamp")
+      .order("timestamp", { ascending: false })
+      .range(from, from + EXPORT_BATCH_SIZE - 1);
+
+    if (error) {
+      return { readings: [], error: error.message };
+    }
+
+    if (!data || data.length === 0) {
+      break;
+    }
+
+    readings.push(...(data as GarageTempReading[]));
+
+    if (data.length < EXPORT_BATCH_SIZE) {
+      break;
+    }
+
+    from += EXPORT_BATCH_SIZE;
+  }
+
+  return { readings, error: null };
+}
+
+function escapeCsvField(value: string | number): string {
+  const str = String(value);
+  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+export function buildGarageTempsCsv(readings: GarageTempReading[]): string {
+  const headers = [
+    "recorded_at",
+    "temperature_f",
+    "temperature_c",
+    "humidity_percent",
+  ];
+
+  const rows = readings.map((reading) =>
+    [
+      new Date(reading.timestamp).toISOString(),
+      Number(reading.tempf).toFixed(1),
+      Number(reading.tempc).toFixed(1),
+      Number(reading.humidity).toFixed(1),
+    ]
+      .map(escapeCsvField)
+      .join(","),
+  );
+
+  return [headers.join(","), ...rows].join("\n");
+}

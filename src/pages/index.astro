@@ -2,7 +2,6 @@
 import Layout from '../layouts/Layout.astro';
 import GetTemps from '../components/GetTemps.astro';
 import Weather from '../components/Weather.astro';
-import DisplayPreferences from '../components/DisplayPreferences.astro';
 import { getAuthFromCookies } from '../lib/auth';
 import { getUserPreferences } from '../lib/userPreferences';
 
@@ -12,13 +11,25 @@ const preferences = isAuthenticated ? getUserPreferences(user) : null;
 
 const showGarageTemps = !isAuthenticated || preferences!.showGarageTemps;
 const showWeather = !isAuthenticated || preferences!.showWeather;
+
+const probeOptions = isAuthenticated
+  ? {
+      showProbe0: preferences!.showProbe0,
+      showProbe1: preferences!.showProbe1,
+      showProbeAvg: preferences!.showProbeAvg,
+    }
+  : {
+      showProbe0: true,
+      showProbe1: true,
+      showProbeAvg: true,
+    };
 ---
 
 <Layout>
 	<div class="page-shell space-y-6">
 		<div class="grid gap-6">
 			{showGarageTemps && (
-				<GetTemps server:defer>
+				<GetTemps {...probeOptions} server:defer>
 					<div slot="fallback" class="loading-state">Loading garage temperature data...</div>
 				</GetTemps>
 			)}
@@ -29,7 +40,7 @@ const showWeather = !isAuthenticated || preferences!.showWeather;
 			)}
 			{isAuthenticated && !showGarageTemps && !showWeather && (
 				<div class="empty-state">
-					<p>Both home page blocks are hidden. Use the display preferences above to show them again.</p>
+					<p>All home page blocks are hidden. Update your display preferences on the dashboard to show them again.</p>
 				</div>
 			)}
 		</div>
