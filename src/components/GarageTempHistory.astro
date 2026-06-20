@@ -1,0 +1,77 @@
+---
+import type { PaginatedGarageTemps } from "../lib/garageTempsHistory";
+import { formatReadingTimestamp } from "../lib/garageTempsHistory";
+
+interface Props {
+  history: PaginatedGarageTemps;
+}
+
+const { history } = Astro.props;
+const { readings, page, pageSize, totalCount, totalPages, error } = history;
+
+const showingFrom = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
+const showingTo = totalCount === 0 ? 0 : Math.min(page * pageSize, totalCount);
+const prevPage = page > 1 ? page - 1 : null;
+const nextPage = page < totalPages ? page + 1 : null;
+---
+
+<section class="card">
+  <h2 class="card-title">Historic probe readings</h2>
+  <p class="card-subtitle">
+    Average temperature and humidity snapshots saved each time live garage data is fetched.
+  </p>
+
+  {error ? (
+    <div class="empty-state">
+      <p>Unable to load historic readings: {error}</p>
+    </div>
+  ) : readings.length === 0 ? (
+    <div class="empty-state">
+      <p>No historic readings have been saved yet. Data is recorded when the home page loads garage temperatures.</p>
+    </div>
+  ) : (
+    <>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Recorded</th>
+              <th scope="col">Temperature (°F)</th>
+              <th scope="col">Temperature (°C)</th>
+              <th scope="col">Humidity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {readings.map((reading) => (
+              <tr>
+                <td>{formatReadingTimestamp(reading.timestamp)}</td>
+                <td>{Number(reading.tempf).toFixed(1)}</td>
+                <td>{Number(reading.tempc).toFixed(1)}</td>
+                <td>{Number(reading.humidity).toFixed(1)}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <p class="pagination-summary">
+          Showing {showingFrom}–{showingTo} of {totalCount} readings
+        </p>
+        <div class="pagination-controls">
+          {prevPage ? (
+            <a class="btn-secondary" href={`/dashboard?page=${prevPage}`}>Previous</a>
+          ) : (
+            <span class="btn-secondary pagination-disabled">Previous</span>
+          )}
+          <span class="pagination-current">Page {page} of {totalPages}</span>
+          {nextPage ? (
+            <a class="btn-secondary" href={`/dashboard?page=${nextPage}`}>Next</a>
+          ) : (
+            <span class="btn-secondary pagination-disabled">Next</span>
+          )}
+        </div>
+      </div>
+    </>
+  )}
+</section>

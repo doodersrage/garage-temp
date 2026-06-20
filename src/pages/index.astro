@@ -16,9 +16,6 @@ const showWeather = !isAuthenticated || preferences!.showWeather;
 
 <Layout>
 	<div class="page-shell space-y-6">
-		{isAuthenticated && (
-			<DisplayPreferences preferences={preferences!} redirectTo="/" />
-		)}
 		<div class="grid gap-6">
 			{showGarageTemps && (
 				<GetTemps server:defer>
