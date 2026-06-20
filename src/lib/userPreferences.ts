@@ -7,6 +7,7 @@ export type UserPreferences = {
   showProbe0: boolean;
   showProbe1: boolean;
   showProbeAvg: boolean;
+  weatherCityId: string | null;
 };
 
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
@@ -15,6 +16,7 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
   showProbe0: true,
   showProbe1: true,
   showProbeAvg: true,
+  weatherCityId: null,
 };
 
 export function getUserPreferences(user: User | null | undefined): UserPreferences {
@@ -30,6 +32,11 @@ export function getUserPreferences(user: User | null | undefined): UserPreferenc
     showProbe0: metadata.show_probe_0 !== false,
     showProbe1: metadata.show_probe_1 !== false,
     showProbeAvg: metadata.show_probe_avg !== false,
+    weatherCityId:
+      typeof metadata.weather_city_id === "string" &&
+      /^\d+$/.test(metadata.weather_city_id.trim())
+        ? metadata.weather_city_id.trim()
+        : null,
   };
 }
 
@@ -54,6 +61,7 @@ export async function updateUserPreferences(
       show_probe_0: preferences.showProbe0,
       show_probe_1: preferences.showProbe1,
       show_probe_avg: preferences.showProbeAvg,
+      weather_city_id: preferences.weatherCityId,
     },
   });
 

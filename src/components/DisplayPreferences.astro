@@ -65,6 +65,34 @@ const { preferences, redirectTo = "/" } = Astro.props;
       />
       <span>Show current weather</span>
     </label>
+
+    <fieldset class="checkbox-group-nested">
+      <legend class="checkbox-group-label">Weather location</legend>
+      <div class="form-field mb-0">
+        <label class="form-label" for="weather_city_id">OpenWeather city ID</label>
+        <input
+          type="text"
+          name="weather_city_id"
+          id="weather_city_id"
+          class="form-input"
+          value={preferences.weatherCityId ?? ""}
+          placeholder="Leave blank to use the site default"
+          inputmode="numeric"
+          pattern="\d*"
+        />
+        <p class="preference-hint">
+          Optional override for your home page weather block. Find city IDs in the
+          <a
+            class="text-link"
+            href="https://openweathermap.org/find"
+            target="_blank"
+            rel="noreferrer"
+          >
+            OpenWeather city list
+          </a>.
+        </p>
+      </div>
+    </fieldset>
   </div>
 
   <button type="submit" class="btn-primary">

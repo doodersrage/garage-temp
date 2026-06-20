@@ -1,10 +1,29 @@
 ---
-Astro.cache.set({
-  maxAge: 1300,
-  swr: 600,
-});
-import { fetchWeather } from '../lib/FetchWeather';
-const weatherData = await fetchWeather();
+import {
+  fetchWeather,
+  getDefaultWeatherCityId,
+  resolveWeatherCityId,
+} from '../lib/FetchWeather';
+
+interface Props {
+  cityId?: string | null;
+}
+
+const { cityId = null } = Astro.props;
+const resolvedCityId = resolveWeatherCityId(cityId);
+
+if (resolvedCityId === getDefaultWeatherCityId()) {
+  Astro.cache.set({
+    maxAge: 1300,
+    swr: 600,
+  });
+}
+
+const weatherData = await fetchWeather(resolvedCityId);
+
+const locationLabel = weatherData
+  ? `${weatherData.name}${weatherData.sys?.country ? `, ${weatherData.sys.country}` : ""}`
+  : "";
 
 const weatherStats = weatherData
   ? [
@@ -27,7 +46,7 @@ const weatherStats = weatherData
   {weatherData ? (
     <>
       <h2 class="card-title">Current Weather</h2>
-      <p class="card-subtitle">Richmond, Virginia</p>
+      <p class="card-subtitle">{locationLabel}</p>
       <div class="stat-grid">
         {weatherStats.map(({ label, value, detail }) => (
           <article class="stat-item">

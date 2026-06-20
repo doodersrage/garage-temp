@@ -34,7 +34,7 @@ const probeOptions = isAuthenticated
 				</GetTemps>
 			)}
 			{showWeather && (
-				<Weather server:defer>
+				<Weather cityId={preferences?.weatherCityId} server:defer>
 					<div slot="fallback" class="loading-state">Loading weather data...</div>
 				</Weather>
 			)}
