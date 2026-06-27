@@ -9,9 +9,11 @@ import {
 interface Props {
   history: PaginatedGarageTemps;
   basePath?: string;
+  canDownloadCsv?: boolean;
 }
 
-const { history, basePath = "/dashboard/history" } = Astro.props;
+const { history, basePath = "/dashboard/history", canDownloadCsv = false } =
+  Astro.props;
 const { readings, page, pageSize, totalCount, totalPages, error } = history;
 
 const showingFrom = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -28,7 +30,7 @@ const nextPage = page < totalPages ? page + 1 : null;
         Temperature and humidity snapshots saved for your configured feeds and probes when you load the home page while signed in.
       </p>
     </div>
-    {!error && totalCount > 0 && (
+    {!error && totalCount > 0 && canDownloadCsv && (
       <a class="btn-secondary" href="/api/garage-temps/export.csv" download>
         Download CSV
       </a>

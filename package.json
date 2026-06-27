@@ -27,6 +27,7 @@
     "nodemailer": "^8.0.6",
     "pg": "^8.20.0",
     "preact": "^10.29.1",
+    "stripe": "^22.3.0",
     "tailwind-animations": "^1.0.1",
     "tailwindcss": "^4.2.4",
     "wrangler": "^4.86.0"

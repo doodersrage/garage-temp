@@ -1,8 +1,11 @@
 ---
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import GarageTempHistory from "../../components/GarageTempHistory.astro";
+import HistorySubscription from "../../components/HistorySubscription.astro";
 import { getAuthFromCookies } from "../../lib/auth";
+import { canDownloadHistoryCsv } from "../../lib/adminAccess";
 import { fetchGarageTempHistory } from "../../lib/garageTempsHistory";
+import { getUserSubscription } from "../../lib/stripeSubscriptions";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -16,11 +19,17 @@ if (pageParam < 1 || Number.isNaN(pageParam)) {
   return Astro.redirect("/dashboard/history?page=1");
 }
 
-const history = await fetchGarageTempHistory(user.id, pageParam);
+const [history, canDownloadCsv, subscription] = await Promise.all([
+  fetchGarageTempHistory(user.id, pageParam),
+  canDownloadHistoryCsv(user.id),
+  getUserSubscription(user.id),
+]);
 
 if (history.totalPages > 0 && pageParam > history.totalPages) {
   return Astro.redirect(`/dashboard/history?page=${history.totalPages}`);
 }
+
+const subscriptionNotice = Astro.url.searchParams.get("subscription");
 ---
 <DashboardLayout title="Reading History">
   <div class="space-y-6">
@@ -28,10 +37,23 @@ if (history.totalPages > 0 && pageParam > history.totalPages) {
       <h1 class="card-title">Historic probe readings</h1>
       <p class="card-subtitle">{user.email}</p>
       <p class="mb-0">
-        Browse saved temperature and humidity snapshots by feed and probe, or download the full record as CSV.
+        Browse saved temperature and humidity snapshots by feed and probe.
+        {canDownloadCsv
+          ? " Download the full record as CSV below."
+          : " Subscribe to unlock CSV export of your saved history."}
       </p>
     </section>
 
-    <GarageTempHistory history={history} basePath="/dashboard/history" />
+    <HistorySubscription
+      canDownloadCsv={canDownloadCsv}
+      subscription={subscription}
+      subscriptionNotice={subscriptionNotice}
+    />
+
+    <GarageTempHistory
+      history={history}
+      basePath="/dashboard/history"
+      canDownloadCsv={canDownloadCsv}
+    />
   </div>
 </DashboardLayout>

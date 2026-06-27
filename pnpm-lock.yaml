@@ -47,6 +47,9 @@ importers:
       preact:
         specifier: ^10.29.1
         version: 10.29.3
+      stripe:
+        specifier: ^22.3.0
+        version: 22.3.0(@types/node@26.0.1)
       tailwind-animations:
         specifier: ^1.0.1
         version: 1.0.1(tailwindcss@4.3.1)
@@ -2177,6 +2180,15 @@ packages:
 
   stringify-entities@4.0.4:
     resolution: {integrity: sha512-IwfBptatlO+QCJUo19AqvrPNqlVMpW9YEL2LIVY+Rpv2qsjCGxaDLNRgeGsQWJhfItebuJhsGSLjaBbNSQ+ieg==}
+
+  stripe@22.3.0:
+    resolution: {integrity: sha512-ypO6xjVrMWs9SmIMeHr8naCx3dAQ0clxMdUTxn7Ejd7hmY9meBGfE+N4pVHkf9sUNebAHp6uJo6mV3GxDIc2cA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
 
   supabase@2.108.0:
     resolution: {integrity: sha512-NofgZCCWJTZIVVf3m9mMRr3oVZROeBSTJB4bAmP1MvmhO+jUq7U+HvF1NPqFdvmZA5PKx4vRtpjvg7g6LbeD+w==}
@@ -4771,6 +4783,10 @@ snapshots:
     dependencies:
       character-entities-html4: 2.1.0
       character-entities-legacy: 3.0.0
+
+  stripe@22.3.0(@types/node@26.0.1):
+    optionalDependencies:
+      '@types/node': 26.0.1
 
   supabase@2.108.0:
     dependencies:

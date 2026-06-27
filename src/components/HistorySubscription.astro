@@ -1,0 +1,66 @@
+---
+import type { UserSubscription } from "../lib/stripeSubscriptions";
+import { isActiveSubscriptionStatus } from "../lib/stripe";
+
+interface Props {
+  canDownloadCsv: boolean;
+  subscription: UserSubscription | null;
+  subscriptionNotice?: string | null;
+}
+
+const {
+  canDownloadCsv,
+  subscription,
+  subscriptionNotice = null,
+} = Astro.props;
+
+const hasActiveSubscription =
+  subscription !== null && isActiveSubscriptionStatus(subscription.status);
+---
+
+<section class="card">
+  <h2 class="card-title">CSV export subscription</h2>
+  <p class="card-subtitle">
+    Downloading temperature history as CSV is available to admin accounts and active subscribers.
+  </p>
+
+  {subscriptionNotice === "success" && (
+    <div class="alert-success mb-4" role="status">
+      <p class="m-0">Subscription activated. CSV export is now available.</p>
+    </div>
+  )}
+
+  {subscriptionNotice === "cancelled" && (
+    <div class="alert-warning mb-4" role="status">
+      <p class="m-0">Checkout was cancelled. You can subscribe whenever you are ready.</p>
+    </div>
+  )}
+
+  {canDownloadCsv ? (
+    <div class="rounded-xl p-4" style="border: 1px solid var(--color-sage); background-color: rgb(196 214 176 / 0.35);">
+      <p class="m-0 mb-3 text-sm" style="color: var(--color-plum);">
+        {hasActiveSubscription
+          ? "Your subscription is active. Use Download CSV on the history table below."
+          : "Your account includes CSV export access."}
+      </p>
+      {hasActiveSubscription && (
+        <form action="/api/stripe/portal" method="post">
+          <button class="btn-secondary" type="submit">
+            Manage subscription
+          </button>
+        </form>
+      )}
+    </div>
+  ) : (
+    <div class="rounded-xl p-4" style="border: 1px solid var(--color-sage); background-color: rgb(255 250 240 / 0.65);">
+      <p class="m-0 mb-3 text-sm" style="color: var(--color-plum);">
+        Subscribe to unlock CSV downloads of your saved temperature and humidity history.
+      </p>
+      <form action="/api/stripe/checkout" method="post">
+        <button class="btn-primary" type="submit">
+          Subscribe for CSV export
+        </button>
+      </form>
+    </div>
+  )}
+</section>
