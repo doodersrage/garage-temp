@@ -1,0 +1,39 @@
+---
+import Layout from "./Layout.astro";
+import DashboardSidebar from "../components/DashboardSidebar.astro";
+import { getAuthFromCookies } from "../lib/auth";
+import { isUserAdmin } from "../lib/adminAccess";
+
+interface Props {
+  title?: string;
+  requireAdmin?: boolean;
+}
+
+const { title, requireAdmin = false } = Astro.props;
+
+const { session, user } = await getAuthFromCookies(Astro.cookies);
+
+if (!session || !user) {
+  return Astro.redirect("/signin");
+}
+
+const admin = await isUserAdmin(user.id);
+
+if (requireAdmin && !admin) {
+  return Astro.redirect("/dashboard");
+}
+
+const currentPath = Astro.url.pathname;
+---
+<Layout title={title}>
+  <div class="dashboard-shell">
+    <div class="dashboard-main">
+      <slot />
+    </div>
+    <DashboardSidebar
+      currentPath={currentPath}
+      isAdmin={admin}
+      email={user.email}
+    />
+  </div>
+</Layout>

@@ -1,5 +1,5 @@
 ---
-import Layout from "../../layouts/Layout.astro";
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import GarageTempHistory from "../../components/GarageTempHistory.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { fetchGarageTempHistory } from "../../lib/garageTempsHistory";
@@ -22,17 +22,16 @@ if (history.totalPages > 0 && pageParam > history.totalPages) {
   return Astro.redirect(`/dashboard/history?page=${history.totalPages}`);
 }
 ---
-<Layout title="Reading History">
-  <div class="page-shell space-y-6">
+<DashboardLayout title="Reading History">
+  <div class="space-y-6">
     <section class="card animate-slide-in-left">
       <h1 class="card-title">Historic probe readings</h1>
       <p class="card-subtitle">{user.email}</p>
-      <p class="mb-6">
+      <p class="mb-0">
         Browse saved temperature and humidity snapshots by feed and probe, or download the full record as CSV.
       </p>
-      <a class="btn-secondary" href="/dashboard">Back to dashboard</a>
     </section>
 
     <GarageTempHistory history={history} basePath="/dashboard/history" />
   </div>
-</Layout>
+</DashboardLayout>

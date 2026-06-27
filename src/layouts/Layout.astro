@@ -4,7 +4,6 @@ import '../styles/global.css'
 const currentYear = new Date().getFullYear();
 import logo from '../assets/gtm.svg';
 import { getAuthFromCookies } from "../lib/auth";
-import { isUserAdmin } from "../lib/adminAccess";
 
 interface Props {
   title?: string;
@@ -14,7 +13,6 @@ const { title } = Astro.props;
 const pageTitle = title ? `${title} · Garage Temperature Monitor` : 'Garage Temperature Monitor';
 
 const { user } = await getAuthFromCookies(Astro.cookies);
-const isAdmin = user ? await isUserAdmin(user.id) : false;
 
 const currentPath = Astro.url.pathname;
 const navItems = [

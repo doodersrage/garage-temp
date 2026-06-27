@@ -431,4 +431,60 @@
   .pagination-disabled {
     @apply pointer-events-none opacity-50;
   }
+
+  .dashboard-shell {
+    @apply mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row lg:items-start lg:px-8;
+  }
+
+  .dashboard-main {
+    @apply min-w-0 flex-1 order-2 lg:order-1;
+  }
+
+  .dashboard-sidebar {
+    @apply order-1 w-full shrink-0 lg:order-2 lg:w-64;
+  }
+
+  .dashboard-sidebar-inner {
+    @apply rounded-2xl p-4 shadow-sm lg:sticky lg:top-24;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-sage);
+  }
+
+  .dashboard-sidebar-label {
+    @apply mb-1 px-2 text-xs font-semibold uppercase tracking-wide;
+    color: var(--color-terracotta);
+  }
+
+  .dashboard-sidebar-email {
+    @apply mb-4 px-2 text-sm;
+    color: var(--color-text-muted);
+  }
+
+  .dashboard-nav-list {
+    @apply m-0 list-none p-0;
+  }
+
+  .dashboard-nav-list li + li {
+    @apply mt-1;
+  }
+
+  .dashboard-nav-link {
+    @apply block rounded-lg px-3 py-2.5 text-sm font-medium transition;
+    color: var(--color-plum);
+  }
+
+  .dashboard-nav-link:hover {
+    background-color: rgb(196 214 176 / 0.35);
+    color: var(--color-plum);
+  }
+
+  .dashboard-nav-link-active {
+    background-color: rgb(252 222 156 / 0.55);
+    color: var(--color-accent-hover);
+  }
+
+  .dashboard-sidebar-footer {
+    @apply mt-4 flex flex-col gap-1 border-t pt-4;
+    border-color: var(--color-sage);
+  }
 }

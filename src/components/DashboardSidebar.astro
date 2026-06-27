@@ -1,0 +1,65 @@
+---
+interface Props {
+  currentPath: string;
+  isAdmin: boolean;
+  email?: string | null;
+}
+
+const { currentPath, isAdmin, email } = Astro.props;
+
+type NavItem = {
+  href: string;
+  label: string;
+  isActive: boolean;
+};
+
+const navItems: NavItem[] = [
+  {
+    href: "/dashboard",
+    label: "Overview",
+    isActive: currentPath === "/dashboard",
+  },
+  {
+    href: "/dashboard/temperature",
+    label: "Temperature",
+    isActive: currentPath.startsWith("/dashboard/temperature"),
+  },
+  {
+    href: "/dashboard/history",
+    label: "History",
+    isActive: currentPath.startsWith("/dashboard/history"),
+  },
+];
+
+if (isAdmin) {
+  navItems.push({
+    href: "/dashboard/contacts",
+    label: "Contacts",
+    isActive: currentPath.startsWith("/dashboard/contacts"),
+  });
+}
+---
+
+<aside class="dashboard-sidebar">
+  <nav class="dashboard-sidebar-inner" aria-label="Dashboard">
+    <p class="dashboard-sidebar-label">Dashboard</p>
+    {email && <p class="dashboard-sidebar-email">{email}</p>}
+    <ul class="dashboard-nav-list">
+      {navItems.map(({ href, label, isActive }) => (
+        <li>
+          <a
+            href={href}
+            class:list={["dashboard-nav-link", isActive && "dashboard-nav-link-active"]}
+            aria-current={isActive ? "page" : undefined}
+          >
+            {label}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <div class="dashboard-sidebar-footer">
+      <a class="dashboard-nav-link" href="/">Back to site</a>
+      <a class="dashboard-nav-link" href="/api/auth/signout">Sign out</a>
+    </div>
+  </nav>
+</aside>

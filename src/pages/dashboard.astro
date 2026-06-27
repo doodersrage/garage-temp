@@ -1,8 +1,7 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import DashboardLayout from "../layouts/DashboardLayout.astro";
 import DisplayPreferences from "../components/DisplayPreferences.astro";
 import { getAuthFromCookies } from "../lib/auth";
-import { isUserAdmin } from "../lib/adminAccess";
 import { getUserPreferences } from "../lib/userPreferences";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
@@ -12,29 +11,15 @@ if (!session || !user) {
 }
 
 const preferences = await getUserPreferences(user);
-const admin = await isUserAdmin(user.id);
-const email = user.email;
 ---
-<Layout title="Dashboard">
-  <div class="page-shell space-y-6">
+<DashboardLayout title="Dashboard">
+  <div class="space-y-6">
     <section class="card animate-slide-in-left">
       <h1 class="card-title">Welcome back</h1>
-      <p class="card-subtitle">{email}</p>
-      <p class="mb-6">Manage your home page and review saved probe readings.</p>
-      <div class="flex flex-wrap gap-3">
-        <a class="btn-secondary" href="/dashboard/temperature">Temperature settings</a>
-        <a class="btn-secondary" href="/dashboard/history">View reading history</a>
-        {admin && (
-          <a class="btn-secondary" href="/dashboard/contacts">Contact submissions</a>
-        )}
-        <form action="/api/auth/signout">
-          <button type="submit" class="btn-secondary">
-            Sign out
-          </button>
-        </form>
-      </div>
+      <p class="card-subtitle">{user.email}</p>
+      <p class="mb-0">Manage your home page display and review saved probe readings.</p>
     </section>
 
     <DisplayPreferences preferences={preferences} redirectTo="/dashboard" />
   </div>
-</Layout>
+</DashboardLayout>
