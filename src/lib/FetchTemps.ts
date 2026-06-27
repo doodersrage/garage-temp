@@ -1,56 +1,116 @@
-// fetch garage temperature data from external API and store in database
-import { createServerClient } from "../lib/supabase";
+import { createServerClient } from "./supabase";
+import type { TempFeedConfig, TempFeedResult, TempProbeConfig, TempReading } from "./tempFeedConfig";
+import {
+  getDefaultTempFeeds,
+  getDefaultTempProbes,
+  parseTempFeedPayload,
+} from "./tempFeedConfig";
 
-export async function fetchTemps(): Promise<any> {
-  const url = `https://garage.robmcd.name/`;
+export type FetchTempsOptions = {
+  feeds?: TempFeedConfig[];
+  probes?: TempProbeConfig[];
+  saveToDatabase?: boolean;
+};
+
+async function saveProbeReadings(
+  feedResults: TempFeedResult[],
+  probes: TempProbeConfig[],
+): Promise<void> {
+  const supabase = createServerClient();
+  const timestamp = new Date();
+  const feedsById = new Map(feedResults.map((feed) => [feed.id, feed]));
+
+  const rows = probes.flatMap((probe) => {
+    const feed = feedsById.get(probe.feedId);
+    if (!feed || feed.error) {
+      return [];
+    }
+
+    const reading = feed.probes[probe.key];
+    if (!reading) {
+      return [];
+    }
+
+    return [
+      {
+        feed_name: feed.name,
+        probe_label: probe.label,
+        probe_key: probe.key,
+        tempc: reading.c,
+        tempf: reading.f,
+        humidity: reading.h,
+        timestamp,
+      },
+    ];
+  });
+
+  if (rows.length === 0) {
+    return;
+  }
+
+  const { error } = await supabase.from("garage_temps").insert(rows);
+
+  if (error) {
+    console.error("Failed to save garage temperature readings:", error.message);
+  }
+}
+
+export async function fetchTempFeed(feed: TempFeedConfig): Promise<TempFeedResult> {
   try {
-    const response = await fetch(url);
+    const response = await fetch(feed.url);
 
     if (!response.ok) {
-        throw new Error('Weather data not found');
+      throw new Error(`Temperature feed request failed (${response.status})`);
     }
 
-    const data = await response.json();
+    const payload = await response.json();
+    const probes = parseTempFeedPayload(payload);
 
-    // check for null values in feed
-    if (data.temp["0"].f === null) {
-      data.temp["0"].f = 0;
-    }
-    if (data.temp["0"].c === null) {
-      data.temp["0"].c = 0;
-    }
-    if (data.temp["0"].h === null) {
-      data.temp["0"].h = 0;
-    }
-    if (data.temp["1"].f === null) {
-      data.temp["1"].f = 0;
-    }
-    if (data.temp["1"].c === null) {
-      data.temp["1"].c = 0;
-    }
-    if (data.temp["1"].h === null) {
-      data.temp["1"].h = 0;
-    }
-    if (data.temp["avg"].f === null) {
-      data.temp["avg"].f = (data.temp["0"].f ? data.temp["0"].f : (data.temp["1"].f ? data.temp["1"].f : 0));
-    }
-    if (data.temp["avg"].c === null) {
-      data.temp["avg"].c = (data.temp["0"].c ? data.temp["0"].c : (data.temp["1"].c ? data.temp["1"].c : 0));
-    }
-    if (data.temp["avg"].h === null) {
-      data.temp["avg"].h = (data.temp["0"].h ? data.temp["0"].h : (data.temp["1"].h ? data.temp["1"].h : 0));
-    }
+    return {
+      id: feed.id,
+      name: feed.name,
+      url: feed.url,
+      probes,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown feed error";
+    console.error(`Failed to fetch temperature feed ${feed.id}:`, message);
 
-    const supabase = createServerClient();
-    const { error } = await supabase
-    .from('garage_temps')
-    .insert([{ tempc: data.temp["avg"].c, tempf: data.temp["avg"].f, humidity: data.temp["avg"].h, timestamp: new Date() }]);
-
-    return data;
-
-  } catch (e) {
-    console.error("Global error caught:", e);
-    throw e; 
+    return {
+      id: feed.id,
+      name: feed.name,
+      url: feed.url,
+      probes: {},
+      error: message,
+    };
   }
-  
+}
+
+export async function fetchTemps(
+  options: FetchTempsOptions = {},
+): Promise<TempFeedResult[]> {
+  const feeds = (options.feeds ?? getDefaultTempFeeds()).filter((feed) => feed.enabled);
+  const probes = options.probes ?? getDefaultTempProbes();
+  const results = await Promise.all(feeds.map((feed) => fetchTempFeed(feed)));
+
+  if (options.saveToDatabase !== false) {
+    await saveProbeReadings(results, probes);
+  }
+
+  return results;
+}
+
+export async function fetchLegacyTempPayload(
+  options: FetchTempsOptions = {},
+): Promise<{ temp: Record<string, TempReading> }> {
+  const feeds = options.feeds ?? getDefaultTempFeeds();
+  const primaryFeed = feeds.find((feed) => feed.enabled) ?? feeds[0];
+  const [result] = await fetchTemps({
+    ...options,
+    feeds: primaryFeed ? [primaryFeed] : [],
+  });
+
+  return {
+    temp: result?.probes ?? {},
+  };
 }

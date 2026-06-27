@@ -1,10 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import DisplayPreferences from "../components/DisplayPreferences.astro";
-import GarageTempHistory from "../components/GarageTempHistory.astro";
 import { getAuthFromCookies } from "../lib/auth";
 import { getUserPreferences } from "../lib/userPreferences";
-import { fetchGarageTempHistory } from "../lib/garageTempsHistory";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -14,18 +12,6 @@ if (!session || !user) {
 
 const preferences = getUserPreferences(user);
 const email = user.email;
-
-const pageParam = Number(Astro.url.searchParams.get("page") ?? "1");
-
-if (pageParam < 1 || Number.isNaN(pageParam)) {
-  return Astro.redirect("/dashboard?page=1");
-}
-
-const history = await fetchGarageTempHistory(pageParam);
-
-if (history.totalPages > 0 && pageParam > history.totalPages) {
-  return Astro.redirect(`/dashboard?page=${history.totalPages}`);
-}
 ---
 <Layout title="Dashboard">
   <div class="page-shell space-y-6">
@@ -33,16 +19,17 @@ if (history.totalPages > 0 && pageParam > history.totalPages) {
       <section class="card animate-slide-in-left">
         <h1 class="card-title">Welcome back</h1>
         <p class="card-subtitle">{email}</p>
-        <p class="mb-6">Review saved probe readings and manage what appears on the home page.</p>
-        <form action="/api/auth/signout">
-          <button type="submit" class="btn-secondary">
-            Sign out
-          </button>
-        </form>
+        <p class="mb-6">Manage what appears on the home page and review saved probe readings.</p>
+        <div class="flex flex-wrap gap-3">
+          <a class="btn-secondary" href="/dashboard/history">View reading history</a>
+          <form action="/api/auth/signout">
+            <button type="submit" class="btn-secondary">
+              Sign out
+            </button>
+          </form>
+        </div>
       </section>
       <DisplayPreferences preferences={preferences} redirectTo="/dashboard" />
     </div>
-
-    <GarageTempHistory history={history} />
   </div>
 </Layout>

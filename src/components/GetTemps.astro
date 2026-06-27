@@ -1,43 +1,59 @@
 ---
-Astro.cache.set({
-  maxAge: 1300,
-  swr: 600,
-});
 import { fetchTemps } from '../lib/FetchTemps';
+import type { TempFeedConfig, TempProbeConfig } from '../lib/tempFeedConfig';
+import {
+  buildDisplayProbes,
+  getDefaultTempFeeds,
+  getDefaultTempProbes,
+  usesDefaultTempConfig,
+} from '../lib/tempFeedConfig';
 
 interface Props {
-  showProbe0?: boolean;
-  showProbe1?: boolean;
-  showProbeAvg?: boolean;
+  feeds?: TempFeedConfig[];
+  probes?: TempProbeConfig[];
 }
 
 const {
-  showProbe0 = true,
-  showProbe1 = true,
-  showProbeAvg = true,
+  feeds = getDefaultTempFeeds(),
+  probes = getDefaultTempProbes(),
 } = Astro.props;
 
-const temps = await fetchTemps();
+if (usesDefaultTempConfig(feeds, probes)) {
+  Astro.cache.set({
+    maxAge: 1300,
+    swr: 600,
+  });
+}
 
-const probes = [
-  { key: '0', label: 'Probe 0', data: temps.temp["0"], visible: showProbe0 },
-  { key: '1', label: 'Probe 1', data: temps.temp["1"], visible: showProbe1 },
-  { key: 'avg', label: 'Average', data: temps.temp["avg"], visible: showProbeAvg },
-].filter((probe) => probe.visible);
+const feedResults = await fetchTemps({ feeds, probes, saveToDatabase: true });
+const displayProbes = buildDisplayProbes(feedResults, probes);
+const feedErrors = feedResults.filter((feed) => feed.error);
+const multipleFeeds = feeds.filter((feed) => feed.enabled).length > 1;
 ---
 
 <section class="card animate-slide-in-left">
   <h2 class="card-title">Garage Temperatures</h2>
-  <p class="card-subtitle">Live readings from the garage temperature sensors.</p>
-  {probes.length === 0 ? (
+  <p class="card-subtitle">Live readings from your configured temperature feeds.</p>
+
+  {feedErrors.length > 0 && (
+    <div class="alert-warning mb-4">
+      {feedErrors.map((feed) => (
+        <p class="m-0">{feed.name}: {feed.error}</p>
+      ))}
+    </div>
+  )}
+
+  {displayProbes.length === 0 ? (
     <div class="empty-state">
-      <p>No garage probes are selected. Update your display preferences on the dashboard to show probe readings.</p>
+      <p>No probe readings are available. Update your feed and probe settings on the dashboard.</p>
     </div>
   ) : (
     <div class="stat-grid">
-      {probes.map(({ label, data }) => (
+      {displayProbes.map(({ id, label, feedName, data }) => (
         <article class="stat-item">
-          <span class="stat-label">{label}</span>
+          <span class="stat-label">
+            {multipleFeeds ? `${feedName} · ${label}` : label}
+          </span>
           <p class="stat-value">{data.f}°F</p>
           <p class="stat-detail">{data.c}°C · {data.h}% humidity</p>
         </article>

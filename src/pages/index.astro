@@ -4,6 +4,7 @@ import GetTemps from '../components/GetTemps.astro';
 import Weather from '../components/Weather.astro';
 import { getAuthFromCookies } from '../lib/auth';
 import { getUserPreferences } from '../lib/userPreferences';
+import { getDefaultTempFeeds, getDefaultTempProbes } from '../lib/tempFeedConfig';
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 const isAuthenticated = !!user;
@@ -12,16 +13,14 @@ const preferences = isAuthenticated ? getUserPreferences(user) : null;
 const showGarageTemps = !isAuthenticated || preferences!.showGarageTemps;
 const showWeather = !isAuthenticated || preferences!.showWeather;
 
-const probeOptions = isAuthenticated
+const tempConfig = isAuthenticated
   ? {
-      showProbe0: preferences!.showProbe0,
-      showProbe1: preferences!.showProbe1,
-      showProbeAvg: preferences!.showProbeAvg,
+      feeds: preferences!.tempFeeds,
+      probes: preferences!.tempProbes,
     }
   : {
-      showProbe0: true,
-      showProbe1: true,
-      showProbeAvg: true,
+      feeds: getDefaultTempFeeds(),
+      probes: getDefaultTempProbes(),
     };
 ---
 
@@ -29,7 +28,7 @@ const probeOptions = isAuthenticated
 	<div class="page-shell space-y-6">
 		<div class="grid gap-6">
 			{showGarageTemps && (
-				<GetTemps {...probeOptions} server:defer>
+				<GetTemps {...tempConfig} server:defer>
 					<div slot="fallback" class="loading-state">Loading garage temperature data...</div>
 				</GetTemps>
 			)}

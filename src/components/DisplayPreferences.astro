@@ -1,5 +1,6 @@
 ---
 import type { UserPreferences } from "../lib/userPreferences";
+import { MAX_TEMP_FEEDS, MAX_TEMP_PROBES, slugifyFeedId } from "../lib/tempFeedConfig";
 
 interface Props {
   preferences: UserPreferences;
@@ -7,14 +8,39 @@ interface Props {
 }
 
 const { preferences, redirectTo = "/" } = Astro.props;
+
+const feedRows = [...preferences.tempFeeds];
+if (feedRows.length < MAX_TEMP_FEEDS) {
+  feedRows.push({ id: "", name: "", url: "", enabled: true });
+}
+
+const feedOptions = feedRows
+  .map((feed, index) => ({
+    ...feed,
+    resolvedId: feed.id || slugifyFeedId(feed.name || `Feed ${index + 1}`, index),
+  }))
+  .filter((feed) => feed.url.trim() || feed.id);
+
+const probeRows = [...preferences.tempProbes];
+if (probeRows.length < MAX_TEMP_PROBES) {
+  probeRows.push({
+    id: "",
+    feedId: feedOptions[0]?.resolvedId ?? "garage",
+    key: "",
+    label: "",
+    visible: true,
+  });
+}
 ---
 
 <form action="/api/user/preferences" method="post" class="card animate-zoom-in">
   <input type="hidden" name="redirect" value={redirectTo} />
   <h2 class="card-title">Home page display</h2>
-  <p class="card-subtitle">Choose which blocks and probes appear on the home page while you are signed in.</p>
+  <p class="card-subtitle">
+    Configure temperature feeds, probes, and other home page blocks while you are signed in.
+  </p>
 
-  <div class="mb-6 flex flex-col gap-3">
+  <div class="mb-6 flex flex-col gap-4">
     <label class="checkbox-row">
       <input
         type="checkbox"
@@ -26,34 +52,107 @@ const { preferences, redirectTo = "/" } = Astro.props;
     </label>
 
     <fieldset class="checkbox-group-nested">
-      <legend class="checkbox-group-label">Garage probes</legend>
-      <label class="checkbox-row">
-        <input
-          type="checkbox"
-          name="show_probe_0"
-          value="true"
-          checked={preferences.showProbe0}
-        />
-        <span>Probe 0</span>
-      </label>
-      <label class="checkbox-row">
-        <input
-          type="checkbox"
-          name="show_probe_1"
-          value="true"
-          checked={preferences.showProbe1}
-        />
-        <span>Probe 1</span>
-      </label>
-      <label class="checkbox-row">
-        <input
-          type="checkbox"
-          name="show_probe_avg"
-          value="true"
-          checked={preferences.showProbeAvg}
-        />
-        <span>Average</span>
-      </label>
+      <legend class="checkbox-group-label">Temperature feeds</legend>
+      <p class="preference-hint mb-3">
+        Add one or more HTTPS JSON feeds. Each feed should expose a <code>temp</code> object with probe keys.
+      </p>
+      {feedRows.map((feed, index) => (
+        <div class="config-row">
+          <input type="hidden" name={`feed_${index}_id`} value={feed.id} />
+          <div class="config-row-grid">
+            <div class="form-field mb-0">
+              <label class="form-label" for={`feed_${index}_name`}>Feed name</label>
+              <input
+                class="form-input"
+                type="text"
+                id={`feed_${index}_name`}
+                name={`feed_${index}_name`}
+                value={feed.name}
+                placeholder="Garage"
+              />
+            </div>
+            <div class="form-field mb-0">
+              <label class="form-label" for={`feed_${index}_url`}>Feed URL</label>
+              <input
+                class="form-input"
+                type="url"
+                id={`feed_${index}_url`}
+                name={`feed_${index}_url`}
+                value={feed.url}
+                placeholder="https://example.com/temperature.json"
+              />
+            </div>
+          </div>
+          <label class="checkbox-row mt-3">
+            <input
+              type="checkbox"
+              name={`feed_${index}_enabled`}
+              value="true"
+              checked={feed.enabled}
+            />
+            <span>Enabled</span>
+          </label>
+        </div>
+      ))}
+    </fieldset>
+
+    <fieldset class="checkbox-group-nested">
+      <legend class="checkbox-group-label">Temperature probes</legend>
+      <p class="preference-hint mb-3">
+        Map probe keys from each feed to a label and choose which readings appear on the home page.
+      </p>
+      {probeRows.map((probe, index) => (
+        <div class="config-row">
+          <input type="hidden" name={`probe_${index}_id`} value={probe.id} />
+          <div class="config-row-grid config-row-grid-probes">
+            <div class="form-field mb-0">
+              <label class="form-label" for={`probe_${index}_feed_id`}>Feed</label>
+              <select
+                class="form-input"
+                id={`probe_${index}_feed_id`}
+                name={`probe_${index}_feed_id`}
+              >
+                {feedOptions.map((feed) => (
+                  <option value={feed.resolvedId} selected={probe.feedId === feed.resolvedId || probe.feedId === feed.id}>
+                    {feed.name || feed.resolvedId}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div class="form-field mb-0">
+              <label class="form-label" for={`probe_${index}_key`}>Probe key</label>
+              <input
+                class="form-input"
+                type="text"
+                id={`probe_${index}_key`}
+                name={`probe_${index}_key`}
+                value={probe.key}
+                placeholder="0, 1, avg"
+              />
+            </div>
+            <div class="form-field mb-0">
+              <label class="form-label" for={`probe_${index}_label`}>Label</label>
+              <input
+                class="form-input"
+                type="text"
+                id={`probe_${index}_label`}
+                name={`probe_${index}_label`}
+                value={probe.label}
+                placeholder="Probe 0"
+              />
+            </div>
+          </div>
+          <label class="checkbox-row mt-3">
+            <input
+              type="checkbox"
+              name={`probe_${index}_visible`}
+              value="true"
+              checked={probe.visible}
+            />
+            <span>Visible on home page</span>
+          </label>
+        </div>
+      ))}
     </fieldset>
 
     <label class="checkbox-row">

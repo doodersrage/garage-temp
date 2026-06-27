@@ -5,6 +5,9 @@ export type GarageTempReading = {
   tempf: number;
   humidity: number;
   timestamp: string;
+  feed_name?: string | null;
+  probe_label?: string | null;
+  probe_key?: string | null;
 };
 
 export type PaginatedGarageTemps = {
@@ -18,11 +21,22 @@ export type PaginatedGarageTemps = {
 
 export const GARAGE_TEMPS_PAGE_SIZE = 20;
 
+const HISTORY_SELECT =
+  "tempc, tempf, humidity, timestamp, feed_name, probe_label, probe_key";
+
 export function formatReadingTimestamp(timestamp: string): string {
   return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(timestamp));
+}
+
+export function getReadingFeedName(reading: GarageTempReading): string {
+  return reading.feed_name?.trim() || "Garage";
+}
+
+export function getReadingProbeLabel(reading: GarageTempReading): string {
+  return reading.probe_label?.trim() || "Average";
 }
 
 export async function fetchGarageTempHistory(
@@ -36,7 +50,7 @@ export async function fetchGarageTempHistory(
   const supabase = createServerClient();
   const { data, error, count } = await supabase
     .from("garage_temps")
-    .select("tempc, tempf, humidity, timestamp", { count: "exact" })
+    .select(HISTORY_SELECT, { count: "exact" })
     .order("timestamp", { ascending: false })
     .range(from, to);
 
@@ -77,7 +91,7 @@ export async function fetchAllGarageTempReadings(): Promise<{
   while (true) {
     const { data, error } = await supabase
       .from("garage_temps")
-      .select("tempc, tempf, humidity, timestamp")
+      .select(HISTORY_SELECT)
       .order("timestamp", { ascending: false })
       .range(from, from + EXPORT_BATCH_SIZE - 1);
 
@@ -112,6 +126,9 @@ function escapeCsvField(value: string | number): string {
 export function buildGarageTempsCsv(readings: GarageTempReading[]): string {
   const headers = [
     "recorded_at",
+    "feed_name",
+    "probe_label",
+    "probe_key",
     "temperature_f",
     "temperature_c",
     "humidity_percent",
@@ -120,6 +137,9 @@ export function buildGarageTempsCsv(readings: GarageTempReading[]): string {
   const rows = readings.map((reading) =>
     [
       new Date(reading.timestamp).toISOString(),
+      getReadingFeedName(reading),
+      getReadingProbeLabel(reading),
+      reading.probe_key?.trim() || "",
       Number(reading.tempf).toFixed(1),
       Number(reading.tempc).toFixed(1),
       Number(reading.humidity).toFixed(1),
