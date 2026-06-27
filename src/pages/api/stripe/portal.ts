@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
-import { createStripeClient, getSiteUrl } from "../../../lib/stripe";
+import { createStripeClient, buildSiteUrl } from "../../../lib/stripe";
 import { getUserSubscription } from "../../../lib/stripeSubscriptions";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
@@ -20,7 +20,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     const stripe = createStripeClient();
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: subscription.stripe_customer_id,
-      return_url: `${getSiteUrl(request)}/dashboard/history`,
+      return_url: buildSiteUrl(request, "/dashboard/history"),
     });
 
     return redirect(portalSession.url);

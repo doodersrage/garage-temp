@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
-import { createStripeClient, getSiteUrl } from "../../../lib/stripe";
+import { createStripeClient, buildSiteUrl } from "../../../lib/stripe";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -9,20 +9,32 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect("/signin");
   }
 
-  if (!import.meta.env.STRIPE_PRICE_ID) {
+  if (!import.meta.env.STRIPE_PRICE_ID?.trim()) {
     return new Response("Stripe price is not configured", { status: 500 });
   }
 
   try {
     const stripe = createStripeClient();
-    const siteUrl = getSiteUrl(request);
+    const priceId = import.meta.env.STRIPE_PRICE_ID?.trim();
+
+    if (!priceId) {
+      return new Response("Stripe price is not configured", { status: 500 });
+    }
+
+    if (!priceId.startsWith("price_")) {
+      return new Response(
+        "STRIPE_PRICE_ID must be a Stripe Price ID (starts with price_), not a Product ID.",
+        { status: 500 },
+      );
+    }
+
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer_email: user.email,
       client_reference_id: user.id,
       line_items: [
         {
-          price: import.meta.env.STRIPE_PRICE_ID,
+          price: priceId,
           quantity: 1,
         },
       ],
@@ -34,8 +46,14 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       metadata: {
         supabase_user_id: user.id,
       },
-      success_url: `${siteUrl}/dashboard/history?subscription=success`,
-      cancel_url: `${siteUrl}/dashboard/history?subscription=cancelled`,
+      success_url: buildSiteUrl(
+        request,
+        "/dashboard/history?subscription=success",
+      ),
+      cancel_url: buildSiteUrl(
+        request,
+        "/dashboard/history?subscription=cancelled",
+      ),
     });
 
     if (!checkoutSession.url) {

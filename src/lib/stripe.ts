@@ -17,7 +17,22 @@ export function createStripeClient(): Stripe {
 }
 
 export function getSiteUrl(request: Request): string {
-  return import.meta.env.SITE_URL ?? new URL(request.url).origin;
+  const configured =
+    import.meta.env.SITE_URL?.trim() ||
+    import.meta.env.ORIGIN?.trim() ||
+    "";
+
+  if (configured) {
+    return configured.replace(/\/+$/, "");
+  }
+
+  return new URL(request.url).origin;
+}
+
+export function buildSiteUrl(request: Request, path: string): string {
+  const base = getSiteUrl(request);
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return new URL(normalizedPath, `${base}/`).toString();
 }
 
 export function isActiveSubscriptionStatus(status: string): boolean {

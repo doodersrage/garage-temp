@@ -6,6 +6,7 @@ interface ImportMetaEnv {
   readonly STRIPE_WEBHOOK_SECRET?: string
   readonly STRIPE_PRICE_ID?: string
   readonly SITE_URL?: string
+  readonly ORIGIN?: string
 }
 
 interface ImportMeta {
