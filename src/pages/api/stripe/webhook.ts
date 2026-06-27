@@ -6,6 +6,22 @@ import {
   upsertUserSubscription,
 } from "../../../lib/stripeSubscriptions";
 
+export const prerender = false;
+
+export const GET: APIRoute = async () => {
+  return new Response(
+    JSON.stringify({
+      ok: true,
+      message:
+        "Stripe webhook endpoint is active. Stripe delivers events here via POST.",
+    }),
+    {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+};
+
 function getUserIdFromSubscription(
   subscription: Stripe.Subscription,
 ): string | null {
