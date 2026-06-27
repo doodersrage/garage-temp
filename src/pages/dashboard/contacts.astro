@@ -1,0 +1,45 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ContactSubmissions from "../../components/ContactSubmissions.astro";
+import { getAuthFromCookies } from "../../lib/auth";
+import { isUserAdmin } from "../../lib/adminAccess";
+import { fetchContactSubmissions } from "../../lib/contactSubmissions";
+
+const { session, user } = await getAuthFromCookies(Astro.cookies);
+
+if (!session || !user) {
+  return Astro.redirect("/signin");
+}
+
+const admin = await isUserAdmin(user.id);
+
+if (!admin) {
+  return Astro.redirect("/dashboard");
+}
+
+const pageParam = Number(Astro.url.searchParams.get("page") ?? "1");
+
+if (pageParam < 1 || Number.isNaN(pageParam)) {
+  return Astro.redirect("/dashboard/contacts?page=1");
+}
+
+const submissions = await fetchContactSubmissions(pageParam);
+
+if (submissions.totalPages > 0 && pageParam > submissions.totalPages) {
+  return Astro.redirect(`/dashboard/contacts?page=${submissions.totalPages}`);
+}
+---
+<Layout title="Contact Submissions">
+  <div class="page-shell space-y-6">
+    <section class="card animate-slide-in-left">
+      <h1 class="card-title">Contact submissions</h1>
+      <p class="card-subtitle">{user.email}</p>
+      <p class="mb-6">
+        Review messages sent through the site contact form. This page is available to members of the admin group.
+      </p>
+      <a class="btn-secondary" href="/dashboard">Back to dashboard</a>
+    </section>
+
+    <ContactSubmissions submissions={submissions} />
+  </div>
+</Layout>

@@ -8,7 +8,7 @@ interface Props {
   redirectTo?: string;
 }
 
-const { feeds, probes, redirectTo = "/dashboard" } = Astro.props;
+const { feeds, probes, redirectTo = "/dashboard/temperature" } = Astro.props;
 
 const probeRows = [...probes];
 if (probeRows.length < MAX_TEMP_PROBES) {

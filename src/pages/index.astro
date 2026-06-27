@@ -5,6 +5,7 @@ import Weather from '../components/Weather.astro';
 import { getAuthFromCookies } from '../lib/auth';
 import { getUserPreferences } from '../lib/userPreferences';
 import { getDefaultTempFeeds, getDefaultTempProbes } from '../lib/tempFeedConfig';
+import { LoaderCircle } from '@lucide/astro';
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 const isAuthenticated = !!user;
@@ -30,12 +31,12 @@ const tempConfig = isAuthenticated
 		<div class="grid gap-6">
 			{showGarageTemps && (
 				<GetTemps {...tempConfig} server:defer>
-					<div slot="fallback" class="loading-state">Loading garage temperature data...</div>
+					<LoaderCircle class="h-8 w-8 animate-spin text-blue-500" />
 				</GetTemps>
 			)}
 			{showWeather && (
 				<Weather cityId={preferences?.weatherCityId} server:defer>
-					<div slot="fallback" class="loading-state">Loading weather data...</div>
+					<div slot="fallback" class="loading-state"><LoaderCircle class="h-8 w-8 animate-spin text-blue-500" /></div>
 				</Weather>
 			)}
 			{isAuthenticated && !showGarageTemps && !showWeather && (

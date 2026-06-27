@@ -1,0 +1,103 @@
+---
+import type { PaginatedContactSubmissions } from "../lib/contactSubmissions";
+import {
+  formatContactTimestamp,
+  getContactMessageText,
+} from "../lib/contactSubmissions";
+
+interface Props {
+  submissions: PaginatedContactSubmissions;
+  basePath?: string;
+}
+
+const { submissions, basePath = "/dashboard/contacts" } = Astro.props;
+const { submissions: rows, page, pageSize, totalCount, totalPages, error } =
+  submissions;
+
+const showingFrom = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
+const showingTo = totalCount === 0 ? 0 : Math.min(page * pageSize, totalCount);
+const prevPage = page > 1 ? page - 1 : null;
+const nextPage = page < totalPages ? page + 1 : null;
+---
+
+<section class="card">
+  <div class="card-header-row">
+    <div>
+      <h2 class="card-title">Contact form submissions</h2>
+      <p class="card-subtitle">
+        Messages submitted through the public contact form, stored when email delivery succeeds.
+      </p>
+    </div>
+    {!error && totalCount > 0 && (
+      <a class="btn-secondary" href="/api/contacts/export.csv" download>
+        Download CSV
+      </a>
+    )}
+  </div>
+
+  {error ? (
+    <div class="empty-state">
+      <p>Unable to load contact submissions: {error}</p>
+    </div>
+  ) : rows.length === 0 ? (
+    <div class="empty-state">
+      <p>No contact form submissions have been recorded yet.</p>
+    </div>
+  ) : (
+    <>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Submitted</th>
+              <th scope="col">Name</th>
+              <th scope="col">Email</th>
+              <th scope="col">Message</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((submission) => (
+              <tr>
+                <td>{formatContactTimestamp(submission.created_at)}</td>
+                <td>{submission.name}</td>
+                <td>
+                  <a href={`mailto:${submission.email}`}>{submission.email}</a>
+                </td>
+                <td class="contact-message-cell">
+                  {getContactMessageText(submission.message)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <p class="pagination-summary">
+          Showing {showingFrom}–{showingTo} of {totalCount} submissions
+        </p>
+        <div class="pagination-controls">
+          {prevPage ? (
+            <a class="btn-secondary" href={`${basePath}?page=${prevPage}`}>Previous</a>
+          ) : (
+            <span class="btn-secondary pagination-disabled">Previous</span>
+          )}
+          <span class="pagination-current">Page {page} of {totalPages}</span>
+          {nextPage ? (
+            <a class="btn-secondary" href={`${basePath}?page=${nextPage}`}>Next</a>
+          ) : (
+            <span class="btn-secondary pagination-disabled">Next</span>
+          )}
+        </div>
+      </div>
+    </>
+  )}
+</section>
+
+<style>
+  .contact-message-cell {
+    max-width: 28rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+</style>

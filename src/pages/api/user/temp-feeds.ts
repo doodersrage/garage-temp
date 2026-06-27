@@ -11,7 +11,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const formData = await request.formData();
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard";
+  const redirectTo = formData.get("redirect")?.toString() || "/dashboard/temperature";
   const tempFeeds = parseTempFeedsFromFormData(formData);
 
   const { error } = await saveUserTempFeeds(user.id, tempFeeds);

@@ -1,0 +1,36 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import TempFeedsSettings from "../../components/TempFeedsSettings.astro";
+import TempProbesSettings from "../../components/TempProbesSettings.astro";
+import { getAuthFromCookies } from "../../lib/auth";
+import { getUserPreferences } from "../../lib/userPreferences";
+
+const { session, user } = await getAuthFromCookies(Astro.cookies);
+
+if (!session || !user) {
+  return Astro.redirect("/signin");
+}
+
+const preferences = await getUserPreferences(user);
+const redirectTo = "/dashboard/temperature";
+---
+<Layout title="Temperature Settings">
+  <div class="page-shell space-y-6">
+    <section class="card animate-slide-in-left">
+      <h1 class="card-title">Temperature feeds & probes</h1>
+      <p class="card-subtitle">{user.email}</p>
+      <p class="mb-6">
+        Configure the temperature feeds and probes that appear on your home page.
+      </p>
+      <a class="btn-secondary" href="/dashboard">Back to dashboard</a>
+    </section>
+
+    <TempFeedsSettings feeds={preferences.tempFeeds} redirectTo={redirectTo} />
+
+    <TempProbesSettings
+      feeds={preferences.tempFeeds}
+      probes={preferences.tempProbes}
+      redirectTo={redirectTo}
+    />
+  </div>
+</Layout>
