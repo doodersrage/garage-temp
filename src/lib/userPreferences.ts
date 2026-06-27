@@ -4,10 +4,8 @@ import type { TempFeedConfig, TempProbeConfig } from "./tempFeedConfig";
 import {
   getDefaultTempFeeds,
   getDefaultTempProbes,
-  getLegacyTempProbes,
-  sanitizeTempFeeds,
-  sanitizeTempProbes,
 } from "./tempFeedConfig";
+import { getUserTempConfig } from "./userTempConfig";
 
 export type UserPreferences = {
   showGarageTemps: boolean;
@@ -25,18 +23,18 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
   tempProbes: getDefaultTempProbes(),
 };
 
-export function getUserPreferences(user: User | null | undefined): UserPreferences {
+function getDisplayPreferencesFromMetadata(
+  user: User | null | undefined,
+): Pick<UserPreferences, "showGarageTemps" | "showWeather" | "weatherCityId"> {
   if (!user?.user_metadata) {
-    return DEFAULT_USER_PREFERENCES;
+    return {
+      showGarageTemps: DEFAULT_USER_PREFERENCES.showGarageTemps,
+      showWeather: DEFAULT_USER_PREFERENCES.showWeather,
+      weatherCityId: DEFAULT_USER_PREFERENCES.weatherCityId,
+    };
   }
 
   const metadata = user.user_metadata;
-  const tempFeeds = metadata.temp_feeds
-    ? sanitizeTempFeeds(metadata.temp_feeds)
-    : getDefaultTempFeeds();
-  const tempProbes = metadata.temp_probes
-    ? sanitizeTempProbes(metadata.temp_probes, tempFeeds)
-    : getLegacyTempProbes(metadata);
 
   return {
     showGarageTemps: metadata.show_garage_temps !== false,
@@ -46,15 +44,30 @@ export function getUserPreferences(user: User | null | undefined): UserPreferenc
       /^\d+$/.test(metadata.weather_city_id.trim())
         ? metadata.weather_city_id.trim()
         : null,
-    tempFeeds,
-    tempProbes,
   };
 }
 
-export async function updateUserPreferences(
+export async function getUserPreferences(
+  user: User | null | undefined,
+): Promise<UserPreferences> {
+  if (!user) {
+    return DEFAULT_USER_PREFERENCES;
+  }
+
+  const displayPreferences = getDisplayPreferencesFromMetadata(user);
+  const tempConfig = await getUserTempConfig(user);
+
+  return {
+    ...displayPreferences,
+    tempFeeds: tempConfig.feeds,
+    tempProbes: tempConfig.probes,
+  };
+}
+
+export async function updateUserDisplayPreferences(
   accessToken: string,
   refreshToken: string,
-  preferences: UserPreferences,
+  preferences: Pick<UserPreferences, "showGarageTemps" | "showWeather" | "weatherCityId">,
 ): Promise<{ user: User | null; error: Error | null }> {
   const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
     access_token: accessToken,
@@ -70,8 +83,6 @@ export async function updateUserPreferences(
       show_garage_temps: preferences.showGarageTemps,
       show_weather: preferences.showWeather,
       weather_city_id: preferences.weatherCityId,
-      temp_feeds: preferences.tempFeeds,
-      temp_probes: preferences.tempProbes,
     },
   });
 

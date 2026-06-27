@@ -10,11 +10,13 @@ export type FetchTempsOptions = {
   feeds?: TempFeedConfig[];
   probes?: TempProbeConfig[];
   saveToDatabase?: boolean;
+  userId?: string | null;
 };
 
 async function saveProbeReadings(
   feedResults: TempFeedResult[],
   probes: TempProbeConfig[],
+  userId: string,
 ): Promise<void> {
   const supabase = createServerClient();
   const timestamp = new Date();
@@ -33,6 +35,7 @@ async function saveProbeReadings(
 
     return [
       {
+        user_id: userId,
         feed_name: feed.name,
         probe_label: probe.label,
         probe_key: probe.key,
@@ -93,8 +96,8 @@ export async function fetchTemps(
   const probes = options.probes ?? getDefaultTempProbes();
   const results = await Promise.all(feeds.map((feed) => fetchTempFeed(feed)));
 
-  if (options.saveToDatabase !== false) {
-    await saveProbeReadings(results, probes);
+  if (options.saveToDatabase !== false && options.userId) {
+    await saveProbeReadings(results, probes, options.userId);
   }
 
   return results;

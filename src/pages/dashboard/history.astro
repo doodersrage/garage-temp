@@ -16,7 +16,7 @@ if (pageParam < 1 || Number.isNaN(pageParam)) {
   return Astro.redirect("/dashboard/history?page=1");
 }
 
-const history = await fetchGarageTempHistory(pageParam);
+const history = await fetchGarageTempHistory(user.id, pageParam);
 
 if (history.totalPages > 0 && pageParam > history.totalPages) {
   return Astro.redirect(`/dashboard/history?page=${history.totalPages}`);

@@ -1,0 +1,103 @@
+---
+import type { TempFeedConfig, TempProbeConfig } from "../lib/tempFeedConfig";
+import { MAX_TEMP_PROBES } from "../lib/tempFeedConfig";
+
+interface Props {
+  feeds: TempFeedConfig[];
+  probes: TempProbeConfig[];
+  redirectTo?: string;
+}
+
+const { feeds, probes, redirectTo = "/dashboard" } = Astro.props;
+
+const probeRows = [...probes];
+if (probeRows.length < MAX_TEMP_PROBES) {
+  probeRows.push({
+    id: "",
+    feedId: feeds[0]?.id ?? "garage",
+    key: "",
+    label: "",
+    visible: true,
+  });
+}
+---
+
+<form action="/api/user/temp-probes" method="post" class="card animate-zoom-in">
+  <input type="hidden" name="redirect" value={redirectTo} />
+  <h2 class="card-title">Temperature probes</h2>
+  <p class="card-subtitle">
+    Map probe keys from each feed to a label and choose which readings appear on the home page.
+  </p>
+
+  <div class="mb-6 flex flex-col gap-3">
+    {probeRows.map((probe, index) => (
+      <div class="config-row">
+        <div class="config-row-actions">
+          <span class="config-row-title">{probe.label || `Probe ${index + 1}`}</span>
+          {probe.id && probe.key && (
+            <button
+              type="submit"
+              class="btn-danger"
+              formaction="/api/user/temp-probes/delete"
+              formmethod="post"
+              name="probe_id"
+              value={probe.id}
+            >
+              Delete probe
+            </button>
+          )}
+        </div>
+        <input type="hidden" name={`probe_${index}_id`} value={probe.id} />
+        <div class="config-row-grid config-row-grid-probes">
+          <div class="form-field mb-0">
+            <label class="form-label" for={`probe_${index}_feed_id`}>Feed</label>
+            <select
+              class="form-input"
+              id={`probe_${index}_feed_id`}
+              name={`probe_${index}_feed_id`}
+            >
+              {feeds.map((feed) => (
+                <option value={feed.id} selected={probe.feedId === feed.id}>
+                  {feed.name || feed.id}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div class="form-field mb-0">
+            <label class="form-label" for={`probe_${index}_key`}>Probe key</label>
+            <input
+              class="form-input"
+              type="text"
+              id={`probe_${index}_key`}
+              name={`probe_${index}_key`}
+              value={probe.key}
+              placeholder="0, 1, avg"
+            />
+          </div>
+          <div class="form-field mb-0">
+            <label class="form-label" for={`probe_${index}_label`}>Label</label>
+            <input
+              class="form-input"
+              type="text"
+              id={`probe_${index}_label`}
+              name={`probe_${index}_label`}
+              value={probe.label}
+              placeholder="Probe 0"
+            />
+          </div>
+        </div>
+        <label class="checkbox-row mt-3">
+          <input
+            type="checkbox"
+            name={`probe_${index}_visible`}
+            value="true"
+            checked={probe.visible}
+          />
+          <span>Visible on home page</span>
+        </label>
+      </div>
+    ))}
+  </div>
+
+  <button type="submit" class="btn-primary">Save probes</button>
+</form>

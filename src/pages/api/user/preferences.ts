@@ -4,11 +4,7 @@ import {
   getAuthFromCookies,
   setAuthCookies,
 } from "../../../lib/auth";
-import {
-  parseTempFeedsFromFormData,
-  parseTempProbesFromFormData,
-} from "../../../lib/tempFeedConfig";
-import { updateUserPreferences } from "../../../lib/userPreferences";
+import { updateUserDisplayPreferences } from "../../../lib/userPreferences";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -22,24 +18,17 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const weatherCityIdRaw = formData.get("weather_city_id")?.toString().trim() ?? "";
   const weatherCityId = /^\d+$/.test(weatherCityIdRaw) ? weatherCityIdRaw : null;
 
-  const tempFeeds = parseTempFeedsFromFormData(formData);
-  const tempProbes = parseTempProbesFromFormData(formData, tempFeeds);
-
-  const preferences = {
-    showGarageTemps: formData.has("show_garage_temps"),
-    showWeather: formData.has("show_weather"),
-    weatherCityId,
-    tempFeeds,
-    tempProbes,
-  };
-
   const accessToken = cookies.get("sb-access-token")!.value;
   const refreshToken = cookies.get("sb-refresh-token")!.value;
 
-  const { error } = await updateUserPreferences(
+  const { error } = await updateUserDisplayPreferences(
     accessToken,
     refreshToken,
-    preferences,
+    {
+      showGarageTemps: formData.has("show_garage_temps"),
+      showWeather: formData.has("show_weather"),
+      weatherCityId,
+    },
   );
 
   if (error) {

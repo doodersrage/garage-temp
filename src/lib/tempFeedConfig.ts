@@ -358,9 +358,81 @@ export function usesDefaultTempConfig(
 export type DisplayProbe = {
   id: string;
   label: string;
+  key: string;
   feedName: string;
-  data: TempReading;
+  data: TempReading | null;
 };
+
+export type FeedDisplayGroup = {
+  feedId: string;
+  feedName: string;
+  enabled: boolean;
+  error?: string;
+  probes: DisplayProbe[];
+};
+
+export function formatProbeLabelFromKey(key: string): string {
+  if (key === "avg") {
+    return "Average";
+  }
+
+  return `Probe ${key}`;
+}
+
+function buildProbesForFeed(
+  feed: TempFeedConfig,
+  assignedProbes: TempProbeConfig[],
+  result: TempFeedResult | undefined,
+): DisplayProbe[] {
+  if (assignedProbes.length > 0) {
+    return assignedProbes.map((probe) => ({
+      id: probe.id,
+      label: probe.label,
+      key: probe.key,
+      feedName: feed.name,
+      data:
+        feed.enabled && result && !result.error
+          ? result.probes[probe.key] ?? null
+          : null,
+    }));
+  }
+
+  if (!feed.enabled || !result || result.error) {
+    return [];
+  }
+
+  return Object.entries(result.probes).map(([key, data]) => ({
+    id: `${feed.id}-${key}`,
+    label: formatProbeLabelFromKey(key),
+    key,
+    feedName: feed.name,
+    data,
+  }));
+}
+
+export function buildFeedDisplayGroups(
+  feeds: TempFeedConfig[],
+  probes: TempProbeConfig[],
+  feedResults: TempFeedResult[],
+): FeedDisplayGroup[] {
+  const resultsById = new Map(feedResults.map((feed) => [feed.id, feed]));
+
+  return feeds.map((feed) => {
+    const assignedProbes = probes.filter((probe) => probe.feedId === feed.id);
+    const result = resultsById.get(feed.id);
+    const error = !feed.enabled
+      ? "This feed is disabled in your dashboard settings."
+      : result?.error;
+
+    return {
+      feedId: feed.id,
+      feedName: feed.name,
+      enabled: feed.enabled,
+      error,
+      probes: buildProbesForFeed(feed, assignedProbes, result),
+    };
+  });
+}
 
 export function buildDisplayProbes(
   feedResults: TempFeedResult[],
@@ -368,28 +440,27 @@ export function buildDisplayProbes(
 ): DisplayProbe[] {
   const feedsById = new Map(feedResults.map((feed) => [feed.id, feed]));
 
-  return probes
-    .filter((probe) => probe.visible)
-    .flatMap((probe) => {
-      const feed = feedsById.get(probe.feedId);
-      if (!feed || feed.error) {
-        return [];
-      }
+  return probes.flatMap((probe) => {
+    const feed = feedsById.get(probe.feedId);
+    if (!feed || feed.error) {
+      return [];
+    }
 
-      const data = feed.probes[probe.key];
-      if (!data) {
-        return [];
-      }
+    const data = feed.probes[probe.key];
+    if (!data) {
+      return [];
+    }
 
-      return [
-        {
-          id: probe.id,
-          label: probe.label,
-          feedName: feed.name,
-          data,
-        },
-      ];
-    });
+    return [
+      {
+        id: probe.id,
+        label: probe.label,
+        key: probe.key,
+        feedName: feed.name,
+        data,
+      },
+    ];
+  });
 }
 
 export function getPrimaryAverageReading(

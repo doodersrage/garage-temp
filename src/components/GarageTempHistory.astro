@@ -25,7 +25,7 @@ const nextPage = page < totalPages ? page + 1 : null;
     <div>
       <h2 class="card-title">Historic probe readings</h2>
       <p class="card-subtitle">
-        Temperature and humidity snapshots saved for each configured feed and probe when live garage data is fetched.
+        Temperature and humidity snapshots saved for your configured feeds and probes when you load the home page while signed in.
       </p>
     </div>
     {!error && totalCount > 0 && (
@@ -41,7 +41,7 @@ const nextPage = page < totalPages ? page + 1 : null;
     </div>
   ) : readings.length === 0 ? (
     <div class="empty-state">
-      <p>No historic readings have been saved yet. Data is recorded when the home page loads garage temperatures.</p>
+      <p>No historic readings have been saved yet. Load the home page while signed in to record readings from your configured feeds and probes.</p>
     </div>
   ) : (
     <>

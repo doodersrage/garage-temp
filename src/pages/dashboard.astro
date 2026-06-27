@@ -1,6 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import DisplayPreferences from "../components/DisplayPreferences.astro";
+import TempFeedsSettings from "../components/TempFeedsSettings.astro";
+import TempProbesSettings from "../components/TempProbesSettings.astro";
 import { getAuthFromCookies } from "../lib/auth";
 import { getUserPreferences } from "../lib/userPreferences";
 
@@ -10,26 +12,34 @@ if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const preferences = getUserPreferences(user);
+const preferences = await getUserPreferences(user);
 const email = user.email;
 ---
 <Layout title="Dashboard">
   <div class="page-shell space-y-6">
+    <section class="card animate-slide-in-left">
+      <h1 class="card-title">Welcome back</h1>
+      <p class="card-subtitle">{email}</p>
+      <p class="mb-6">Manage what appears on the home page and review saved probe readings.</p>
+      <div class="flex flex-wrap gap-3">
+        <a class="btn-secondary" href="/dashboard/history">View reading history</a>
+        <form action="/api/auth/signout">
+          <button type="submit" class="btn-secondary">
+            Sign out
+          </button>
+        </form>
+      </div>
+    </section>
+
     <div class="page-grid">
-      <section class="card animate-slide-in-left">
-        <h1 class="card-title">Welcome back</h1>
-        <p class="card-subtitle">{email}</p>
-        <p class="mb-6">Manage what appears on the home page and review saved probe readings.</p>
-        <div class="flex flex-wrap gap-3">
-          <a class="btn-secondary" href="/dashboard/history">View reading history</a>
-          <form action="/api/auth/signout">
-            <button type="submit" class="btn-secondary">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </section>
       <DisplayPreferences preferences={preferences} redirectTo="/dashboard" />
+      <TempFeedsSettings feeds={preferences.tempFeeds} redirectTo="/dashboard" />
     </div>
+
+    <TempProbesSettings
+      feeds={preferences.tempFeeds}
+      probes={preferences.tempProbes}
+      redirectTo="/dashboard"
+    />
   </div>
 </Layout>

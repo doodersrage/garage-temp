@@ -2,7 +2,7 @@
 import { fetchTemps } from '../lib/FetchTemps';
 import type { TempFeedConfig, TempProbeConfig } from '../lib/tempFeedConfig';
 import {
-  buildDisplayProbes,
+  buildFeedDisplayGroups,
   getDefaultTempFeeds,
   getDefaultTempProbes,
   usesDefaultTempConfig,
@@ -11,52 +11,84 @@ import {
 interface Props {
   feeds?: TempFeedConfig[];
   probes?: TempProbeConfig[];
+  userId?: string | null;
 }
 
 const {
   feeds = getDefaultTempFeeds(),
   probes = getDefaultTempProbes(),
+  userId = null,
 } = Astro.props;
 
-if (usesDefaultTempConfig(feeds, probes)) {
+if (usesDefaultTempConfig(feeds, probes) && !userId) {
   Astro.cache.set({
     maxAge: 1300,
     swr: 600,
   });
 }
 
-const feedResults = await fetchTemps({ feeds, probes, saveToDatabase: true });
-const displayProbes = buildDisplayProbes(feedResults, probes);
-const feedErrors = feedResults.filter((feed) => feed.error);
-const multipleFeeds = feeds.filter((feed) => feed.enabled).length > 1;
+const feedResults = await fetchTemps({
+  feeds,
+  probes,
+  saveToDatabase: !!userId,
+  userId,
+});
+const feedGroups = buildFeedDisplayGroups(feeds, probes, feedResults);
 ---
 
 <section class="card animate-slide-in-left">
   <h2 class="card-title">Garage Temperatures</h2>
-  <p class="card-subtitle">Live readings from your configured temperature feeds.</p>
+  <p class="card-subtitle">
+    Live readings from all temperature feeds and probes assigned in your dashboard.
+  </p>
 
-  {feedErrors.length > 0 && (
-    <div class="alert-warning mb-4">
-      {feedErrors.map((feed) => (
-        <p class="m-0">{feed.name}: {feed.error}</p>
-      ))}
-    </div>
-  )}
-
-  {displayProbes.length === 0 ? (
+  {!feeds.length ? (
     <div class="empty-state">
-      <p>No probe readings are available. Update your feed and probe settings on the dashboard.</p>
+      <p>No temperature feeds are configured. Add feeds on the dashboard to see readings here.</p>
+    </div>
+  ) : feedGroups.length === 0 ? (
+    <div class="empty-state">
+      <p>No feed groups are available. Check your dashboard feed and probe assignments.</p>
     </div>
   ) : (
-    <div class="stat-grid">
-      {displayProbes.map(({ id, label, feedName, data }) => (
-        <article class="stat-item">
-          <span class="stat-label">
-            {multipleFeeds ? `${feedName} · ${label}` : label}
-          </span>
-          <p class="stat-value">{data.f}°F</p>
-          <p class="stat-detail">{data.c}°C · {data.h}% humidity</p>
-        </article>
+    <div class="feed-groups">
+      {feedGroups.map((group) => (
+        <section class="feed-group">
+          <div class="feed-group-header">
+            <h3 class="feed-group-title">{group.feedName}</h3>
+            {!group.enabled && (
+              <span class="feed-group-badge">Disabled</span>
+            )}
+          </div>
+
+          {group.error && (
+            <div class="alert-warning mb-4">
+              <p class="m-0">{group.error}</p>
+            </div>
+          )}
+
+          {group.probes.length === 0 ? (
+            <p class="stat-detail">
+              No probes are assigned to this feed yet. Add probes on the dashboard or they will be discovered automatically from the feed response.
+            </p>
+          ) : (
+            <div class="stat-grid">
+              {group.probes.map((probe) => (
+                <article class="stat-item">
+                  <span class="stat-label">{probe.label}</span>
+                  {probe.data ? (
+                    <>
+                      <p class="stat-value">{probe.data.f}°F</p>
+                      <p class="stat-detail">{probe.data.c}°C · {probe.data.h}% humidity</p>
+                    </>
+                  ) : (
+                    <p class="stat-detail">No reading available for key "{probe.key}"</p>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
       ))}
     </div>
   )}

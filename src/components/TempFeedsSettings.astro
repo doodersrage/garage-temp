@@ -1,0 +1,82 @@
+---
+import type { TempFeedConfig } from "../lib/tempFeedConfig";
+import { MAX_TEMP_FEEDS } from "../lib/tempFeedConfig";
+
+interface Props {
+  feeds: TempFeedConfig[];
+  redirectTo?: string;
+}
+
+const { feeds, redirectTo = "/dashboard" } = Astro.props;
+
+const feedRows = [...feeds];
+if (feedRows.length < MAX_TEMP_FEEDS) {
+  feedRows.push({ id: "", name: "", url: "", enabled: true });
+}
+---
+
+<form action="/api/user/temp-feeds" method="post" class="card animate-zoom-in">
+  <input type="hidden" name="redirect" value={redirectTo} />
+  <h2 class="card-title">Temperature feeds</h2>
+  <p class="card-subtitle">
+    Add one or more HTTPS JSON feeds. Each feed should expose a <code>temp</code> object with probe keys.
+  </p>
+
+  <div class="mb-6 flex flex-col gap-3">
+    {feedRows.map((feed, index) => (
+      <div class="config-row">
+        <div class="config-row-actions">
+          <span class="config-row-title">{feed.name || `Feed ${index + 1}`}</span>
+          {feed.id && feed.url && (
+            <button
+              type="submit"
+              class="btn-danger"
+              formaction="/api/user/temp-feeds/delete"
+              formmethod="post"
+              name="feed_id"
+              value={feed.id}
+            >
+              Delete feed
+            </button>
+          )}
+        </div>
+        <input type="hidden" name={`feed_${index}_id`} value={feed.id} />
+        <div class="config-row-grid">
+          <div class="form-field mb-0">
+            <label class="form-label" for={`feed_${index}_name`}>Feed name</label>
+            <input
+              class="form-input"
+              type="text"
+              id={`feed_${index}_name`}
+              name={`feed_${index}_name`}
+              value={feed.name}
+              placeholder="Garage"
+            />
+          </div>
+          <div class="form-field mb-0">
+            <label class="form-label" for={`feed_${index}_url`}>Feed URL</label>
+            <input
+              class="form-input"
+              type="url"
+              id={`feed_${index}_url`}
+              name={`feed_${index}_url`}
+              value={feed.url}
+              placeholder="https://example.com/temperature.json"
+            />
+          </div>
+        </div>
+        <label class="checkbox-row mt-3">
+          <input
+            type="checkbox"
+            name={`feed_${index}_enabled`}
+            value="true"
+            checked={feed.enabled}
+          />
+          <span>Enabled</span>
+        </label>
+      </div>
+    ))}
+  </div>
+
+  <button type="submit" class="btn-primary">Save feeds</button>
+</form>

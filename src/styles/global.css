@@ -239,6 +239,19 @@
     background-color: rgb(196 214 176 / 0.35);
   }
 
+  .btn-danger {
+    @apply inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    background-color: var(--color-surface);
+    border: 1px solid #9a471e;
+    color: #9a471e;
+    --tw-ring-color: var(--color-peach);
+  }
+
+  .btn-danger:hover {
+    background-color: rgb(186 86 36 / 0.12);
+    color: var(--color-accent-hover);
+  }
+
   .btn-ghost {
     @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
     color: var(--color-text-muted);
@@ -295,6 +308,40 @@
 
   .config-row-grid-probes {
     @apply sm:grid-cols-3;
+  }
+
+  .config-row-actions {
+    @apply mb-3 flex items-center justify-between gap-3;
+  }
+
+  .config-row-title {
+    @apply text-sm font-semibold;
+    color: var(--color-plum);
+  }
+
+  .feed-groups {
+    @apply flex flex-col gap-6;
+  }
+
+  .feed-group {
+    @apply rounded-xl p-4;
+    border: 1px solid var(--color-sage);
+    background-color: rgb(255 250 240 / 0.45);
+  }
+
+  .feed-group-header {
+    @apply mb-4 flex items-center justify-between gap-3;
+  }
+
+  .feed-group-title {
+    @apply m-0 text-lg font-semibold normal-case tracking-normal;
+    color: var(--color-plum);
+  }
+
+  .feed-group-badge {
+    @apply rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide;
+    background-color: rgb(252 222 156 / 0.55);
+    color: var(--color-accent-hover);
   }
 
   .empty-state {

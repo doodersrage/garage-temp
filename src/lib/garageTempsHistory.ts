@@ -8,6 +8,7 @@ export type GarageTempReading = {
   feed_name?: string | null;
   probe_label?: string | null;
   probe_key?: string | null;
+  user_id?: string | null;
 };
 
 export type PaginatedGarageTemps = {
@@ -22,7 +23,7 @@ export type PaginatedGarageTemps = {
 export const GARAGE_TEMPS_PAGE_SIZE = 20;
 
 const HISTORY_SELECT =
-  "tempc, tempf, humidity, timestamp, feed_name, probe_label, probe_key";
+  "tempc, tempf, humidity, timestamp, feed_name, probe_label, probe_key, user_id";
 
 export function formatReadingTimestamp(timestamp: string): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -40,6 +41,7 @@ export function getReadingProbeLabel(reading: GarageTempReading): string {
 }
 
 export async function fetchGarageTempHistory(
+  userId: string,
   page = 1,
   pageSize = GARAGE_TEMPS_PAGE_SIZE,
 ): Promise<PaginatedGarageTemps> {
@@ -51,6 +53,7 @@ export async function fetchGarageTempHistory(
   const { data, error, count } = await supabase
     .from("garage_temps")
     .select(HISTORY_SELECT, { count: "exact" })
+    .eq("user_id", userId)
     .order("timestamp", { ascending: false })
     .range(from, to);
 
@@ -80,7 +83,7 @@ export async function fetchGarageTempHistory(
 
 const EXPORT_BATCH_SIZE = 1000;
 
-export async function fetchAllGarageTempReadings(): Promise<{
+export async function fetchAllGarageTempReadings(userId: string): Promise<{
   readings: GarageTempReading[];
   error: string | null;
 }> {
@@ -92,6 +95,7 @@ export async function fetchAllGarageTempReadings(): Promise<{
     const { data, error } = await supabase
       .from("garage_temps")
       .select(HISTORY_SELECT)
+      .eq("user_id", userId)
       .order("timestamp", { ascending: false })
       .range(from, from + EXPORT_BATCH_SIZE - 1);
 

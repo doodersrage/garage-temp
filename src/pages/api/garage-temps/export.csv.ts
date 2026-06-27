@@ -12,7 +12,7 @@ export const GET: APIRoute = async ({ cookies }) => {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const { readings, error } = await fetchAllGarageTempReadings();
+  const { readings, error } = await fetchAllGarageTempReadings(user.id);
 
   if (error) {
     return new Response(error, { status: 500 });

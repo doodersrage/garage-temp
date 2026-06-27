@@ -8,7 +8,7 @@ import { getDefaultTempFeeds, getDefaultTempProbes } from '../lib/tempFeedConfig
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 const isAuthenticated = !!user;
-const preferences = isAuthenticated ? getUserPreferences(user) : null;
+const preferences = isAuthenticated ? await getUserPreferences(user) : null;
 
 const showGarageTemps = !isAuthenticated || preferences!.showGarageTemps;
 const showWeather = !isAuthenticated || preferences!.showWeather;
@@ -17,6 +17,7 @@ const tempConfig = isAuthenticated
   ? {
       feeds: preferences!.tempFeeds,
       probes: preferences!.tempProbes,
+      userId: user!.id,
     }
   : {
       feeds: getDefaultTempFeeds(),
