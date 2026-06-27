@@ -1,12 +1,16 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { getAuthFromCookies } from "../lib/auth";
+import { getSignInErrorMessage } from "../lib/signInErrors";
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 
 if (user) {
   return Astro.redirect("/dashboard");
 }
+
+const errorMessage = getSignInErrorMessage(Astro.url.searchParams.get("error"));
+const emailValue = Astro.url.searchParams.get("email") ?? "";
 ---
 
 <Layout title="Sign in">
@@ -23,9 +27,21 @@ if (user) {
     </section>
 
     <form class="form-panel animate-blurred-fade-in" action="/api/auth/signin" method="post">
+      {errorMessage && (
+        <div class="alert-warning mb-4" role="alert">
+          <p class="m-0">{errorMessage}</p>
+        </div>
+      )}
       <div class="form-field">
         <label class="form-label" for="email">Email</label>
-        <input class="form-input" type="email" name="email" id="email" required />
+        <input
+          class="form-input"
+          type="email"
+          name="email"
+          id="email"
+          value={emailValue}
+          required
+        />
       </div>
       <div class="form-field">
         <label class="form-label" for="password">Password</label>

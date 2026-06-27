@@ -1,6 +1,10 @@
 import type { APIRoute } from "astro";
 import { supabase } from "../../../lib/supabase";
 import type { Provider } from "@supabase/supabase-js";
+import {
+  buildSignInRedirectUrl,
+  mapSignInError,
+} from "../../../lib/signInErrors";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const formData = await request.formData();
@@ -14,19 +18,19 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: provider as Provider,
       options: {
-        redirectTo: "http://localhost:4321/api/auth/callback"
+        redirectTo: "http://localhost:4321/api/auth/callback",
       },
     });
 
     if (error) {
-      return new Response(error.message, { status: 500 });
+      return redirect(buildSignInRedirectUrl("oauth_failed"));
     }
 
     return redirect(data.url);
   }
 
   if (!email || !password) {
-    return new Response("Email and password are required", { status: 400 });
+    return redirect(buildSignInRedirectUrl("missing_fields", email));
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -35,7 +39,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   });
 
   if (error) {
-    return new Response(error.message, { status: 500 });
+    return redirect(buildSignInRedirectUrl(mapSignInError(error), email));
   }
 
   const { access_token, refresh_token } = data.session;

@@ -32,7 +32,8 @@
     "wrangler": "^4.86.0"
   },
   "devDependencies": {
-    "@types/pg": "^8.20.0"
+    "@types/pg": "^8.20.0",
+    "supabase": "^2.108.0"
   },
   "overrides": {
     "vite": "^7"
