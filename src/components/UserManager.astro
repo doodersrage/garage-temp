@@ -1,0 +1,148 @@
+---
+import type { PaginatedManagedUsers } from "../lib/userManager";
+import {
+  formatUserGroups,
+  formatUserTimestamp,
+} from "../lib/userManager";
+
+interface Props {
+  users: PaginatedManagedUsers;
+  currentUserId: string;
+  basePath?: string;
+  status?: string | null;
+}
+
+const {
+  users,
+  currentUserId,
+  basePath = "/dashboard/users",
+  status = null,
+} = Astro.props;
+const { users: rows, page, pageSize, totalCount, totalPages, error } = users;
+
+const showingFrom = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
+const showingTo = totalCount === 0 ? 0 : Math.min(page * pageSize, totalCount);
+const prevPage = page > 1 ? page - 1 : null;
+const nextPage = page < totalPages ? page + 1 : null;
+const redirectTo = page > 1 ? `${basePath}?page=${page}` : basePath;
+---
+
+<section class="card">
+  <div class="card-header-row">
+    <div>
+      <h2 class="card-title">Registered users</h2>
+      <p class="card-subtitle">
+        Review accounts, group memberships, and grant or revoke admin access.
+      </p>
+    </div>
+  </div>
+
+  {status === "updated" && (
+    <div class="alert-success mb-4" role="status">
+      <p class="m-0">User access updated.</p>
+    </div>
+  )}
+
+  {status === "error" && (
+    <div class="alert-warning mb-4" role="alert">
+      <p class="m-0">Unable to update user access. Please try again.</p>
+    </div>
+  )}
+
+  {error ? (
+    <div class="empty-state">
+      <p>Unable to load users: {error}</p>
+    </div>
+  ) : rows.length === 0 ? (
+    <div class="empty-state">
+      <p>No registered users were found.</p>
+    </div>
+  ) : (
+    <>
+      <div class="table-wrap">
+        <table class="data-table data-table-users">
+          <thead>
+            <tr>
+              <th scope="col">Email</th>
+              <th scope="col">Joined</th>
+              <th scope="col">Groups</th>
+              <th scope="col">Admin</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((managedUser) => {
+              const isSelf = managedUser.user_id === currentUserId;
+
+              return (
+                <tr>
+                  <td>
+                    {managedUser.email}
+                    {isSelf && (
+                      <span class="ml-2 rounded-full bg-[rgb(252_222_156/0.55)] px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-[var(--color-accent-hover)]">
+                        You
+                      </span>
+                    )}
+                  </td>
+                  <td>{formatUserTimestamp(managedUser.created_at)}</td>
+                  <td>{formatUserGroups(managedUser.groups)}</td>
+                  <td>
+                    {managedUser.is_admin ? (
+                      isSelf ? (
+                        <span class="rounded-full bg-[rgb(252_222_156/0.55)] px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-[var(--color-accent-hover)]">
+                          Admin
+                        </span>
+                      ) : (
+                        <form action="/api/admin/users/toggle-admin" method="post">
+                          <input type="hidden" name="redirect" value={redirectTo} />
+                          <input type="hidden" name="user_id" value={managedUser.user_id} />
+                          <input type="hidden" name="make_admin" value="false" />
+                          <button class="btn-danger" type="submit">
+                            Revoke admin
+                          </button>
+                        </form>
+                      )
+                    ) : (
+                      <form action="/api/admin/users/toggle-admin" method="post">
+                        <input type="hidden" name="redirect" value={redirectTo} />
+                        <input type="hidden" name="user_id" value={managedUser.user_id} />
+                        <input type="hidden" name="make_admin" value="true" />
+                        <button class="btn-secondary" type="submit">
+                          Grant admin
+                        </button>
+                      </form>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <p class="pagination-summary">
+          Showing {showingFrom}–{showingTo} of {totalCount} users
+        </p>
+        <div class="pagination-controls">
+          {prevPage ? (
+            <a class="btn-secondary" href={`${basePath}?page=${prevPage}`}>Previous</a>
+          ) : (
+            <span class="btn-secondary pagination-disabled">Previous</span>
+          )}
+          <span class="pagination-current">Page {page} of {totalPages}</span>
+          {nextPage ? (
+            <a class="btn-secondary" href={`${basePath}?page=${nextPage}`}>Next</a>
+          ) : (
+            <span class="btn-secondary pagination-disabled">Next</span>
+          )}
+        </div>
+      </div>
+    </>
+  )}
+</section>
+
+<style>
+  .data-table-users {
+    min-width: 48rem;
+  }
+</style>

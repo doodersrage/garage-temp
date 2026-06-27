@@ -1,0 +1,42 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import UserManager from "../../components/UserManager.astro";
+import { getAuthFromCookies } from "../../lib/auth";
+import { fetchManagedUsers } from "../../lib/userManager";
+
+const { session, user } = await getAuthFromCookies(Astro.cookies);
+
+if (!session || !user) {
+  return Astro.redirect("/signin");
+}
+
+const pageParam = Number(Astro.url.searchParams.get("page") ?? "1");
+
+if (pageParam < 1 || Number.isNaN(pageParam)) {
+  return Astro.redirect("/dashboard/users?page=1");
+}
+
+const users = await fetchManagedUsers(user.id, pageParam);
+const status = Astro.url.searchParams.get("status");
+
+if (users.totalPages > 0 && pageParam > users.totalPages) {
+  return Astro.redirect(`/dashboard/users?page=${users.totalPages}`);
+}
+---
+<DashboardLayout title="User Manager" requireAdmin>
+  <div class="space-y-6">
+    <section class="card animate-slide-in-left">
+      <h1 class="card-title">User manager</h1>
+      <p class="card-subtitle">{user.email}</p>
+      <p class="mb-0">
+        Manage registered accounts and admin group membership. New signups are automatically added to the user group.
+      </p>
+    </section>
+
+    <UserManager
+      users={users}
+      currentUserId={user.id}
+      status={status}
+    />
+  </div>
+</DashboardLayout>
