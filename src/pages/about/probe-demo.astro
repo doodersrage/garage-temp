@@ -1,0 +1,75 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ProbeDemo from "../../components/ProbeDemo";
+import {
+  getArticleSchema,
+  getBreadcrumbSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../../lib/schemaMarkup";
+import "../../styles/about.css";
+
+const title = "Interactive temperature probe demo";
+const description =
+  "Simulate garage probe readings by changing outdoor temperature, sun load, and door state. See live JSON output like the real monitoring feed.";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/about/probe-demo");
+const schema = [
+  getArticleSchema({
+    siteUrl,
+    pageUrl,
+    headline: title,
+    description,
+  }),
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "About", path: "/about" },
+    { name: title, path: "/about/probe-demo" },
+  ]),
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: title,
+    description,
+    url: pageUrl,
+    applicationCategory: "EducationalApplication",
+    operatingSystem: "Any",
+  },
+];
+---
+<Layout title={title} description={description} schema={schema}>
+  <div class="page-shell space-y-6">
+    <section class="card animate-slide-in-left">
+      <nav aria-label="Breadcrumb">
+        <ol class="about-breadcrumbs">
+          <li><a href="/">Home</a> /</li>
+          <li><a href="/about">About</a> /</li>
+          <li aria-current="page">{title}</li>
+        </ol>
+      </nav>
+      <h1 class="card-title">{title}</h1>
+      <p class="card-subtitle">{description}</p>
+      <div class="about-prose">
+        <p>
+          Move the sliders to mimic weather and garage use, then compare how three probe zones and
+          their average respond. Readings refresh every two seconds with small random noise—similar
+          to how real sensors jitter in a live feed.
+        </p>
+        <p>
+          For background on placement and interpretation, read
+          <a class="text-link" href="/about/temperature-probes">temperature probes and their uses</a>
+          and
+          <a class="text-link" href="/about/temperature-changes">temperature changes and what causes them</a>.
+        </p>
+      </div>
+    </section>
+
+    <ProbeDemo client:load />
+
+    <nav class="card about-pagination" aria-label="About section pages">
+      <a class="btn-secondary" href="/about/temperature-probes">← Temperature probes guide</a>
+      <a class="btn-secondary" href="/about">Back to about overview</a>
+    </nav>
+  </div>
+</Layout>

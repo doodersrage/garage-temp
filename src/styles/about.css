@@ -217,3 +217,109 @@
   padding-top: 1.5rem;
   border-top: 1px solid var(--color-sage);
 }
+
+.probe-demo-callout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border: 1px solid var(--color-peach);
+  background:
+    linear-gradient(135deg, rgb(252 222 156 / 0.45), rgb(196 214 176 / 0.35));
+}
+
+.probe-demo {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.probe-demo-controls {
+  display: grid;
+  gap: 1rem;
+}
+
+.probe-demo-control {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.probe-demo-range {
+  width: 100%;
+  accent-color: var(--color-terracotta);
+}
+
+.probe-demo-toggle {
+  margin-top: 0.25rem;
+}
+
+.probe-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.probe-demo-updated {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.probe-demo-bars {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.probe-demo-bar-row {
+  display: grid;
+  grid-template-columns: minmax(6rem, 8rem) 1fr minmax(4.5rem, auto);
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.probe-demo-bar-label,
+.probe-demo-bar-value {
+  font-size: 0.875rem;
+  color: var(--color-plum);
+}
+
+.probe-demo-bar-value {
+  text-align: right;
+  font-weight: 600;
+}
+
+.probe-demo-bar-track {
+  overflow: hidden;
+  height: 0.85rem;
+  border-radius: 999px;
+  background-color: rgb(196 214 176 / 0.45);
+  border: 1px solid var(--color-sage);
+}
+
+.probe-demo-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    var(--color-sage),
+    var(--color-peach),
+    var(--color-terracotta)
+  );
+  transition: width 600ms ease;
+}
+
+.probe-demo-json {
+  overflow-x: auto;
+  margin: 0;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-sage);
+  background-color: rgb(56 29 42 / 0.92);
+  color: #fffaf0;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.probe-demo-json code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
