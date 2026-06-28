@@ -6,7 +6,6 @@ import { aboutPages, getAboutPage } from "../lib/aboutPages";
 import {
   getArticleSchema,
   getBreadcrumbSchema,
-  getDefaultDescription,
   resolvePageUrl,
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
@@ -18,9 +17,14 @@ interface Props {
   description: string;
   heroImage?: ImageMetadata;
   heroAlt?: string;
+  sectionParent?: {
+    slug: string;
+    title: string;
+  };
 }
 
-const { slug, title, description, heroImage, heroAlt } = Astro.props;
+const { slug, title, description, heroImage, heroAlt, sectionParent } =
+  Astro.props;
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, `/about/${slug}`);
@@ -34,6 +38,9 @@ const nextPage =
 const breadcrumbs = [
   { name: "Home", path: "/" },
   { name: "About", path: "/about" },
+  ...(sectionParent
+    ? [{ name: sectionParent.title, path: `/about/${sectionParent.slug}` }]
+    : []),
   { name: title, path: `/about/${slug}` },
 ];
 
@@ -55,6 +62,11 @@ const schema = [
         <ol class="about-breadcrumbs">
           <li><a href="/">Home</a> /</li>
           <li><a href="/about">About</a> /</li>
+          {sectionParent && (
+            <li>
+              <a href={`/about/${sectionParent.slug}`}>{sectionParent.title}</a> /
+            </li>
+          )}
           <li aria-current="page">{title}</li>
         </ol>
       </nav>

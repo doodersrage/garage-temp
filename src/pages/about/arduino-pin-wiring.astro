@@ -1,0 +1,95 @@
+---
+import AboutArticle from "../../components/AboutArticle.astro";
+import { Image } from "astro:assets";
+import arduinoPinLevelWiring from "../../assets/dht22_arduino_lcd_pin_level_wiring.svg";
+import { getAboutPage } from "../../lib/aboutPages";
+
+const page = getAboutPage("arduino-pin-wiring")!;
+const sectionParent = {
+  slug: "arduino-sketches",
+  title: "Arduino and Arduino sketches",
+};
+---
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  sectionParent={sectionParent}
+>
+  <p>
+    The pin-level diagram below matches the firmware's <code>LiquidCrystal</code> constructor and the
+    DHT22 data lines used in this project. Use it when verifying jumper wires against the sketch—especially
+    if analog pins are serving as digital I/O.
+  </p>
+
+  <figure class="about-figure about-figure-svg card overflow-hidden p-0">
+    <Image
+      src={arduinoPinLevelWiring}
+      alt="Pin-level wiring diagram for Arduino Uno connecting LCD and two DHT22 sensors"
+      class="h-auto w-full"
+    />
+    <figcaption>
+      RS, RW, EN, data lines, backlight, and both DHT22 data pins mapped to specific Uno pins.
+    </figcaption>
+  </figure>
+
+  <h2>16×2 LCD pin map</h2>
+  <p>
+    The sketch uses the seven-argument <code>LiquidCrystal(rs, rw, enable, d4, d5, d6, d7)</code> form.
+    In this build:
+  </p>
+  <ul>
+    <li><strong>RS</strong> → digital pin 8</li>
+    <li><strong>RW</strong> → digital pin 9</li>
+    <li><strong>Enable</strong> → analog pin A2 (used as digital output)</li>
+    <li><strong>D4–D7</strong> → digital pins 5, 6, 3, and analog pin A3 respectively</li>
+  </ul>
+  <p>
+    Most tutorials tie RW straight to ground and use a six-argument constructor. Wiring RW to pin 9
+    is less common but valid—it allows the library to read the LCD busy flag instead of blind-writing
+    every character.
+  </p>
+
+  <h2>Backlight on pin 7</h2>
+  <p>
+    Pin 7 is not an LCD data line. It drives the backlight through a small transistor on the breadboard
+    (visible near the header in the physical build). Switching the backlight separately saves power and
+    lets you blink the display for alerts without rewriting LCD text.
+  </p>
+
+  <h2>DHT22 data pins</h2>
+  <ul>
+    <li><strong>Sensor 1 data</strong> → analog pin A4</li>
+    <li><strong>Sensor 2 data</strong> → analog pin A5</li>
+    <li>Both sensors also connect to 5 V and GND</li>
+  </ul>
+  <p>
+    Analog pins A4 and A5 work perfectly as digital inputs on the Uno. They appear as <code>A4</code> and
+    <code>A5</code> in code rather than <code>D14</code>/<code>D15</code> aliases—worth remembering when
+    tracing wires by eye.
+  </p>
+
+  <h2>Reserved SPI pins (Ethernet)</h2>
+  <p>
+    The Ethernet shield reserves pins 10–13 for SPI. None of the LCD or DHT22 wiring may use those lines;
+    they are effectively off-limits on the header. Planning around that reservation is what makes Ethernet
+    plus local sensors feasible on one Uno.
+  </p>
+
+  <pre><code>{`// Example constructor matching this wiring
+#include <LiquidCrystal.h>
+LiquidCrystal lcd(8, 9, A2, 5, 6, 3, A3);
+
+// DHT22 data lines (DHT library pin arguments)
+#define DHT_PIN_1 A4
+#define DHT_PIN_2 A5
+#define BACKLIGHT_PIN 7`}</code></pre>
+
+  <p>
+    Return to the
+    <a class="text-link" href="/about/arduino-circuit-wiring">circuit wiring overview</a>
+    for breadboard layout context, or read
+    <a class="text-link" href="/about/arduino-dht22-lcd">DHT22 sensors and LCD display</a>
+    for runtime behavior.
+  </p>
+</AboutArticle>

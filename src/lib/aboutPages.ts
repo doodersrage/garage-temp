@@ -39,6 +39,30 @@ export const aboutPages: AboutPage[] = [
       "Sketches read probes, format JSON, and publish readings over HTTPS from the garage to the web.",
   },
   {
+    slug: "arduino-circuit-wiring",
+    title: "Arduino circuit wiring overview",
+    description:
+      "High-level wiring for an Arduino Uno with Ethernet shield, breadboard power rails, LCD contrast, and two DHT22 sensors.",
+    summary:
+      "How USB power, the breadboard, contrast pot, LCD, sensors, and Ethernet shield fit together.",
+  },
+  {
+    slug: "arduino-pin-wiring",
+    title: "Arduino pin-level wiring",
+    description:
+      "Exact GPIO assignments for the 16×2 LCD, DHT22 data lines, backlight transistor, and reserved SPI pins.",
+    summary:
+      "Pin-by-pin map matching the LiquidCrystal constructor and sensor data lines in firmware.",
+  },
+  {
+    slug: "arduino-dht22-lcd",
+    title: "DHT22 sensors and LCD display",
+    description:
+      "Dual DHT22 polling, local LCD readouts, backlight control, and how the Ethernet shield shares the header.",
+    summary:
+      "Why two probes show separate readings on the LCD while JSON feeds expose both to the website.",
+  },
+  {
     slug: "python-feeds",
     title: "Python scripts and JSON feeds",
     description:

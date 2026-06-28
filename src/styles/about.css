@@ -320,6 +320,22 @@
   line-height: 1.6;
 }
 
-.probe-demo-json code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+.about-figure-svg img,
+.about-figure-svg svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  padding: 1rem;
+  background-color: rgb(255 250 240 / 0.65);
+}
+
+.about-subguide-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .about-subguide-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }

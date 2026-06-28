@@ -5,6 +5,12 @@ import tempProbeV2 from "../../assets/temp-probe-v2.jpg";
 import { getAboutPage } from "../../lib/aboutPages";
 
 const page = getAboutPage("arduino-sketches")!;
+
+const wiringGuides = [
+  getAboutPage("arduino-circuit-wiring")!,
+  getAboutPage("arduino-pin-wiring")!,
+  getAboutPage("arduino-dht22-lcd")!,
+];
 ---
 <AboutArticle
   slug={page.slug}
@@ -21,18 +27,18 @@ const page = getAboutPage("arduino-sketches")!;
 
   <h2>Sketch responsibilities</h2>
   <ol>
-    <li>Initialize sensor buses (often OneWire or I²C depending on the probe model).</li>
-    <li>Read each configured probe with retry logic for transient bus errors.</li>
-    <li>Compute an average across healthy probes for a quick summary value.</li>
-    <li>Respond to HTTPS requests with a compact JSON document.</li>
+    <li>Initialize sensor buses and the local 16×2 LCD for on-site readouts.</li>
+    <li>Read each DHT22 probe with retry logic for transient bus errors.</li>
+    <li>Compute an average across healthy probes for a quick summary value in JSON.</li>
+    <li>Respond to HTTP requests with a compact JSON document via the Ethernet shield.</li>
     <li>Optionally log errors to serial for on-site debugging.</li>
   </ol>
 
   <h2>Typical JSON shape</h2>
   <p>
     Consumers expect a top-level <code>temp</code> object with numeric keys for each probe plus
-    <code>avg</code>. Humidity may appear alongside temperature per probe depending on firmware version.
-    Keeping keys stable matters more than pretty printing—dashboard mappings reference those keys directly.
+    <code>avg</code>. Humidity appears alongside temperature per probe. Keeping keys stable matters
+    more than pretty printing—dashboard mappings reference those keys directly.
   </p>
   <pre><code>{`{
   "temp": {
@@ -42,12 +48,26 @@ const page = getAboutPage("arduino-sketches")!;
   }
 }`}</code></pre>
 
+  <h2>Hardware wiring guides</h2>
+  <p>
+    The physical build uses an Arduino Uno, W5100 Ethernet shield, breadboard, contrast potentiometer,
+    16×2 LCD, and two DHT22 sensors. Three companion pages document the schematics and pin map in detail:
+  </p>
+  <div class="about-subguide-grid">
+    {wiringGuides.map((guide) => (
+      <a class="about-nav-card" href={`/about/${guide.slug}`}>
+        <h3>{guide.title}</h3>
+        <p>{guide.summary}</p>
+      </a>
+    ))}
+  </div>
+
   <h2>Network stack choices</h2>
   <p>
-    Early revisions used Ethernet shields; later boards may use Wi-Fi modules. The sketch must handle
-    DHCP, reconnect loops, and TLS where HTTPS termination happens on-device or on a nearby relay.
-    When TLS is too heavy for the MCU, a Python relay on a Raspberry Pi or server can terminate HTTPS
-    and forward cached JSON—see <a class="text-link" href="/about/python-feeds">Python scripts and feeds</a>.
+    This revision uses an Ethernet shield on SPI. The sketch handles DHCP, reconnect loops, and JSON
+    serving while the LCD continues to show live probe values. When TLS is too heavy for the MCU, a
+    Python relay can terminate HTTPS—see
+    <a class="text-link" href="/about/python-feeds">Python scripts and feeds</a>.
   </p>
 
   <figure class="about-figure">
@@ -58,10 +78,9 @@ const page = getAboutPage("arduino-sketches")!;
   <h2>Development workflow</h2>
   <p>
     Sketches are edited in the Arduino IDE or PlatformIO, flashed over USB, then verified with serial
-    logging before the board is mounted in the garage. Network testing from a laptop curl command confirms
-    JSON shape before adding the URL to the website dashboard. Source for this project’s firmware lives in the
-    <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/arduino-network-json-temperature-sever">arduino-network-json-temperature-sever</a>
-    repository.
+    logging before the board is mounted in the garage. Confirm JSON shape with curl before adding the
+    feed URL to the website dashboard. Source firmware:
+    <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/arduino-network-json-temperature-sever">arduino-network-json-temperature-sever</a>.
   </p>
 
   <h2>Reliability tips</h2>
@@ -69,6 +88,6 @@ const page = getAboutPage("arduino-sketches")!;
     <li>Watchdog resets recover from rare network hangs without climbing a ladder.</li>
     <li>Separate sensor power noise from MCU power where long cable runs exist.</li>
     <li>Version your JSON schema in documentation when adding fields.</li>
-    <li>Document which GPIO pins map to which physical probe labels.</li>
+    <li>Document which GPIO pins map to which physical probe labels—see the pin wiring guide.</li>
   </ul>
 </AboutArticle>
