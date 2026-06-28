@@ -1,0 +1,73 @@
+---
+import AboutArticle from "../../components/AboutArticle.astro";
+import JSONProbe from "../../assets/json-temp.jpg";
+import { getAboutPage } from "../../lib/aboutPages";
+
+const page = getAboutPage("historical-data")!;
+---
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={JSONProbe}
+  heroAlt="Sample JSON temperature output used for historical logging and CSV export"
+>
+  <p>
+    Live readings answer “what is happening now?” Historical data answers “what usually happens here?”
+    Garage Temperature Monitor saves snapshots when signed-in users load the home page, building a
+    personal timeline of average and per-probe values you can browse or export.
+  </p>
+
+  <h2>Why keep history at all</h2>
+  <p>
+    Spot checks are easy to forget. A timestamped record reveals overnight minimums during a cold week,
+    slow humidity creep after a roof leak, or the first day spring warmth stays above freezing inside.
+    That context supports insurance documentation, HVAC tuning, and deciding whether insulation upgrades
+    paid off.
+  </p>
+
+  <h2>What gets stored</h2>
+  <p>
+    Each saved row includes Fahrenheit and Celsius temperatures, humidity percentage, timestamp, feed name,
+    probe label, and probe key. Multiple probes from one load create multiple rows, while the configured
+    average still captures a quick summary. Data is associated with your account so guests do not write
+    to the shared history table.
+  </p>
+
+  <h2>Browsing paginated history</h2>
+  <p>
+    The dashboard history view lists recent snapshots with feed and probe columns so you can filter
+    mentally by zone. Pagination keeps large datasets responsive. When you need the full record outside
+    the website, CSV export downloads every stored reading for your account—available to admins and
+    active subscribers.
+  </p>
+
+  <h2>CSV export workflows</h2>
+  <ul>
+    <li>Import into spreadsheets for pivot tables and custom charts.</li>
+    <li>Join with utility bills or weather archives for correlation studies.</li>
+    <li>Share anonymized excerpts with contractors when diagnosing insulation issues.</li>
+    <li>Archive yearly files for long-term property records.</li>
+  </ul>
+
+  <h2>Analysis ideas</h2>
+  <p>
+    Plot daily minimum temperature through December to find how often you approach pipe-freeze risk.
+    Compare average humidity before and after installing a dehumidifier. Overlay probe <code>0</code>
+    versus <code>1</code> to quantify wall-to-wall differences. Because keys are stable in JSON feeds,
+    scripts you write today still work after you rename display labels in the dashboard.
+  </p>
+
+  <h2>Limits and good practices</h2>
+  <p>
+    History reflects how often you visit the home page while signed in—it is not a high-frequency
+    data logger unless you automate visits. For minute-by-minute forensic work, add a dedicated logger
+    or increase fetch frequency in your own tooling. Treat this store as an convenient, account-backed
+    journal rather than a laboratory instrument.
+  </p>
+
+  <p>
+    Subscription details for CSV export are covered in
+    <a class="text-link" href="/about/accounts-and-dashboard">accounts and dashboard tools</a>.
+  </p>
+</AboutArticle>

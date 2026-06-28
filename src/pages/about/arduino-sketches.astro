@@ -1,0 +1,74 @@
+---
+import AboutArticle from "../../components/AboutArticle.astro";
+import tempProbeV1 from "../../assets/temp-probe-v1.jpg";
+import tempProbeV2 from "../../assets/temp-probe-v2.jpg";
+import { getAboutPage } from "../../lib/aboutPages";
+
+const page = getAboutPage("arduino-sketches")!;
+---
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={tempProbeV2}
+  heroAlt="Arduino microcontroller board wired to temperature sensors and a network shield"
+>
+  <p>
+    The garage probe hardware runs on Arduino-compatible microcontrollers. Firmware—commonly called a
+    sketch—reads sensors on a timer, formats the results as JSON, and serves them over the network
+    so the website and other clients can fetch live data without serial cables.
+  </p>
+
+  <h2>Sketch responsibilities</h2>
+  <ol>
+    <li>Initialize sensor buses (often OneWire or I²C depending on the probe model).</li>
+    <li>Read each configured probe with retry logic for transient bus errors.</li>
+    <li>Compute an average across healthy probes for a quick summary value.</li>
+    <li>Respond to HTTPS requests with a compact JSON document.</li>
+    <li>Optionally log errors to serial for on-site debugging.</li>
+  </ol>
+
+  <h2>Typical JSON shape</h2>
+  <p>
+    Consumers expect a top-level <code>temp</code> object with numeric keys for each probe plus
+    <code>avg</code>. Humidity may appear alongside temperature per probe depending on firmware version.
+    Keeping keys stable matters more than pretty printing—dashboard mappings reference those keys directly.
+  </p>
+  <pre><code>{`{
+  "temp": {
+    "0": { "f": 38.2, "c": 3.4, "h": 41.0 },
+    "1": { "f": 36.8, "c": 2.7, "h": 43.5 },
+    "avg": { "f": 37.5, "c": 3.1, "h": 42.2 }
+  }
+}`}</code></pre>
+
+  <h2>Network stack choices</h2>
+  <p>
+    Early revisions used Ethernet shields; later boards may use Wi-Fi modules. The sketch must handle
+    DHCP, reconnect loops, and TLS where HTTPS termination happens on-device or on a nearby relay.
+    When TLS is too heavy for the MCU, a Python relay on a Raspberry Pi or server can terminate HTTPS
+    and forward cached JSON—see <a class="text-link" href="/about/python-feeds">Python scripts and feeds</a>.
+  </p>
+
+  <figure class="about-figure">
+    <img src={tempProbeV1.src} width={tempProbeV1.width} height={tempProbeV1.height} alt="First revision probe board showing sensor wiring headers" />
+    <figcaption>Revision one established the multi-probe layout later refined in revision two.</figcaption>
+  </figure>
+
+  <h2>Development workflow</h2>
+  <p>
+    Sketches are edited in the Arduino IDE or PlatformIO, flashed over USB, then verified with serial
+    logging before the board is mounted in the garage. Network testing from a laptop curl command confirms
+    JSON shape before adding the URL to the website dashboard. Source for this project’s firmware lives in the
+    <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/arduino-network-json-temperature-sever">arduino-network-json-temperature-sever</a>
+    repository.
+  </p>
+
+  <h2>Reliability tips</h2>
+  <ul>
+    <li>Watchdog resets recover from rare network hangs without climbing a ladder.</li>
+    <li>Separate sensor power noise from MCU power where long cable runs exist.</li>
+    <li>Version your JSON schema in documentation when adding fields.</li>
+    <li>Document which GPIO pins map to which physical probe labels.</li>
+  </ul>
+</AboutArticle>

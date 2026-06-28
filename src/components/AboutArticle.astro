@@ -1,0 +1,93 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import { aboutPages, getAboutPage } from "../lib/aboutPages";
+import {
+  getArticleSchema,
+  getBreadcrumbSchema,
+  getDefaultDescription,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+import "../styles/about.css";
+
+interface Props {
+  slug: string;
+  title: string;
+  description: string;
+  heroImage?: ImageMetadata;
+  heroAlt?: string;
+}
+
+const { slug, title, description, heroImage, heroAlt } = Astro.props;
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, `/about/${slug}`);
+const pageIndex = aboutPages.findIndex((page) => page.slug === slug);
+const previousPage = pageIndex > 0 ? aboutPages[pageIndex - 1] : null;
+const nextPage =
+  pageIndex >= 0 && pageIndex < aboutPages.length - 1
+    ? aboutPages[pageIndex + 1]
+    : null;
+
+const breadcrumbs = [
+  { name: "Home", path: "/" },
+  { name: "About", path: "/about" },
+  { name: title, path: `/about/${slug}` },
+];
+
+const schema = [
+  getArticleSchema({
+    siteUrl,
+    pageUrl,
+    headline: title,
+    description,
+    imageUrl: heroImage ? new URL(heroImage.src, siteUrl).href : undefined,
+  }),
+  getBreadcrumbSchema(siteUrl, breadcrumbs),
+];
+---
+<Layout title={title} description={description} schema={schema}>
+  <div class="page-shell space-y-6">
+    <section class="card animate-slide-in-left">
+      <nav aria-label="Breadcrumb">
+        <ol class="about-breadcrumbs">
+          <li><a href="/">Home</a> /</li>
+          <li><a href="/about">About</a> /</li>
+          <li aria-current="page">{title}</li>
+        </ol>
+      </nav>
+      <h1 class="card-title">{title}</h1>
+      <p class="card-subtitle">{description}</p>
+    </section>
+
+    {heroImage && (
+      <figure class="about-figure card overflow-hidden p-0">
+        <Image src={heroImage} alt={heroAlt ?? title} class="h-full w-full object-cover" />
+        {heroAlt && <figcaption>{heroAlt}</figcaption>}
+      </figure>
+    )}
+
+    <section class="card about-prose">
+      <slot />
+    </section>
+
+    <nav class="card about-pagination" aria-label="About section pages">
+      {previousPage ? (
+        <a class="btn-secondary" href={`/about/${previousPage.slug}`}>
+          ← {previousPage.title}
+        </a>
+      ) : (
+        <a class="btn-secondary" href="/about">← About overview</a>
+      )}
+      {nextPage ? (
+        <a class="btn-secondary" href={`/about/${nextPage.slug}`}>
+          {nextPage.title} →
+        </a>
+      ) : (
+        <a class="btn-secondary" href="/about">Back to overview</a>
+      )}
+    </nav>
+  </div>
+</Layout>

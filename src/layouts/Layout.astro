@@ -4,17 +4,43 @@ import '../styles/global.css'
 const currentYear = new Date().getFullYear();
 import logo from '../assets/gtm.svg';
 import { getAuthFromCookies } from "../lib/auth";
+import SchemaMarkup from "../components/SchemaMarkup.astro";
+import {
+  getDefaultDescription,
+  getSiteSchemas,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
 
 interface Props {
   title?: string;
+  description?: string;
+  schema?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const { title } = Astro.props;
+const { title, description, schema } = Astro.props;
 const pageTitle = title ? `${title} · Garage Temperature Monitor` : 'Garage Temperature Monitor';
+const metaDescription = description ?? getDefaultDescription();
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 
 const currentPath = Astro.url.pathname;
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, currentPath);
+const extraSchemas = schema
+  ? Array.isArray(schema)
+    ? schema
+    : [schema]
+  : [];
+
+const schemas = getSiteSchemas({
+  siteUrl,
+  pageUrl,
+  pageName: pageTitle,
+  pageDescription: metaDescription,
+  extraSchemas,
+});
+
 const navItems = [
   { href: '/', label: 'Home' },
   { href: '/about', label: 'About' },
@@ -26,11 +52,14 @@ const navItems = [
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content={metaDescription} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
+		<link rel="canonical" href={pageUrl} />
 		<meta name="generator" content={Astro.generator} />
-		<link rel="sitemap" href="/sitemap-index.xml" />
+		<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap-index.xml" />
 		<title>{pageTitle}</title>
+		<SchemaMarkup schemas={schemas} />
 		<script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-YKDZ0787JG"></script>
 		<script is:inline>
 		window.dataLayer = window.dataLayer || [];
@@ -70,8 +99,11 @@ const navItems = [
 				<slot />
 			</main>
 			<footer class="site-footer">
-				<div class="mx-auto flex w-full max-w-6xl items-center justify-center px-4 py-6 sm:px-6 lg:px-8">
-					Copyright © {currentYear} Garage Temperature Monitor. All rights reserved.
+				<div class="mx-auto flex w-full max-w-6xl flex-col items-center justify-center gap-2 px-4 py-6 text-center sm:px-6 lg:px-8">
+					<p class="m-0">Copyright © {currentYear} Garage Temperature Monitor. All rights reserved.</p>
+					<p class="m-0">
+						<a href="/sitemap-index.xml" class="text-link">XML Sitemap</a>
+					</p>
 				</div>
 			</footer>
 		</div>

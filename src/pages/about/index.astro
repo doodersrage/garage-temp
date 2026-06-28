@@ -1,0 +1,114 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { Image } from "astro:assets";
+import tempProbeV1 from "../../assets/temp-probe-v1.jpg";
+import tempProbeV2 from "../../assets/temp-probe-v2.jpg";
+import JSONProbe from "../../assets/json-temp.jpg";
+import { Swiper, SwiperWrapper, SwiperSlide } from "astro-swiper";
+import { aboutPages } from "../../lib/aboutPages";
+import {
+  getBreadcrumbSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../../lib/schemaMarkup";
+import "../../styles/about.css";
+
+const title = "About Garage Temperature Monitor";
+const description =
+  "Guides on temperature probes, historical data, Arduino firmware, Python feeds, Astro, Node.js, and the full monitoring stack behind this site.";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/about");
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "About", path: "/about" },
+  ]),
+];
+---
+<Layout title="About" description={description} schema={schema}>
+  <div class="page-shell space-y-6">
+    <div class="page-grid items-start">
+      <section class="card overflow-hidden p-0">
+        <Swiper
+          class="about-hero-swiper"
+          options={{
+            loop: true,
+            autoplay: {
+              delay: 4000,
+              disableOnInteraction: false,
+            },
+          }}
+        >
+          <SwiperWrapper>
+            <SwiperSlide>
+              <Image src={tempProbeV1} alt="Version 1 of the Arduino temperature probe board" class="h-full w-full object-cover" />
+            </SwiperSlide>
+            <SwiperSlide>
+              <Image src={tempProbeV2} alt="Version 2 of the Arduino temperature probe board" class="h-full w-full object-cover" />
+            </SwiperSlide>
+            <SwiperSlide>
+              <Image src={JSONProbe} alt="JSON temperature feed output from the probe system" class="h-full w-full object-cover" />
+            </SwiperSlide>
+          </SwiperWrapper>
+        </Swiper>
+      </section>
+
+      <section class="card animate-slide-up-fade">
+        <h1 class="card-title">{title}</h1>
+        <p class="card-subtitle">Live sensor readings, local weather, saved history, and the technology behind the project.</p>
+        <div class="about-prose">
+          <p>
+            Garage Temperature Monitor combines Arduino probes, JSON feeds, and a modern web dashboard
+            so you can see current conditions, compare them with outdoor weather, and review trends over time.
+          </p>
+          <p>
+            The about section below is organized into focused guides—roughly ten pages of material covering
+            probes, physics, historical data, firmware, backend scripts, and the Astro application that
+            powers this website.
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2 class="card-title">Explore the guides</h2>
+      <p class="card-subtitle">Each page goes deeper on one part of the monitoring stack.</p>
+      <div class="about-nav-grid">
+        {aboutPages.map((page) => (
+          <a class="about-nav-card" href={`/about/${page.slug}`}>
+            <h3>{page.title}</h3>
+            <p>{page.summary}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Open-source repositories</h2>
+      <p class="card-subtitle">Projects you can inspect, fork, or adapt for your own build.</p>
+      <div class="about-prose">
+        <ul>
+          <li>
+            Arduino sketch and sensor firmware:
+            <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/arduino-network-json-temperature-sever">
+              arduino-network-json-temperature-sever
+            </a>
+          </li>
+          <li>
+            This website (Astro on Cloudflare):
+            <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/garage-temp">
+              garage-temp
+            </a>
+          </li>
+          <li>
+            JSON feed relay (FastAPI with Redis caching):
+            <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/fast-api-relay">
+              fast-api-relay
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</Layout>

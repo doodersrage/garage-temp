@@ -1,0 +1,85 @@
+export type AboutPage = {
+  slug: string;
+  title: string;
+  description: string;
+  summary: string;
+};
+
+export const aboutPages: AboutPage[] = [
+  {
+    slug: "temperature-probes",
+    title: "Temperature probes and their uses",
+    description:
+      "How garage temperature probes work, where they are placed, and why multiple sensors improve reliability.",
+    summary:
+      "Probe types, placement strategies, and why averaging multiple sensors matters in garages and workshops.",
+  },
+  {
+    slug: "temperature-changes",
+    title: "Temperature changes and what causes them",
+    description:
+      "Understand daily swings, seasonal shifts, and sudden garage temperature changes driven by weather and building physics.",
+    summary:
+      "Sun load, infiltration, doors, HVAC, and stored heat explain most garage temperature movement.",
+  },
+  {
+    slug: "historical-data",
+    title: "Historical temperature data usage",
+    description:
+      "Why saved readings matter for trend analysis, freeze protection, equipment checks, and CSV export workflows.",
+    summary:
+      "Turn snapshots into charts, alerts, and long-term records for maintenance and seasonal planning.",
+  },
+  {
+    slug: "arduino-sketches",
+    title: "Arduino and Arduino sketches",
+    description:
+      "Firmware architecture for network-connected temperature probes using Arduino boards and humidity sensors.",
+    summary:
+      "Sketches read probes, format JSON, and publish readings over HTTPS from the garage to the web.",
+  },
+  {
+    slug: "python-feeds",
+    title: "Python scripts and JSON feeds",
+    description:
+      "FastAPI relay services, Redis caching, and Python tooling that sit between probes and the dashboard.",
+    summary:
+      "Backend scripts normalize probe JSON, cache responses, and expose stable HTTPS endpoints.",
+  },
+  {
+    slug: "astro-applications",
+    title: "Astro applications in this project",
+    description:
+      "How Astro server rendering, islands, and Cloudflare deployment power the Garage Temperature Monitor site.",
+    summary:
+      "This site uses Astro for fast pages, authenticated dashboards, and API routes at the edge.",
+  },
+  {
+    slug: "nextjs-node-applications",
+    title: "Next.js and Node applications",
+    description:
+      "Compare Node-based dashboards with this stack and when Next.js fits similar monitoring projects.",
+    summary:
+      "Node runtimes excel at APIs and SSR; this project achieves the same goals with Astro on Cloudflare.",
+  },
+  {
+    slug: "data-flow",
+    title: "End-to-end monitoring data flow",
+    description:
+      "Follow a reading from the probe wire through JSON feeds, storage, and the signed-in history dashboard.",
+    summary:
+      "Hardware, relay, website fetch, Supabase storage, and CSV export in one pipeline.",
+  },
+  {
+    slug: "accounts-and-dashboard",
+    title: "Accounts, subscriptions, and dashboard tools",
+    description:
+      "Signed-in preferences, feed configuration, Stripe CSV export access, and admin features on the dashboard.",
+    summary:
+      "Personalize the home page, manage probes, review history, and unlock export with a subscription.",
+  },
+];
+
+export function getAboutPage(slug: string): AboutPage | undefined {
+  return aboutPages.find((page) => page.slug === slug);
+}

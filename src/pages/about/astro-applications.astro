@@ -1,0 +1,64 @@
+---
+import AboutArticle from "../../components/AboutArticle.astro";
+import { getAboutPage } from "../../lib/aboutPages";
+
+const page = getAboutPage("astro-applications")!;
+---
+<AboutArticle slug={page.slug} title={page.title} description={page.description}>
+  <p>
+    This website is an Astro application deployed to Cloudflare Workers. Astro combines mostly static
+    HTML with selective server rendering, which fits a monitoring dashboard: fast public pages, authenticated
+    dashboard routes, and API endpoints for auth, Stripe, and CSV export—all in one codebase.
+  </p>
+
+  <h2>Why Astro fits monitoring dashboards</h2>
+  <p>
+    Environmental dashboards mix mostly-read pages (home, about, history tables) with small interactive
+    islands (contact form, preferences forms). Astro renders the stable shell on the server and hydrates
+    only what needs JavaScript, keeping first loads quick on phones checking garage temps from the driveway.
+  </p>
+
+  <h2>Server output mode</h2>
+  <p>
+    The project uses <code>output: 'server'</code> with the Cloudflare adapter. Each request can run
+    server code to read Supabase session cookies, load user feed configuration, and fetch live JSON before
+    HTML leaves the edge. API routes live beside pages under <code>src/pages/api</code>—the same pattern
+    as Next.js route handlers but compiled for Workers.
+  </p>
+
+  <h2>Islands and deferred loading</h2>
+  <p>
+    The home page wraps temperature and weather widgets with deferred server rendering so visitors see
+    layout immediately while probes resolve. Contact form hydration uses Preact via <code>client:load</code>
+    because it needs Turnstile and client-side validation. Choosing island boundaries deliberately avoids
+    shipping a full SPA for pages that are mostly read-only.
+  </p>
+
+  <h2>Project structure highlights</h2>
+  <ul>
+    <li><code>src/pages</code> — routes for marketing, dashboard, and REST-like API endpoints.</li>
+    <li><code>src/lib</code> — Supabase access, feed parsing, Stripe, schema markup, and history queries.</li>
+    <li><code>src/components</code> — reusable Astro UI for tables, settings forms, and about articles.</li>
+    <li><code>src/layouts</code> — shared chrome with JSON-LD schema and sitemap links.</li>
+  </ul>
+
+  <h2>Edge deployment</h2>
+  <p>
+    Cloudflare Workers run the server bundle close to users. Environment secrets (Supabase keys, Stripe,
+    SMTP) are injected at deploy time. Image assets pass through Astro’s image pipeline for optimized
+    delivery in about guides and the home page logo.
+  </p>
+
+  <h2>Compared to a pure SPA</h2>
+  <p>
+    A client-only React app would shift probe fetching to the browser, exposing feed URLs and delaying
+    meaningful content until JavaScript executes. Astro keeps sensitive fetches on the server where cookies
+    and service keys stay controlled. For a Node-centric comparison, read
+    <a class="text-link" href="/about/nextjs-node-applications">Next.js and Node applications</a>.
+  </p>
+
+  <p>
+    Source code:
+    <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/garage-temp">github.com/doodersrage/garage-temp</a>
+  </p>
+</AboutArticle>

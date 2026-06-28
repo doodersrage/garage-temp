@@ -1,0 +1,59 @@
+---
+import AboutArticle from "../../components/AboutArticle.astro";
+import { getAboutPage } from "../../lib/aboutPages";
+
+const page = getAboutPage("nextjs-node-applications")!;
+---
+<AboutArticle slug={page.slug} title={page.title} description={page.description}>
+  <p>
+    Many teams reach for Next.js on Node when they need authenticated dashboards, API routes, and server
+    rendering. This project solves the same problems with Astro on Cloudflare, but the architectural
+    trade-offs are easier to understand if you know how a Node-based stack would look.
+  </p>
+
+  <h2>What Next.js on Node provides</h2>
+  <p>
+    Next.js combines file-based routing, React components, and API route handlers in one repository.
+    Deploying to Node (Vercel, Docker, or a VPS) gives you long-lived processes, familiar middleware,
+    and direct access to PostgreSQL drivers—ideal for heavy CRUD admin panels and WebSocket streams.
+  </p>
+
+  <h2>Mapping concepts to this site</h2>
+  <ul>
+    <li><strong>Pages router / app router</strong> → Astro <code>.astro</code> pages and layouts.</li>
+    <li><strong>API routes</strong> → <code>src/pages/api/*.ts</code> exporting HTTP method handlers.</li>
+    <li><strong>getServerSideProps</strong> → frontmatter <code>await</code> calls before HTML renders.</li>
+    <li><strong>Middleware</strong> → auth checks in layouts and API routes via Supabase cookies.</li>
+    <li><strong>Environment variables</strong> → Cloudflare/W wrangler secrets and <code>.env</code> locally.</li>
+  </ul>
+
+  <h2>When Next.js is still the better pick</h2>
+  <p>
+    Choose Next.js when you need deep React ecosystem integration, incremental static regeneration at
+    massive scale, or long-running background jobs on the same Node host. Real-time charts with websockets,
+    complex client state, and shared component libraries with an existing React product all push toward Next.
+  </p>
+
+  <h2>Why Astro was chosen here</h2>
+  <p>
+    Garage Temperature Monitor is read-heavy: fetch probes, render tables, export CSV. Most dashboard forms
+    work with plain HTML POSTs. Astro keeps bundles small, ships less JavaScript to phones, and deploys to
+    Cloudflare’s edge without maintaining a Node server. API routes cover Stripe webhooks and auth callbacks
+    without adopting a full React runtime on every page.
+  </p>
+
+  <h2>Hybrid architectures</h2>
+  <p>
+    Production systems often mix both: Next.js admin consoles, Python relays for probes, and static marketing
+    sites. The about section documents each layer independently so you can swap Astro for Next on the dashboard
+    while keeping Arduino and Python pieces unchanged. JSON feed contracts are the stable interface.
+  </p>
+
+  <h2>Local Node development</h2>
+  <p>
+    Developers still use Node 22 locally to run <code>astro dev</code>, build pipelines, and Wrangler previews.
+    The runtime on Cloudflare is Workers-compatible rather than a traditional Node process, but tooling remains
+    familiar. See <a class="text-link" href="/about/astro-applications">Astro applications</a> for how this
+    repository is organized day to day.
+  </p>
+</AboutArticle>

@@ -42,7 +42,16 @@ export default defineConfig({
   },
 
   output: 'server',
-  integrations: [sitemap(), preact()],
+  integrations: [
+    sitemap({
+      filter: (page) =>
+        !page.includes("/dashboard") &&
+        !page.includes("/api/") &&
+        !page.includes("/signin") &&
+        !page.includes("/register"),
+    }),
+    preact(),
+  ],
 
   experimental: {
     cache: {
