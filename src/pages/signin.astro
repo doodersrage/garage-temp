@@ -13,17 +13,39 @@ const errorMessage = getSignInErrorMessage(Astro.url.searchParams.get("error"));
 const emailValue = Astro.url.searchParams.get("email") ?? "";
 ---
 
-<Layout title="Sign in">
-  <div class="page-shell page-grid">
+<Layout
+  title="Sign in"
+  description="Sign in to your dashboard to manage display preferences, probe feeds, reading history, and CSV export."
+>
+  <div class="page-shell page-grid items-start">
     <section class="card animate-zoom-in">
       <h1 class="card-title">Sign in</h1>
       <p class="card-subtitle">
-        Access your dashboard and customize what appears on the home page.
+        Pick up where you left off—your preferences, feeds, and saved readings are waiting in the dashboard.
       </p>
-      <p>
-        New here?
-        <a class="text-link" href="/register">Create an account</a>
-      </p>
+      <div class="grid gap-4 leading-relaxed text-[var(--color-text-muted)]">
+        <p>
+          A signed-in account keeps the home page yours: show or hide garage temperatures and weather, wire up HTTPS
+          JSON feeds, and label each probe so the cards make sense at a glance. Everything you configure is described in
+          <a class="text-link" href="/about/accounts-and-dashboard">accounts and dashboard tools</a>.
+        </p>
+        <p>
+          The dashboard also stores a running history of probe snapshots so you can spot drift, cold snaps, and seasonal
+          patterns over time—see
+          <a class="text-link" href="/about/historical-data">historical data usage</a> for how that data is used.
+          Curious how readings get from the garage to this site? Follow the
+          <a class="text-link" href="/about/data-flow">end-to-end data flow</a>, or browse
+          <a class="text-link" href="/about/temperature-probes">probe guides</a> and the
+          <a class="text-link" href="/about/probe-demo">interactive demo</a> in the
+          <a class="text-link" href="/about">about section</a>.
+        </p>
+        <p>
+          New here and not registered yet?
+          <a class="text-link" href="/register">Create a free account</a>
+          to unlock the dashboard. Questions before you sign in—wiring, feeds, or subscriptions?
+          <a class="text-link" href="/contact">Contact us</a> and we will point you in the right direction.
+        </p>
+      </div>
     </section>
 
     <form class="form-panel animate-blurred-fade-in" action="/api/auth/signin" method="post">
