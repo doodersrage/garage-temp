@@ -45,5 +45,30 @@ const tempConfig = isAuthenticated
 				</div>
 			)}
 		</div>
+
+		<section class="card animate-slide-up-fade">
+			<h2 class="card-title">About these readings</h2>
+			<p class="card-subtitle">Probes, weather, history, and the technology behind this site.</p>
+			<div class="grid gap-4 leading-relaxed text-[var(--color-text-muted)]">
+				<p>
+					This site combines DHT22 probes, JSON feeds, and local weather so you can compare garage conditions
+					with the outdoors. The guides explain
+					<a class="text-link" href="/about/temperature-probes">probe placement and averaging</a>,
+					<a class="text-link" href="/about/temperature-changes">what drives daily and seasonal swings</a>, and the
+					<a class="text-link" href="/about/data-flow">path from sensor wire to screen</a>.
+				</p>
+				<p>
+					The <a class="text-link" href="/about">about section</a> covers firmware, wiring, backend scripts, and
+					this Astro application in depth—including an
+					<a class="text-link" href="/about/probe-demo">interactive probe demo</a>,
+					<a class="text-link" href="/about/arduino-sketches">Arduino sketches</a> with
+					<a class="text-link" href="/about/arduino-circuit-wiring">circuit</a> and
+					<a class="text-link" href="/about/arduino-pin-wiring">pin-level wiring</a>, and guides on
+					<a class="text-link" href="/about/historical-data">historical data</a> and
+					<a class="text-link" href="/about/accounts-and-dashboard">dashboard tools</a>.
+				</p>
+			</div>
+			<a class="btn-primary mt-6 inline-flex" href="/about">Explore the about guides</a>
+		</section>
 	</div>
 </Layout>
