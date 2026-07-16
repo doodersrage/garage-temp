@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
-import { aboutPages, getAboutPage } from "../lib/aboutPages";
+import { aboutPages, getAboutPage, getAboutParent } from "../lib/aboutPages";
 import {
   getArticleSchema,
   getBreadcrumbSchema,
@@ -23,8 +23,15 @@ interface Props {
   };
 }
 
-const { slug, title, description, heroImage, heroAlt, sectionParent } =
+const { slug, title, description, heroImage, heroAlt, sectionParent: sectionParentProp } =
   Astro.props;
+
+const sectionParent =
+  sectionParentProp ??
+  (() => {
+    const parent = getAboutParent(slug);
+    return parent ? { slug: parent.slug, title: parent.title } : undefined;
+  })();
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, `/about/${slug}`);

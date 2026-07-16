@@ -1,11 +1,14 @@
+import { expandedAboutPageMeta } from "./aboutExpandedPages";
+
 export type AboutPage = {
   slug: string;
   title: string;
   description: string;
   summary: string;
+  parentSlug?: string;
 };
 
-export const aboutPages: AboutPage[] = [
+const coreAboutPages: AboutPage[] = [
   {
     slug: "temperature-probes",
     title: "Temperature probes and their uses",
@@ -104,6 +107,38 @@ export const aboutPages: AboutPage[] = [
   },
 ];
 
+function buildAboutPages(): AboutPage[] {
+  const expandedByParent = new Map<string, AboutPage[]>();
+
+  for (const page of expandedAboutPageMeta) {
+    const parent = page.parentSlug;
+    if (!parent) continue;
+    const group = expandedByParent.get(parent) ?? [];
+    group.push(page);
+    expandedByParent.set(parent, group);
+  }
+
+  const pages: AboutPage[] = [];
+
+  for (const core of coreAboutPages) {
+    pages.push(core);
+    const children = expandedByParent.get(core.slug);
+    if (children) {
+      pages.push(...children);
+    }
+  }
+
+  return pages;
+}
+
+export const aboutPages: AboutPage[] = buildAboutPages();
+
 export function getAboutPage(slug: string): AboutPage | undefined {
   return aboutPages.find((page) => page.slug === slug);
+}
+
+export function getAboutParent(slug: string): AboutPage | undefined {
+  const page = getAboutPage(slug);
+  if (!page?.parentSlug) return undefined;
+  return getAboutPage(page.parentSlug);
 }

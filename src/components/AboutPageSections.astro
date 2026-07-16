@@ -1,0 +1,47 @@
+---
+import type { AboutContentBlock } from "../lib/aboutExpandedContent";
+
+interface Props {
+  sections: AboutContentBlock[];
+}
+
+const { sections } = Astro.props;
+
+function formatListItem(text: string): string {
+  return text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+}
+---
+{sections.map((block) => {
+  if (block.type === "p") {
+    return <p set:html={block.html} />;
+  }
+  if (block.type === "h2") {
+    return <h2>{block.text}</h2>;
+  }
+  if (block.type === "ul") {
+    return (
+      <ul>
+        {block.items.map((item) => (
+          <li set:html={formatListItem(item)} />
+        ))}
+      </ul>
+    );
+  }
+  if (block.type === "ol") {
+    return (
+      <ol>
+        {block.items.map((item) => (
+          <li set:html={formatListItem(item)} />
+        ))}
+      </ol>
+    );
+  }
+  if (block.type === "pre") {
+    return (
+      <pre>
+        <code>{block.code}</code>
+      </pre>
+    );
+  }
+  return null;
+})}
