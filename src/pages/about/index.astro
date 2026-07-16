@@ -5,12 +5,13 @@ import tempProbeV1 from "../../assets/temp-probe-v1.jpg";
 import tempProbeV2 from "../../assets/temp-probe-v2.jpg";
 import JSONProbe from "../../assets/json-temp.jpg";
 import { Swiper, SwiperWrapper, SwiperSlide } from "astro-swiper";
-import { aboutPages } from "../../lib/aboutPages";
+import AboutHubNav from "../../components/AboutHubNav.astro";
 import {
   getBreadcrumbSchema,
   resolvePageUrl,
   resolveSiteUrl,
 } from "../../lib/schemaMarkup";
+import { aboutPages } from "../../lib/aboutPages";
 import "../../styles/about.css";
 
 const title = "About Garage Temperature Monitor";
@@ -18,13 +19,14 @@ const description =
   "Guides on temperature probes, historical data, Arduino firmware, Python feeds, Astro, Node.js, and the full monitoring stack behind this site.";
 
 const siteUrl = resolveSiteUrl(Astro.site);
-const pageUrl = resolvePageUrl(siteUrl, "/about");
 const schema = [
   getBreadcrumbSchema(siteUrl, [
     { name: "Home", path: "/" },
     { name: "About", path: "/about" },
   ]),
 ];
+
+const guideCount = aboutPages.filter((page) => page.parentSlug).length;
 ---
 <Layout title="About" description={description} schema={schema}>
   <div class="page-shell space-y-6">
@@ -63,9 +65,9 @@ const schema = [
             so you can see current conditions, compare them with outdoor weather, and review trends over time.
           </p>
           <p>
-            The about section below is organized into focused guides—more than fifty pages covering
-            probes, physics, historical data, firmware, backend scripts, and the Astro application that
-            powers this website.
+            The guides below follow four learning paths—{guideCount} focused articles plus twelve topic
+            overviews—covering probes, physics, historical data, firmware, backend scripts, and the Astro
+            application that powers this website.
           </p>
         </div>
       </section>
@@ -81,18 +83,7 @@ const schema = [
       <a class="btn-primary self-start" href="/about/probe-demo">Open the interactive demo</a>
     </section>
 
-    <section class="card">
-      <h2 class="card-title">Explore the guides</h2>
-      <p class="card-subtitle">Each page goes deeper on one part of the monitoring stack.</p>
-      <div class="about-nav-grid">
-        {aboutPages.map((page) => (
-          <a class="about-nav-card" href={`/about/${page.slug}`}>
-            <h3>{page.title}</h3>
-            <p>{page.summary}</p>
-          </a>
-        ))}
-      </div>
-    </section>
+    <AboutHubNav />
 
     <section class="card">
       <h2 class="card-title">Open-source repositories</h2>

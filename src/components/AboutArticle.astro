@@ -10,6 +10,7 @@ import {
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
 import "../styles/about.css";
+import AboutTopicSidebar from "./AboutTopicSidebar.astro";
 
 interface Props {
   slug: string;
@@ -64,49 +65,55 @@ const schema = [
 ---
 <Layout title={title} description={description} schema={schema}>
   <div class="page-shell space-y-6">
-    <section class="card animate-slide-in-left">
-      <nav aria-label="Breadcrumb">
-        <ol class="about-breadcrumbs">
-          <li><a href="/">Home</a> /</li>
-          <li><a href="/about">About</a> /</li>
-          {sectionParent && (
-            <li>
-              <a href={`/about/${sectionParent.slug}`}>{sectionParent.title}</a> /
-            </li>
+    <div class="about-article-layout">
+      <AboutTopicSidebar slug={slug} />
+
+      <div class="about-article-main space-y-6">
+        <section class="card animate-slide-in-left">
+          <nav aria-label="Breadcrumb">
+            <ol class="about-breadcrumbs">
+              <li><a href="/">Home</a> /</li>
+              <li><a href="/about">About</a> /</li>
+              {sectionParent && (
+                <li>
+                  <a href={`/about/${sectionParent.slug}`}>{sectionParent.title}</a> /
+                </li>
+              )}
+              <li aria-current="page">{title}</li>
+            </ol>
+          </nav>
+          <h1 class="card-title">{title}</h1>
+          <p class="card-subtitle">{description}</p>
+        </section>
+
+        {heroImage && (
+          <figure class="about-figure card overflow-hidden p-0">
+            <Image src={heroImage} alt={heroAlt ?? title} class="h-full w-full object-cover" />
+            {heroAlt && <figcaption>{heroAlt}</figcaption>}
+          </figure>
+        )}
+
+        <section class="card about-prose">
+          <slot />
+        </section>
+
+        <nav class="card about-pagination" aria-label="About section pages">
+          {previousPage ? (
+            <a class="btn-secondary" href={`/about/${previousPage.slug}`}>
+              ← {previousPage.title}
+            </a>
+          ) : (
+            <a class="btn-secondary" href="/about">← About overview</a>
           )}
-          <li aria-current="page">{title}</li>
-        </ol>
-      </nav>
-      <h1 class="card-title">{title}</h1>
-      <p class="card-subtitle">{description}</p>
-    </section>
-
-    {heroImage && (
-      <figure class="about-figure card overflow-hidden p-0">
-        <Image src={heroImage} alt={heroAlt ?? title} class="h-full w-full object-cover" />
-        {heroAlt && <figcaption>{heroAlt}</figcaption>}
-      </figure>
-    )}
-
-    <section class="card about-prose">
-      <slot />
-    </section>
-
-    <nav class="card about-pagination" aria-label="About section pages">
-      {previousPage ? (
-        <a class="btn-secondary" href={`/about/${previousPage.slug}`}>
-          ← {previousPage.title}
-        </a>
-      ) : (
-        <a class="btn-secondary" href="/about">← About overview</a>
-      )}
-      {nextPage ? (
-        <a class="btn-secondary" href={`/about/${nextPage.slug}`}>
-          {nextPage.title} →
-        </a>
-      ) : (
-        <a class="btn-secondary" href="/about">Back to overview</a>
-      )}
-    </nav>
+          {nextPage ? (
+            <a class="btn-secondary" href={`/about/${nextPage.slug}`}>
+              {nextPage.title} →
+            </a>
+          ) : (
+            <a class="btn-secondary" href="/about">Back to overview</a>
+          )}
+        </nav>
+      </div>
+    </div>
   </div>
 </Layout>

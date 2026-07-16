@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-hosting-cost-comparison desc-hosting-cost-comparison">
+  <title id="title-hosting-cost-comparison">Hosting cost comparison</title>
+  <desc id="desc-hosting-cost-comparison">Relative monthly cost bars by stack</desc>
+  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
+  <text x="80" y="70" fill="#381d2a" font-size="12" font-family="system-ui">Edge Astro</text>
+  <rect x="200" y="50" width="80" height="30" fill="#c4d6b0"/>
+  <text x="80" y="120" fill="#381d2a" font-size="12" font-family="system-ui">VPS Node</text>
+  <rect x="200" y="100" width="200" height="30" fill="#ffa552"/>
+  <text x="80" y="170" fill="#381d2a" font-size="12" font-family="system-ui">Vercel Next</text>
+  <rect x="200" y="150" width="160" height="30" fill="#ba5624"/>
+  <text x="80" y="220" fill="#381d2a" font-size="12" font-family="system-ui">Home relay</text>
+  <rect x="200" y="200" width="60" height="30" fill="#381d2a"/>
+  <text x="320" y="280" fill="#381d2a" font-size="11" font-family="system-ui">Relative monthly cost →</text>
+</svg>

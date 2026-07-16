@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-contact-form-admin-review desc-contact-form-admin-review">
+  <title id="title-contact-form-admin-review">Contact admin review</title>
+  <desc id="desc-contact-form-admin-review">Admin queue lists contact submissions</desc>
+  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
+  <rect x="120" y="60" width="400" height="240" rx="8" fill="#ffffff" stroke="#381d2a" stroke-width="2"/>
+  <rect x="140" y="80" width="360" height="36" fill="#381d2a"/>
+  <text x="320" y="103" text-anchor="middle" fill="#fcde9c" font-size="12" font-family="system-ui">Contact submissions</text>
+  <line x1="140" y1="130" x2="500" y2="130" stroke="#c4d6b0"/>
+  <line x1="140" y1="170" x2="500" y2="170" stroke="#c4d6b0"/>
+  <line x1="140" y1="210" x2="500" y2="210" stroke="#c4d6b0"/>
+  <circle cx="470" cy="150" r="12" fill="#ffa552"/>
+  <text x="470" y="154" text-anchor="middle" fill="#381d2a" font-size="10" font-family="system-ui">✓</text>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-cookie-session-lifecycle desc-cookie-session-lifecycle">
+  <title id="title-cookie-session-lifecycle">Session cookie lifecycle</title>
+  <desc id="desc-cookie-session-lifecycle">Sign-in to cookie to SSR to history insert</desc>
+  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
+  <rect x="60" y="160" width="90" height="50" rx="4" fill="#ffa552"/>
+  <text x="105" y="190" text-anchor="middle" fill="#381d2a" font-size="10" font-family="system-ui">Sign-in</text>
+  <rect x="190" y="160" width="90" height="50" rx="4" fill="#c4d6b0"/>
+  <text x="235" y="190" text-anchor="middle" fill="#381d2a" font-size="10" font-family="system-ui">Cookie</text>
+  <rect x="320" y="160" width="90" height="50" rx="4" fill="#381d2a"/>
+  <text x="365" y="190" text-anchor="middle" fill="#fcde9c" font-size="10" font-family="system-ui">SSR</text>
+  <rect x="450" y="160" width="130" height="50" rx="4" fill="#ba5624"/>
+  <text x="515" y="190" text-anchor="middle" fill="#fcde9c" font-size="10" font-family="system-ui">History insert</text>
+  <line x1="150" y1="185" x2="190" y2="185" stroke="#381d2a" stroke-width="2"/>
+  <line x1="280" y1="185" x2="320" y2="185" stroke="#381d2a" stroke-width="2"/>
+  <line x1="410" y1="185" x2="450" y2="185" stroke="#381d2a" stroke-width="2"/>
+</svg>

@@ -1,0 +1,103 @@
+import { coreAboutPages, aboutPages, getAboutPage, type AboutPage } from "./aboutPages";
+
+export type AboutTopicSection = {
+  core: AboutPage;
+  guides: AboutPage[];
+};
+
+export type AboutMegaGroup = {
+  id: string;
+  title: string;
+  description: string;
+  coreSlugs: string[];
+};
+
+/** Four high-level learning paths on the about hub. */
+export const aboutMegaGroups: AboutMegaGroup[] = [
+  {
+    id: "environment",
+    title: "Garage environment",
+    description: "Probes, placement, and the physics that move readings.",
+    coreSlugs: ["temperature-probes", "temperature-changes"],
+  },
+  {
+    id: "history",
+    title: "Data & history",
+    description: "Saved snapshots, exports, and how readings reach storage.",
+    coreSlugs: ["historical-data", "data-flow"],
+  },
+  {
+    id: "hardware",
+    title: "Hardware & firmware",
+    description: "Arduino sketches, wiring, sensors, and the local LCD.",
+    coreSlugs: [
+      "arduino-sketches",
+      "arduino-circuit-wiring",
+      "arduino-pin-wiring",
+      "arduino-dht22-lcd",
+    ],
+  },
+  {
+    id: "software",
+    title: "Backend & website",
+    description: "Python relays, Astro on Cloudflare, accounts, and dashboards.",
+    coreSlugs: [
+      "python-feeds",
+      "astro-applications",
+      "nextjs-node-applications",
+      "accounts-and-dashboard",
+    ],
+  },
+];
+
+export function getAboutTopicSections(): AboutTopicSection[] {
+  const guidesByParent = new Map<string, AboutPage[]>();
+
+  for (const page of aboutPages) {
+    if (!page.parentSlug) continue;
+    const list = guidesByParent.get(page.parentSlug) ?? [];
+    list.push(page);
+    guidesByParent.set(page.parentSlug, list);
+  }
+
+  return coreAboutPages.map((core) => ({
+    core,
+    guides: guidesByParent.get(core.slug) ?? [],
+  }));
+}
+
+export function getAboutMegaGroupSections(): {
+  group: AboutMegaGroup;
+  sections: AboutTopicSection[];
+}[] {
+  const sectionBySlug = new Map(
+    getAboutTopicSections().map((section) => [section.core.slug, section]),
+  );
+
+  return aboutMegaGroups.map((group) => ({
+    group,
+    sections: group.coreSlugs
+      .map((slug) => sectionBySlug.get(slug))
+      .filter((section): section is AboutTopicSection => !!section),
+  }));
+}
+
+export function getTopicContext(slug: string): {
+  core: AboutPage;
+  guides: AboutPage[];
+  current: AboutPage;
+} | null {
+  const current = getAboutPage(slug);
+  if (!current) return null;
+
+  const coreSlug = current.parentSlug ?? current.slug;
+  const core = getAboutPage(coreSlug);
+  if (!core) return null;
+
+  const section = getAboutTopicSections().find((s) => s.core.slug === coreSlug);
+  if (!section) return null;
+
+  return { core, guides: section.guides, current };
+}
+
+export { coreAboutPages };

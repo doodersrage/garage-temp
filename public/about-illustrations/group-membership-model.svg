@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-group-membership-model desc-group-membership-model">
+  <title id="title-group-membership-model">Group membership</title>
+  <desc id="desc-group-membership-model">User linked to member and admin groups</desc>
+  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
+  <circle cx="320" cy="120" r="50" fill="#381d2a"/>
+  <text x="320" y="125" text-anchor="middle" fill="#fcde9c" font-size="12" font-family="system-ui">User</text>
+  <rect x="100" y="220" width="140" height="70" rx="6" fill="#c4d6b0"/>
+  <text x="170" y="260" text-anchor="middle" fill="#381d2a" font-size="12" font-family="system-ui">member</text>
+  <rect x="400" y="220" width="140" height="70" rx="6" fill="#ba5624"/>
+  <text x="470" y="260" text-anchor="middle" fill="#fcde9c" font-size="12" font-family="system-ui">admin</text>
+  <line x1="280" y1="160" x2="170" y2="220" stroke="#ffa552" stroke-width="2"/>
+  <line x1="360" y1="160" x2="470" y2="220" stroke="#ffa552" stroke-width="2"/>
+  <text x="170" y="310" fill="#381d2a" font-size="10" font-family="system-ui">CSV export</text>
+  <text x="470" y="310" fill="#381d2a" font-size="10" font-family="system-ui">Admin queue</text>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-health-check-endpoints desc-health-check-endpoints">
+  <title id="title-health-check-endpoints">Health check endpoints</title>
+  <desc id="desc-health-check-endpoints">Monitor probes relay Redis and upstream</desc>
+  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
+  <circle cx="100" cy="180" r="40" fill="#ffa552"/>
+  <text x="100" y="185" text-anchor="middle" fill="#381d2a" font-size="10" font-family="system-ui">Monitor</text>
+  <rect x="220" y="140" width="120" height="80" rx="6" fill="#381d2a"/>
+  <text x="280" y="185" text-anchor="middle" fill="#fcde9c" font-size="11" font-family="system-ui">/health</text>
+  <rect x="400" y="100" width="80" height="50" rx="4" fill="#c4d6b0"/>
+  <text x="440" y="130" text-anchor="middle" fill="#381d2a" font-size="10" font-family="system-ui">Redis</text>
+  <rect x="400" y="210" width="80" height="50" rx="4" fill="#ba5624"/>
+  <text x="440" y="240" text-anchor="middle" fill="#fcde9c" font-size="10" font-family="system-ui">Arduino</text>
+  <line x1="340" y1="170" x2="400" y2="125" stroke="#381d2a" stroke-width="2"/>
+  <line x1="340" y1="190" x2="400" y2="235" stroke="#381d2a" stroke-width="2"/>
+  <line x1="140" y1="180" x2="220" y2="180" stroke="#ba5624" stroke-width="2"/>
+</svg>

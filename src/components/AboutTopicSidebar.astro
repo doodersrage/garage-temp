@@ -1,0 +1,54 @@
+---
+import { getTopicContext } from "../lib/aboutNavigation";
+
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+const context = getTopicContext(slug);
+
+if (!context) {
+  return null;
+}
+
+const { core, guides, current } = context;
+const isCorePage = current.slug === core.slug;
+---
+<aside class="about-topic-sidebar card" aria-label="Guides in this topic">
+  <p class="about-topic-sidebar-label">In this topic</p>
+  <a class="about-topic-sidebar-core" href={`/about/${core.slug}`}>
+    {core.title}
+  </a>
+
+  {guides.length > 0 && (
+    <nav aria-label="Related guides">
+      <ul class="about-topic-sidebar-list">
+        {guides.map((guide) => (
+          <li>
+            <a
+              href={`/about/${guide.slug}`}
+              aria-current={guide.slug === current.slug ? "page" : undefined}
+              class:list={[
+                "about-topic-sidebar-item",
+                guide.slug === current.slug && "about-topic-sidebar-item-active",
+              ]}
+            >
+              {guide.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )}
+
+  {!isCorePage && (
+    <a class="text-link about-topic-sidebar-back" href={`/about/${core.slug}`}>
+      ← Back to overview
+    </a>
+  )}
+
+  <a class="text-link about-topic-sidebar-hub" href="/about">
+    All about topics
+  </a>
+</aside>

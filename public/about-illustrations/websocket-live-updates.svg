@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-websocket-live-updates desc-websocket-live-updates">
+  <title id="title-websocket-live-updates">WebSocket live updates</title>
+  <desc id="desc-websocket-live-updates">Server pushes probe JSON to browsers</desc>
+  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
+  <rect x="80" y="140" width="120" height="80" rx="6" fill="#381d2a"/>
+  <text x="140" y="185" text-anchor="middle" fill="#fcde9c" font-size="11" font-family="system-ui">Node server</text>
+  <rect x="440" y="100" width="120" height="60" rx="4" fill="#c4d6b0"/>
+  <rect x="440" y="200" width="120" height="60" rx="4" fill="#c4d6b0"/>
+  <text x="500" y="280" text-anchor="middle" fill="#381d2a" font-size="11" font-family="system-ui">Browsers</text>
+  <path d="M200 170 Q320 100 440 130" stroke="#ba5624" stroke-width="2" fill="none"/>
+  <path d="M200 190 Q320 260 440 230" stroke="#ba5624" stroke-width="2" fill="none"/>
+  <text x="310" y="90" fill="#381d2a" font-size="11" font-family="system-ui">WebSocket push</text>
+</svg>

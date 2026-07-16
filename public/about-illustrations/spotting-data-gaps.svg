@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-spotting-data-gaps desc-spotting-data-gaps">
+  <title id="title-spotting-data-gaps">Data gaps in charts</title>
+  <desc id="desc-spotting-data-gaps">Gap versus flat line in time series</desc>
+  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
+  <line x1="60" y1="280" x2="580" y2="280" stroke="#381d2a" stroke-width="2"/>
+  <polyline points="60,220 140,200 220,210 300,190" fill="none" stroke="#ba5624" stroke-width="3"/>
+  <text x="340" y="200" fill="#381d2a" font-size="24" font-family="system-ui">···</text>
+  <polyline points="420,180 500,170 580,160" fill="none" stroke="#ba5624" stroke-width="3"/>
+  <line x1="60" y1="100" x2="580" y2="100" stroke="#c4d6b0" stroke-width="2" stroke-dasharray="4 4"/>
+  <text x="70" y="90" fill="#381d2a" font-size="12" font-family="system-ui">Flat (valid)</text>
+  <text x="330" y="240" fill="#ba5624" font-size="12" font-family="system-ui">Gap (missing)</text>
+</svg>

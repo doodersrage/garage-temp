@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-display-preferences-deep-dive desc-display-preferences-deep-dive">
+  <title id="title-display-preferences-deep-dive">Display preferences</title>
+  <desc id="desc-display-preferences-deep-dive">Settings toggles for units and card order</desc>
+  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
+  <rect x="140" y="60" width="360" height="240" rx="8" fill="#ffffff" stroke="#381d2a" stroke-width="2"/>
+  <text x="320" y="100" text-anchor="middle" fill="#381d2a" font-size="14" font-family="system-ui">Display preferences</text>
+  <rect x="180" y="120" width="60" height="30" rx="15" fill="#ba5624"/>
+  <rect x="250" y="125" width="30" height="20" rx="10" fill="#fcde9c"/>
+  <text x="320" y="140" fill="#381d2a" font-size="11" font-family="system-ui">°F / °C</text>
+  <rect x="180" y="180" width="280" height="40" rx="4" fill="#c4d6b0" opacity="0.5"/>
+  <text x="200" y="205" fill="#381d2a" font-size="11" font-family="system-ui">Feed order ⋮⋮</text>
+  <rect x="180" y="240" width="280" height="40" rx="4" fill="#ffa552" opacity="0.4"/>
+  <text x="200" y="265" fill="#381d2a" font-size="11" font-family="system-ui">Show humidity</text>
+</svg>

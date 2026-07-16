@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-weather-api-parallel-path desc-weather-api-parallel-path">
+  <title id="title-weather-api-parallel-path">Parallel weather fetch</title>
+  <desc id="desc-weather-api-parallel-path">SSR fetches probes and weather concurrently</desc>
+  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
+  <rect x="260" y="100" width="120" height="60" rx="6" fill="#381d2a"/>
+  <text x="320" y="135" text-anchor="middle" fill="#fcde9c" font-size="11" font-family="system-ui">Astro SSR</text>
+  <rect x="80" y="220" width="140" height="60" rx="4" fill="#ba5624"/>
+  <text x="150" y="255" text-anchor="middle" fill="#fcde9c" font-size="10" font-family="system-ui">Probe JSON</text>
+  <rect x="420" y="220" width="140" height="60" rx="4" fill="#c4d6b0"/>
+  <text x="490" y="255" text-anchor="middle" fill="#381d2a" font-size="10" font-family="system-ui">Weather API</text>
+  <line x1="290" y1="160" x2="150" y2="220" stroke="#ffa552" stroke-width="2"/>
+  <line x1="350" y1="160" x2="490" y2="220" stroke="#ffa552" stroke-width="2"/>
+  <text x="280" y="310" fill="#381d2a" font-size="12" font-family="system-ui">Promise.allSettled</text>
+</svg>

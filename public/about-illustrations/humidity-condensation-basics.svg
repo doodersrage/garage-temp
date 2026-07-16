@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-humidity-condensation-basics desc-humidity-condensation-basics">
+  <title id="title-humidity-condensation-basics">Humidity and condensation</title>
+  <desc id="desc-humidity-condensation-basics">Warm humid air meets a cold slab and releases moisture</desc>
+  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
+  <rect x="40" y="240" width="560" height="80" fill="#381d2a" opacity="0.85"/>
+  <text x="320" y="285" text-anchor="middle" fill="#fcde9c" font-family="system-ui,sans-serif" font-size="14">Cold concrete slab</text>
+  <path d="M120 80 Q200 140 280 200 T440 220" stroke="#ba5624" stroke-width="3" fill="none" marker-end="url(#arr)"/>
+  <ellipse cx="180" cy="100" rx="70" ry="40" fill="#c4d6b0" opacity="0.7"/>
+  <text x="180" y="105" text-anchor="middle" fill="#381d2a" font-size="13" font-family="system-ui">Humid air</text>
+  <circle cx="400" cy="180" r="8" fill="#ffa552"/>
+  <circle cx="420" cy="200" r="6" fill="#ffa552"/>
+  <circle cx="380" cy="210" r="7" fill="#ffa552"/>
+  <text x="480" y="170" fill="#381d2a" font-size="12" font-family="system-ui">Dew point</text>
+  <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#ba5624"/></marker></defs>
+</svg>

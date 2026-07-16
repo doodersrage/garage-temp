@@ -43,5 +43,18 @@ function formatListItem(text: string): string {
       </pre>
     );
   }
+  if (block.type === "figure") {
+    return (
+      <figure class="about-figure about-figure-svg card overflow-hidden p-0">
+        <img
+          src={`/about-illustrations/${block.illustration}`}
+          alt={block.alt}
+          class="h-auto w-full"
+          loading="lazy"
+        />
+        {block.caption && <figcaption>{block.caption}</figcaption>}
+      </figure>
+    );
+  }
   return null;
 })}

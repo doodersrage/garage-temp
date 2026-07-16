@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-thermal-mass-concrete-slab desc-thermal-mass-concrete-slab">
+  <title id="title-thermal-mass-concrete-slab">Thermal mass slab</title>
+  <desc id="desc-thermal-mass-concrete-slab">Slab stores heat and lags air temperature</desc>
+  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
+  <rect x="0" y="260" width="640" height="100" fill="#381d2a"/>
+  <text x="320" y="310" text-anchor="middle" fill="#fcde9c" font-size="13" font-family="system-ui">Concrete thermal mass</text>
+  <path d="M80 220 L560 220" stroke="#ba5624" stroke-width="2"/>
+  <path d="M80 180 Q200 200 320 150 T560 120" stroke="#ffa552" stroke-width="3" fill="none"/>
+  <text x="90" y="175" fill="#381d2a" font-size="12" font-family="system-ui">Air temp (fast)</text>
+  <path d="M80 240 Q200 235 320 230 T560 225" stroke="#c4d6b0" stroke-width="3" fill="none"/>
+  <text x="90" y="250" fill="#381d2a" font-size="12" font-family="system-ui">Slab influence (slow)</text>
+</svg>

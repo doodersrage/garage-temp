@@ -1,0 +1,65 @@
+---
+import { getAboutMegaGroupSections } from "../lib/aboutNavigation";
+
+const megaGroups = getAboutMegaGroupSections();
+---
+<nav class="about-hub-toc card" aria-label="About section topics">
+  <h2 class="about-hub-toc-title">Browse by topic</h2>
+  <p class="about-hub-toc-lead">
+    Four learning paths—from garage physics to firmware, relays, and the dashboard. Jump to a section below.
+  </p>
+  <ol class="about-hub-toc-list">
+    {megaGroups.map(({ group }) => (
+      <li>
+        <a class="about-hub-toc-link" href={`#${group.id}`}>
+          <span class="about-hub-toc-link-title">{group.title}</span>
+          <span class="about-hub-toc-link-desc">{group.description}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</nav>
+
+{megaGroups.map(({ group, sections }) => (
+  <section id={group.id} class="about-mega-group">
+    <header class="about-mega-group-header">
+      <h2 class="about-mega-group-title">{group.title}</h2>
+      <p class="about-mega-group-desc">{group.description}</p>
+    </header>
+
+    <div class="about-mega-group-sections">
+      {sections.map(({ core, guides }) => (
+        <article class="card about-topic-card">
+          <div class="about-topic-card-header">
+            <a class="about-topic-core-link" href={`/about/${core.slug}`}>
+              <h3>{core.title}</h3>
+              <p>{core.summary}</p>
+            </a>
+            <a class="btn-secondary about-topic-start" href={`/about/${core.slug}`}>
+              Start here
+            </a>
+          </div>
+
+          {guides.length > 0 && (
+            <details class="about-topic-guides" open={guides.length <= 5}>
+              <summary>
+                Deep-dive guides
+                <span class="about-topic-count">{guides.length}</span>
+              </summary>
+              <ul class="about-topic-guide-list">
+                {guides.map((guide) => (
+                  <li>
+                    <a href={`/about/${guide.slug}`}>
+                      <span class="about-topic-guide-title">{guide.title}</span>
+                      <span class="about-topic-guide-summary">{guide.summary}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
+))}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-stored-vehicle-heat desc-stored-vehicle-heat">
+  <title id="title-stored-vehicle-heat">Vehicle heat plume</title>
+  <desc id="desc-stored-vehicle-heat">Parked car radiates heat toward nearby probe</desc>
+  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
+  <rect x="120" y="200" width="200" height="80" rx="12" fill="#381d2a"/>
+  <rect x="140" y="180" width="160" height="40" rx="8" fill="#ba5624"/>
+  <text x="220" y="250" text-anchor="middle" fill="#fcde9c" font-size="12" font-family="system-ui">Vehicle</text>
+  <path d="M220 160 Q220 100 280 80 Q340 60 380 90" stroke="#ffa552" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M240 150 Q260 110 300 95" stroke="#ffa552" stroke-width="2" fill="none" opacity="0.5"/>
+  <circle cx="480" cy="120" r="20" fill="#c4d6b0" stroke="#381d2a" stroke-width="2"/>
+  <text x="480" y="125" text-anchor="middle" fill="#381d2a" font-size="10" font-family="system-ui">Probe</text>
+</svg>

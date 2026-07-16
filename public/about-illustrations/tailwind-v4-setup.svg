@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-tailwind-v4-setup desc-tailwind-v4-setup">
+  <title id="title-tailwind-v4-setup">Tailwind v4 in Astro</title>
+  <desc id="desc-tailwind-v4-setup">CSS theme tokens flow to components</desc>
+  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
+  <rect x="100" y="80" width="180" height="100" rx="6" fill="#381d2a"/>
+  <text x="190" y="130" text-anchor="middle" fill="#fcde9c" font-size="12" font-family="system-ui">@theme CSS</text>
+  <rect x="360" y="60" width="180" height="70" rx="4" fill="#c4d6b0"/>
+  <text x="450" y="100" text-anchor="middle" fill="#381d2a" font-size="11" font-family="system-ui">Astro layout</text>
+  <rect x="360" y="150" width="180" height="70" rx="4" fill="#ffa552"/>
+  <text x="450" y="190" text-anchor="middle" fill="#381d2a" font-size="11" font-family="system-ui">Components</text>
+  <rect x="360" y="240" width="180" height="70" rx="4" fill="#ba5624"/>
+  <text x="450" y="280" text-anchor="middle" fill="#fcde9c" font-size="11" font-family="system-ui">Islands</text>
+  <line x1="280" y1="130" x2="360" y2="95" stroke="#381d2a" stroke-width="2"/>
+  <line x1="280" y1="130" x2="360" y2="185" stroke="#381d2a" stroke-width="2"/>
+  <line x1="280" y1="130" x2="360" y2="275" stroke="#381d2a" stroke-width="2"/>
+</svg>

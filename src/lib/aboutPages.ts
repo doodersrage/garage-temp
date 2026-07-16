@@ -8,7 +8,7 @@ export type AboutPage = {
   parentSlug?: string;
 };
 
-const coreAboutPages: AboutPage[] = [
+export const coreAboutPages: AboutPage[] = [
   {
     slug: "temperature-probes",
     title: "Temperature probes and their uses",
