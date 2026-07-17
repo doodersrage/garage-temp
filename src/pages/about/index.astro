@@ -24,7 +24,7 @@ const schema = [
 const guideCount = aboutPages.filter((page) => page.parentSlug).length;
 ---
 <Layout title="About" description={description} schema={schema}>
-  <div class="page-shell space-y-6">
+  <div class="page-shell page-stack">
     <div class="page-grid items-start">
       <section class="card overflow-hidden p-0">
         <AboutProbeActivity client:visible />

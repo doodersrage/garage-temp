@@ -64,11 +64,11 @@ const schema = [
 ];
 ---
 <Layout title={title} description={description} schema={schema}>
-  <div class="page-shell space-y-6">
+  <div class="page-shell page-stack">
     <div class="about-article-layout">
       <AboutTopicSidebar slug={slug} />
 
-      <div class="about-article-main space-y-6">
+      <div class="about-article-main page-stack-tight">
         <section class="card animate-slide-in-left">
           <nav aria-label="Breadcrumb">
             <ol class="about-breadcrumbs">
@@ -100,17 +100,25 @@ const schema = [
         <nav class="card about-pagination" aria-label="About section pages">
           {previousPage ? (
             <a class="btn-secondary" href={`/about/${previousPage.slug}`}>
-              ← {previousPage.title}
+              <span class="btn-icon btn-icon--start" aria-hidden="true">←</span>
+              {previousPage.title}
             </a>
           ) : (
-            <a class="btn-secondary" href="/about">← About overview</a>
+            <a class="btn-secondary" href="/about">
+              <span class="btn-icon btn-icon--start" aria-hidden="true">←</span>
+              About overview
+            </a>
           )}
           {nextPage ? (
             <a class="btn-secondary" href={`/about/${nextPage.slug}`}>
-              {nextPage.title} →
+              {nextPage.title}
+              <span class="btn-icon btn-icon--end" aria-hidden="true">→</span>
             </a>
           ) : (
-            <a class="btn-secondary" href="/about">Back to overview</a>
+            <a class="btn-secondary" href="/about">
+              Back to overview
+              <span class="btn-icon btn-icon--end" aria-hidden="true">→</span>
+            </a>
           )}
         </nav>
       </div>

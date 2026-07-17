@@ -8,15 +8,15 @@ import ContactForm from "../components/ContactForm";
   title="Contact"
   description="Questions about garage probes, Arduino wiring, the dashboard, or building your own monitor? Get in touch—or explore the about guides first."
 >
-  <div class="page-shell space-y-6">
+  <div class="page-shell page-stack">
     <div class="page-grid items-start">
-      <div class="space-y-6">
+      <div class="page-stack page-stack-relaxed">
         <section class="card animate-zoom-in">
           <h1 class="card-title">Get in touch</h1>
           <p class="card-subtitle">
             Building, debugging, or adapting garage monitoring? We read every message and reply as soon as we can.
           </p>
-          <div class="grid gap-4 leading-relaxed text-[var(--color-text-muted)]">
+          <div class="grid gap-4 leading-relaxed">
             <p>
               Garage Temperature Monitor started as a practical build—Arduino probes in a workshop, JSON feeds on the
               network, and a dashboard to watch trends over time. If you are wiring your first DHT22, chasing a flaky
@@ -34,7 +34,7 @@ import ContactForm from "../components/ContactForm";
         <section class="card animate-slide-up-fade">
           <h2 class="card-title">Good reasons to write</h2>
           <p class="card-subtitle">We especially welcome messages about:</p>
-          <ul class="grid gap-2 pl-5 leading-relaxed text-[var(--color-text-muted)] [list-style:disc]">
+          <ul class="grid gap-2 pl-5 leading-relaxed [list-style:disc]">
             <li>Probe placement, averaging, or unexplained temperature swings</li>
             <li>Arduino firmware, wiring, or getting JSON feeds online</li>
             <li>Dashboard setup, history, CSV export, or account questions</li>
@@ -45,7 +45,7 @@ import ContactForm from "../components/ContactForm";
         <section class="card animate-slide-up-fade">
           <h2 class="card-title">Explore the guides first</h2>
           <p class="card-subtitle">Many answers are already documented—browse before you send if you prefer.</p>
-          <div class="grid gap-4 leading-relaxed text-[var(--color-text-muted)]">
+          <div class="grid gap-4 leading-relaxed">
             <p>
               The <a class="text-link" href="/about">about section</a> walks through the full stack: from
               <a class="text-link" href="/about/temperature-probes">temperature probes</a> and

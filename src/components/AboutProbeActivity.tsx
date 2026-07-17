@@ -7,13 +7,16 @@ import {
 } from "../lib/probeDemo";
 
 const COLORS = {
-  cream: "#fcde9c",
-  peach: "#ffa552",
-  terracotta: "#ba5624",
-  plum: "#381d2a",
-  sage: "#c4d6b0",
-  surface: "#fffaf0",
-  muted: "#6b4a55",
+  bgTop: "#0f1319",
+  bgBottom: "#090b0f",
+  surface: "#1a2230",
+  surfaceRaised: "#222b3a",
+  accent: "#3b82f6",
+  accentBright: "#60a5fa",
+  text: "#f8fafc",
+  textMuted: "#94a3b8",
+  border: "rgba(255,255,255,0.12)",
+  plum: "#1e293b",
 };
 
 type ProbeNode = {
@@ -31,9 +34,9 @@ const PROBE_NODES: ProbeNode[] = [
 
 function tempColor(tempF: number): string {
   const t = Math.min(1, Math.max(0, (tempF - 34) / 28));
-  const r = Math.round(196 + t * (186 - 196));
-  const g = Math.round(214 - t * (214 - 86));
-  const b = Math.round(176 - t * (176 - 36));
+  const r = Math.round(37 + t * (96 - 37));
+  const g = Math.round(99 + t * (165 - 99));
+  const b = Math.round(235 + t * (250 - 235));
   return `rgb(${r}, ${g}, ${b})`;
 }
 
@@ -138,20 +141,20 @@ export default function AboutProbeActivity() {
       const radius = 22 + intensity * 0.18;
 
       const glow = ctx!.createRadialGradient(sunX, sunY, 0, sunX, sunY, radius * 2.2);
-      glow.addColorStop(0, `rgba(255, 165, 82, ${0.35 + intensity * 0.004})`);
-      glow.addColorStop(1, "rgba(255, 165, 82, 0)");
+      glow.addColorStop(0, `rgba(59, 130, 246, ${0.35 + intensity * 0.004})`);
+      glow.addColorStop(1, "rgba(59, 130, 246, 0)");
       ctx!.fillStyle = glow;
       ctx!.beginPath();
       ctx!.arc(sunX, sunY, radius * 2.2, 0, Math.PI * 2);
       ctx!.fill();
 
-      ctx!.fillStyle = COLORS.peach;
+      ctx!.fillStyle = COLORS.accentBright;
       ctx!.beginPath();
       ctx!.arc(sunX, sunY, radius, 0, Math.PI * 2);
       ctx!.fill();
 
       if (!reducedMotionRef.current) {
-        ctx!.strokeStyle = `rgba(186, 86, 36, ${0.25 + intensity * 0.005})`;
+        ctx!.strokeStyle = `rgba(96, 165, 250, ${0.35 + intensity * 0.005})`;
         ctx!.lineWidth = 2;
         for (let i = 0; i < 8; i++) {
           const angle = (elapsedRayAngle(start) + i * Math.PI) / 4;
@@ -162,7 +165,7 @@ export default function AboutProbeActivity() {
         }
       }
 
-      ctx!.fillStyle = COLORS.plum;
+      ctx!.fillStyle = COLORS.textMuted;
       ctx!.font = "600 11px system-ui, sans-serif";
       ctx!.textAlign = "center";
       ctx!.fillText(`Sun load ${Math.round(intensity)}%`, sunX, sunY + radius + 22);
@@ -181,19 +184,19 @@ export default function AboutProbeActivity() {
       const doorH = gh * 0.72;
 
       const sky = ctx!.createLinearGradient(0, 0, 0, gy);
-      sky.addColorStop(0, "#e8f0e0");
-      sky.addColorStop(1, COLORS.cream);
+      sky.addColorStop(0, "#141c28");
+      sky.addColorStop(1, COLORS.bgTop);
       ctx!.fillStyle = sky;
       ctx!.fillRect(0, 0, width, gy);
 
       ctx!.fillStyle = COLORS.surface;
       drawRoundedRect(ctx!, gx, gy, gw, gh, 10);
       ctx!.fill();
-      ctx!.strokeStyle = COLORS.plum;
+      ctx!.strokeStyle = COLORS.border;
       ctx!.lineWidth = 2;
       ctx!.stroke();
 
-      ctx!.fillStyle = COLORS.muted;
+      ctx!.fillStyle = COLORS.textMuted;
       ctx!.font = "600 13px system-ui, sans-serif";
       ctx!.textAlign = "left";
       ctx!.fillText("Garage interior", gx + 14, gy + 22);
@@ -202,19 +205,19 @@ export default function AboutProbeActivity() {
       const doorX = gx + 16;
       const doorY = gy + gh - doorH - 12 + doorLift;
 
-      ctx!.fillStyle = `rgba(196, 214, 176, ${0.35 + doorAmount * 0.45})`;
+      ctx!.fillStyle = `rgba(59, 130, 246, ${0.06 + doorAmount * 0.1})`;
       ctx!.fillRect(gx, gy, gw, gh);
 
-      ctx!.fillStyle = lerpColor(doorAmount, "#8a9a78", "#c4d6b0");
+      ctx!.fillStyle = lerpColor(doorAmount, "#2a3444", "#3d4d66");
       drawRoundedRect(ctx!, doorX, doorY, doorW, doorH - doorLift, 6);
       ctx!.fill();
-      ctx!.strokeStyle = COLORS.plum;
+      ctx!.strokeStyle = COLORS.border;
       ctx!.lineWidth = 1.5;
       ctx!.stroke();
 
       for (let i = 0; i < 4; i++) {
         const ly = doorY + 18 + i * ((doorH - doorLift - 28) / 3);
-        ctx!.strokeStyle = "rgba(56, 29, 42, 0.25)";
+        ctx!.strokeStyle = "rgba(255, 255, 255, 0.12)";
         ctx!.beginPath();
         ctx!.moveTo(doorX + 10, ly);
         ctx!.lineTo(doorX + doorW - 10, ly);
@@ -224,7 +227,7 @@ export default function AboutProbeActivity() {
       if (doorAmount > 0.05) {
         ctx!.fillStyle = tempColor(outdoorF);
         ctx!.fillRect(gx, gy, 12, gh);
-        ctx!.fillStyle = COLORS.plum;
+        ctx!.fillStyle = COLORS.textMuted;
         ctx!.font = "500 10px system-ui, sans-serif";
         ctx!.save();
         ctx!.translate(gx + 6, gy + gh / 2);
@@ -254,7 +257,7 @@ export default function AboutProbeActivity() {
 
       if (!reducedMotionRef.current) {
         const ring = 16 + pulse * 10;
-        ctx!.strokeStyle = `rgba(186, 86, 36, ${0.35 - pulse * 0.25})`;
+        ctx!.strokeStyle = `rgba(59, 130, 246, ${0.45 - pulse * 0.3})`;
         ctx!.lineWidth = 2;
         ctx!.beginPath();
         ctx!.arc(x, y, ring, 0, Math.PI * 2);
@@ -265,7 +268,7 @@ export default function AboutProbeActivity() {
       ctx!.beginPath();
       ctx!.arc(x, y, 9, 0, Math.PI * 2);
       ctx!.fill();
-      ctx!.strokeStyle = COLORS.plum;
+      ctx!.strokeStyle = COLORS.text;
       ctx!.lineWidth = 2;
       ctx!.stroke();
 
@@ -274,24 +277,24 @@ export default function AboutProbeActivity() {
       const cardX = x - cardW / 2;
       const cardY = y - 58;
 
-      ctx!.fillStyle = "rgba(255, 250, 240, 0.94)";
+      ctx!.fillStyle = "rgba(26, 34, 48, 0.94)";
       drawRoundedRect(ctx!, cardX, cardY, cardW, cardH, 8);
       ctx!.fill();
-      ctx!.strokeStyle = COLORS.sage;
+      ctx!.strokeStyle = COLORS.border;
       ctx!.lineWidth = 1;
       ctx!.stroke();
 
-      ctx!.fillStyle = COLORS.plum;
+      ctx!.fillStyle = COLORS.textMuted;
       ctx!.font = "600 10px system-ui, sans-serif";
       ctx!.textAlign = "center";
       ctx!.fillText(node.label, x, cardY + 16);
 
       ctx!.font = "700 14px system-ui, sans-serif";
-      ctx!.fillStyle = COLORS.terracotta;
+      ctx!.fillStyle = COLORS.accentBright;
       ctx!.fillText(`${tempF.toFixed(1)}°F`, x, cardY + 34);
 
       ctx!.font = "500 10px system-ui, sans-serif";
-      ctx!.fillStyle = COLORS.muted;
+      ctx!.fillStyle = COLORS.textMuted;
       ctx!.fillText(`${humidity.toFixed(0)}% RH`, x, cardY + 46);
     }
 
@@ -303,14 +306,14 @@ export default function AboutProbeActivity() {
       h: number,
       label: string,
     ) {
-      ctx!.fillStyle = "rgba(255, 250, 240, 0.92)";
+      ctx!.fillStyle = "rgba(26, 34, 48, 0.92)";
       drawRoundedRect(ctx!, x, y, w, h, 6);
       ctx!.fill();
-      ctx!.strokeStyle = COLORS.sage;
+      ctx!.strokeStyle = COLORS.border;
       ctx!.lineWidth = 1;
       ctx!.stroke();
 
-      ctx!.fillStyle = COLORS.plum;
+      ctx!.fillStyle = COLORS.textMuted;
       ctx!.font = "600 9px system-ui, sans-serif";
       ctx!.textAlign = "left";
       ctx!.fillText(label, x + 8, y + 14);
@@ -325,7 +328,7 @@ export default function AboutProbeActivity() {
       const innerW = w - padX * 2;
       const innerH = h - 24;
 
-      ctx!.strokeStyle = COLORS.terracotta;
+      ctx!.strokeStyle = COLORS.accentBright;
       ctx!.lineWidth = 1.5;
       ctx!.beginPath();
       history.forEach((val, i) => {
@@ -342,7 +345,7 @@ export default function AboutProbeActivity() {
       const pulseY = height * 0.93;
       const pulseW = width * 0.8;
 
-      ctx!.fillStyle = COLORS.plum;
+      ctx!.fillStyle = COLORS.textMuted;
       ctx!.font = "600 11px system-ui, sans-serif";
       ctx!.textAlign = "left";
       ctx!.fillText("JSON feed → website dashboard", pulseX, pulseY - 8);
@@ -352,7 +355,7 @@ export default function AboutProbeActivity() {
         const progress = ((elapsed / 1800 + i / dotCount) % 1);
         const dx = pulseX + progress * pulseW;
         const alpha = progress < 0.85 ? 0.85 : (1 - progress) * 5;
-        ctx!.fillStyle = `rgba(186, 86, 36, ${alpha})`;
+        ctx!.fillStyle = `rgba(59, 130, 246, ${alpha})`;
         ctx!.beginPath();
         ctx!.arc(dx, pulseY + 10, 4, 0, Math.PI * 2);
         ctx!.fill();
@@ -369,8 +372,8 @@ export default function AboutProbeActivity() {
       }
 
       const bg = ctx!.createLinearGradient(0, 0, width, height);
-      bg.addColorStop(0, COLORS.cream);
-      bg.addColorStop(1, "#f5efd8");
+      bg.addColorStop(0, COLORS.bgTop);
+      bg.addColorStop(1, COLORS.bgBottom);
       ctx!.fillStyle = bg;
       ctx!.fillRect(0, 0, width, height);
 
@@ -402,7 +405,7 @@ export default function AboutProbeActivity() {
 
       drawDataPulse(elapsed);
 
-      ctx!.fillStyle = COLORS.muted;
+      ctx!.fillStyle = COLORS.textMuted;
       ctx!.font = "500 10px system-ui, sans-serif";
       ctx!.textAlign = "right";
       ctx!.fillText(

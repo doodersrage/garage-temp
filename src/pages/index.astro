@@ -27,7 +27,7 @@ const tempConfig = isAuthenticated
 ---
 
 <Layout description="Live garage temperature and humidity readings with local weather, saved history, and a configurable dashboard.">
-	<div class="page-shell space-y-6">
+	<div class="page-shell page-stack">
 		<div class="grid gap-6">
 			{showGarageTemps && (
 				<GetTemps {...tempConfig} server:defer>
@@ -49,7 +49,7 @@ const tempConfig = isAuthenticated
 		<section class="card animate-slide-up-fade">
 			<h2 class="card-title">About these readings</h2>
 			<p class="card-subtitle">Probes, weather, history, and the technology behind this site.</p>
-			<div class="grid gap-4 leading-relaxed text-[var(--color-text-muted)]">
+			<div class="grid gap-4 leading-relaxed">
 				<p>
 					This site combines DHT22 probes, JSON feeds, and local weather so you can compare garage conditions
 					with the outdoors. The guides explain

@@ -39,7 +39,7 @@ const schema = [
 ];
 ---
 <Layout title={title} description={description} schema={schema}>
-  <div class="page-shell space-y-6">
+  <div class="page-shell page-stack">
     <section class="card animate-slide-in-left">
       <nav aria-label="Breadcrumb">
         <ol class="about-breadcrumbs">
@@ -68,8 +68,14 @@ const schema = [
     <ProbeDemo client:load />
 
     <nav class="card about-pagination" aria-label="About section pages">
-      <a class="btn-secondary" href="/about/temperature-probes">← Temperature probes guide</a>
-      <a class="btn-secondary" href="/about">Back to about overview</a>
+      <a class="btn-secondary" href="/about/temperature-probes">
+        <span class="btn-icon btn-icon--start" aria-hidden="true">←</span>
+        Temperature probes guide
+      </a>
+      <a class="btn-secondary" href="/about">
+        Back to about overview
+        <span class="btn-icon btn-icon--end" aria-hidden="true">→</span>
+      </a>
     </nav>
   </div>
 </Layout>
