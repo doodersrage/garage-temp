@@ -1,16 +1,44 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-health-check-endpoints desc-health-check-endpoints">
   <title id="title-health-check-endpoints">Health check endpoints</title>
   <desc id="desc-health-check-endpoints">Monitor probes relay Redis and upstream</desc>
-  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
-  <circle cx="100" cy="180" r="40" fill="#ffa552"/>
-  <text x="100" y="185" text-anchor="middle" fill="#381d2a" font-size="10" font-family="system-ui">Monitor</text>
-  <rect x="220" y="140" width="120" height="80" rx="6" fill="#381d2a"/>
-  <text x="280" y="185" text-anchor="middle" fill="#fcde9c" font-size="11" font-family="system-ui">/health</text>
-  <rect x="400" y="100" width="80" height="50" rx="4" fill="#c4d6b0"/>
-  <text x="440" y="130" text-anchor="middle" fill="#381d2a" font-size="10" font-family="system-ui">Redis</text>
-  <rect x="400" y="210" width="80" height="50" rx="4" fill="#ba5624"/>
-  <text x="440" y="240" text-anchor="middle" fill="#fcde9c" font-size="10" font-family="system-ui">Arduino</text>
-  <line x1="340" y1="170" x2="400" y2="125" stroke="#381d2a" stroke-width="2"/>
-  <line x1="340" y1="190" x2="400" y2="235" stroke="#381d2a" stroke-width="2"/>
-  <line x1="140" y1="180" x2="220" y2="180" stroke="#ba5624" stroke-width="2"/>
+  <defs>
+    <linearGradient id="bg-healthxcheckxendpoints" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121820"/>
+      <stop offset="45%" stop-color="#090b0f"/>
+      <stop offset="100%" stop-color="#0a1628"/>
+    </linearGradient>
+    <radialGradient id="glow-healthxcheckxendpoints" cx="72%" cy="8%" r="55%">
+      <stop offset="0%" stop-color="rgba(59,130,246,0.22)"/>
+      <stop offset="100%" stop-color="rgba(59,130,246,0)"/>
+    </radialGradient>
+    <radialGradient id="glow2-healthxcheckxendpoints" cx="12%" cy="92%" r="45%">
+      <stop offset="0%" stop-color="rgba(37,99,235,0.14)"/>
+      <stop offset="100%" stop-color="rgba(37,99,235,0)"/>
+    </radialGradient>
+    <pattern id="dots-healthxcheckxendpoints" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="rgba(148,163,184,0.12)"/>
+    </pattern>
+    <filter id="soft-healthxcheckxendpoints" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg-healthxcheckxendpoints)"/>
+  <rect width="640" height="360" fill="url(#glow-healthxcheckxendpoints)"/>
+  <rect width="640" height="360" fill="url(#glow2-healthxcheckxendpoints)"/>
+  <rect width="640" height="360" fill="url(#dots-healthxcheckxendpoints)" opacity="0.55"/>
+  <rect x="16" y="16" width="608" height="328" rx="14" fill="none" stroke="rgba(255,255,255,0.07)"/>
+  <rect x="17" y="17" width="606" height="326" rx="13" fill="rgba(255,255,255,0.02)"/>
+  <text x="36" y="44" fill="#94a3b8" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="600" letter-spacing="0.12em">HEALTH CHECK ENDPOINTS</text>
+  <line x1="36" y1="52" x2="604" y2="52" stroke="rgba(255,255,255,0.06)"/>
+  <g filter="url(#soft-healthxcheckxendpoints)" transform="translate(0, 8)"><circle cx="100" cy="180" r="40" fill="#60a5fa"/>
+  <text x="100" y="185" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="system-ui">Monitor</text>
+  <rect x="220" y="140" width="120" height="80" rx="6" fill="#1a2230"/>
+  <text x="280" y="185" text-anchor="middle" fill="#f8fafc" font-size="11" font-family="system-ui">/health</text>
+  <rect x="400" y="100" width="80" height="50" rx="4" fill="rgba(59,130,246,0.28)"/>
+  <text x="440" y="130" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="system-ui">Redis</text>
+  <rect x="400" y="210" width="80" height="50" rx="4" fill="#3b82f6"/>
+  <text x="440" y="240" text-anchor="middle" fill="#f8fafc" font-size="10" font-family="system-ui">Arduino</text>
+  <line x1="340" y1="170" x2="400" y2="125" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <line x1="340" y1="190" x2="400" y2="235" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <line x1="140" y1="180" x2="220" y2="180" stroke="#3b82f6" stroke-width="2"/></g>
 </svg>

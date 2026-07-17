@@ -1,13 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-environment-variables-relay desc-environment-variables-relay">
   <title id="title-environment-variables-relay">Relay environment variables</title>
   <desc id="desc-environment-variables-relay">Env file configures relay at startup</desc>
-  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
-  <rect x="80" y="80" width="200" height="200" rx="6" fill="#ffffff" stroke="#381d2a" stroke-width="2"/>
-  <text x="100" y="110" fill="#381d2a" font-size="11" font-family="monospace">UPSTREAM_URL=</text>
-  <text x="100" y="140" fill="#381d2a" font-size="11" font-family="monospace">REDIS_URL=</text>
-  <text x="100" y="170" fill="#381d2a" font-size="11" font-family="monospace">CACHE_TTL=</text>
-  <path d="M280 180 H360" stroke="#ba5624" stroke-width="3" marker-end="url(#arr3)"/>
-  <rect x="360" y="130" width="200" height="100" rx="8" fill="#c4d6b0"/>
-  <text x="460" y="185" text-anchor="middle" fill="#381d2a" font-size="13" font-family="system-ui">Relay process</text>
-  <defs><marker id="arr3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#ba5624"/></marker></defs>
+  <defs>
+    <linearGradient id="bg-environmentxvariablesxrelay" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121820"/>
+      <stop offset="45%" stop-color="#090b0f"/>
+      <stop offset="100%" stop-color="#0a1628"/>
+    </linearGradient>
+    <radialGradient id="glow-environmentxvariablesxrelay" cx="72%" cy="8%" r="55%">
+      <stop offset="0%" stop-color="rgba(59,130,246,0.22)"/>
+      <stop offset="100%" stop-color="rgba(59,130,246,0)"/>
+    </radialGradient>
+    <radialGradient id="glow2-environmentxvariablesxrelay" cx="12%" cy="92%" r="45%">
+      <stop offset="0%" stop-color="rgba(37,99,235,0.14)"/>
+      <stop offset="100%" stop-color="rgba(37,99,235,0)"/>
+    </radialGradient>
+    <pattern id="dots-environmentxvariablesxrelay" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="rgba(148,163,184,0.12)"/>
+    </pattern>
+    <filter id="soft-environmentxvariablesxrelay" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg-environmentxvariablesxrelay)"/>
+  <rect width="640" height="360" fill="url(#glow-environmentxvariablesxrelay)"/>
+  <rect width="640" height="360" fill="url(#glow2-environmentxvariablesxrelay)"/>
+  <rect width="640" height="360" fill="url(#dots-environmentxvariablesxrelay)" opacity="0.55"/>
+  <rect x="16" y="16" width="608" height="328" rx="14" fill="none" stroke="rgba(255,255,255,0.07)"/>
+  <rect x="17" y="17" width="606" height="326" rx="13" fill="rgba(255,255,255,0.02)"/>
+  <text x="36" y="44" fill="#94a3b8" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="600" letter-spacing="0.12em">RELAY ENVIRONMENT VARIABLES</text>
+  <line x1="36" y1="52" x2="604" y2="52" stroke="rgba(255,255,255,0.06)"/>
+  <g filter="url(#soft-environmentxvariablesxrelay)" transform="translate(0, 8)"><rect x="80" y="80" width="200" height="200" rx="6" fill="#151b24" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <text x="100" y="110" fill="#94a3b8" font-size="11" font-family="monospace">UPSTREAM_URL=</text>
+  <text x="100" y="140" fill="#94a3b8" font-size="11" font-family="monospace">REDIS_URL=</text>
+  <text x="100" y="170" fill="#94a3b8" font-size="11" font-family="monospace">CACHE_TTL=</text>
+  <path d="M280 180 H360" stroke="#3b82f6" stroke-width="3" marker-end="url(#arr3)"/>
+  <rect x="360" y="130" width="200" height="100" rx="8" fill="rgba(59,130,246,0.28)"/>
+  <text x="460" y="185" text-anchor="middle" fill="#94a3b8" font-size="13" font-family="system-ui">Relay process</text>
+  <defs><marker id="arr3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#3b82f6"/></marker></defs></g>
 </svg>

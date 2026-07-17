@@ -1,16 +1,44 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-library-dependencies desc-library-dependencies">
   <title id="title-library-dependencies">Library dependencies</title>
   <desc id="desc-library-dependencies">Sketch depends on DHT LCD and Ethernet libs</desc>
-  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
-  <rect x="240" y="140" width="160" height="80" rx="6" fill="#381d2a"/>
-  <text x="320" y="185" text-anchor="middle" fill="#fcde9c" font-size="13" font-family="system-ui">Sketch</text>
-  <rect x="80" y="60" width="120" height="50" rx="4" fill="#c4d6b0"/>
-  <text x="140" y="90" text-anchor="middle" fill="#381d2a" font-size="11" font-family="system-ui">DHT lib</text>
-  <rect x="440" y="60" width="120" height="50" rx="4" fill="#c4d6b0"/>
-  <text x="500" y="90" text-anchor="middle" fill="#381d2a" font-size="11" font-family="system-ui">LCD lib</text>
-  <rect x="260" y="260" width="120" height="50" rx="4" fill="#c4d6b0"/>
-  <text x="320" y="290" text-anchor="middle" fill="#381d2a" font-size="11" font-family="system-ui">Ethernet</text>
-  <line x1="200" y1="110" x2="280" y2="150" stroke="#ba5624" stroke-width="2"/>
-  <line x1="440" y1="110" x2="360" y2="150" stroke="#ba5624" stroke-width="2"/>
-  <line x1="320" y1="220" x2="320" y2="260" stroke="#ba5624" stroke-width="2"/>
+  <defs>
+    <linearGradient id="bg-libraryxdependencies" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121820"/>
+      <stop offset="45%" stop-color="#090b0f"/>
+      <stop offset="100%" stop-color="#0a1628"/>
+    </linearGradient>
+    <radialGradient id="glow-libraryxdependencies" cx="72%" cy="8%" r="55%">
+      <stop offset="0%" stop-color="rgba(59,130,246,0.22)"/>
+      <stop offset="100%" stop-color="rgba(59,130,246,0)"/>
+    </radialGradient>
+    <radialGradient id="glow2-libraryxdependencies" cx="12%" cy="92%" r="45%">
+      <stop offset="0%" stop-color="rgba(37,99,235,0.14)"/>
+      <stop offset="100%" stop-color="rgba(37,99,235,0)"/>
+    </radialGradient>
+    <pattern id="dots-libraryxdependencies" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="rgba(148,163,184,0.12)"/>
+    </pattern>
+    <filter id="soft-libraryxdependencies" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg-libraryxdependencies)"/>
+  <rect width="640" height="360" fill="url(#glow-libraryxdependencies)"/>
+  <rect width="640" height="360" fill="url(#glow2-libraryxdependencies)"/>
+  <rect width="640" height="360" fill="url(#dots-libraryxdependencies)" opacity="0.55"/>
+  <rect x="16" y="16" width="608" height="328" rx="14" fill="none" stroke="rgba(255,255,255,0.07)"/>
+  <rect x="17" y="17" width="606" height="326" rx="13" fill="rgba(255,255,255,0.02)"/>
+  <text x="36" y="44" fill="#94a3b8" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="600" letter-spacing="0.12em">LIBRARY DEPENDENCIES</text>
+  <line x1="36" y1="52" x2="604" y2="52" stroke="rgba(255,255,255,0.06)"/>
+  <g filter="url(#soft-libraryxdependencies)" transform="translate(0, 8)"><rect x="240" y="140" width="160" height="80" rx="6" fill="#1a2230"/>
+  <text x="320" y="185" text-anchor="middle" fill="#f8fafc" font-size="13" font-family="system-ui">Sketch</text>
+  <rect x="80" y="60" width="120" height="50" rx="4" fill="rgba(59,130,246,0.28)"/>
+  <text x="140" y="90" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="system-ui">DHT lib</text>
+  <rect x="440" y="60" width="120" height="50" rx="4" fill="rgba(59,130,246,0.28)"/>
+  <text x="500" y="90" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="system-ui">LCD lib</text>
+  <rect x="260" y="260" width="120" height="50" rx="4" fill="rgba(59,130,246,0.28)"/>
+  <text x="320" y="290" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="system-ui">Ethernet</text>
+  <line x1="200" y1="110" x2="280" y2="150" stroke="#3b82f6" stroke-width="2"/>
+  <line x1="440" y1="110" x2="360" y2="150" stroke="#3b82f6" stroke-width="2"/>
+  <line x1="320" y1="220" x2="320" y2="260" stroke="#3b82f6" stroke-width="2"/></g>
 </svg>

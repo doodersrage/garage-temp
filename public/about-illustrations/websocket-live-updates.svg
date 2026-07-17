@@ -1,13 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-websocket-live-updates desc-websocket-live-updates">
   <title id="title-websocket-live-updates">WebSocket live updates</title>
   <desc id="desc-websocket-live-updates">Server pushes probe JSON to browsers</desc>
-  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
-  <rect x="80" y="140" width="120" height="80" rx="6" fill="#381d2a"/>
-  <text x="140" y="185" text-anchor="middle" fill="#fcde9c" font-size="11" font-family="system-ui">Node server</text>
-  <rect x="440" y="100" width="120" height="60" rx="4" fill="#c4d6b0"/>
-  <rect x="440" y="200" width="120" height="60" rx="4" fill="#c4d6b0"/>
-  <text x="500" y="280" text-anchor="middle" fill="#381d2a" font-size="11" font-family="system-ui">Browsers</text>
-  <path d="M200 170 Q320 100 440 130" stroke="#ba5624" stroke-width="2" fill="none"/>
-  <path d="M200 190 Q320 260 440 230" stroke="#ba5624" stroke-width="2" fill="none"/>
-  <text x="310" y="90" fill="#381d2a" font-size="11" font-family="system-ui">WebSocket push</text>
+  <defs>
+    <linearGradient id="bg-websocketxlivexupdates" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121820"/>
+      <stop offset="45%" stop-color="#090b0f"/>
+      <stop offset="100%" stop-color="#0a1628"/>
+    </linearGradient>
+    <radialGradient id="glow-websocketxlivexupdates" cx="72%" cy="8%" r="55%">
+      <stop offset="0%" stop-color="rgba(59,130,246,0.22)"/>
+      <stop offset="100%" stop-color="rgba(59,130,246,0)"/>
+    </radialGradient>
+    <radialGradient id="glow2-websocketxlivexupdates" cx="12%" cy="92%" r="45%">
+      <stop offset="0%" stop-color="rgba(37,99,235,0.14)"/>
+      <stop offset="100%" stop-color="rgba(37,99,235,0)"/>
+    </radialGradient>
+    <pattern id="dots-websocketxlivexupdates" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="rgba(148,163,184,0.12)"/>
+    </pattern>
+    <filter id="soft-websocketxlivexupdates" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg-websocketxlivexupdates)"/>
+  <rect width="640" height="360" fill="url(#glow-websocketxlivexupdates)"/>
+  <rect width="640" height="360" fill="url(#glow2-websocketxlivexupdates)"/>
+  <rect width="640" height="360" fill="url(#dots-websocketxlivexupdates)" opacity="0.55"/>
+  <rect x="16" y="16" width="608" height="328" rx="14" fill="none" stroke="rgba(255,255,255,0.07)"/>
+  <rect x="17" y="17" width="606" height="326" rx="13" fill="rgba(255,255,255,0.02)"/>
+  <text x="36" y="44" fill="#94a3b8" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="600" letter-spacing="0.12em">WEBSOCKET LIVE UPDATES</text>
+  <line x1="36" y1="52" x2="604" y2="52" stroke="rgba(255,255,255,0.06)"/>
+  <g filter="url(#soft-websocketxlivexupdates)" transform="translate(0, 8)"><rect x="80" y="140" width="120" height="80" rx="6" fill="#1a2230"/>
+  <text x="140" y="185" text-anchor="middle" fill="#f8fafc" font-size="11" font-family="system-ui">Node server</text>
+  <rect x="440" y="100" width="120" height="60" rx="4" fill="rgba(59,130,246,0.28)"/>
+  <rect x="440" y="200" width="120" height="60" rx="4" fill="rgba(59,130,246,0.28)"/>
+  <text x="500" y="280" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="system-ui">Browsers</text>
+  <path d="M200 170 Q320 100 440 130" stroke="#3b82f6" stroke-width="2" fill="none"/>
+  <path d="M200 190 Q320 260 440 230" stroke="#3b82f6" stroke-width="2" fill="none"/>
+  <text x="310" y="90" fill="#94a3b8" font-size="11" font-family="system-ui">WebSocket push</text></g>
 </svg>

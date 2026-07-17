@@ -1,18 +1,46 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-lcd-i2c-alternative desc-lcd-i2c-alternative">
   <title id="title-lcd-i2c-alternative">I2C LCD alternative</title>
   <desc id="desc-lcd-i2c-alternative">Parallel vs I2C pin count</desc>
-  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
-  <rect x="60" y="100" width="220" height="160" rx="6" fill="#ffffff" stroke="#381d2a" stroke-width="2"/>
-  <text x="170" y="130" text-anchor="middle" fill="#381d2a" font-size="12" font-family="system-ui">Parallel: 6+ pins</text>
-  <rect x="90" y="160" width="16" height="40" fill="#ba5624"/>
-  <rect x="118" y="160" width="16" height="40" fill="#ba5624"/>
-  <rect x="146" y="160" width="16" height="40" fill="#ba5624"/>
-  <rect x="174" y="160" width="16" height="40" fill="#ba5624"/>
-  <rect x="202" y="160" width="16" height="40" fill="#ba5624"/>
-  <rect x="230" y="160" width="16" height="40" fill="#ba5624"/>
-  <rect x="360" y="100" width="220" height="160" rx="6" fill="#ffffff" stroke="#381d2a" stroke-width="2"/>
-  <text x="470" y="130" text-anchor="middle" fill="#381d2a" font-size="12" font-family="system-ui">I²C: 2 wires</text>
-  <line x1="400" y1="200" x2="540" y2="200" stroke="#c4d6b0" stroke-width="4"/>
-  <line x1="400" y1="230" x2="540" y2="230" stroke="#c4d6b0" stroke-width="4"/>
-  <text x="470" y="260" text-anchor="middle" fill="#381d2a" font-size="11" font-family="system-ui">SDA / SCL</text>
+  <defs>
+    <linearGradient id="bg-lcdxi2cxalternative" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121820"/>
+      <stop offset="45%" stop-color="#090b0f"/>
+      <stop offset="100%" stop-color="#0a1628"/>
+    </linearGradient>
+    <radialGradient id="glow-lcdxi2cxalternative" cx="72%" cy="8%" r="55%">
+      <stop offset="0%" stop-color="rgba(59,130,246,0.22)"/>
+      <stop offset="100%" stop-color="rgba(59,130,246,0)"/>
+    </radialGradient>
+    <radialGradient id="glow2-lcdxi2cxalternative" cx="12%" cy="92%" r="45%">
+      <stop offset="0%" stop-color="rgba(37,99,235,0.14)"/>
+      <stop offset="100%" stop-color="rgba(37,99,235,0)"/>
+    </radialGradient>
+    <pattern id="dots-lcdxi2cxalternative" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="rgba(148,163,184,0.12)"/>
+    </pattern>
+    <filter id="soft-lcdxi2cxalternative" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg-lcdxi2cxalternative)"/>
+  <rect width="640" height="360" fill="url(#glow-lcdxi2cxalternative)"/>
+  <rect width="640" height="360" fill="url(#glow2-lcdxi2cxalternative)"/>
+  <rect width="640" height="360" fill="url(#dots-lcdxi2cxalternative)" opacity="0.55"/>
+  <rect x="16" y="16" width="608" height="328" rx="14" fill="none" stroke="rgba(255,255,255,0.07)"/>
+  <rect x="17" y="17" width="606" height="326" rx="13" fill="rgba(255,255,255,0.02)"/>
+  <text x="36" y="44" fill="#94a3b8" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="600" letter-spacing="0.12em">I2C LCD ALTERNATIVE</text>
+  <line x1="36" y1="52" x2="604" y2="52" stroke="rgba(255,255,255,0.06)"/>
+  <g filter="url(#soft-lcdxi2cxalternative)" transform="translate(0, 8)"><rect x="60" y="100" width="220" height="160" rx="6" fill="#151b24" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <text x="170" y="130" text-anchor="middle" fill="#94a3b8" font-size="12" font-family="system-ui">Parallel: 6+ pins</text>
+  <rect x="90" y="160" width="16" height="40" fill="#3b82f6"/>
+  <rect x="118" y="160" width="16" height="40" fill="#3b82f6"/>
+  <rect x="146" y="160" width="16" height="40" fill="#3b82f6"/>
+  <rect x="174" y="160" width="16" height="40" fill="#3b82f6"/>
+  <rect x="202" y="160" width="16" height="40" fill="#3b82f6"/>
+  <rect x="230" y="160" width="16" height="40" fill="#3b82f6"/>
+  <rect x="360" y="100" width="220" height="160" rx="6" fill="#151b24" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <text x="470" y="130" text-anchor="middle" fill="#94a3b8" font-size="12" font-family="system-ui">I²C: 2 wires</text>
+  <line x1="400" y1="200" x2="540" y2="200" stroke="rgba(59,130,246,0.28)" stroke-width="4"/>
+  <line x1="400" y1="230" x2="540" y2="230" stroke="rgba(59,130,246,0.28)" stroke-width="4"/>
+  <text x="470" y="260" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="system-ui">SDA / SCL</text></g>
 </svg>

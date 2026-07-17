@@ -1,15 +1,43 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-group-membership-model desc-group-membership-model">
   <title id="title-group-membership-model">Group membership</title>
   <desc id="desc-group-membership-model">User linked to member and admin groups</desc>
-  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
-  <circle cx="320" cy="120" r="50" fill="#381d2a"/>
-  <text x="320" y="125" text-anchor="middle" fill="#fcde9c" font-size="12" font-family="system-ui">User</text>
-  <rect x="100" y="220" width="140" height="70" rx="6" fill="#c4d6b0"/>
-  <text x="170" y="260" text-anchor="middle" fill="#381d2a" font-size="12" font-family="system-ui">member</text>
-  <rect x="400" y="220" width="140" height="70" rx="6" fill="#ba5624"/>
-  <text x="470" y="260" text-anchor="middle" fill="#fcde9c" font-size="12" font-family="system-ui">admin</text>
-  <line x1="280" y1="160" x2="170" y2="220" stroke="#ffa552" stroke-width="2"/>
-  <line x1="360" y1="160" x2="470" y2="220" stroke="#ffa552" stroke-width="2"/>
-  <text x="170" y="310" fill="#381d2a" font-size="10" font-family="system-ui">CSV export</text>
-  <text x="470" y="310" fill="#381d2a" font-size="10" font-family="system-ui">Admin queue</text>
+  <defs>
+    <linearGradient id="bg-groupxmembershipxmodel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121820"/>
+      <stop offset="45%" stop-color="#090b0f"/>
+      <stop offset="100%" stop-color="#0a1628"/>
+    </linearGradient>
+    <radialGradient id="glow-groupxmembershipxmodel" cx="72%" cy="8%" r="55%">
+      <stop offset="0%" stop-color="rgba(59,130,246,0.22)"/>
+      <stop offset="100%" stop-color="rgba(59,130,246,0)"/>
+    </radialGradient>
+    <radialGradient id="glow2-groupxmembershipxmodel" cx="12%" cy="92%" r="45%">
+      <stop offset="0%" stop-color="rgba(37,99,235,0.14)"/>
+      <stop offset="100%" stop-color="rgba(37,99,235,0)"/>
+    </radialGradient>
+    <pattern id="dots-groupxmembershipxmodel" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="rgba(148,163,184,0.12)"/>
+    </pattern>
+    <filter id="soft-groupxmembershipxmodel" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg-groupxmembershipxmodel)"/>
+  <rect width="640" height="360" fill="url(#glow-groupxmembershipxmodel)"/>
+  <rect width="640" height="360" fill="url(#glow2-groupxmembershipxmodel)"/>
+  <rect width="640" height="360" fill="url(#dots-groupxmembershipxmodel)" opacity="0.55"/>
+  <rect x="16" y="16" width="608" height="328" rx="14" fill="none" stroke="rgba(255,255,255,0.07)"/>
+  <rect x="17" y="17" width="606" height="326" rx="13" fill="rgba(255,255,255,0.02)"/>
+  <text x="36" y="44" fill="#94a3b8" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="600" letter-spacing="0.12em">GROUP MEMBERSHIP</text>
+  <line x1="36" y1="52" x2="604" y2="52" stroke="rgba(255,255,255,0.06)"/>
+  <g filter="url(#soft-groupxmembershipxmodel)" transform="translate(0, 8)"><circle cx="320" cy="120" r="50" fill="#1a2230"/>
+  <text x="320" y="125" text-anchor="middle" fill="#f8fafc" font-size="12" font-family="system-ui">User</text>
+  <rect x="100" y="220" width="140" height="70" rx="6" fill="rgba(59,130,246,0.28)"/>
+  <text x="170" y="260" text-anchor="middle" fill="#94a3b8" font-size="12" font-family="system-ui">member</text>
+  <rect x="400" y="220" width="140" height="70" rx="6" fill="#3b82f6"/>
+  <text x="470" y="260" text-anchor="middle" fill="#f8fafc" font-size="12" font-family="system-ui">admin</text>
+  <line x1="280" y1="160" x2="170" y2="220" stroke="#60a5fa" stroke-width="2"/>
+  <line x1="360" y1="160" x2="470" y2="220" stroke="#60a5fa" stroke-width="2"/>
+  <text x="170" y="310" fill="#94a3b8" font-size="10" font-family="system-ui">CSV export</text>
+  <text x="470" y="310" fill="#94a3b8" font-size="10" font-family="system-ui">Admin queue</text></g>
 </svg>

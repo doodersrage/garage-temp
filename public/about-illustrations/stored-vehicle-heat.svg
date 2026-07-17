@@ -1,12 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-stored-vehicle-heat desc-stored-vehicle-heat">
   <title id="title-stored-vehicle-heat">Vehicle heat plume</title>
   <desc id="desc-stored-vehicle-heat">Parked car radiates heat toward nearby probe</desc>
-  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
-  <rect x="120" y="200" width="200" height="80" rx="12" fill="#381d2a"/>
-  <rect x="140" y="180" width="160" height="40" rx="8" fill="#ba5624"/>
-  <text x="220" y="250" text-anchor="middle" fill="#fcde9c" font-size="12" font-family="system-ui">Vehicle</text>
-  <path d="M220 160 Q220 100 280 80 Q340 60 380 90" stroke="#ffa552" stroke-width="2" fill="none" opacity="0.6"/>
-  <path d="M240 150 Q260 110 300 95" stroke="#ffa552" stroke-width="2" fill="none" opacity="0.5"/>
-  <circle cx="480" cy="120" r="20" fill="#c4d6b0" stroke="#381d2a" stroke-width="2"/>
-  <text x="480" y="125" text-anchor="middle" fill="#381d2a" font-size="10" font-family="system-ui">Probe</text>
+  <defs>
+    <linearGradient id="bg-storedxvehiclexheat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121820"/>
+      <stop offset="45%" stop-color="#090b0f"/>
+      <stop offset="100%" stop-color="#0a1628"/>
+    </linearGradient>
+    <radialGradient id="glow-storedxvehiclexheat" cx="72%" cy="8%" r="55%">
+      <stop offset="0%" stop-color="rgba(59,130,246,0.22)"/>
+      <stop offset="100%" stop-color="rgba(59,130,246,0)"/>
+    </radialGradient>
+    <radialGradient id="glow2-storedxvehiclexheat" cx="12%" cy="92%" r="45%">
+      <stop offset="0%" stop-color="rgba(37,99,235,0.14)"/>
+      <stop offset="100%" stop-color="rgba(37,99,235,0)"/>
+    </radialGradient>
+    <pattern id="dots-storedxvehiclexheat" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="rgba(148,163,184,0.12)"/>
+    </pattern>
+    <filter id="soft-storedxvehiclexheat" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg-storedxvehiclexheat)"/>
+  <rect width="640" height="360" fill="url(#glow-storedxvehiclexheat)"/>
+  <rect width="640" height="360" fill="url(#glow2-storedxvehiclexheat)"/>
+  <rect width="640" height="360" fill="url(#dots-storedxvehiclexheat)" opacity="0.55"/>
+  <rect x="16" y="16" width="608" height="328" rx="14" fill="none" stroke="rgba(255,255,255,0.07)"/>
+  <rect x="17" y="17" width="606" height="326" rx="13" fill="rgba(255,255,255,0.02)"/>
+  <text x="36" y="44" fill="#94a3b8" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="600" letter-spacing="0.12em">VEHICLE HEAT PLUME</text>
+  <line x1="36" y1="52" x2="604" y2="52" stroke="rgba(255,255,255,0.06)"/>
+  <g filter="url(#soft-storedxvehiclexheat)" transform="translate(0, 8)"><rect x="120" y="200" width="200" height="80" rx="12" fill="#1a2230"/>
+  <rect x="140" y="180" width="160" height="40" rx="8" fill="#3b82f6"/>
+  <text x="220" y="250" text-anchor="middle" fill="#f8fafc" font-size="12" font-family="system-ui">Vehicle</text>
+  <path d="M220 160 Q220 100 280 80 Q340 60 380 90" stroke="#60a5fa" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M240 150 Q260 110 300 95" stroke="#60a5fa" stroke-width="2" fill="none" opacity="0.5"/>
+  <circle cx="480" cy="120" r="20" fill="rgba(59,130,246,0.28)" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <text x="480" y="125" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="system-ui">Probe</text></g>
 </svg>

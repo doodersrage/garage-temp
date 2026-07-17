@@ -25,27 +25,35 @@ const guideCount = aboutPages.filter((page) => page.parentSlug).length;
 ---
 <Layout title="About" description={description} schema={schema}>
   <div class="page-shell page-stack">
-    <div class="page-grid items-start">
-      <section class="card overflow-hidden p-0">
-        <AboutProbeActivity client:visible />
-      </section>
-
-      <section class="card animate-slide-up-fade">
-        <h1 class="card-title">{title}</h1>
-        <p class="card-subtitle">Live sensor readings, local weather, saved history, and the technology behind the project.</p>
-        <div class="about-prose">
-          <p>
-            Garage Temperature Monitor combines Arduino probes, JSON feeds, and a modern web dashboard
-            so you can see current conditions, compare them with outdoor weather, and review trends over time.
-          </p>
-          <p>
-            The guides below follow four learning paths—{guideCount} focused articles plus twelve topic
-            overviews—covering probes, physics, historical data, firmware, backend scripts, and the Astro
-            application that powers this website.
+    <section class="about-probe-hero">
+      <div class="about-probe-hero-shell card overflow-hidden p-0">
+        <div class="about-probe-hero-intro">
+          <p class="about-probe-hero-eyebrow">Live simulation</p>
+          <h2 class="about-probe-hero-title">Three probes, one garage</h2>
+          <p class="about-probe-hero-lede">
+            Watch temperature and humidity shift as sun load, outdoor air, and the door cycle change
+            conditions zone by zone—just like the live JSON feed.
           </p>
         </div>
-      </section>
-    </div>
+        <AboutProbeActivity client:visible />
+      </div>
+    </section>
+
+    <section class="card animate-slide-up-fade">
+      <h1 class="card-title">{title}</h1>
+      <p class="card-subtitle">Live sensor readings, local weather, saved history, and the technology behind the project.</p>
+      <div class="about-prose">
+        <p>
+          Garage Temperature Monitor combines Arduino probes, JSON feeds, and a modern web dashboard
+          so you can see current conditions, compare them with outdoor weather, and review trends over time.
+        </p>
+        <p>
+          The guides below follow four learning paths—{guideCount} focused articles plus twelve topic
+          overviews—covering probes, physics, historical data, firmware, backend scripts, and the Astro
+          application that powers this website.
+        </p>
+      </div>
+    </section>
 
     <section class="card probe-demo-callout">
       <div>

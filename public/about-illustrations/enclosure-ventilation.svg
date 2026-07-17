@@ -1,15 +1,43 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-enclosure-ventilation desc-enclosure-ventilation">
   <title id="title-enclosure-ventilation">Enclosure ventilation</title>
   <desc id="desc-enclosure-ventilation">Ventilated probe box and louvered MCU enclosure</desc>
-  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
-  <rect x="80" y="100" width="180" height="160" rx="8" fill="#c4d6b0" stroke="#381d2a" stroke-width="2"/>
-  <line x1="100" y1="120" x2="100" y2="240" stroke="#381d2a" stroke-width="2"/>
-  <line x1="130" y1="120" x2="130" y2="240" stroke="#381d2a" stroke-width="2"/>
-  <circle cx="170" cy="180" r="20" fill="#ba5624"/>
-  <text x="170" y="280" text-anchor="middle" fill="#381d2a" font-size="11" font-family="system-ui">Probe box</text>
-  <rect x="380" y="100" width="180" height="160" rx="8" fill="#ffa552" opacity="0.5" stroke="#381d2a" stroke-width="2"/>
-  <path d="M400 130 H540 M400 160 H540 M400 190 H540" stroke="#381d2a" stroke-width="2"/>
-  <path d="M520 100 L540 80 M520 260 L540 280" stroke="#ba5624" stroke-width="2" marker-end="url(#arr2)"/>
-  <text x="470" y="280" text-anchor="middle" fill="#381d2a" font-size="11" font-family="system-ui">MCU exhaust</text>
-  <defs><marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#ba5624"/></marker></defs>
+  <defs>
+    <linearGradient id="bg-enclosurexventilation" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121820"/>
+      <stop offset="45%" stop-color="#090b0f"/>
+      <stop offset="100%" stop-color="#0a1628"/>
+    </linearGradient>
+    <radialGradient id="glow-enclosurexventilation" cx="72%" cy="8%" r="55%">
+      <stop offset="0%" stop-color="rgba(59,130,246,0.22)"/>
+      <stop offset="100%" stop-color="rgba(59,130,246,0)"/>
+    </radialGradient>
+    <radialGradient id="glow2-enclosurexventilation" cx="12%" cy="92%" r="45%">
+      <stop offset="0%" stop-color="rgba(37,99,235,0.14)"/>
+      <stop offset="100%" stop-color="rgba(37,99,235,0)"/>
+    </radialGradient>
+    <pattern id="dots-enclosurexventilation" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="rgba(148,163,184,0.12)"/>
+    </pattern>
+    <filter id="soft-enclosurexventilation" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg-enclosurexventilation)"/>
+  <rect width="640" height="360" fill="url(#glow-enclosurexventilation)"/>
+  <rect width="640" height="360" fill="url(#glow2-enclosurexventilation)"/>
+  <rect width="640" height="360" fill="url(#dots-enclosurexventilation)" opacity="0.55"/>
+  <rect x="16" y="16" width="608" height="328" rx="14" fill="none" stroke="rgba(255,255,255,0.07)"/>
+  <rect x="17" y="17" width="606" height="326" rx="13" fill="rgba(255,255,255,0.02)"/>
+  <text x="36" y="44" fill="#94a3b8" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="600" letter-spacing="0.12em">ENCLOSURE VENTILATION</text>
+  <line x1="36" y1="52" x2="604" y2="52" stroke="rgba(255,255,255,0.06)"/>
+  <g filter="url(#soft-enclosurexventilation)" transform="translate(0, 8)"><rect x="80" y="100" width="180" height="160" rx="8" fill="rgba(59,130,246,0.28)" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <line x1="100" y1="120" x2="100" y2="240" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <line x1="130" y1="120" x2="130" y2="240" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <circle cx="170" cy="180" r="20" fill="#3b82f6"/>
+  <text x="170" y="280" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="system-ui">Probe box</text>
+  <rect x="380" y="100" width="180" height="160" rx="8" fill="#60a5fa" opacity="0.5" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <path d="M400 130 H540 M400 160 H540 M400 190 H540" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <path d="M520 100 L540 80 M520 260 L540 280" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr2)"/>
+  <text x="470" y="280" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="system-ui">MCU exhaust</text>
+  <defs><marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#3b82f6"/></marker></defs></g>
 </svg>

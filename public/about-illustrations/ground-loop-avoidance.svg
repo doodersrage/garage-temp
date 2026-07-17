@@ -1,14 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-ground-loop-avoidance desc-ground-loop-avoidance">
   <title id="title-ground-loop-avoidance">Ground star wiring</title>
   <desc id="desc-ground-loop-avoidance">Single ground reference at Arduino</desc>
-  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
-  <circle cx="320" cy="200" r="40" fill="#381d2a"/>
-  <text x="320" y="205" text-anchor="middle" fill="#fcde9c" font-size="11" font-family="system-ui">GND ★</text>
-  <line x1="320" y1="200" x2="120" y2="100" stroke="#c4d6b0" stroke-width="3"/>
-  <line x1="320" y1="200" x2="520" y2="100" stroke="#c4d6b0" stroke-width="3"/>
-  <line x1="320" y1="200" x2="120" y2="300" stroke="#c4d6b0" stroke-width="3"/>
-  <line x1="320" y1="200" x2="520" y2="300" stroke="#c4d6b0" stroke-width="3"/>
-  <text x="320" y="60" text-anchor="middle" fill="#381d2a" font-size="13" font-family="system-ui">Star ground (good)</text>
-  <path d="M80 320 H200 H120 H240" stroke="#ba5624" stroke-width="2" fill="none" stroke-dasharray="4 3"/>
-  <text x="160" y="345" fill="#ba5624" font-size="11" font-family="system-ui">Loop (bad)</text>
+  <defs>
+    <linearGradient id="bg-groundxloopxavoidance" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121820"/>
+      <stop offset="45%" stop-color="#090b0f"/>
+      <stop offset="100%" stop-color="#0a1628"/>
+    </linearGradient>
+    <radialGradient id="glow-groundxloopxavoidance" cx="72%" cy="8%" r="55%">
+      <stop offset="0%" stop-color="rgba(59,130,246,0.22)"/>
+      <stop offset="100%" stop-color="rgba(59,130,246,0)"/>
+    </radialGradient>
+    <radialGradient id="glow2-groundxloopxavoidance" cx="12%" cy="92%" r="45%">
+      <stop offset="0%" stop-color="rgba(37,99,235,0.14)"/>
+      <stop offset="100%" stop-color="rgba(37,99,235,0)"/>
+    </radialGradient>
+    <pattern id="dots-groundxloopxavoidance" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="rgba(148,163,184,0.12)"/>
+    </pattern>
+    <filter id="soft-groundxloopxavoidance" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg-groundxloopxavoidance)"/>
+  <rect width="640" height="360" fill="url(#glow-groundxloopxavoidance)"/>
+  <rect width="640" height="360" fill="url(#glow2-groundxloopxavoidance)"/>
+  <rect width="640" height="360" fill="url(#dots-groundxloopxavoidance)" opacity="0.55"/>
+  <rect x="16" y="16" width="608" height="328" rx="14" fill="none" stroke="rgba(255,255,255,0.07)"/>
+  <rect x="17" y="17" width="606" height="326" rx="13" fill="rgba(255,255,255,0.02)"/>
+  <text x="36" y="44" fill="#94a3b8" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="600" letter-spacing="0.12em">GROUND STAR WIRING</text>
+  <line x1="36" y1="52" x2="604" y2="52" stroke="rgba(255,255,255,0.06)"/>
+  <g filter="url(#soft-groundxloopxavoidance)" transform="translate(0, 8)"><circle cx="320" cy="200" r="40" fill="#1a2230"/>
+  <text x="320" y="205" text-anchor="middle" fill="#f8fafc" font-size="11" font-family="system-ui">GND ★</text>
+  <line x1="320" y1="200" x2="120" y2="100" stroke="rgba(59,130,246,0.28)" stroke-width="3"/>
+  <line x1="320" y1="200" x2="520" y2="100" stroke="rgba(59,130,246,0.28)" stroke-width="3"/>
+  <line x1="320" y1="200" x2="120" y2="300" stroke="rgba(59,130,246,0.28)" stroke-width="3"/>
+  <line x1="320" y1="200" x2="520" y2="300" stroke="rgba(59,130,246,0.28)" stroke-width="3"/>
+  <text x="320" y="60" text-anchor="middle" fill="#94a3b8" font-size="13" font-family="system-ui">Star ground (good)</text>
+  <path d="M80 320 H200 H120 H240" stroke="#3b82f6" stroke-width="2" fill="none" stroke-dasharray="4 3"/>
+  <text x="160" y="345" fill="#3b82f6" font-size="11" font-family="system-ui">Loop (bad)</text></g>
 </svg>

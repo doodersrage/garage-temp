@@ -1,13 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title-contact-form-admin-review desc-contact-form-admin-review">
   <title id="title-contact-form-admin-review">Contact admin review</title>
   <desc id="desc-contact-form-admin-review">Admin queue lists contact submissions</desc>
-  <rect width="640" height="360" fill="#fcde9c" rx="8"/>
-  <rect x="120" y="60" width="400" height="240" rx="8" fill="#ffffff" stroke="#381d2a" stroke-width="2"/>
-  <rect x="140" y="80" width="360" height="36" fill="#381d2a"/>
-  <text x="320" y="103" text-anchor="middle" fill="#fcde9c" font-size="12" font-family="system-ui">Contact submissions</text>
-  <line x1="140" y1="130" x2="500" y2="130" stroke="#c4d6b0"/>
-  <line x1="140" y1="170" x2="500" y2="170" stroke="#c4d6b0"/>
-  <line x1="140" y1="210" x2="500" y2="210" stroke="#c4d6b0"/>
-  <circle cx="470" cy="150" r="12" fill="#ffa552"/>
-  <text x="470" y="154" text-anchor="middle" fill="#381d2a" font-size="10" font-family="system-ui">✓</text>
+  <defs>
+    <linearGradient id="bg-contactxformxadminxreview" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121820"/>
+      <stop offset="45%" stop-color="#090b0f"/>
+      <stop offset="100%" stop-color="#0a1628"/>
+    </linearGradient>
+    <radialGradient id="glow-contactxformxadminxreview" cx="72%" cy="8%" r="55%">
+      <stop offset="0%" stop-color="rgba(59,130,246,0.22)"/>
+      <stop offset="100%" stop-color="rgba(59,130,246,0)"/>
+    </radialGradient>
+    <radialGradient id="glow2-contactxformxadminxreview" cx="12%" cy="92%" r="45%">
+      <stop offset="0%" stop-color="rgba(37,99,235,0.14)"/>
+      <stop offset="100%" stop-color="rgba(37,99,235,0)"/>
+    </radialGradient>
+    <pattern id="dots-contactxformxadminxreview" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="rgba(148,163,184,0.12)"/>
+    </pattern>
+    <filter id="soft-contactxformxadminxreview" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg-contactxformxadminxreview)"/>
+  <rect width="640" height="360" fill="url(#glow-contactxformxadminxreview)"/>
+  <rect width="640" height="360" fill="url(#glow2-contactxformxadminxreview)"/>
+  <rect width="640" height="360" fill="url(#dots-contactxformxadminxreview)" opacity="0.55"/>
+  <rect x="16" y="16" width="608" height="328" rx="14" fill="none" stroke="rgba(255,255,255,0.07)"/>
+  <rect x="17" y="17" width="606" height="326" rx="13" fill="rgba(255,255,255,0.02)"/>
+  <text x="36" y="44" fill="#94a3b8" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="600" letter-spacing="0.12em">CONTACT ADMIN REVIEW</text>
+  <line x1="36" y1="52" x2="604" y2="52" stroke="rgba(255,255,255,0.06)"/>
+  <g filter="url(#soft-contactxformxadminxreview)" transform="translate(0, 8)"><rect x="120" y="60" width="400" height="240" rx="8" fill="#151b24" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <rect x="140" y="80" width="360" height="36" fill="#1a2230"/>
+  <text x="320" y="103" text-anchor="middle" fill="#f8fafc" font-size="12" font-family="system-ui">Contact submissions</text>
+  <line x1="140" y1="130" x2="500" y2="130" stroke="rgba(59,130,246,0.28)"/>
+  <line x1="140" y1="170" x2="500" y2="170" stroke="rgba(59,130,246,0.28)"/>
+  <line x1="140" y1="210" x2="500" y2="210" stroke="rgba(59,130,246,0.28)"/>
+  <circle cx="470" cy="150" r="12" fill="#60a5fa"/>
+  <text x="470" y="154" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="system-ui">✓</text></g>
 </svg>
