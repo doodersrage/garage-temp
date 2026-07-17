@@ -1,14 +1,9 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import { Image } from "astro:assets";
-import tempProbeV1 from "../../assets/temp-probe-v1.jpg";
-import tempProbeV2 from "../../assets/temp-probe-v2.jpg";
-import JSONProbe from "../../assets/json-temp.jpg";
-import { Swiper, SwiperWrapper, SwiperSlide } from "astro-swiper";
 import AboutHubNav from "../../components/AboutHubNav.astro";
+import AboutProbeActivity from "../../components/AboutProbeActivity";
 import {
   getBreadcrumbSchema,
-  resolvePageUrl,
   resolveSiteUrl,
 } from "../../lib/schemaMarkup";
 import { aboutPages } from "../../lib/aboutPages";
@@ -32,28 +27,7 @@ const guideCount = aboutPages.filter((page) => page.parentSlug).length;
   <div class="page-shell space-y-6">
     <div class="page-grid items-start">
       <section class="card overflow-hidden p-0">
-        <Swiper
-          class="about-hero-swiper"
-          options={{
-            loop: true,
-            autoplay: {
-              delay: 4000,
-              disableOnInteraction: false,
-            },
-          }}
-        >
-          <SwiperWrapper>
-            <SwiperSlide>
-              <Image src={tempProbeV1} alt="Version 1 of the Arduino temperature probe board" class="h-full w-full object-cover" />
-            </SwiperSlide>
-            <SwiperSlide>
-              <Image src={tempProbeV2} alt="Version 2 of the Arduino temperature probe board" class="h-full w-full object-cover" />
-            </SwiperSlide>
-            <SwiperSlide>
-              <Image src={JSONProbe} alt="JSON temperature feed output from the probe system" class="h-full w-full object-cover" />
-            </SwiperSlide>
-          </SwiperWrapper>
-        </Swiper>
+        <AboutProbeActivity client:visible />
       </section>
 
       <section class="card animate-slide-up-fade">

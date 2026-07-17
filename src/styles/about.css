@@ -3,6 +3,41 @@
   max-width: 100%;
 }
 
+.about-probe-activity {
+  display: grid;
+  gap: 0;
+  min-height: 280px;
+}
+
+.about-probe-activity-canvas {
+  display: block;
+  width: 100%;
+  height: 320px;
+  background: linear-gradient(180deg, var(--color-cream), rgb(255 250 240 / 0.95));
+}
+
+.about-probe-activity-caption {
+  margin: 0;
+  padding: 0.65rem 1rem 0.85rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+  border-top: 1px solid var(--color-sage);
+  background-color: rgb(255 250 240 / 0.85);
+}
+
+@media (min-width: 768px) {
+  .about-probe-activity-canvas {
+    height: 340px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-probe-activity-canvas {
+    height: 300px;
+  }
+}
+
 .about-hero-swiper .swiper-slide img {
   display: block;
   width: 100%;
