@@ -50,9 +50,26 @@ const guideCount = aboutPages.filter((page) => page.parentSlug).length;
         <p>
           The guides below follow four learning paths—{guideCount} focused articles plus twelve topic
           overviews—covering probes, physics, historical data, firmware, backend scripts, and the Astro
-          application that powers this website.
+          application that powers this website. Start with the
+          <a class="text-link" href="/about/temperature-probe-case-study">temperature probe case study</a>
+          for the real-world build story behind the hardware.
         </p>
       </div>
+    </section>
+
+    <section class="card about-case-study-callout">
+      <div>
+        <p class="about-case-study-eyebrow">Case study</p>
+        <h2 class="card-title">From breadboard to live JSON feeds</h2>
+        <p class="card-subtitle">
+          How two DHT22 zones in an attached garage became a multi-probe monitoring system—with placement
+          decisions, firmware revisions, and what the data showed across seasons.
+        </p>
+      </div>
+      <a class="btn-primary self-start" href="/about/temperature-probe-case-study">
+        Read the probe case study
+        <span class="btn-icon btn-icon--end" aria-hidden="true">→</span>
+      </a>
     </section>
 
     <section class="card probe-demo-callout">

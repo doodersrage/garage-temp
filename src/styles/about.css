@@ -221,6 +221,38 @@
   margin-bottom: 0;
 }
 
+.about-case-study-callout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border: 1px solid rgb(34 197 94 / 0.22);
+  background:
+    linear-gradient(135deg, rgb(34 197 94 / 0.08), transparent 55%),
+    var(--color-surface);
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+@media (min-width: 640px) {
+  .about-case-study-callout {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.about-case-study-callout .card-subtitle {
+  margin-bottom: 0;
+}
+
+.about-case-study-eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #86efac;
+}
+
 /* Hub navigation */
 .about-hub-toc {
   scroll-margin-top: 2rem;

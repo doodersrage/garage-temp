@@ -9,6 +9,15 @@ export type ExpandedAboutPageMeta = {
 /** Metadata for 70 expanded about guides (content lives in aboutExpandedContent.ts). */
 export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
   {
+    slug: "temperature-probe-case-study",
+    parentSlug: "temperature-probes",
+    title: "Temperature probe case study",
+    description:
+      "How two DHT22 probes in a real garage became a reliable monitoring system—from first breadboard to JSON feeds and dashboard charts.",
+    summary:
+      "Real-world build story: placement decisions, firmware iterations, and what the data showed after deployment.",
+  },
+  {
     slug: "dht22-sensor-overview",
     parentSlug: "temperature-probes",
     title: "DHT22 sensor overview",
