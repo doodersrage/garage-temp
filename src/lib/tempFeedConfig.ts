@@ -384,8 +384,10 @@ function buildProbesForFeed(
   assignedProbes: TempProbeConfig[],
   result: TempFeedResult | undefined,
 ): DisplayProbe[] {
-  if (assignedProbes.length > 0) {
-    return assignedProbes.map((probe) => ({
+  const visibleProbes = assignedProbes.filter((probe) => probe.visible);
+
+  if (visibleProbes.length > 0) {
+    return visibleProbes.map((probe) => ({
       id: probe.id,
       label: probe.label,
       key: probe.key,
@@ -440,7 +442,9 @@ export function buildDisplayProbes(
 ): DisplayProbe[] {
   const feedsById = new Map(feedResults.map((feed) => [feed.id, feed]));
 
-  return probes.flatMap((probe) => {
+  return probes
+    .filter((probe) => probe.visible)
+    .flatMap((probe) => {
     const feed = feedsById.get(probe.feedId);
     if (!feed || feed.error) {
       return [];

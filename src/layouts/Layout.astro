@@ -16,16 +16,18 @@ interface Props {
   title?: string;
   description?: string;
   schema?: Record<string, unknown> | Record<string, unknown>[];
+  ogImage?: string;
 }
 
-const { title, description, schema } = Astro.props;
+const { title, description, schema, ogImage } = Astro.props;
 const pageTitle = title ? `${title} · Garage Temperature Monitor` : 'Garage Temperature Monitor';
 const metaDescription = description ?? getDefaultDescription();
+const siteUrl = resolveSiteUrl(Astro.site);
+const ogImageUrl = ogImage ?? `${siteUrl}/favicon.svg`;
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 
 const currentPath = Astro.url.pathname;
-const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, currentPath);
 const extraSchemas = schema
   ? Array.isArray(schema)
@@ -59,6 +61,15 @@ const navItems = [
 		<meta name="generator" content={Astro.generator} />
 		<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap-index.xml" />
 		<title>{pageTitle}</title>
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={metaDescription} />
+		<meta property="og:url" content={pageUrl} />
+		<meta property="og:image" content={ogImageUrl} />
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:title" content={pageTitle} />
+		<meta name="twitter:description" content={metaDescription} />
+		<meta name="twitter:image" content={ogImageUrl} />
 		<SchemaMarkup schemas={schemas} />
 		<script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-YKDZ0787JG"></script>
 		<script is:inline>
@@ -69,13 +80,23 @@ const navItems = [
 		</script>
 	</head>
 	<body>
+		<a class="skip-link" href="#main-content">Skip to content</a>
 		<div class="flex min-h-screen flex-col">
 			<header class="site-header">
 				<div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
 					<a href="/" class="flex items-center gap-3">
 						<Image src={logo} height={48} alt="Garage Temperature Monitor logo" />
 					</a>
-					<nav class="flex flex-wrap items-center justify-end gap-1">
+					<button
+						type="button"
+						class="site-nav-toggle btn-ghost lg:hidden"
+						aria-expanded="false"
+						aria-controls="site-nav"
+						id="site-nav-toggle"
+					>
+						Menu
+					</button>
+					<nav id="site-nav" class="site-nav" aria-label="Main">
 						{navItems.map(({ href, label }) => (
 							<a
 								href={href}
@@ -95,7 +116,7 @@ const navItems = [
 					</nav>
 				</div>
 			</header>
-			<main class="flex-grow">
+			<main id="main-content" class="flex-grow">
 				<slot />
 			</main>
 			<footer class="site-footer">
@@ -105,5 +126,15 @@ const navItems = [
 			</footer>
 		</div>
 		<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline />
+		<script is:inline>
+			const toggle = document.getElementById("site-nav-toggle");
+			const nav = document.getElementById("site-nav");
+			if (toggle && nav) {
+				toggle.addEventListener("click", () => {
+					const open = nav.classList.toggle("site-nav-open");
+					toggle.setAttribute("aria-expanded", open ? "true" : "false");
+				});
+			}
+		</script>
 	</body>
 </html>

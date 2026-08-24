@@ -1,15 +1,23 @@
-// With `output: 'static'` configured:
-// export const prerender = false;
 import type { APIRoute } from "astro";
 import { supabase } from "../../../lib/supabase";
+import { getTurnstileToken, verifyTurnstileToken } from "../../../lib/turnstile";
 
-export const POST: APIRoute = async ({ request, redirect }) => {
+export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
   const formData = await request.formData();
+  const turnstile = await verifyTurnstileToken(
+    getTurnstileToken(formData),
+    clientAddress,
+  );
+
+  if (!turnstile.success) {
+    return redirect("/register?error=verification");
+  }
+
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
 
   if (!email || !password) {
-    return new Response("Email and password are required", { status: 400 });
+    return redirect("/register?error=missing_fields");
   }
 
   const { error } = await supabase.auth.signUp({
@@ -18,8 +26,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   });
 
   if (error) {
-    return new Response(error.message, { status: 500 });
+    return redirect(`/register?error=${encodeURIComponent(error.message)}`);
   }
 
-  return redirect("/signin");
+  return redirect("/signin?registered=1");
 };

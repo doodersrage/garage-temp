@@ -45,6 +45,15 @@ export function setAuthCookies(
   accessToken: string,
   refreshToken: string,
 ): void {
-  cookies.set("sb-access-token", accessToken, { path: "/" });
-  cookies.set("sb-refresh-token", refreshToken, { path: "/" });
+  const secure = import.meta.env.PROD;
+  const cookieOptions = {
+    path: "/",
+    httpOnly: true,
+    secure,
+    sameSite: "lax" as const,
+    maxAge: 60 * 60 * 24 * 7,
+  };
+
+  cookies.set("sb-access-token", accessToken, cookieOptions);
+  cookies.set("sb-refresh-token", refreshToken, cookieOptions);
 }

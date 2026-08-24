@@ -12,12 +12,16 @@ interface Props {
   feeds?: TempFeedConfig[];
   probes?: TempProbeConfig[];
   userId?: string | null;
+  userEmail?: string | null;
+  userMetadata?: Record<string, unknown>;
 }
 
 const {
   feeds = getDefaultTempFeeds(),
   probes = getDefaultTempProbes(),
   userId = null,
+  userEmail = null,
+  userMetadata = undefined,
 } = Astro.props;
 
 if (usesDefaultTempConfig(feeds, probes) && !userId) {
@@ -32,6 +36,8 @@ const feedResults = await fetchTemps({
   probes,
   saveToDatabase: !!userId,
   userId,
+  userEmail,
+  userMetadata,
 });
 const feedGroups = buildFeedDisplayGroups(feeds, probes, feedResults);
 ---

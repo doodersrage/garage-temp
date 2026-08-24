@@ -4,6 +4,7 @@ import TempFeedsSettings from "../../components/TempFeedsSettings.astro";
 import TempProbesSettings from "../../components/TempProbesSettings.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getUserPreferences } from "../../lib/userPreferences";
+import { checkFeedHealth } from "../../lib/collectHistory";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -11,7 +12,11 @@ if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const preferences = await getUserPreferences(user);
+const [preferences, feedHealth] = await Promise.all([
+  getUserPreferences(user),
+  checkFeedHealth(user.id),
+]);
+
 const redirectTo = "/dashboard/temperature";
 ---
 <DashboardLayout title="Temperature Settings">
@@ -23,6 +28,26 @@ const redirectTo = "/dashboard/temperature";
         Configure the temperature feeds and probes that appear on your home page.
       </p>
     </section>
+
+    {feedHealth.statuses.length > 0 && (
+      <section class="card">
+        <h2 class="card-title">Feed health</h2>
+        <p class="card-subtitle">Latest status check for your enabled feeds.</p>
+        <div class="feed-health-grid">
+          {feedHealth.statuses.map((status) => (
+            <div class="feed-health-item">
+              <div>
+                <strong>{status.feedName}</strong>
+                <p class="m-0 text-sm text-[var(--color-text-muted)]">{status.message}</p>
+              </div>
+              <span class={status.ok ? "feed-health-ok" : "feed-health-error"}>
+                {status.ok ? "Online" : "Issue"}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
 
     <TempFeedsSettings feeds={preferences.tempFeeds} redirectTo={redirectTo} />
 

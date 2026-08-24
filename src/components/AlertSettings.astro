@@ -1,0 +1,63 @@
+---
+import { getAlertSettingsFromMetadata } from "../lib/alerts";
+
+interface Props {
+  userEmail: string;
+  userMetadata: Record<string, unknown>;
+  redirectTo?: string;
+}
+
+const { userEmail, userMetadata, redirectTo = "/dashboard" } = Astro.props;
+const settings = getAlertSettingsFromMetadata(userMetadata);
+---
+<form action="/api/user/alert-settings" method="post" class="card animate-slide-up-fade">
+  <input type="hidden" name="redirect" value={redirectTo} />
+  <h2 class="card-title">Threshold alerts</h2>
+  <p class="card-subtitle">
+    Email alerts when probe readings cross your freeze or humidity thresholds. Checked when readings are fetched.
+  </p>
+
+  <label class="checkbox-row mb-4">
+    <input type="checkbox" name="alerts_enabled" value="true" checked={settings.enabled} />
+    <span>Enable email alerts</span>
+  </label>
+
+  <div class="config-row-grid mb-4">
+    <div class="form-field mb-0">
+      <label class="form-label" for="freeze_threshold_f">Freeze threshold (°F)</label>
+      <input
+        class="form-input"
+        type="number"
+        step="0.5"
+        id="freeze_threshold_f"
+        name="freeze_threshold_f"
+        value={settings.freezeThresholdF}
+      />
+    </div>
+    <div class="form-field mb-0">
+      <label class="form-label" for="humidity_threshold">Humidity threshold (%)</label>
+      <input
+        class="form-input"
+        type="number"
+        step="1"
+        id="humidity_threshold"
+        name="humidity_threshold"
+        value={settings.humidityThreshold}
+      />
+    </div>
+  </div>
+
+  <div class="form-field">
+    <label class="form-label" for="alert_email">Alert email</label>
+    <input
+      class="form-input"
+      type="email"
+      id="alert_email"
+      name="alert_email"
+      value={settings.email ?? userEmail}
+      placeholder={userEmail}
+    />
+  </div>
+
+  <button type="submit" class="btn-primary">Save alert settings</button>
+</form>

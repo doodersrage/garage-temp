@@ -22,6 +22,18 @@ export type PaginatedGarageTemps = {
 
 export const GARAGE_TEMPS_PAGE_SIZE = 20;
 
+export type HistoryFilters = {
+  feedName?: string;
+  probeKey?: string;
+};
+
+export type ChartPoint = {
+  timestamp: string;
+  tempf: number;
+  humidity: number;
+  probeLabel: string;
+};
+
 const HISTORY_SELECT =
   "tempc, tempf, humidity, timestamp, feed_name, probe_label, probe_key, user_id";
 
@@ -44,16 +56,27 @@ export async function fetchGarageTempHistory(
   userId: string,
   page = 1,
   pageSize = GARAGE_TEMPS_PAGE_SIZE,
+  filters: HistoryFilters = {},
 ): Promise<PaginatedGarageTemps> {
   const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
   const from = (safePage - 1) * pageSize;
   const to = from + pageSize - 1;
 
   const supabase = createServerClient();
-  const { data, error, count } = await supabase
+  let query = supabase
     .from("garage_temps")
     .select(HISTORY_SELECT, { count: "exact" })
-    .eq("user_id", userId)
+    .eq("user_id", userId);
+
+  if (filters.feedName) {
+    query = query.eq("feed_name", filters.feedName);
+  }
+
+  if (filters.probeKey) {
+    query = query.eq("probe_key", filters.probeKey);
+  }
+
+  const { data, error, count } = await query
     .order("timestamp", { ascending: false })
     .range(from, to);
 
@@ -117,6 +140,78 @@ export async function fetchAllGarageTempReadings(userId: string): Promise<{
   }
 
   return { readings, error: null };
+}
+
+export async function fetchGarageTempChartData(
+  userId: string,
+  days = 7,
+  filters: HistoryFilters = {},
+): Promise<{ points: ChartPoint[]; error: string | null }> {
+  const supabase = createServerClient();
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+
+  let query = supabase
+    .from("garage_temps")
+    .select("tempf, humidity, timestamp, probe_label, probe_key")
+    .eq("user_id", userId)
+    .gte("timestamp", since.toISOString());
+
+  if (filters.feedName) {
+    query = query.eq("feed_name", filters.feedName);
+  }
+
+  if (filters.probeKey) {
+    query = query.eq("probe_key", filters.probeKey);
+  }
+
+  const { data, error } = await query.order("timestamp", { ascending: true }).limit(500);
+
+  if (error) {
+    return { points: [], error: error.message };
+  }
+
+  const points: ChartPoint[] = (data ?? []).map((row) => ({
+    timestamp: row.timestamp,
+    tempf: Number(row.tempf),
+    humidity: Number(row.humidity),
+    probeLabel: row.probe_label?.trim() || row.probe_key || "Probe",
+  }));
+
+  return { points, error: null };
+}
+
+export async function fetchHistoryFilterOptions(userId: string): Promise<{
+  feeds: string[];
+  probes: { key: string; label: string }[];
+  error: string | null;
+}> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("garage_temps")
+    .select("feed_name, probe_key, probe_label")
+    .eq("user_id", userId)
+    .order("timestamp", { ascending: false })
+    .limit(500);
+
+  if (error) {
+    return { feeds: [], probes: [], error: error.message };
+  }
+
+  const feeds = [...new Set((data ?? []).map((row) => row.feed_name?.trim() || "Garage"))];
+  const probeMap = new Map<string, string>();
+
+  for (const row of data ?? []) {
+    const key = row.probe_key?.trim();
+    if (!key || probeMap.has(key)) continue;
+    probeMap.set(key, row.probe_label?.trim() || key);
+  }
+
+  return {
+    feeds,
+    probes: [...probeMap.entries()].map(([key, label]) => ({ key, label })),
+    error: null,
+  };
 }
 
 function escapeCsvField(value: string | number): string {

@@ -1,6 +1,7 @@
 ---
 import type { TempFeedConfig } from "../lib/tempFeedConfig";
 import { MAX_TEMP_FEEDS } from "../lib/tempFeedConfig";
+import FeedTestButton from "./FeedTestButton";
 
 interface Props {
   feeds: TempFeedConfig[];
@@ -63,6 +64,7 @@ if (feedRows.length < MAX_TEMP_FEEDS) {
               value={feed.url}
               placeholder="https://example.com/temperature.json"
             />
+            <FeedTestButton client:visible inputId={`feed_${index}_url`} />
           </div>
         </div>
         <label class="checkbox-row mt-3">

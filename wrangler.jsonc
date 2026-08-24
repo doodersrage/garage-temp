@@ -22,5 +22,8 @@
 		"name": "MAILER",
 		"destination_address": "doodersrage@gmail.com"
 		}
-  	]
+  	],
+	"triggers": {
+		"crons": ["0 * * * *"]
+	}
 }

@@ -1,8 +1,12 @@
 ---
 import DashboardLayout from "../layouts/DashboardLayout.astro";
 import DisplayPreferences from "../components/DisplayPreferences.astro";
+import DashboardOnboarding from "../components/DashboardOnboarding.astro";
+import AlertSettings from "../components/AlertSettings.astro";
 import { getAuthFromCookies } from "../lib/auth";
 import { getUserPreferences } from "../lib/userPreferences";
+import { fetchGarageTempHistory } from "../lib/garageTempsHistory";
+import { fetchUserTempConfig } from "../lib/userTempConfig";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -10,16 +14,41 @@ if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const preferences = await getUserPreferences(user);
+const [preferences, tempConfig, history] = await Promise.all([
+  getUserPreferences(user),
+  fetchUserTempConfig(user.id),
+  fetchGarageTempHistory(user.id, 1, 1),
+]);
+
+const alertNotice = Astro.url.searchParams.get("alert_saved")
+  ? "Alert settings saved."
+  : Astro.url.searchParams.get("alert_error")
+    ? "Unable to save alert settings."
+    : null;
 ---
 <DashboardLayout title="Dashboard">
   <div class="space-y-6">
     <section class="card animate-slide-in-left">
       <h1 class="card-title">Welcome back</h1>
       <p class="card-subtitle">{user.email}</p>
-      <p class="mb-0">Manage your home page display and review saved probe readings.</p>
+      <p class="mb-0">Manage your home page display, alerts, and review saved probe readings.</p>
+      {alertNotice && (
+        <p class="alert-success mt-4">{alertNotice}</p>
+      )}
     </section>
 
+    <DashboardOnboarding
+      hasCustomFeeds={tempConfig.hasCustomConfig}
+      hasProbes={preferences.tempProbes.length > 0}
+      hasHistory={history.totalCount > 0}
+    />
+
     <DisplayPreferences preferences={preferences} redirectTo="/dashboard" />
+
+    <AlertSettings
+      userEmail={user.email ?? ""}
+      userMetadata={user.user_metadata as Record<string, unknown>}
+      redirectTo="/dashboard"
+    />
   </div>
 </DashboardLayout>

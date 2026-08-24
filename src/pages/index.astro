@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import GetTemps from '../components/GetTemps.astro';
 import Weather from '../components/Weather.astro';
+import LiveRefresh from '../components/LiveRefresh';
 import { getAuthFromCookies } from '../lib/auth';
 import { getUserPreferences } from '../lib/userPreferences';
 import { getDefaultTempFeeds, getDefaultTempProbes } from '../lib/tempFeedConfig';
@@ -19,6 +20,8 @@ const tempConfig = isAuthenticated
       feeds: preferences!.tempFeeds,
       probes: preferences!.tempProbes,
       userId: user!.id,
+      userEmail: user!.email,
+      userMetadata: user!.user_metadata as Record<string, unknown>,
     }
   : {
       feeds: getDefaultTempFeeds(),
@@ -28,6 +31,9 @@ const tempConfig = isAuthenticated
 
 <Layout description="Live garage temperature and humidity readings with local weather, saved history, and a configurable dashboard.">
 	<div class="page-shell page-stack">
+		{(showGarageTemps || showWeather) && isAuthenticated && (
+			<LiveRefresh client:visible />
+		)}
 		<div class="grid gap-6">
 			{showGarageTemps && (
 				<GetTemps {...tempConfig} server:defer>

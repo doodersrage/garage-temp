@@ -1,12 +1,15 @@
 import type { APIRoute } from "astro";
 import { supabase } from "../../../lib/supabase";
 import type { Provider } from "@supabase/supabase-js";
+import { setAuthCookies } from "../../../lib/auth";
 import {
   buildSignInRedirectUrl,
   mapSignInError,
 } from "../../../lib/signInErrors";
+import { buildOAuthCallbackUrl } from "../../../lib/siteUrl";
+import { getTurnstileToken, verifyTurnstileToken } from "../../../lib/turnstile";
 
-export const POST: APIRoute = async ({ request, cookies, redirect }) => {
+export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress, site }) => {
   const formData = await request.formData();
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
@@ -18,7 +21,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: provider as Provider,
       options: {
-        redirectTo: "http://localhost:4321/api/auth/callback",
+        redirectTo: buildOAuthCallbackUrl(request, site),
       },
     });
 
@@ -27,6 +30,15 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     }
 
     return redirect(data.url);
+  }
+
+  const turnstile = await verifyTurnstileToken(
+    getTurnstileToken(formData),
+    clientAddress,
+  );
+
+  if (!turnstile.success) {
+    return redirect(buildSignInRedirectUrl("generic", email));
   }
 
   if (!email || !password) {
@@ -43,11 +55,6 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const { access_token, refresh_token } = data.session;
-  cookies.set("sb-access-token", access_token, {
-    path: "/",
-  });
-  cookies.set("sb-refresh-token", refresh_token, {
-    path: "/",
-  });
+  setAuthCookies(cookies, access_token, refresh_token);
   return redirect("/dashboard");
 };

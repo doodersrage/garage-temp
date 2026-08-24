@@ -5,12 +5,16 @@ import {
   getDefaultTempProbes,
   parseTempFeedPayload,
 } from "./tempFeedConfig";
+import { maybeSendThresholdAlerts } from "./alertNotifications";
 
 export type FetchTempsOptions = {
   feeds?: TempFeedConfig[];
   probes?: TempProbeConfig[];
   saveToDatabase?: boolean;
   userId?: string | null;
+  userEmail?: string | null;
+  userMetadata?: Record<string, unknown>;
+  sendAlerts?: boolean;
 };
 
 async function saveProbeReadings(
@@ -97,7 +101,18 @@ export async function fetchTemps(
   const results = await Promise.all(feeds.map((feed) => fetchTempFeed(feed)));
 
   if (options.saveToDatabase !== false && options.userId) {
-    await saveProbeReadings(results, probes, options.userId);
+    const visibleProbes = probes.filter((probe) => probe.visible);
+    await saveProbeReadings(results, visibleProbes, options.userId);
+
+    if (options.sendAlerts !== false) {
+      await maybeSendThresholdAlerts(
+        options.userId,
+        options.userEmail,
+        options.userMetadata,
+        feeds,
+        visibleProbes,
+      );
+    }
   }
 
   return results;

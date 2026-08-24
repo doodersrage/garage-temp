@@ -1,69 +1,81 @@
 // API route for handling contact form submissions
-export const prerender = false; // Not needed in 'server' mode
+export const prerender = false;
 import type { APIRoute } from "astro";
 import { EmailMessage } from "cloudflare:email";
-import { env } from 'cloudflare:workers';
+import { env } from "cloudflare:workers";
 import { createMimeMessage } from "mimetext";
 import { createServerClient } from "../../lib/supabase";
+import { getTurnstileToken, verifyTurnstileToken } from "../../lib/turnstile";
 
-export const POST: APIRoute = async ({ request }) => {
-    const data = await request.formData();
-    const name = data.get("name");
-    const email = data.get("email");
-    const message = data.get("message");
+export const POST: APIRoute = async ({ request, clientAddress }) => {
+  const data = await request.formData();
+  const turnstile = await verifyTurnstileToken(
+    getTurnstileToken(data),
+    clientAddress,
+  );
 
-    // Validate the data - you'll probably want to do more than this
-    if (!name || !email || !message) {
-        return new Response(
-            JSON.stringify({
-            message: "Missing required fields",
-            }),
-            { status: 400 }
-        );
-    }
-
-    // send email using Cloudflare's email service and mime message
-    const msg = createMimeMessage();
-    msg.setSender({ name: "Sender", addr: import.meta.env.SMTP_MAIL_FROM });
-    msg.setRecipient(import.meta.env.SMTP_MAIL_TO);
-    msg.setSubject('Contact Form Submission');
-    msg.addMessage({
-        contentType: "text/plain",
-        data: 'Name: ' + name + '\nEmail: ' + email + '\nMessage: ' + message,
-    });
-
-    var mailMessage = new EmailMessage(
-        import.meta.env.SMTP_MAIL_FROM,
-        import.meta.env.SMTP_MAIL_TO,
-        msg.asRaw(),
+  if (!turnstile.success) {
+    return new Response(
+      JSON.stringify({ message: turnstile.error ?? "Verification failed." }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
     );
+  }
 
-    try {
+  const name = data.get("name")?.toString().trim();
+  const email = data.get("email")?.toString().trim();
+  const message = data.get("message")?.toString().trim();
 
-        await env.MAILER.send(mailMessage);
+  if (!name || !email || !message) {
+    return new Response(
+      JSON.stringify({ message: "Missing required fields." }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
 
-        // store contact form submission in database
-        const supabase = createServerClient();
-        const { error } = await supabase
-        .from('contacts')
-        .insert([{ name: name, email: email, message: JSON.stringify(message) }]);
+  const msg = createMimeMessage();
+  msg.setSender({ name: "Garage Temp Monitor", addr: import.meta.env.SMTP_MAIL_FROM });
+  msg.setRecipient(import.meta.env.SMTP_MAIL_TO);
+  msg.setSubject("Contact Form Submission");
+  msg.addMessage({
+    contentType: "text/plain",
+    data: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
+  });
 
-        // return success response
-        return new Response(
-            JSON.stringify(
-                { success: true, message: "Contact form submitted successfully." }
-            ),
-                { status: 200 }
-            );
+  const mailMessage = new EmailMessage(
+    import.meta.env.SMTP_MAIL_FROM,
+    import.meta.env.SMTP_MAIL_TO,
+    msg.asRaw(),
+  );
 
-    } catch (e) {                  
-        return { success: false, message: e };
+  try {
+    await env.MAILER.send(mailMessage);
+
+    const supabase = createServerClient();
+    const { error } = await supabase.from("contacts").insert([
+      { name, email, message },
+    ]);
+
+    if (error) {
+      console.error("Failed to store contact submission:", error.message);
     }
 
-    // Do something with the data, then return a success response
-    
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Contact form submitted successfully.",
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : "Unknown error";
+    console.error("Contact form error:", errorMessage);
 
-
-
-    
+    return new Response(
+      JSON.stringify({
+        success: false,
+        message: "Unable to send your message right now. Please try again later.",
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
 };

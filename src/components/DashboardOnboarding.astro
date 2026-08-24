@@ -1,0 +1,49 @@
+---
+interface Props {
+  hasCustomFeeds: boolean;
+  hasProbes: boolean;
+  hasHistory: boolean;
+}
+
+const { hasCustomFeeds, hasProbes, hasHistory } = Astro.props;
+
+const steps = [
+  {
+    done: hasCustomFeeds,
+    href: "/dashboard/temperature",
+    title: "Configure temperature feeds",
+    detail: "Add HTTPS JSON feed URLs for your probes.",
+  },
+  {
+    done: hasProbes,
+    href: "/dashboard/temperature",
+    title: "Map probes and labels",
+    detail: "Assign keys to friendly names and choose visible probes.",
+  },
+  {
+    done: hasHistory,
+    href: "/dashboard/history",
+    title: "Review saved history",
+    detail: "Load the home page while signed in to start collecting snapshots.",
+  },
+];
+
+const completedCount = steps.filter((step) => step.done).length;
+---
+<section class="card animate-slide-up-fade">
+  <h2 class="card-title">Getting started</h2>
+  <p class="card-subtitle">
+    {completedCount} of {steps.length} setup steps complete
+  </p>
+  <div class="dashboard-onboarding">
+    {steps.map((step, index) => (
+      <a class="dashboard-onboarding-item" href={step.href}>
+        <span class="dashboard-onboarding-step">{step.done ? "✓" : index + 1}</span>
+        <span>
+          <strong>{step.title}</strong>
+          <span class="block text-sm text-[var(--color-text-muted)]">{step.detail}</span>
+        </span>
+      </a>
+    ))}
+  </div>
+</section>

@@ -4,7 +4,11 @@ import GarageTempHistory from "../../components/GarageTempHistory.astro";
 import HistorySubscription from "../../components/HistorySubscription.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { canDownloadHistoryCsv } from "../../lib/adminAccess";
-import { fetchGarageTempHistory } from "../../lib/garageTempsHistory";
+import {
+  fetchGarageTempChartData,
+  fetchGarageTempHistory,
+  fetchHistoryFilterOptions,
+} from "../../lib/garageTempsHistory";
 import { getUserSubscription } from "../../lib/stripeSubscriptions";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
@@ -14,13 +18,22 @@ if (!session || !user) {
 }
 
 const pageParam = Number(Astro.url.searchParams.get("page") ?? "1");
+const feedFilter = Astro.url.searchParams.get("feed")?.trim() ?? "";
+const probeFilter = Astro.url.searchParams.get("probe")?.trim() ?? "";
 
 if (pageParam < 1 || Number.isNaN(pageParam)) {
   return Astro.redirect("/dashboard/history?page=1");
 }
 
-const [history, canDownloadCsv, subscription] = await Promise.all([
-  fetchGarageTempHistory(user.id, pageParam),
+const filters = {
+  feedName: feedFilter || undefined,
+  probeKey: probeFilter || undefined,
+};
+
+const [history, chartData, filterOptions, canDownloadCsv, subscription] = await Promise.all([
+  fetchGarageTempHistory(user.id, pageParam, undefined, filters),
+  fetchGarageTempChartData(user.id, 7, filters),
+  fetchHistoryFilterOptions(user.id),
   canDownloadHistoryCsv(user.id),
   getUserSubscription(user.id),
 ]);
@@ -52,8 +65,12 @@ const subscriptionNotice = Astro.url.searchParams.get("subscription");
 
     <GarageTempHistory
       history={history}
+      chartPoints={chartData.points}
       basePath="/dashboard/history"
       canDownloadCsv={canDownloadCsv}
+      feedFilter={feedFilter}
+      probeFilter={probeFilter}
+      filterOptions={filterOptions}
     />
   </div>
 </DashboardLayout>

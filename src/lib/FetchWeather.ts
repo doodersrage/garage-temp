@@ -12,21 +12,28 @@ export function resolveWeatherCityId(cityId?: string | null): string {
   return getDefaultWeatherCityId();
 }
 
-export async function fetchWeather(cityId?: string | null): Promise<any> {
+export async function fetchWeather(cityId?: string | null): Promise<any | null> {
   const apiKey = import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
   const city = resolveWeatherCityId(cityId);
+
+  if (!apiKey) {
+    console.error("OpenWeather API key is not configured");
+    return null;
+  }
+
   const url = `https://api.openweathermap.org/data/2.5/weather?id=${city}&appid=${apiKey}&units=imperial`;
 
   try {
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error("Weather data not found");
+      console.error(`Weather request failed (${response.status})`);
+      return null;
     }
 
     return await response.json();
   } catch (e) {
-    console.error("Global error caught:", e);
-    throw e;
+    console.error("Weather fetch error:", e);
+    return null;
   }
 }

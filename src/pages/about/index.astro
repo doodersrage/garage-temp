@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import AboutHubNav from "../../components/AboutHubNav.astro";
 import AboutProbeActivity from "../../components/AboutProbeActivity";
+import AboutSearch from "../../components/AboutSearch";
 import {
   getBreadcrumbSchema,
   resolveSiteUrl,
@@ -55,6 +56,12 @@ const guideCount = aboutPages.filter((page) => page.parentSlug).length;
           for the real-world build story behind the hardware.
         </p>
       </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Search the guides</h2>
+      <p class="card-subtitle">Find a topic across {guideCount + 12} articles.</p>
+      <AboutSearch client:visible pages={aboutPages} />
     </section>
 
     <section class="card about-case-study-callout">

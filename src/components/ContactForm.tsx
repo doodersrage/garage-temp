@@ -11,6 +11,10 @@ export default function Form() {
       body: formData,
     });
     const data = await response.json();
+    if (!response.ok) {
+      setResponseMessage(data.message ?? "Something went wrong. Please try again.");
+      return;
+    }
     if (data.message) {
       setResponseMessage(data.message);
     }

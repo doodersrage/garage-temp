@@ -1,0 +1,50 @@
+import type { APIRoute } from "astro";
+import { getAuthFromCookies } from "../../../lib/auth";
+import { fetchTempFeed } from "../../../lib/FetchTemps";
+import { isValidFeedUrl } from "../../../lib/tempFeedConfig";
+
+export const POST: APIRoute = async ({ request, cookies }) => {
+  const { session } = await getAuthFromCookies(cookies);
+
+  if (!session) {
+    return new Response(JSON.stringify({ ok: false, message: "Sign in required." }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const body = (await request.json()) as { url?: string };
+  const url = body.url?.trim();
+
+  if (!url || !isValidFeedUrl(url)) {
+    return new Response(
+      JSON.stringify({ ok: false, message: "Enter a valid HTTPS feed URL." }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  const result = await fetchTempFeed({
+    id: "test",
+    name: "Test feed",
+    url,
+    enabled: true,
+  });
+
+  if (result.error) {
+    return new Response(
+      JSON.stringify({ ok: false, message: result.error }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  const probeCount = Object.keys(result.probes).length;
+  const avg = result.probes.avg;
+
+  return new Response(
+    JSON.stringify({
+      ok: true,
+      message: `Feed OK — ${probeCount} probe(s) found${avg ? `, average ${avg.f.toFixed(1)}°F` : ""}.`,
+    }),
+    { status: 200, headers: { "Content-Type": "application/json" } },
+  );
+};

@@ -1,5 +1,6 @@
 ---
-import type { PaginatedGarageTemps } from "../lib/garageTempsHistory";
+import type { PaginatedGarageTemps, ChartPoint } from "../lib/garageTempsHistory";
+import HistoryChart from "./HistoryChart";
 import {
   formatReadingTimestamp,
   getReadingFeedName,
@@ -8,18 +9,40 @@ import {
 
 interface Props {
   history: PaginatedGarageTemps;
+  chartPoints: ChartPoint[];
   basePath?: string;
   canDownloadCsv?: boolean;
+  feedFilter?: string;
+  probeFilter?: string;
+  filterOptions?: {
+    feeds: string[];
+    probes: { key: string; label: string }[];
+  };
 }
 
-const { history, basePath = "/dashboard/history", canDownloadCsv = false } =
-  Astro.props;
+const {
+  history,
+  chartPoints,
+  basePath = "/dashboard/history",
+  canDownloadCsv = false,
+  feedFilter = "",
+  probeFilter = "",
+  filterOptions = { feeds: [], probes: [] },
+} = Astro.props;
 const { readings, page, pageSize, totalCount, totalPages, error } = history;
 
 const showingFrom = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
 const showingTo = totalCount === 0 ? 0 : Math.min(page * pageSize, totalCount);
 const prevPage = page > 1 ? page - 1 : null;
 const nextPage = page < totalPages ? page + 1 : null;
+
+function buildFilterUrl(nextFeed: string, nextProbe: string, nextPage = 1): string {
+  const params = new URLSearchParams();
+  params.set("page", String(nextPage));
+  if (nextFeed) params.set("feed", nextFeed);
+  if (nextProbe) params.set("probe", nextProbe);
+  return `${basePath}?${params.toString()}`;
+}
 ---
 
 <section class="card">
@@ -36,6 +59,32 @@ const nextPage = page < totalPages ? page + 1 : null;
       </a>
     )}
   </div>
+
+  {(filterOptions.feeds.length > 0 || filterOptions.probes.length > 0) && (
+    <form class="history-filters" method="get" action={basePath}>
+      <div class="form-field mb-0">
+        <label class="form-label" for="feed-filter">Feed</label>
+        <select class="form-input" id="feed-filter" name="feed">
+          <option value="">All feeds</option>
+          {filterOptions.feeds.map((feed) => (
+            <option value={feed} selected={feedFilter === feed}>{feed}</option>
+          ))}
+        </select>
+      </div>
+      <div class="form-field mb-0">
+        <label class="form-label" for="probe-filter">Probe</label>
+        <select class="form-input" id="probe-filter" name="probe">
+          <option value="">All probes</option>
+          {filterOptions.probes.map((probe) => (
+            <option value={probe.key} selected={probeFilter === probe.key}>{probe.label}</option>
+          ))}
+        </select>
+      </div>
+      <button type="submit" class="btn-secondary self-end">Apply filters</button>
+    </form>
+  )}
+
+  <HistoryChart client:visible points={chartPoints} />
 
   {error ? (
     <div class="empty-state">
@@ -80,13 +129,13 @@ const nextPage = page < totalPages ? page + 1 : null;
         </p>
         <div class="pagination-controls">
           {prevPage ? (
-            <a class="btn-secondary" href={`${basePath}?page=${prevPage}`}>Previous</a>
+            <a class="btn-secondary" href={buildFilterUrl(feedFilter, probeFilter, prevPage)}>Previous</a>
           ) : (
             <span class="btn-secondary pagination-disabled">Previous</span>
           )}
           <span class="pagination-current">Page {page} of {totalPages}</span>
           {nextPage ? (
-            <a class="btn-secondary" href={`${basePath}?page=${nextPage}`}>Next</a>
+            <a class="btn-secondary" href={buildFilterUrl(feedFilter, probeFilter, nextPage)}>Next</a>
           ) : (
             <span class="btn-secondary pagination-disabled">Next</span>
           )}
