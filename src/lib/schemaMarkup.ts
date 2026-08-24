@@ -29,7 +29,7 @@ export function getOrganizationSchema(siteUrl: string) {
     "@type": "Organization",
     name: SITE_NAME,
     url: siteUrl,
-    logo: `${siteUrl}/favicon.svg`,
+    logo: `${siteUrl}/logo.svg`,
   };
 }
 
@@ -95,7 +95,7 @@ export function getArticleSchema(options: {
       name: SITE_NAME,
       logo: {
         "@type": "ImageObject",
-        url: `${options.siteUrl}/favicon.svg`,
+        url: `${options.siteUrl}/logo.svg`,
       },
     },
   };

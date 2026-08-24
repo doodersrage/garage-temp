@@ -5,7 +5,7 @@
 		"nodejs_compat"
 	],
 	"name": "garage-temp",
-	"main": "@astrojs/cloudflare/entrypoints/server",
+	"main": "./src/worker.ts",
 	"assets": {
 		"directory": "./dist/client",
 		"binding": "ASSETS"

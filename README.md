@@ -49,14 +49,14 @@ Configure in `.env` (local) and Cloudflare secrets (production):
 
 ## Background history collection
 
-Set `CRON_SECRET` and configure an hourly trigger to call:
+Set `CRON_SECRET` if you want to trigger collection manually via HTTP. Hourly collection runs automatically through the Worker's `scheduled` handler configured in `wrangler.jsonc`.
+
+Optional manual trigger:
 
 ```bash
 curl -X POST https://your-domain/api/cron/collect-history \
   -H "Authorization: Bearer $CRON_SECRET"
 ```
-
-`wrangler.jsonc` includes an hourly cron trigger — wire it to this endpoint in your deployment pipeline or a Cloudflare scheduled worker wrapper.
 
 ## Deploy
 

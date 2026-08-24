@@ -23,7 +23,7 @@ const { title, description, schema, ogImage } = Astro.props;
 const pageTitle = title ? `${title} · Garage Temperature Monitor` : 'Garage Temperature Monitor';
 const metaDescription = description ?? getDefaultDescription();
 const siteUrl = resolveSiteUrl(Astro.site);
-const ogImageUrl = ogImage ?? `${siteUrl}/favicon.svg`;
+const ogImageUrl = ogImage ?? `${siteUrl}/logo.svg`;
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 
@@ -84,8 +84,8 @@ const navItems = [
 		<div class="flex min-h-screen flex-col">
 			<header class="site-header">
 				<div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-					<a href="/" class="flex items-center gap-3">
-						<Image src={logo} height={48} alt="Garage Temperature Monitor logo" />
+					<a href="/" class="site-logo-link flex items-center gap-3">
+						<Image src={logo} height={48} width={311} alt="Garage Temperature Probe" class="site-logo" />
 					</a>
 					<button
 						type="button"
