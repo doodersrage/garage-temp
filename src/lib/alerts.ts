@@ -3,6 +3,7 @@ export type AlertSettings = {
   freezeThresholdF: number;
   humidityThreshold: number;
   email: string | null;
+  lastAlertSentAt: string | null;
 };
 
 export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
@@ -10,7 +11,11 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   freezeThresholdF: 34,
   humidityThreshold: 75,
   email: null,
+  lastAlertSentAt: null,
 };
+
+/** Minimum time between alert emails for the same account. */
+export const ALERT_COOLDOWN_MS = 4 * 60 * 60 * 1000;
 
 export function getAlertSettingsFromMetadata(
   metadata: Record<string, unknown> | undefined,
@@ -32,7 +37,16 @@ export function getAlertSettingsFromMetadata(
         ? raw.humidity_threshold
         : DEFAULT_ALERT_SETTINGS.humidityThreshold,
     email: typeof raw.email === "string" ? raw.email : null,
+    lastAlertSentAt:
+      typeof raw.last_alert_sent_at === "string" ? raw.last_alert_sent_at : null,
   };
+}
+
+export function isAlertCooldownActive(settings: AlertSettings, now = Date.now()): boolean {
+  if (!settings.lastAlertSentAt) return false;
+  const lastSent = Date.parse(settings.lastAlertSentAt);
+  if (Number.isNaN(lastSent)) return false;
+  return now - lastSent < ALERT_COOLDOWN_MS;
 }
 
 export type AlertReading = {
@@ -66,4 +80,14 @@ export function evaluateAlerts(
   }
 
   return messages;
+}
+
+export function serializeAlertSettings(settings: AlertSettings): Record<string, unknown> {
+  return {
+    enabled: settings.enabled,
+    freeze_threshold_f: settings.freezeThresholdF,
+    humidity_threshold: settings.humidityThreshold,
+    email: settings.email,
+    last_alert_sent_at: settings.lastAlertSentAt,
+  };
 }

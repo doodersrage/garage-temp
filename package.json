@@ -10,6 +10,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "test": "vitest run",
     "astro": "astro",
     "generate-types": "wrangler types"
   },
@@ -34,7 +35,8 @@
   },
   "devDependencies": {
     "@types/pg": "^8.20.0",
-    "supabase": "^2.108.0"
+    "supabase": "^2.108.0",
+    "vitest": "^3.2.4"
   },
   "overrides": {
     "vite": "^7"

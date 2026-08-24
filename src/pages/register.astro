@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import OAuthButtons from "../components/OAuthButtons.astro";
 ---
 
 <Layout
@@ -56,6 +57,7 @@ import Layout from "../layouts/Layout.astro";
         <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
       </div>
       <button class="btn-primary" type="submit">Create account</button>
+      <OAuthButtons action="/api/auth/signin" />
     </form>
   </div>
 </Layout>

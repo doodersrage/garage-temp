@@ -1,0 +1,93 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import { collectAllUsersFeedHealth } from "../../lib/collectHistory";
+import { getAuthFromCookies } from "../../lib/auth";
+
+const { session, user } = await getAuthFromCookies(Astro.cookies);
+
+if (!session || !user) {
+  return Astro.redirect("/signin");
+}
+
+const { statuses, errors } = await collectAllUsersFeedHealth();
+const failing = statuses.filter((status) => !status.ok);
+const healthy = statuses.filter((status) => status.ok);
+---
+
+<DashboardLayout title="Feed health" requireAdmin>
+  <div class="space-y-6">
+    <section class="card animate-slide-in-left">
+      <h1 class="card-title">Platform feed health</h1>
+      <p class="card-subtitle">{user.email}</p>
+      <p class="mb-0">
+        Live status for every configured feed across all accounts. Refresh this page to re-check URLs.
+      </p>
+    </section>
+
+    {errors.length > 0 && (
+      <div class="alert-warning">
+        {errors.map((message) => <p class="m-0">{message}</p>)}
+      </div>
+    )}
+
+    <section class="card">
+      <h2 class="card-title">Needs attention ({failing.length})</h2>
+      {failing.length === 0 ? (
+        <p class="m-0 stat-detail">All checked feeds are responding.</p>
+      ) : (
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">User</th>
+                <th scope="col">Feed</th>
+                <th scope="col">URL</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {failing.map((status) => (
+                <tr>
+                  <td>{status.userEmail ?? status.userId}</td>
+                  <td>{status.feedName}</td>
+                  <td><code>{status.url}</code></td>
+                  <td>{status.message}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Healthy feeds ({healthy.length})</h2>
+      {healthy.length === 0 ? (
+        <p class="m-0 stat-detail">No healthy feeds found.</p>
+      ) : (
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">User</th>
+                <th scope="col">Feed</th>
+                <th scope="col">Probes</th>
+                <th scope="col">Checked</th>
+              </tr>
+            </thead>
+            <tbody>
+              {healthy.map((status) => (
+                <tr>
+                  <td>{status.userEmail ?? status.userId}</td>
+                  <td>{status.feedName}</td>
+                  <td>{status.probeCount}</td>
+                  <td>{new Date(status.checkedAt).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  </div>
+</DashboardLayout>

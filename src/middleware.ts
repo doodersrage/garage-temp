@@ -1,4 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
+import { getAuthFromCookies } from "./lib/auth";
 
 const protectedPaths = ["/dashboard"];
 const protectedApiPrefixes = [
@@ -7,6 +8,7 @@ const protectedApiPrefixes = [
   "/api/stripe/",
   "/api/admin/",
   "/api/feeds/",
+  "/api/home/",
 ];
 
 export const onRequest = defineMiddleware(async (context, next) => {
@@ -21,10 +23,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return next();
   }
 
-  const accessToken = context.cookies.get("sb-access-token")?.value;
-  const refreshToken = context.cookies.get("sb-refresh-token")?.value;
+  const { session } = await getAuthFromCookies(context.cookies);
 
-  if (!accessToken || !refreshToken) {
+  if (!session) {
     if (pathname.startsWith("/api/")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,

@@ -9,6 +9,7 @@ import {
   fetchGarageTempHistory,
   fetchHistoryFilterOptions,
 } from "../../lib/garageTempsHistory";
+import { detectTemperatureAnomalies } from "../../lib/anomalyDetection";
 import { getUserSubscription } from "../../lib/stripeSubscriptions";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
@@ -20,6 +21,8 @@ if (!session || !user) {
 const pageParam = Number(Astro.url.searchParams.get("page") ?? "1");
 const feedFilter = Astro.url.searchParams.get("feed")?.trim() ?? "";
 const probeFilter = Astro.url.searchParams.get("probe")?.trim() ?? "";
+const fromDate = Astro.url.searchParams.get("from")?.trim() ?? "";
+const toDate = Astro.url.searchParams.get("to")?.trim() ?? "";
 
 if (pageParam < 1 || Number.isNaN(pageParam)) {
   return Astro.redirect("/dashboard/history?page=1");
@@ -28,6 +31,8 @@ if (pageParam < 1 || Number.isNaN(pageParam)) {
 const filters = {
   feedName: feedFilter || undefined,
   probeKey: probeFilter || undefined,
+  from: fromDate ? new Date(`${fromDate}T00:00:00`).toISOString() : undefined,
+  to: toDate ? new Date(`${toDate}T23:59:59`).toISOString() : undefined,
 };
 
 const [history, chartData, filterOptions, canDownloadCsv, subscription] = await Promise.all([
@@ -43,6 +48,7 @@ if (history.totalPages > 0 && pageParam > history.totalPages) {
 }
 
 const subscriptionNotice = Astro.url.searchParams.get("subscription");
+const anomalies = detectTemperatureAnomalies(chartData.points);
 ---
 <DashboardLayout title="Reading History">
   <div class="space-y-6">
@@ -70,6 +76,9 @@ const subscriptionNotice = Astro.url.searchParams.get("subscription");
       canDownloadCsv={canDownloadCsv}
       feedFilter={feedFilter}
       probeFilter={probeFilter}
+      fromDate={fromDate}
+      toDate={toDate}
+      anomalies={anomalies}
       filterOptions={filterOptions}
     />
   </div>

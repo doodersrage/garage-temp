@@ -25,7 +25,34 @@ export const GARAGE_TEMPS_PAGE_SIZE = 20;
 export type HistoryFilters = {
   feedName?: string;
   probeKey?: string;
+  from?: string;
+  to?: string;
 };
+
+function applyHistoryFilters<T extends { eq: Function; gte: Function; lte: Function }>(
+  query: T,
+  filters: HistoryFilters,
+): T {
+  let next = query;
+
+  if (filters.feedName) {
+    next = next.eq("feed_name", filters.feedName) as T;
+  }
+
+  if (filters.probeKey) {
+    next = next.eq("probe_key", filters.probeKey) as T;
+  }
+
+  if (filters.from) {
+    next = next.gte("timestamp", filters.from) as T;
+  }
+
+  if (filters.to) {
+    next = next.lte("timestamp", filters.to) as T;
+  }
+
+  return next;
+}
 
 export type ChartPoint = {
   timestamp: string;
@@ -68,13 +95,7 @@ export async function fetchGarageTempHistory(
     .select(HISTORY_SELECT, { count: "exact" })
     .eq("user_id", userId);
 
-  if (filters.feedName) {
-    query = query.eq("feed_name", filters.feedName);
-  }
-
-  if (filters.probeKey) {
-    query = query.eq("probe_key", filters.probeKey);
-  }
+  query = applyHistoryFilters(query, filters);
 
   const { data, error, count } = await query
     .order("timestamp", { ascending: false })
@@ -106,21 +127,28 @@ export async function fetchGarageTempHistory(
 
 const EXPORT_BATCH_SIZE = 1000;
 
-export async function fetchAllGarageTempReadings(userId: string): Promise<{
+export async function fetchAllGarageTempReadings(
+  userId: string,
+  filters: HistoryFilters = {},
+): Promise<{
   readings: GarageTempReading[];
   error: string | null;
 }> {
   const supabase = createServerClient();
   const readings: GarageTempReading[] = [];
-  let from = 0;
+  let offset = 0;
 
   while (true) {
-    const { data, error } = await supabase
+    let query = supabase
       .from("garage_temps")
       .select(HISTORY_SELECT)
-      .eq("user_id", userId)
+      .eq("user_id", userId);
+
+    query = applyHistoryFilters(query, filters);
+
+    const { data, error } = await query
       .order("timestamp", { ascending: false })
-      .range(from, from + EXPORT_BATCH_SIZE - 1);
+      .range(offset, offset + EXPORT_BATCH_SIZE - 1);
 
     if (error) {
       return { readings: [], error: error.message };
@@ -136,7 +164,7 @@ export async function fetchAllGarageTempReadings(userId: string): Promise<{
       break;
     }
 
-    from += EXPORT_BATCH_SIZE;
+    offset += EXPORT_BATCH_SIZE;
   }
 
   return { readings, error: null };
@@ -150,20 +178,14 @@ export async function fetchGarageTempChartData(
   const supabase = createServerClient();
   const since = new Date();
   since.setDate(since.getDate() - days);
+  const sinceIso = filters.from ?? since.toISOString();
 
   let query = supabase
     .from("garage_temps")
     .select("tempf, humidity, timestamp, probe_label, probe_key")
-    .eq("user_id", userId)
-    .gte("timestamp", since.toISOString());
+    .eq("user_id", userId);
 
-  if (filters.feedName) {
-    query = query.eq("feed_name", filters.feedName);
-  }
-
-  if (filters.probeKey) {
-    query = query.eq("probe_key", filters.probeKey);
-  }
+  query = applyHistoryFilters(query, { ...filters, from: sinceIso });
 
   const { data, error } = await query.order("timestamp", { ascending: true }).limit(500);
 

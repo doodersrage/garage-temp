@@ -1,10 +1,14 @@
 ---
 import AboutArticle from "../../components/AboutArticle.astro";
 import AboutPageSections from "../../components/AboutPageSections.astro";
-import { getAboutPage } from "../../lib/aboutPages";
+import { aboutPages, getAboutPage } from "../../lib/aboutPages";
 import { getExpandedAboutContent } from "../../lib/aboutExpandedContent";
 
-export const prerender = false;
+export const prerender = true;
+
+export function getStaticPaths() {
+  return aboutPages.map((page) => ({ params: { slug: page.slug } }));
+}
 
 const { slug } = Astro.params;
 

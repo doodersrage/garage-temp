@@ -11,12 +11,17 @@ if (!session || !user) {
 }
 
 const pageParam = Number(Astro.url.searchParams.get("page") ?? "1");
+const statusFilter = Astro.url.searchParams.get("status")?.trim() ?? "";
+const searchFilter = Astro.url.searchParams.get("q")?.trim() ?? "";
 
 if (pageParam < 1 || Number.isNaN(pageParam)) {
   return Astro.redirect("/dashboard/contacts?page=1");
 }
 
-const submissions = await fetchContactSubmissions(pageParam);
+const submissions = await fetchContactSubmissions(pageParam, undefined, {
+  status: statusFilter || undefined,
+  search: searchFilter || undefined,
+});
 
 if (submissions.totalPages > 0 && pageParam > submissions.totalPages) {
   return Astro.redirect(`/dashboard/contacts?page=${submissions.totalPages}`);
@@ -28,10 +33,14 @@ if (submissions.totalPages > 0 && pageParam > submissions.totalPages) {
       <h1 class="card-title">Contact submissions</h1>
       <p class="card-subtitle">{user.email}</p>
       <p class="mb-0">
-        Review messages sent through the site contact form. This page is available to members of the admin group.
+        Review messages sent through the site contact form. Mark items read or spam to keep the inbox manageable.
       </p>
     </section>
 
-    <ContactSubmissions submissions={submissions} />
+    <ContactSubmissions
+      submissions={submissions}
+      statusFilter={statusFilter}
+      searchFilter={searchFilter}
+    />
   </div>
 </DashboardLayout>

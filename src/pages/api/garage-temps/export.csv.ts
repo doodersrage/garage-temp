@@ -4,9 +4,22 @@ import { canDownloadHistoryCsv } from "../../../lib/adminAccess";
 import {
   buildGarageTempsCsv,
   fetchAllGarageTempReadings,
+  type HistoryFilters,
 } from "../../../lib/garageTempsHistory";
 
-export const GET: APIRoute = async ({ cookies }) => {
+function parseDateParam(value: string | null, endOfDay = false): string | undefined {
+  if (!value?.trim()) return undefined;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return undefined;
+  if (endOfDay) {
+    parsed.setHours(23, 59, 59, 999);
+  } else {
+    parsed.setHours(0, 0, 0, 0);
+  }
+  return parsed.toISOString();
+}
+
+export const GET: APIRoute = async ({ cookies, url }) => {
   const { session, user } = await getAuthFromCookies(cookies);
 
   if (!session || !user) {
@@ -21,7 +34,14 @@ export const GET: APIRoute = async ({ cookies }) => {
     });
   }
 
-  const { readings, error } = await fetchAllGarageTempReadings(user.id);
+  const filters: HistoryFilters = {
+    feedName: url.searchParams.get("feed")?.trim() || undefined,
+    probeKey: url.searchParams.get("probe")?.trim() || undefined,
+    from: parseDateParam(url.searchParams.get("from")),
+    to: parseDateParam(url.searchParams.get("to"), true),
+  };
+
+  const { readings, error } = await fetchAllGarageTempReadings(user.id, filters);
 
   if (error) {
     return new Response(error, { status: 500 });

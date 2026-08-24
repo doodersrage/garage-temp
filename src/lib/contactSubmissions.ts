@@ -6,6 +6,7 @@ export type ContactSubmission = {
   email: string;
   message: string;
   created_at: string;
+  status: string;
 };
 
 export type PaginatedContactSubmissions = {
@@ -17,9 +18,14 @@ export type PaginatedContactSubmissions = {
   error: string | null;
 };
 
+export type ContactFilters = {
+  status?: string;
+  search?: string;
+};
+
 export const CONTACTS_PAGE_SIZE = 20;
 
-const CONTACTS_SELECT = "id, name, email, message, created_at";
+const CONTACTS_SELECT = "id, name, email, message, created_at, status";
 
 export function formatContactTimestamp(timestamp: string): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -49,15 +55,27 @@ export function getContactMessageText(message: string): string {
 export async function fetchContactSubmissions(
   page = 1,
   pageSize = CONTACTS_PAGE_SIZE,
+  filters: ContactFilters = {},
 ): Promise<PaginatedContactSubmissions> {
   const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
   const from = (safePage - 1) * pageSize;
   const to = from + pageSize - 1;
 
   const supabase = createServerClient();
-  const { data, error, count } = await supabase
-    .from("contacts")
-    .select(CONTACTS_SELECT, { count: "exact" })
+  let query = supabase.from("contacts").select(CONTACTS_SELECT, { count: "exact" });
+
+  if (filters.status) {
+    query = query.eq("status", filters.status);
+  }
+
+  if (filters.search) {
+    const term = `%${filters.search}%`;
+    query = query.or(
+      `name.ilike.${term},email.ilike.${term},message.ilike.${term}`,
+    );
+  }
+
+  const { data, error, count } = await query
     .order("created_at", { ascending: false })
     .range(from, to);
 
@@ -131,13 +149,14 @@ function escapeCsvField(value: string | number): string {
 }
 
 export function buildContactsCsv(submissions: ContactSubmission[]): string {
-  const headers = ["submitted_at", "name", "email", "message"];
+  const headers = ["submitted_at", "name", "email", "status", "message"];
 
   const rows = submissions.map((submission) =>
     [
       new Date(submission.created_at).toISOString(),
       submission.name,
       submission.email,
+      submission.status,
       getContactMessageText(submission.message),
     ]
       .map(escapeCsvField)

@@ -111,6 +111,7 @@ export async function fetchTemps(
         options.userMetadata,
         feeds,
         visibleProbes,
+        results,
       );
     }
   }

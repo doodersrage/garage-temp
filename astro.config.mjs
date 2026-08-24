@@ -1,8 +1,6 @@
 // @ts-check
 import { defineConfig, memoryCache, fontProviders } from 'astro/config';
 
-import node from '@astrojs/node';
-
 import tailwindcss from '@tailwindcss/vite';
 
 import sitemap from '@astrojs/sitemap';

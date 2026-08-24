@@ -1,5 +1,9 @@
 import { handle } from "@astrojs/cloudflare/handler";
 import { collectHistoryForAllUsers } from "./lib/collectHistory";
+import {
+  sendWeeklyDigestsForAllUsers,
+  shouldSendWeeklyDigest,
+} from "./lib/digestEmails";
 
 export default {
   fetch(request: Request, env: unknown, ctx: ExecutionContext) {
@@ -16,6 +20,16 @@ export default {
         console.info(
           `Scheduled history collection finished: ${result.usersProcessed} user(s) processed`,
         );
+
+        if (shouldSendWeeklyDigest()) {
+          const digest = await sendWeeklyDigestsForAllUsers();
+          if (digest.errors.length > 0) {
+            console.error("Weekly digest errors:", digest.errors);
+          }
+          console.info(
+            `Weekly digest finished: ${digest.sent} sent, ${digest.skipped} skipped`,
+          );
+        }
       })(),
     );
   },

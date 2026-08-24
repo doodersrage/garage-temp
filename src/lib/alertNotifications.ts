@@ -1,12 +1,13 @@
-import type { TempFeedConfig, TempProbeConfig } from "./tempFeedConfig";
-import { fetchTemps } from "./FetchTemps";
+import type { TempFeedConfig, TempFeedResult, TempProbeConfig } from "./tempFeedConfig";
 import {
   evaluateAlerts,
   getAlertSettingsFromMetadata,
+  isAlertCooldownActive,
+  serializeAlertSettings,
   type AlertReading,
   type AlertSettings,
 } from "./alerts";
-import { supabase } from "./supabase";
+import { createAdminClient, supabase } from "./supabase";
 
 async function sendAlertEmail(
   to: string,
@@ -39,32 +40,50 @@ async function sendAlertEmail(
   }
 }
 
-export async function maybeSendThresholdAlerts(
-  userId: string,
-  email: string | null | undefined,
-  userMetadata: Record<string, unknown> | undefined,
-  feeds: TempFeedConfig[],
+function buildReadingsFromResults(
+  results: TempFeedResult[],
   probes: TempProbeConfig[],
-): Promise<void> {
-  const settings = getAlertSettingsFromMetadata(userMetadata);
-  if (!settings.enabled) return;
-
-  const alertEmail = settings.email ?? email;
-  if (!alertEmail) return;
-
-  const visibleProbes = probes.filter((probe) => probe.visible);
-  const results = await fetchTemps({
-    feeds,
-    probes: visibleProbes,
-    saveToDatabase: false,
-  });
-
-  const readings: AlertReading[] = visibleProbes.flatMap((probe) => {
+): AlertReading[] {
+  return probes.flatMap((probe) => {
     const feed = results.find((result) => result.id === probe.feedId);
     const data = feed?.probes[probe.key];
     if (!feed || feed.error || !data) return [];
     return [{ label: probe.label, tempf: data.f, humidity: data.h }];
   });
+}
+
+async function markAlertSent(
+  userId: string,
+  settings: AlertSettings,
+): Promise<void> {
+  const admin = createAdminClient();
+  const sentAt = new Date().toISOString();
+  const nextSettings = { ...settings, lastAlertSentAt: sentAt };
+
+  const { error } = await admin.auth.admin.updateUserById(userId, {
+    user_metadata: {
+      alert_settings: serializeAlertSettings(nextSettings),
+    },
+  });
+
+  if (error) {
+    console.error("Failed to update alert cooldown metadata:", error.message);
+  }
+}
+
+export async function sendThresholdAlertsIfNeeded(
+  userId: string,
+  email: string | null | undefined,
+  userMetadata: Record<string, unknown> | undefined,
+  readings: AlertReading[],
+): Promise<void> {
+  const settings = getAlertSettingsFromMetadata(userMetadata);
+  if (!settings.enabled || readings.length === 0) return;
+
+  const alertEmail = settings.email ?? email;
+  if (!alertEmail) return;
+
+  if (isAlertCooldownActive(settings)) return;
 
   const messages = evaluateAlerts(settings, readings);
   if (messages.length === 0) return;
@@ -74,6 +93,32 @@ export async function maybeSendThresholdAlerts(
     "Garage temperature alert",
     messages.join("\n"),
   );
+  await markAlertSent(userId, settings);
+}
+
+export async function maybeSendThresholdAlerts(
+  userId: string,
+  email: string | null | undefined,
+  userMetadata: Record<string, unknown> | undefined,
+  feeds: TempFeedConfig[],
+  probes: TempProbeConfig[],
+  existingResults?: TempFeedResult[],
+): Promise<void> {
+  const visibleProbes = probes.filter((probe) => probe.visible);
+  if (visibleProbes.length === 0) return;
+
+  let results = existingResults;
+  if (!results) {
+    const { fetchTemps } = await import("./FetchTemps");
+    results = await fetchTemps({
+      feeds,
+      probes: visibleProbes,
+      saveToDatabase: false,
+    });
+  }
+
+  const readings = buildReadingsFromResults(results, visibleProbes);
+  await sendThresholdAlertsIfNeeded(userId, email, userMetadata, readings);
 }
 
 export async function updateUserAlertSettings(
@@ -92,12 +137,7 @@ export async function updateUserAlertSettings(
 
   const { error } = await supabase.auth.updateUser({
     data: {
-      alert_settings: {
-        enabled: settings.enabled,
-        freeze_threshold_f: settings.freezeThresholdF,
-        humidity_threshold: settings.humidityThreshold,
-        email: settings.email,
-      },
+      alert_settings: serializeAlertSettings(settings),
     },
   });
 

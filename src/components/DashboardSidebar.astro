@@ -33,6 +33,11 @@ const navItems: NavItem[] = [
 
 if (isAdmin) {
   navItems.push({
+    href: "/dashboard/feeds",
+    label: "Feed health",
+    isActive: currentPath.startsWith("/dashboard/feeds"),
+  });
+  navItems.push({
     href: "/dashboard/users",
     label: "Users",
     isActive: currentPath.startsWith("/dashboard/users"),

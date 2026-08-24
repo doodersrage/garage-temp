@@ -8,9 +8,16 @@ import {
 interface Props {
   submissions: PaginatedContactSubmissions;
   basePath?: string;
+  statusFilter?: string;
+  searchFilter?: string;
 }
 
-const { submissions, basePath = "/dashboard/contacts" } = Astro.props;
+const {
+  submissions,
+  basePath = "/dashboard/contacts",
+  statusFilter = "",
+  searchFilter = "",
+} = Astro.props;
 const { submissions: rows, page, pageSize, totalCount, totalPages, error } =
   submissions;
 
@@ -18,6 +25,14 @@ const showingFrom = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
 const showingTo = totalCount === 0 ? 0 : Math.min(page * pageSize, totalCount);
 const prevPage = page > 1 ? page - 1 : null;
 const nextPage = page < totalPages ? page + 1 : null;
+
+function buildPageUrl(nextPage: number): string {
+  const params = new URLSearchParams();
+  params.set("page", String(nextPage));
+  if (statusFilter) params.set("status", statusFilter);
+  if (searchFilter) params.set("q", searchFilter);
+  return `${basePath}?${params.toString()}`;
+}
 ---
 
 <section class="card">
@@ -35,13 +50,37 @@ const nextPage = page < totalPages ? page + 1 : null;
     )}
   </div>
 
+  <form class="history-filters" method="get" action={basePath}>
+    <div class="form-field mb-0">
+      <label class="form-label" for="contact-status">Status</label>
+      <select class="form-input" id="contact-status" name="status">
+        <option value="">All</option>
+        <option value="new" selected={statusFilter === "new"}>New</option>
+        <option value="read" selected={statusFilter === "read"}>Read</option>
+        <option value="spam" selected={statusFilter === "spam"}>Spam</option>
+      </select>
+    </div>
+    <div class="form-field mb-0">
+      <label class="form-label" for="contact-search">Search</label>
+      <input
+        class="form-input"
+        type="search"
+        id="contact-search"
+        name="q"
+        value={searchFilter}
+        placeholder="Name, email, or message"
+      />
+    </div>
+    <button type="submit" class="btn-secondary self-end">Filter</button>
+  </form>
+
   {error ? (
     <div class="empty-state">
       <p>Unable to load contact submissions: {error}</p>
     </div>
   ) : rows.length === 0 ? (
     <div class="empty-state">
-      <p>No contact form submissions have been recorded yet.</p>
+      <p>No contact form submissions match these filters.</p>
     </div>
   ) : (
     <>
@@ -50,21 +89,42 @@ const nextPage = page < totalPages ? page + 1 : null;
           <thead>
             <tr>
               <th scope="col">Submitted</th>
+              <th scope="col">Status</th>
               <th scope="col">Name</th>
               <th scope="col">Email</th>
               <th scope="col">Message</th>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((submission) => (
               <tr>
                 <td>{formatContactTimestamp(submission.created_at)}</td>
+                <td>{submission.status}</td>
                 <td>{submission.name}</td>
                 <td>
                   <a href={`mailto:${submission.email}`}>{submission.email}</a>
                 </td>
                 <td class="contact-message-cell">
                   {getContactMessageText(submission.message)}
+                </td>
+                <td class="contact-actions-cell">
+                  {submission.status !== "read" && (
+                    <form action="/api/admin/contacts/status" method="post">
+                      <input type="hidden" name="id" value={submission.id} />
+                      <input type="hidden" name="status" value="read" />
+                      <input type="hidden" name="redirect" value={buildPageUrl(page)} />
+                      <button class="btn-ghost" type="submit">Mark read</button>
+                    </form>
+                  )}
+                  {submission.status !== "spam" && (
+                    <form action="/api/admin/contacts/status" method="post">
+                      <input type="hidden" name="id" value={submission.id} />
+                      <input type="hidden" name="status" value="spam" />
+                      <input type="hidden" name="redirect" value={buildPageUrl(page)} />
+                      <button class="btn-ghost" type="submit">Spam</button>
+                    </form>
+                  )}
                 </td>
               </tr>
             ))}
@@ -78,13 +138,13 @@ const nextPage = page < totalPages ? page + 1 : null;
         </p>
         <div class="pagination-controls">
           {prevPage ? (
-            <a class="btn-secondary" href={`${basePath}?page=${prevPage}`}>Previous</a>
+            <a class="btn-secondary" href={buildPageUrl(prevPage)}>Previous</a>
           ) : (
             <span class="btn-secondary pagination-disabled">Previous</span>
           )}
           <span class="pagination-current">Page {page} of {totalPages}</span>
           {nextPage ? (
-            <a class="btn-secondary" href={`${basePath}?page=${nextPage}`}>Next</a>
+            <a class="btn-secondary" href={buildPageUrl(nextPage)}>Next</a>
           ) : (
             <span class="btn-secondary pagination-disabled">Next</span>
           )}
@@ -99,5 +159,12 @@ const nextPage = page < totalPages ? page + 1 : null;
     max-width: 28rem;
     white-space: pre-wrap;
     word-break: break-word;
+  }
+
+  .contact-actions-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 6rem;
   }
 </style>

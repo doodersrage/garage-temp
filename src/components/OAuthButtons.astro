@@ -1,0 +1,52 @@
+---
+interface Props {
+  action?: string;
+}
+
+const { action = "/api/auth/signin" } = Astro.props;
+
+const providers = [
+  { id: "google", label: "Continue with Google" },
+  { id: "github", label: "Continue with GitHub" },
+  { id: "discord", label: "Continue with Discord" },
+];
+---
+
+<div class="oauth-buttons">
+  <p class="oauth-divider"><span>or continue with</span></p>
+  <div class="flex flex-col gap-2">
+    {providers.map(({ id, label }) => (
+      <form action={action} method="post">
+        <input type="hidden" name="provider" value={id} />
+        <button class="btn-secondary w-full" type="submit">{label}</button>
+      </form>
+    ))}
+  </div>
+</div>
+
+<style>
+  .oauth-buttons {
+    margin-top: 0.25rem;
+  }
+
+  .oauth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0 0.75rem;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+  }
+
+  .oauth-divider::before,
+  .oauth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+  }
+
+  .oauth-divider span {
+    white-space: nowrap;
+  }
+</style>

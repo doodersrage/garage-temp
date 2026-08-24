@@ -1,0 +1,22 @@
+{
+  "name": "Garage Temperature Monitor",
+  "short_name": "Garage Temp",
+  "description": "Live garage temperature and humidity monitoring with history, alerts, and probe dashboards.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090b0f",
+  "theme_color": "#090b0f",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
