@@ -157,6 +157,22 @@ export async function saveUserTempConfig(
     }
   }
 
+  // Keep devices model in sync for cron / ingest / multi-sensor
+  try {
+    const { getOrCreateHouseholdForUser } = await import("./households");
+    const { savePullDevicesForHousehold } = await import("./devices");
+    const household = await getOrCreateHouseholdForUser(userId);
+    if (household.householdId) {
+      await savePullDevicesForHousehold(
+        household.householdId,
+        sanitizedFeeds,
+        sanitizedProbes,
+      );
+    }
+  } catch (error) {
+    console.error("Failed to sync devices from temp config:", error);
+  }
+
   return { error: null };
 }
 

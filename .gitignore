@@ -6,6 +6,7 @@ dist/
 
 # dependencies
 node_modules/
+.pnpm-store/
 
 # logs
 npm-debug.log*
@@ -25,3 +26,5 @@ pnpm-debug.log*
 
 # wrangler 
 .wrangler/
+.wrangler-home/
+.wrangler-local/

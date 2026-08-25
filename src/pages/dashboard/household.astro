@@ -1,0 +1,79 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import { getAuthFromCookies } from "../../lib/auth";
+import {
+  getOrCreateHouseholdForUser,
+  listHouseholdMembers,
+} from "../../lib/households";
+import { createAdminClient } from "../../lib/supabase";
+
+const { session, user } = await getAuthFromCookies(Astro.cookies);
+if (!session || !user) {
+  return Astro.redirect("/signin");
+}
+
+const household = await getOrCreateHouseholdForUser(user.id, user.email);
+const membersResult = household.householdId
+  ? await listHouseholdMembers(household.householdId)
+  : { members: [], error: "No household" };
+
+const admin = createAdminClient();
+const membersWithEmail = await Promise.all(
+  membersResult.members.map(async (member) => {
+    const { data } = await admin.auth.admin.getUserById(member.user_id);
+    return { ...member, email: data.user?.email ?? member.user_id };
+  }),
+);
+
+const notice = Astro.url.searchParams.get("invited")
+  ? "Member invited."
+  : Astro.url.searchParams.get("removed")
+    ? "Member removed."
+    : Astro.url.searchParams.get("saved")
+      ? "Household updated."
+      : Astro.url.searchParams.get("error")
+        ? `Could not complete request (${Astro.url.searchParams.get("error")}).`
+        : null;
+---
+<DashboardLayout title="Household">
+  <div class="space-y-6">
+    <section class="card">
+      <h1 class="card-title">Household sharing</h1>
+      <p class="card-subtitle">Share devices and history with family members who already have accounts.</p>
+      {notice && <p class="alert-success mt-4">{notice}</p>}
+    </section>
+
+    <form action="/api/household" method="post" class="card">
+      <input type="hidden" name="action" value="invite" />
+      <input type="hidden" name="redirect" value="/dashboard/household" />
+      <h2 class="card-title">Invite by email</h2>
+      <div class="form-field">
+        <label class="form-label" for="email">Member email</label>
+        <input class="form-input" type="email" id="email" name="email" required />
+      </div>
+      <button class="btn-primary" type="submit">Invite</button>
+    </form>
+
+    <section class="card">
+      <h2 class="card-title">Members</h2>
+      <ul class="space-y-3">
+        {membersWithEmail.map((member) => (
+          <li class="flex items-center justify-between gap-4">
+            <div>
+              <strong>{member.email}</strong>
+              <span class="text-sm text-[var(--color-text-muted)]"> · {member.role}</span>
+            </div>
+            {member.role !== "owner" && (
+              <form action="/api/household" method="post">
+                <input type="hidden" name="action" value="remove" />
+                <input type="hidden" name="user_id" value={member.user_id} />
+                <input type="hidden" name="redirect" value="/dashboard/household" />
+                <button class="btn-ghost" type="submit">Remove</button>
+              </form>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
+</DashboardLayout>

@@ -1,0 +1,54 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+const token = Astro.params.token;
+if (!token) {
+  return Astro.redirect("/");
+}
+
+const readingsUrl = `/api/share/${token}/readings`;
+---
+<Layout title="Shared live view" description="Read-only shared garage sensor readings.">
+  <main id="main-content" class="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
+    <h1 class="text-3xl font-semibold mb-2">Shared sensors</h1>
+    <p class="text-[var(--color-text-muted)] mb-8">Live read-only view</p>
+    <div id="share-root" class="space-y-4" data-url={readingsUrl}>
+      <p>Loading…</p>
+    </div>
+  </main>
+</Layout>
+
+<script is:inline>
+  (async () => {
+    const root = document.getElementById("share-root");
+    if (!root) return;
+    const url = root.getAttribute("data-url");
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!res.ok) {
+        root.innerHTML = `<p>${data.error || "Unable to load"}</p>`;
+        return;
+      }
+      root.innerHTML = (data.readings || [])
+        .map(
+          (r) => `<div class="card">
+            <strong>${r.label}</strong>
+            <p class="m-0 text-sm text-[var(--color-text-muted)]">${r.device} · ${r.kind}</p>
+            <p class="text-2xl m-0 mt-2">${
+              r.value_bool != null
+                ? r.value_bool
+                  ? "On / Open"
+                  : "Off / Closed"
+                : r.value_num != null
+                  ? `${Number(r.value_num).toFixed(1)}${r.unit ? " " + r.unit : ""}`
+                  : r.value_text || "—"
+            }</p>
+          </div>`,
+        )
+        .join("") || "<p>No readings yet.</p>";
+    } catch (e) {
+      root.innerHTML = "<p>Failed to load shared readings.</p>";
+    }
+  })();
+</script>

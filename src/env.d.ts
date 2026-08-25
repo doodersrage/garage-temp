@@ -12,9 +12,16 @@ interface ImportMetaEnv {
   readonly STRIPE_SECRET_KEY?: string;
   readonly STRIPE_WEBHOOK_SECRET?: string;
   readonly STRIPE_PRICE_ID?: string;
+  readonly STRIPE_PRICE_ID_PRO?: string;
   readonly SITE_URL?: string;
   readonly ORIGIN?: string;
   readonly CRON_SECRET?: string;
+  readonly TWILIO_ACCOUNT_SID?: string;
+  readonly TWILIO_AUTH_TOKEN?: string;
+  readonly TWILIO_FROM_NUMBER?: string;
+  readonly VAPID_PUBLIC_KEY?: string;
+  readonly VAPID_PRIVATE_KEY?: string;
+  readonly VAPID_SUBJECT?: string;
   readonly PROD: boolean;
 }
 

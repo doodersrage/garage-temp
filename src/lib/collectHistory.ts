@@ -1,7 +1,12 @@
 import { createAdminClient, createServerClient } from "./supabase";
 import { fetchTemps } from "./FetchTemps";
-import { fetchUserTempConfig } from "./userTempConfig";
-import { maybeSendThresholdAlerts } from "./alertNotifications";
+import { getUserDevicesAsTempConfig } from "./devices";
+import { listAllHouseholdOwnerUserIds } from "./households";
+import {
+  maybeSendRateAndOutageAlerts,
+  maybeSendThresholdAlerts,
+} from "./alertNotifications";
+import { getAlertSettingsForUser } from "./notify";
 
 export type FeedHealthStatus = {
   feedId: string;
@@ -18,7 +23,7 @@ export type FeedHealthStatus = {
 export async function checkFeedHealth(
   userId: string,
 ): Promise<{ statuses: FeedHealthStatus[]; error: string | null }> {
-  const config = await fetchUserTempConfig(userId);
+  const config = await getUserDevicesAsTempConfig(userId);
 
   if (config.error) {
     return { statuses: [], error: config.error };
@@ -28,6 +33,8 @@ export async function checkFeedHealth(
   const results = await fetchTemps({
     feeds: enabledFeeds,
     probes: config.probes,
+    devices: config.devices,
+    householdId: config.householdId,
     saveToDatabase: false,
   });
 
@@ -67,20 +74,9 @@ export async function collectAllUsersFeedHealth(): Promise<{
   statuses: FeedHealthStatus[];
   errors: string[];
 }> {
-  const supabase = createServerClient();
   const errors: string[] = [];
   const statuses: FeedHealthStatus[] = [];
-
-  const { data: feedRows, error } = await supabase
-    .from("user_temp_feeds")
-    .select("user_id")
-    .order("user_id");
-
-  if (error) {
-    return { statuses: [], errors: [error.message] };
-  }
-
-  const userIds = [...new Set((feedRows ?? []).map((row) => row.user_id))];
+  const userIds = await listAllHouseholdOwnerUserIds();
   const admin = createAdminClient();
 
   for (const userId of userIds) {
@@ -108,25 +104,28 @@ export async function collectHistoryForAllUsers(): Promise<{
   usersProcessed: number;
   errors: string[];
 }> {
-  const supabase = createServerClient();
   const admin = createAdminClient();
   const errors: string[] = [];
   let usersProcessed = 0;
 
-  const { data: feedRows, error } = await supabase
-    .from("user_temp_feeds")
-    .select("user_id")
-    .order("user_id");
+  // Include every household owner — seeds default pull device when needed
+  const userIds = await listAllHouseholdOwnerUserIds();
 
-  if (error) {
-    return { usersProcessed: 0, errors: [error.message] };
+  // Also include users who only have legacy feeds and somehow missed household
+  const supabase = createServerClient();
+  const { data: feedRows } = await supabase.from("user_temp_feeds").select("user_id");
+  for (const row of feedRows ?? []) {
+    if (!userIds.includes(row.user_id)) {
+      userIds.push(row.user_id);
+    }
   }
-
-  const userIds = [...new Set((feedRows ?? []).map((row) => row.user_id))];
 
   for (const userId of userIds) {
     try {
-      const config = await fetchUserTempConfig(userId);
+      const { data: userData } = await admin.auth.admin.getUserById(userId);
+      const authUser = userData.user;
+      const config = await getUserDevicesAsTempConfig(userId, authUser?.email);
+
       if (config.error) {
         errors.push(`${userId}: ${config.error}`);
         continue;
@@ -136,13 +135,13 @@ export async function collectHistoryForAllUsers(): Promise<{
       const results = await fetchTemps({
         feeds: config.feeds,
         probes: visibleProbes,
+        devices: config.devices,
+        householdId: config.householdId,
         saveToDatabase: true,
         userId,
+        userEmail: authUser?.email,
         sendAlerts: false,
       });
-
-      const { data: userData } = await admin.auth.admin.getUserById(userId);
-      const authUser = userData.user;
 
       await maybeSendThresholdAlerts(
         userId,
@@ -151,6 +150,17 @@ export async function collectHistoryForAllUsers(): Promise<{
         config.feeds,
         config.probes,
         results,
+      );
+
+      const settings = await getAlertSettingsForUser(
+        userId,
+        authUser?.user_metadata as Record<string, unknown> | undefined,
+      );
+      await maybeSendRateAndOutageAlerts(
+        userId,
+        authUser?.email,
+        config.devices,
+        settings,
       );
 
       usersProcessed += 1;

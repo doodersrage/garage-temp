@@ -14,18 +14,28 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   const formData = await request.formData();
   const id = Number(formData.get("id"));
-  const status = formData.get("status")?.toString() ?? "read";
+  const status = formData.get("status")?.toString();
+  const adminNotes = formData.get("admin_notes")?.toString();
   const redirectTo = formData.get("redirect")?.toString() || "/dashboard/contacts";
 
-  if (!Number.isFinite(id) || !ALLOWED_STATUSES.has(status)) {
+  if (!Number.isFinite(id)) {
+    return redirect(`${redirectTo}?contact_error=1`);
+  }
+
+  const updates: Record<string, string> = {};
+  if (status && ALLOWED_STATUSES.has(status)) {
+    updates.status = status;
+  }
+  if (adminNotes !== undefined) {
+    updates.admin_notes = adminNotes;
+  }
+
+  if (Object.keys(updates).length === 0) {
     return redirect(`${redirectTo}?contact_error=1`);
   }
 
   const supabase = createServerClient();
-  const { error } = await supabase
-    .from("contacts")
-    .update({ status })
-    .eq("id", id);
+  const { error } = await supabase.from("contacts").update(updates).eq("id", id);
 
   if (error) {
     return redirect(`${redirectTo}?contact_error=1`);

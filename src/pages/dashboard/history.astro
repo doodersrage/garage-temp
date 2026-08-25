@@ -11,6 +11,10 @@ import {
 } from "../../lib/garageTempsHistory";
 import { detectTemperatureAnomalies } from "../../lib/anomalyDetection";
 import { getUserSubscription } from "../../lib/stripeSubscriptions";
+import {
+  compareProbeAverages,
+  computeSeasonalInsights,
+} from "../../lib/seasonalInsights";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -35,13 +39,15 @@ const filters = {
   to: toDate ? new Date(`${toDate}T23:59:59`).toISOString() : undefined,
 };
 
-const [history, chartData, filterOptions, canDownloadCsv, subscription] = await Promise.all([
-  fetchGarageTempHistory(user.id, pageParam, undefined, filters),
-  fetchGarageTempChartData(user.id, 7, filters),
-  fetchHistoryFilterOptions(user.id),
-  canDownloadHistoryCsv(user.id),
-  getUserSubscription(user.id),
-]);
+const [history, chartData, filterOptions, canDownloadCsv, subscription, insights] =
+  await Promise.all([
+    fetchGarageTempHistory(user.id, pageParam, undefined, filters),
+    fetchGarageTempChartData(user.id, 7, filters),
+    fetchHistoryFilterOptions(user.id),
+    canDownloadHistoryCsv(user.id),
+    getUserSubscription(user.id),
+    computeSeasonalInsights(user.id, 30),
+  ]);
 
 if (history.totalPages > 0 && pageParam > history.totalPages) {
   return Astro.redirect(`/dashboard/history?page=${history.totalPages}`);
@@ -49,6 +55,7 @@ if (history.totalPages > 0 && pageParam > history.totalPages) {
 
 const subscriptionNotice = Astro.url.searchParams.get("subscription");
 const anomalies = detectTemperatureAnomalies(chartData.points);
+const probeCompare = compareProbeAverages(chartData.points);
 ---
 <DashboardLayout title="Reading History">
   <div class="space-y-6">
@@ -62,6 +69,22 @@ const anomalies = detectTemperatureAnomalies(chartData.points);
           : " Subscribe to unlock CSV export of your saved history."}
       </p>
     </section>
+
+    {insights.length > 0 && (
+      <section class="card">
+        <h2 class="card-title">Seasonal insights (30 days)</h2>
+        <ul class="space-y-2 mb-0">
+          {insights.map((insight) => (
+            <li>
+              <strong>{insight.title}:</strong> {insight.detail}
+            </li>
+          ))}
+        </ul>
+        {probeCompare.length > 0 && (
+          <p class="mt-4 mb-0 text-sm">{probeCompare[0]}</p>
+        )}
+      </section>
+    )}
 
     <HistorySubscription
       canDownloadCsv={canDownloadCsv}

@@ -105,6 +105,14 @@ export const coreAboutPages: AboutPage[] = [
     summary:
       "Personalize the home page, manage probes, review history, and unlock export with a subscription.",
   },
+  {
+    slug: "ingest-and-webhooks",
+    title: "Ingest API and alert webhooks",
+    description:
+      "Push sensor readings into Garage Temp with the ingest API, and send alerts to Discord, IFTTT, or Home Assistant.",
+    summary:
+      "Device API keys, typed sensor payloads, outbound HMAC webhooks, and Pro alert channels.",
+  },
 ];
 
 function buildAboutPages(): AboutPage[] {

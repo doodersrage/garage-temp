@@ -16,17 +16,18 @@ const {
 
 const hasActiveSubscription =
   subscription !== null && isActiveSubscriptionStatus(subscription.status);
+const isPro = subscription?.plan_tier === "pro";
 ---
 
 <section class="card">
-  <h2 class="card-title">CSV export subscription</h2>
+  <h2 class="card-title">Plans & CSV export</h2>
   <p class="card-subtitle">
-    Downloading temperature history as CSV is available to admin accounts and active subscribers.
+    Member unlocks CSV export. Pro adds SMS, web push, share links, outbound webhooks, and more devices.
   </p>
 
   {subscriptionNotice === "success" && (
     <div class="alert-success mb-4" role="status">
-      <p class="m-0">Subscription activated. CSV export is now available.</p>
+      <p class="m-0">Subscription activated.</p>
     </div>
   )}
 
@@ -40,7 +41,7 @@ const hasActiveSubscription =
     <div class="card-muted">
       <p class="m-0 mb-3 text-sm">
         {hasActiveSubscription
-          ? "Your subscription is active. Use Download CSV on the history table below."
+          ? `Your ${isPro ? "Pro" : "Member"} subscription is active.`
           : "Your account includes CSV export access."}
       </p>
       {hasActiveSubscription && (
@@ -50,15 +51,25 @@ const hasActiveSubscription =
           </button>
         </form>
       )}
+      {hasActiveSubscription && !isPro && (
+        <form action="/api/stripe/checkout" method="post" class="mt-3">
+          <input type="hidden" name="plan" value="pro" />
+          <button class="btn-primary" type="submit">Upgrade to Pro</button>
+        </form>
+      )}
     </div>
   ) : (
-    <div class="card-muted">
-      <p class="m-0 mb-3 text-sm">
-        Subscribe to unlock CSV downloads of your saved temperature and humidity history.
-      </p>
+    <div class="card-muted flex flex-wrap gap-3">
       <form action="/api/stripe/checkout" method="post">
+        <input type="hidden" name="plan" value="member" />
         <button class="btn-primary" type="submit">
-          Subscribe for CSV export
+          Member (CSV)
+        </button>
+      </form>
+      <form action="/api/stripe/checkout" method="post">
+        <input type="hidden" name="plan" value="pro" />
+        <button class="btn-secondary" type="submit">
+          Pro (alerts + share)
         </button>
       </form>
     </div>

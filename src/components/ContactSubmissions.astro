@@ -125,6 +125,19 @@ function buildPageUrl(nextPage: number): string {
                       <button class="btn-ghost" type="submit">Spam</button>
                     </form>
                   )}
+                  <form action="/api/admin/contacts/status" method="post" class="contact-notes-form">
+                    <input type="hidden" name="id" value={submission.id} />
+                    <input type="hidden" name="redirect" value={buildPageUrl(page)} />
+                    <label class="sr-only" for={`notes-${submission.id}`}>Admin notes</label>
+                    <textarea
+                      class="form-input"
+                      id={`notes-${submission.id}`}
+                      name="admin_notes"
+                      rows="2"
+                      placeholder="Admin notes"
+                    >{submission.admin_notes ?? ""}</textarea>
+                    <button class="btn-ghost" type="submit">Save notes</button>
+                  </form>
                 </td>
               </tr>
             ))}

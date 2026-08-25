@@ -1,0 +1,102 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import { getAuthFromCookies } from "../../lib/auth";
+import { getOrCreateHouseholdForUser } from "../../lib/households";
+import { getUserEntitlements } from "../../lib/entitlements";
+import { createServerClient } from "../../lib/supabase";
+import { getSiteUrl } from "../../lib/stripe";
+
+const { session, user } = await getAuthFromCookies(Astro.cookies);
+if (!session || !user) {
+  return Astro.redirect("/signin");
+}
+
+const entitlements = await getUserEntitlements(user.id);
+const household = await getOrCreateHouseholdForUser(user.id, user.email);
+const supabase = createServerClient();
+const { data: links } = household.householdId
+  ? await supabase
+      .from("share_links")
+      .select("id, token, scope, label, expires_at, created_at")
+      .eq("household_id", household.householdId)
+      .order("created_at", { ascending: false })
+  : { data: [] };
+
+const siteUrl = getSiteUrl(Astro.request);
+const notice = Astro.url.searchParams.get("created")
+  ? "Share link created."
+  : Astro.url.searchParams.get("revoked")
+    ? "Share link revoked."
+    : Astro.url.searchParams.get("error") === "pro_required"
+      ? "Pro plan required for share links."
+      : null;
+---
+<DashboardLayout title="Share links">
+  <div class="space-y-6">
+    <section class="card">
+      <h1 class="card-title">Public share links</h1>
+      <p class="card-subtitle">Read-only live views for family without accounts. Pro feature.</p>
+      {notice && <p class="alert-success mt-4">{notice}</p>}
+    </section>
+
+    {!entitlements.canCreateShareLinks ? (
+      <section class="card">
+        <p class="mb-4">Upgrade to Pro to create public share links.</p>
+        <form action="/api/stripe/checkout" method="post">
+          <input type="hidden" name="plan" value="pro" />
+          <button class="btn-primary" type="submit">Upgrade to Pro</button>
+        </form>
+      </section>
+    ) : (
+      <form action="/api/share/manage" method="post" class="card">
+        <input type="hidden" name="action" value="create" />
+        <input type="hidden" name="redirect" value="/dashboard/share" />
+        <h2 class="card-title">Create link</h2>
+        <div class="config-row-grid">
+          <div class="form-field mb-0">
+            <label class="form-label" for="label">Label</label>
+            <input class="form-input" id="label" name="label" placeholder="Family live view" />
+          </div>
+          <div class="form-field mb-0">
+            <label class="form-label" for="scope">Scope</label>
+            <select class="form-input" id="scope" name="scope">
+              <option value="live">Live</option>
+              <option value="history">History</option>
+            </select>
+          </div>
+          <div class="form-field mb-0">
+            <label class="form-label" for="expires_days">Expires (days, 0 = never)</label>
+            <input class="form-input" type="number" id="expires_days" name="expires_days" value="0" min="0" />
+          </div>
+        </div>
+        <button class="btn-primary mt-4" type="submit">Create</button>
+      </form>
+    )}
+
+    <section class="card">
+      <h2 class="card-title">Your links</h2>
+      {(links ?? []).length === 0 ? (
+        <p class="mb-0">No share links yet.</p>
+      ) : (
+        <ul class="space-y-4">
+          {(links ?? []).map((link) => (
+            <li class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <strong>{link.label || link.scope}</strong>
+                <p class="m-0 text-sm break-all">
+                  <a href={`${siteUrl}/share/${link.token}`}>{siteUrl}/share/{link.token}</a>
+                </p>
+              </div>
+              <form action="/api/share/manage" method="post">
+                <input type="hidden" name="action" value="revoke" />
+                <input type="hidden" name="id" value={link.id} />
+                <input type="hidden" name="redirect" value="/dashboard/share" />
+                <button class="btn-ghost" type="submit">Revoke</button>
+              </form>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  </div>
+</DashboardLayout>

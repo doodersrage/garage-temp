@@ -137,6 +137,11 @@ const navItems = [
 					toggle.setAttribute("aria-expanded", open ? "true" : "false");
 				});
 			}
+			if ("serviceWorker" in navigator) {
+				window.addEventListener("load", () => {
+					navigator.serviceWorker.register("/sw.js").catch(() => {});
+				});
+			}
 		</script>
 	</body>
 </html>

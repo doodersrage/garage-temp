@@ -9,24 +9,25 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect("/signin");
   }
 
-  if (!import.meta.env.STRIPE_PRICE_ID?.trim()) {
+  const formData = await request.formData().catch(() => null);
+  const plan = formData?.get("plan")?.toString() === "pro" ? "pro" : "member";
+  const memberPrice = import.meta.env.STRIPE_PRICE_ID?.trim();
+  const proPrice = import.meta.env.STRIPE_PRICE_ID_PRO?.trim();
+  const priceId = plan === "pro" ? proPrice || memberPrice : memberPrice;
+
+  if (!priceId) {
     return new Response("Stripe price is not configured", { status: 500 });
+  }
+
+  if (!priceId.startsWith("price_")) {
+    return new Response(
+      "Stripe price IDs must start with price_.",
+      { status: 500 },
+    );
   }
 
   try {
     const stripe = createStripeClient();
-    const priceId = import.meta.env.STRIPE_PRICE_ID?.trim();
-
-    if (!priceId) {
-      return new Response("Stripe price is not configured", { status: 500 });
-    }
-
-    if (!priceId.startsWith("price_")) {
-      return new Response(
-        "STRIPE_PRICE_ID must be a Stripe Price ID (starts with price_), not a Product ID.",
-        { status: 500 },
-      );
-    }
 
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -41,10 +42,12 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       subscription_data: {
         metadata: {
           supabase_user_id: user.id,
+          plan_tier: plan,
         },
       },
       metadata: {
         supabase_user_id: user.id,
+        plan_tier: plan,
       },
       success_url: buildSiteUrl(
         request,

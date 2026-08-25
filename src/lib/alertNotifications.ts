@@ -1,44 +1,20 @@
 import type { TempFeedConfig, TempFeedResult, TempProbeConfig } from "./tempFeedConfig";
 import {
   evaluateAlerts,
-  getAlertSettingsFromMetadata,
+  evaluateOutage,
+  evaluateRateChange,
   isAlertCooldownActive,
-  serializeAlertSettings,
   type AlertReading,
   type AlertSettings,
 } from "./alerts";
-import { createAdminClient, supabase } from "./supabase";
-
-async function sendAlertEmail(
-  to: string,
-  subject: string,
-  body: string,
-): Promise<void> {
-  try {
-    const { EmailMessage } = await import("cloudflare:email");
-    const { createMimeMessage } = await import("mimetext");
-    const { env } = await import("cloudflare:workers");
-
-    const msg = createMimeMessage();
-    msg.setSender({
-      name: "Garage Temp Monitor",
-      addr: import.meta.env.SMTP_MAIL_FROM,
-    });
-    msg.setRecipient(to);
-    msg.setSubject(subject);
-    msg.addMessage({ contentType: "text/plain", data: body });
-
-    const mail = new EmailMessage(
-      import.meta.env.SMTP_MAIL_FROM,
-      to,
-      msg.asRaw(),
-    );
-
-    await env.MAILER.send(mail);
-  } catch (error) {
-    console.error("Failed to send alert email:", error);
-  }
-}
+import {
+  getAlertSettingsForUser,
+  markCooldown,
+  notifyUser,
+  saveAlertSettingsForUser,
+} from "./notify";
+import type { DeviceWithSensors } from "./devices";
+import { getRecentNumericReadings } from "./sensorReadings";
 
 function buildReadingsFromResults(
   results: TempFeedResult[],
@@ -52,48 +28,24 @@ function buildReadingsFromResults(
   });
 }
 
-async function markAlertSent(
-  userId: string,
-  settings: AlertSettings,
-): Promise<void> {
-  const admin = createAdminClient();
-  const sentAt = new Date().toISOString();
-  const nextSettings = { ...settings, lastAlertSentAt: sentAt };
-
-  const { error } = await admin.auth.admin.updateUserById(userId, {
-    user_metadata: {
-      alert_settings: serializeAlertSettings(nextSettings),
-    },
-  });
-
-  if (error) {
-    console.error("Failed to update alert cooldown metadata:", error.message);
-  }
-}
-
 export async function sendThresholdAlertsIfNeeded(
   userId: string,
   email: string | null | undefined,
-  userMetadata: Record<string, unknown> | undefined,
+  settings: AlertSettings,
   readings: AlertReading[],
 ): Promise<void> {
-  const settings = getAlertSettingsFromMetadata(userMetadata);
   if (!settings.enabled || readings.length === 0) return;
-
-  const alertEmail = settings.email ?? email;
-  if (!alertEmail) return;
-
-  if (isAlertCooldownActive(settings)) return;
+  if (isAlertCooldownActive(settings.lastAlertSentAt)) return;
 
   const messages = evaluateAlerts(settings, readings);
   if (messages.length === 0) return;
 
-  await sendAlertEmail(
-    alertEmail,
-    "Garage temperature alert",
-    messages.join("\n"),
-  );
-  await markAlertSent(userId, settings);
+  await notifyUser(userId, email, settings, {
+    title: "Garage temperature alert",
+    body: messages.join("\n"),
+    kind: "threshold",
+  });
+  await markCooldown(userId, "last_alert_sent_at");
 }
 
 export async function maybeSendThresholdAlerts(
@@ -104,6 +56,7 @@ export async function maybeSendThresholdAlerts(
   probes: TempProbeConfig[],
   existingResults?: TempFeedResult[],
 ): Promise<void> {
+  const settings = await getAlertSettingsForUser(userId, userMetadata);
   const visibleProbes = probes.filter((probe) => probe.visible);
   if (visibleProbes.length === 0) return;
 
@@ -118,28 +71,60 @@ export async function maybeSendThresholdAlerts(
   }
 
   const readings = buildReadingsFromResults(results, visibleProbes);
-  await sendThresholdAlertsIfNeeded(userId, email, userMetadata, readings);
+  await sendThresholdAlertsIfNeeded(userId, email, settings, readings);
+}
+
+export async function maybeSendRateAndOutageAlerts(
+  userId: string,
+  email: string | null | undefined,
+  devices: DeviceWithSensors[],
+  settings: AlertSettings,
+): Promise<void> {
+  if (!settings.enabled) return;
+
+  const outageMessages: string[] = [];
+  for (const device of devices.filter((d) => d.enabled)) {
+    const msg = evaluateOutage(settings, device.name, device.last_seen_at);
+    if (msg) outageMessages.push(msg);
+  }
+
+  if (outageMessages.length > 0 && !isAlertCooldownActive(settings.lastOutageAlertAt)) {
+    await notifyUser(userId, email, settings, {
+      title: "Device outage alert",
+      body: outageMessages.join("\n"),
+      kind: "outage",
+    });
+    await markCooldown(userId, "last_outage_alert_at");
+  }
+
+  const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const rateMessages: string[] = [];
+
+  for (const device of devices) {
+    for (const sensor of device.sensors) {
+      if (sensor.kind !== "temperature" || !sensor.visible) continue;
+      const values = await getRecentNumericReadings(sensor.id, since);
+      const msg = evaluateRateChange(settings, sensor.label, values);
+      if (msg) rateMessages.push(msg);
+    }
+  }
+
+  if (rateMessages.length > 0 && !isAlertCooldownActive(settings.lastRateAlertAt)) {
+    await notifyUser(userId, email, settings, {
+      title: "Rapid temperature change",
+      body: rateMessages.join("\n"),
+      kind: "rate",
+    });
+    await markCooldown(userId, "last_rate_alert_at");
+  }
 }
 
 export async function updateUserAlertSettings(
-  accessToken: string,
-  refreshToken: string,
+  _accessToken: string,
+  _refreshToken: string,
+  userId: string,
   settings: AlertSettings,
 ): Promise<{ error: Error | null }> {
-  const { error: sessionError } = await supabase.auth.setSession({
-    access_token: accessToken,
-    refresh_token: refreshToken,
-  });
-
-  if (sessionError) {
-    return { error: sessionError };
-  }
-
-  const { error } = await supabase.auth.updateUser({
-    data: {
-      alert_settings: serializeAlertSettings(settings),
-    },
-  });
-
-  return { error: error ?? null };
+  const result = await saveAlertSettingsForUser(userId, settings);
+  return { error: result.error ? new Error(result.error) : null };
 }

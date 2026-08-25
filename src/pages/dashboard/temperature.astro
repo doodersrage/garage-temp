@@ -5,6 +5,10 @@ import TempProbesSettings from "../../components/TempProbesSettings.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getUserPreferences } from "../../lib/userPreferences";
 import { checkFeedHealth } from "../../lib/collectHistory";
+import { getUserDevicesAsTempConfig, listHouseholdDevices } from "../../lib/devices";
+import { getOrCreateHouseholdForUser } from "../../lib/households";
+import { getUserEntitlements } from "../../lib/entitlements";
+import { fetchLatestSensorValues } from "../../lib/sensorReadings";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -12,22 +16,77 @@ if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const [preferences, feedHealth] = await Promise.all([
+const [preferences, feedHealth, deviceConfig, entitlements, household] = await Promise.all([
   getUserPreferences(user),
   checkFeedHealth(user.id),
+  getUserDevicesAsTempConfig(user.id, user.email),
+  getUserEntitlements(user.id),
+  getOrCreateHouseholdForUser(user.id, user.email),
 ]);
 
+const devices = household.householdId
+  ? (await listHouseholdDevices(household.householdId)).devices
+  : deviceConfig.devices;
+
+const latest = household.householdId
+  ? await fetchLatestSensorValues(household.householdId)
+  : [];
+
 const redirectTo = "/dashboard/temperature";
+const ingestKey = Astro.url.searchParams.get("ingest_key");
+const deviceNotice = Astro.url.searchParams.get("device_created")
+  ? "Push device created. Copy the ingest key now — it will not be shown again."
+  : Astro.url.searchParams.get("device_deleted")
+    ? "Device deleted."
+    : Astro.url.searchParams.get("sensor_added")
+      ? "Sensor added."
+      : Astro.url.searchParams.get("error") === "device_limit"
+        ? `Device limit reached (${entitlements.maxDevices}).`
+        : null;
 ---
 <DashboardLayout title="Temperature Settings">
   <div class="space-y-6">
     <section class="card animate-slide-in-left">
-      <h1 class="card-title">Temperature feeds & probes</h1>
+      <h1 class="card-title">Devices, feeds & sensors</h1>
       <p class="card-subtitle">{user.email}</p>
       <p class="mb-0">
-        Configure the temperature feeds and probes that appear on your home page.
+        Configure pull feeds, push ingest devices, and multi-kind sensors (temp, humidity, CO₂, door, power, flood).
       </p>
+      {deviceNotice && <p class="alert-success mt-4">{deviceNotice}</p>}
+      {ingestKey && (
+        <p class="mt-3 break-all">
+          Ingest key: <code>{ingestKey}</code><br />
+          POST to <code>/api/ingest/{ingestKey}</code>
+        </p>
+      )}
     </section>
+
+    {latest.length > 0 && (
+      <section class="card">
+        <h2 class="card-title">Latest sensor values</h2>
+        <div class="feed-health-grid">
+          {latest.map((row) => (
+            <div class="feed-health-item">
+              <div>
+                <strong>{row.sensor.label}</strong>
+                <p class="m-0 text-sm text-[var(--color-text-muted)]">
+                  {row.deviceName} · {row.sensor.kind}
+                </p>
+              </div>
+              <span>
+                {row.value_bool != null
+                  ? row.value_bool
+                    ? "On/Open"
+                    : "Off/Closed"
+                  : row.value_num != null
+                    ? `${row.value_num.toFixed(1)}${row.sensor.unit ? ` ${row.sensor.unit}` : ""}`
+                    : row.value_text ?? "—"}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
 
     {feedHealth.statuses.length > 0 && (
       <section class="card">
@@ -48,6 +107,90 @@ const redirectTo = "/dashboard/temperature";
         </div>
       </section>
     )}
+
+    <section class="card">
+      <h2 class="card-title">Push ingest device</h2>
+      <p class="card-subtitle">
+        Create an API key for ESP/Arduino to POST readings. Limit: {entitlements.maxDevices} devices ({entitlements.tier}).
+      </p>
+      <form action="/api/devices" method="post" class="space-y-3">
+        <input type="hidden" name="action" value="create_push" />
+        <input type="hidden" name="redirect" value={redirectTo} />
+        <div class="form-field">
+          <label class="form-label" for="device-name">Device name</label>
+          <input class="form-input" id="device-name" name="name" placeholder="Garage ESP32" />
+        </div>
+        <button class="btn-primary" type="submit">Create push device</button>
+      </form>
+
+      {devices.filter((d) => d.source === "push").length > 0 && (
+        <ul class="mt-6 space-y-3">
+          {devices
+            .filter((d) => d.source === "push")
+            .map((device) => (
+              <li class="flex items-center justify-between gap-3">
+                <div>
+                  <strong>{device.name}</strong>
+                  <p class="m-0 text-sm text-[var(--color-text-muted)]">
+                    key prefix {device.ingest_key_prefix}… · last seen {device.last_seen_at ?? "never"}
+                  </p>
+                </div>
+                <form action="/api/devices" method="post">
+                  <input type="hidden" name="action" value="delete" />
+                  <input type="hidden" name="device_id" value={device.id} />
+                  <input type="hidden" name="redirect" value={redirectTo} />
+                  <button class="btn-ghost" type="submit">Delete</button>
+                </form>
+              </li>
+            ))}
+        </ul>
+      )}
+
+      {devices.some((d) => d.source === "push") && (
+        <form action="/api/devices" method="post" class="mt-6 space-y-3 border-t border-[var(--color-border)] pt-4">
+          <h3 class="text-base font-semibold">Add sensor to push device</h3>
+          <input type="hidden" name="action" value="add_sensor" />
+          <input type="hidden" name="redirect" value={redirectTo} />
+          <div class="config-row-grid">
+            <div class="form-field mb-0">
+              <label class="form-label" for="sensor-device">Device</label>
+              <select class="form-input" id="sensor-device" name="device_id">
+                {devices
+                  .filter((d) => d.source === "push")
+                  .map((d) => (
+                    <option value={d.id}>{d.name}</option>
+                  ))}
+              </select>
+            </div>
+            <div class="form-field mb-0">
+              <label class="form-label" for="sensor-key">Key</label>
+              <input class="form-input" id="sensor-key" name="key" required placeholder="door1" />
+            </div>
+            <div class="form-field mb-0">
+              <label class="form-label" for="sensor-label">Label</label>
+              <input class="form-input" id="sensor-label" name="label" required placeholder="Garage door" />
+            </div>
+            <div class="form-field mb-0">
+              <label class="form-label" for="sensor-kind">Kind</label>
+              <select class="form-input" id="sensor-kind" name="kind">
+                <option value="temperature">temperature</option>
+                <option value="humidity">humidity</option>
+                <option value="co2">co2</option>
+                <option value="door">door</option>
+                <option value="power">power</option>
+                <option value="flood">flood</option>
+                <option value="generic">generic</option>
+              </select>
+            </div>
+            <div class="form-field mb-0">
+              <label class="form-label" for="sensor-unit">Unit</label>
+              <input class="form-input" id="sensor-unit" name="unit" placeholder="ppm / F / %" />
+            </div>
+          </div>
+          <button class="btn-secondary" type="submit">Add sensor</button>
+        </form>
+      )}
+    </section>
 
     <TempFeedsSettings feeds={preferences.tempFeeds} redirectTo={redirectTo} />
 

@@ -1,63 +1,148 @@
 ---
-import { getAlertSettingsFromMetadata } from "../lib/alerts";
+import type { AlertSettings } from "../lib/alerts";
+import type { Entitlements } from "../lib/entitlements";
 
 interface Props {
   userEmail: string;
-  userMetadata: Record<string, unknown>;
+  settings: AlertSettings;
+  entitlements: Entitlements;
+  vapidPublicKey?: string;
   redirectTo?: string;
 }
 
-const { userEmail, userMetadata, redirectTo = "/dashboard" } = Astro.props;
-const settings = getAlertSettingsFromMetadata(userMetadata);
+const {
+  userEmail,
+  settings,
+  entitlements,
+  vapidPublicKey = "",
+  redirectTo = "/dashboard",
+} = Astro.props;
 ---
 <form action="/api/user/alert-settings" method="post" class="card animate-slide-up-fade">
   <input type="hidden" name="redirect" value={redirectTo} />
-  <h2 class="card-title">Threshold alerts</h2>
+  <h2 class="card-title">Alerts & digests</h2>
   <p class="card-subtitle">
-    Email alerts when probe readings cross your freeze or humidity thresholds. Checked when readings are fetched.
+    Threshold, rate-of-change, and outage alerts across email, Discord, SMS, push, and webhooks.
   </p>
 
-  <label class="checkbox-row mb-4">
+  <label class="checkbox-row mb-3">
     <input type="checkbox" name="alerts_enabled" value="true" checked={settings.enabled} />
-    <span>Enable email alerts</span>
+    <span>Enable alert evaluation</span>
+  </label>
+
+  <label class="checkbox-row mb-4">
+    <input type="checkbox" name="digest_enabled" value="true" checked={settings.digestEnabled} />
+    <span>Weekly email digest (Mondays)</span>
   </label>
 
   <div class="config-row-grid mb-4">
     <div class="form-field mb-0">
       <label class="form-label" for="freeze_threshold_f">Freeze threshold (°F)</label>
-      <input
-        class="form-input"
-        type="number"
-        step="0.5"
-        id="freeze_threshold_f"
-        name="freeze_threshold_f"
-        value={settings.freezeThresholdF}
-      />
+      <input class="form-input" type="number" step="0.5" id="freeze_threshold_f" name="freeze_threshold_f" value={settings.freezeThresholdF} />
     </div>
     <div class="form-field mb-0">
       <label class="form-label" for="humidity_threshold">Humidity threshold (%)</label>
-      <input
-        class="form-input"
-        type="number"
-        step="1"
-        id="humidity_threshold"
-        name="humidity_threshold"
-        value={settings.humidityThreshold}
-      />
+      <input class="form-input" type="number" step="1" id="humidity_threshold" name="humidity_threshold" value={settings.humidityThreshold} />
     </div>
+    <div class="form-field mb-0">
+      <label class="form-label" for="rate_change_f">Rate change (°F / hour)</label>
+      <input class="form-input" type="number" step="0.5" id="rate_change_f" name="rate_change_f" value={settings.rateChangeF} />
+    </div>
+    <div class="form-field mb-0">
+      <label class="form-label" for="outage_hours">Outage hours</label>
+      <input class="form-input" type="number" step="0.5" id="outage_hours" name="outage_hours" value={settings.outageHours} />
+    </div>
+  </div>
+
+  <h3 class="text-base font-semibold mb-2">Channels</h3>
+  <div class="space-y-2 mb-4">
+    <label class="checkbox-row">
+      <input type="checkbox" name="channel_email" value="true" checked={settings.channelEmail} />
+      <span>Email</span>
+    </label>
+    <label class="checkbox-row">
+      <input type="checkbox" name="channel_discord" value="true" checked={settings.channelDiscord} />
+      <span>Discord webhook</span>
+    </label>
+    <label class="checkbox-row">
+      <input type="checkbox" name="channel_sms" value="true" checked={settings.channelSms} disabled={!entitlements.canUseSms} />
+      <span>SMS (Twilio){!entitlements.canUseSms ? " — Pro" : ""}</span>
+    </label>
+    <label class="checkbox-row">
+      <input type="checkbox" name="channel_push" value="true" checked={settings.channelPush} disabled={!entitlements.canUsePush} />
+      <span>Web Push{!entitlements.canUsePush ? " — Pro" : ""}</span>
+    </label>
+    <label class="checkbox-row">
+      <input type="checkbox" name="channel_webhook" value="true" checked={settings.channelWebhook} disabled={!entitlements.canUseOutboundWebhook} />
+      <span>Outbound webhook (IFTTT / Home Assistant){!entitlements.canUseOutboundWebhook ? " — Pro" : ""}</span>
+    </label>
   </div>
 
   <div class="form-field">
     <label class="form-label" for="alert_email">Alert email</label>
-    <input
-      class="form-input"
-      type="email"
-      id="alert_email"
-      name="alert_email"
-      value={settings.email ?? userEmail}
-      placeholder={userEmail}
-    />
+    <input class="form-input" type="email" id="alert_email" name="alert_email" value={settings.email ?? userEmail} placeholder={userEmail} />
+  </div>
+
+  <div class="form-field">
+    <label class="form-label" for="discord_webhook_url">Discord webhook URL</label>
+    <input class="form-input" type="url" id="discord_webhook_url" name="discord_webhook_url" value={settings.discordWebhookUrl ?? ""} placeholder="https://discord.com/api/webhooks/..." />
+  </div>
+
+  <div class="form-field">
+    <label class="form-label" for="sms_phone">SMS phone (E.164)</label>
+    <input class="form-input" type="tel" id="sms_phone" name="sms_phone" value={settings.smsPhone ?? ""} placeholder="+15551234567" disabled={!entitlements.canUseSms} />
+  </div>
+
+  <div class="form-field">
+    <label class="form-label" for="outbound_webhook_url">Outbound webhook URL</label>
+    <input class="form-input" type="url" id="outbound_webhook_url" name="outbound_webhook_url" value={settings.outboundWebhookUrl ?? ""} placeholder="https://hooks.example.com/..." disabled={!entitlements.canUseOutboundWebhook} />
+  </div>
+
+  <div class="form-field">
+    <label class="form-label" for="outbound_webhook_secret">Webhook HMAC secret</label>
+    <input class="form-input" type="text" id="outbound_webhook_secret" name="outbound_webhook_secret" value={settings.outboundWebhookSecret ?? ""} disabled={!entitlements.canUseOutboundWebhook} />
   </div>
 
   <button type="submit" class="btn-primary">Save alert settings</button>
+
+  {entitlements.canUsePush && vapidPublicKey && (
+    <div class="mt-4">
+      <button type="button" class="btn-secondary" id="enable-push-btn" data-vapid={vapidPublicKey}>
+        Enable browser push
+      </button>
+      <p class="card-subtitle mt-2 mb-0" id="push-status"></p>
+    </div>
+  )}
 </form>
+
+{entitlements.canUsePush && vapidPublicKey && (
+  <script is:inline define:vars={{ vapidPublicKey }}>
+    function urlBase64ToUint8Array(base64String) {
+      const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+      const rawData = atob(base64);
+      return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+    }
+
+    const btn = document.getElementById("enable-push-btn");
+    const status = document.getElementById("push-status");
+    btn?.addEventListener("click", async () => {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+        });
+        const json = sub.toJSON();
+        await fetch("/api/push/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
+        });
+        if (status) status.textContent = "Push notifications enabled.";
+      } catch (e) {
+        if (status) status.textContent = "Could not enable push: " + (e?.message || e);
+      }
+    });
+  </script>
+)}

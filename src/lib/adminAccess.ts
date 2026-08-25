@@ -5,12 +5,9 @@ export const USER_GROUP_NAME = "user";
 export const MEMBER_GROUP_NAME = "member";
 
 export async function canDownloadHistoryCsv(userId: string): Promise<boolean> {
-  const [admin, member] = await Promise.all([
-    isUserAdmin(userId),
-    isUserInGroup(userId, MEMBER_GROUP_NAME),
-  ]);
-
-  return admin || member;
+  const { getUserEntitlements } = await import("./entitlements");
+  const entitlements = await getUserEntitlements(userId);
+  return entitlements.canDownloadCsv;
 }
 
 export async function isUserInGroup(

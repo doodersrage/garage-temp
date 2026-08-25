@@ -7,6 +7,7 @@ export type ContactSubmission = {
   message: string;
   created_at: string;
   status: string;
+  admin_notes: string | null;
 };
 
 export type PaginatedContactSubmissions = {
@@ -25,7 +26,7 @@ export type ContactFilters = {
 
 export const CONTACTS_PAGE_SIZE = 20;
 
-const CONTACTS_SELECT = "id, name, email, message, created_at, status";
+const CONTACTS_SELECT = "id, name, email, message, created_at, status, admin_notes";
 
 export function formatContactTimestamp(timestamp: string): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -149,7 +150,7 @@ function escapeCsvField(value: string | number): string {
 }
 
 export function buildContactsCsv(submissions: ContactSubmission[]): string {
-  const headers = ["submitted_at", "name", "email", "status", "message"];
+  const headers = ["submitted_at", "name", "email", "status", "admin_notes", "message"];
 
   const rows = submissions.map((submission) =>
     [
@@ -157,6 +158,7 @@ export function buildContactsCsv(submissions: ContactSubmission[]): string {
       submission.name,
       submission.email,
       submission.status,
+      submission.admin_notes ?? "",
       getContactMessageText(submission.message),
     ]
       .map(escapeCsvField)

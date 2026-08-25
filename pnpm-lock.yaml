@@ -17,6 +17,9 @@ importers:
       '@astrojs/sitemap':
         specifier: ^3.7.3
         version: 3.7.3
+      '@block65/webcrypto-web-push':
+        specifier: ^1.0.2
+        version: 1.0.2
       '@lucide/astro':
         specifier: ^1.21.0
         version: 1.21.0(astro@6.4.8(@types/node@24.13.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.62.2))
@@ -192,6 +195,13 @@ packages:
   '@babel/types@7.29.7':
     resolution: {integrity: sha512-4zBIxpPzowiZpusoFkyGVwakdRJUyuH5PxQ/PrqghfdFWWasvnCdPfQXHrenDai+gyLARulZjZowCOj6fjT4pA==}
     engines: {node: '>=6.9.0'}
+
+  '@block65/custom-error@12.2.0':
+    resolution: {integrity: sha512-OH3qt4aY9W2kfpI5BY075Mc/M5HNJHjtYkxwUV62OZhKrKQeSUcIXHZkB6H+9YQ5a7D0po3JCouV3egeQDS2pA==}
+    engines: {node: '>=18.0.0'}
+
+  '@block65/webcrypto-web-push@1.0.2':
+    resolution: {integrity: sha512-KYFCz4tgnquZ+Mu4EFrB5IfwM0gWJdEKAN4Gj5ZbTRO+ZYcNLs2th36v0toGa+1XOL4qD7G20LnU6yH7zn5siQ==}
 
   '@capsizecss/unpack@4.0.1':
     resolution: {integrity: sha512-CuNiSqg7+e1cO/GjffyMOm5Tt2jUF9CWHHnvQ/UkqvtkGfHdgwEC0wpmq7fkN3gxwpRnrAN0WzO3vREKmNolMQ==}
@@ -1251,6 +1261,10 @@ packages:
   bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
 
+  base64-arraybuffer@1.0.2:
+    resolution: {integrity: sha512-I3yl4r9QB5ZRY3XuJVEPfc2XhZO6YweFPI+UovAzn+8/hb3oJ6lnysaFcjVpkCPfVWFUDvoZ8kmVDP7WyRtYtQ==}
+    engines: {node: '>= 0.6.0'}
+
   baseline-browser-mapping@2.10.40:
     resolution: {integrity: sha512-BSSLZ9/Cjjv7Gtj5B68ZzXcXUg8iOf3fme+FCuh8rC/Go+Kmh8cox7M3A8dolou16s64QjLPOSdngh7GxXvkSw==}
     engines: {node: '>=6.0.0'}
@@ -2068,6 +2082,10 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  serialize-error@11.0.3:
+    resolution: {integrity: sha512-2G2y++21dhj2R7iHAdd0FIzjGwuKZld+7Pl/bTU6YIkrC2ZMbVUjm+luj6A6V34Rv9XfKJDKpTWu9W4Gse1D9g==}
+    engines: {node: '>=14.16'}
+
   sharp@0.34.5:
     resolution: {integrity: sha512-Ou9I5Ft9WNcCbXrU9cMgPBcCK8LiwLqcbywW3t4oDV37n1pzpuNLsYiAV8eODnjbtQlSDwZ2cUEeQz4E54Hltg==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
@@ -2199,6 +2217,14 @@ packages:
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
+  type-fest@2.19.0:
+    resolution: {integrity: sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==}
+    engines: {node: '>=12.20'}
+
+  type-fest@4.41.0:
+    resolution: {integrity: sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA==}
+    engines: {node: '>=16'}
 
   ufo@1.6.4:
     resolution: {integrity: sha512-JFNbkD1Svwe0KvGi8GOeLcP4kAWQ609twvCdcHxq1oSL8svv39ZuSvajcD8B+5D0eL4+s1Is2D/O6KN3qcTeRA==}
@@ -2725,6 +2751,16 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
+
+  '@block65/custom-error@12.2.0':
+    dependencies:
+      serialize-error: 11.0.3
+
+  '@block65/webcrypto-web-push@1.0.2':
+    dependencies:
+      '@block65/custom-error': 12.2.0
+      base64-arraybuffer: 1.0.2
+      type-fest: 4.41.0
 
   '@capsizecss/unpack@4.0.1':
     dependencies:
@@ -3579,6 +3615,8 @@ snapshots:
       '@babel/core': 7.29.7
 
   bail@2.0.2: {}
+
+  base64-arraybuffer@1.0.2: {}
 
   baseline-browser-mapping@2.10.40: {}
 
@@ -4647,6 +4685,10 @@ snapshots:
 
   semver@7.8.5: {}
 
+  serialize-error@11.0.3:
+    dependencies:
+      type-fest: 2.19.0
+
   sharp@0.34.5:
     dependencies:
       '@img/colour': 1.1.0
@@ -4792,6 +4834,10 @@ snapshots:
   trough@2.2.0: {}
 
   tslib@2.8.1: {}
+
+  type-fest@2.19.0: {}
+
+  type-fest@4.41.0: {}
 
   ufo@1.6.4: {}
 

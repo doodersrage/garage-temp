@@ -1,6 +1,9 @@
-import type { ChartPoint } from "./garageTempsHistory";
 import { createAdminClient, createServerClient } from "./supabase";
-import { getAlertSettingsFromMetadata } from "./alerts";
+import type { ChartPoint } from "./garageTempsHistory";
+import { getAlertSettingsForUser } from "./notify";
+import { listAllHouseholdOwnerUserIds } from "./households";
+import { summarizeSeasonal } from "./seasonalInsights";
+import { notifyUser } from "./notify";
 
 async function sendDigestEmail(to: string, subject: string, body: string): Promise<void> {
   try {
@@ -70,16 +73,7 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
   const since = new Date();
   since.setDate(since.getDate() - 7);
 
-  const { data: feedRows, error } = await supabase
-    .from("user_temp_feeds")
-    .select("user_id")
-    .order("user_id");
-
-  if (error) {
-    return { sent: 0, skipped: 0, errors: [error.message] };
-  }
-
-  const userIds = [...new Set((feedRows ?? []).map((row) => row.user_id))];
+  const userIds = await listAllHouseholdOwnerUserIds();
 
   for (const userId of userIds) {
     try {
@@ -90,11 +84,12 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
         continue;
       }
 
-      const settings = getAlertSettingsFromMetadata(
+      const settings = await getAlertSettingsForUser(
+        userId,
         user.user_metadata as Record<string, unknown> | undefined,
       );
 
-      if (!settings.enabled) {
+      if (!settings.digestEnabled) {
         skipped += 1;
         continue;
       }
@@ -125,15 +120,27 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
       }));
 
       const summary = summarizePoints(points);
+      const seasonal = summarizeSeasonal(points, 7);
       const body = [
         "Weekly garage temperature summary (last 7 days)",
         "",
         ...summary,
         "",
-        "Manage alert settings in your dashboard.",
+        "Seasonal highlights:",
+        ...seasonal.map((item) => `- ${item.title}: ${item.detail}`),
+        "",
+        "Manage digest settings in your dashboard.",
       ].join("\n");
 
       await sendDigestEmail(digestEmail, "Weekly garage temperature digest", body);
+
+      // Also fan out to other digest-capable channels if enabled
+      await notifyUser(userId, digestEmail, { ...settings, channelEmail: false }, {
+        title: "Weekly garage digest",
+        body: summary.join("\n"),
+        kind: "digest",
+      });
+
       sent += 1;
     } catch (e) {
       errors.push(

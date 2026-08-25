@@ -6,6 +6,16 @@ import {
   parseTempFeedPayload,
 } from "./tempFeedConfig";
 import { maybeSendThresholdAlerts } from "./alertNotifications";
+import {
+  buildReadingRowsFromTempResults,
+  insertSensorReadings,
+} from "./sensorReadings";
+import {
+  ensureDefaultPullDevice,
+  getUserDevicesAsTempConfig,
+  touchDeviceLastSeen,
+  type DeviceWithSensors,
+} from "./devices";
 
 export type FetchTempsOptions = {
   feeds?: TempFeedConfig[];
@@ -15,9 +25,11 @@ export type FetchTempsOptions = {
   userEmail?: string | null;
   userMetadata?: Record<string, unknown>;
   sendAlerts?: boolean;
+  householdId?: string | null;
+  devices?: DeviceWithSensors[];
 };
 
-async function saveProbeReadings(
+async function saveProbeReadingsLegacy(
   feedResults: TempFeedResult[],
   probes: TempProbeConfig[],
   userId: string,
@@ -96,13 +108,50 @@ export async function fetchTempFeed(feed: TempFeedConfig): Promise<TempFeedResul
 export async function fetchTemps(
   options: FetchTempsOptions = {},
 ): Promise<TempFeedResult[]> {
-  const feeds = (options.feeds ?? getDefaultTempFeeds()).filter((feed) => feed.enabled);
-  const probes = options.probes ?? getDefaultTempProbes();
+  let feeds = options.feeds;
+  let probes = options.probes;
+  let devices = options.devices;
+  let householdId = options.householdId;
+
+  if (options.userId && (!feeds || !probes)) {
+    const config = await getUserDevicesAsTempConfig(options.userId, options.userEmail);
+    feeds = feeds ?? config.feeds;
+    probes = probes ?? config.probes;
+    devices = devices ?? config.devices;
+    householdId = householdId ?? config.householdId;
+  }
+
+  feeds = (feeds ?? getDefaultTempFeeds()).filter((feed) => feed.enabled);
+  probes = probes ?? getDefaultTempProbes();
   const results = await Promise.all(feeds.map((feed) => fetchTempFeed(feed)));
 
   if (options.saveToDatabase !== false && options.userId) {
     const visibleProbes = probes.filter((probe) => probe.visible);
-    await saveProbeReadings(results, visibleProbes, options.userId);
+
+    // Prefer sensor_readings when household/devices available
+    if (householdId && devices && devices.length > 0) {
+      const rows = buildReadingRowsFromTempResults(
+        householdId,
+        devices,
+        results,
+        visibleProbes,
+      );
+      const { error } = await insertSensorReadings(rows);
+      if (error) {
+        console.error("Failed to save sensor readings:", error);
+      }
+
+      for (const result of results) {
+        if (!result.error) {
+          await touchDeviceLastSeen(result.id);
+        }
+      }
+
+      // Keep legacy table in sync for older history UI paths until fully cut over
+      await saveProbeReadingsLegacy(results, visibleProbes, options.userId);
+    } else {
+      await saveProbeReadingsLegacy(results, visibleProbes, options.userId);
+    }
 
     if (options.sendAlerts !== false) {
       await maybeSendThresholdAlerts(
@@ -133,3 +182,5 @@ export async function fetchLegacyTempPayload(
     temp: result?.probes ?? {},
   };
 }
+
+export { ensureDefaultPullDevice };

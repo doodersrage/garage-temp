@@ -9,6 +9,10 @@ const protectedApiPrefixes = [
   "/api/admin/",
   "/api/feeds/",
   "/api/home/",
+  "/api/household",
+  "/api/devices",
+  "/api/push/",
+  "/api/share/manage",
 ];
 
 export const onRequest = defineMiddleware(async (context, next) => {

@@ -1,0 +1,76 @@
+---
+export const prerender = true;
+
+import AboutArticle from "../../components/AboutArticle.astro";
+import { getAboutPage } from "../../lib/aboutPages";
+
+const page = getAboutPage("ingest-and-webhooks")!;
+---
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+>
+  <p>
+    In addition to pulling HTTPS JSON feeds, Garage Temperature Monitor accepts
+    push ingest from ESP/Arduino devices and can fan alert notifications out to
+    Discord, SMS, web push, and generic HTTPS webhooks for IFTTT or Home Assistant.
+  </p>
+
+  <h2>Push ingest</h2>
+  <p>
+    From <strong>Dashboard → Devices</strong>, create a push device to receive a one-time API key.
+    Send readings with:
+  </p>
+  <pre><code>POST /api/ingest/&lt;device-key&gt;
+Content-Type: application/json</code></pre>
+
+  <h3>Classic Arduino JSON</h3>
+  <pre><code>{`{
+  "temp": {
+    "0": { "c": 18.5, "f": 65.3, "h": 42 },
+    "1": { "c": 19.0, "f": 66.2, "h": 40 }
+  }
+}`}</code></pre>
+
+  <h3>Typed multi-sensor payload</h3>
+  <pre><code>{`{
+  "sensors": [
+    { "key": "garage_temp", "kind": "temperature", "value": 65.3, "unit": "F" },
+    { "key": "garage_rh", "kind": "humidity", "value": 42, "unit": "%" },
+    { "key": "door1", "kind": "door", "bool": true },
+    { "key": "co2", "kind": "co2", "value": 820, "unit": "ppm" }
+  ]
+}`}</code></pre>
+  <p>
+    Supported kinds: <code>temperature</code>, <code>humidity</code>, <code>co2</code>,
+    <code>door</code>, <code>power</code>, <code>flood</code>, <code>generic</code>.
+  </p>
+
+  <h2>Outbound alert webhooks</h2>
+  <p>
+    Pro accounts can enable an outbound webhook in alert settings. Each alert POSTs JSON:
+  </p>
+  <pre><code>{`{
+  "title": "Garage temperature alert",
+  "body": "Probe 1 is 31.2°F …",
+  "kind": "threshold",
+  "sent_at": "2026-08-25T12:00:00.000Z"
+}`}</code></pre>
+  <p>
+    When a webhook secret is set, the request includes
+    <code>X-Signature</code> as a hex HMAC-SHA256 of the raw body. Use that in Home Assistant
+    or IFTTT Webhooks to verify authenticity.
+  </p>
+
+  <h2>Other Pro channels</h2>
+  <ul>
+    <li>Discord webhook URL</li>
+    <li>Twilio SMS (requires Twilio env vars on the Worker)</li>
+    <li>Web Push (VAPID keys + browser permission)</li>
+  </ul>
+  <p>
+    Email alerts remain available on all plans. Weekly digests can be enabled independently
+    of freeze/humidity threshold alerts.
+  </p>
+</AboutArticle>
