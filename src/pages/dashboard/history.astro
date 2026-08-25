@@ -15,6 +15,8 @@ import {
   compareProbeAverages,
   computeSeasonalInsights,
 } from "../../lib/seasonalInsights";
+import { getUserPreferences } from "../../lib/userPreferences";
+import { fetchIndoorOutdoorDelta } from "../../lib/indoorOutdoorDelta";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -39,6 +41,8 @@ const filters = {
   to: toDate ? new Date(`${toDate}T23:59:59`).toISOString() : undefined,
 };
 
+const preferences = await getUserPreferences(user);
+
 const [history, chartData, filterOptions, canDownloadCsv, subscription, insights] =
   await Promise.all([
     fetchGarageTempHistory(user.id, pageParam, undefined, filters),
@@ -48,6 +52,11 @@ const [history, chartData, filterOptions, canDownloadCsv, subscription, insights
     getUserSubscription(user.id),
     computeSeasonalInsights(user.id, 30),
   ]);
+
+const outdoorDelta = await fetchIndoorOutdoorDelta(
+  chartData.points,
+  preferences.weatherCityId,
+);
 
 if (history.totalPages > 0 && pageParam > history.totalPages) {
   return Astro.redirect(`/dashboard/history?page=${history.totalPages}`);
@@ -69,6 +78,41 @@ const probeCompare = compareProbeAverages(chartData.points);
           : " Subscribe to unlock CSV export of your saved history."}
       </p>
     </section>
+
+    {outdoorDelta && (
+      <section class="card">
+        <h2 class="card-title">Indoor vs outdoor</h2>
+        <p class="card-subtitle">
+          Chart-window garage average compared with current outdoor weather
+          {outdoorDelta.cityName ? ` in ${outdoorDelta.cityName}` : ""}.
+        </p>
+        <div class="stat-grid">
+          <article class="stat-item">
+            <span class="stat-label">Indoor avg</span>
+            <p class="stat-value">{outdoorDelta.indoorAvgF.toFixed(1)}°F</p>
+          </article>
+          <article class="stat-item">
+            <span class="stat-label">Outdoor now</span>
+            <p class="stat-value">{outdoorDelta.outdoorF.toFixed(1)}°F</p>
+            <p class="stat-detail">{outdoorDelta.outdoorDescription}</p>
+          </article>
+          <article class="stat-item">
+            <span class="stat-label">Delta</span>
+            <p class="stat-value">
+              {outdoorDelta.deltaF > 0 ? "+" : ""}
+              {outdoorDelta.deltaF.toFixed(1)}°F
+            </p>
+            <p class="stat-detail">
+              {outdoorDelta.deltaF > 0
+                ? "Garage warmer than outdoors"
+                : outdoorDelta.deltaF < 0
+                  ? "Garage cooler than outdoors"
+                  : "Matched outdoors"}
+            </p>
+          </article>
+        </div>
+      </section>
+    )}
 
     {insights.length > 0 && (
       <section class="card">

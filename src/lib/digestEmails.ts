@@ -1,9 +1,8 @@
-import { createAdminClient, createServerClient } from "./supabase";
+import { createAdminClient } from "./supabase";
 import type { ChartPoint } from "./garageTempsHistory";
-import { getAlertSettingsForUser } from "./notify";
+import { getAlertSettingsForUser, notifyUser } from "./notify";
 import { listAllHouseholdOwnerUserIds } from "./households";
 import { summarizeSeasonal } from "./seasonalInsights";
-import { notifyUser } from "./notify";
 
 async function sendDigestEmail(to: string, subject: string, body: string): Promise<void> {
   try {
@@ -64,14 +63,10 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
   skipped: number;
   errors: string[];
 }> {
-  const supabase = createServerClient();
   const admin = createAdminClient();
   const errors: string[] = [];
   let sent = 0;
   let skipped = 0;
-
-  const since = new Date();
-  since.setDate(since.getDate() - 7);
 
   const userIds = await listAllHouseholdOwnerUserIds();
 
@@ -95,29 +90,19 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
       }
 
       const digestEmail = settings.email ?? user.email;
-      const { data: rows, error: historyError } = await supabase
-        .from("garage_temps")
-        .select("tempf, humidity, timestamp, probe_label, probe_key")
-        .eq("user_id", userId)
-        .gte("timestamp", since.toISOString())
-        .order("timestamp", { ascending: true });
+      const { fetchGarageTempChartData } = await import("./garageTempsHistory");
+      const chart = await fetchGarageTempChartData(userId, 7);
 
-      if (historyError) {
-        errors.push(`${user.email}: ${historyError.message}`);
+      if (chart.error) {
+        errors.push(`${user.email}: ${chart.error}`);
         continue;
       }
 
-      if (!rows || rows.length === 0) {
+      const points = chart.points;
+      if (!points || points.length === 0) {
         skipped += 1;
         continue;
       }
-
-      const points: ChartPoint[] = rows.map((row) => ({
-        timestamp: row.timestamp,
-        tempf: Number(row.tempf),
-        humidity: Number(row.humidity),
-        probeLabel: row.probe_label?.trim() || row.probe_key || "Probe",
-      }));
 
       const summary = summarizePoints(points);
       const seasonal = summarizeSeasonal(points, 7);

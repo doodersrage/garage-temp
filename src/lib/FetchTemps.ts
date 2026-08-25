@@ -1,4 +1,3 @@
-import { createServerClient } from "./supabase";
 import type { TempFeedConfig, TempFeedResult, TempProbeConfig, TempReading } from "./tempFeedConfig";
 import {
   getDefaultTempFeeds,
@@ -28,51 +27,6 @@ export type FetchTempsOptions = {
   householdId?: string | null;
   devices?: DeviceWithSensors[];
 };
-
-async function saveProbeReadingsLegacy(
-  feedResults: TempFeedResult[],
-  probes: TempProbeConfig[],
-  userId: string,
-): Promise<void> {
-  const supabase = createServerClient();
-  const timestamp = new Date();
-  const feedsById = new Map(feedResults.map((feed) => [feed.id, feed]));
-
-  const rows = probes.flatMap((probe) => {
-    const feed = feedsById.get(probe.feedId);
-    if (!feed || feed.error) {
-      return [];
-    }
-
-    const reading = feed.probes[probe.key];
-    if (!reading) {
-      return [];
-    }
-
-    return [
-      {
-        user_id: userId,
-        feed_name: feed.name,
-        probe_label: probe.label,
-        probe_key: probe.key,
-        tempc: reading.c,
-        tempf: reading.f,
-        humidity: reading.h,
-        timestamp,
-      },
-    ];
-  });
-
-  if (rows.length === 0) {
-    return;
-  }
-
-  const { error } = await supabase.from("garage_temps").insert(rows);
-
-  if (error) {
-    console.error("Failed to save garage temperature readings:", error.message);
-  }
-}
 
 export async function fetchTempFeed(feed: TempFeedConfig): Promise<TempFeedResult> {
   try {
@@ -113,12 +67,29 @@ export async function fetchTemps(
   let devices = options.devices;
   let householdId = options.householdId;
 
-  if (options.userId && (!feeds || !probes)) {
+  if (options.userId && (!feeds || !probes || !devices || !householdId)) {
     const config = await getUserDevicesAsTempConfig(options.userId, options.userEmail);
     feeds = feeds ?? config.feeds;
     probes = probes ?? config.probes;
     devices = devices ?? config.devices;
     householdId = householdId ?? config.householdId;
+  }
+
+  // Anonymous / no user: ensure we still have defaults
+  if (!options.userId) {
+    feeds = feeds ?? getDefaultTempFeeds();
+    probes = probes ?? getDefaultTempProbes();
+  } else if ((!devices || devices.length === 0) && options.userId) {
+    const ensured = await ensureDefaultPullDevice(options.userId, options.userEmail);
+    devices = ensured.devices;
+    householdId = ensured.householdId || householdId;
+    if (!feeds?.length) {
+      const mapped = await getUserDevicesAsTempConfig(options.userId, options.userEmail);
+      feeds = mapped.feeds;
+      probes = mapped.probes;
+      devices = mapped.devices;
+      householdId = mapped.householdId;
+    }
   }
 
   feeds = (feeds ?? getDefaultTempFeeds()).filter((feed) => feed.enabled);
@@ -128,7 +99,6 @@ export async function fetchTemps(
   if (options.saveToDatabase !== false && options.userId) {
     const visibleProbes = probes.filter((probe) => probe.visible);
 
-    // Prefer sensor_readings when household/devices available
     if (householdId && devices && devices.length > 0) {
       const rows = buildReadingRowsFromTempResults(
         householdId,
@@ -146,11 +116,6 @@ export async function fetchTemps(
           await touchDeviceLastSeen(result.id);
         }
       }
-
-      // Keep legacy table in sync for older history UI paths until fully cut over
-      await saveProbeReadingsLegacy(results, visibleProbes, options.userId);
-    } else {
-      await saveProbeReadingsLegacy(results, visibleProbes, options.userId);
     }
 
     if (options.sendAlerts !== false) {

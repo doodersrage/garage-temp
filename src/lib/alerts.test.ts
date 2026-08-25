@@ -12,6 +12,7 @@ import { detectTemperatureAnomalies } from "./anomalyDetection";
 import { parseIngestPayload, inferSensorKind } from "./ingestPayload";
 import { resolvePlanTierFromPriceId } from "./planTier";
 import { summarizeSeasonal } from "./seasonalInsights";
+import { computeIndoorOutdoorDelta } from "./indoorOutdoorDelta";
 
 describe("evaluateAlerts", () => {
   it("flags freeze and humidity thresholds", () => {
@@ -96,6 +97,22 @@ describe("seasonal insights", () => {
       30,
     );
     expect(insights.length).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe("indoor outdoor delta", () => {
+  it("computes garage vs outdoor difference", () => {
+    const delta = computeIndoorOutdoorDelta(
+      [
+        { timestamp: "2026-01-01T00:00:00Z", tempf: 50, humidity: 40, probeLabel: "A" },
+        { timestamp: "2026-01-01T01:00:00Z", tempf: 60, humidity: 40, probeLabel: "A" },
+      ],
+      40,
+      "clear sky",
+      "Testville",
+    );
+    expect(delta?.indoorAvgF).toBe(55);
+    expect(delta?.deltaF).toBe(15);
   });
 });
 

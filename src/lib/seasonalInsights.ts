@@ -64,28 +64,10 @@ export async function computeSeasonalInsights(
   userId: string,
   days = 30,
 ): Promise<SeasonalInsight[]> {
-  const { createServerClient } = await import("./supabase");
-  const since = new Date();
-  since.setDate(since.getDate() - days);
-
-  const supabase = createServerClient();
-  const { data, error } = await supabase
-    .from("garage_temps")
-    .select("tempf, humidity, timestamp, probe_label")
-    .eq("user_id", userId)
-    .gte("timestamp", since.toISOString())
-    .order("timestamp", { ascending: true });
-
-  if (error || !data || data.length === 0) {
+  const { fetchGarageTempChartData } = await import("./garageTempsHistory");
+  const chart = await fetchGarageTempChartData(userId, days);
+  if (chart.error || chart.points.length === 0) {
     return [];
   }
-
-  const points: ChartPoint[] = data.map((row) => ({
-    timestamp: row.timestamp,
-    tempf: Number(row.tempf),
-    humidity: Number(row.humidity),
-    probeLabel: row.probe_label?.trim() || "Probe",
-  }));
-
-  return summarizeSeasonal(points, days);
+  return summarizeSeasonal(chart.points, days);
 }
