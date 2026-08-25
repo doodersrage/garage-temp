@@ -1,0 +1,72 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getAuthFromCookies } from "../../lib/auth";
+import { getInviteByToken } from "../../lib/householdInvites";
+import { createServerClient } from "../../lib/supabase";
+
+const token = Astro.params.token;
+if (!token) {
+  return Astro.redirect("/");
+}
+
+const invite = await getInviteByToken(token);
+const { session, user } = await getAuthFromCookies(Astro.cookies);
+
+let householdName = "a household";
+if (invite) {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from("households")
+    .select("name")
+    .eq("id", invite.household_id)
+    .maybeSingle();
+  householdName = data?.name ?? householdName;
+}
+
+const expired = invite ? Date.parse(invite.expires_at) < Date.now() : false;
+const alreadyAccepted = Boolean(invite?.accepted_at);
+const acceptError = Astro.url.searchParams.get("error");
+const nextPath = `/invite/${token}`;
+---
+<Layout title="Household invite" description="Accept a household sharing invite.">
+  <main id="main-content" class="mx-auto w-full max-w-lg px-4 py-12 sm:px-6">
+    <section class="card">
+      <h1 class="card-title">Household invite</h1>
+      {!invite ? (
+        <p>This invite link is invalid.</p>
+      ) : expired ? (
+        <p>This invite has expired. Ask the household owner to send a new one.</p>
+      ) : alreadyAccepted ? (
+        <p>
+          This invite was already accepted.{" "}
+          <a class="text-link" href="/dashboard/household">Open household</a>
+        </p>
+      ) : (
+        <>
+          <p class="card-subtitle">
+            You've been invited to share sensors in <strong>{householdName}</strong>
+            {invite.email ? <> as <strong>{invite.email}</strong></> : null}.
+          </p>
+          {acceptError && <p class="alert-warning">{acceptError}</p>}
+          {!session || !user ? (
+            <div class="space-y-3 mt-4">
+              <p class="mb-0">Sign in or register with the invited email to accept.</p>
+              <a class="btn-primary" href={`/signin?next=${encodeURIComponent(nextPath)}`}>
+                Sign in
+              </a>
+              <a class="btn-secondary" href={`/register?next=${encodeURIComponent(nextPath)}`}>
+                Create account
+              </a>
+            </div>
+          ) : (
+            <form action="/api/household/accept" method="post" class="mt-4 space-y-3">
+              <input type="hidden" name="token" value={token} />
+              <p class="text-sm mb-0">Signed in as {user.email}</p>
+              <button class="btn-primary" type="submit">Join household</button>
+            </form>
+          )}
+        </>
+      )}
+    </section>
+  </main>
+</Layout>

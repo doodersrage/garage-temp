@@ -1,0 +1,59 @@
+---
+export const prerender = true;
+
+import AboutArticle from "../../components/AboutArticle.astro";
+import { getAboutPage } from "../../lib/aboutPages";
+
+const page = getAboutPage("install-pwa") ?? {
+  slug: "install-pwa",
+  title: "Install as an app (PWA)",
+  description:
+    "Add Garage Temperature Monitor to your home screen for faster access and optional push alerts.",
+};
+---
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+>
+  <p>
+    Garage Temperature Monitor includes a Progressive Web App manifest and service worker.
+    You can install it like an app on supported browsers for a standalone window, offline shell caching,
+    and (on Pro) Web Push alerts.
+  </p>
+
+  <h2>Desktop (Chrome / Edge)</h2>
+  <ol>
+    <li>Open the site while signed in.</li>
+    <li>Look for the install icon in the address bar, or use the browser menu → <strong>Install app</strong>.</li>
+    <li>Confirm. The app opens without browser chrome and starts at the dashboard.</li>
+  </ol>
+
+  <h2>Android</h2>
+  <ol>
+    <li>Open the site in Chrome.</li>
+    <li>Tap the menu → <strong>Install app</strong> / <strong>Add to Home screen</strong>.</li>
+  </ol>
+
+  <h2>iPhone / iPad (Safari)</h2>
+  <p>
+    iOS does not support the same Web Push / install APIs as desktop Chrome. You can still add a home-screen shortcut:
+  </p>
+  <ol>
+    <li>Open the site in <strong>Safari</strong> (not Chrome or in-app browsers).</li>
+    <li>Tap the Share button → <strong>Add to Home Screen</strong>.</li>
+    <li>Open the icon for a full-screen experience.</li>
+  </ol>
+  <p>
+    <strong>Push notifications on iOS</strong> require iOS 16.4+ and installing via Add to Home Screen, then enabling
+    push from the dashboard alert settings (Pro). Results vary by iOS version; email and Discord remain the most
+    reliable channels on Apple devices.
+  </p>
+
+  <h2>After install</h2>
+  <ul>
+    <li>Enable browser push from <strong>Dashboard → Alerts</strong> (Pro).</li>
+    <li>Keep the service worker updated by visiting the site occasionally.</li>
+    <li>Live readings still need network access; the offline cache only helps the shell and last cached payload.</li>
+  </ul>
+</AboutArticle>

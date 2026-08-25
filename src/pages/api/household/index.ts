@@ -1,14 +1,21 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
-import { createAdminClient } from "../../../lib/supabase";
+import { createServerClient } from "../../../lib/supabase";
 import {
-  addHouseholdMemberByUserId,
+  getOwnedHouseholdId,
   getOrCreateHouseholdForUser,
   listHouseholdMembers,
+  listUserHouseholds,
   removeHouseholdMember,
+  setActiveHouseholdForUser,
   updateHouseholdName,
 } from "../../../lib/households";
-import { isUserInHousehold } from "../../../lib/households";
+import {
+  createHouseholdInvite,
+  listPendingInvites,
+  sendInviteEmail,
+} from "../../../lib/householdInvites";
+import { buildSiteUrl } from "../../../lib/stripe";
 
 export const GET: APIRoute = async ({ cookies }) => {
   const { user } = await getAuthFromCookies(cookies);
@@ -27,11 +34,18 @@ export const GET: APIRoute = async ({ cookies }) => {
     });
   }
 
-  const members = await listHouseholdMembers(household.householdId);
+  const [members, households, invites] = await Promise.all([
+    listHouseholdMembers(household.householdId),
+    listUserHouseholds(user.id),
+    listPendingInvites(household.householdId),
+  ]);
+
   return new Response(
     JSON.stringify({
       householdId: household.householdId,
       members: members.members,
+      households: households.households,
+      invites: invites.invites,
     }),
     { status: 200, headers: { "Content-Type": "application/json" } },
   );
@@ -47,14 +61,29 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const action = formData.get("action")?.toString() ?? "invite";
   const redirectTo = formData.get("redirect")?.toString() || "/dashboard/household";
 
+  if (action === "switch") {
+    const householdId = formData.get("household_id")?.toString();
+    if (!householdId) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+    const result = await setActiveHouseholdForUser(user.id, householdId);
+    if (result.error) {
+      return redirect(`${redirectTo}?error=${encodeURIComponent(result.error)}`);
+    }
+    return redirect(`${redirectTo}?switched=1`);
+  }
+
+  const ownedId = await getOwnedHouseholdId(user.id);
   const household = await getOrCreateHouseholdForUser(user.id, user.email);
-  if (household.error || !household.householdId) {
+  const manageId = ownedId ?? household.householdId;
+
+  if (!manageId) {
     return redirect(`${redirectTo}?error=1`);
   }
 
   if (action === "rename") {
     const name = formData.get("name")?.toString() ?? "";
-    await updateHouseholdName(household.householdId, name);
+    await updateHouseholdName(manageId, name);
     return redirect(`${redirectTo}?saved=1`);
   }
 
@@ -63,50 +92,38 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     if (!memberUserId) {
       return redirect(`${redirectTo}?error=1`);
     }
-    const result = await removeHouseholdMember(household.householdId, memberUserId);
+    const result = await removeHouseholdMember(manageId, memberUserId);
     if (result.error) {
       return redirect(`${redirectTo}?error=${encodeURIComponent(result.error)}`);
     }
     return redirect(`${redirectTo}?removed=1`);
   }
 
-  // invite by email
+  // Email invite link (does not require existing account)
   const email = formData.get("email")?.toString().trim().toLowerCase();
   if (!email) {
     return redirect(`${redirectTo}?error=missing_email`);
   }
 
-  const admin = createAdminClient();
-  const { data: listed, error } = await admin.auth.admin.listUsers({
-    page: 1,
-    perPage: 1000,
-  });
-
-  if (error) {
-    return redirect(`${redirectTo}?error=lookup`);
-  }
-
-  const target = listed.users.find(
-    (u) => u.email?.toLowerCase() === email,
-  );
-
-  if (!target) {
-    return redirect(`${redirectTo}?error=user_not_found`);
-  }
-
-  if (await isUserInHousehold(target.id, household.householdId)) {
-    return redirect(`${redirectTo}?error=already_member`);
-  }
-
-  const add = await addHouseholdMemberByUserId(
-    household.householdId,
-    target.id,
-    "member",
-  );
-
-  if (add.error) {
+  const { invite, error } = await createHouseholdInvite(manageId, email, user.id);
+  if (error || !invite) {
     return redirect(`${redirectTo}?error=1`);
   }
+
+  const supabase = createServerClient();
+  const { data: householdRow } = await supabase
+    .from("households")
+    .select("name")
+    .eq("id", manageId)
+    .maybeSingle();
+
+  const acceptUrl = buildSiteUrl(request, `/invite/${invite.token}`);
+  await sendInviteEmail(
+    email,
+    acceptUrl,
+    householdRow?.name ?? "a household",
+    user.email ?? null,
+  );
 
   return redirect(`${redirectTo}?invited=1`);
 };

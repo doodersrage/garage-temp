@@ -113,6 +113,14 @@ export const coreAboutPages: AboutPage[] = [
     summary:
       "Device API keys, typed sensor payloads, outbound HMAC webhooks, and Pro alert channels.",
   },
+  {
+    slug: "install-pwa",
+    title: "Install as an app (PWA)",
+    description:
+      "Add Garage Temperature Monitor to your home screen for faster access and optional push alerts.",
+    summary:
+      "Desktop, Android, and iOS install steps, plus Web Push limits on Apple devices.",
+  },
 ];
 
 function buildAboutPages(): AboutPage[] {

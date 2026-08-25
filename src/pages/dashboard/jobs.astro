@@ -1,0 +1,55 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import { listRecentJobRuns } from "../../lib/jobRuns";
+
+const { runs, error } = await listRecentJobRuns(40);
+---
+<DashboardLayout title="Jobs" requireAdmin={true}>
+  <div class="space-y-6">
+    <section class="card">
+      <h1 class="card-title">Background jobs</h1>
+      <p class="card-subtitle">
+        Cron history collection, weekly digests, and sensor retention runs recorded by the Worker.
+      </p>
+    </section>
+
+    <section class="card">
+      {error ? (
+        <p class="alert-warning">Unable to load job runs: {error}</p>
+      ) : runs.length === 0 ? (
+        <p class="mb-0">No job runs recorded yet. They appear after the hourly cron fires.</p>
+      ) : (
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Started</th>
+                <th>Job</th>
+                <th>Status</th>
+                <th>Finished</th>
+                <th>Detail</th>
+              </tr>
+            </thead>
+            <tbody>
+              {runs.map((run) => (
+                <tr>
+                  <td>{new Date(run.started_at).toLocaleString()}</td>
+                  <td>{run.job_name}</td>
+                  <td>
+                    <span class={run.status === "success" ? "feed-health-ok" : run.status === "error" ? "feed-health-error" : ""}>
+                      {run.status}
+                    </span>
+                  </td>
+                  <td>{run.finished_at ? new Date(run.finished_at).toLocaleString() : "—"}</td>
+                  <td class="contact-message-cell">
+                    <code>{JSON.stringify(run.detail)}</code>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  </div>
+</DashboardLayout>

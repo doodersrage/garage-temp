@@ -1,7 +1,11 @@
-import { createAdminClient, createServerClient } from "./supabase";
+import { createAdminClient } from "./supabase";
 import { fetchTemps } from "./FetchTemps";
 import { getUserDevicesAsTempConfig } from "./devices";
-import { listAllHouseholdOwnerUserIds } from "./households";
+import {
+  listAllHouseholdOwnerUserIds,
+  listHouseholdIdsForCron,
+  listHouseholdMembers,
+} from "./households";
 import {
   maybeSendRateAndOutageAlerts,
   maybeSendThresholdAlerts,
@@ -102,33 +106,30 @@ export async function collectAllUsersFeedHealth(): Promise<{
 
 export async function collectHistoryForAllUsers(): Promise<{
   usersProcessed: number;
+  householdsProcessed: number;
   errors: string[];
 }> {
   const admin = createAdminClient();
   const errors: string[] = [];
   let usersProcessed = 0;
+  let householdsProcessed = 0;
 
-  // Include every household owner — seeds default pull device when needed
-  const userIds = await listAllHouseholdOwnerUserIds();
+  const households = await listHouseholdIdsForCron();
 
-  // Also include users who only have legacy feeds and somehow missed household
-  const supabase = createServerClient();
-  const { data: feedRows } = await supabase.from("user_temp_feeds").select("user_id");
-  for (const row of feedRows ?? []) {
-    if (!userIds.includes(row.user_id)) {
-      userIds.push(row.user_id);
-    }
-  }
-
-  for (const userId of userIds) {
+  for (const { householdId, ownerUserId } of households) {
     try {
-      const { data: userData } = await admin.auth.admin.getUserById(userId);
+      const { data: userData } = await admin.auth.admin.getUserById(ownerUserId);
       const authUser = userData.user;
-      const config = await getUserDevicesAsTempConfig(userId, authUser?.email);
+      const config = await getUserDevicesAsTempConfig(ownerUserId, authUser?.email);
 
       if (config.error) {
-        errors.push(`${userId}: ${config.error}`);
+        errors.push(`${ownerUserId}: ${config.error}`);
         continue;
+      }
+
+      // Force household from cron list (owner preferred devices)
+      if (config.householdId !== householdId && householdId) {
+        // Still collect using owner's device config for this household id
       }
 
       const visibleProbes = config.probes.filter((probe) => probe.visible);
@@ -136,40 +137,46 @@ export async function collectHistoryForAllUsers(): Promise<{
         feeds: config.feeds,
         probes: visibleProbes,
         devices: config.devices,
-        householdId: config.householdId,
+        householdId: config.householdId || householdId,
         saveToDatabase: true,
-        userId,
+        userId: ownerUserId,
         userEmail: authUser?.email,
         sendAlerts: false,
       });
 
-      await maybeSendThresholdAlerts(
-        userId,
-        authUser?.email,
-        authUser?.user_metadata as Record<string, unknown> | undefined,
-        config.feeds,
-        config.probes,
-        results,
-      );
+      const members = await listHouseholdMembers(config.householdId || householdId);
+      for (const member of members.members) {
+        const { data: memberData } = await admin.auth.admin.getUserById(member.user_id);
+        const memberUser = memberData.user;
+        await maybeSendThresholdAlerts(
+          member.user_id,
+          memberUser?.email,
+          memberUser?.user_metadata as Record<string, unknown> | undefined,
+          config.feeds,
+          config.probes,
+          results,
+        );
 
-      const settings = await getAlertSettingsForUser(
-        userId,
-        authUser?.user_metadata as Record<string, unknown> | undefined,
-      );
-      await maybeSendRateAndOutageAlerts(
-        userId,
-        authUser?.email,
-        config.devices,
-        settings,
-      );
+        const settings = await getAlertSettingsForUser(
+          member.user_id,
+          memberUser?.user_metadata as Record<string, unknown> | undefined,
+        );
+        await maybeSendRateAndOutageAlerts(
+          member.user_id,
+          memberUser?.email,
+          config.devices,
+          settings,
+        );
+        usersProcessed += 1;
+      }
 
-      usersProcessed += 1;
+      householdsProcessed += 1;
     } catch (e) {
       errors.push(
-        `${userId}: ${e instanceof Error ? e.message : "Unknown error"}`,
+        `${ownerUserId}: ${e instanceof Error ? e.message : "Unknown error"}`,
       );
     }
   }
 
-  return { usersProcessed, errors };
+  return { usersProcessed, householdsProcessed, errors };
 }

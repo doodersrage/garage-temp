@@ -29,5 +29,9 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
     return redirect(`/register?error=${encodeURIComponent(error.message)}`);
   }
 
-  return redirect("/signin?registered=1");
+  const next = formData.get("next")?.toString() ?? "";
+  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "";
+  const params = new URLSearchParams({ registered: "1" });
+  if (safeNext) params.set("next", safeNext);
+  return redirect(`/signin?${params.toString()}`);
 };

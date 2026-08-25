@@ -59,5 +59,13 @@ const alertNotice = Astro.url.searchParams.get("alert_saved")
       vapidPublicKey={import.meta.env.VAPID_PUBLIC_KEY ?? ""}
       redirectTo="/dashboard"
     />
+
+    <section class="card">
+      <h2 class="card-title">Install the app</h2>
+      <p class="card-subtitle mb-3">
+        Add Garage Temp to your home screen for faster access. See iOS limits and install steps in the guide.
+      </p>
+      <a class="btn-secondary" href="/about/install-pwa">PWA install guide</a>
+    </section>
   </div>
 </DashboardLayout>

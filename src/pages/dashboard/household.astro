@@ -3,19 +3,31 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import {
   getOrCreateHouseholdForUser,
+  getOwnedHouseholdId,
   listHouseholdMembers,
+  listUserHouseholds,
 } from "../../lib/households";
-import { createAdminClient } from "../../lib/supabase";
+import { listPendingInvites } from "../../lib/householdInvites";
+import { createAdminClient, createServerClient } from "../../lib/supabase";
+import { buildSiteUrl } from "../../lib/stripe";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const household = await getOrCreateHouseholdForUser(user.id, user.email);
-const membersResult = household.householdId
-  ? await listHouseholdMembers(household.householdId)
-  : { members: [], error: "No household" };
+const active = await getOrCreateHouseholdForUser(user.id, user.email);
+const ownedId = await getOwnedHouseholdId(user.id);
+const manageId = ownedId ?? active.householdId;
+
+const [membersResult, householdsResult, invitesResult, householdRow] = await Promise.all([
+  manageId ? listHouseholdMembers(manageId) : Promise.resolve({ members: [], error: null }),
+  listUserHouseholds(user.id),
+  manageId ? listPendingInvites(manageId) : Promise.resolve({ invites: [], error: null }),
+  manageId
+    ? createServerClient().from("households").select("name").eq("id", manageId).maybeSingle()
+    : Promise.resolve({ data: null }),
+]);
 
 const admin = createAdminClient();
 const membersWithEmail = await Promise.all(
@@ -26,33 +38,89 @@ const membersWithEmail = await Promise.all(
 );
 
 const notice = Astro.url.searchParams.get("invited")
-  ? "Member invited."
+  ? "Invite email sent."
   : Astro.url.searchParams.get("removed")
     ? "Member removed."
     : Astro.url.searchParams.get("saved")
       ? "Household updated."
+      : Astro.url.searchParams.get("switched")
+        ? "Active household switched."
+      : Astro.url.searchParams.get("joined")
+        ? "You joined the household."
       : Astro.url.searchParams.get("error")
         ? `Could not complete request (${Astro.url.searchParams.get("error")}).`
         : null;
+
+const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
 ---
 <DashboardLayout title="Household">
   <div class="space-y-6">
     <section class="card">
       <h1 class="card-title">Household sharing</h1>
-      <p class="card-subtitle">Share devices and history with family members who already have accounts.</p>
+      <p class="card-subtitle">
+        Share devices and history. Invite by email — recipients get a link and don’t need an account yet.
+      </p>
       {notice && <p class="alert-success mt-4">{notice}</p>}
     </section>
+
+    {householdsResult.households.length > 1 && (
+      <section class="card">
+        <h2 class="card-title">Active household</h2>
+        <p class="card-subtitle">Choose which household’s devices and history you see.</p>
+        <ul class="space-y-3">
+          {householdsResult.households.map((h) => (
+            <li class="flex items-center justify-between gap-4">
+              <div>
+                <strong>{h.name}</strong>
+                <span class="text-sm text-[var(--color-text-muted)]"> · {h.role}</span>
+                {h.household_id === active.householdId && (
+                  <span class="feed-health-ok ml-2">Active</span>
+                )}
+              </div>
+              {h.household_id !== active.householdId && (
+                <form action="/api/household" method="post">
+                  <input type="hidden" name="action" value="switch" />
+                  <input type="hidden" name="household_id" value={h.household_id} />
+                  <input type="hidden" name="redirect" value="/dashboard/household" />
+                  <button class="btn-secondary" type="submit">Switch</button>
+                </form>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
 
     <form action="/api/household" method="post" class="card">
       <input type="hidden" name="action" value="invite" />
       <input type="hidden" name="redirect" value="/dashboard/household" />
       <h2 class="card-title">Invite by email</h2>
+      <p class="card-subtitle mb-4">
+        Invites go to your owned household{householdRow.data?.name ? ` (${householdRow.data.name})` : ""}.
+      </p>
       <div class="form-field">
-        <label class="form-label" for="email">Member email</label>
+        <label class="form-label" for="email">Invitee email</label>
         <input class="form-input" type="email" id="email" name="email" required />
       </div>
-      <button class="btn-primary" type="submit">Invite</button>
+      <button class="btn-primary" type="submit">Send invite link</button>
     </form>
+
+    {(invitesResult.invites ?? []).length > 0 && (
+      <section class="card">
+        <h2 class="card-title">Pending invites</h2>
+        <ul class="space-y-3">
+          {invitesResult.invites.map((invite) => (
+            <li>
+              <strong>{invite.email}</strong>
+              <p class="m-0 text-sm break-all text-[var(--color-text-muted)]">
+                {siteOrigin}/invite/{invite.token}
+              </p>
+              <p class="m-0 text-sm">Expires {new Date(invite.expires_at).toLocaleString()}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
 
     <section class="card">
       <h2 class="card-title">Members</h2>
@@ -63,7 +131,7 @@ const notice = Astro.url.searchParams.get("invited")
               <strong>{member.email}</strong>
               <span class="text-sm text-[var(--color-text-muted)]"> · {member.role}</span>
             </div>
-            {member.role !== "owner" && (
+            {member.role !== "owner" && ownedId === manageId && (
               <form action="/api/household" method="post">
                 <input type="hidden" name="action" value="remove" />
                 <input type="hidden" name="user_id" value={member.user_id} />

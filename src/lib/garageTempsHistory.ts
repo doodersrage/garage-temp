@@ -115,7 +115,6 @@ function pairTempHumidityRows(
     seen.add(key);
   }
 
-  // Orphan humidity-only samples (unlikely)
   for (const [key, humidityRow] of humidities) {
     if (seen.has(key)) continue;
     const sensor = humidityRow.device_sensors!;
@@ -199,7 +198,6 @@ async function fetchPairedFromSensorReadings(
   });
 
   if (options.limit) {
-    // Fetch extra raw rows so paired temp+humidity samples still fill the limit
     query = query.limit(Math.max(options.limit * 4, 200));
   }
 
@@ -216,56 +214,10 @@ async function fetchPairedFromSensorReadings(
 
   let readings = pairTempHumidityRows(filteredKinds, userId);
   readings = readings.filter((reading) => matchesFilters(reading, filters));
-  if (options.limit && options.ascending) {
-    readings = readings.slice(0, options.limit);
-  } else if (options.limit) {
+  if (options.limit) {
     readings = readings.slice(0, options.limit);
   }
   return { readings, error: null };
-}
-
-/** Legacy fallback while older rows still exist only in garage_temps. */
-async function fetchPairedFromGarageTemps(
-  userId: string,
-  filters: HistoryFilters = {},
-  options: { limit?: number; ascending?: boolean; range?: [number, number] } = {},
-): Promise<{
-  readings: GarageTempReading[];
-  totalCount?: number;
-  error: string | null;
-}> {
-  const supabase = createServerClient();
-  let query = supabase
-    .from("garage_temps")
-    .select(
-      "tempc, tempf, humidity, timestamp, feed_name, probe_label, probe_key, user_id",
-      { count: "exact" },
-    )
-    .eq("user_id", userId);
-
-  if (filters.feedName) query = query.eq("feed_name", filters.feedName);
-  if (filters.probeKey) query = query.eq("probe_key", filters.probeKey);
-  if (filters.from) query = query.gte("timestamp", filters.from);
-  if (filters.to) query = query.lte("timestamp", filters.to);
-
-  query = query.order("timestamp", { ascending: options.ascending === true });
-
-  if (options.range) {
-    query = query.range(options.range[0], options.range[1]);
-  } else if (options.limit) {
-    query = query.limit(options.limit);
-  }
-
-  const { data, error, count } = await query;
-  if (error) {
-    return { readings: [], error: error.message };
-  }
-
-  return {
-    readings: (data ?? []) as GarageTempReading[],
-    totalCount: count ?? undefined,
-    error: null,
-  };
 }
 
 export async function fetchGarageTempHistory(
@@ -291,26 +243,7 @@ export async function fetchGarageTempHistory(
     };
   }
 
-  let all = fromSensor.readings;
-
-  // Fall back / merge legacy rows not represented in sensor_readings
-  if (all.length === 0) {
-    const legacy = await fetchPairedFromGarageTemps(userId, filters, {
-      ascending: false,
-    });
-    if (legacy.error) {
-      return {
-        readings: [],
-        page: safePage,
-        pageSize,
-        totalCount: 0,
-        totalPages: 0,
-        error: legacy.error,
-      };
-    }
-    all = legacy.readings;
-  }
-
+  const all = fromSensor.readings;
   const totalCount = all.length;
   const totalPages = totalCount === 0 ? 0 : Math.ceil(totalCount / pageSize);
   const start = (safePage - 1) * pageSize;
@@ -334,20 +267,10 @@ export async function fetchAllGarageTempReadings(
   readings: GarageTempReading[];
   error: string | null;
 }> {
-  const fromSensor = await fetchPairedFromSensorReadings(userId, filters, {
+  return fetchPairedFromSensorReadings(userId, filters, {
     ascending: false,
     limit: EXPORT_BATCH_SIZE,
   });
-
-  if (fromSensor.error) {
-    return { readings: [], error: fromSensor.error };
-  }
-
-  if (fromSensor.readings.length > 0) {
-    return fromSensor;
-  }
-
-  return fetchPairedFromGarageTemps(userId, filters, { ascending: false });
 }
 
 export async function fetchGarageTempChartData(
@@ -369,20 +292,7 @@ export async function fetchGarageTempChartData(
     return { points: [], error: fromSensor.error };
   }
 
-  let readings = fromSensor.readings;
-  if (readings.length === 0) {
-    const legacy = await fetchPairedFromGarageTemps(userId, chartFilters, {
-      ascending: true,
-      limit: 500,
-    });
-    if (legacy.error) {
-      return { points: [], error: legacy.error };
-    }
-    readings = legacy.readings;
-  }
-
-  // Chronological for charts
-  readings = [...readings].sort(
+  const readings = [...fromSensor.readings].sort(
     (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
   );
 
@@ -410,21 +320,8 @@ export async function fetchHistoryFilterOptions(userId: string): Promise<{
     return { feeds: [], probes: [], error: fromSensor.error };
   }
 
-  let rows = fromSensor.readings;
-  if (rows.length === 0) {
-    const legacy = await fetchPairedFromGarageTemps(userId, {}, {
-      ascending: false,
-      limit: 500,
-    });
-    if (legacy.error) {
-      return { feeds: [], probes: [], error: legacy.error };
-    }
-    rows = legacy.readings;
-  }
-
-  const feeds = [
-    ...new Set(rows.map((row) => getReadingFeedName(row))),
-  ];
+  const rows = fromSensor.readings;
+  const feeds = [...new Set(rows.map((row) => getReadingFeedName(row)))];
   const probeMap = new Map<string, string>();
 
   for (const row of rows) {

@@ -56,5 +56,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress
 
   const { access_token, refresh_token } = data.session;
   setAuthCookies(cookies, access_token, refresh_token);
-  return redirect("/dashboard");
+  const next = formData.get("next")?.toString() ?? "";
+  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+  return redirect(safeNext);
 };

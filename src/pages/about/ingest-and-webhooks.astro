@@ -63,6 +63,33 @@ Content-Type: application/json</code></pre>
     or IFTTT Webhooks to verify authenticity.
   </p>
 
+  <h2>Home Assistant</h2>
+  <p>
+    Cloudflare Workers do not run an MQTT broker. Use the outbound HTTPS webhook (Pro) and an automation:
+  </p>
+  <pre><code>{`automation:
+  - alias: Garage Temp webhook
+    trigger:
+      - platform: webhook
+        webhook_id: garage_temp_alerts
+        allowed_methods:
+          - POST
+        local_only: false
+    action:
+      - service: notify.persistent_notification
+        data:
+          title: "{{ trigger.json.title }}"
+          message: "{{ trigger.json.body }}"`}</code></pre>
+  <p>
+    Point your Garage Temp outbound webhook URL at
+    <code>https://&lt;your-ha-host&gt;/api/webhook/garage_temp_alerts</code>
+    (or a Cloudflare Tunnel / Nabu Casa URL). Verify <code>X-Signature</code> in a template condition if you set a secret.
+  </p>
+  <p>
+    For MQTT, have Home Assistant (or Node-RED) receive the webhook and publish to your broker—that keeps MQTT local
+    while Garage Temp stays on HTTPS.
+  </p>
+
   <h2>Other Pro channels</h2>
   <ul>
     <li>Discord webhook URL</li>

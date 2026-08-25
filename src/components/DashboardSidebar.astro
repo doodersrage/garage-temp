@@ -48,6 +48,11 @@ if (isAdmin) {
     isActive: currentPath.startsWith("/dashboard/feeds"),
   });
   navItems.push({
+    href: "/dashboard/jobs",
+    label: "Jobs",
+    isActive: currentPath.startsWith("/dashboard/jobs"),
+  });
+  navItems.push({
     href: "/dashboard/users",
     label: "Users",
     isActive: currentPath.startsWith("/dashboard/users"),
