@@ -43,3 +43,21 @@ describe("ingest + indoor delta smoke", () => {
     expect(delta?.deltaF).toBe(10);
   });
 });
+
+describe("weather snapshot coords", () => {
+  it("keeps lat/lon for map embeds", async () => {
+    const { normalizeWeatherPayload, weatherMapEmbedUrl } = await import("./FetchWeather");
+    const snap = normalizeWeatherPayload({
+      name: "Nashville",
+      sys: { country: "US" },
+      coord: { lat: 36.16, lon: -86.78 },
+      main: { temp: 42, humidity: 50, feels_like: 40 },
+      wind: { speed: 5 },
+      clouds: { all: 20 },
+      weather: [{ description: "clear sky" }],
+    });
+    expect(snap?.lat).toBeCloseTo(36.16);
+    expect(snap?.lon).toBeCloseTo(-86.78);
+    expect(weatherMapEmbedUrl(snap!.lat!, snap!.lon!)).toContain("openstreetmap.org");
+  });
+});

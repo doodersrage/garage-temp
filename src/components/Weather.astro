@@ -3,6 +3,8 @@ import {
   fetchWeatherSnapshot,
   getDefaultWeatherCityId,
   resolveWeatherCityId,
+  weatherMapEmbedUrl,
+  weatherMapExternalUrl,
 } from '../lib/FetchWeather';
 
 interface Props {
@@ -45,6 +47,16 @@ const weatherStats = weather
       },
     ]
   : [];
+
+const hasCoords =
+  weather?.lat != null &&
+  weather?.lon != null &&
+  Number.isFinite(weather.lat) &&
+  Number.isFinite(weather.lon);
+const mapEmbed =
+  hasCoords && weather ? weatherMapEmbedUrl(weather.lat!, weather.lon!) : null;
+const mapExternal =
+  hasCoords && weather ? weatherMapExternalUrl(weather.lat!, weather.lon!) : null;
 ---
 
 <section class="card animate-slide-in-right">
@@ -52,6 +64,23 @@ const weatherStats = weather
     <>
       <h2 class="card-title">Current Weather</h2>
       <p class="card-subtitle">{locationLabel}</p>
+      {mapEmbed && mapExternal && (
+        <figure class="weather-map mb-6">
+          <iframe
+            class="weather-map-frame"
+            title={`Map of ${locationLabel}`}
+            src={mapEmbed}
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+          />
+          <figcaption class="weather-map-caption">
+            <a class="text-link" href={mapExternal} target="_blank" rel="noreferrer">
+              Open larger map
+            </a>
+            <span class="text-[var(--color-text-muted)]"> · © OpenStreetMap</span>
+          </figcaption>
+        </figure>
+      )}
       <div class="stat-grid">
         {weatherStats.map(({ label, value, detail }) => (
           <article class="stat-item">

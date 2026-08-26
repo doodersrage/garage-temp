@@ -5,6 +5,8 @@ const WEATHER_FETCH_TIMEOUT_MS = 5000;
 export type WeatherSnapshot = {
   name: string;
   country: string | null;
+  lat: number | null;
+  lon: number | null;
   temp: number;
   humidity: number;
   feelsLike: number;
@@ -13,6 +15,19 @@ export type WeatherSnapshot = {
   cloudCover: number;
   description: string;
 };
+
+/** OpenStreetMap embed centered on coords with a marker. */
+export function weatherMapEmbedUrl(lat: number, lon: number, delta = 0.12): string {
+  const west = lon - delta;
+  const south = lat - delta;
+  const east = lon + delta;
+  const north = lat + delta;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${west}%2C${south}%2C${east}%2C${north}&layer=mapnik&marker=${lat}%2C${lon}`;
+}
+
+export function weatherMapExternalUrl(lat: number, lon: number): string {
+  return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=11/${lat}/${lon}`;
+}
 
 function cleanEnv(value: unknown): string {
   return String(value ?? "").replace(/\r/g, "").trim();
@@ -34,9 +49,14 @@ export function normalizeWeatherPayload(raw: Record<string, any>): WeatherSnapsh
   const temp = Number(raw?.main?.temp);
   if (!Number.isFinite(temp)) return null;
 
+  const lat = Number(raw?.coord?.lat);
+  const lon = Number(raw?.coord?.lon);
+
   return {
     name: typeof raw?.name === "string" ? raw.name : "Unknown",
     country: typeof raw?.sys?.country === "string" ? raw.sys.country : null,
+    lat: Number.isFinite(lat) ? lat : null,
+    lon: Number.isFinite(lon) ? lon : null,
     temp,
     humidity: Number(raw?.main?.humidity) || 0,
     feelsLike: Number(raw?.main?.feels_like) || temp,

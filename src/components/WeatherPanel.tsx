@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
 import type { WeatherSnapshot } from "../lib/FetchWeather";
+import { weatherMapEmbedUrl, weatherMapExternalUrl } from "../lib/FetchWeather";
 
 interface Props {
   cityId?: string | null;
@@ -76,6 +77,11 @@ export default function WeatherPanel({ cityId = null, intervalMs = 300000 }: Pro
   if (!weather) return null;
 
   const locationLabel = `${weather.name}${weather.country ? `, ${weather.country}` : ""}`;
+  const hasCoords =
+    weather.lat != null &&
+    weather.lon != null &&
+    Number.isFinite(weather.lat) &&
+    Number.isFinite(weather.lon);
   const stats: Array<{ label: string; value: string; detail?: boolean }> = [
     { label: "Temperature", value: `${weather.temp}°F` },
     { label: "Humidity", value: `${weather.humidity}%` },
@@ -107,6 +113,28 @@ export default function WeatherPanel({ cityId = null, intervalMs = 300000 }: Pro
             </button>
           </p>
         </div>
+      )}
+      {hasCoords && (
+        <figure class="weather-map mb-6">
+          <iframe
+            class="weather-map-frame"
+            title={`Map of ${locationLabel}`}
+            src={weatherMapEmbedUrl(weather.lat!, weather.lon!)}
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+          />
+          <figcaption class="weather-map-caption">
+            <a
+              class="text-link"
+              href={weatherMapExternalUrl(weather.lat!, weather.lon!)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open larger map
+            </a>
+            <span class="text-[var(--color-text-muted)]"> · © OpenStreetMap</span>
+          </figcaption>
+        </figure>
       )}
       <div class="stat-grid">
         {stats.map(({ label, value, detail }) => (

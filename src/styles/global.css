@@ -397,6 +397,21 @@
     @apply mb-0;
   }
 
+  .weather-map {
+    @apply m-0;
+  }
+
+  .weather-map-frame {
+    @apply block h-56 w-full border-0 sm:h-64;
+    border-radius: 0.875rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface-raised);
+  }
+
+  .weather-map-caption {
+    @apply mt-2 mb-0 text-sm;
+  }
+
   .stat-grid {
     @apply grid gap-4 sm:grid-cols-2 xl:grid-cols-3;
   }
