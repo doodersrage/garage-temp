@@ -8,7 +8,7 @@ const protectedApiPrefixes = [
   "/api/stripe/",
   "/api/admin/",
   "/api/feeds/",
-  "/api/home/",
+  "/api/home/readings",
   "/api/household",
   "/api/devices",
   "/api/push/",

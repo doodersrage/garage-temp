@@ -190,6 +190,6 @@ The prerendered **About** section is the product docs hub:
 - Stripe webhooks should point at `/api/stripe/webhook` with `STRIPE_WEBHOOK_SECRET`.
 - VAPID keys are required for Pro push; generate once and store as secrets.
 
-## License / status
+## License
 
-Personal / hobby project. Contributions and forks welcome; open an issue if you hit a rough edge in setup or docs.
+Released under the [MIT License](LICENSE). Contributions and forks welcome; open an issue if you hit a rough edge in setup or docs.
