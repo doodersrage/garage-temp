@@ -110,6 +110,22 @@ function formatLatestValue(row: (typeof latest)[number]): string {
   return row.value_text ?? "—";
 }
 
+function readDeviceMetaNumber(meta: unknown, key: string): number | null {
+  if (!meta || typeof meta !== "object" || Array.isArray(meta)) return null;
+  const value = (meta as Record<string, unknown>)[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function formatDeviceBattery(meta: unknown): string {
+  const battery = readDeviceMetaNumber(meta, "battery_pct");
+  return battery == null ? "—" : `${battery}%`;
+}
+
+function formatDeviceRssi(meta: unknown): string {
+  const rssi = readDeviceMetaNumber(meta, "rssi");
+  return rssi == null ? "—" : `${rssi} dBm`;
+}
+
 const ingestCurlExample = ingestKey
   ? `curl -X POST "${Astro.url.origin}/api/ingest/${ingestKey}" \\\n  -H "Content-Type: application/json" \\\n  -d '{"door1": true, "temp1": 42.5}'`
   : "";
@@ -169,10 +185,8 @@ const ingestCurlExample = ingestKey
             <tbody>
               {devices.map((device) => {
                 const age = formatRelativeAge(device.last_seen_at);
-                const meta = (device.meta ?? {}) as Record<string, unknown>;
-                const battery =
-                  typeof meta.battery_pct === "number" ? `${meta.battery_pct}%` : "—";
-                const rssi = typeof meta.rssi === "number" ? `${meta.rssi} dBm` : "—";
+                const battery = formatDeviceBattery(device.meta);
+                const rssi = formatDeviceRssi(device.meta);
                 const pullHealth = feedHealth.statuses.find((f) => f.feedId === device.id);
                 return (
                   <tr class="border-t border-[var(--color-border)]">
