@@ -392,6 +392,118 @@
     box-shadow: var(--shadow-card);
   }
 
+  .upgrade-nudge {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-accent);
+    background: var(--color-accent-soft);
+  }
+
+  .upgrade-nudge-compact {
+    padding: 0.875rem 1rem;
+  }
+
+  .upgrade-nudge-title {
+    margin: 0 0 0.35rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .upgrade-nudge-text {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    max-width: 42rem;
+  }
+
+  .upgrade-nudge-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .plan-tier-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  }
+
+  .plan-tier-card {
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-raised);
+  }
+
+  .plan-tier-card-featured {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 1px var(--color-accent-soft);
+  }
+
+  .plan-tier-name {
+    margin: 0 0 0.25rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .plan-tier-price {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-accent);
+  }
+
+  .plan-tier-tagline {
+    margin: 0 0 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  .plan-tier-list {
+    margin: 0 0 1rem;
+    padding-left: 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  .plan-comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  .plan-comparison-table th,
+  .plan-comparison-table td {
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .plan-comparison-table thead th {
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  .plan-comparison-category th {
+    padding-top: 1rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    background: transparent;
+  }
+
+  .plan-col-highlight {
+    background: var(--color-accent-soft);
+  }
+
   .card-title {
     margin: 0 0 0.75rem;
     font-size: clamp(1.75rem, 3.5vw, 2.25rem);

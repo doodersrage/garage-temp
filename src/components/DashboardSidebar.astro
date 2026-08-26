@@ -20,6 +20,11 @@ const navItems: NavItem[] = [
     isActive: currentPath === "/dashboard",
   },
   {
+    href: "/dashboard/plans",
+    label: "Plans",
+    isActive: currentPath.startsWith("/dashboard/plans"),
+  },
+  {
     href: "/dashboard/temperature",
     label: "Devices",
     isActive: currentPath.startsWith("/dashboard/temperature"),

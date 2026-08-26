@@ -52,6 +52,8 @@ const tierLabel = entitlements?.tier ?? (isPro ? "pro" : canDownloadCsv ? "membe
   <p class="mb-4 text-sm text-[var(--color-text-muted)]">
     Current plan: <strong class="text-[var(--color-text)]">{tierLabel}</strong>
     {entitlements ? ` · up to ${entitlements.maxDevices} push devices` : ""}
+    {" · "}
+    <a class="text-link" href="/pricing">Full comparison</a>
   </p>
 
   {canDownloadCsv || isPro ? (

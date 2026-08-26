@@ -1,12 +1,10 @@
 ---
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import AlertSettings from "../../components/AlertSettings.astro";
-import PlansCard from "../../components/PlansCard.astro";
+import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getAlertSettingsForUser } from "../../lib/notify";
 import { getUserEntitlements } from "../../lib/entitlements";
-import { getUserSubscription } from "../../lib/stripeSubscriptions";
-import { canDownloadHistoryCsv } from "../../lib/adminAccess";
 import { formatRelativeAge } from "../../lib/relativeTime";
 import { listRecentAlertEvents } from "../../lib/alertEvents";
 import {
@@ -27,12 +25,10 @@ const householdRole = household.householdId
   : null;
 const canEdit = canEditHousehold(householdRole);
 
-const [alertSettings, entitlements, subscription, canDownloadCsv, recentEvents] =
+const [alertSettings, entitlements, recentEvents] =
   await Promise.all([
     getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
     getUserEntitlements(user.id),
-    getUserSubscription(user.id),
-    canDownloadHistoryCsv(user.id),
     listRecentAlertEvents(user.id, 15),
   ]);
 
@@ -138,13 +134,7 @@ const lastAlertAge = formatRelativeAge(lastAlertAt);
     </section>
 
     {needsPro && (
-      <PlansCard
-        canDownloadCsv={canDownloadCsv}
-        subscription={subscription}
-        entitlements={entitlements}
-        title="Unlock Pro alert channels"
-        showCsvNote={false}
-      />
+      <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} />
     )}
 
     <AlertSettings

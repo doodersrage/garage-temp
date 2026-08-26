@@ -10,6 +10,7 @@ import { getOrCreateHouseholdForUser, listUserHouseholds, getUserHouseholdRole, 
 import { getUserEntitlements } from "../../lib/entitlements";
 import { fetchLatestSensorValues } from "../../lib/sensorReadings";
 import { formatRelativeAge } from "../../lib/relativeTime";
+import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import { batterySparklinePath, parseBatteryHistory } from "../../lib/batterySparkline";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
@@ -163,6 +164,10 @@ const ingestCurlExample = ingestKey
         </p>
       )}
     </section>
+
+    {(noticeParam === "device_limit" || atDeviceLimit) && (
+      <UpgradeNudge feature="device_limit" tier={entitlements.tier} />
+    )}
 
     {showAddSensorNudge && (
       <section class="card alert-success" id="next-sensor-step">

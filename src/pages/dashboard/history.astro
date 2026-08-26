@@ -1,6 +1,5 @@
 ---
-import DashboardLayout from "../../layouts/DashboardLayout.astro";
-import GarageTempHistory from "../../components/GarageTempHistory.astro";
+import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import HistorySubscription from "../../components/HistorySubscription.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { canDownloadHistoryCsv } from "../../lib/adminAccess";
@@ -132,6 +131,10 @@ const showRetentionNote =
           : " Subscribe to unlock CSV export of your saved history."}
       </p>
     </section>
+
+    {!canDownloadCsv && (
+      <UpgradeNudge feature="csv_export" tier={entitlements.tier} />
+    )}
 
     <section class="card">
       <h2 class="card-title">Data retention</h2>

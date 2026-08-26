@@ -37,6 +37,8 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 
 ### Accounts & collaboration
 - Email/password auth, password reset, optional OAuth (Google/GitHub/Discord when enabled in Supabase)
+- **Plans & pricing** — public `/pricing` comparison page plus dashboard `/dashboard/plans`
+- Contextual **upgrade nudges** on dashboard, alerts, history, devices, and share when a feature needs Member or Pro
 - Households: invite members (including read-only **viewer** role), rename, leave, revoke
 - Multi-household switcher when you belong to more than one property
 - Public share links (Pro): live, history (7d), metrics, or embed scopes

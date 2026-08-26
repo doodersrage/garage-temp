@@ -1,0 +1,59 @@
+---
+import type { PlanTier } from "../lib/entitlements";
+import { getNudgeContent, type NudgeFeatureId } from "../lib/planComparison";
+
+interface Props {
+  feature: NudgeFeatureId;
+  tier: PlanTier;
+  compact?: boolean;
+}
+
+const { feature, tier, compact = false } = Astro.props;
+const nudge = getNudgeContent(tier, feature);
+if (!nudge) return null;
+
+const checkoutPlan = nudge.targetTier === "member" ? "member" : "pro";
+---
+<aside
+  class:list={["upgrade-nudge", compact && "upgrade-nudge-compact"]}
+  data-nudge-key={nudge.dismissKey}
+  role="note"
+>
+  <div class="upgrade-nudge-body">
+    <p class="upgrade-nudge-title">{nudge.title}</p>
+    <p class="upgrade-nudge-text">{nudge.body}</p>
+  </div>
+  <div class="upgrade-nudge-actions">
+    <a class="btn-secondary" href={nudge.compareHref}>Compare plans</a>
+    <form action="/api/stripe/checkout" method="post">
+      <input type="hidden" name="plan" value={checkoutPlan} />
+      <input type="hidden" name="interval" value="monthly" />
+      <button class="btn-primary" type="submit">
+        {nudge.targetTier === "member" ? "Upgrade to Member" : "Upgrade to Pro"}
+      </button>
+    </form>
+    <button type="button" class="btn-ghost upgrade-nudge-dismiss" data-dismiss={nudge.dismissKey}>
+      Dismiss
+    </button>
+  </div>
+</aside>
+
+<script is:inline>
+  (() => {
+    document.querySelectorAll(".upgrade-nudge[data-nudge-key]").forEach((el) => {
+      const key = el.getAttribute("data-nudge-key");
+      if (key && localStorage.getItem(key) === "1") {
+        el.remove();
+      }
+    });
+
+    document.querySelectorAll(".upgrade-nudge-dismiss").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const key = btn.getAttribute("data-dismiss");
+        const card = btn.closest(".upgrade-nudge");
+        if (key) localStorage.setItem(key, "1");
+        card?.remove();
+      });
+    });
+  })();
+</script>

@@ -1,0 +1,136 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import PlanComparisonTable from "../components/PlanComparisonTable.astro";
+import { getAuthFromCookies } from "../lib/auth";
+import { getUserEntitlements } from "../lib/entitlements";
+import { normalizeComparisonTier } from "../lib/planComparison";
+import { getUserSubscription } from "../lib/stripeSubscriptions";
+import { isActiveSubscriptionStatus } from "../lib/stripe";
+
+const { user } = await getAuthFromCookies(Astro.cookies);
+const entitlements = user ? await getUserEntitlements(user.id) : null;
+const subscription = user ? await getUserSubscription(user.id) : null;
+const currentTier = entitlements ? normalizeComparisonTier(entitlements.tier) : null;
+const hasBilling =
+  subscription !== null && isActiveSubscriptionStatus(subscription.status);
+---
+<Layout
+  title="Plans & pricing"
+  description="Compare Free, Member, and Pro plans for garage temperature monitoring — devices, alerts, history export, share links, and integrations."
+>
+  <div class="page-shell page-stack">
+    <section class="card animate-slide-in-left">
+      <h1 class="card-title">Plans & pricing</h1>
+      <p class="card-subtitle mb-4">
+        Start free with live monitoring and basic alerts. Member adds CSV export and more devices.
+        Pro unlocks SMS, push, share links, webhooks, Grafana, and a 14-day trial.
+      </p>
+      {user ? (
+        <p class="mb-0 text-sm">
+          Signed in as <strong>{user.email}</strong>
+          {currentTier && (
+            <>
+              {" · "}
+              Current plan: <strong>{currentTier}</strong>
+            </>
+          )}
+          {" · "}
+          <a class="text-link" href="/dashboard">Dashboard</a>
+        </p>
+      ) : (
+        <p class="mb-0">
+          <a class="btn-primary" href="/register">Create free account</a>
+          {" "}
+          <a class="text-link" href="/signin">Sign in</a>
+        </p>
+      )}
+    </section>
+
+    <section class="card plan-tier-cards">
+      <div class="plan-tier-grid">
+        <article class="plan-tier-card">
+          <h2 class="plan-tier-name">Free</h2>
+          <p class="plan-tier-price">$0</p>
+          <p class="plan-tier-tagline">Live monitoring for one garage</p>
+          <ul class="plan-tier-list">
+            <li>2 push devices</li>
+            <li>Email & chat alerts</li>
+            <li>Charts & dashboard</li>
+          </ul>
+          {!user && (
+            <a class="btn-secondary w-full" href="/register">Get started</a>
+          )}
+        </article>
+
+        <article class="plan-tier-card plan-tier-card-featured">
+          <h2 class="plan-tier-name">Member</h2>
+          <p class="plan-tier-price">Monthly or annual</p>
+          <p class="plan-tier-tagline">History export & more headroom</p>
+          <ul class="plan-tier-list">
+            <li>6 push devices</li>
+            <li>CSV history export</li>
+            <li>Everything in Free</li>
+          </ul>
+          {user ? (
+            currentTier === "free" ? (
+              <form action="/api/stripe/checkout" method="post">
+                <input type="hidden" name="plan" value="member" />
+                <input type="hidden" name="interval" value="monthly" />
+                <button class="btn-primary w-full" type="submit">Upgrade to Member</button>
+              </form>
+            ) : (
+              <p class="text-sm text-[var(--color-text-muted)] mb-0">Included in your plan</p>
+            )
+          ) : (
+            <a class="btn-primary w-full" href="/signin?next=/pricing">Sign in to subscribe</a>
+          )}
+        </article>
+
+        <article class="plan-tier-card">
+          <h2 class="plan-tier-name">Pro</h2>
+          <p class="plan-tier-price">14-day trial</p>
+          <p class="plan-tier-tagline">Alerts anywhere + integrations</p>
+          <ul class="plan-tier-list">
+            <li>24 push devices</li>
+            <li>SMS, push, webhooks</li>
+            <li>Share links & API keys</li>
+          </ul>
+          {user ? (
+            currentTier !== "pro" ? (
+              <form action="/api/stripe/checkout" method="post">
+                <input type="hidden" name="plan" value="pro" />
+                <input type="hidden" name="interval" value="monthly" />
+                <button class="btn-primary w-full" type="submit">Start Pro trial</button>
+              </form>
+            ) : (
+              <p class="text-sm text-[var(--color-text-muted)] mb-0">You're on Pro</p>
+            )
+          ) : (
+            <a class="btn-primary w-full" href="/signin?next=/pricing">Sign in for Pro trial</a>
+          )}
+        </article>
+      </div>
+      {user && hasBilling && (
+        <form action="/api/stripe/portal" method="post" class="mt-4">
+          <button class="btn-secondary" type="submit">Manage billing</button>
+        </form>
+      )}
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Full feature comparison</h2>
+      <p class="card-subtitle mb-4">Every tier at a glance — anchor links work from upgrade prompts across the app.</p>
+      <PlanComparisonTable highlightTier={currentTier} />
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Questions?</h2>
+      <p class="mb-0">
+        See the <a class="text-link" href="/about/accounts-and-dashboard">accounts guide</a>
+        or <a class="text-link" href="/contact">contact us</a> if you're unsure which tier fits.
+      </p>
+    </section>
+  </div>
+</Layout>

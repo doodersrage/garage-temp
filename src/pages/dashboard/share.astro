@@ -3,6 +3,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getOrCreateHouseholdForUser } from "../../lib/households";
 import { getUserEntitlements } from "../../lib/entitlements";
+import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import { createServerClient } from "../../lib/supabase";
 import { getSiteUrl } from "../../lib/stripe";
 import { listHouseholdApiKeys } from "../../lib/apiKeys";
@@ -116,13 +117,7 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
     )}
 
     {!entitlements.canCreateShareLinks ? (
-      <section class="card">
-        <p class="mb-4">Upgrade to Pro to create public share links.</p>
-        <form action="/api/stripe/checkout" method="post">
-          <input type="hidden" name="plan" value="pro" />
-          <button class="btn-primary" type="submit">Upgrade to Pro</button>
-        </form>
-      </section>
+      <UpgradeNudge feature="share_links" tier={entitlements.tier} />
     ) : canEdit ? (
       <form action="/api/share/manage" method="post" class="card">
         <input type="hidden" name="action" value="create" />
@@ -336,6 +331,10 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
           </a>
         </p>
       </section>
+    )}
+
+    {!entitlements.canUseOutboundWebhook && (
+      <UpgradeNudge feature="webhooks" tier={entitlements.tier} />
     )}
 
     {entitlements.canUseOutboundWebhook && (
