@@ -47,7 +47,8 @@ const tempConfig = isAuthenticated
 			)}
 			{isAuthenticated && !showGarageTemps && !showWeather && (
 				<div class="empty-state">
-					<p>All home page blocks are hidden. Update your display preferences on the dashboard to show them again.</p>
+					<p class="mb-4">All home page blocks are hidden. Update your display preferences to show them again.</p>
+					<a class="btn-primary" href="/dashboard">Open display preferences</a>
 				</div>
 			)}
 		</div>

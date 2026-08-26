@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getInviteByToken } from "../../lib/householdInvites";
+import { getHouseholdErrorMessage } from "../../lib/householdErrors";
 import { createServerClient } from "../../lib/supabase";
 
 const token = Astro.params.token;
@@ -25,11 +26,11 @@ if (invite) {
 
 const expired = invite ? Date.parse(invite.expires_at) < Date.now() : false;
 const alreadyAccepted = Boolean(invite?.accepted_at);
-const acceptError = Astro.url.searchParams.get("error");
+const acceptError = getHouseholdErrorMessage(Astro.url.searchParams.get("error"));
 const nextPath = `/invite/${token}`;
 ---
 <Layout title="Household invite" description="Accept a household sharing invite.">
-  <main id="main-content" class="mx-auto w-full max-w-lg px-4 py-12 sm:px-6">
+  <div class="mx-auto w-full max-w-lg px-4 py-12 sm:px-6">
     <section class="card">
       <h1 class="card-title">Household invite</h1>
       {!invite ? (
@@ -47,7 +48,7 @@ const nextPath = `/invite/${token}`;
             You've been invited to share sensors in <strong>{householdName}</strong>
             {invite.email ? <> as <strong>{invite.email}</strong></> : null}.
           </p>
-          {acceptError && <p class="alert-warning">{acceptError}</p>}
+          {acceptError && <p class="alert-warning" role="alert">{acceptError}</p>}
           {!session || !user ? (
             <div class="space-y-3 mt-4">
               <p class="mb-0">Sign in or register with the invited email to accept.</p>
@@ -68,5 +69,5 @@ const nextPath = `/invite/${token}`;
         </>
       )}
     </section>
-  </main>
+  </div>
 </Layout>

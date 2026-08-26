@@ -25,6 +25,11 @@ const navItems: NavItem[] = [
     isActive: currentPath.startsWith("/dashboard/temperature"),
   },
   {
+    href: "/dashboard/alerts",
+    label: "Alerts",
+    isActive: currentPath.startsWith("/dashboard/alerts"),
+  },
+  {
     href: "/dashboard/history",
     label: "History",
     isActive: currentPath.startsWith("/dashboard/history"),
@@ -63,28 +68,75 @@ if (isAdmin) {
     isActive: currentPath.startsWith("/dashboard/contacts"),
   });
 }
+
+const activeLabel =
+  navItems.find((item) => item.isActive)?.label ?? "Dashboard";
 ---
 
 <aside class="dashboard-sidebar">
-  <nav class="dashboard-sidebar-inner" aria-label="Dashboard">
-    <p class="dashboard-sidebar-label">Dashboard</p>
-    {email && <p class="dashboard-sidebar-email">{email}</p>}
-    <ul class="dashboard-nav-list">
-      {navItems.map(({ href, label, isActive }) => (
-        <li>
-          <a
-            href={href}
-            class:list={["dashboard-nav-link", isActive && "dashboard-nav-link-active"]}
-            aria-current={isActive ? "page" : undefined}
-          >
-            {label}
-          </a>
-        </li>
-      ))}
-    </ul>
-    <div class="dashboard-sidebar-footer">
-      <a class="dashboard-nav-link" href="/">Back to site</a>
-      <a class="dashboard-nav-link" href="/api/auth/signout">Sign out</a>
+  <nav class="dashboard-sidebar-inner" aria-label="Dashboard" id="dashboard-nav">
+    <div class="dashboard-sidebar-top">
+      <div>
+        <p class="dashboard-sidebar-label">Dashboard</p>
+        {email && <p class="dashboard-sidebar-email">{email}</p>}
+      </div>
+      <button
+        type="button"
+        class="dashboard-nav-toggle btn-ghost lg:hidden"
+        id="dashboard-nav-toggle"
+        aria-expanded="false"
+        aria-controls="dashboard-nav-panel"
+      >
+        {activeLabel}
+      </button>
+    </div>
+    <div id="dashboard-nav-panel" class="dashboard-nav-panel">
+      <ul class="dashboard-nav-list">
+        {navItems.map(({ href, label, isActive }) => (
+          <li>
+            <a
+              href={href}
+              class:list={["dashboard-nav-link", isActive && "dashboard-nav-link-active"]}
+              aria-current={isActive ? "page" : undefined}
+            >
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="dashboard-sidebar-footer">
+        <a class="dashboard-nav-link" href="/">Back to site</a>
+        <a class="dashboard-nav-link" href="/api/auth/signout">Sign out</a>
+      </div>
     </div>
   </nav>
 </aside>
+
+<script is:inline>
+  (() => {
+    const toggle = document.getElementById("dashboard-nav-toggle");
+    const panel = document.getElementById("dashboard-nav-panel");
+    if (!toggle || !panel) return;
+
+    const setOpen = (open) => {
+      panel.classList.toggle("dashboard-nav-open", open);
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    };
+
+    toggle.addEventListener("click", () => {
+      setOpen(!panel.classList.contains("dashboard-nav-open"));
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") setOpen(false);
+    });
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (!panel.contains(target) && !toggle.contains(target)) {
+        setOpen(false);
+      }
+    });
+  })();
+</script>

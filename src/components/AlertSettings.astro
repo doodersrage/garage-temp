@@ -15,19 +15,24 @@ const {
   settings,
   entitlements,
   vapidPublicKey = "",
-  redirectTo = "/dashboard",
+  redirectTo = "/dashboard/alerts",
 } = Astro.props;
+
+const needsPro =
+  !entitlements.canUseSms ||
+  !entitlements.canUsePush ||
+  !entitlements.canUseOutboundWebhook;
 ---
 <form action="/api/user/alert-settings" method="post" class="card animate-slide-up-fade">
   <input type="hidden" name="redirect" value={redirectTo} />
-  <h2 class="card-title">Alerts & digests</h2>
+  <h2 class="card-title">When to notify you</h2>
   <p class="card-subtitle">
-    Threshold, rate-of-change, and outage alerts across email, Discord, SMS, push, and webhooks.
+    Choose thresholds and channels. Free plans include email and Discord; SMS, browser push, and outbound webhooks need Pro.
   </p>
 
   <label class="checkbox-row mb-3">
     <input type="checkbox" name="alerts_enabled" value="true" checked={settings.enabled} />
-    <span>Enable alert evaluation</span>
+    <span>Turn on alerts</span>
   </label>
 
   <label class="checkbox-row mb-4">
@@ -37,24 +42,24 @@ const {
 
   <div class="config-row-grid mb-4">
     <div class="form-field mb-0">
-      <label class="form-label" for="freeze_threshold_f">Freeze threshold (°F)</label>
+      <label class="form-label" for="freeze_threshold_f">Alert if temperature drops below (°F)</label>
       <input class="form-input" type="number" step="0.5" id="freeze_threshold_f" name="freeze_threshold_f" value={settings.freezeThresholdF} />
     </div>
     <div class="form-field mb-0">
-      <label class="form-label" for="humidity_threshold">Humidity threshold (%)</label>
+      <label class="form-label" for="humidity_threshold">Alert if humidity rises above (%)</label>
       <input class="form-input" type="number" step="1" id="humidity_threshold" name="humidity_threshold" value={settings.humidityThreshold} />
     </div>
     <div class="form-field mb-0">
-      <label class="form-label" for="rate_change_f">Rate change (°F / hour)</label>
+      <label class="form-label" for="rate_change_f">Alert me if temp drops faster than (°F / hour)</label>
       <input class="form-input" type="number" step="0.5" id="rate_change_f" name="rate_change_f" value={settings.rateChangeF} />
     </div>
     <div class="form-field mb-0">
-      <label class="form-label" for="outage_hours">Outage hours</label>
+      <label class="form-label" for="outage_hours">Alert if no reading for (hours)</label>
       <input class="form-input" type="number" step="0.5" id="outage_hours" name="outage_hours" value={settings.outageHours} />
     </div>
   </div>
 
-  <h3 class="text-base font-semibold mb-2">Channels</h3>
+  <h3 class="text-base font-semibold mb-2">How to reach you</h3>
   <div class="space-y-2 mb-4">
     <label class="checkbox-row">
       <input type="checkbox" name="channel_email" value="true" checked={settings.channelEmail} />
@@ -66,17 +71,39 @@ const {
     </label>
     <label class="checkbox-row">
       <input type="checkbox" name="channel_sms" value="true" checked={settings.channelSms} disabled={!entitlements.canUseSms} />
-      <span>SMS (Twilio){!entitlements.canUseSms ? " — Pro" : ""}</span>
+      <span>
+        SMS (Twilio)
+        {!entitlements.canUseSms && (
+          <> — Pro · <a class="text-link" href="/dashboard/history">Upgrade</a></>
+        )}
+      </span>
     </label>
     <label class="checkbox-row">
       <input type="checkbox" name="channel_push" value="true" checked={settings.channelPush} disabled={!entitlements.canUsePush} />
-      <span>Web Push{!entitlements.canUsePush ? " — Pro" : ""}</span>
+      <span>
+        Browser push
+        {!entitlements.canUsePush && (
+          <> — Pro · <a class="text-link" href="/dashboard/history">Upgrade</a></>
+        )}
+      </span>
     </label>
     <label class="checkbox-row">
       <input type="checkbox" name="channel_webhook" value="true" checked={settings.channelWebhook} disabled={!entitlements.canUseOutboundWebhook} />
-      <span>Outbound webhook (IFTTT / Home Assistant){!entitlements.canUseOutboundWebhook ? " — Pro" : ""}</span>
+      <span>
+        Outbound webhook (IFTTT / Home Assistant)
+        {!entitlements.canUseOutboundWebhook && (
+          <> — Pro · <a class="text-link" href="/dashboard/history">Upgrade</a></>
+        )}
+      </span>
     </label>
   </div>
+
+  {needsPro && (
+    <p class="mb-4 text-sm text-[var(--color-text-muted)]">
+      Unlock SMS, push, and webhooks with
+      <a class="text-link" href="/dashboard/history">Pro (via History / CSV)</a>.
+    </p>
+  )}
 
   <div class="form-field">
     <label class="form-label" for="alert_email">Alert email</label>
@@ -89,8 +116,9 @@ const {
   </div>
 
   <div class="form-field">
-    <label class="form-label" for="sms_phone">SMS phone (E.164)</label>
+    <label class="form-label" for="sms_phone">SMS phone number</label>
     <input class="form-input" type="tel" id="sms_phone" name="sms_phone" value={settings.smsPhone ?? ""} placeholder="+15551234567" disabled={!entitlements.canUseSms} />
+    <p class="form-hint">Use international format, e.g. +1 for US numbers.</p>
   </div>
 
   <div class="form-field">
@@ -99,8 +127,9 @@ const {
   </div>
 
   <div class="form-field">
-    <label class="form-label" for="outbound_webhook_secret">Webhook HMAC secret</label>
+    <label class="form-label" for="outbound_webhook_secret">Webhook signing secret (optional)</label>
     <input class="form-input" type="text" id="outbound_webhook_secret" name="outbound_webhook_secret" value={settings.outboundWebhookSecret ?? ""} disabled={!entitlements.canUseOutboundWebhook} />
+    <p class="form-hint">Used to verify requests from this site (HMAC). Leave blank if your automation does not need it.</p>
   </div>
 
   <button type="submit" class="btn-primary">Save alert settings</button>

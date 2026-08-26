@@ -63,6 +63,7 @@ const notice = Astro.url.searchParams.get("created")
               <option value="live">Live</option>
               <option value="history">History</option>
             </select>
+            <p class="form-hint">Live = current sensors only. History marks the link for future history views.</p>
           </div>
           <div class="form-field mb-0">
             <label class="form-label" for="expires_days">Expires (days, 0 = never)</label>
@@ -79,22 +80,43 @@ const notice = Astro.url.searchParams.get("created")
         <p class="mb-0">No share links yet.</p>
       ) : (
         <ul class="space-y-4">
-          {(links ?? []).map((link) => (
-            <li class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <strong>{link.label || link.scope}</strong>
-                <p class="m-0 text-sm break-all">
-                  <a href={`${siteUrl}/share/${link.token}`}>{siteUrl}/share/{link.token}</a>
-                </p>
-              </div>
-              <form action="/api/share/manage" method="post">
-                <input type="hidden" name="action" value="revoke" />
-                <input type="hidden" name="id" value={link.id} />
-                <input type="hidden" name="redirect" value="/dashboard/share" />
-                <button class="btn-ghost" type="submit">Revoke</button>
-              </form>
-            </li>
-          ))}
+          {(links ?? []).map((link) => {
+            const href = `${siteUrl}/share/${link.token}`;
+            return (
+              <li class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <strong>{link.label || link.scope}</strong>
+                  <p class="m-0 text-sm break-all">
+                    <a href={href}>{href}</a>
+                  </p>
+                  <p class="m-0 text-sm text-[var(--color-text-muted)]">
+                    Scope: {link.scope}
+                    {link.expires_at
+                      ? ` · Expires ${new Date(link.expires_at).toLocaleDateString()}`
+                      : " · No expiry"}
+                  </p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    data-copy={href}
+                    data-copy-label="Copy link"
+                  >
+                    Copy link
+                  </button>
+                  <form action="/api/share/manage" method="post">
+                    <input type="hidden" name="action" value="revoke" />
+                    <input type="hidden" name="id" value={link.id} />
+                    <input type="hidden" name="redirect" value="/dashboard/share" />
+                    <button class="btn-ghost" type="submit" onclick="return confirm('Revoke this share link?');">
+                      Revoke
+                    </button>
+                  </form>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

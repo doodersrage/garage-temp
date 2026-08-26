@@ -2,13 +2,12 @@
 import DashboardLayout from "../layouts/DashboardLayout.astro";
 import DisplayPreferences from "../components/DisplayPreferences.astro";
 import DashboardOnboarding from "../components/DashboardOnboarding.astro";
-import AlertSettings from "../components/AlertSettings.astro";
 import { getAuthFromCookies } from "../lib/auth";
 import { getUserPreferences } from "../lib/userPreferences";
 import { fetchGarageTempHistory } from "../lib/garageTempsHistory";
 import { fetchUserTempConfig } from "../lib/userTempConfig";
-import { getAlertSettingsForUser } from "../lib/notify";
 import { getUserEntitlements } from "../lib/entitlements";
+import { getUserDevicesAsTempConfig } from "../lib/devices";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -16,19 +15,22 @@ if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const [preferences, tempConfig, history, alertSettings, entitlements] = await Promise.all([
+const [preferences, tempConfig, history, entitlements, deviceConfig] = await Promise.all([
   getUserPreferences(user),
   fetchUserTempConfig(user.id),
   fetchGarageTempHistory(user.id, 1, 1),
-  getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
   getUserEntitlements(user.id),
+  getUserDevicesAsTempConfig(user.id, user.email),
 ]);
 
-const alertNotice = Astro.url.searchParams.get("alert_saved")
-  ? "Alert settings saved."
-  : Astro.url.searchParams.get("alert_error")
-    ? "Unable to save alert settings."
-    : null;
+const hasDevices =
+  tempConfig.hasCustomConfig ||
+  deviceConfig.devices.some((d) => d.source === "push");
+const hasSensors =
+  preferences.tempProbes.length > 0 ||
+  deviceConfig.devices.some(
+    (d) => d.source === "push" && d.sensors.length > 0,
+  );
 ---
 <DashboardLayout title="Dashboard">
   <div class="space-y-6">
@@ -36,29 +38,26 @@ const alertNotice = Astro.url.searchParams.get("alert_saved")
       <h1 class="card-title">Welcome back</h1>
       <p class="card-subtitle">{user.email}</p>
       <p class="mb-0">Manage your home page display, alerts, household sharing, and probe readings.</p>
-      {alertNotice && (
-        <p class="alert-success mt-4">{alertNotice}</p>
-      )}
       <p class="mt-3 mb-0 text-sm text-[var(--color-text-muted)]">
         Plan: <strong>{entitlements.tier}</strong>
       </p>
     </section>
 
     <DashboardOnboarding
-      hasCustomFeeds={tempConfig.hasCustomConfig}
-      hasProbes={preferences.tempProbes.length > 0}
+      hasDevices={hasDevices}
+      hasSensors={hasSensors}
       hasHistory={history.totalCount > 0}
     />
 
     <DisplayPreferences preferences={preferences} redirectTo="/dashboard" />
 
-    <AlertSettings
-      userEmail={user.email ?? ""}
-      settings={alertSettings}
-      entitlements={entitlements}
-      vapidPublicKey={import.meta.env.VAPID_PUBLIC_KEY ?? ""}
-      redirectTo="/dashboard"
-    />
+    <section class="card">
+      <h2 class="card-title">Alerts</h2>
+      <p class="card-subtitle mb-3">
+        Freeze, humidity, outage, and rate-of-change notifications across email, Discord, SMS, push, and webhooks.
+      </p>
+      <a class="btn-secondary" href="/dashboard/alerts">Manage alerts</a>
+    </section>
 
     <section class="card">
       <h2 class="card-title">Install the app</h2>

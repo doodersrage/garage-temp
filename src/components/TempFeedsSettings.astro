@@ -18,9 +18,9 @@ if (feedRows.length < MAX_TEMP_FEEDS) {
 
 <form action="/api/user/temp-feeds" method="post" class="card animate-zoom-in">
   <input type="hidden" name="redirect" value={redirectTo} />
-  <h2 class="card-title">Temperature feeds</h2>
+  <h2 class="card-title">Feed URLs</h2>
   <p class="card-subtitle">
-    Add one or more HTTPS JSON feeds. Each feed should expose a <code>temp</code> object with probe keys.
+    Add HTTPS JSON feeds we should pull. Each feed should expose a <code>temp</code> object with probe keys.
   </p>
 
   <div class="mb-6 flex flex-col gap-3">
@@ -36,6 +36,7 @@ if (feedRows.length < MAX_TEMP_FEEDS) {
               formmethod="post"
               name="feed_id"
               value={feed.id}
+              onclick="return confirm('Delete this feed?');"
             >
               Delete feed
             </button>

@@ -50,11 +50,13 @@ const feedGroups = buildFeedDisplayGroups(feeds, probes, feedResults);
 
   {!feeds.length ? (
     <div class="empty-state">
-      <p>No temperature feeds are configured. Add feeds on the dashboard to see readings here.</p>
+      <p class="mb-4">No temperature feeds are configured yet.</p>
+      <a class="btn-primary" href="/signin">Sign in to connect your probes</a>
     </div>
   ) : feedGroups.length === 0 ? (
     <div class="empty-state">
-      <p>No feed groups are available. Check your dashboard feed and probe assignments.</p>
+      <p class="mb-4">No feed groups are available yet.</p>
+      <a class="btn-primary" href="/signin">Sign in to connect your probes</a>
     </div>
   ) : (
     <div class="feed-groups">

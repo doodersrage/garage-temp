@@ -1,30 +1,30 @@
 ---
 interface Props {
-  hasCustomFeeds: boolean;
-  hasProbes: boolean;
+  hasDevices: boolean;
+  hasSensors: boolean;
   hasHistory: boolean;
 }
 
-const { hasCustomFeeds, hasProbes, hasHistory } = Astro.props;
+const { hasDevices, hasSensors, hasHistory } = Astro.props;
 
 const steps = [
   {
-    done: hasCustomFeeds,
+    done: hasDevices,
     href: "/dashboard/temperature",
-    title: "Configure temperature feeds",
-    detail: "Add HTTPS JSON feed URLs for your probes.",
+    title: "Connect a device or feed",
+    detail: "Add a push ingest device (ESP/Arduino) or an HTTPS JSON pull feed.",
   },
   {
-    done: hasProbes,
+    done: hasSensors,
     href: "/dashboard/temperature",
-    title: "Map probes and labels",
-    detail: "Assign keys to friendly names and choose visible probes.",
+    title: "Label your sensors",
+    detail: "Map keys to friendly names so home and history cards are readable.",
   },
   {
     done: hasHistory,
     href: "/dashboard/history",
     title: "Review saved history",
-    detail: "Load the home page while signed in to start collecting snapshots.",
+    detail: "Snapshots collect automatically while feeds or devices are online (including hourly jobs).",
   },
 ];
 

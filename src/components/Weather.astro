@@ -20,7 +20,9 @@ if (resolvedCityId === getDefaultWeatherCityId()) {
 }
 
 const weatherData = await fetchWeather(resolvedCityId);
-const weatherError = weatherData ? null : "Unable to load weather for this location. Check your OpenWeather city ID in display preferences.";
+const weatherError = weatherData
+  ? null
+  : "Unable to load weather for this location.";
 
 const locationLabel = weatherData
   ? `${weatherData.name}${weatherData.sys?.country ? `, ${weatherData.sys.country}` : ""}`
@@ -64,7 +66,8 @@ const weatherStats = weatherData
   ) : weatherError ? (
     <div class="empty-state">
       <h2 class="card-title">Current Weather</h2>
-      <p class="m-0">{weatherError}</p>
+      <p class="mb-4">{weatherError}</p>
+      <a class="btn-secondary" href="/dashboard">Change weather location</a>
     </div>
   ) : (
     <p class="loading-state">Loading weather data...</p>

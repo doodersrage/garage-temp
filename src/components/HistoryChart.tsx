@@ -100,7 +100,7 @@ export default function HistoryChart({
       <div class="history-chart-wrap">
         <p class="history-chart-title m-0">{title}</p>
         <p class="m-0 text-sm text-[var(--color-text-muted)]">
-          Not enough readings yet for a chart. Load the home page while signed in to collect data.
+          Not enough readings yet for a chart. Snapshots collect automatically while devices are online.
         </p>
       </div>
     );

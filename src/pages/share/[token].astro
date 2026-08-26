@@ -9,46 +9,96 @@ if (!token) {
 const readingsUrl = `/api/share/${token}/readings`;
 ---
 <Layout title="Shared live view" description="Read-only shared garage sensor readings.">
-  <main id="main-content" class="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
-    <h1 class="text-3xl font-semibold mb-2">Shared sensors</h1>
-    <p class="text-[var(--color-text-muted)] mb-8">Live read-only view</p>
+  <div class="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
+    <h1 class="text-3xl font-semibold mb-2" id="share-title">Shared sensors</h1>
+    <p class="text-[var(--color-text-muted)] mb-2" id="share-subtitle">Live read-only view</p>
+    <p class="text-sm text-[var(--color-text-muted)] mb-8" id="share-meta"></p>
     <div id="share-root" class="space-y-4" data-url={readingsUrl}>
       <p>Loading…</p>
     </div>
-  </main>
+    <p class="mt-10 text-sm text-[var(--color-text-muted)]">
+      Want your own garage monitor?
+      <a class="text-link" href="/register">Create a free account</a>
+    </p>
+  </div>
 </Layout>
 
 <script is:inline>
-  (async () => {
+  (() => {
     const root = document.getElementById("share-root");
+    const titleEl = document.getElementById("share-title");
+    const subtitleEl = document.getElementById("share-subtitle");
+    const metaEl = document.getElementById("share-meta");
     if (!root) return;
     const url = root.getAttribute("data-url");
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
-      if (!res.ok) {
-        root.innerHTML = `<p>${data.error || "Unable to load"}</p>`;
-        return;
+    const kindLabels = {
+      temperature: "Temperature",
+      humidity: "Humidity",
+      co2: "CO₂",
+      door: "Door",
+      power: "Power",
+      flood: "Flood",
+      generic: "Sensor",
+    };
+
+    function formatValue(r) {
+      if (r.value_bool != null) {
+        return r.value_bool ? "On / Open" : "Off / Closed";
       }
+      if (r.value_num != null) {
+        return `${Number(r.value_num).toFixed(1)}${r.unit ? " " + r.unit : ""}`;
+      }
+      return r.value_text || "—";
+    }
+
+    function render(data) {
+      if (titleEl && data.label) titleEl.textContent = data.label;
+      if (subtitleEl) {
+        subtitleEl.textContent =
+          data.scope === "history"
+            ? "Shared history scope (current sensors shown)"
+            : "Live read-only view";
+      }
+      if (metaEl) {
+        const parts = [];
+        if (data.expires_at) {
+          parts.push("Expires " + new Date(data.expires_at).toLocaleString());
+        } else {
+          parts.push("No expiry");
+        }
+        parts.push("Updates every 90 seconds");
+        metaEl.textContent = parts.join(" · ");
+      }
+
       root.innerHTML = (data.readings || [])
         .map(
           (r) => `<div class="card">
             <strong>${r.label}</strong>
-            <p class="m-0 text-sm text-[var(--color-text-muted)]">${r.device} · ${r.kind}</p>
-            <p class="text-2xl m-0 mt-2">${
-              r.value_bool != null
-                ? r.value_bool
-                  ? "On / Open"
-                  : "Off / Closed"
-                : r.value_num != null
-                  ? `${Number(r.value_num).toFixed(1)}${r.unit ? " " + r.unit : ""}`
-                  : r.value_text || "—"
+            <p class="m-0 text-sm text-[var(--color-text-muted)]">${r.device} · ${
+              kindLabels[r.kind] || r.kind
             }</p>
+            <p class="text-2xl m-0 mt-2">${formatValue(r)}</p>
           </div>`,
         )
-        .join("") || "<p>No readings yet.</p>";
-    } catch (e) {
-      root.innerHTML = "<p>Failed to load shared readings.</p>";
+        .join("") || '<div class="empty-state"><p>No readings yet.</p></div>';
     }
+
+    async function load() {
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!res.ok) {
+          root.innerHTML = `<div class="empty-state"><p>${data.error || "Unable to load"}</p></div>`;
+          if (metaEl) metaEl.textContent = "";
+          return;
+        }
+        render(data);
+      } catch {
+        root.innerHTML = '<div class="empty-state"><p>Failed to load shared readings.</p></div>';
+      }
+    }
+
+    load();
+    setInterval(load, 90000);
   })();
 </script>

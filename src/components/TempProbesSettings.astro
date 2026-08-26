@@ -42,6 +42,7 @@ if (probeRows.length < MAX_TEMP_PROBES) {
               formmethod="post"
               name="probe_id"
               value={probe.id}
+              onclick="return confirm('Delete this probe?');"
             >
               Delete probe
             </button>

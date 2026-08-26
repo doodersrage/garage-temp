@@ -48,6 +48,7 @@ const navItems = [
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ];
+const isDashboard = currentPath.startsWith("/dashboard");
 ---
 <!doctype html>
 <html lang="en">
@@ -109,8 +110,19 @@ const navItems = [
 						))}
 						{user ? (
 							<>
-								<a href="/dashboard" class:list={["nav-link", currentPath === "/dashboard" && "nav-link-active"]}>Dashboard</a>
-								<a href="/api/auth/signout" class="nav-link">Sign out</a>
+								<a
+									href="/dashboard"
+									class:list={[
+										"nav-link",
+										(currentPath === "/dashboard" || currentPath.startsWith("/dashboard/")) &&
+											"nav-link-active",
+									]}
+								>
+									Dashboard
+								</a>
+								{!isDashboard && (
+									<a href="/api/auth/signout" class="nav-link">Sign out</a>
+								)}
 							</>
 						) : (
 							<a href="/signin" class:list={["nav-link", currentPath === "/signin" && "nav-link-active"]}>Sign in</a>
@@ -129,14 +141,60 @@ const navItems = [
 		</div>
 		<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline />
 		<script is:inline>
-			const toggle = document.getElementById("site-nav-toggle");
-			const nav = document.getElementById("site-nav");
-			if (toggle && nav) {
-				toggle.addEventListener("click", () => {
-					const open = nav.classList.toggle("site-nav-open");
+			(() => {
+				const toggle = document.getElementById("site-nav-toggle");
+				const nav = document.getElementById("site-nav");
+				if (!toggle || !nav) return;
+
+				const setOpen = (open) => {
+					nav.classList.toggle("site-nav-open", open);
 					toggle.setAttribute("aria-expanded", open ? "true" : "false");
+				};
+
+				toggle.addEventListener("click", (event) => {
+					event.stopPropagation();
+					setOpen(!nav.classList.contains("site-nav-open"));
 				});
-			}
+
+				document.addEventListener("keydown", (event) => {
+					if (event.key === "Escape") setOpen(false);
+				});
+
+				document.addEventListener("click", (event) => {
+					const target = event.target;
+					if (!(target instanceof Node)) return;
+					if (!nav.contains(target) && !toggle.contains(target)) {
+						setOpen(false);
+					}
+				});
+
+				nav.querySelectorAll("a").forEach((link) => {
+					link.addEventListener("click", () => setOpen(false));
+				});
+			})();
+
+			document.addEventListener("click", async (event) => {
+				const target = event.target;
+				if (!(target instanceof HTMLElement)) return;
+				const btn = target.closest("[data-copy]");
+				if (!(btn instanceof HTMLElement)) return;
+				const text = btn.getAttribute("data-copy");
+				if (!text) return;
+				const label = btn.getAttribute("data-copy-label") || "Copy";
+				try {
+					await navigator.clipboard.writeText(text);
+					btn.textContent = "Copied";
+					setTimeout(() => {
+						btn.textContent = label;
+					}, 1500);
+				} catch {
+					btn.textContent = "Copy failed";
+					setTimeout(() => {
+						btn.textContent = label;
+					}, 1500);
+				}
+			});
+
 			if ("serviceWorker" in navigator) {
 				window.addEventListener("load", () => {
 					navigator.serviceWorker.register("/sw.js").catch(() => {});

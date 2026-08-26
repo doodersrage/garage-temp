@@ -40,6 +40,7 @@ export const GET: APIRoute = async ({ params }) => {
     JSON.stringify({
       scope: share.scope,
       label: share.label,
+      expires_at: share.expires_at,
       readings: readings.map((row) => ({
         device: row.deviceName,
         key: row.sensor.key,

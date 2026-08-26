@@ -16,7 +16,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const formData = await request.formData();
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard";
+  const redirectTo = formData.get("redirect")?.toString() || "/dashboard/alerts";
   const existing = await getAlertSettingsForUser(
     user.id,
     user.user_metadata as Record<string, unknown> | undefined,

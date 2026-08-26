@@ -1,0 +1,44 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import AlertSettings from "../../components/AlertSettings.astro";
+import { getAuthFromCookies } from "../../lib/auth";
+import { getAlertSettingsForUser } from "../../lib/notify";
+import { getUserEntitlements } from "../../lib/entitlements";
+
+const { session, user } = await getAuthFromCookies(Astro.cookies);
+
+if (!session || !user) {
+  return Astro.redirect("/signin");
+}
+
+const [alertSettings, entitlements] = await Promise.all([
+  getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
+  getUserEntitlements(user.id),
+]);
+
+const alertNotice = Astro.url.searchParams.get("alert_saved")
+  ? "Alert settings saved."
+  : Astro.url.searchParams.get("alert_error")
+    ? "Unable to save alert settings."
+    : null;
+---
+<DashboardLayout title="Alerts">
+  <div class="space-y-6">
+    <section class="card animate-slide-in-left">
+      <h1 class="card-title">Alerts & digests</h1>
+      <p class="card-subtitle">{user.email}</p>
+      <p class="mb-0">
+        Get notified when temperatures drop, humidity spikes, feeds go quiet, or conditions change quickly.
+      </p>
+      {alertNotice && <p class="alert-success mt-4">{alertNotice}</p>}
+    </section>
+
+    <AlertSettings
+      userEmail={user.email ?? ""}
+      settings={alertSettings}
+      entitlements={entitlements}
+      vapidPublicKey={import.meta.env.VAPID_PUBLIC_KEY ?? ""}
+      redirectTo="/dashboard/alerts"
+    />
+  </div>
+</DashboardLayout>

@@ -258,7 +258,10 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
         </div>
       ) : (
         <div class="empty-state">
-          <p>No sensors available. Configure devices in your dashboard.</p>
+          <p class="mb-4">No sensors available yet.</p>
+          <a class="btn-primary" href="/dashboard/temperature">
+            Configure devices
+          </a>
         </div>
       )}
 
