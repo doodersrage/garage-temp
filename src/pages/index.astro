@@ -1,12 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import GetTemps from '../components/GetTemps.astro';
+import DemoTempsPanel from '../components/DemoTempsPanel';
 import WeatherPanel from '../components/WeatherPanel';
 import LiveTempsPanel from '../components/LiveTempsPanel';
 import { getAuthFromCookies } from '../lib/auth';
 import { getUserPreferences } from '../lib/userPreferences';
-import { getDefaultTempFeeds, getDefaultTempProbes } from '../lib/tempFeedConfig';
-import { LoaderCircle } from '@lucide/astro';
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 const isAuthenticated = !!user;
@@ -14,19 +12,6 @@ const preferences = isAuthenticated ? await getUserPreferences(user) : null;
 
 const showGarageTemps = !isAuthenticated || preferences!.showGarageTemps;
 const showWeather = !isAuthenticated || preferences!.showWeather;
-
-const tempConfig = isAuthenticated
-  ? {
-      feeds: preferences!.tempFeeds,
-      probes: preferences!.tempProbes,
-      userId: user!.id,
-      userEmail: user!.email,
-      userMetadata: user!.user_metadata as Record<string, unknown>,
-    }
-  : {
-      feeds: getDefaultTempFeeds(),
-      probes: getDefaultTempProbes(),
-    };
 ---
 
 <Layout description="Live garage temperature and humidity readings with local weather, saved history, and a configurable dashboard.">
@@ -36,9 +21,7 @@ const tempConfig = isAuthenticated
 				<LiveTempsPanel client:visible />
 			)}
 			{showGarageTemps && !isAuthenticated && (
-				<GetTemps {...tempConfig} server:defer>
-					<LoaderCircle class="h-8 w-8 animate-spin text-blue-500" />
-				</GetTemps>
+				<DemoTempsPanel client:visible />
 			)}
 			{showWeather && (
 				<WeatherPanel client:visible cityId={preferences?.weatherCityId ?? null} />

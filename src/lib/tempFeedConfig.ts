@@ -31,7 +31,11 @@ export const MAX_TEMP_FEEDS = 6;
 export const MAX_TEMP_PROBES = 12;
 
 export function getDefaultFeedUrl(): string {
-  return import.meta.env.GARAGE_TEMP_FEED_URL ?? "https://garage.robmcd.name/";
+  return (
+    String(import.meta.env.GARAGE_TEMP_FEED_URL ?? "https://garage.robmcd.name/")
+      .replace(/\r/g, "")
+      .trim() || "https://garage.robmcd.name/"
+  );
 }
 
 export function getDefaultTempFeeds(): TempFeedConfig[] {

@@ -1,18 +1,24 @@
 /* Garage Temp PWA service worker */
-const CACHE = "garage-temp-v1";
-const PRECACHE = ["/", "/manifest.webmanifest", "/favicon.svg", "/logo.svg"];
+const CACHE = "garage-temp-v2";
+const PRECACHE = ["/manifest.webmanifest", "/favicon.svg", "/logo.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()),
+    caches
+      .open(CACHE)
+      .then((cache) => cache.addAll(PRECACHE))
+      .then(() => self.skipWaiting()),
   );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))),
-    ).then(() => self.clients.claim()),
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))),
+      )
+      .then(() => self.clients.claim()),
   );
 });
 
@@ -20,24 +26,75 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
 
-  // Network-first for API; cache-first for navigations/static
-  if (request.url.includes("/api/")) {
+  let url;
+  try {
+    url = new URL(request.url);
+  } catch {
+    return;
+  }
+
+  // Never intercept third-party requests (Cloudflare Insights, fonts, etc.)
+  if (url.origin !== self.location.origin) return;
+
+  // Let the browser handle Astro islands / build assets directly
+  if (
+    url.pathname.startsWith("/_server-islands/") ||
+    url.pathname.startsWith("/_astro/") ||
+    url.pathname.startsWith("/src/")
+  ) {
+    return;
+  }
+
+  // Network-first for API
+  if (url.pathname.startsWith("/api/")) {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const copy = response.clone();
-          if (response.ok && request.url.includes("/api/home/readings")) {
+          if (response.ok && url.pathname === "/api/home/readings") {
+            const copy = response.clone();
             caches.open(CACHE).then((cache) => cache.put(request, copy));
           }
           return response;
         })
-        .catch(() => caches.match(request)),
+        .catch(() => caches.match(request).then((cached) => cached || Response.error())),
     );
     return;
   }
 
+  // Network-first for HTML navigations so deploys are not stuck behind a stale "/"
+  const isNavigation =
+    request.mode === "navigate" ||
+    (request.headers.get("accept") || "").includes("text/html");
+
+  if (isNavigation) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match("/"))),
+    );
+    return;
+  }
+
+  // Cache-first for same-origin static assets
   event.respondWith(
-    caches.match(request).then((cached) => cached || fetch(request)),
+    caches.match(request).then((cached) => {
+      if (cached) return cached;
+      return fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => Response.error());
+    }),
   );
 });
 

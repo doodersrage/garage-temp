@@ -30,7 +30,9 @@ export type FetchTempsOptions = {
 
 export async function fetchTempFeed(feed: TempFeedConfig): Promise<TempFeedResult> {
   try {
-    const response = await fetch(feed.url);
+    const response = await fetch(feed.url, {
+      signal: AbortSignal.timeout(8000),
+    });
 
     if (!response.ok) {
       throw new Error(`Temperature feed request failed (${response.status})`);

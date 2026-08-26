@@ -1,0 +1,142 @@
+import { useCallback, useEffect, useState } from "preact/hooks";
+
+type ProbeReading = {
+  key: string;
+  label: string;
+  data: { f: number; c: number; h: number } | null;
+};
+
+type FeedGroup = {
+  feedId: string;
+  feedName: string;
+  enabled: boolean;
+  error?: string;
+  probes: ProbeReading[];
+};
+
+interface Props {
+  intervalMs?: number;
+}
+
+export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
+  const [groups, setGroups] = useState<FeedGroup[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [countdown, setCountdown] = useState(intervalMs / 1000);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const response = await fetch("/api/home/demo-temps", {
+        credentials: "same-origin",
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Unable to load garage temperatures");
+      }
+      setGroups(payload.groups ?? []);
+      setUpdatedAt(payload.updatedAt ?? null);
+      setError(null);
+      setCountdown(intervalMs / 1000);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unable to load garage temperatures");
+    } finally {
+      setLoading(false);
+    }
+  }, [intervalMs]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  useEffect(() => {
+    const tick = window.setInterval(() => {
+      setCountdown((current) => {
+        if (current <= 1) {
+          void load();
+          return intervalMs / 1000;
+        }
+        return current - 1;
+      });
+    }, 1000);
+    return () => window.clearInterval(tick);
+  }, [intervalMs, load]);
+
+  if (loading && groups.length === 0) {
+    return (
+      <section class="card animate-slide-in-left">
+        <p class="live-refresh-note m-0">Loading garage temperatures…</p>
+      </section>
+    );
+  }
+
+  return (
+    <section class="card animate-slide-in-left">
+      <h2 class="card-title">Garage Temperatures</h2>
+      <p class="card-subtitle">Live readings from the site’s demo temperature feeds.</p>
+
+      {error && (
+        <div class="alert-warning mb-4">
+          <p class="m-0">{error}</p>
+          <button type="button" class="btn-secondary mt-3" onClick={() => void load()}>
+            Retry now
+          </button>
+        </div>
+      )}
+
+      {!error && groups.length === 0 ? (
+        <div class="empty-state">
+          <p class="mb-4">No temperature feeds are available yet.</p>
+          <a class="btn-primary" href="/signin">
+            Sign in to connect your probes
+          </a>
+        </div>
+      ) : (
+        <div class="feed-groups">
+          {groups.map((group) => (
+            <section class="feed-group" key={group.feedId}>
+              <div class="feed-group-header">
+                <h3 class="feed-group-title">{group.feedName}</h3>
+                {!group.enabled && <span class="feed-group-badge">Disabled</span>}
+              </div>
+
+              {group.error && (
+                <div class="alert-warning mb-4">
+                  <p class="m-0">{group.error}</p>
+                </div>
+              )}
+
+              {group.probes.length === 0 ? (
+                <p class="stat-detail m-0">No probes are assigned to this feed yet.</p>
+              ) : (
+                <div class="stat-grid">
+                  {group.probes.map((probe) => (
+                    <article class="stat-item" key={probe.key}>
+                      <span class="stat-label">{probe.label}</span>
+                      {probe.data ? (
+                        <>
+                          <p class="stat-value">{probe.data.f}°F</p>
+                          <p class="stat-detail">
+                            {probe.data.c}°C · {probe.data.h}% humidity
+                          </p>
+                        </>
+                      ) : (
+                        <p class="stat-detail">No reading available for key "{probe.key}"</p>
+                      )}
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+          ))}
+        </div>
+      )}
+
+      <p class="live-refresh-note">
+        {updatedAt
+          ? `Updated ${new Date(updatedAt).toLocaleTimeString()}. Next refresh in ${countdown}s.`
+          : `Next refresh in ${countdown}s.`}
+      </p>
+    </section>
+  );
+}
