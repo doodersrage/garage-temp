@@ -10,6 +10,7 @@ import type { SensorKind } from "../../../lib/devices";
 export type LiveSensorCard = {
   deviceId: string;
   deviceName: string;
+  space: string | null;
   key: string;
   label: string;
   kind: SensorKind;
@@ -77,6 +78,7 @@ export const GET: APIRoute = async ({ cookies, url }) => {
     }
   }
 
+  const spaceFilter = url.searchParams.get("space")?.trim().toLowerCase() || null;
   const sensors: LiveSensorCard[] = [];
 
   for (const device of deviceConfig.devices.filter((d) => d.enabled)) {
@@ -89,6 +91,7 @@ export const GET: APIRoute = async ({ cookies, url }) => {
       sensors.push({
         deviceId: device.id,
         deviceName: device.name,
+        space: device.space ?? null,
         key: sensor.key,
         label: sensor.label,
         kind: sensor.kind,
@@ -125,6 +128,9 @@ export const GET: APIRoute = async ({ cookies, url }) => {
         sensors.push({
           deviceId: row.sensor.device_id,
           deviceName: row.deviceName,
+          space:
+            deviceConfig.devices.find((d) => d.id === row.sensor.device_id)?.space ??
+            null,
           key: row.sensor.key,
           label: row.sensor.label,
           kind: row.sensor.kind,
@@ -160,11 +166,25 @@ export const GET: APIRoute = async ({ cookies, url }) => {
     }
   }
 
+  const filtered =
+    spaceFilter == null
+      ? sensors
+      : sensors.filter(
+          (s) => (s.space ?? "").toLowerCase() === spaceFilter,
+        );
+
   return new Response(
     JSON.stringify({
       updatedAt: new Date().toISOString(),
       groups,
-      sensors,
+      sensors: filtered,
+      spaces: [
+        ...new Set(
+          deviceConfig.devices
+            .map((d) => d.space)
+            .filter((s): s is string => Boolean(s?.trim())),
+        ),
+      ].sort(),
     }),
     {
       status: 200,

@@ -110,7 +110,18 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     }
     const optIn = formData.has("freeze_map_opt_in");
     const cityId = formData.get("freeze_map_city_id")?.toString().trim() || null;
-    const result = await updateHouseholdFreezeMapSettings(manageId, optIn, cityId);
+    const label = formData.get("freeze_map_label")?.toString().trim() || null;
+    const latRaw = formData.get("freeze_map_lat")?.toString().trim();
+    const lonRaw = formData.get("freeze_map_lon")?.toString().trim();
+    const lat = latRaw ? Number(latRaw) : null;
+    const lon = lonRaw ? Number(lonRaw) : null;
+    const result = await updateHouseholdFreezeMapSettings(manageId, {
+      optIn,
+      cityId,
+      lat: Number.isFinite(lat) ? lat : null,
+      lon: Number.isFinite(lon) ? lon : null,
+      label,
+    });
     if (result.error) {
       return redirect(`${redirectTo}?error=1`);
     }

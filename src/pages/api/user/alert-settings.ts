@@ -79,10 +79,21 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       formData.get("quiet_hours_timezone")?.toString().trim() ||
       existing.quietHoursTimezone,
     quietHoursBypassFreeze: formData.has("quiet_hours_bypass_freeze"),
+    quietHoursSmsCritical:
+      formData.has("quiet_hours_sms_critical") && entitlements.canUseSms,
     alertRules: parseAlertRulesFromForm(
       formData.get("alert_rules_json")?.toString(),
     ),
-    channelSeverity: existing.channelSeverity,
+    channelSeverity: (() => {
+      try {
+        const raw = formData.get("channel_severity_json")?.toString();
+        if (!raw) return existing.channelSeverity;
+        const parsed = JSON.parse(raw) as Record<string, string[]>;
+        return parsed && typeof parsed === "object" ? parsed : existing.channelSeverity;
+      } catch {
+        return existing.channelSeverity;
+      }
+    })(),
   };
 
   const { error } = await updateUserAlertSettings(

@@ -156,9 +156,114 @@ export function minForecastTempInWindow(
 }
 
 export async function fetchForecastMinTemp(
-  cityId: string | null | undefined,
-  hoursAhead: number,
+  cityId?: string | null,
+  hoursAhead = 24,
 ): Promise<ForecastWindow | null> {
   const raw = await fetchWeatherForecastRaw(cityId);
   return minForecastTempInWindow(raw, hoursAhead);
+}
+
+export async function fetchForecastMinTempByCoords(
+  lat: number,
+  lon: number,
+  hoursAhead = 24,
+): Promise<ForecastWindow | null> {
+  const raw = await fetchWeatherForecastByCoords(lat, lon);
+  return minForecastTempInWindow(raw, hoursAhead);
+}
+
+export async function fetchWeatherByCoords(
+  lat: number,
+  lon: number,
+): Promise<any | null> {
+  const apiKey = cleanEnv(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY);
+  if (!apiKey || !Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`;
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(WEATHER_FETCH_TIMEOUT_MS),
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchWeatherForecastByCoords(
+  lat: number,
+  lon: number,
+): Promise<any | null> {
+  const apiKey = cleanEnv(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY);
+  if (!apiKey || !Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`;
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(WEATHER_FETCH_TIMEOUT_MS),
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+export type NightRisk = {
+  dateLabel: string;
+  minTempF: number;
+  atRisk: boolean;
+};
+
+/** Overnight mins for the next few local nights from 3h forecast steps. */
+export function nightsAtRiskFromForecast(
+  raw: Record<string, any> | null | undefined,
+  freezeThresholdF: number,
+  nights = 5,
+): NightRisk[] {
+  const list = raw?.list;
+  if (!Array.isArray(list)) return [];
+
+  const byDay = new Map<string, number>();
+  for (const entry of list) {
+    const ts = Number(entry?.dt) * 1000;
+    if (!Number.isFinite(ts)) continue;
+    const d = new Date(ts);
+    const hour = d.getUTCHours();
+    // Treat 00–09 UTC buckets as overnight-ish for US; still useful as a proxy
+    if (hour > 12) continue;
+    const key = d.toISOString().slice(0, 10);
+    const temp = Number(entry?.main?.temp);
+    if (!Number.isFinite(temp)) continue;
+    const prev = byDay.get(key);
+    if (prev == null || temp < prev) byDay.set(key, temp);
+  }
+
+  return [...byDay.entries()]
+    .slice(0, nights)
+    .map(([date, minTempF]) => ({
+      dateLabel: new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      }),
+      minTempF,
+      atRisk: minTempF <= freezeThresholdF,
+    }));
+}
+
+export async function fetchNightsAtRisk(
+  options: {
+    cityId?: string | null;
+    lat?: number | null;
+    lon?: number | null;
+    freezeThresholdF: number;
+  },
+): Promise<NightRisk[]> {
+  let raw: any = null;
+  if (options.lat != null && options.lon != null) {
+    raw = await fetchWeatherForecastByCoords(options.lat, options.lon);
+  } else {
+    raw = await fetchWeatherForecastRaw(options.cityId);
+  }
+  return nightsAtRiskFromForecast(raw, options.freezeThresholdF);
 }

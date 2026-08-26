@@ -5,6 +5,7 @@ import { getOrCreateHouseholdForUser } from "../../lib/households";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { createServerClient } from "../../lib/supabase";
 import { getSiteUrl } from "../../lib/stripe";
+import { listHouseholdApiKeys } from "../../lib/apiKeys";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
@@ -22,16 +23,25 @@ const { data: links } = household.householdId
       .order("created_at", { ascending: false })
   : { data: [] };
 
+const apiKeys = household.householdId
+  ? await listHouseholdApiKeys(household.householdId)
+  : [];
+
 const siteUrl = getSiteUrl(Astro.request);
 const newToken = Astro.url.searchParams.get("new_token");
 const newHref = newToken ? `${siteUrl}/share/${newToken}` : null;
+const newApiKey = Astro.url.searchParams.get("new_api_key");
 const notice = Astro.url.searchParams.get("created")
   ? "Share link created — copy it below to send to family."
   : Astro.url.searchParams.get("revoked")
     ? "Share link revoked."
-    : Astro.url.searchParams.get("error") === "pro_required"
-      ? "Pro plan required for share links."
-      : null;
+    : Astro.url.searchParams.get("api_key_created")
+      ? "API key created — copy it now; it will not be shown again."
+      : Astro.url.searchParams.get("api_key_revoked")
+        ? "API key revoked."
+        : Astro.url.searchParams.get("error") === "pro_required"
+          ? "Pro plan required for share links and API keys."
+          : null;
 const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
 ---
 <DashboardLayout title="Share links">
@@ -85,10 +95,12 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
             <label class="form-label" for="scope">Scope</label>
             <select class="form-input" id="scope" name="scope">
               <option value="live">Live sensors</option>
+              <option value="history">History (7-day chart)</option>
               <option value="metrics">Metrics (Prometheus / Grafana)</option>
             </select>
             <p class="form-hint">
               Metrics links expose scrape URLs at <code>/api/share/&lt;token&gt;/readings?format=prometheus</code>.
+              Pro API keys are also available below.
             </p>
           </div>
           <div class="form-field mb-0">
@@ -172,6 +184,53 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
         </ul>
       )}
     </section>
+
+    {entitlements.canCreateShareLinks && (
+      <section class="card">
+        <h2 class="card-title">Dashboard API keys</h2>
+        <p class="card-subtitle mb-4">
+          Scrape Prometheus metrics with <code>Authorization: Bearer &lt;key&gt;</code> at
+          <code>/api/v1/metrics</code>.
+        </p>
+        {newApiKey && (
+          <div class="ingest-key-callout mb-4">
+            <p class="ingest-key-value break-all text-sm mb-2">{newApiKey}</p>
+            <button type="button" class="btn-primary" data-copy={newApiKey} data-copy-label="Copy key">
+              Copy key
+            </button>
+          </div>
+        )}
+        <form action="/api/api-keys" method="post" class="mb-4 flex flex-wrap gap-2 items-end">
+          <input type="hidden" name="action" value="create" />
+          <input type="hidden" name="redirect" value="/dashboard/share" />
+          <div class="form-field mb-0">
+            <label class="form-label" for="api-key-name">Name</label>
+            <input class="form-input" id="api-key-name" name="name" value="Metrics key" />
+          </div>
+          <button class="btn-secondary" type="submit">Create API key</button>
+        </form>
+        {apiKeys.length === 0 ? (
+          <p class="mb-0 text-sm text-[var(--color-text-muted)]">No active API keys.</p>
+        ) : (
+          <ul class="space-y-3">
+            {apiKeys.map((key) => (
+              <li class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <strong>{key.name}</strong>
+                  <span class="text-sm text-[var(--color-text-muted)]"> · {key.key_prefix}…</span>
+                </div>
+                <form action="/api/api-keys" method="post">
+                  <input type="hidden" name="action" value="revoke" />
+                  <input type="hidden" name="id" value={key.id} />
+                  <input type="hidden" name="redirect" value="/dashboard/share" />
+                  <button class="btn-ghost" type="submit">Revoke</button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    )}
   </div>
 </DashboardLayout>
 

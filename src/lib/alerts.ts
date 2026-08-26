@@ -20,6 +20,43 @@ export type NotifyKind =
 
 export type ChannelSeverityMap = Partial<Record<NotifyKind, AlertChannelName[]>>;
 
+const ALERT_CHANNEL_NAMES = new Set<AlertChannelName>([
+  "email",
+  "sms",
+  "discord",
+  "push",
+  "webhook",
+  "telegram",
+  "slack",
+]);
+
+const NOTIFY_KINDS = new Set<NotifyKind>([
+  "threshold",
+  "rate",
+  "outage",
+  "digest",
+  "generic",
+  "forecast",
+  "rule",
+]);
+
+export function parseChannelSeverity(raw: unknown): ChannelSeverityMap {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out: ChannelSeverityMap = {};
+  for (const [kind, channels] of Object.entries(raw as Record<string, unknown>)) {
+    if (!NOTIFY_KINDS.has(kind as NotifyKind)) continue;
+    if (!Array.isArray(channels)) continue;
+    const cleaned = channels.filter(
+      (ch): ch is AlertChannelName =>
+        typeof ch === "string" && ALERT_CHANNEL_NAMES.has(ch as AlertChannelName),
+    );
+    if (cleaned.length > 0) {
+      out[kind as NotifyKind] = cleaned;
+    }
+  }
+  return out;
+}
+
 export type AlertSettings = {
   enabled: boolean;
   digestEnabled: boolean;
@@ -53,6 +90,7 @@ export type AlertSettings = {
   quietHoursEnd: string;
   quietHoursTimezone: string;
   quietHoursBypassFreeze: boolean;
+  quietHoursSmsCritical: boolean;
   alertRules: AlertRule[];
   channelSeverity: ChannelSeverityMap;
 };
@@ -90,6 +128,7 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   quietHoursEnd: "07:00",
   quietHoursTimezone: "America/New_York",
   quietHoursBypassFreeze: true,
+  quietHoursSmsCritical: true,
   alertRules: [],
   channelSeverity: {},
 };
@@ -108,11 +147,6 @@ function parseAlertRules(raw: unknown): AlertRule[] {
       Array.isArray(rule.all)
     );
   }) as AlertRule[];
-}
-
-function parseChannelSeverity(raw: unknown): ChannelSeverityMap {
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
-  return raw as ChannelSeverityMap;
 }
 
 export function getAlertSettingsFromMetadata(
@@ -224,6 +258,7 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
         ? row.quiet_hours_timezone
         : DEFAULT_ALERT_SETTINGS.quietHoursTimezone,
     quietHoursBypassFreeze: row.quiet_hours_bypass_freeze !== false,
+    quietHoursSmsCritical: row.quiet_hours_sms_critical !== false,
     alertRules: parseAlertRules(row.alert_rules),
     channelSeverity: parseChannelSeverity(row.channel_severity),
   };
@@ -358,6 +393,7 @@ export function serializeAlertSettings(settings: AlertSettings): Record<string, 
     quiet_hours_end: settings.quietHoursEnd,
     quiet_hours_timezone: settings.quietHoursTimezone,
     quiet_hours_bypass_freeze: settings.quietHoursBypassFreeze,
+    quiet_hours_sms_critical: settings.quietHoursSmsCritical,
     alert_rules: settings.alertRules,
     channel_severity: settings.channelSeverity,
   };

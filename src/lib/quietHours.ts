@@ -78,3 +78,18 @@ export function shouldSuppressForQuietHours(
   if (quietHoursBypassed(settings, kind)) return false;
   return true;
 }
+
+/**
+ * When quiet hours are active and full bypass does not apply, still allow SMS
+ * for freeze/forecast if quietHoursSmsCritical is enabled.
+ */
+export function quietHoursAllowsSmsCritical(
+  settings: AlertSettings,
+  kind: NotifyKind | undefined,
+  now = new Date(),
+): boolean {
+  if (!isInQuietHours(settings, now)) return false;
+  if (quietHoursBypassed(settings, kind)) return false;
+  if (!settings.quietHoursSmsCritical) return false;
+  return kind === "threshold" || kind === "forecast";
+}

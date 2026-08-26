@@ -2,6 +2,8 @@ import type { APIRoute } from "astro";
 import { createServerClient } from "../../../../lib/supabase";
 import { fetchLatestSensorValues } from "../../../../lib/sensorReadings";
 import { listHouseholdDevices } from "../../../../lib/devices";
+import { buildPrometheusText } from "../../../../lib/prometheusMetrics";
+import { fetchHouseholdChartData } from "../../../../lib/garageTempsHistory";
 
 async function resolveShare(token: string) {
   const supabase = createServerClient();
@@ -14,14 +16,6 @@ async function resolveShare(token: string) {
   if (error || !data) return null;
   if (data.expires_at && Date.parse(data.expires_at) < Date.now()) return null;
   return data;
-}
-
-function prometheusMetricName(device: string, key: string, kind: string): string {
-  const base = `garage_${kind}_${device}_${key}`
-    .toLowerCase()
-    .replace(/[^a-z0-9_]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-  return base || "garage_sensor";
 }
 
 export const GET: APIRoute = async ({ params, request, url }) => {
@@ -53,24 +47,8 @@ export const GET: APIRoute = async ({ params, request, url }) => {
         : "json");
 
   if (format === "prometheus" || share.scope === "metrics") {
-    const lines: string[] = [
-      "# HELP garage_sensor_value Latest numeric garage sensor reading",
-      "# TYPE garage_sensor_value gauge",
-    ];
-    for (const row of readings) {
-      if (row.value_num == null) continue;
-      const name = prometheusMetricName(
-        row.deviceName,
-        row.sensor.key,
-        row.sensor.kind,
-      );
-      const labels = `device="${row.deviceName.replace(/"/g, "")}",key="${row.sensor.key}",kind="${row.sensor.kind}"`;
-      const ts = Date.parse(row.recorded_at);
-      lines.push(
-        `${name}{${labels}} ${row.value_num}${Number.isFinite(ts) ? ` ${ts}` : ""}`,
-      );
-    }
-    return new Response(lines.join("\n") + "\n", {
+    const body = await buildPrometheusText(share.household_id);
+    return new Response(body, {
       status: 200,
       headers: {
         "Content-Type": "text/plain; version=0.0.4; charset=utf-8",
@@ -94,6 +72,17 @@ export const GET: APIRoute = async ({ params, request, url }) => {
     });
   }
 
+  let historyPoints: Array<{
+    timestamp: string;
+    tempf: number;
+    humidity: number;
+    probeLabel: string;
+  }> = [];
+  if (share.scope === "history") {
+    const chart = await fetchHouseholdChartData(share.household_id, 7);
+    historyPoints = chart.points;
+  }
+
   return new Response(
     JSON.stringify({
       scope: share.scope,
@@ -114,7 +103,9 @@ export const GET: APIRoute = async ({ params, request, url }) => {
         name: d.name,
         last_seen_at: d.last_seen_at,
         source: d.source,
+        space: d.space ?? null,
       })),
+      history_points: historyPoints,
       metrics_urls: {
         prometheus: `/api/share/${token}/readings?format=prometheus`,
         grafana: `/api/share/${token}/readings?format=grafana`,

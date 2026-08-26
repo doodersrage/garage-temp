@@ -29,6 +29,7 @@ export type Device = {
   last_seen_at: string | null;
   sort_order: number;
   meta?: Record<string, unknown>;
+  space?: string | null;
 };
 
 export type DeviceSensor = {
@@ -45,7 +46,7 @@ export type DeviceSensor = {
 export type DeviceWithSensors = Device & { sensors: DeviceSensor[] };
 
 const DEVICE_SELECT =
-  "id, household_id, name, source, pull_url, ingest_key_prefix, enabled, last_seen_at, sort_order, meta";
+  "id, household_id, name, source, pull_url, ingest_key_prefix, enabled, last_seen_at, sort_order, meta, space";
 const SENSOR_SELECT =
   "id, device_id, key, label, kind, unit, visible, sort_order";
 
@@ -347,6 +348,27 @@ export async function renamePushDevice(
     return { error: error?.message ?? "Failed to rename device" };
   }
 
+  return { error: null };
+}
+
+export async function updateDeviceSpace(
+  householdId: string,
+  deviceId: string,
+  space: string | null,
+): Promise<{ error: string | null }> {
+  const trimmed = space?.trim() || null;
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("devices")
+    .update({ space: trimmed, updated_at: new Date().toISOString() })
+    .eq("id", deviceId)
+    .eq("household_id", householdId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    return { error: error?.message ?? "Failed to update space" };
+  }
   return { error: null };
 }
 

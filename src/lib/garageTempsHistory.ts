@@ -305,7 +305,10 @@ export async function fetchGarageTempChartData(
 
   // For windows beyond raw retention, fill gaps from hourly rollups.
   if (days > 90 || points.length < 10) {
-    const rollupPoints = await fetchRollupChartPoints(userId, sinceIso, filters);
+    const householdId = await getUserHouseholdId(userId);
+    const rollupPoints = householdId
+      ? await fetchRollupChartPointsForHousehold(householdId, sinceIso, filters)
+      : [];
     if (rollupPoints.length > 0) {
       const byTs = new Map(points.map((p) => [p.timestamp, p]));
       for (const point of rollupPoints) {
@@ -321,14 +324,11 @@ export async function fetchGarageTempChartData(
   return { points, error: null };
 }
 
-async function fetchRollupChartPoints(
-  userId: string,
+async function fetchRollupChartPointsForHousehold(
+  householdId: string,
   sinceIso: string,
-  filters: HistoryFilters,
+  filters: HistoryFilters = {},
 ): Promise<ChartPoint[]> {
-  const householdId = await getUserHouseholdId(userId);
-  if (!householdId) return [];
-
   const supabase = createServerClient();
   const { data, error } = await supabase
     .from("sensor_reading_rollups")
@@ -380,6 +380,70 @@ async function fetchRollupChartPoints(
   return points;
 }
 
+export async function fetchHouseholdChartData(
+  householdId: string,
+  days = 7,
+): Promise<{ points: ChartPoint[]; error: string | null }> {
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+  const sinceIso = since.toISOString();
+
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("sensor_readings")
+    .select(
+      `
+      recorded_at,
+      value_num,
+      meta,
+      device_sensors!inner (
+        key,
+        label,
+        kind,
+        devices!inner ( name )
+      )
+    `,
+    )
+    .eq("household_id", householdId)
+    .gte("recorded_at", sinceIso)
+    .order("recorded_at", { ascending: true })
+    .limit(2000);
+
+  if (error) {
+    return { points: [], error: error.message };
+  }
+
+  const readings = pairTempHumidityRows(
+    ((data ?? []) as SensorRow[]).filter((row) => {
+      const kind = row.device_sensors?.kind;
+      return kind === "temperature" || kind === "humidity";
+    }),
+    householdId,
+  );
+
+  let points: ChartPoint[] = readings.map((row) => ({
+    timestamp: row.timestamp,
+    tempf: Number(row.tempf),
+    humidity: Number(row.humidity),
+    probeLabel: row.probe_label?.trim() || row.probe_key || "Probe",
+  }));
+
+  if (points.length < 10) {
+    const rollups = await fetchRollupChartPointsForHousehold(householdId, sinceIso);
+    if (rollups.length > 0) {
+      const byTs = new Map(points.map((p) => [p.timestamp, p]));
+      for (const point of rollups) {
+        if (!byTs.has(point.timestamp)) byTs.set(point.timestamp, point);
+      }
+      points = [...byTs.values()].sort(
+        (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+      );
+    }
+  }
+
+  return { points, error: null };
+}
+
 /** Chart points from the same calendar window one year earlier (rollups + raw). */
 export async function fetchGarageTempChartDataPriorYear(
   userId: string,
@@ -412,7 +476,14 @@ export async function fetchGarageTempChartDataPriorYear(
     probeLabel: row.probe_label?.trim() || row.probe_key || "Probe",
   }));
 
-  const rollups = await fetchRollupChartPoints(userId, start.toISOString(), priorFilters);
+  const householdId = await getUserHouseholdId(userId);
+  const rollups = householdId
+    ? await fetchRollupChartPointsForHousehold(
+        householdId,
+        start.toISOString(),
+        priorFilters,
+      )
+    : [];
   const endMs = end.getTime();
   const filteredRollups = rollups.filter((p) => Date.parse(p.timestamp) <= endMs);
   if (filteredRollups.length > 0) {

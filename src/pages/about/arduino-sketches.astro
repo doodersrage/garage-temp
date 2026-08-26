@@ -49,6 +49,19 @@ const wiringGuides = [
     "avg": { "f": 37.5, "c": 3.1, "h": 42.2 }
   }
 }`}</code></pre>
+  <p>
+    For <a class="text-link" href="/about/ingest-and-webhooks">push ingest</a>, the same probe object can be
+    posted to <code>/api/ingest/&lt;key&gt;</code>. Optional top-level <code>battery</code> (or
+    <code>battery_pct</code>) and <code>rssi</code> fields update device health on the Devices page without
+    requiring extra sensor keys.
+  </p>
+  <pre><code>{`{
+  "temp": {
+    "0": { "f": 38.2, "c": 3.4, "h": 41.0 }
+  },
+  "battery": 87,
+  "rssi": -62
+}`}</code></pre>
 
   <h2>Hardware wiring guides</h2>
   <p>

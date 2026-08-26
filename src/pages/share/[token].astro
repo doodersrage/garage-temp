@@ -92,7 +92,14 @@ const readingsUrl = `/api/share/${token}/readings`;
 
     function render(data) {
       if (titleEl && data.label) titleEl.textContent = data.label;
-      if (subtitleEl) subtitleEl.textContent = "Live read-only view";
+      if (subtitleEl) {
+        subtitleEl.textContent =
+          data.scope === "history"
+            ? "History read-only view (7 days)"
+            : data.scope === "metrics"
+              ? "Metrics share"
+              : "Live read-only view";
+      }
       if (metaEl) {
         const parts = [];
         if (data.expires_at) {
@@ -100,12 +107,42 @@ const readingsUrl = `/api/share/${token}/readings`;
         } else {
           parts.push("No expiry");
         }
-        parts.push("Updates every 90 seconds");
+        if (data.scope !== "history") {
+          parts.push("Updates every 90 seconds");
+        }
         metaEl.textContent = parts.join(" · ");
       }
 
+      const history = data.history_points || [];
+      let historyHtml = "";
+      if (data.scope === "history" && history.length >= 2) {
+        const temps = history.map((p) => p.tempf);
+        const min = Math.min(...temps) - 2;
+        const max = Math.max(...temps) + 2;
+        const range = max - min || 1;
+        const w = 320;
+        const h = 120;
+        const path = history
+          .map((p, i) => {
+            const x = (i / (history.length - 1)) * w;
+            const y = h - ((p.tempf - min) / range) * h;
+            return (i === 0 ? "M" : "L") + x.toFixed(1) + "," + y.toFixed(1);
+          })
+          .join(" ");
+        historyHtml =
+          '<div class="card mb-4"><p class="m-0 mb-2 text-sm text-[var(--color-text-muted)]">7-day temperature trend</p>' +
+          '<svg viewBox="0 0 ' +
+          w +
+          " " +
+          h +
+          '" width="100%" height="120" role="img" aria-label="Temperature history chart">' +
+          '<path d="' +
+          path +
+          '" fill="none" stroke="#60a5fa" stroke-width="2" /></svg></div>';
+      }
+
       const readings = data.readings || [];
-      if (readings.length === 0) {
+      if (readings.length === 0 && !historyHtml) {
         root.innerHTML =
           '<div class="empty-state">' +
           "<p>No readings yet. Sensors on this link may not have posted data.</p>" +
@@ -116,16 +153,18 @@ const readingsUrl = `/api/share/${token}/readings`;
         return;
       }
 
-      root.innerHTML = readings
-        .map((r) => {
-          const age = formatAge(r.recorded_at);
-          const staleClass = age && age.stale ? " stat-item-stale" : "";
-          const ageHtml = age
-            ? `<p class="m-0 mt-1 text-sm ${
-                age.stale ? "text-amber-300" : "text-[var(--color-text-muted)]"
-              }">${age.stale ? "Stale · " + age.label : age.label}</p>`
-            : "";
-          return `<div class="card${staleClass}">
+      root.innerHTML =
+        historyHtml +
+        readings
+          .map((r) => {
+            const age = formatAge(r.recorded_at);
+            const staleClass = age && age.stale ? " stat-item-stale" : "";
+            const ageHtml = age
+              ? `<p class="m-0 mt-1 text-sm ${
+                  age.stale ? "text-amber-300" : "text-[var(--color-text-muted)]"
+                }">${age.stale ? "Stale · " + age.label : age.label}</p>`
+              : "";
+            return `<div class="card${staleClass}">
             <strong>${r.label}</strong>
             <p class="m-0 text-sm text-[var(--color-text-muted)]">${r.device} · ${kindLabel(
               r.kind,
@@ -133,8 +172,8 @@ const readingsUrl = `/api/share/${token}/readings`;
             <p class="text-2xl m-0 mt-2">${formatValue(r)}</p>
             ${ageHtml}
           </div>`;
-        })
-        .join("");
+          })
+          .join("");
     }
 
     async function load() {

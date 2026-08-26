@@ -70,7 +70,11 @@ Content-Type: application/json</code></pre>
 
   <h2>Home Assistant</h2>
   <p>
-    Cloudflare Workers do not run an MQTT broker. Use the outbound HTTPS webhook (Pro) and an automation:
+    Cloudflare Workers do not run an MQTT broker. Use the outbound HTTPS webhook (Pro) and an automation,
+    or import the downloadable blueprint:
+  </p>
+  <p>
+    <a class="text-link" href="/ha/garage_temp_webhook.yaml" download>Download HA blueprint (YAML)</a>
   </p>
   <pre><code>{`automation:
   - alias: Garage Temp webhook
@@ -92,16 +96,21 @@ Content-Type: application/json</code></pre>
   </p>
   <p>
     For MQTT, have Home Assistant (or Node-RED) receive the webhook and publish to your broker—that keeps MQTT local
-    while Garage Temp stays on HTTPS.
+    while Garage Temp stays on HTTPS. The blueprint includes an optional MQTT topic input for that path.
   </p>
 
   <h2>Grafana / Prometheus metrics</h2>
   <p>
-    Pro share links can use the <strong>Metrics</strong> scope. Scrape:
+    Pro accounts can create dashboard API keys (Dashboard → Share) and scrape:
+  </p>
+  <pre><code>GET /api/v1/metrics
+Authorization: Bearer gtm_…</code></pre>
+  <p>
+    Or use a Pro share link with the <strong>Metrics</strong> scope:
   </p>
   <pre><code>GET /api/share/&lt;token&gt;/readings?format=prometheus</code></pre>
   <p>
-    Or <code>?format=grafana</code> for a simple JSON datapoints array. Pair with the live share page for humans.
+    Or <code>?format=grafana</code> for a simple JSON datapoints array. History share scope returns a 7-day chart on the public page.
   </p>
 
   <h2>Alert channels</h2>

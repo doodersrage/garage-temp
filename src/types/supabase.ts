@@ -222,6 +222,9 @@ export type Database = {
           created_at: string
           freeze_map_opt_in: boolean
           freeze_map_city_id: string | null
+          freeze_map_lat: number | null
+          freeze_map_lon: number | null
+          freeze_map_label: string | null
         }
         Insert: {
           id?: string
@@ -229,6 +232,9 @@ export type Database = {
           created_at?: string
           freeze_map_opt_in?: boolean
           freeze_map_city_id?: string | null
+          freeze_map_lat?: number | null
+          freeze_map_lon?: number | null
+          freeze_map_label?: string | null
         }
         Update: {
           id?: string
@@ -236,6 +242,9 @@ export type Database = {
           created_at?: string
           freeze_map_opt_in?: boolean
           freeze_map_city_id?: string | null
+          freeze_map_lat?: number | null
+          freeze_map_lon?: number | null
+          freeze_map_label?: string | null
         }
         Relationships: []
       }
@@ -278,6 +287,7 @@ export type Database = {
           created_at: string
           updated_at: string
           meta: Json
+          space: string | null
         }
         Insert: {
           id?: string
@@ -293,6 +303,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           meta?: Json
+          space?: string | null
         }
         Update: {
           id?: string
@@ -308,6 +319,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           meta?: Json
+          space?: string | null
         }
         Relationships: []
       }
@@ -411,6 +423,7 @@ export type Database = {
           quiet_hours_end: string
           quiet_hours_timezone: string
           quiet_hours_bypass_freeze: boolean
+          quiet_hours_sms_critical: boolean
           channel_telegram: boolean
           telegram_bot_token: string | null
           telegram_chat_id: string | null
@@ -449,6 +462,7 @@ export type Database = {
           quiet_hours_end?: string
           quiet_hours_timezone?: string
           quiet_hours_bypass_freeze?: boolean
+          quiet_hours_sms_critical?: boolean
           channel_telegram?: boolean
           telegram_bot_token?: string | null
           telegram_chat_id?: string | null
@@ -487,6 +501,7 @@ export type Database = {
           quiet_hours_end?: string
           quiet_hours_timezone?: string
           quiet_hours_bypass_freeze?: boolean
+          quiet_hours_sms_critical?: boolean
           channel_telegram?: boolean
           telegram_bot_token?: string | null
           telegram_chat_id?: string | null
@@ -587,6 +602,42 @@ export type Database = {
           channels_sent?: string[]
           channels_skipped?: string[]
           created_at?: string
+        }
+        Relationships: []
+      }
+      api_keys: {
+        Row: {
+          id: string
+          household_id: string
+          name: string
+          key_prefix: string
+          key_hash: string
+          created_by: string | null
+          created_at: string
+          last_used_at: string | null
+          revoked_at: string | null
+        }
+        Insert: {
+          id?: string
+          household_id: string
+          name?: string
+          key_prefix: string
+          key_hash: string
+          created_by?: string | null
+          created_at?: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+        }
+        Update: {
+          id?: string
+          household_id?: string
+          name?: string
+          key_prefix?: string
+          key_hash?: string
+          created_by?: string | null
+          created_at?: string
+          last_used_at?: string | null
+          revoked_at?: string | null
         }
         Relationships: []
       }

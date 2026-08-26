@@ -17,6 +17,7 @@ type FeedGroup = {
 type LiveSensor = {
   deviceId: string;
   deviceName: string;
+  space?: string | null;
   key: string;
   label: string;
   kind: string;
@@ -120,6 +121,8 @@ function formatSensorValue(sensor: LiveSensor): { primary: string; detail: strin
 export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
   const [groups, setGroups] = useState<FeedGroup[]>([]);
   const [sensors, setSensors] = useState<LiveSensor[]>([]);
+  const [spaces, setSpaces] = useState<string[]>([]);
+  const [spaceFilter, setSpaceFilter] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState(intervalMs / 1000);
@@ -127,7 +130,10 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
 
   const loadReadings = useCallback(async () => {
     try {
-      const response = await fetch("/api/home/readings", {
+      const qs = spaceFilter
+        ? `?space=${encodeURIComponent(spaceFilter)}`
+        : "";
+      const response = await fetch(`/api/home/readings${qs}`, {
         credentials: "same-origin",
       });
 
@@ -138,11 +144,13 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
       const payload = (await response.json()) as {
         groups: FeedGroup[];
         sensors?: LiveSensor[];
+        spaces?: string[];
         updatedAt: string;
       };
 
       setGroups(payload.groups ?? []);
       setSensors(payload.sensors ?? []);
+      if (payload.spaces) setSpaces(payload.spaces);
       setUpdatedAt(payload.updatedAt);
       setError(null);
       setCountdown(intervalMs / 1000);
@@ -151,7 +159,7 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [intervalMs]);
+  }, [intervalMs, spaceFilter]);
 
   useEffect(() => {
     void loadReadings();
@@ -198,6 +206,29 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
       <p class="card-subtitle">
         Temperature, humidity, and other probes from pull feeds and push devices.
       </p>
+
+      {spaces.length > 0 && (
+        <div class="mb-4">
+          <label class="form-label" for="space-filter">
+            Space
+          </label>
+          <select
+            id="space-filter"
+            class="form-input"
+            value={spaceFilter}
+            onChange={(e) =>
+              setSpaceFilter((e.target as HTMLSelectElement).value)
+            }
+          >
+            <option value="">All spaces</option>
+            {spaces.map((space) => (
+              <option value={space} key={space}>
+                {space}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {error && (
         <div class="alert-warning mb-4">

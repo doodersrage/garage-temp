@@ -82,6 +82,15 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     <input type="checkbox" name="quiet_hours_bypass_freeze" value="true" checked={settings.quietHoursBypassFreeze} />
     <span>Always deliver freeze / forecast freeze alerts</span>
   </label>
+  <label class="checkbox-row mb-3">
+    <input type="checkbox" name="quiet_hours_sms_critical" value="true" checked={settings.quietHoursSmsCritical} disabled={!entitlements.canUseSms} />
+    <span>
+      During quiet hours, still send critical freeze/forecast via SMS (Pro)
+      {!entitlements.canUseSms && (
+        <> — <a class="text-link" href="/dashboard#plans">Upgrade</a></>
+      )}
+    </span>
+  </label>
   <div class="config-row-grid mb-4">
     <div class="form-field mb-0">
       <label class="form-label" for="quiet_hours_start">Quiet start (HH:MM)</label>
@@ -103,6 +112,35 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
   </p>
   <div id="alert-rules-list" class="space-y-3 mb-3"></div>
   <button type="button" class="btn-secondary mb-4" id="add-alert-rule">Add rule</button>
+
+  <h3 class="text-base font-semibold mb-2">Severity routing (optional)</h3>
+  <p class="card-subtitle mb-3">
+    Leave empty to use the global channel checkboxes. Otherwise only the selected channels fire for that kind.
+  </p>
+  <input type="hidden" name="channel_severity_json" id="channel_severity_json" value={JSON.stringify(settings.channelSeverity ?? {})} />
+  <div class="space-y-3 mb-4" id="severity-routing">
+    {(["threshold", "forecast", "rate", "outage", "rule"] as const).map((kind) => {
+      const selected = settings.channelSeverity?.[kind] ?? [];
+      return (
+        <div class="form-field mb-0">
+          <label class="form-label">{kind}</label>
+          <div class="flex flex-wrap gap-3">
+            {(["email", "discord", "telegram", "slack", "sms", "push", "webhook"] as const).map((ch) => (
+              <label class="checkbox-row mb-0">
+                <input
+                  type="checkbox"
+                  data-severity-kind={kind}
+                  data-severity-channel={ch}
+                  checked={selected.includes(ch)}
+                />
+                <span>{ch}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      );
+    })}
+  </div>
 
   <h3 class="text-base font-semibold mb-2">How to reach you</h3>
   <div class="space-y-2 mb-4">
@@ -249,6 +287,8 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
               .join("");
             return `<div class="flex flex-wrap gap-2 mb-2 items-center" data-ci="${ci}">
               <select data-field="type" class="form-input">${opts}</select>
+              <input data-field="value" class="form-input" type="number" step="0.5" style="max-width:7rem" placeholder="value" value="${c.value != null ? c.value : ""}" />
+              <input data-field="labelIncludes" class="form-input" type="text" style="max-width:10rem" placeholder="label contains" value="${(c.labelIncludes || "").replace(/"/g, "&quot;")}" />
               <button type="button" class="btn-secondary text-sm" data-remove-cond>Remove</button>
             </div>`;
           })
@@ -284,6 +324,16 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
           const ci = Number(row.getAttribute("data-ci"));
           row.querySelector('[data-field="type"]')?.addEventListener("change", (e) => {
             rules[ruleIndex].all[ci].type = e.target.value;
+            syncRulesHidden();
+          });
+          row.querySelector('[data-field="value"]')?.addEventListener("input", (e) => {
+            const v = e.target.value;
+            rules[ruleIndex].all[ci].value = v === "" ? undefined : Number(v);
+            syncRulesHidden();
+          });
+          row.querySelector('[data-field="labelIncludes"]')?.addEventListener("input", (e) => {
+            const v = e.target.value.trim();
+            rules[ruleIndex].all[ci].labelIncludes = v || undefined;
             syncRulesHidden();
           });
           row.querySelector("[data-remove-cond]")?.addEventListener("click", () => {
@@ -334,7 +384,22 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
 
     form.addEventListener("change", syncIncompleteHint);
     form.addEventListener("input", syncIncompleteHint);
-    form.addEventListener("submit", syncRulesHidden);
+    form.addEventListener("submit", () => {
+      syncRulesHidden();
+      const severityHidden = document.getElementById("channel_severity_json");
+      if (severityHidden) {
+        const map = {};
+        document.querySelectorAll("[data-severity-kind]").forEach((el) => {
+          if (!el.checked) return;
+          const kind = el.getAttribute("data-severity-kind");
+          const ch = el.getAttribute("data-severity-channel");
+          if (!kind || !ch) return;
+          if (!map[kind]) map[kind] = [];
+          map[kind].push(ch);
+        });
+        severityHidden.value = JSON.stringify(map);
+      }
+    });
     syncIncompleteHint();
     renderRules();
   })();

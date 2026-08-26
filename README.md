@@ -18,13 +18,16 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 - Feed health checks and relative “last seen” / staleness indicators
 - OpenWeather outdoor comparison on the home page
 - Historic readings with chart, YoY overlay, filters, anomaly hints, and CSV export (Member/Pro)
-- Opt-in public city freeze-risk map (`/freeze-map`)
+- Opt-in public city freeze-risk map (`/freeze-map`) with presets, geocode city search, and sparklines
+- Device space labels (garage / attic / …) and home filter
+- “Nights at risk” forecast outlook on the dashboard
 
 ### Alerts & digests
-- Threshold alerts (freeze, humidity, rate-of-change, outage)
+- Threshold alerts (freeze, humidity, rate-of-change, outage); also evaluated on push ingest
 - Forecast freeze risk (OpenWeather 3h forecast look-ahead)
-- Composite AND rules (door + temp drop, flood, power, outage, …)
-- Quiet hours with optional freeze/forecast bypass
+- Composite AND rules (door + temp drop, flood, power, outage, …) with optional value/label filters
+- Quiet hours with optional freeze/forecast bypass and Pro SMS-critical override
+- Per-kind severity routing (which channels fire for threshold vs rate vs outage, …)
 - Channels: email, Discord, Telegram, Slack; Pro adds SMS (Twilio), browser push, outbound webhooks
 - Test alert with per-channel sent/skipped feedback and alert activity audit trail
 - Weekly email digest (Mondays)
@@ -32,7 +35,8 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 ### Accounts & collaboration
 - Email/password auth, password reset, optional OAuth (Google/GitHub/Discord when enabled in Supabase)
 - Households: invite members, rename household, leave, revoke
-- Public share links (Pro) with create handoff and expiry badges
+- Public share links (Pro): live, history (7d), or metrics scopes
+- Dashboard API keys (Pro) for `GET /api/v1/metrics` Prometheus scrape
 - Getting-started checklist with dismiss / auto-hide
 - PWA install support
 
@@ -50,7 +54,7 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 | Frontend | Astro 6, Preact islands, Tailwind CSS v4 |
 | Deploy | Cloudflare Workers (`@astrojs/cloudflare`) |
 | Auth & DB | Supabase (Auth, Postgres, RLS) |
-| Billing | Stripe (Free / Member / Pro) |
+| Billing | Stripe (Free / Member / Pro; monthly + annual prices) |
 | Email | Cloudflare Email binding |
 | SMS | Twilio (Pro) |
 | Push | Web Push + VAPID (Pro) |
@@ -66,6 +70,8 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 | SMS, browser push, outbound webhook | | | ✓ |
 | Public share links | | | ✓ |
 | Metrics share (Prometheus/Grafana) | | | ✓ |
+| Dashboard API keys (`/api/v1/metrics`) | | | ✓ |
+| History share links | | | ✓ |
 
 Exact device limits live in `src/lib/entitlements.ts`.
 
@@ -120,7 +126,8 @@ Configure in `.env` (local) and Cloudflare Worker secrets / vars (production). S
 | `NEXT_PUBLIC_OPENWEATHER_API_KEY` / `NEXT_PUBLIC_OPENWEATHER_CITY_ID` | Outdoor weather |
 | `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_TOKEN` | Contact form bot protection |
 | `SMTP_MAIL_FROM` / `SMTP_MAIL_TO` | Contact + alert From/To |
-| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `STRIPE_PRICE_ID` / `STRIPE_PRICE_ID_PRO` | Billing |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `STRIPE_PRICE_ID` / `STRIPE_PRICE_ID_PRO` | Billing (monthly) |
+| `STRIPE_PRICE_ID_ANNUAL` / `STRIPE_PRICE_ID_PRO_ANNUAL` | Billing (annual Member/Pro; create prices in Stripe Dashboard) |
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER` | Pro SMS |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` | Pro browser push |
 | `SITE_URL` / `ORIGIN` | OAuth, password reset, Stripe redirects |
@@ -137,9 +144,9 @@ Migrations cover devices/sensors, households/invites, share links, alert metadat
 
 ## Background jobs
 
-Hourly history collection and alert evaluation run via the Worker `scheduled` handler (`src/worker.ts`, cron `0 * * * *` in `wrangler.jsonc`).
+Hourly history collection and alert evaluation run via the Worker `scheduled` handler (`src/worker.ts`, cron `0 * * * *` in `wrangler.jsonc`). The same cron also snapshots opt-in freeze-map city aggregates (`freeze-map` job).
 
-Threshold alerts use live pull-feed readings when available and otherwise fall back to latest stored sensor values (so push-only devices are covered). Push-only households no longer fall back to the public demo feed for cron alerts.
+Threshold alerts use live pull-feed readings when available and otherwise fall back to latest stored sensor values (so push-only devices are covered). Push ingest also evaluates threshold/rule alerts immediately (with the same cooldowns as cron). Push-only households no longer fall back to the public demo feed for cron alerts.
 
 Weekly digest emails send Monday 08:00 UTC to users with digests enabled.
 
@@ -165,12 +172,15 @@ Example:
 ```bash
 curl -X POST "https://your-domain/api/ingest/YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"door1": true, "temp1": 42.5}'
+  -d '{"door1": true, "temp1": 42.5, "battery": 87, "rssi": -62}'
 ```
+
+Optional top-level `battery` / `battery_pct` and `rssi` update device health metadata.
 
 Guides:
 
 - [Ingest & webhooks](https://garage-temp.robmcd.name/about/ingest-and-webhooks)
+- [Home Assistant blueprint](https://garage-temp.robmcd.name/ha/garage_temp_webhook.yaml)
 - [Accounts & dashboard](https://garage-temp.robmcd.name/about/accounts-and-dashboard)
 - Full About hub: [/about](https://garage-temp.robmcd.name/about)
 

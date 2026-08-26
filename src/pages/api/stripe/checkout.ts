@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import { createStripeClient, buildSiteUrl } from "../../../lib/stripe";
+import { resolveStripePriceId } from "../../../lib/planTier";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -11,9 +12,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   const formData = await request.formData().catch(() => null);
   const plan = formData?.get("plan")?.toString() === "pro" ? "pro" : "member";
-  const memberPrice = import.meta.env.STRIPE_PRICE_ID?.trim();
-  const proPrice = import.meta.env.STRIPE_PRICE_ID_PRO?.trim();
-  const priceId = plan === "pro" ? proPrice || memberPrice : memberPrice;
+  const interval =
+    formData?.get("interval")?.toString() === "annual" ? "annual" : "monthly";
+  const priceId = resolveStripePriceId(plan, interval);
 
   if (!priceId) {
     return new Response("Stripe price is not configured", { status: 500 });
@@ -43,11 +44,13 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         metadata: {
           supabase_user_id: user.id,
           plan_tier: plan,
+          billing_interval: interval,
         },
       },
       metadata: {
         supabase_user_id: user.id,
         plan_tier: plan,
+        billing_interval: interval,
       },
       success_url: buildSiteUrl(
         request,

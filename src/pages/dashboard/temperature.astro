@@ -175,6 +175,7 @@ const ingestCurlExample = ingestKey
             <thead>
               <tr class="text-left text-[var(--color-text-muted)]">
                 <th class="py-2 pr-3">Device</th>
+                <th class="py-2 pr-3">Space</th>
                 <th class="py-2 pr-3">Source</th>
                 <th class="py-2 pr-3">Last seen</th>
                 <th class="py-2 pr-3">Sensors</th>
@@ -198,6 +199,7 @@ const ingestCurlExample = ingestKey
                         </span>
                       )}
                     </td>
+                    <td class="py-2 pr-3">{device.space || "—"}</td>
                     <td class="py-2 pr-3">
                       {device.source === "push" ? "Push" : "Pull"}
                       {pullHealth && (
@@ -376,6 +378,23 @@ const ingestCurlExample = ingestKey
                     </div>
                     <button class="btn-secondary" type="submit">Rename</button>
                   </form>
+                  <form action="/api/devices" method="post" class="flex flex-wrap items-end gap-2">
+                    <input type="hidden" name="action" value="set_space" />
+                    <input type="hidden" name="device_id" value={device.id} />
+                    <input type="hidden" name="redirect" value={redirectTo} />
+                    <div class="form-field mb-0">
+                      <label class="form-label" for={`space-${device.id}`}>Space</label>
+                      <input
+                        class="form-input"
+                        id={`space-${device.id}`}
+                        name="space"
+                        value={device.space ?? ""}
+                        placeholder="garage, attic…"
+                        list="space-suggestions"
+                      />
+                    </div>
+                    <button class="btn-secondary" type="submit">Save space</button>
+                  </form>
                   <form action="/api/devices" method="post" onsubmit="return confirm('Rotate this ingest key? The old key stops working immediately.');">
                     <input type="hidden" name="action" value="rotate_key" />
                     <input type="hidden" name="device_id" value={device.id} />
@@ -507,6 +526,13 @@ const ingestCurlExample = ingestKey
       redirectTo={redirectTo}
     />
   </div>
+  <datalist id="space-suggestions">
+    <option value="garage" />
+    <option value="attic" />
+    <option value="greenhouse" />
+    <option value="workshop" />
+    <option value="basement" />
+  </datalist>
 </DashboardLayout>
 
 {ingestKey && (

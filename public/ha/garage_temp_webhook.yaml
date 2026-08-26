@@ -1,0 +1,64 @@
+# Garage Temp → Home Assistant webhook blueprint
+# Import via Settings → Automations & Scenes → Blueprints → Import
+# Or copy into config/blueprints/automation/garage_temp_webhook.yaml
+#
+# Point Garage Temp Pro outbound webhook at:
+#   https://<your-ha-host>/api/webhook/<webhook_id>
+# Optional: set the same secret in Garage Temp and verify X-Signature (HMAC-SHA256 hex of body).
+
+blueprint:
+  name: Garage Temp alert webhook
+  description: >
+    Receive Garage Temp outbound HTTPS alerts and create a persistent notification.
+    Optionally republish to MQTT for local automations.
+  domain: automation
+  input:
+    webhook_id:
+      name: Webhook ID
+      description: Must match the path segment in /api/webhook/<id>
+      default: garage_temp_alerts
+      selector:
+        text:
+    mqtt_topic:
+      name: MQTT topic (optional)
+      description: Leave empty to skip MQTT publish
+      default: ""
+      selector:
+        text:
+    notify_title_prefix:
+      name: Notification title prefix
+      default: "Garage Temp"
+      selector:
+        text:
+
+trigger:
+  - platform: webhook
+    webhook_id: !input webhook_id
+    allowed_methods:
+      - POST
+    local_only: false
+
+action:
+  - variables:
+      alert_title: "{{ trigger.json.title | default('Alert') }}"
+      alert_body: "{{ trigger.json.body | default('') }}"
+      alert_kind: "{{ trigger.json.kind | default('generic') }}"
+      title_prefix: !input notify_title_prefix
+      mqtt_topic: !input mqtt_topic
+  - service: notify.persistent_notification
+    data:
+      title: "{{ title_prefix }}: {{ alert_title }}"
+      message: "{{ alert_body }} ({{ alert_kind }})"
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ mqtt_topic | length > 0 }}"
+        sequence:
+          - service: mqtt.publish
+            data:
+              topic: "{{ mqtt_topic }}"
+              payload: "{{ trigger.json | to_json }}"
+              qos: 0
+              retain: false
+mode: queued
+max: 20

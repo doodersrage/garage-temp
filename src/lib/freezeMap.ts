@@ -1,6 +1,10 @@
 import { createServerClient } from "./supabase";
 import { fetchLatestSensorValues } from "./sensorReadings";
-import { WEATHER_CITY_PRESETS } from "./weatherCities";
+import {
+  freezeMapAggregateKey,
+  getWeatherPresetLabel,
+  uniqueWeatherCityPresets,
+} from "./weatherCities";
 
 export type FreezeMapSnapshot = {
   city_id: string;
@@ -12,22 +16,33 @@ export type FreezeMapSnapshot = {
   captured_at: string;
 };
 
-function cityLabel(cityId: string): string {
-  const match = WEATHER_CITY_PRESETS.find((c) => c.id === cityId);
-  return match?.label ?? `City ${cityId}`;
+export type FreezeMapHouseholdSettings = {
+  optIn: boolean;
+  cityId: string | null;
+  lat: number | null;
+  lon: number | null;
+  label: string | null;
+};
+
+function cityLabelFromId(cityId: string): string {
+  return getWeatherPresetLabel(cityId) ?? `City ${cityId}`;
 }
 
 export async function updateHouseholdFreezeMapSettings(
   householdId: string,
-  optIn: boolean,
-  cityId: string | null,
+  settings: FreezeMapHouseholdSettings,
 ): Promise<{ error: string | null }> {
   const supabase = createServerClient();
+  const cityId =
+    settings.cityId && /^\d+$/.test(settings.cityId) ? settings.cityId : null;
   const { error } = await supabase
     .from("households")
     .update({
-      freeze_map_opt_in: optIn,
-      freeze_map_city_id: cityId && /^\d+$/.test(cityId) ? cityId : null,
+      freeze_map_opt_in: settings.optIn,
+      freeze_map_city_id: cityId,
+      freeze_map_lat: settings.lat,
+      freeze_map_lon: settings.lon,
+      freeze_map_label: settings.label?.trim() || null,
     })
     .eq("id", householdId);
   return { error: error?.message ?? null };
@@ -40,9 +55,10 @@ export async function collectFreezeMapSnapshots(): Promise<{
   const supabase = createServerClient();
   const { data: households, error } = await supabase
     .from("households")
-    .select("id, freeze_map_city_id")
-    .eq("freeze_map_opt_in", true)
-    .not("freeze_map_city_id", "is", null);
+    .select(
+      "id, freeze_map_city_id, freeze_map_lat, freeze_map_lon, freeze_map_label",
+    )
+    .eq("freeze_map_opt_in", true);
 
   if (error) {
     return { cities: 0, error: error.message };
@@ -50,14 +66,20 @@ export async function collectFreezeMapSnapshots(): Promise<{
 
   type Acc = {
     city_id: string;
+    city_label: string;
     temps: number[];
     freeze_risk_count: number;
   };
   const byCity = new Map<string, Acc>();
 
   for (const household of households ?? []) {
-    const cityId = household.freeze_map_city_id;
-    if (!cityId) continue;
+    const key = freezeMapAggregateKey({
+      cityId: household.freeze_map_city_id,
+      lat: household.freeze_map_lat,
+      lon: household.freeze_map_lon,
+    });
+    if (!key) continue;
+
     const latest = await fetchLatestSensorValues(household.id);
     const temps = latest
       .filter((r) => r.sensor.kind === "temperature" && r.value_num != null)
@@ -66,14 +88,20 @@ export async function collectFreezeMapSnapshots(): Promise<{
 
     const avg = temps.reduce((a, b) => a + b, 0) / temps.length;
     const min = Math.min(...temps);
-    const entry = byCity.get(cityId) ?? {
-      city_id: cityId,
+    const label =
+      household.freeze_map_label?.trim() ||
+      (household.freeze_map_city_id
+        ? cityLabelFromId(household.freeze_map_city_id)
+        : key);
+    const entry = byCity.get(key) ?? {
+      city_id: key,
+      city_label: label,
       temps: [],
       freeze_risk_count: 0,
     };
     entry.temps.push(avg);
     if (min <= 34) entry.freeze_risk_count += 1;
-    byCity.set(cityId, entry);
+    byCity.set(key, entry);
   }
 
   const capturedAt = new Date().toISOString();
@@ -82,7 +110,7 @@ export async function collectFreezeMapSnapshots(): Promise<{
       entry.temps.reduce((a, b) => a + b, 0) / Math.max(entry.temps.length, 1);
     return {
       city_id: entry.city_id,
-      city_label: cityLabel(entry.city_id),
+      city_label: entry.city_label,
       sample_count: entry.temps.length,
       avg_temp_f: avg,
       min_temp_f: Math.min(...entry.temps),
@@ -103,7 +131,6 @@ export async function collectFreezeMapSnapshots(): Promise<{
   return { cities: rows.length, error: null };
 }
 
-/** Latest snapshot per city (most recent capture batch preferred). */
 export async function listLatestFreezeMapSnapshots(): Promise<FreezeMapSnapshot[]> {
   const supabase = createServerClient();
   const { data, error } = await supabase
@@ -112,7 +139,7 @@ export async function listLatestFreezeMapSnapshots(): Promise<FreezeMapSnapshot[
       "city_id, city_label, sample_count, avg_temp_f, min_temp_f, freeze_risk_count, captured_at",
     )
     .order("captured_at", { ascending: false })
-    .limit(200);
+    .limit(400);
 
   if (error || !data) return [];
 
@@ -125,3 +152,33 @@ export async function listLatestFreezeMapSnapshots(): Promise<FreezeMapSnapshot[
     (a, b) => (a.avg_temp_f ?? 999) - (b.avg_temp_f ?? 999),
   ) as FreezeMapSnapshot[];
 }
+
+/** Last N avg temps per city for sparklines (oldest → newest). */
+export async function listFreezeMapSparklines(
+  limitPoints = 7,
+): Promise<Map<string, number[]>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("freeze_map_snapshots")
+    .select("city_id, avg_temp_f, captured_at")
+    .order("captured_at", { ascending: false })
+    .limit(800);
+
+  const map = new Map<string, number[]>();
+  if (error || !data) return map;
+
+  for (const row of data) {
+    if (row.avg_temp_f == null) continue;
+    const list = map.get(row.city_id) ?? [];
+    if (list.length >= limitPoints) continue;
+    list.push(row.avg_temp_f);
+    map.set(row.city_id, list);
+  }
+
+  for (const [key, values] of map) {
+    map.set(key, [...values].reverse());
+  }
+  return map;
+}
+
+export { uniqueWeatherCityPresets };

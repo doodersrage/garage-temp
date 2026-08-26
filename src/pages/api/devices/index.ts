@@ -8,6 +8,7 @@ import {
   renamePushDevice,
   rotatePushDeviceKey,
   updateDeviceSensor,
+  updateDeviceSpace,
 } from "../../../lib/devices";
 import { getUserEntitlements } from "../../../lib/entitlements";
 import { createServerClient } from "../../../lib/supabase";
@@ -63,6 +64,23 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       return redirect(`${redirectTo}?error=1`);
     }
     const result = await renamePushDevice(household.householdId, deviceId, name);
+    if (result.error) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+    return redirect(`${redirectTo}?device_renamed=1`);
+  }
+
+  if (action === "set_space") {
+    const deviceId = formData.get("device_id")?.toString();
+    const space = formData.get("space")?.toString() ?? "";
+    if (!deviceId) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+    const result = await updateDeviceSpace(
+      household.householdId,
+      deviceId,
+      space,
+    );
     if (result.error) {
       return redirect(`${redirectTo}?error=1`);
     }

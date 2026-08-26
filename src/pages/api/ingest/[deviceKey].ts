@@ -171,6 +171,52 @@ export const POST: APIRoute = async ({ params, request }) => {
     await touchDeviceLastSeen(device.id);
   }
 
+  // Best-effort immediate alerts (cooldowns still apply)
+  try {
+    const { listHouseholdMembers } = await import("../../../lib/households");
+    const { listHouseholdDevices } = await import("../../../lib/devices");
+    const {
+      getAlertSettingsForUser,
+    } = await import("../../../lib/notify");
+    const {
+      sendThresholdAlertsIfNeeded,
+      maybeSendRuleAlerts,
+      buildAlertReadingsFromLatestSensors,
+    } = await import("../../../lib/alertNotifications");
+    const { fetchLatestSensorValues } = await import("../../../lib/sensorReadings");
+    const { createAdminClient } = await import("../../../lib/supabase");
+
+    const members = await listHouseholdMembers(device.household_id);
+    const devices = await listHouseholdDevices(device.household_id);
+    const latest = await fetchLatestSensorValues(device.household_id);
+    const readings = buildAlertReadingsFromLatestSensors(latest);
+    const admin = createAdminClient();
+
+    for (const member of members.members) {
+      const { data } = await admin.auth.admin.getUserById(member.user_id);
+      const settings = await getAlertSettingsForUser(
+        member.user_id,
+        data.user?.user_metadata as Record<string, unknown> | undefined,
+      );
+      await sendThresholdAlertsIfNeeded(
+        member.user_id,
+        data.user?.email,
+        settings,
+        readings,
+      );
+      await maybeSendRuleAlerts(
+        member.user_id,
+        data.user?.email,
+        devices.devices,
+        settings,
+        readings,
+        device.household_id,
+      );
+    }
+  } catch (alertError) {
+    console.error("Ingest alert evaluation failed:", alertError);
+  }
+
   return new Response(
     JSON.stringify({ ok: true, readings: rows.length }),
     {

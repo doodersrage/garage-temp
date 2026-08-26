@@ -7,7 +7,10 @@ import {
   rowToAlertSettings,
 } from "./alerts";
 import { recordAlertEvent } from "./alertEvents";
-import { shouldSuppressForQuietHours } from "./quietHours";
+import {
+  quietHoursAllowsSmsCritical,
+  shouldSuppressForQuietHours,
+} from "./quietHours";
 import { createServerClient } from "./supabase";
 import { getUserEntitlements } from "./entitlements";
 
@@ -307,7 +310,8 @@ export async function notifyUser(
   settings: AlertSettings,
   payload: NotifyPayload,
 ): Promise<{ sent: string[]; skipped: string[] }> {
-  if (shouldSuppressForQuietHours(settings, payload.kind)) {
+  const smsCriticalOnly = quietHoursAllowsSmsCritical(settings, payload.kind);
+  if (shouldSuppressForQuietHours(settings, payload.kind) && !smsCriticalOnly) {
     const skipped = ["quiet_hours"];
     await recordAlertEvent({
       userId,
@@ -325,8 +329,12 @@ export async function notifyUser(
   const sent: string[] = [];
   const skipped: string[] = [];
   const kind = payload.kind;
+  const allowChannel = (channel: AlertChannelName) => {
+    if (smsCriticalOnly) return channel === "sms";
+    return channelAllowed(settings, kind, channel);
+  };
 
-  if (settings.channelEmail && channelAllowed(settings, kind, "email")) {
+  if (settings.channelEmail && allowChannel("email")) {
     if (email) {
       await sendEmail(email, payload.title, payload.body);
       sent.push("email");
@@ -335,7 +343,7 @@ export async function notifyUser(
     }
   }
 
-  if (settings.channelDiscord && channelAllowed(settings, kind, "discord")) {
+  if (settings.channelDiscord && allowChannel("discord")) {
     if (settings.discordWebhookUrl) {
       await sendDiscord(settings.discordWebhookUrl, payload.title, payload.body);
       sent.push("discord");
@@ -344,7 +352,7 @@ export async function notifyUser(
     }
   }
 
-  if (settings.channelSlack && channelAllowed(settings, kind, "slack")) {
+  if (settings.channelSlack && allowChannel("slack")) {
     if (settings.slackWebhookUrl) {
       await sendSlack(settings.slackWebhookUrl, payload.title, payload.body);
       sent.push("slack");
@@ -353,7 +361,7 @@ export async function notifyUser(
     }
   }
 
-  if (settings.channelTelegram && channelAllowed(settings, kind, "telegram")) {
+  if (settings.channelTelegram && allowChannel("telegram")) {
     if (settings.telegramBotToken && settings.telegramChatId) {
       await sendTelegram(
         settings.telegramBotToken,
@@ -367,7 +375,7 @@ export async function notifyUser(
     }
   }
 
-  if (settings.channelSms && channelAllowed(settings, kind, "sms")) {
+  if (settings.channelSms && allowChannel("sms")) {
     if (settings.smsPhone && entitlements.canUseSms) {
       await sendTwilioSms(settings.smsPhone, `${payload.title}: ${payload.body}`);
       sent.push("sms");
@@ -376,7 +384,7 @@ export async function notifyUser(
     }
   }
 
-  if (settings.channelPush && channelAllowed(settings, kind, "push")) {
+  if (settings.channelPush && allowChannel("push")) {
     if (entitlements.canUsePush) {
       await sendWebPushToUser(userId, payload);
       sent.push("push");
@@ -385,7 +393,7 @@ export async function notifyUser(
     }
   }
 
-  if (settings.channelWebhook && channelAllowed(settings, kind, "webhook")) {
+  if (settings.channelWebhook && allowChannel("webhook")) {
     if (settings.outboundWebhookUrl && entitlements.canUseOutboundWebhook) {
       await sendOutboundWebhook(
         settings.outboundWebhookUrl,
@@ -396,6 +404,10 @@ export async function notifyUser(
     } else {
       skipped.push("webhook");
     }
+  }
+
+  if (smsCriticalOnly && sent.length === 0) {
+    skipped.push("quiet_hours");
   }
 
   await recordAlertEvent({
