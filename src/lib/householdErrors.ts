@@ -5,6 +5,7 @@ const HOUSEHOLD_ERROR_MESSAGES: Record<string, string> = {
   already_member: "You are already a member of this household.",
   expired: "This invite has expired. Ask for a new one.",
   invalid: "This invite link is invalid.",
+  cannot_leave_owner: "Household owners cannot leave. Transfer ownership or delete the household instead.",
 };
 
 export function getHouseholdErrorMessage(code: string | null): string | null {

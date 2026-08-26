@@ -169,18 +169,18 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const hash = await sha256Hex(rawKey);
   const prefix = rawKey.slice(0, 8);
 
-  const { error } = await createPushDevice(
+  const { device, error } = await createPushDevice(
     household.householdId,
     name,
     hash,
     prefix,
   );
 
-  if (error) {
+  if (error || !device) {
     return redirect(`${redirectTo}?error=1`);
   }
 
   return redirect(
-    `${redirectTo}?ingest_key=${encodeURIComponent(rawKey)}&device_created=1`,
+    `${redirectTo}?ingest_key=${encodeURIComponent(rawKey)}&device_created=1&focus_device=${encodeURIComponent(device.id)}`,
   );
 };

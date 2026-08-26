@@ -31,31 +31,56 @@ const readingsUrl = `/api/share/${token}/readings`;
     const metaEl = document.getElementById("share-meta");
     if (!root) return;
     const url = root.getAttribute("data-url");
-    const kindLabels = {
-      temperature: "Temperature",
-      humidity: "Humidity",
-      co2: "CO₂",
-      door: "Door",
-      power: "Power",
-      flood: "Flood",
-      generic: "Sensor",
-    };
+    const STALE_MS = 2 * 60 * 60 * 1000;
+
+    function formatAge(iso) {
+      if (!iso) return null;
+      const ms = Date.now() - Date.parse(iso);
+      if (Number.isNaN(ms) || ms < 0) return null;
+      const minutes = Math.floor(ms / 60000);
+      let label;
+      if (minutes < 1) label = "Updated just now";
+      else if (minutes < 60) label = "Updated " + minutes + "m ago";
+      else {
+        const hours = Math.floor(minutes / 60);
+        label =
+          hours < 48
+            ? "Updated " + hours + "h ago"
+            : "Updated " + Math.floor(hours / 24) + "d ago";
+      }
+      return { label, stale: ms >= STALE_MS };
+    }
 
     function formatValue(r) {
       if (r.value_bool != null) {
+        if (r.kind === "door") return r.value_bool ? "Open" : "Closed";
+        if (r.kind === "power") return r.value_bool ? "On" : "Off";
+        if (r.kind === "flood") return r.value_bool ? "Wet" : "Dry";
         return r.value_bool ? "On / Open" : "Off / Closed";
       }
       if (r.value_num != null) {
-        return `${Number(r.value_num).toFixed(1)}${r.unit ? " " + r.unit : ""}`;
+        return Number(r.value_num).toFixed(1) + (r.unit ? " " + r.unit : "");
       }
       return r.value_text || "—";
     }
 
+    function kindLabel(kind) {
+      return (
+        {
+          temperature: "Temperature",
+          humidity: "Humidity",
+          co2: "CO₂",
+          door: "Door",
+          power: "Power",
+          flood: "Flood",
+          generic: "Sensor",
+        }[kind] || kind
+      );
+    }
+
     function render(data) {
       if (titleEl && data.label) titleEl.textContent = data.label;
-      if (subtitleEl) {
-        subtitleEl.textContent = "Live read-only view";
-      }
+      if (subtitleEl) subtitleEl.textContent = "Live read-only view";
       if (metaEl) {
         const parts = [];
         if (data.expires_at) {
@@ -68,15 +93,23 @@ const readingsUrl = `/api/share/${token}/readings`;
       }
 
       root.innerHTML = (data.readings || [])
-        .map(
-          (r) => `<div class="card">
+        .map((r) => {
+          const age = formatAge(r.recorded_at);
+          const staleClass = age && age.stale ? " stat-item-stale" : "";
+          const ageHtml = age
+            ? `<p class="m-0 mt-1 text-sm ${
+                age.stale ? "text-amber-300" : "text-[var(--color-text-muted)]"
+              }">${age.stale ? "Stale · " + age.label : age.label}</p>`
+            : "";
+          return `<div class="card${staleClass}">
             <strong>${r.label}</strong>
-            <p class="m-0 text-sm text-[var(--color-text-muted)]">${r.device} · ${
-              kindLabels[r.kind] || r.kind
-            }</p>
+            <p class="m-0 text-sm text-[var(--color-text-muted)]">${r.device} · ${kindLabel(
+              r.kind,
+            )}</p>
             <p class="text-2xl m-0 mt-2">${formatValue(r)}</p>
-          </div>`,
-        )
+            ${ageHtml}
+          </div>`;
+        })
         .join("") || '<div class="empty-state"><p>No readings yet.</p></div>';
     }
 
@@ -85,13 +118,16 @@ const readingsUrl = `/api/share/${token}/readings`;
         const res = await fetch(url);
         const data = await res.json();
         if (!res.ok) {
-          root.innerHTML = `<div class="empty-state"><p>${data.error || "Unable to load"}</p></div>`;
+          root.innerHTML = `<div class="empty-state"><p>${
+            data.error || "Unable to load"
+          }</p></div>`;
           if (metaEl) metaEl.textContent = "";
           return;
         }
         render(data);
       } catch {
-        root.innerHTML = '<div class="empty-state"><p>Failed to load shared readings.</p></div>';
+        root.innerHTML =
+          '<div class="empty-state"><p>Failed to load shared readings.</p></div>';
       }
     }
 

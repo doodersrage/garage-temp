@@ -4,6 +4,7 @@ import { createServerClient } from "../../../lib/supabase";
 import {
   getOwnedHouseholdId,
   getOrCreateHouseholdForUser,
+  leaveHousehold,
   listHouseholdMembers,
   listUserHouseholds,
   removeHouseholdMember,
@@ -72,6 +73,20 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       return redirect(`${redirectTo}?error=${encodeURIComponent(result.error)}`);
     }
     return redirect(`${redirectTo}?switched=1`);
+  }
+
+  if (action === "leave") {
+    const householdId = formData.get("household_id")?.toString();
+    if (!householdId) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+    const result = await leaveHousehold(user.id, householdId);
+    if (result.error) {
+      return redirect(
+        `${redirectTo}?error=${encodeURIComponent(result.error === "Cannot remove the household owner" ? "cannot_leave_owner" : result.error)}`,
+      );
+    }
+    return redirect(`${redirectTo}?left=1`);
   }
 
   const ownedId = await getOwnedHouseholdId(user.id);

@@ -733,6 +733,39 @@
     border-color: rgb(251 191 36 / 0.35);
   }
 
+  .status-strip {
+    @apply grid gap-3 sm:grid-cols-2 lg:grid-cols-4;
+  }
+
+  .status-strip-item {
+    @apply block rounded-xl p-4 no-underline;
+    background-color: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    color: inherit;
+    transition:
+      border-color var(--motion-duration) var(--motion-ease),
+      background-color var(--motion-duration) var(--motion-ease);
+  }
+
+  .status-strip-item:hover {
+    border-color: var(--color-border-strong);
+    background-color: rgb(255 255 255 / 0.04);
+  }
+
+  .status-strip-label {
+    @apply mb-1 block text-xs font-semibold uppercase tracking-wide;
+    color: var(--color-text-muted);
+  }
+
+  .status-strip-value {
+    @apply text-sm font-medium;
+    color: var(--color-text);
+  }
+
+  .status-strip-warn {
+    color: #fcd34d;
+  }
+
   .data-table {
     @apply w-full min-w-[36rem] text-left text-sm;
     border-collapse: collapse;

@@ -1,0 +1,58 @@
+---
+interface Props {
+  lastReadingLabel: string | null;
+  lastReadingStale: boolean;
+  staleSensorCount: number;
+  sensorCount: number;
+  feedIssueCount: number;
+  feedCount: number;
+  alertsEnabled: boolean;
+}
+
+const {
+  lastReadingLabel,
+  lastReadingStale,
+  staleSensorCount,
+  sensorCount,
+  feedIssueCount,
+  feedCount,
+  alertsEnabled,
+} = Astro.props;
+---
+
+<section class="card" id="status">
+  <h2 class="card-title">Status at a glance</h2>
+  <p class="card-subtitle mb-4">Quick health check for your garage sensors.</p>
+  <div class="status-strip">
+    <a class="status-strip-item" href="/">
+      <span class="status-strip-label">Last reading</span>
+      <span class:list={["status-strip-value", lastReadingStale && "status-strip-warn"]}>
+        {lastReadingLabel ?? "None yet"}
+      </span>
+    </a>
+    <a class="status-strip-item" href="/dashboard/temperature">
+      <span class="status-strip-label">Sensors</span>
+      <span class:list={["status-strip-value", staleSensorCount > 0 && "status-strip-warn"]}>
+        {sensorCount === 0
+          ? "None configured"
+          : staleSensorCount > 0
+            ? `${staleSensorCount} stale of ${sensorCount}`
+            : `${sensorCount} fresh`}
+      </span>
+    </a>
+    <a class="status-strip-item" href="/dashboard/temperature#pull-feeds">
+      <span class="status-strip-label">Feeds</span>
+      <span class:list={["status-strip-value", feedIssueCount > 0 && "status-strip-warn"]}>
+        {feedCount === 0
+          ? "No pull feeds"
+          : feedIssueCount > 0
+            ? `${feedIssueCount} issue${feedIssueCount === 1 ? "" : "s"}`
+            : `${feedCount} online`}
+      </span>
+    </a>
+    <a class="status-strip-item" href="/dashboard/alerts">
+      <span class="status-strip-label">Alerts</span>
+      <span class="status-strip-value">{alertsEnabled ? "On" : "Off"}</span>
+    </a>
+  </div>
+</section>

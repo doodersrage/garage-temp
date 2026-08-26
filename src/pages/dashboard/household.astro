@@ -52,9 +52,16 @@ const notice = Astro.url.searchParams.get("invited")
         ? "You joined the household."
       : Astro.url.searchParams.get("invite_revoked")
         ? "Invite cancelled."
+      : Astro.url.searchParams.get("left")
+        ? "You left the household."
       : null;
 
 const isOwner = Boolean(ownedId && ownedId === manageId);
+const activeMembership = householdsResult.households.find(
+  (h) => h.household_id === active.householdId,
+);
+const canLeaveActive =
+  Boolean(active.householdId) && activeMembership?.role === "member";
 const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
 ---
 <DashboardLayout title="Household">
@@ -202,6 +209,22 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
           </li>
         ))}
       </ul>
+      {canLeaveActive && active.householdId && (
+        <form
+          action="/api/household"
+          method="post"
+          class="mt-6 border-t border-[var(--color-border)] pt-4"
+          onsubmit="return confirm('Leave this household? You will lose access to its shared devices and history.');"
+        >
+          <input type="hidden" name="action" value="leave" />
+          <input type="hidden" name="household_id" value={active.householdId} />
+          <input type="hidden" name="redirect" value="/dashboard/household" />
+          <p class="card-subtitle mb-3">
+            You are a member of this household. Leaving removes your access to its devices and history.
+          </p>
+          <button class="btn-ghost" type="submit">Leave household</button>
+        </form>
+      )}
     </section>
   </div>
 </DashboardLayout>

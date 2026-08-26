@@ -25,7 +25,15 @@ const alertNotice = Astro.url.searchParams.get("alert_saved")
   ? "Alert settings saved."
   : Astro.url.searchParams.get("alert_error")
     ? "Unable to save alert settings."
-    : null;
+    : Astro.url.searchParams.get("test_sent")
+      ? "Test alert sent to your enabled channels."
+      : Astro.url.searchParams.get("test_error")
+        ? "Could not send test alert. Check channel settings and try again."
+        : null;
+
+const alertNoticeIsError =
+  Boolean(Astro.url.searchParams.get("alert_error")) ||
+  Boolean(Astro.url.searchParams.get("test_error"));
 
 const needsPro =
   !entitlements.canUseSms ||
@@ -40,7 +48,11 @@ const needsPro =
       <p class="mb-0">
         Get notified when temperatures drop, humidity spikes, feeds go quiet, or conditions change quickly.
       </p>
-      {alertNotice && <p class="alert-success mt-4">{alertNotice}</p>}
+      {alertNotice && (
+        <p class:list={[alertNoticeIsError ? "alert-warning" : "alert-success", "mt-4"]} role="status">
+          {alertNotice}
+        </p>
+      )}
     </section>
 
     {needsPro && (
@@ -60,5 +72,17 @@ const needsPro =
       vapidPublicKey={import.meta.env.VAPID_PUBLIC_KEY ?? ""}
       redirectTo="/dashboard/alerts"
     />
+
+    <section class="card">
+      <h2 class="card-title">Send a test alert</h2>
+      <p class="card-subtitle mb-4">
+        Fires a sample message to every channel you currently have enabled (email, Discord, SMS, push, webhook).
+        Save settings first if you just changed them.
+      </p>
+      <form action="/api/user/alert-test" method="post">
+        <input type="hidden" name="redirect" value="/dashboard/alerts" />
+        <button class="btn-secondary" type="submit">Send test now</button>
+      </form>
+    </section>
   </div>
 </DashboardLayout>

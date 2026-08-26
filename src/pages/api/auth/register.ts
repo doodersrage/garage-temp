@@ -20,6 +20,10 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
     return redirect("/register?error=missing_fields");
   }
 
+  if (password.length < 8) {
+    return redirect("/register?error=weak_password");
+  }
+
   const { error } = await supabase.auth.signUp({
     email,
     password,

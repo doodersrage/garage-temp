@@ -6,10 +6,14 @@ import { getRegisterErrorMessage } from "../lib/registerErrors";
 const nextPath = Astro.url.searchParams.get("next") ?? "";
 const safeNext =
   nextPath.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "";
-const signInHref = safeNext
-  ? `/signin?next=${encodeURIComponent(safeNext)}`
-  : "/signin";
 const errorMessage = getRegisterErrorMessage(Astro.url.searchParams.get("error"));
+const emailValue = Astro.url.searchParams.get("email") ?? "";
+const signInParams = new URLSearchParams();
+if (safeNext) signInParams.set("next", safeNext);
+if (emailValue) signInParams.set("email", emailValue);
+const signInHref = signInParams.toString()
+  ? `/signin?${signInParams.toString()}`
+  : "/signin";
 ---
 
 <Layout
@@ -27,11 +31,27 @@ const errorMessage = getRegisterErrorMessage(Astro.url.searchParams.get("error")
         )}
         <div class="form-field">
           <label class="form-label" for="email">Email</label>
-          <input class="form-input" type="email" name="email" id="email" required />
+          <input
+            class="form-input"
+            type="email"
+            name="email"
+            id="email"
+            value={emailValue}
+            required
+          />
         </div>
         <div class="form-field">
           <label class="form-label" for="password">Password</label>
-          <input class="form-input" type="password" name="password" id="password" required />
+          <input
+            class="form-input"
+            type="password"
+            name="password"
+            id="password"
+            required
+            minlength={8}
+            autocomplete="new-password"
+          />
+          <p class="form-hint">Use at least 8 characters.</p>
         </div>
         <div class="form-field">
           <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>

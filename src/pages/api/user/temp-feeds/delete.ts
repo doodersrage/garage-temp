@@ -20,8 +20,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { error } = await deleteUserTempFeed(user.id, feedId);
 
   if (error) {
-    return new Response(error.message, { status: 500 });
+    return redirect(`${redirectTo}?feeds_error=1`);
   }
 
-  return redirect(redirectTo);
+  return redirect(`${redirectTo}?feed_deleted=1`);
 };

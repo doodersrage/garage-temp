@@ -32,7 +32,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   );
 
   if (error) {
-    return new Response(error.message, { status: 500 });
+    return redirect(`${redirectTo}?prefs_error=1`);
   }
 
   const { data: refreshedSession } = await supabase.auth.refreshSession({
@@ -47,5 +47,5 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     );
   }
 
-  return redirect(redirectTo);
+  return redirect(`${redirectTo}${redirectTo.includes("?") ? "&" : "?"}prefs_saved=1`);
 };

@@ -16,8 +16,12 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   const result = await acceptHouseholdInvite(token, user.id, user.email);
   if (result.error) {
+    const code =
+      result.error.toLowerCase().includes("invited email")
+        ? "email_mismatch"
+        : result.error;
     return redirect(
-      `/invite/${token}?error=${encodeURIComponent(result.error)}`,
+      `/invite/${token}?error=${encodeURIComponent(code)}`,
     );
   }
 

@@ -18,8 +18,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { error } = await saveUserTempProbes(user.id, tempProbes);
 
   if (error) {
-    return new Response(error.message, { status: 500 });
+    return redirect(`${redirectTo}?probes_error=1`);
   }
 
-  return redirect(redirectTo);
+  return redirect(`${redirectTo}?probes_saved=1`);
 };

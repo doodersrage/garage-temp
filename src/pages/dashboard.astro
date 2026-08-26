@@ -2,13 +2,14 @@
 import DashboardLayout from "../layouts/DashboardLayout.astro";
 import DisplayPreferences from "../components/DisplayPreferences.astro";
 import DashboardOnboarding from "../components/DashboardOnboarding.astro";
+import DashboardStatusStrip from "../components/DashboardStatusStrip.astro";
 import PlansCard from "../components/PlansCard.astro";
 import { getAuthFromCookies } from "../lib/auth";
 import { getUserPreferences } from "../lib/userPreferences";
 import { fetchGarageTempHistory } from "../lib/garageTempsHistory";
 import { fetchUserTempConfig } from "../lib/userTempConfig";
 import { getUserEntitlements } from "../lib/entitlements";
-import { getUserDevicesAsTempConfig } from "../lib/devices";
+import { getUserDevicesAsTempConfig, listHouseholdDevices } from "../lib/devices";
 import { getAlertSettingsForUser } from "../lib/notify";
 import { getUserSubscription } from "../lib/stripeSubscriptions";
 import { canDownloadHistoryCsv } from "../lib/adminAccess";
@@ -16,6 +17,9 @@ import {
   getOrCreateHouseholdForUser,
   listHouseholdMembers,
 } from "../lib/households";
+import { checkFeedHealth } from "../lib/collectHistory";
+import { fetchLatestSensorValues } from "../lib/sensorReadings";
+import { formatRelativeAge, STALE_MS } from "../lib/relativeTime";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -23,7 +27,7 @@ if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const [preferences, tempConfig, history, entitlements, deviceConfig, alertSettings, subscription, canDownloadCsv, household] =
+const [preferences, tempConfig, history, entitlements, deviceConfig, alertSettings, subscription, canDownloadCsv, household, feedHealth] =
   await Promise.all([
     getUserPreferences(user),
     fetchUserTempConfig(user.id),
@@ -34,11 +38,20 @@ const [preferences, tempConfig, history, entitlements, deviceConfig, alertSettin
     getUserSubscription(user.id),
     canDownloadHistoryCsv(user.id),
     getOrCreateHouseholdForUser(user.id, user.email),
+    checkFeedHealth(user.id),
   ]);
 
 const members = household.householdId
   ? await listHouseholdMembers(household.householdId)
   : { members: [] };
+
+const devices = household.householdId
+  ? (await listHouseholdDevices(household.householdId)).devices
+  : deviceConfig.devices;
+
+const latest = household.householdId
+  ? await fetchLatestSensorValues(household.householdId)
+  : [];
 
 const hasDevices =
   tempConfig.hasCustomConfig ||
@@ -52,6 +65,24 @@ const hasAlertsConfigured = alertSettings.enabled;
 const hasHouseholdMembers = members.members.length > 1;
 
 const subscriptionNotice = Astro.url.searchParams.get("subscription");
+const prefsSaved = Astro.url.searchParams.get("prefs_saved");
+const prefsError = Astro.url.searchParams.get("prefs_error");
+const passwordUpdated = Astro.url.searchParams.get("password") === "updated";
+
+const newestReading = latest
+  .map((row) => row.recorded_at)
+  .filter(Boolean)
+  .sort((a, b) => Date.parse(b!) - Date.parse(a!))[0] ?? null;
+const lastAge = formatRelativeAge(newestReading);
+const staleSensorCount = latest.filter((row) => {
+  if (!row.recorded_at) return true;
+  return Date.now() - Date.parse(row.recorded_at) >= STALE_MS;
+}).length;
+const feedIssueCount = feedHealth.statuses.filter((s) => !s.ok).length;
+const sensorCount =
+  latest.length > 0
+    ? latest.length
+    : devices.reduce((sum, d) => sum + d.sensors.length, 0);
 ---
 <DashboardLayout title="Dashboard">
   <div class="space-y-6">
@@ -64,7 +95,26 @@ const subscriptionNotice = Astro.url.searchParams.get("subscription");
         {" · "}
         <a class="text-link" href="#plans">Manage plan</a>
       </p>
+      {passwordUpdated && (
+        <p class="alert-success mt-4" role="status">Password updated.</p>
+      )}
+      {prefsSaved && (
+        <p class="alert-success mt-4" role="status">Display preferences saved.</p>
+      )}
+      {prefsError && (
+        <p class="alert-warning mt-4" role="alert">Could not save display preferences.</p>
+      )}
     </section>
+
+    <DashboardStatusStrip
+      lastReadingLabel={newestReading ? lastAge.label : null}
+      lastReadingStale={!newestReading || lastAge.stale}
+      staleSensorCount={staleSensorCount}
+      sensorCount={sensorCount}
+      feedIssueCount={feedIssueCount}
+      feedCount={feedHealth.statuses.length}
+      alertsEnabled={alertSettings.enabled}
+    />
 
     <DashboardOnboarding
       hasDevices={hasDevices}
@@ -91,12 +141,51 @@ const subscriptionNotice = Astro.url.searchParams.get("subscription");
       <a class="btn-secondary" href="/dashboard/alerts">Manage alerts</a>
     </section>
 
-    <section class="card">
+    <section class="card" id="pwa-install">
       <h2 class="card-title">Install the app</h2>
       <p class="card-subtitle mb-3">
-        Add Garage Temp to your home screen for faster access. See iOS limits and install steps in the guide.
+        Add Garage Temp to your home screen for faster access.
       </p>
-      <a class="btn-secondary" href="/about/install-pwa">PWA install guide</a>
+      <div class="flex flex-wrap gap-3">
+        <button type="button" class="btn-primary" id="pwa-install-btn" hidden>
+          Install app
+        </button>
+        <a class="btn-secondary" href="/about/install-pwa">PWA install guide</a>
+      </div>
+      <p class="card-subtitle mt-2 mb-0" id="pwa-install-status"></p>
     </section>
   </div>
 </DashboardLayout>
+
+<script is:inline>
+  (() => {
+    const btn = document.getElementById("pwa-install-btn");
+    const status = document.getElementById("pwa-install-status");
+    let deferredPrompt = null;
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredPrompt = event;
+      if (btn) btn.hidden = false;
+    });
+
+    btn?.addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (status) {
+        status.textContent =
+          choice.outcome === "accepted"
+            ? "Install started."
+            : "Install dismissed. You can still use the guide below.";
+      }
+      deferredPrompt = null;
+      if (btn) btn.hidden = true;
+    });
+
+    window.addEventListener("appinstalled", () => {
+      if (status) status.textContent = "App installed.";
+      if (btn) btn.hidden = true;
+    });
+  })();
+</script>

@@ -26,8 +26,16 @@ if (invite) {
 
 const expired = invite ? Date.parse(invite.expires_at) < Date.now() : false;
 const alreadyAccepted = Boolean(invite?.accepted_at);
-const acceptError = getHouseholdErrorMessage(Astro.url.searchParams.get("error"));
+const rawError = Astro.url.searchParams.get("error");
+const acceptError = getHouseholdErrorMessage(rawError);
+const isEmailMismatch =
+  Boolean(rawError) &&
+  (rawError === "email_mismatch" ||
+    (rawError ?? "").toLowerCase().includes("invited email"));
 const nextPath = `/invite/${token}`;
+const inviteEmail = invite?.email ?? "";
+const authQuery = new URLSearchParams({ next: nextPath });
+if (inviteEmail) authQuery.set("email", inviteEmail);
 ---
 <Layout title="Household invite" description="Accept a household sharing invite.">
   <div class="mx-auto w-full max-w-lg px-4 py-12 sm:px-6">
@@ -48,15 +56,37 @@ const nextPath = `/invite/${token}`;
             You've been invited to share sensors in <strong>{householdName}</strong>
             {invite.email ? <> as <strong>{invite.email}</strong></> : null}.
           </p>
-          {acceptError && <p class="alert-warning" role="alert">{acceptError}</p>}
+          {acceptError && (
+            <div class="space-y-2">
+              <p class="alert-warning" role="alert">{acceptError}</p>
+              {isEmailMismatch && session && user && (
+                <p class="m-0 text-sm">
+                  <a class="text-link" href="/api/auth/signout">Sign out</a>
+                  {" "}and use the invited email.
+                </p>
+              )}
+            </div>
+          )}
           {!session || !user ? (
             <div class="space-y-3 mt-4">
-              <p class="mb-0">Sign in or register with the invited email to accept.</p>
-              <a class="btn-primary" href={`/signin?next=${encodeURIComponent(nextPath)}`}>
+              <p class="mb-0">
+                Sign in or register with{inviteEmail ? ` ${inviteEmail}` : " the invited email"} to accept.
+              </p>
+              <a class="btn-primary" href={`/signin?${authQuery.toString()}`}>
                 Sign in
               </a>
-              <a class="btn-secondary" href={`/register?next=${encodeURIComponent(nextPath)}`}>
+              <a class="btn-secondary" href={`/register?${authQuery.toString()}`}>
                 Create account
+              </a>
+            </div>
+          ) : isEmailMismatch ? (
+            <div class="space-y-3 mt-4">
+              <p class="mb-0 text-sm">
+                Signed in as {user.email}. Sign out and use the invited address to join.
+              </p>
+              <a class="btn-primary" href="/api/auth/signout">Sign out</a>
+              <a class="btn-secondary" href={`/signin?${authQuery.toString()}`}>
+                Sign in as {inviteEmail || "invited email"}
               </a>
             </div>
           ) : (

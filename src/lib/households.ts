@@ -252,6 +252,31 @@ export async function removeHouseholdMember(
   return { error: error?.message ?? null };
 }
 
+/** Member leaves their current household (not allowed for owners). */
+export async function leaveHousehold(
+  userId: string,
+  householdId: string,
+): Promise<{ error: string | null }> {
+  const result = await removeHouseholdMember(householdId, userId);
+  if (result.error) {
+    return result;
+  }
+
+  const remaining = await listUserHouseholds(userId);
+  const next = remaining.households[0]?.household_id ?? null;
+  if (next) {
+    await setActiveHouseholdForUser(userId, next);
+  } else {
+    // Fall back to owned household or recreate personal one
+    const owned = await getOwnedHouseholdId(userId);
+    if (owned) {
+      await setActiveHouseholdForUser(userId, owned);
+    }
+  }
+
+  return { error: null };
+}
+
 export async function updateHouseholdName(
   householdId: string,
   name: string,
