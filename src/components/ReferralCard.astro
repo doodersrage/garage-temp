@@ -1,0 +1,55 @@
+---
+interface Props {
+  siteUrl: string;
+}
+
+const { siteUrl } = Astro.props;
+---
+<section class="card" id="referral-card">
+  <h2 class="card-title">Invite friends</h2>
+  <p class="card-subtitle mb-4">
+    Share your link — new signups get <strong>7 extra days</strong> on Pro trial. You earn credit when they join.
+  </p>
+  <p class="ingest-key-value break-all text-sm mb-2" id="referral-url">Loading referral link…</p>
+  <p class="text-sm text-[var(--color-text-muted)] mb-3" id="referral-stats"></p>
+  <button type="button" class="btn-secondary" id="referral-copy" disabled>Copy invite link</button>
+</section>
+
+<script is:inline define:vars={{ siteUrl }}>
+  (async () => {
+    const urlEl = document.getElementById("referral-url");
+    const statsEl = document.getElementById("referral-stats");
+    const btn = document.getElementById("referral-copy");
+    try {
+      const res = await fetch("/api/user/referral");
+      if (!res.ok) throw new Error("Could not load referral");
+      const data = await res.json();
+      const link = data.registerUrl || `${siteUrl}/register?ref=${data.code}`;
+      if (urlEl) urlEl.textContent = link;
+      if (statsEl) {
+        statsEl.textContent =
+          data.signupCount > 0
+            ? `${data.signupCount} friend${data.signupCount === 1 ? "" : "s"} joined via your link.`
+            : "No signups yet — share the link above.";
+      }
+      if (btn instanceof HTMLButtonElement) {
+        btn.disabled = false;
+        btn.dataset.copy = link;
+        btn.dataset.copyLabel = "Copy invite link";
+        btn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(link);
+            btn.textContent = "Copied!";
+            setTimeout(() => {
+              btn.textContent = "Copy invite link";
+            }, 2000);
+          } catch {
+            btn.textContent = "Copy failed";
+          }
+        });
+      }
+    } catch {
+      if (urlEl) urlEl.textContent = "Referral link unavailable.";
+    }
+  })();
+</script>

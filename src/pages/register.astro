@@ -11,6 +11,7 @@ const emailValue = Astro.url.searchParams.get("email") ?? "";
 const signInParams = new URLSearchParams();
 if (safeNext) signInParams.set("next", safeNext);
 if (emailValue) signInParams.set("email", emailValue);
+const refCode = Astro.url.searchParams.get("ref")?.trim().toLowerCase() ?? "";
 const signInHref = signInParams.toString()
   ? `/signin?${signInParams.toString()}`
   : "/signin";
@@ -24,6 +25,12 @@ const signInHref = signInParams.toString()
     <div class="auth-form animate-blurred-fade-in space-y-4">
       <form class="form-panel" action="/api/auth/register" method="post">
         {safeNext && <input type="hidden" name="next" value={safeNext} />}
+        {refCode && <input type="hidden" name="ref" value={refCode} />}
+        {refCode && (
+          <p class="form-hint mb-4">
+            Referral code <strong>{refCode}</strong> applied — Pro trial includes an extra 7 days.
+          </p>
+        )}
         {errorMessage && (
           <div class="alert-warning mb-4" role="alert">
             <p class="m-0">{errorMessage}</p>

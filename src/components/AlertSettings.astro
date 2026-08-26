@@ -9,6 +9,7 @@ interface Props {
   entitlements: Entitlements;
   vapidPublicKey?: string;
   redirectTo?: string;
+  canEdit?: boolean;
 }
 
 const {
@@ -17,7 +18,18 @@ const {
   entitlements,
   vapidPublicKey = "",
   redirectTo = "/dashboard/alerts",
+  canEdit = true,
 } = Astro.props;
+
+const templateKinds = [
+  "threshold",
+  "forecast",
+  "rate",
+  "outage",
+  "rule",
+  "battery",
+  "rssi",
+] as const;
 
 const needsPro =
   !entitlements.canUseSms ||
@@ -27,7 +39,13 @@ const needsPro =
 const rulesJson = JSON.stringify(settings.alertRules ?? []);
 ---
 <div class="card animate-slide-up-fade">
+{!canEdit && (
+  <p class="alert-warning mb-4" role="status">
+    View-only — alert settings cannot be changed on this account.
+  </p>
+)}
 <form action="/api/user/alert-settings" method="post" id="alert-settings-form">
+  <fieldset disabled={!canEdit} class="border-0 p-0 m-0 min-w-0">
   <input type="hidden" name="redirect" value={redirectTo} />
   <input type="hidden" name="alert_rules_json" id="alert_rules_json" value={rulesJson} />
   <h2 class="card-title">When to notify you</h2>
@@ -76,6 +94,10 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     <label class="checkbox-row mb-0">
       <input type="checkbox" name="battery_alerts_enabled" value="true" checked={settings.batteryAlertsEnabled} />
       <span>Low battery alerts</span>
+    </label>
+    <label class="checkbox-row mb-0">
+      <input type="checkbox" name="battery_trend_alerts_enabled" value="true" checked={settings.batteryTrendAlertsEnabled} />
+      <span>Battery trend drop alerts</span>
     </label>
     <div class="form-field mb-0">
       <label class="form-label" for="battery_threshold_pct">Battery below (%)</label>
@@ -182,7 +204,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
   </p>
   <input type="hidden" name="channel_severity_json" id="channel_severity_json" value={JSON.stringify(settings.channelSeverity ?? {})} />
   <div class="space-y-3 mb-4" id="severity-routing">
-    {(["threshold", "forecast", "rate", "outage", "rule"] as const).map((kind) => {
+    {(["threshold", "forecast", "rate", "outage", "rule", "battery", "rssi"] as const).map((kind) => {
       const selected = settings.channelSeverity?.[kind] ?? [];
       return (
         <div class="form-field mb-0">
@@ -199,6 +221,45 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
                 <span>{ch}</span>
               </label>
             ))}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  <h3 class="text-base font-semibold mb-2 mt-4">Custom alert messages (optional)</h3>
+  <p class="card-subtitle mb-3">
+    Override title/body per alert kind. Variables: <code>{`{{kind}}`}</code>, <code>{`{{title}}`}</code>, <code>{`{{body}}`}</code>.
+  </p>
+  <div class="space-y-3 mb-4" id="alert-templates-editor">
+    {templateKinds.map((kind) => {
+      const tpl = settings.alertTemplates?.[kind] ?? {};
+      return (
+        <div class="rounded border border-[var(--color-border)] p-3">
+          <p class="text-sm font-semibold mb-2 capitalize">{kind}</p>
+          <div class="form-field mb-2">
+            <label class="form-label" for={`tpl-title-${kind}`}>Title</label>
+            <input
+              class="form-input"
+              type="text"
+              id={`tpl-title-${kind}`}
+              data-template-kind={kind}
+              data-template-field="title"
+              value={tpl.title ?? ""}
+              placeholder="Leave blank for default"
+            />
+          </div>
+          <div class="form-field mb-0">
+            <label class="form-label" for={`tpl-body-${kind}`}>Body</label>
+            <input
+              class="form-input"
+              type="text"
+              id={`tpl-body-${kind}`}
+              data-template-kind={kind}
+              data-template-field="body"
+              value={tpl.body ?? ""}
+              placeholder="Leave blank for default"
+            />
           </div>
         </div>
       );
@@ -309,7 +370,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     <p class="form-hint">Used to verify requests from this site (HMAC). Leave blank if your automation does not need it.</p>
   </div>
 
-  <button type="submit" class="btn-primary">Save alert settings</button>
+  <button type="submit" class="btn-primary" hidden={!canEdit}>Save alert settings</button>
   <p class="form-hint mt-2 mb-0" id="channel-incomplete-hint" hidden>
     A checked channel needs its destination filled in, or it will be skipped when alerts fire.
   </p>
@@ -332,6 +393,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
       )}
     </div>
   )}
+  </fieldset>
 </form>
 
 <form id="alert-snooze-24-form" action="/api/user/alert-snooze" method="post" hidden>
@@ -500,6 +562,20 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
           map[kind].push(ch);
         });
         severityHidden.value = JSON.stringify(map);
+      }
+      const templatesHidden = document.getElementById("alert_templates_json");
+      if (templatesHidden) {
+        const map = {};
+        document.querySelectorAll("[data-template-kind]").forEach((el) => {
+          const kind = el.getAttribute("data-template-kind");
+          const field = el.getAttribute("data-template-field");
+          if (!kind || !field) return;
+          const value = el.value?.trim();
+          if (!value) return;
+          if (!map[kind]) map[kind] = {};
+          map[kind][field] = value;
+        });
+        templatesHidden.value = JSON.stringify(map);
       }
     });
     syncIncompleteHint();

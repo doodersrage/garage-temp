@@ -54,6 +54,17 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 - **Live SSE** stream (`/api/home/readings/stream`), 30s home polling, PWA offline stale cache (v3)
 - Freeze-map heatmap rings sized by sample count; HA entity naming YAML in `public/ha/`
 
+### Final expansion (referrals, polish, operator tools)
+- **Referral program** — invite link on dashboard; referred signups get +7 days Pro trial
+- **Alert template editor** — per-kind title/body overrides with `{{kind}}`, `{{title}}`, `{{body}}`
+- **Battery trend alerts** — separate toggle from low-battery threshold; own cooldown
+- **Door open history** — persisted closed sessions on dashboard
+- **Inbound webhook actions** — `clear_snooze`, `clear_vacation`, `status` in addition to snooze/vacation
+- **Viewer read-only alerts** — form disabled for viewer role; test alert hidden
+- **SSE-triggered live refresh** — home panel reloads on stream events (polling fallback)
+- **Grafana setup** card on Share page with dashboard JSON download
+- **Activity + ingest stats** — always visible with empty states on Share page
+
 ### Ops & content
 - Hourly Worker cron for history collection and alert evaluation
 - Admin tools: users, contact inbox, jobs

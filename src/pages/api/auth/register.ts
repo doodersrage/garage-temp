@@ -1,6 +1,11 @@
 import type { APIRoute } from "astro";
 import { supabase } from "../../../lib/supabase";
 import { getTurnstileToken, verifyTurnstileToken } from "../../../lib/turnstile";
+import { createAdminClient } from "../../../lib/supabase";
+import {
+  recordReferralSignup,
+  resolveReferrerUserId,
+} from "../../../lib/referrals";
 
 export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
   const formData = await request.formData();
@@ -15,6 +20,7 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
 
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
+  const refCode = formData.get("ref")?.toString()?.trim().toLowerCase() ?? "";
 
   if (!email || !password) {
     return redirect("/register?error=missing_fields");
@@ -24,13 +30,27 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
     return redirect("/register?error=weak_password");
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
   });
 
   if (error) {
     return redirect(`/register?error=${encodeURIComponent(error.message)}`);
+  }
+
+  if (data.user && refCode) {
+    const referrerId = await resolveReferrerUserId(refCode);
+    if (referrerId) {
+      await recordReferralSignup(referrerId, data.user.id);
+      const admin = createAdminClient();
+      await admin.auth.admin.updateUserById(data.user.id, {
+        user_metadata: {
+          ...(data.user.user_metadata ?? {}),
+          referred_by: refCode,
+        },
+      });
+    }
   }
 
   const next = formData.get("next")?.toString() ?? "";

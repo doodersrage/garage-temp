@@ -9,12 +9,23 @@ import { getUserSubscription } from "../../lib/stripeSubscriptions";
 import { canDownloadHistoryCsv } from "../../lib/adminAccess";
 import { formatRelativeAge } from "../../lib/relativeTime";
 import { listRecentAlertEvents } from "../../lib/alertEvents";
+import {
+  getOrCreateHouseholdForUser,
+  getUserHouseholdRole,
+  canEditHousehold,
+} from "../../lib/households";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
 if (!session || !user) {
   return Astro.redirect("/signin");
 }
+
+const household = await getOrCreateHouseholdForUser(user.id, user.email);
+const householdRole = household.householdId
+  ? await getUserHouseholdRole(user.id, household.householdId)
+  : null;
+const canEdit = canEditHousehold(householdRole);
 
 const [alertSettings, entitlements, subscription, canDownloadCsv, recentEvents] =
   await Promise.all([
@@ -138,10 +149,12 @@ const lastAlertAge = formatRelativeAge(lastAlertAt);
       entitlements={entitlements}
       vapidPublicKey={import.meta.env.VAPID_PUBLIC_KEY ?? ""}
       redirectTo="/dashboard/alerts"
+      canEdit={canEdit}
     />
 
-    <section class="card">
-      <h2 class="card-title">Send a test alert</h2>
+    {canEdit && (
+      <section class="card">
+        <h2 class="card-title">Send a test alert</h2>
       <p class="card-subtitle mb-4">
         Fires a sample message to every channel you currently have enabled.
         Save settings first if you just changed them.
@@ -151,6 +164,7 @@ const lastAlertAge = formatRelativeAge(lastAlertAt);
         <button class="btn-secondary" type="submit">Send test now</button>
       </form>
     </section>
+    )}
 
     <section class="card">
       <h2 class="card-title">Recent alert activity</h2>

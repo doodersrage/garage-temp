@@ -122,4 +122,34 @@ export async function clearVacationForUser(userId: string): Promise<void> {
   await saveAlertSettingsForUser(userId, { ...settings, vacationUntil: null });
 }
 
+export async function clearSnoozeForHouseholdMembers(householdId: string): Promise<number> {
+  const supabase = createServerClient();
+  const { data: members } = await supabase
+    .from("household_members")
+    .select("user_id")
+    .eq("household_id", householdId);
+
+  let count = 0;
+  for (const member of members ?? []) {
+    await clearSnoozeForUser(member.user_id);
+    count += 1;
+  }
+  return count;
+}
+
+export async function clearVacationForHouseholdMembers(householdId: string): Promise<number> {
+  const supabase = createServerClient();
+  const { data: members } = await supabase
+    .from("household_members")
+    .select("user_id")
+    .eq("household_id", householdId);
+
+  let count = 0;
+  for (const member of members ?? []) {
+    await clearVacationForUser(member.user_id);
+    count += 1;
+  }
+  return count;
+}
+
 export { sha256Hex };

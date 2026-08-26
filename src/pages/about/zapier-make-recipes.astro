@@ -21,7 +21,11 @@ const page = getAboutPage("zapier-make-recipes")!;
   <pre><code>{`POST /api/inbound/gtw_…
 Content-Type: application/json
 
-{"action":"snooze","hours":24}`}</code></pre>
+{"action":"snooze","hours":24}
+{"action":"vacation","days":7}
+{"action":"clear_snooze"}
+{"action":"clear_vacation"}
+{"action":"status"}`}</code></pre>
   <p>
     Use Make/Zapier <strong>HTTP POST</strong> when you leave home or arm the alarm to pause non-critical alerts.
   </p>

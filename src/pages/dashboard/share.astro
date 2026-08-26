@@ -341,10 +341,13 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
       <section class="card">
         <h2 class="card-title">Inbound webhooks</h2>
         <p class="card-subtitle mb-4">
-          Let Home Assistant or Zapier POST to Garage Temp to snooze alerts or start vacation mode.
-          <code>POST /api/inbound/&lt;token&gt;</code> with JSON <code>{`{"action":"snooze","hours":24}`}</code> or
-          <code>{`{"action":"vacation","days":7}`}</code>.
+          Let Home Assistant or Zapier POST to Garage Temp. Actions:
+          <code>snooze</code>, <code>vacation</code>, <code>clear_snooze</code>, <code>clear_vacation</code>, <code>status</code>.
+          Example: <code>{`{"action":"snooze","hours":24}`}</code> to <code>POST /api/inbound/&lt;token&gt;</code>.
         </p>
+        {!canEdit && (
+          <p class="alert-warning mb-4" role="status">View-only — cannot create or revoke inbound webhooks.</p>
+        )}
         {inboundToken && (
           <div class="ingest-key-callout mb-4">
             <p class="text-sm mb-2">New webhook URL (copy now):</p>
@@ -354,6 +357,7 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
             </button>
           </div>
         )}
+        {canEdit && (
         <form action="/api/inbound-webhooks" method="post" class="mb-4 flex flex-wrap gap-2 items-end">
           <input type="hidden" name="action" value="create" />
           <input type="hidden" name="redirect" value="/dashboard/share" />
@@ -363,6 +367,7 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
           </div>
           <button class="btn-secondary" type="submit">Create inbound webhook</button>
         </form>
+        )}
         {inboundWebhooks.length === 0 ? (
           <p class="mb-0 text-sm text-[var(--color-text-muted)]">No inbound webhooks yet.</p>
         ) : (
@@ -386,10 +391,13 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
       </section>
     )}
 
-    {ingestStats.length > 0 && (
-      <section class="card">
-        <h2 class="card-title">Ingest stats (7 days)</h2>
-        <p class="card-subtitle mb-4">Daily POST success and error counts per push device.</p>
+    <section class="card">
+      <h2 class="card-title">Ingest stats (7 days)</h2>
+      <p class="card-subtitle mb-4">
+        Daily POST success and error counts per push device.
+        {ingestStats.length === 0 && " No ingest activity recorded yet — POST from a push device to populate."}
+      </p>
+      {ingestStats.length > 0 && (
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead>
@@ -412,12 +420,36 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
             </tbody>
           </table>
         </div>
-      </section>
-    )}
+      )}
+    </section>
 
-    {activity.length > 0 && (
-      <section class="card">
-        <h2 class="card-title">Recent activity</h2>
+    <section class="card">
+      <h2 class="card-title">Grafana setup</h2>
+      <p class="card-subtitle mb-3">
+        Import the bundled dashboard JSON and scrape with a Pro API key or metrics share link.
+      </p>
+      <ul class="text-sm space-y-2 mb-4">
+        <li>
+          <a class="text-link" href="/grafana/garage-temp-dashboard.json" download>
+            Download dashboard JSON
+          </a>
+        </li>
+        <li>
+          Scrape URL: <code>/api/v1/metrics</code> with <code>Authorization: Bearer gtm_…</code>
+        </li>
+        <li>
+          Or use a metrics share link: <code>/api/share/&lt;token&gt;/readings?format=prometheus</code>
+        </li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Recent activity</h2>
+      {activity.length === 0 ? (
+        <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+          Household actions (share links, alert saves, device transfers) will appear here.
+        </p>
+      ) : (
         <ul class="space-y-2 mb-0 text-sm">
           {activity.map((row) => (
             <li>
@@ -430,8 +462,8 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
             </li>
           ))}
         </ul>
-      </section>
-    )}
+      )}
+    </section>
 
     <section class="card">
       <h2 class="card-title">Export your data</h2>

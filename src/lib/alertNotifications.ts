@@ -41,6 +41,7 @@ import { fetchForecastMinTemp } from "./FetchWeather";
 import { buildSnoozeUrl } from "./alertSnoozeTokens";
 import { buildSiteUrl } from "./siteUrl";
 import { computeDoorOpenSessions } from "./doorDuration";
+import { persistDoorSessions } from "./doorEvents";
 
 export {
   buildAlertReadingsFromLatestSensors,
@@ -205,6 +206,7 @@ async function buildRuleContext(
           })),
         );
         doorOpenSessions.push(...sessions);
+        void persistDoorSessions(householdId, sessions);
       }
     }
   }
@@ -379,11 +381,11 @@ export async function maybeSendDeviceHealthAlerts(
     await markCooldown(userId, "last_rssi_alert_at");
   }
 
-  if (settings.batteryAlertsEnabled) {
+  if (settings.batteryTrendAlertsEnabled) {
     for (const device of devices) {
       const history = device.meta?.battery_history as BatterySample[] | undefined;
       const trend = detectBatteryTrendDrop(Array.isArray(history) ? history : []);
-      if (trend && !isAlertCooldownActive(settings.lastBatteryAlertAt)) {
+      if (trend && !isAlertCooldownActive(settings.lastBatteryTrendAlertAt)) {
         await notifyUser(
           userId,
           email,
@@ -391,7 +393,7 @@ export async function maybeSendDeviceHealthAlerts(
           { title: "Battery trend alert", body: `${device.name}: ${trend}`, kind: "battery" },
           notifyOpts,
         );
-        await markCooldown(userId, "last_battery_alert_at");
+        await markCooldown(userId, "last_battery_trend_alert_at");
         break;
       }
     }

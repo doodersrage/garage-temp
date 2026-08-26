@@ -168,6 +168,24 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
   }, [loadReadings]);
 
   useEffect(() => {
+    let es: EventSource | null = null;
+    try {
+      es = new EventSource("/api/home/readings/stream");
+      es.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "readings") void loadReadings();
+        } catch {
+          /* ignore */
+        }
+      };
+    } catch {
+      /* SSE unavailable — polling fallback remains */
+    }
+    return () => es?.close();
+  }, [loadReadings]);
+
+  useEffect(() => {
     const tick = window.setInterval(() => {
       setCountdown((current) => {
         if (current <= 1) {

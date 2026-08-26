@@ -100,11 +100,13 @@ export type AlertSettings = {
   snoozeUntil: string | null;
   vacationUntil: string | null;
   batteryAlertsEnabled: boolean;
+  batteryTrendAlertsEnabled: boolean;
   batteryThresholdPct: number;
   rssiAlertsEnabled: boolean;
   rssiThreshold: number;
   monthlyReportEnabled: boolean;
   lastBatteryAlertAt: string | null;
+  lastBatteryTrendAlertAt: string | null;
   lastRssiAlertAt: string | null;
   lastMonthlyReportAt: string | null;
   escalationEnabled: boolean;
@@ -153,11 +155,13 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   snoozeUntil: null,
   vacationUntil: null,
   batteryAlertsEnabled: false,
+  batteryTrendAlertsEnabled: true,
   batteryThresholdPct: 20,
   rssiAlertsEnabled: false,
   rssiThreshold: -80,
   monthlyReportEnabled: false,
   lastBatteryAlertAt: null,
+  lastBatteryTrendAlertAt: null,
   lastRssiAlertAt: null,
   lastMonthlyReportAt: null,
   escalationEnabled: false,
@@ -300,6 +304,7 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
     vacationUntil:
       typeof row.vacation_until === "string" ? row.vacation_until : null,
     batteryAlertsEnabled: row.battery_alerts_enabled === true,
+    batteryTrendAlertsEnabled: row.battery_trend_alerts_enabled !== false,
     batteryThresholdPct:
       typeof row.battery_threshold_pct === "number"
         ? row.battery_threshold_pct
@@ -313,6 +318,10 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
     lastBatteryAlertAt:
       typeof row.last_battery_alert_at === "string"
         ? row.last_battery_alert_at
+        : null,
+    lastBatteryTrendAlertAt:
+      typeof row.last_battery_trend_alert_at === "string"
+        ? row.last_battery_trend_alert_at
         : null,
     lastRssiAlertAt:
       typeof row.last_rssi_alert_at === "string" ? row.last_rssi_alert_at : null,
@@ -514,11 +523,13 @@ export function serializeAlertSettings(settings: AlertSettings): Record<string, 
     snooze_until: settings.snoozeUntil,
     vacation_until: settings.vacationUntil,
     battery_alerts_enabled: settings.batteryAlertsEnabled,
+    battery_trend_alerts_enabled: settings.batteryTrendAlertsEnabled,
     battery_threshold_pct: settings.batteryThresholdPct,
     rssi_alerts_enabled: settings.rssiAlertsEnabled,
     rssi_threshold: settings.rssiThreshold,
     monthly_report_enabled: settings.monthlyReportEnabled,
     last_battery_alert_at: settings.lastBatteryAlertAt,
+    last_battery_trend_alert_at: settings.lastBatteryTrendAlertAt,
     last_rssi_alert_at: settings.lastRssiAlertAt,
     last_monthly_report_at: settings.lastMonthlyReportAt,
     escalation_enabled: settings.escalationEnabled,

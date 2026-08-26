@@ -13,6 +13,8 @@ import {
   redirectUnlessEditor,
   requireHouseholdEditor,
 } from "../../../lib/householdAuth";
+import { recordHouseholdActivity } from "../../../lib/householdActivity";
+import { getUserHouseholdId } from "../../../lib/households";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -95,6 +97,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     ),
     monthlyReportEnabled: formData.has("monthly_report_enabled"),
     batteryAlertsEnabled: formData.has("battery_alerts_enabled"),
+    batteryTrendAlertsEnabled: formData.has("battery_trend_alerts_enabled"),
     batteryThresholdPct: Number(
       formData.get("battery_threshold_pct") ?? existing.batteryThresholdPct,
     ),
@@ -103,6 +106,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     snoozeUntil: existing.snoozeUntil,
     vacationUntil: existing.vacationUntil,
     lastBatteryAlertAt: existing.lastBatteryAlertAt,
+    lastBatteryTrendAlertAt: existing.lastBatteryTrendAlertAt,
     lastRssiAlertAt: existing.lastRssiAlertAt,
     lastMonthlyReportAt: existing.lastMonthlyReportAt,
     escalationEnabled: formData.has("escalation_enabled"),
@@ -142,6 +146,16 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   if (error) {
     return redirect(`${redirectTo}?alert_error=1`);
+  }
+
+  const householdId = await getUserHouseholdId(user.id);
+  if (householdId) {
+    await recordHouseholdActivity({
+      householdId,
+      userId: user.id,
+      action: "alert_settings_saved",
+      detail: settings.enabled ? "alerts on" : "alerts off",
+    });
   }
 
   const incomplete =

@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import { createStripeClient, buildSiteUrl } from "../../../lib/stripe";
 import { resolveStripePriceId } from "../../../lib/planTier";
+import { PRO_TRIAL_DAYS, referralBonusTrialDays } from "../../../lib/referrals";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -27,6 +28,14 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     );
   }
 
+  const metadata = user.user_metadata as Record<string, unknown> | undefined;
+  const referredBy =
+    typeof metadata?.referred_by === "string" ? metadata.referred_by : null;
+  const proTrialDays =
+    plan === "pro"
+      ? PRO_TRIAL_DAYS + referralBonusTrialDays(referredBy)
+      : undefined;
+
   try {
     const stripe = createStripeClient();
 
@@ -46,7 +55,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
           plan_tier: plan,
           billing_interval: interval,
         },
-        trial_period_days: plan === "pro" ? 14 : undefined,
+        trial_period_days: proTrialDays,
       },
       metadata: {
         supabase_user_id: user.id,

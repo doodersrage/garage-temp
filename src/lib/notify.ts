@@ -235,6 +235,7 @@ export async function markCooldown(
     | "last_rate_alert_at"
     | "last_forecast_alert_at"
     | "last_battery_alert_at"
+    | "last_battery_trend_alert_at"
     | "last_rssi_alert_at",
 ): Promise<void> {
   const supabase = createServerClient();

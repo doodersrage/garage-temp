@@ -23,6 +23,9 @@ import {
 } from "../lib/households";
 import HouseholdSwitcher from "../components/HouseholdSwitcher.astro";
 import DoorDurationCard from "../components/DoorDurationCard.astro";
+import DoorEventHistory from "../components/DoorEventHistory.astro";
+import ReferralCard from "../components/ReferralCard.astro";
+import { getSiteUrl } from "../lib/stripe";
 import { checkFeedHealth } from "../lib/collectHistory";
 import { fetchLatestSensorValues } from "../lib/sensorReadings";
 import { formatRelativeAge, STALE_MS } from "../lib/relativeTime";
@@ -81,6 +84,8 @@ const hasHouseholdMembers = members.members.length > 1;
 const onboardingDismissed =
   (user.user_metadata as Record<string, unknown> | undefined)?.onboarding_dismissed ===
   true;
+
+const siteUrl = getSiteUrl(Astro.request);
 
 const subscriptionNotice = Astro.url.searchParams.get("subscription");
 const prefsSaved = Astro.url.searchParams.get("prefs_saved");
@@ -166,6 +171,10 @@ const canEdit = canEditHousehold(householdRole);
     )}
 
     <DoorDurationCard devices={devices} />
+
+    <DoorEventHistory householdId={household.householdId} />
+
+    <ReferralCard siteUrl={siteUrl} />
 
     {nightsAtRisk.length > 0 && (
       <section class="card">

@@ -3,7 +3,12 @@ import { resolveInboundWebhook } from "../../../lib/inboundWebhooks";
 import {
   applySnoozeForHouseholdMembers,
   applyVacationForHouseholdMembers,
+  clearSnoozeForHouseholdMembers,
+  clearVacationForHouseholdMembers,
 } from "../../../lib/alertSnoozeTokens";
+import { listHouseholdDevices } from "../../../lib/devices";
+import { fetchLatestSensorValues } from "../../../lib/sensorReadings";
+import { recordHouseholdActivity } from "../../../lib/householdActivity";
 
 export const prerender = false;
 
@@ -42,6 +47,11 @@ export const POST: APIRoute = async ({ params, request }) => {
       resolved.householdId,
       Number.isFinite(hours) ? hours : 24,
     );
+    await recordHouseholdActivity({
+      householdId: resolved.householdId,
+      action: "inbound_snooze",
+      detail: `${hours}h`,
+    });
     return new Response(JSON.stringify({ ok: true, action: "snooze", members: count }), {
       headers: { "Content-Type": "application/json" },
     });
@@ -53,15 +63,56 @@ export const POST: APIRoute = async ({ params, request }) => {
       resolved.householdId,
       Number.isFinite(days) ? days : 7,
     );
+    await recordHouseholdActivity({
+      householdId: resolved.householdId,
+      action: "inbound_vacation",
+      detail: `${days}d`,
+    });
     return new Response(JSON.stringify({ ok: true, action: "vacation", members: count }), {
       headers: { "Content-Type": "application/json" },
     });
   }
 
+  if (action === "clear_snooze") {
+    const count = await clearSnoozeForHouseholdMembers(resolved.householdId);
+    return new Response(JSON.stringify({ ok: true, action: "clear_snooze", members: count }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  if (action === "clear_vacation") {
+    const count = await clearVacationForHouseholdMembers(resolved.householdId);
+    return new Response(JSON.stringify({ ok: true, action: "clear_vacation", members: count }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  if (action === "status") {
+    const devices = await listHouseholdDevices(resolved.householdId);
+    const sensors = await fetchLatestSensorValues(resolved.householdId);
+    const temps = sensors.filter((s) => s.kind === "temperature" && s.value_num != null);
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        action: "status",
+        deviceCount: devices.length,
+        sensorCount: sensors.length,
+        temperatures: temps.slice(0, 8).map((s) => ({
+          label: s.label,
+          value: s.value_num,
+          unit: s.unit,
+          recorded_at: s.recorded_at,
+        })),
+      }),
+      { headers: { "Content-Type": "application/json" } },
+    );
+  }
+
   return new Response(
     JSON.stringify({
       ok: true,
-      message: "Webhook received. Use action=snooze or action=vacation.",
+      message:
+        "Use action=snooze, vacation, clear_snooze, clear_vacation, or status.",
     }),
     { headers: { "Content-Type": "application/json" } },
   );
