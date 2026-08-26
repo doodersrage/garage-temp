@@ -1,10 +1,8 @@
 import type { APIRoute } from "astro";
 import { supabase } from "../../../lib/supabase";
 import { getTurnstileToken, verifyTurnstileToken } from "../../../lib/turnstile";
-import { createAdminClient } from "../../../lib/supabase";
 import {
-  recordReferralSignup,
-  resolveReferrerUserId,
+  applyReferralForNewUser,
 } from "../../../lib/referrals";
 
 export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
@@ -40,17 +38,7 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
   }
 
   if (data.user && refCode) {
-    const referrerId = await resolveReferrerUserId(refCode);
-    if (referrerId) {
-      await recordReferralSignup(referrerId, data.user.id);
-      const admin = createAdminClient();
-      await admin.auth.admin.updateUserById(data.user.id, {
-        user_metadata: {
-          ...(data.user.user_metadata ?? {}),
-          referred_by: refCode,
-        },
-      });
-    }
+    await applyReferralForNewUser(data.user.id, refCode, data.user.user_metadata);
   }
 
   const next = formData.get("next")?.toString() ?? "";

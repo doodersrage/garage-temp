@@ -26,7 +26,7 @@ const schema = [
 
 const guideCount = aboutPages.filter((page) => page.parentSlug).length;
 ---
-<Layout title="About" description={description} schema={schema}>
+<Layout title="About" description={description} schema={schema} skipAuth>
   <div class="page-shell page-stack">
     <section class="about-probe-hero">
       <div class="about-probe-hero-shell card overflow-hidden p-0">

@@ -78,3 +78,31 @@ export function referralBonusTrialDays(referredByCode: string | null | undefined
 }
 
 export const PRO_TRIAL_DAYS = 14;
+
+/** OAuth/email signups within this window can still receive a referral code. */
+export function isLikelyNewUser(createdAt: string): boolean {
+  const created = Date.parse(createdAt);
+  if (Number.isNaN(created)) return false;
+  return Date.now() - created < 10 * 60 * 1000;
+}
+
+export async function applyReferralForNewUser(
+  userId: string,
+  refCode: string,
+  userMetadata?: Record<string, unknown> | null,
+): Promise<void> {
+  const normalized = refCode.trim().toLowerCase();
+  if (!normalized || userMetadata?.referred_by) return;
+
+  const referrerId = await resolveReferrerUserId(normalized);
+  if (!referrerId) return;
+
+  await recordReferralSignup(referrerId, userId);
+  const admin = createAdminClient();
+  await admin.auth.admin.updateUserById(userId, {
+    user_metadata: {
+      ...(userMetadata ?? {}),
+      referred_by: normalized,
+    },
+  });
+}

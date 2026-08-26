@@ -65,7 +65,7 @@ const signInHref = signInParams.toString()
         </div>
         <button class="btn-primary" type="submit">Create account</button>
       </form>
-      <OAuthButtons action="/api/auth/signin" next={safeNext} />
+      <OAuthButtons action="/api/auth/signin" next={safeNext} ref={refCode} />
     </div>
 
     <section class="card auth-aside animate-zoom-in">

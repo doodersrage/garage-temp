@@ -193,9 +193,12 @@ async function buildRuleContext(
       }
     }
 
+    const sensorIdByLabel = new Map<string, string>();
+
     for (const device of devices) {
       for (const sensor of device.sensors) {
         if (sensor.kind !== "door") continue;
+        sensorIdByLabel.set(sensor.label, sensor.id);
         const readings = await fetchRecentBoolReadings(sensor.id, doorSince);
         const sessions = computeDoorOpenSessions(
           readings.map((r) => ({
@@ -206,8 +209,13 @@ async function buildRuleContext(
           })),
         );
         doorOpenSessions.push(...sessions);
-        void persistDoorSessions(householdId, sessions);
       }
+    }
+
+    try {
+      await persistDoorSessions(householdId, doorOpenSessions, sensorIdByLabel);
+    } catch (err) {
+      console.error("persistDoorSessions failed:", err);
     }
   }
 

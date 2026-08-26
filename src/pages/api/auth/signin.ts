@@ -9,6 +9,7 @@ import {
 import {
   buildOAuthCallbackUrl,
   OAUTH_NEXT_COOKIE,
+  OAUTH_REF_COOKIE,
   sanitizeNextPath,
 } from "../../../lib/siteUrl";
 import { getTurnstileToken, verifyTurnstileToken } from "../../../lib/turnstile";
@@ -19,6 +20,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress
   const password = formData.get("password")?.toString();
   const provider = formData.get("provider")?.toString();
   const safeNext = sanitizeNextPath(formData.get("next")?.toString());
+
+  const refCode = formData.get("ref")?.toString()?.trim().toLowerCase() ?? "";
 
   const validProviders = ["google", "github", "discord"];
 
@@ -36,6 +39,18 @@ export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress
       });
     } else {
       cookies.delete(OAUTH_NEXT_COOKIE, { path: "/" });
+    }
+
+    if (refCode) {
+      cookies.set(OAUTH_REF_COOKIE, refCode, {
+        path: "/",
+        httpOnly: true,
+        secure,
+        sameSite: "lax",
+        maxAge: 60 * 10,
+      });
+    } else {
+      cookies.delete(OAUTH_REF_COOKIE, { path: "/" });
     }
 
     const { data, error } = await supabase.auth.signInWithOAuth({

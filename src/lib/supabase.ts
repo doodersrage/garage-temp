@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from "../types/supabase";
 
 function getSupabaseUrl(): string {
   return import.meta.env.SUPABASE_URL;
@@ -13,7 +14,7 @@ function getServerKey(): string {
 }
 
 /** Browser-facing auth flows (sign-in, register, user session updates). */
-export const supabase = createClient(getSupabaseUrl(), getAnonKey(), {
+export const supabase = createClient<Database>(getSupabaseUrl(), getAnonKey(), {
   auth: {
     flowType: "pkce",
   },
@@ -21,7 +22,7 @@ export const supabase = createClient(getSupabaseUrl(), getAnonKey(), {
 
 /** Server-side database access (uses service role when configured). */
 export function createServerClient() {
-  return createClient(getSupabaseUrl(), getServerKey(), {
+  return createClient<Database>(getSupabaseUrl(), getServerKey(), {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -36,7 +37,7 @@ export function createAdminClient() {
     return createServerClient();
   }
 
-  return createClient(getSupabaseUrl(), serviceKey, {
+  return createClient<Database>(getSupabaseUrl(), serviceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

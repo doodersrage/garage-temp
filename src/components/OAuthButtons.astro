@@ -2,10 +2,12 @@
 interface Props {
   action?: string;
   next?: string;
+  ref?: string;
 }
 
-const { action = "/api/auth/signin", next = "" } = Astro.props;
+const { action = "/api/auth/signin", next = "", ref = "" } = Astro.props;
 const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "";
+const safeRef = ref.trim().toLowerCase();
 
 const providers = [
   { id: "google", label: "Continue with Google" },
@@ -21,6 +23,7 @@ const providers = [
       <form action={action} method="post">
         <input type="hidden" name="provider" value={id} />
         {safeNext && <input type="hidden" name="next" value={safeNext} />}
+        {safeRef && <input type="hidden" name="ref" value={safeRef} />}
         <button class="btn-secondary w-full" type="submit">{label}</button>
       </form>
     ))}

@@ -26,3 +26,4 @@ export function sanitizeNextPath(next: string | null | undefined): string | null
 }
 
 export const OAUTH_NEXT_COOKIE = "oauth_next";
+export const OAUTH_REF_COOKIE = "oauth_ref";

@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   graphql_public: {
     Tables: {
@@ -39,33 +39,498 @@ export type Database = {
   }
   public: {
     Tables: {
+      alert_events: {
+        Row: {
+          body: string
+          channels_sent: string[]
+          channels_skipped: string[]
+          created_at: string
+          id: number
+          kind: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          channels_sent?: string[]
+          channels_skipped?: string[]
+          created_at?: string
+          id?: number
+          kind: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          channels_sent?: string[]
+          channels_skipped?: string[]
+          created_at?: string
+          id?: number
+          kind?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      alert_settings: {
+        Row: {
+          alert_rules: Json
+          alert_templates: Json
+          battery_alerts_enabled: boolean
+          battery_threshold_pct: number
+          battery_trend_alerts_enabled: boolean
+          channel_discord: boolean
+          channel_email: boolean
+          channel_push: boolean
+          channel_severity: Json
+          channel_slack: boolean
+          channel_sms: boolean
+          channel_telegram: boolean
+          channel_webhook: boolean
+          digest_enabled: boolean
+          discord_webhook_url: string | null
+          email: string | null
+          enabled: boolean
+          escalation_enabled: boolean
+          escalation_minutes: number
+          forecast_freeze_enabled: boolean
+          forecast_hours_ahead: number
+          freeze_threshold_f: number
+          humidity_threshold: number
+          last_alert_sent_at: string | null
+          last_battery_alert_at: string | null
+          last_battery_trend_alert_at: string | null
+          last_escalation_at: string | null
+          last_forecast_alert_at: string | null
+          last_monthly_report_at: string | null
+          last_outage_alert_at: string | null
+          last_rate_alert_at: string | null
+          last_rssi_alert_at: string | null
+          monthly_report_enabled: boolean
+          outage_hours: number
+          outbound_webhook_secret: string | null
+          outbound_webhook_url: string | null
+          quiet_hours_bypass_freeze: boolean
+          quiet_hours_enabled: boolean
+          quiet_hours_end: string
+          quiet_hours_sms_critical: boolean
+          quiet_hours_start: string
+          quiet_hours_timezone: string
+          rate_change_f: number
+          rssi_alerts_enabled: boolean
+          rssi_threshold: number
+          slack_webhook_url: string | null
+          sms_phone: string | null
+          snooze_until: string | null
+          telegram_bot_token: string | null
+          telegram_chat_id: string | null
+          telegram_command_secret: string | null
+          updated_at: string
+          user_id: string
+          vacation_until: string | null
+        }
+        Insert: {
+          alert_rules?: Json
+          alert_templates?: Json
+          battery_alerts_enabled?: boolean
+          battery_threshold_pct?: number
+          battery_trend_alerts_enabled?: boolean
+          channel_discord?: boolean
+          channel_email?: boolean
+          channel_push?: boolean
+          channel_severity?: Json
+          channel_slack?: boolean
+          channel_sms?: boolean
+          channel_telegram?: boolean
+          channel_webhook?: boolean
+          digest_enabled?: boolean
+          discord_webhook_url?: string | null
+          email?: string | null
+          enabled?: boolean
+          escalation_enabled?: boolean
+          escalation_minutes?: number
+          forecast_freeze_enabled?: boolean
+          forecast_hours_ahead?: number
+          freeze_threshold_f?: number
+          humidity_threshold?: number
+          last_alert_sent_at?: string | null
+          last_battery_alert_at?: string | null
+          last_battery_trend_alert_at?: string | null
+          last_escalation_at?: string | null
+          last_forecast_alert_at?: string | null
+          last_monthly_report_at?: string | null
+          last_outage_alert_at?: string | null
+          last_rate_alert_at?: string | null
+          last_rssi_alert_at?: string | null
+          monthly_report_enabled?: boolean
+          outage_hours?: number
+          outbound_webhook_secret?: string | null
+          outbound_webhook_url?: string | null
+          quiet_hours_bypass_freeze?: boolean
+          quiet_hours_enabled?: boolean
+          quiet_hours_end?: string
+          quiet_hours_sms_critical?: boolean
+          quiet_hours_start?: string
+          quiet_hours_timezone?: string
+          rate_change_f?: number
+          rssi_alerts_enabled?: boolean
+          rssi_threshold?: number
+          slack_webhook_url?: string | null
+          sms_phone?: string | null
+          snooze_until?: string | null
+          telegram_bot_token?: string | null
+          telegram_chat_id?: string | null
+          telegram_command_secret?: string | null
+          updated_at?: string
+          user_id: string
+          vacation_until?: string | null
+        }
+        Update: {
+          alert_rules?: Json
+          alert_templates?: Json
+          battery_alerts_enabled?: boolean
+          battery_threshold_pct?: number
+          battery_trend_alerts_enabled?: boolean
+          channel_discord?: boolean
+          channel_email?: boolean
+          channel_push?: boolean
+          channel_severity?: Json
+          channel_slack?: boolean
+          channel_sms?: boolean
+          channel_telegram?: boolean
+          channel_webhook?: boolean
+          digest_enabled?: boolean
+          discord_webhook_url?: string | null
+          email?: string | null
+          enabled?: boolean
+          escalation_enabled?: boolean
+          escalation_minutes?: number
+          forecast_freeze_enabled?: boolean
+          forecast_hours_ahead?: number
+          freeze_threshold_f?: number
+          humidity_threshold?: number
+          last_alert_sent_at?: string | null
+          last_battery_alert_at?: string | null
+          last_battery_trend_alert_at?: string | null
+          last_escalation_at?: string | null
+          last_forecast_alert_at?: string | null
+          last_monthly_report_at?: string | null
+          last_outage_alert_at?: string | null
+          last_rate_alert_at?: string | null
+          last_rssi_alert_at?: string | null
+          monthly_report_enabled?: boolean
+          outage_hours?: number
+          outbound_webhook_secret?: string | null
+          outbound_webhook_url?: string | null
+          quiet_hours_bypass_freeze?: boolean
+          quiet_hours_enabled?: boolean
+          quiet_hours_end?: string
+          quiet_hours_sms_critical?: boolean
+          quiet_hours_start?: string
+          quiet_hours_timezone?: string
+          rate_change_f?: number
+          rssi_alerts_enabled?: boolean
+          rssi_threshold?: number
+          slack_webhook_url?: string | null
+          sms_phone?: string | null
+          snooze_until?: string | null
+          telegram_bot_token?: string | null
+          telegram_chat_id?: string | null
+          telegram_command_secret?: string | null
+          updated_at?: string
+          user_id?: string
+          vacation_until?: string | null
+        }
+        Relationships: []
+      }
+      alert_snooze_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          hours: number
+          token: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          hours?: number
+          token: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          hours?: number
+          token?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      api_keys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          household_id: string
+          id: string
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          revoked_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          household_id: string
+          id?: string
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name?: string
+          revoked_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          household_id?: string
+          id?: string
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          revoked_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
+          admin_notes: string | null
           created_at: string | null
           email: string
           id: number
           message: string
           name: string
-          status: string | null
-          admin_notes: string | null
+          status: string
         }
         Insert: {
+          admin_notes?: string | null
           created_at?: string | null
           email?: string
           id?: number
           message: string
           name?: string
-          status?: string | null
-          admin_notes?: string | null
+          status?: string
         }
         Update: {
+          admin_notes?: string | null
           created_at?: string | null
           email?: string
           id?: number
           message?: string
           name?: string
-          status?: string | null
-          admin_notes?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      device_sensors: {
+        Row: {
+          created_at: string
+          device_id: string
+          id: string
+          key: string
+          kind: string
+          label: string
+          sort_order: number
+          unit: string | null
+          visible: boolean
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          id?: string
+          key: string
+          kind: string
+          label: string
+          sort_order?: number
+          unit?: string | null
+          visible?: boolean
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          id?: string
+          key?: string
+          kind?: string
+          label?: string
+          sort_order?: number
+          unit?: string | null
+          visible?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "device_sensors_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devices: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          household_id: string
+          id: string
+          ingest_key_hash: string | null
+          ingest_key_prefix: string | null
+          last_seen_at: string | null
+          meta: Json
+          name: string
+          pull_url: string | null
+          sort_order: number
+          source: string
+          space: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          household_id: string
+          id?: string
+          ingest_key_hash?: string | null
+          ingest_key_prefix?: string | null
+          last_seen_at?: string | null
+          meta?: Json
+          name: string
+          pull_url?: string | null
+          sort_order?: number
+          source: string
+          space?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          household_id?: string
+          id?: string
+          ingest_key_hash?: string | null
+          ingest_key_prefix?: string | null
+          last_seen_at?: string | null
+          meta?: Json
+          name?: string
+          pull_url?: string | null
+          sort_order?: number
+          source?: string
+          space?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devices_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      door_open_events: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          duration_ms: number | null
+          household_id: string
+          id: string
+          label: string
+          opened_at: string
+          sensor_id: string | null
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          household_id: string
+          id?: string
+          label: string
+          opened_at: string
+          sensor_id?: string | null
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          household_id?: string
+          id?: string
+          label?: string
+          opened_at?: string
+          sensor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "door_open_events_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "door_open_events_sensor_id_fkey"
+            columns: ["sensor_id"]
+            isOneToOne: false
+            referencedRelation: "device_sensors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freeze_map_snapshots: {
+        Row: {
+          avg_temp_f: number | null
+          captured_at: string
+          city_id: string
+          city_label: string
+          freeze_risk_count: number
+          id: number
+          lat: number | null
+          lon: number | null
+          min_temp_f: number | null
+          sample_count: number
+        }
+        Insert: {
+          avg_temp_f?: number | null
+          captured_at?: string
+          city_id: string
+          city_label: string
+          freeze_risk_count?: number
+          id?: number
+          lat?: number | null
+          lon?: number | null
+          min_temp_f?: number | null
+          sample_count?: number
+        }
+        Update: {
+          avg_temp_f?: number | null
+          captured_at?: string
+          city_id?: string
+          city_label?: string
+          freeze_risk_count?: number
+          id?: number
+          lat?: number | null
+          lon?: number | null
+          min_temp_f?: number | null
+          sample_count?: number
         }
         Relationships: []
       }
@@ -152,6 +617,521 @@ export type Database = {
         }
         Relationships: []
       }
+      household_activity: {
+        Row: {
+          action: string
+          created_at: string
+          detail: string | null
+          household_id: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          detail?: string | null
+          household_id: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          detail?: string | null
+          household_id?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_activity_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      household_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          household_id: string
+          id: string
+          invited_by: string | null
+          role: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at: string
+          household_id: string
+          id?: string
+          invited_by?: string | null
+          role?: string
+          token: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          household_id?: string
+          id?: string
+          invited_by?: string | null
+          role?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_invites_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      household_members: {
+        Row: {
+          created_at: string
+          household_id: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          household_id: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          household_id?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_members_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      households: {
+        Row: {
+          created_at: string
+          freeze_map_city_id: string | null
+          freeze_map_label: string | null
+          freeze_map_lat: number | null
+          freeze_map_lon: number | null
+          freeze_map_opt_in: boolean
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          freeze_map_city_id?: string | null
+          freeze_map_label?: string | null
+          freeze_map_lat?: number | null
+          freeze_map_lon?: number | null
+          freeze_map_opt_in?: boolean
+          id?: string
+          name?: string
+        }
+        Update: {
+          created_at?: string
+          freeze_map_city_id?: string | null
+          freeze_map_label?: string | null
+          freeze_map_lat?: number | null
+          freeze_map_lon?: number | null
+          freeze_map_opt_in?: boolean
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      inbound_webhooks: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          household_id: string
+          id: string
+          last_used_at: string | null
+          name: string
+          token_hash: string
+          token_prefix: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          household_id: string
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          token_hash: string
+          token_prefix: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          household_id?: string
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          token_hash?: string
+          token_prefix?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbound_webhooks_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ingest_stats: {
+        Row: {
+          day: string
+          device_id: string
+          error_count: number
+          success_count: number
+        }
+        Insert: {
+          day: string
+          device_id: string
+          error_count?: number
+          success_count?: number
+        }
+        Update: {
+          day?: string
+          device_id?: string
+          error_count?: number
+          success_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingest_stats_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_runs: {
+        Row: {
+          detail: Json
+          finished_at: string | null
+          id: number
+          job_name: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          detail?: Json
+          finished_at?: string | null
+          id?: number
+          job_name: string
+          started_at?: string
+          status: string
+        }
+        Update: {
+          detail?: Json
+          finished_at?: string | null
+          id?: number
+          job_name?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referral_signups: {
+        Row: {
+          created_at: string
+          id: string
+          referred_user_id: string
+          referrer_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referred_user_id: string
+          referrer_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referred_user_id?: string
+          referrer_user_id?: string
+        }
+        Relationships: []
+      }
+      sensor_reading_rollups: {
+        Row: {
+          avg_num: number | null
+          bucket_start: string
+          household_id: string
+          max_num: number | null
+          min_num: number | null
+          sample_count: number
+          sensor_id: string
+        }
+        Insert: {
+          avg_num?: number | null
+          bucket_start: string
+          household_id: string
+          max_num?: number | null
+          min_num?: number | null
+          sample_count?: number
+          sensor_id: string
+        }
+        Update: {
+          avg_num?: number | null
+          bucket_start?: string
+          household_id?: string
+          max_num?: number | null
+          min_num?: number | null
+          sample_count?: number
+          sensor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sensor_reading_rollups_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sensor_reading_rollups_sensor_id_fkey"
+            columns: ["sensor_id"]
+            isOneToOne: false
+            referencedRelation: "device_sensors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sensor_readings: {
+        Row: {
+          household_id: string
+          id: number
+          meta: Json
+          recorded_at: string
+          sensor_id: string
+          value_bool: boolean | null
+          value_num: number | null
+          value_text: string | null
+        }
+        Insert: {
+          household_id: string
+          id?: number
+          meta?: Json
+          recorded_at?: string
+          sensor_id: string
+          value_bool?: boolean | null
+          value_num?: number | null
+          value_text?: string | null
+        }
+        Update: {
+          household_id?: string
+          id?: number
+          meta?: Json
+          recorded_at?: string
+          sensor_id?: string
+          value_bool?: boolean | null
+          value_num?: number | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sensor_readings_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sensor_readings_sensor_id_fkey"
+            columns: ["sensor_id"]
+            isOneToOne: false
+            referencedRelation: "device_sensors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      share_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          household_id: string
+          id: string
+          label: string | null
+          scope: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          household_id: string
+          id?: string
+          label?: string | null
+          scope: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          household_id?: string
+          id?: string
+          label?: string | null
+          scope?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_links_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      status_page_tokens: {
+        Row: {
+          created_at: string
+          household_id: string
+          id: string
+          label: string
+          revoked_at: string | null
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          household_id: string
+          id?: string
+          label?: string
+          revoked_at?: string | null
+          token: string
+        }
+        Update: {
+          created_at?: string
+          household_id?: string
+          id?: string
+          label?: string
+          revoked_at?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "status_page_tokens_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stripe_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          plan_tier: string
+          status: string
+          stripe_customer_id: string
+          stripe_price_id: string | null
+          stripe_subscription_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan_tier?: string
+          status: string
+          stripe_customer_id: string
+          stripe_price_id?: string | null
+          stripe_subscription_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan_tier?: string
+          status?: string
+          stripe_customer_id?: string
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_temp_feeds: {
         Row: {
           enabled: boolean
@@ -215,496 +1195,42 @@ export type Database = {
         }
         Relationships: []
       }
-      households: {
-        Row: {
-          id: string
-          name: string
-          created_at: string
-          freeze_map_opt_in: boolean
-          freeze_map_city_id: string | null
-          freeze_map_lat: number | null
-          freeze_map_lon: number | null
-          freeze_map_label: string | null
-        }
-        Insert: {
-          id?: string
-          name?: string
-          created_at?: string
-          freeze_map_opt_in?: boolean
-          freeze_map_city_id?: string | null
-          freeze_map_lat?: number | null
-          freeze_map_lon?: number | null
-          freeze_map_label?: string | null
-        }
-        Update: {
-          id?: string
-          name?: string
-          created_at?: string
-          freeze_map_opt_in?: boolean
-          freeze_map_city_id?: string | null
-          freeze_map_lat?: number | null
-          freeze_map_lon?: number | null
-          freeze_map_label?: string | null
-        }
-        Relationships: []
-      }
-      household_members: {
-        Row: {
-          id: string
-          household_id: string
-          user_id: string
-          role: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          household_id: string
-          user_id: string
-          role?: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          household_id?: string
-          user_id?: string
-          role?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
-      devices: {
-        Row: {
-          id: string
-          household_id: string
-          name: string
-          source: string
-          pull_url: string | null
-          ingest_key_hash: string | null
-          ingest_key_prefix: string | null
-          enabled: boolean
-          last_seen_at: string | null
-          sort_order: number
-          created_at: string
-          updated_at: string
-          meta: Json
-          space: string | null
-        }
-        Insert: {
-          id?: string
-          household_id: string
-          name: string
-          source: string
-          pull_url?: string | null
-          ingest_key_hash?: string | null
-          ingest_key_prefix?: string | null
-          enabled?: boolean
-          last_seen_at?: string | null
-          sort_order?: number
-          created_at?: string
-          updated_at?: string
-          meta?: Json
-          space?: string | null
-        }
-        Update: {
-          id?: string
-          household_id?: string
-          name?: string
-          source?: string
-          pull_url?: string | null
-          ingest_key_hash?: string | null
-          ingest_key_prefix?: string | null
-          enabled?: boolean
-          last_seen_at?: string | null
-          sort_order?: number
-          created_at?: string
-          updated_at?: string
-          meta?: Json
-          space?: string | null
-        }
-        Relationships: []
-      }
-      device_sensors: {
-        Row: {
-          id: string
-          device_id: string
-          key: string
-          label: string
-          kind: string
-          unit: string | null
-          visible: boolean
-          sort_order: number
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          device_id: string
-          key: string
-          label: string
-          kind: string
-          unit?: string | null
-          visible?: boolean
-          sort_order?: number
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          device_id?: string
-          key?: string
-          label?: string
-          kind?: string
-          unit?: string | null
-          visible?: boolean
-          sort_order?: number
-          created_at?: string
-        }
-        Relationships: []
-      }
-      sensor_readings: {
-        Row: {
-          id: number
-          sensor_id: string
-          household_id: string
-          recorded_at: string
-          value_num: number | null
-          value_bool: boolean | null
-          value_text: string | null
-          meta: Json
-        }
-        Insert: {
-          id?: number
-          sensor_id: string
-          household_id: string
-          recorded_at?: string
-          value_num?: number | null
-          value_bool?: boolean | null
-          value_text?: string | null
-          meta?: Json
-        }
-        Update: {
-          id?: number
-          sensor_id?: string
-          household_id?: string
-          recorded_at?: string
-          value_num?: number | null
-          value_bool?: boolean | null
-          value_text?: string | null
-          meta?: Json
-        }
-        Relationships: []
-      }
-      alert_settings: {
-        Row: {
-          user_id: string
-          enabled: boolean
-          digest_enabled: boolean
-          freeze_threshold_f: number
-          humidity_threshold: number
-          rate_change_f: number
-          outage_hours: number
-          email: string | null
-          channel_email: boolean
-          channel_sms: boolean
-          channel_discord: boolean
-          channel_push: boolean
-          channel_webhook: boolean
-          discord_webhook_url: string | null
-          sms_phone: string | null
-          outbound_webhook_url: string | null
-          outbound_webhook_secret: string | null
-          last_alert_sent_at: string | null
-          last_outage_alert_at: string | null
-          last_rate_alert_at: string | null
-          updated_at: string
-          forecast_freeze_enabled: boolean
-          forecast_hours_ahead: number
-          last_forecast_alert_at: string | null
-          quiet_hours_enabled: boolean
-          quiet_hours_start: string
-          quiet_hours_end: string
-          quiet_hours_timezone: string
-          quiet_hours_bypass_freeze: boolean
-          quiet_hours_sms_critical: boolean
-          channel_telegram: boolean
-          telegram_bot_token: string | null
-          telegram_chat_id: string | null
-          channel_slack: boolean
-          slack_webhook_url: string | null
-          alert_rules: Json
-          channel_severity: Json
-        }
-        Insert: {
-          user_id: string
-          enabled?: boolean
-          digest_enabled?: boolean
-          freeze_threshold_f?: number
-          humidity_threshold?: number
-          rate_change_f?: number
-          outage_hours?: number
-          email?: string | null
-          channel_email?: boolean
-          channel_sms?: boolean
-          channel_discord?: boolean
-          channel_push?: boolean
-          channel_webhook?: boolean
-          discord_webhook_url?: string | null
-          sms_phone?: string | null
-          outbound_webhook_url?: string | null
-          outbound_webhook_secret?: string | null
-          last_alert_sent_at?: string | null
-          last_outage_alert_at?: string | null
-          last_rate_alert_at?: string | null
-          updated_at?: string
-          forecast_freeze_enabled?: boolean
-          forecast_hours_ahead?: number
-          last_forecast_alert_at?: string | null
-          quiet_hours_enabled?: boolean
-          quiet_hours_start?: string
-          quiet_hours_end?: string
-          quiet_hours_timezone?: string
-          quiet_hours_bypass_freeze?: boolean
-          quiet_hours_sms_critical?: boolean
-          channel_telegram?: boolean
-          telegram_bot_token?: string | null
-          telegram_chat_id?: string | null
-          channel_slack?: boolean
-          slack_webhook_url?: string | null
-          alert_rules?: Json
-          channel_severity?: Json
-        }
-        Update: {
-          user_id?: string
-          enabled?: boolean
-          digest_enabled?: boolean
-          freeze_threshold_f?: number
-          humidity_threshold?: number
-          rate_change_f?: number
-          outage_hours?: number
-          email?: string | null
-          channel_email?: boolean
-          channel_sms?: boolean
-          channel_discord?: boolean
-          channel_push?: boolean
-          channel_webhook?: boolean
-          discord_webhook_url?: string | null
-          sms_phone?: string | null
-          outbound_webhook_url?: string | null
-          outbound_webhook_secret?: string | null
-          last_alert_sent_at?: string | null
-          last_outage_alert_at?: string | null
-          last_rate_alert_at?: string | null
-          updated_at?: string
-          forecast_freeze_enabled?: boolean
-          forecast_hours_ahead?: number
-          last_forecast_alert_at?: string | null
-          quiet_hours_enabled?: boolean
-          quiet_hours_start?: string
-          quiet_hours_end?: string
-          quiet_hours_timezone?: string
-          quiet_hours_bypass_freeze?: boolean
-          quiet_hours_sms_critical?: boolean
-          channel_telegram?: boolean
-          telegram_bot_token?: string | null
-          telegram_chat_id?: string | null
-          channel_slack?: boolean
-          slack_webhook_url?: string | null
-          alert_rules?: Json
-          channel_severity?: Json
-        }
-        Relationships: []
-      }
-      push_subscriptions: {
-        Row: {
-          id: string
-          user_id: string
-          endpoint: string
-          p256dh: string
-          auth: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          endpoint: string
-          p256dh: string
-          auth: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          endpoint?: string
-          p256dh?: string
-          auth?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
-      share_links: {
-        Row: {
-          id: string
-          token: string
-          household_id: string
-          scope: string
-          label: string | null
-          expires_at: string | null
-          created_by: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          token: string
-          household_id: string
-          scope: string
-          label?: string | null
-          expires_at?: string | null
-          created_by?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          token?: string
-          household_id?: string
-          scope?: string
-          label?: string | null
-          expires_at?: string | null
-          created_by?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
-      alert_events: {
-        Row: {
-          id: number
-          user_id: string
-          kind: string
-          title: string
-          body: string
-          channels_sent: string[]
-          channels_skipped: string[]
-          created_at: string
-        }
-        Insert: {
-          id?: number
-          user_id: string
-          kind: string
-          title: string
-          body: string
-          channels_sent?: string[]
-          channels_skipped?: string[]
-          created_at?: string
-        }
-        Update: {
-          id?: number
-          user_id?: string
-          kind?: string
-          title?: string
-          body?: string
-          channels_sent?: string[]
-          channels_skipped?: string[]
-          created_at?: string
-        }
-        Relationships: []
-      }
-      api_keys: {
-        Row: {
-          id: string
-          household_id: string
-          name: string
-          key_prefix: string
-          key_hash: string
-          created_by: string | null
-          created_at: string
-          last_used_at: string | null
-          revoked_at: string | null
-        }
-        Insert: {
-          id?: string
-          household_id: string
-          name?: string
-          key_prefix: string
-          key_hash: string
-          created_by?: string | null
-          created_at?: string
-          last_used_at?: string | null
-          revoked_at?: string | null
-        }
-        Update: {
-          id?: string
-          household_id?: string
-          name?: string
-          key_prefix?: string
-          key_hash?: string
-          created_by?: string | null
-          created_at?: string
-          last_used_at?: string | null
-          revoked_at?: string | null
-        }
-        Relationships: []
-      }
-      freeze_map_snapshots: {
-        Row: {
-          id: number
-          city_id: string
-          city_label: string
-          sample_count: number
-          avg_temp_f: number | null
-          min_temp_f: number | null
-          freeze_risk_count: number
-          captured_at: string
-        }
-        Insert: {
-          id?: number
-          city_id: string
-          city_label: string
-          sample_count?: number
-          avg_temp_f?: number | null
-          min_temp_f?: number | null
-          freeze_risk_count?: number
-          captured_at?: string
-        }
-        Update: {
-          id?: number
-          city_id?: string
-          city_label?: string
-          sample_count?: number
-          avg_temp_f?: number | null
-          min_temp_f?: number | null
-          freeze_risk_count?: number
-          captured_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      sync_plan_group_membership: {
-        Args: {
-          target_user_id: string
-          plan_tier: string
-          is_active: boolean
-        }
+      count_managed_users: { Args: { caller_id: string }; Returns: number }
+      get_user_household_id: {
+        Args: { target_user_id: string }
+        Returns: string
+      }
+      is_admin_user: { Args: { caller_id: string }; Returns: boolean }
+      is_household_member: {
+        Args: { target_household_id: string }
+        Returns: boolean
+      }
+      list_managed_users: {
+        Args: { caller_id: string; page_num?: number; page_size?: number }
+        Returns: {
+          created_at: string
+          email: string
+          groups: string[]
+          is_admin: boolean
+          user_id: string
+        }[]
+      }
+      set_user_admin_membership: {
+        Args: { caller_id: string; make_admin: boolean; target_user_id: string }
         Returns: undefined
       }
       sync_member_group_membership: {
-        Args: {
-          target_user_id: string
-          is_active: boolean
-        }
+        Args: { is_active: boolean; target_user_id: string }
         Returns: undefined
       }
-      is_household_member: {
-        Args: {
-          target_household_id: string
-        }
-        Returns: boolean
-      }
-      get_user_household_id: {
-        Args: {
-          target_user_id: string
-        }
-        Returns: string
+      sync_plan_group_membership: {
+        Args: { is_active: boolean; plan_tier: string; target_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {

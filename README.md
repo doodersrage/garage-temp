@@ -55,7 +55,7 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 - Freeze-map heatmap rings sized by sample count; HA entity naming YAML in `public/ha/`
 
 ### Final expansion (referrals, polish, operator tools)
-- **Referral program** — invite link on dashboard; referred signups get +7 days Pro trial
+- **Referral program** — invite link on dashboard; referred signups get +7 days Pro trial (email or OAuth)
 - **Alert template editor** — per-kind title/body overrides with `{{kind}}`, `{{title}}`, `{{body}}`
 - **Battery trend alerts** — separate toggle from low-battery threshold; own cooldown
 - **Door open history** — persisted closed sessions on dashboard
