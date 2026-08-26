@@ -18,27 +18,32 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 - Feed health checks and relative “last seen” / staleness indicators
 - OpenWeather outdoor comparison on the home page
 - Historic readings with chart, YoY overlay, filters, anomaly hints, and CSV export (Member/Pro)
-- Opt-in public city freeze-risk map (`/freeze-map`) with presets, geocode city search, and sparklines
-- Device space labels (garage / attic / …) and home filter
-- “Nights at risk” forecast outlook on the dashboard
+- Opt-in public city freeze-risk map (`/freeze-map`) with geographic map, presets, geocode search, sparklines
+- Device space labels (garage / attic / …), home filter, and space comparison on history
+- “Nights at risk” outlook on the dashboard with weather map and NWS freeze alerts (US)
+- Embeddable live widget (`/embed/<token>`) for share links
 
 ### Alerts & digests
 - Threshold alerts (freeze, humidity, rate-of-change, outage); also evaluated on push ingest
+- Battery/RSSI device health alerts
+- Alert snooze (24h) and vacation mode (7d); one-click snooze links in Telegram/Slack messages
 - Forecast freeze risk (OpenWeather 3h forecast look-ahead)
 - Composite AND rules (door + temp drop, flood, power, outage, …) with optional value/label filters
 - Quiet hours with optional freeze/forecast bypass and Pro SMS-critical override
 - Per-kind severity routing (which channels fire for threshold vs rate vs outage, …)
 - Channels: email, Discord, Telegram, Slack; Pro adds SMS (Twilio), browser push, outbound webhooks
 - Test alert with per-channel sent/skipped feedback and alert activity audit trail
-- Weekly email digest (Mondays)
+- Weekly email digest (Mondays) and optional monthly freeze report (1st of month)
 
 ### Accounts & collaboration
 - Email/password auth, password reset, optional OAuth (Google/GitHub/Discord when enabled in Supabase)
-- Households: invite members, rename household, leave, revoke
-- Public share links (Pro): live, history (7d), or metrics scopes
-- Dashboard API keys (Pro) for `GET /api/v1/metrics` Prometheus scrape
-- Getting-started checklist with dismiss / auto-hide
-- PWA install support
+- Households: invite members (including read-only **viewer** role), rename, leave, revoke
+- Multi-household switcher when you belong to more than one property
+- Public share links (Pro): live, history (7d), metrics, or embed scopes
+- Inbound webhooks (Pro): snooze/vacation from HA, Zapier, or Make
+- Dashboard API keys (Pro) for `GET /api/v1/metrics`; downloadable Grafana dashboard JSON
+- JSON data export (`GET /api/user/export`)
+- Pro checkout includes 14-day trial
 
 ### Ops & content
 - Hourly Worker cron for history collection and alert evaluation

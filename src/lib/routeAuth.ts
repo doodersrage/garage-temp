@@ -23,8 +23,15 @@ const publicApiExactPaths = new Set([
   "/api/home/weather",
 ]);
 
+/** Public API path prefixes (e.g. token-based inbound webhooks). */
+const publicApiPrefixes = ["/api/inbound/", "/api/alerts/snooze"];
+
 export function pathRequiresAuth(pathname: string): boolean {
   if (publicApiExactPaths.has(pathname)) {
+    return false;
+  }
+
+  if (publicApiPrefixes.some((prefix) => pathname.startsWith(prefix))) {
     return false;
   }
 

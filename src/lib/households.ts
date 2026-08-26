@@ -1,6 +1,6 @@
 import { createServerClient } from "./supabase";
 
-export type HouseholdRole = "owner" | "member";
+export type HouseholdRole = "owner" | "member" | "viewer";
 
 export type Household = {
   id: string;
@@ -191,6 +191,24 @@ export async function listHouseholdMembers(
   }
 
   return { members: (data ?? []) as HouseholdMember[], error: null };
+}
+
+export async function getUserHouseholdRole(
+  userId: string,
+  householdId: string,
+): Promise<HouseholdRole | null> {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from("household_members")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("household_id", householdId)
+    .maybeSingle();
+  return (data?.role as HouseholdRole | undefined) ?? null;
+}
+
+export function canEditHousehold(role: HouseholdRole | null): boolean {
+  return role === "owner" || role === "member";
 }
 
 export async function isUserInHousehold(

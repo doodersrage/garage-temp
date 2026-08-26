@@ -11,6 +11,7 @@ import {
   quietHoursAllowsSmsCritical,
   shouldSuppressForQuietHours,
 } from "./quietHours";
+import { shouldSuppressForSnoozeOrVacation } from "./alertSnooze";
 import { createServerClient } from "./supabase";
 import { getUserEntitlements } from "./entitlements";
 
@@ -295,7 +296,9 @@ export async function markCooldown(
     | "last_alert_sent_at"
     | "last_outage_alert_at"
     | "last_rate_alert_at"
-    | "last_forecast_alert_at",
+    | "last_forecast_alert_at"
+    | "last_battery_alert_at"
+    | "last_rssi_alert_at",
 ): Promise<void> {
   const supabase = createServerClient();
   await supabase
@@ -309,7 +312,21 @@ export async function notifyUser(
   fallbackEmail: string | null | undefined,
   settings: AlertSettings,
   payload: NotifyPayload,
+  options?: { snoozeUrl?: string },
 ): Promise<{ sent: string[]; skipped: string[] }> {
+  if (shouldSuppressForSnoozeOrVacation(settings, payload.kind)) {
+    const skipped = ["snooze_or_vacation"];
+    await recordAlertEvent({
+      userId,
+      kind: payload.kind ?? "generic",
+      title: payload.title,
+      body: payload.body,
+      channelsSent: [],
+      channelsSkipped: skipped,
+    });
+    return { sent: [], skipped };
+  }
+
   const smsCriticalOnly = quietHoursAllowsSmsCritical(settings, payload.kind);
   if (shouldSuppressForQuietHours(settings, payload.kind) && !smsCriticalOnly) {
     const skipped = ["quiet_hours"];
@@ -329,6 +346,9 @@ export async function notifyUser(
   const sent: string[] = [];
   const skipped: string[] = [];
   const kind = payload.kind;
+  const bodyWithSnooze = options?.snoozeUrl
+    ? `${payload.body}\n\nSnooze 24h: ${options.snoozeUrl}`
+    : payload.body;
   const allowChannel = (channel: AlertChannelName) => {
     if (smsCriticalOnly) return channel === "sms";
     return channelAllowed(settings, kind, channel);
@@ -336,7 +356,7 @@ export async function notifyUser(
 
   if (settings.channelEmail && allowChannel("email")) {
     if (email) {
-      await sendEmail(email, payload.title, payload.body);
+      await sendEmail(email, payload.title, bodyWithSnooze);
       sent.push("email");
     } else {
       skipped.push("email");
@@ -345,7 +365,7 @@ export async function notifyUser(
 
   if (settings.channelDiscord && allowChannel("discord")) {
     if (settings.discordWebhookUrl) {
-      await sendDiscord(settings.discordWebhookUrl, payload.title, payload.body);
+      await sendDiscord(settings.discordWebhookUrl, payload.title, bodyWithSnooze);
       sent.push("discord");
     } else {
       skipped.push("discord");
@@ -354,7 +374,7 @@ export async function notifyUser(
 
   if (settings.channelSlack && allowChannel("slack")) {
     if (settings.slackWebhookUrl) {
-      await sendSlack(settings.slackWebhookUrl, payload.title, payload.body);
+      await sendSlack(settings.slackWebhookUrl, payload.title, bodyWithSnooze);
       sent.push("slack");
     } else {
       skipped.push("slack");
@@ -367,7 +387,7 @@ export async function notifyUser(
         settings.telegramBotToken,
         settings.telegramChatId,
         payload.title,
-        payload.body,
+        bodyWithSnooze,
       );
       sent.push("telegram");
     } else {
@@ -377,7 +397,7 @@ export async function notifyUser(
 
   if (settings.channelSms && allowChannel("sms")) {
     if (settings.smsPhone && entitlements.canUseSms) {
-      await sendTwilioSms(settings.smsPhone, `${payload.title}: ${payload.body}`);
+      await sendTwilioSms(settings.smsPhone, `${payload.title}: ${bodyWithSnooze}`);
       sent.push("sms");
     } else {
       skipped.push("sms");

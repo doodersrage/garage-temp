@@ -158,7 +158,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?error=missing_email`);
   }
 
-  const { invite, error } = await createHouseholdInvite(manageId, email, user.id);
+  const role = formData.get("role")?.toString() === "viewer" ? "viewer" : "member";
+  const { invite, error } = await createHouseholdInvite(manageId, email, user.id, 7, role);
   if (error || !invite) {
     return redirect(`${redirectTo}?error=1`);
   }

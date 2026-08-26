@@ -84,6 +84,18 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     alertRules: parseAlertRulesFromForm(
       formData.get("alert_rules_json")?.toString(),
     ),
+    monthlyReportEnabled: formData.has("monthly_report_enabled"),
+    batteryAlertsEnabled: formData.has("battery_alerts_enabled"),
+    batteryThresholdPct: Number(
+      formData.get("battery_threshold_pct") ?? existing.batteryThresholdPct,
+    ),
+    rssiAlertsEnabled: formData.has("rssi_alerts_enabled"),
+    rssiThreshold: Number(formData.get("rssi_threshold") ?? existing.rssiThreshold),
+    snoozeUntil: existing.snoozeUntil,
+    vacationUntil: existing.vacationUntil,
+    lastBatteryAlertAt: existing.lastBatteryAlertAt,
+    lastRssiAlertAt: existing.lastRssiAlertAt,
+    lastMonthlyReportAt: existing.lastMonthlyReportAt,
     channelSeverity: (() => {
       try {
         const raw = formData.get("channel_severity_json")?.toString();

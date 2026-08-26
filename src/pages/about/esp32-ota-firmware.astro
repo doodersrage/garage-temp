@@ -1,0 +1,34 @@
+---
+import AboutArticle from "../../components/AboutArticle.astro";
+---
+<AboutArticle
+  slug="esp32-ota-firmware"
+  title="ESP32 OTA and battery reporting"
+  summary="Over-the-air updates and health fields for push ingest devices."
+>
+  <h2>OTA updates</h2>
+  <p>
+    Use the Arduino OTA or ESP-IDF HTTPS OTA libraries on your LAN, then POST readings to Garage Temp
+    over HTTPS. OTA and ingest are independent — firmware updates locally while telemetry uses
+    <code>/api/ingest/&lt;key&gt;</code>.
+  </p>
+  <pre><code>{`#include <ArduinoOTA.h>
+// After WiFi.connect():
+ArduinoOTA.begin();
+// in loop():
+ArduinoOTA.handle();`}</code></pre>
+
+  <h2>Battery and RSSI in ingest</h2>
+  <p>
+    Include optional top-level fields so the Devices page and health alerts stay accurate:
+  </p>
+  <pre><code>{`{
+  "temp1": 42.5,
+  "door1": false,
+  "battery": 87,
+  "rssi": -62
+}`}</code></pre>
+  <p>
+    Enable low-battery and weak-signal alerts under Dashboard → Alerts → Device health.
+  </p>
+</AboutArticle>

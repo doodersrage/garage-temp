@@ -273,6 +273,13 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
           <label class="form-label" for="email">Invitee email</label>
           <input class="form-input" type="email" id="email" name="email" required />
         </div>
+        <div class="form-field">
+          <label class="form-label" for="invite_role">Role</label>
+          <select class="form-input" id="invite_role" name="role">
+            <option value="member">Member (can edit devices & alerts)</option>
+            <option value="viewer">Viewer (read-only dashboard)</option>
+          </select>
+        </div>
         <button class="btn-primary" type="submit">Send invite link</button>
       </form>
     ) : (

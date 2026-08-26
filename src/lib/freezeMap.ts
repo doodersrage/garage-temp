@@ -14,6 +14,8 @@ export type FreezeMapSnapshot = {
   min_temp_f: number | null;
   freeze_risk_count: number;
   captured_at: string;
+  lat: number | null;
+  lon: number | null;
 };
 
 export type FreezeMapHouseholdSettings = {
@@ -67,6 +69,8 @@ export async function collectFreezeMapSnapshots(): Promise<{
   type Acc = {
     city_id: string;
     city_label: string;
+    lat: number | null;
+    lon: number | null;
     temps: number[];
     freeze_risk_count: number;
   };
@@ -79,6 +83,13 @@ export async function collectFreezeMapSnapshots(): Promise<{
       lon: household.freeze_map_lon,
     });
     if (!key) continue;
+
+    const lat =
+      household.freeze_map_lat ??
+      parseGeoKeyLat(key);
+    const lon =
+      household.freeze_map_lon ??
+      parseGeoKeyLon(key);
 
     const latest = await fetchLatestSensorValues(household.id);
     const temps = latest
@@ -96,9 +107,13 @@ export async function collectFreezeMapSnapshots(): Promise<{
     const entry = byCity.get(key) ?? {
       city_id: key,
       city_label: label,
+      lat,
+      lon,
       temps: [],
       freeze_risk_count: 0,
     };
+    if (lat != null && entry.lat == null) entry.lat = lat;
+    if (lon != null && entry.lon == null) entry.lon = lon;
     entry.temps.push(avg);
     if (min <= 34) entry.freeze_risk_count += 1;
     byCity.set(key, entry);
@@ -111,6 +126,8 @@ export async function collectFreezeMapSnapshots(): Promise<{
     return {
       city_id: entry.city_id,
       city_label: entry.city_label,
+      lat: entry.lat,
+      lon: entry.lon,
       sample_count: entry.temps.length,
       avg_temp_f: avg,
       min_temp_f: Math.min(...entry.temps),
@@ -136,7 +153,7 @@ export async function listLatestFreezeMapSnapshots(): Promise<FreezeMapSnapshot[
   const { data, error } = await supabase
     .from("freeze_map_snapshots")
     .select(
-      "city_id, city_label, sample_count, avg_temp_f, min_temp_f, freeze_risk_count, captured_at",
+      "city_id, city_label, sample_count, avg_temp_f, min_temp_f, freeze_risk_count, captured_at, lat, lon",
     )
     .order("captured_at", { ascending: false })
     .limit(400);
@@ -182,3 +199,17 @@ export async function listFreezeMapSparklines(
 }
 
 export { uniqueWeatherCityPresets };
+
+function parseGeoKeyLat(key: string): number | null {
+  const match = /^geo:([-\d.]+),/.exec(key);
+  if (!match) return null;
+  const lat = Number(match[1]);
+  return Number.isFinite(lat) ? lat : null;
+}
+
+function parseGeoKeyLon(key: string): number | null {
+  const match = /^geo:[-\d.]+,([-\d.]+)$/.exec(key);
+  if (!match) return null;
+  const lon = Number(match[1]);
+  return Number.isFinite(lon) ? lon : null;
+}

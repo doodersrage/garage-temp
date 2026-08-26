@@ -8,6 +8,7 @@ import {
 } from "./households";
 import {
   maybeSendRateAndOutageAlerts,
+  maybeSendDeviceHealthAlerts,
   maybeSendThresholdAlerts,
 } from "./alertNotifications";
 import { getAlertSettingsForUser } from "./notify";
@@ -168,6 +169,12 @@ export async function collectHistoryForAllUsers(): Promise<{
           config.devices,
           settings,
           config.householdId || householdId,
+        );
+        await maybeSendDeviceHealthAlerts(
+          member.user_id,
+          memberUser?.email,
+          config.devices,
+          settings,
         );
         usersProcessed += 1;
       }

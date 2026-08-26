@@ -37,6 +37,12 @@ const kitSteps = [
     detail: "curl the ingest URL, or follow the Arduino wiring / sketches guides.",
   },
   {
+    done: hasHistory || hasSensors,
+    href: "/about/kit-qr-onboarding",
+    title: "Optional: QR sticker",
+    detail: "Encode your ingest URL on a kit label for quick phone setup.",
+  },
+  {
     done: hasAlertsConfigured,
     href: "/dashboard/alerts",
     title: "Enable freeze alerts",

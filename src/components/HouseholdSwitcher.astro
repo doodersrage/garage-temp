@@ -1,0 +1,33 @@
+---
+interface Props {
+  households: Array<{ household_id: string; name: string; role: string }>;
+  activeHouseholdId: string | null;
+  redirectTo?: string;
+}
+
+const { households, activeHouseholdId, redirectTo = "/dashboard" } = Astro.props;
+
+if (households.length <= 1) {
+  return null;
+}
+---
+<section class="card">
+  <h2 class="card-title">Switch property</h2>
+  <p class="card-subtitle mb-3">
+    You belong to {households.length} households. Choose which one to manage.
+  </p>
+  <form action="/api/household/switch" method="post" class="flex flex-wrap items-end gap-3">
+    <input type="hidden" name="redirect" value={redirectTo} />
+    <div class="form-field mb-0 flex-1" style="min-width:12rem">
+      <label class="form-label" for="household-switch">Household</label>
+      <select class="form-input" id="household-switch" name="household_id" required>
+        {households.map((h) => (
+          <option value={h.household_id} selected={h.household_id === activeHouseholdId}>
+            {h.name} ({h.role})
+          </option>
+        ))}
+      </select>
+    </div>
+    <button type="submit" class="btn-secondary">Switch</button>
+  </form>
+</section>

@@ -1,9 +1,11 @@
 import type { TempFeedConfig, TempFeedResult, TempProbeConfig } from "./tempFeedConfig";
 import {
   evaluateAlerts,
+  evaluateBatteryHealth,
   evaluateForecastFreeze,
   evaluateOutage,
   evaluateRateChange,
+  evaluateRssiHealth,
   isAlertCooldownActive,
   type AlertReading,
   type AlertSettings,
@@ -26,6 +28,9 @@ import {
   mergeAlertReadings,
 } from "./alertReadings";
 import { fetchForecastMinTemp } from "./FetchWeather";
+import { deviceHealthFromDevices } from "./deviceHealth";
+import { buildSnoozeUrl } from "./alertSnoozeTokens";
+import { buildSiteUrl } from "./siteUrl";
 
 export {
   buildAlertReadingsFromLatestSensors,
@@ -266,6 +271,56 @@ export async function maybeSendRateAndOutageAlerts(
     readings,
     householdId,
   );
+}
+
+export async function maybeSendDeviceHealthAlerts(
+  userId: string,
+  email: string | null | undefined,
+  devices: DeviceWithSensors[],
+  settings: AlertSettings,
+  siteBaseUrl?: string,
+): Promise<void> {
+  if (!settings.enabled) return;
+
+  const health = deviceHealthFromDevices(devices);
+  const base = siteBaseUrl ?? buildSiteUrl();
+  const snoozeUrl = await buildSnoozeUrl(base, userId);
+  const notifyOpts = { snoozeUrl };
+
+  const batteryMessages = evaluateBatteryHealth(settings, health);
+  if (
+    batteryMessages.length > 0 &&
+    !isAlertCooldownActive(settings.lastBatteryAlertAt)
+  ) {
+    await notifyUser(
+      userId,
+      email,
+      settings,
+      {
+        title: "Device battery low",
+        body: batteryMessages.join("\n"),
+        kind: "battery",
+      },
+      notifyOpts,
+    );
+    await markCooldown(userId, "last_battery_alert_at");
+  }
+
+  const rssiMessages = evaluateRssiHealth(settings, health);
+  if (rssiMessages.length > 0 && !isAlertCooldownActive(settings.lastRssiAlertAt)) {
+    await notifyUser(
+      userId,
+      email,
+      settings,
+      {
+        title: "Device signal weak",
+        body: rssiMessages.join("\n"),
+        kind: "rssi",
+      },
+      notifyOpts,
+    );
+    await markCooldown(userId, "last_rssi_alert_at");
+  }
 }
 
 export async function updateUserAlertSettings(

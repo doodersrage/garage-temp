@@ -5,6 +5,10 @@ import {
   shouldSendWeeklyDigest,
 } from "./lib/digestEmails";
 import {
+  sendMonthlyReportsForAllUsers,
+  shouldSendMonthlyReport,
+} from "./lib/monthlyReportEmails";
+import {
   finishJobRun,
   runSensorReadingRetention,
   shouldRunDailyRetention,
@@ -99,6 +103,34 @@ export default {
               "Garage Temp job failed: weekly-digest",
               formatJobFailureBody("weekly-digest", details),
             );
+          }
+        }
+
+        if (shouldSendMonthlyReport()) {
+          const monthlyJobId = await startJobRun("monthly-report");
+          try {
+            const monthly = await sendMonthlyReportsForAllUsers();
+            if (monthly.errors.length > 0) {
+              await finishJobRun(monthlyJobId, "error", {
+                sent: monthly.sent,
+                skipped: monthly.skipped,
+                errors: monthly.errors.slice(0, 20),
+              });
+            } else {
+              await finishJobRun(monthlyJobId, "success", {
+                sent: monthly.sent,
+                skipped: monthly.skipped,
+                errors: [],
+              });
+              console.info(
+                `Monthly report finished: ${monthly.sent} sent, ${monthly.skipped} skipped`,
+              );
+            }
+          } catch (error) {
+            const details = {
+              message: error instanceof Error ? error.message : "Unknown error",
+            };
+            await finishJobRun(monthlyJobId, "error", details);
           }
         }
 

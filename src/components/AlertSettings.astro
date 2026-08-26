@@ -44,6 +44,68 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     <span>Weekly email digest (Mondays)</span>
   </label>
 
+  <label class="checkbox-row mb-4">
+    <input type="checkbox" name="monthly_report_enabled" value="true" checked={settings.monthlyReportEnabled} />
+    <span>Monthly freeze report email (1st of month)</span>
+  </label>
+
+  <h3 class="text-base font-semibold mb-2">Snooze & vacation</h3>
+  <p class="card-subtitle mb-3">
+    Snooze pauses most alerts for 24h (outage still fires). Vacation suppresses non-critical alerts for 7 days.
+    {settings.snoozeUntil && (
+      <span class="block mt-1">Snoozed until {new Date(settings.snoozeUntil).toLocaleString()}.</span>
+    )}
+    {settings.vacationUntil && (
+      <span class="block mt-1">Vacation until {new Date(settings.vacationUntil).toLocaleString()}.</span>
+    )}
+  </p>
+  <div class="flex flex-wrap gap-2 mb-4">
+    <form action="/api/user/alert-snooze" method="post">
+      <input type="hidden" name="redirect" value={redirectTo} />
+      <input type="hidden" name="action" value="snooze_24" />
+      <button type="submit" class="btn-secondary">Snooze 24h</button>
+    </form>
+    <form action="/api/user/alert-snooze" method="post">
+      <input type="hidden" name="redirect" value={redirectTo} />
+      <input type="hidden" name="action" value="vacation_7" />
+      <button type="submit" class="btn-secondary">Vacation 7d</button>
+    </form>
+    {settings.snoozeUntil && (
+      <form action="/api/user/alert-snooze" method="post">
+        <input type="hidden" name="redirect" value={redirectTo} />
+        <input type="hidden" name="action" value="clear_snooze" />
+        <button type="submit" class="btn-secondary">Clear snooze</button>
+      </form>
+    )}
+    {settings.vacationUntil && (
+      <form action="/api/user/alert-snooze" method="post">
+        <input type="hidden" name="redirect" value={redirectTo} />
+        <input type="hidden" name="action" value="clear_vacation" />
+        <button type="submit" class="btn-secondary">End vacation</button>
+      </form>
+    )}
+  </div>
+
+  <h3 class="text-base font-semibold mb-2">Device health alerts</h3>
+  <div class="config-row-grid mb-4">
+    <label class="checkbox-row mb-0">
+      <input type="checkbox" name="battery_alerts_enabled" value="true" checked={settings.batteryAlertsEnabled} />
+      <span>Low battery alerts</span>
+    </label>
+    <div class="form-field mb-0">
+      <label class="form-label" for="battery_threshold_pct">Battery below (%)</label>
+      <input class="form-input" type="number" id="battery_threshold_pct" name="battery_threshold_pct" value={settings.batteryThresholdPct} />
+    </div>
+    <label class="checkbox-row mb-0">
+      <input type="checkbox" name="rssi_alerts_enabled" value="true" checked={settings.rssiAlertsEnabled} />
+      <span>Weak WiFi signal alerts</span>
+    </label>
+    <div class="form-field mb-0">
+      <label class="form-label" for="rssi_threshold">RSSI below (dBm)</label>
+      <input class="form-input" type="number" id="rssi_threshold" name="rssi_threshold" value={settings.rssiThreshold} />
+    </div>
+  </div>
+
   <div class="config-row-grid mb-4">
     <div class="form-field mb-0">
       <label class="form-label" for="freeze_threshold_f">Alert if temperature drops below (°F)</label>

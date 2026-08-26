@@ -10,6 +10,7 @@ export type HouseholdInvite = {
   expires_at: string;
   accepted_at: string | null;
   created_at: string;
+  role: "member" | "viewer";
 };
 
 function randomToken(): string {
@@ -22,6 +23,7 @@ export async function createHouseholdInvite(
   email: string,
   invitedBy: string,
   expiresInDays = 7,
+  role: "member" | "viewer" = "member",
 ): Promise<{ invite: HouseholdInvite | null; error: string | null }> {
   const supabase = createServerClient();
   const normalized = email.trim().toLowerCase();
@@ -37,6 +39,7 @@ export async function createHouseholdInvite(
       token: randomToken(),
       invited_by: invitedBy,
       expires_at,
+      role,
     })
     .select("*")
     .single();
@@ -111,7 +114,7 @@ export async function acceptHouseholdInvite(
   const add = await addHouseholdMemberByUserId(
     invite.household_id,
     userId,
-    "member",
+    invite.role === "viewer" ? "viewer" : "member",
   );
   if (add.error) {
     return { householdId: null, error: add.error };

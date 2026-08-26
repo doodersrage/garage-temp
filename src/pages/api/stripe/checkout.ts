@@ -46,6 +46,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
           plan_tier: plan,
           billing_interval: interval,
         },
+        trial_period_days: plan === "pro" ? 14 : undefined,
       },
       metadata: {
         supabase_user_id: user.id,

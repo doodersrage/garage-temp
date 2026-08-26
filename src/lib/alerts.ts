@@ -16,7 +16,9 @@ export type NotifyKind =
   | "digest"
   | "generic"
   | "forecast"
-  | "rule";
+  | "rule"
+  | "battery"
+  | "rssi";
 
 export type ChannelSeverityMap = Partial<Record<NotifyKind, AlertChannelName[]>>;
 
@@ -38,6 +40,8 @@ const NOTIFY_KINDS = new Set<NotifyKind>([
   "generic",
   "forecast",
   "rule",
+  "battery",
+  "rssi",
 ]);
 
 export function parseChannelSeverity(raw: unknown): ChannelSeverityMap {
@@ -93,6 +97,16 @@ export type AlertSettings = {
   quietHoursSmsCritical: boolean;
   alertRules: AlertRule[];
   channelSeverity: ChannelSeverityMap;
+  snoozeUntil: string | null;
+  vacationUntil: string | null;
+  batteryAlertsEnabled: boolean;
+  batteryThresholdPct: number;
+  rssiAlertsEnabled: boolean;
+  rssiThreshold: number;
+  monthlyReportEnabled: boolean;
+  lastBatteryAlertAt: string | null;
+  lastRssiAlertAt: string | null;
+  lastMonthlyReportAt: string | null;
 };
 
 export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
@@ -131,6 +145,16 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   quietHoursSmsCritical: true,
   alertRules: [],
   channelSeverity: {},
+  snoozeUntil: null,
+  vacationUntil: null,
+  batteryAlertsEnabled: false,
+  batteryThresholdPct: 20,
+  rssiAlertsEnabled: false,
+  rssiThreshold: -80,
+  monthlyReportEnabled: false,
+  lastBatteryAlertAt: null,
+  lastRssiAlertAt: null,
+  lastMonthlyReportAt: null,
 };
 
 /** Minimum time between threshold alert notifications for the same account. */
@@ -261,6 +285,31 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
     quietHoursSmsCritical: row.quiet_hours_sms_critical !== false,
     alertRules: parseAlertRules(row.alert_rules),
     channelSeverity: parseChannelSeverity(row.channel_severity),
+    snoozeUntil:
+      typeof row.snooze_until === "string" ? row.snooze_until : null,
+    vacationUntil:
+      typeof row.vacation_until === "string" ? row.vacation_until : null,
+    batteryAlertsEnabled: row.battery_alerts_enabled === true,
+    batteryThresholdPct:
+      typeof row.battery_threshold_pct === "number"
+        ? row.battery_threshold_pct
+        : DEFAULT_ALERT_SETTINGS.batteryThresholdPct,
+    rssiAlertsEnabled: row.rssi_alerts_enabled === true,
+    rssiThreshold:
+      typeof row.rssi_threshold === "number"
+        ? row.rssi_threshold
+        : DEFAULT_ALERT_SETTINGS.rssiThreshold,
+    monthlyReportEnabled: row.monthly_report_enabled === true,
+    lastBatteryAlertAt:
+      typeof row.last_battery_alert_at === "string"
+        ? row.last_battery_alert_at
+        : null,
+    lastRssiAlertAt:
+      typeof row.last_rssi_alert_at === "string" ? row.last_rssi_alert_at : null,
+    lastMonthlyReportAt:
+      typeof row.last_monthly_report_at === "string"
+        ? row.last_monthly_report_at
+        : null,
   };
 }
 
@@ -340,6 +389,47 @@ export function evaluateRateChange(
   return null;
 }
 
+export type DeviceHealth = {
+  deviceName: string;
+  batteryPct: number | null;
+  rssi: number | null;
+};
+
+export function evaluateBatteryHealth(
+  settings: AlertSettings,
+  devices: DeviceHealth[],
+): string[] {
+  if (!settings.enabled || !settings.batteryAlertsEnabled) return [];
+  const messages: string[] = [];
+  for (const device of devices) {
+    if (
+      device.batteryPct != null &&
+      device.batteryPct <= settings.batteryThresholdPct
+    ) {
+      messages.push(
+        `${device.deviceName} battery is ${device.batteryPct}% (threshold ${settings.batteryThresholdPct}%).`,
+      );
+    }
+  }
+  return messages;
+}
+
+export function evaluateRssiHealth(
+  settings: AlertSettings,
+  devices: DeviceHealth[],
+): string[] {
+  if (!settings.enabled || !settings.rssiAlertsEnabled) return [];
+  const messages: string[] = [];
+  for (const device of devices) {
+    if (device.rssi != null && device.rssi <= settings.rssiThreshold) {
+      messages.push(
+        `${device.deviceName} signal is ${device.rssi} dBm (threshold ${settings.rssiThreshold} dBm).`,
+      );
+    }
+  }
+  return messages;
+}
+
 export function evaluateOutage(
   settings: AlertSettings,
   deviceName: string,
@@ -396,6 +486,16 @@ export function serializeAlertSettings(settings: AlertSettings): Record<string, 
     quiet_hours_sms_critical: settings.quietHoursSmsCritical,
     alert_rules: settings.alertRules,
     channel_severity: settings.channelSeverity,
+    snooze_until: settings.snoozeUntil,
+    vacation_until: settings.vacationUntil,
+    battery_alerts_enabled: settings.batteryAlertsEnabled,
+    battery_threshold_pct: settings.batteryThresholdPct,
+    rssi_alerts_enabled: settings.rssiAlertsEnabled,
+    rssi_threshold: settings.rssiThreshold,
+    monthly_report_enabled: settings.monthlyReportEnabled,
+    last_battery_alert_at: settings.lastBatteryAlertAt,
+    last_rssi_alert_at: settings.lastRssiAlertAt,
+    last_monthly_report_at: settings.lastMonthlyReportAt,
   };
 }
 

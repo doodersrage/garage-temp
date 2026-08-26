@@ -14,8 +14,10 @@ import { detectTemperatureAnomalies } from "../../lib/anomalyDetection";
 import { getUserSubscription } from "../../lib/stripeSubscriptions";
 import {
   compareProbeAverages,
+  compareSpaceAverages,
   computeSeasonalInsights,
 } from "../../lib/seasonalInsights";
+import { getUserDevicesAsTempConfig } from "../../lib/devices";
 import { getUserPreferences } from "../../lib/userPreferences";
 import { fetchIndoorOutdoorDelta } from "../../lib/indoorOutdoorDelta";
 import { RAW_READING_RETENTION_DAYS } from "../../lib/retentionSchedule";
@@ -94,6 +96,18 @@ if (history.totalPages > 0 && pageParam > history.totalPages) {
 const subscriptionNotice = Astro.url.searchParams.get("subscription");
 const anomalies = detectTemperatureAnomalies(chartData.points);
 const probeCompare = compareProbeAverages(chartData.points);
+
+const deviceConfig = await getUserDevicesAsTempConfig(user.id, user.email);
+const probeToSpace = new Map<string, string>();
+for (const device of deviceConfig.devices) {
+  if (!device.space) continue;
+  for (const sensor of device.sensors) {
+    if (sensor.kind === "temperature") {
+      probeToSpace.set(sensor.label, device.space);
+    }
+  }
+}
+const spaceCompare = compareSpaceAverages(chartData.points, probeToSpace);
 const showRetentionNote =
   entitlements.tier === "member" ||
   entitlements.tier === "pro" ||
@@ -171,6 +185,9 @@ const showRetentionNote =
         </ul>
         {probeCompare.length > 0 && (
           <p class="mt-4 mb-0 text-sm">{probeCompare[0]}</p>
+        )}
+        {spaceCompare.length > 0 && (
+          <p class="mt-2 mb-0 text-sm">{spaceCompare[0]}</p>
         )}
       </section>
     )}

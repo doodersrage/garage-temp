@@ -60,6 +60,33 @@ export function compareProbeAverages(points: ChartPoint[]): string[] {
   ];
 }
 
+/** Average temp by device space label (garage, attic, …). */
+export function compareSpaceAverages(
+  points: ChartPoint[],
+  probeToSpace: Map<string, string>,
+): string[] {
+  const bySpace = new Map<string, number[]>();
+  for (const point of points) {
+    const space = probeToSpace.get(point.probeLabel);
+    if (!space) continue;
+    const list = bySpace.get(space) ?? [];
+    list.push(point.tempf);
+    bySpace.set(space, list);
+  }
+  if (bySpace.size < 2) return [];
+
+  const averages = [...bySpace.entries()].map(([space, temps]) => ({
+    space,
+    avg: temps.reduce((a, b) => a + b, 0) / temps.length,
+  }));
+  averages.sort((a, b) => a.avg - b.avg);
+  const coolest = averages[0];
+  const warmest = averages[averages.length - 1];
+  return [
+    `${warmest.space} averages ${(warmest.avg - coolest.avg).toFixed(1)}°F warmer than ${coolest.space} in this window.`,
+  ];
+}
+
 export function compareYearOverYear(
   current: ChartPoint[],
   priorYear: ChartPoint[],

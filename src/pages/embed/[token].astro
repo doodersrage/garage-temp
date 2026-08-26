@@ -1,0 +1,57 @@
+---
+export const prerender = false;
+import Layout from "../../layouts/Layout.astro";
+
+const token = Astro.params.token;
+if (!token) {
+  return Astro.redirect("/");
+}
+---
+<Layout title="Garage Temp embed" description="Embeddable live readings">
+  <div class="page-shell" style="max-width:420px;margin:0 auto;padding:1rem">
+    <div id="embed-root" class="card">
+      <p class="card-subtitle mb-2">Loading…</p>
+    </div>
+    <p class="text-center text-sm mt-2 mb-0">
+      <a class="text-link" href={`/share/${token}`} target="_blank" rel="noreferrer">Open full page</a>
+    </p>
+  </div>
+</Layout>
+
+<style is:global>
+  html, body { background: #090b0f; margin: 0; }
+</style>
+
+<script define:vars={{ token }}>
+  const root = document.getElementById("embed-root");
+  const url = `/api/share/${encodeURIComponent(token)}/readings`;
+
+  async function render() {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Unavailable");
+      const data = await res.json();
+      const readings = data.readings ?? [];
+      if (readings.length === 0) {
+        root.innerHTML = '<p class="mb-0">No readings yet.</p>';
+        return;
+      }
+      root.innerHTML =
+        '<h2 class="card-title" style="font-size:1.1rem">Live readings</h2>' +
+        readings
+          .slice(0, 8)
+          .map(
+            (r) =>
+              `<div style="display:flex;justify-content:space-between;padding:0.35rem 0;border-bottom:1px solid var(--color-border)">` +
+              `<span>${r.label ?? r.sensor ?? "Sensor"}</span>` +
+              `<strong>${r.tempf != null ? r.tempf.toFixed(1) + "°F" : r.value ?? "—"}</strong></div>`,
+          )
+          .join("");
+    } catch {
+      root.innerHTML = '<p class="mb-0 text-[var(--color-text-muted)]">Could not load share.</p>';
+    }
+  }
+
+  render();
+  setInterval(render, 90000);
+</script>
