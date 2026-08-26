@@ -43,7 +43,9 @@ const noticeParam = Astro.url.searchParams.get("error");
 const deviceNotice =
   Astro.url.searchParams.get("device_deleted")
     ? "Device deleted."
-    : Astro.url.searchParams.get("sensor_added")
+    : Astro.url.searchParams.get("device_renamed")
+      ? "Device renamed."
+      : Astro.url.searchParams.get("sensor_added")
       ? "Sensor added."
       : Astro.url.searchParams.get("sensor_updated")
         ? "Sensor updated."
@@ -254,6 +256,22 @@ const ingestCurlExample = ingestKey
                   )}
                 </div>
                 <div class="flex flex-wrap gap-2">
+                  <form action="/api/devices" method="post" class="flex flex-wrap items-end gap-2">
+                    <input type="hidden" name="action" value="rename" />
+                    <input type="hidden" name="device_id" value={device.id} />
+                    <input type="hidden" name="redirect" value={redirectTo} />
+                    <div class="form-field mb-0">
+                      <label class="form-label" for={`rename-${device.id}`}>Name</label>
+                      <input
+                        class="form-input"
+                        id={`rename-${device.id}`}
+                        name="name"
+                        value={device.name}
+                        required
+                      />
+                    </div>
+                    <button class="btn-secondary" type="submit">Rename</button>
+                  </form>
                   <form action="/api/devices" method="post" onsubmit="return confirm('Rotate this ingest key? The old key stops working immediately.');">
                     <input type="hidden" name="action" value="rotate_key" />
                     <input type="hidden" name="device_id" value={device.id} />

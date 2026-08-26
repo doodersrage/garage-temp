@@ -5,6 +5,7 @@ import {
   createPushDevice,
   deleteDeviceSensor,
   listHouseholdDevices,
+  renamePushDevice,
   rotatePushDeviceKey,
   updateDeviceSensor,
 } from "../../../lib/devices";
@@ -53,6 +54,19 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         .eq("household_id", household.householdId);
     }
     return redirect(`${redirectTo}?device_deleted=1`);
+  }
+
+  if (action === "rename") {
+    const deviceId = formData.get("device_id")?.toString();
+    const name = formData.get("name")?.toString() ?? "";
+    if (!deviceId) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+    const result = await renamePushDevice(household.householdId, deviceId, name);
+    if (result.error) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+    return redirect(`${redirectTo}?device_renamed=1`);
   }
 
   if (action === "rotate_key") {

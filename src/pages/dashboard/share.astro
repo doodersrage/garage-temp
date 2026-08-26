@@ -23,21 +23,45 @@ const { data: links } = household.householdId
   : { data: [] };
 
 const siteUrl = getSiteUrl(Astro.request);
+const newToken = Astro.url.searchParams.get("new_token");
+const newHref = newToken ? `${siteUrl}/share/${newToken}` : null;
 const notice = Astro.url.searchParams.get("created")
-  ? "Share link created."
+  ? "Share link created — copy it below to send to family."
   : Astro.url.searchParams.get("revoked")
     ? "Share link revoked."
     : Astro.url.searchParams.get("error") === "pro_required"
       ? "Pro plan required for share links."
       : null;
+const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
 ---
 <DashboardLayout title="Share links">
   <div class="space-y-6">
     <section class="card">
       <h1 class="card-title">Public share links</h1>
       <p class="card-subtitle">Read-only live views for family without accounts. Pro feature.</p>
-      {notice && <p class="alert-success mt-4">{notice}</p>}
+      {notice && (
+        <p class:list={[noticeIsError ? "alert-warning" : "alert-success", "mt-4"]}>{notice}</p>
+      )}
     </section>
+
+    {newHref && (
+      <section class="card ingest-key-callout" id="new-share-link">
+        <h2 class="card-title">New share link</h2>
+        <p class="card-subtitle">Copy and send this link. Anyone with it can view live sensors.</p>
+        <p class="ingest-key-value break-all text-sm mb-4">
+          <a href={newHref}>{newHref}</a>
+        </p>
+        <button
+          type="button"
+          class="btn-primary"
+          data-copy={newHref}
+          data-copy-label="Copy link"
+          id="copy-new-share"
+        >
+          Copy link
+        </button>
+      </section>
+    )}
 
     {!entitlements.canCreateShareLinks ? (
       <section class="card">
@@ -81,10 +105,18 @@ const notice = Astro.url.searchParams.get("created")
         <ul class="space-y-4">
           {(links ?? []).map((link) => {
             const href = `${siteUrl}/share/${link.token}`;
+            const isNew = newToken === link.token;
             return (
-              <li class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <li
+                class:list={[
+                  "flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-xl p-3",
+                  isNew && "share-link-new",
+                ]}
+                id={isNew ? "share-link-highlighted" : undefined}
+              >
                 <div>
                   <strong>{link.label || link.scope}</strong>
+                  {isNew && <span class="feed-health-ok ml-2">New</span>}
                   <p class="m-0 text-sm break-all">
                     <a href={href}>{href}</a>
                   </p>
@@ -121,3 +153,12 @@ const notice = Astro.url.searchParams.get("created")
     </section>
   </div>
 </DashboardLayout>
+
+{newHref && (
+  <script is:inline>
+    (() => {
+      const el = document.getElementById("new-share-link");
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    })();
+  </script>
+)}

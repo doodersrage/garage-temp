@@ -88,8 +88,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       ? new Date(Date.now() + expiresDays * 24 * 60 * 60 * 1000).toISOString()
       : null;
 
+  const token = randomToken();
   const { error } = await supabase.from("share_links").insert({
-    token: randomToken(),
+    token,
     household_id: household.householdId,
     scope,
     label,
@@ -101,5 +102,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?error=1`);
   }
 
-  return redirect(`${redirectTo}?created=1`);
+  return redirect(
+    `${redirectTo}?created=1&new_token=${encodeURIComponent(token)}`,
+  );
 };

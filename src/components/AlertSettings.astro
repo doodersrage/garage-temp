@@ -135,11 +135,12 @@ const needsPro =
   <button type="submit" class="btn-primary">Save alert settings</button>
 
   {entitlements.canUsePush && vapidPublicKey && (
-    <div class="mt-4">
+    <div class="mt-4 border-t border-[var(--color-border)] pt-4">
+      <h3 class="text-base font-semibold mb-2">Browser push on this device</h3>
+      <p class="card-subtitle mb-3" id="push-status">Checking push status…</p>
       <button type="button" class="btn-secondary" id="enable-push-btn" data-vapid={vapidPublicKey}>
         Enable browser push
       </button>
-      <p class="card-subtitle mt-2 mb-0" id="push-status"></p>
     </div>
   )}
 </form>
@@ -155,6 +156,40 @@ const needsPro =
 
     const btn = document.getElementById("enable-push-btn");
     const status = document.getElementById("push-status");
+
+    async function refreshPushStatus() {
+      if (!status) return;
+      if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+        status.textContent = "Push is not supported in this browser.";
+        if (btn) btn.hidden = true;
+        return;
+      }
+
+      const permission = Notification.permission;
+      if (permission === "denied") {
+        status.textContent = "Notifications are blocked for this site. Allow them in browser settings, then retry.";
+        if (btn) btn.textContent = "Retry enable push";
+        return;
+      }
+
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const existing = await reg.pushManager.getSubscription();
+        if (existing) {
+          status.textContent = "Push enabled on this browser.";
+          if (btn) btn.textContent = "Re-enable / refresh push";
+        } else if (permission === "granted") {
+          status.textContent = "Permission granted, but this browser is not subscribed yet.";
+          if (btn) btn.textContent = "Subscribe this browser";
+        } else {
+          status.textContent = "Not enabled on this browser yet.";
+          if (btn) btn.textContent = "Enable browser push";
+        }
+      } catch {
+        status.textContent = "Could not read push status.";
+      }
+    }
+
     btn?.addEventListener("click", async () => {
       try {
         const reg = await navigator.serviceWorker.ready;
@@ -163,15 +198,20 @@ const needsPro =
           applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
         });
         const json = sub.toJSON();
-        await fetch("/api/push/subscribe", {
+        const res = await fetch("/api/push/subscribe", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
         });
-        if (status) status.textContent = "Push notifications enabled.";
+        if (!res.ok) throw new Error("Server rejected subscription");
+        if (status) status.textContent = "Push notifications enabled on this browser.";
+        if (btn) btn.textContent = "Re-enable / refresh push";
       } catch (e) {
         if (status) status.textContent = "Could not enable push: " + (e?.message || e);
+        await refreshPushStatus();
       }
     });
+
+    refreshPushStatus();
   </script>
 )}

@@ -7,6 +7,7 @@ interface Props {
   feedIssueCount: number;
   feedCount: number;
   alertsEnabled: boolean;
+  lastAlertLabel?: string | null;
 }
 
 const {
@@ -17,6 +18,7 @@ const {
   feedIssueCount,
   feedCount,
   alertsEnabled,
+  lastAlertLabel = null,
 } = Astro.props;
 ---
 
@@ -52,7 +54,10 @@ const {
     </a>
     <a class="status-strip-item" href="/dashboard/alerts">
       <span class="status-strip-label">Alerts</span>
-      <span class="status-strip-value">{alertsEnabled ? "On" : "Off"}</span>
+      <span class="status-strip-value">
+        {alertsEnabled ? "On" : "Off"}
+        {lastAlertLabel ? ` · last ${lastAlertLabel}` : ""}
+      </span>
     </a>
   </div>
 </section>

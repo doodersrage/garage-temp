@@ -296,6 +296,33 @@ export async function createPushDevice(
   return { device: data as Device, error: null };
 }
 
+export async function renamePushDevice(
+  householdId: string,
+  deviceId: string,
+  name: string,
+): Promise<{ error: string | null }> {
+  const trimmed = name.trim();
+  if (!trimmed) {
+    return { error: "Name is required" };
+  }
+
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("devices")
+    .update({ name: trimmed })
+    .eq("id", deviceId)
+    .eq("household_id", householdId)
+    .eq("source", "push")
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    return { error: error?.message ?? "Failed to rename device" };
+  }
+
+  return { error: null };
+}
+
 export async function rotatePushDeviceKey(
   householdId: string,
   deviceId: string,

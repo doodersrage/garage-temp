@@ -63,6 +63,9 @@ const hasSensors =
   );
 const hasAlertsConfigured = alertSettings.enabled;
 const hasHouseholdMembers = members.members.length > 1;
+const onboardingDismissed =
+  (user.user_metadata as Record<string, unknown> | undefined)?.onboarding_dismissed ===
+  true;
 
 const subscriptionNotice = Astro.url.searchParams.get("subscription");
 const prefsSaved = Astro.url.searchParams.get("prefs_saved");
@@ -83,6 +86,15 @@ const sensorCount =
   latest.length > 0
     ? latest.length
     : devices.reduce((sum, d) => sum + d.sensors.length, 0);
+
+const lastAlertCandidates = [
+  alertSettings.lastAlertSentAt,
+  alertSettings.lastOutageAlertAt,
+  alertSettings.lastRateAlertAt,
+].filter(Boolean) as string[];
+const lastAlertAt =
+  lastAlertCandidates.sort((a, b) => Date.parse(b) - Date.parse(a))[0] ?? null;
+const lastAlertAge = formatRelativeAge(lastAlertAt);
 ---
 <DashboardLayout title="Dashboard">
   <div class="space-y-6">
@@ -114,6 +126,7 @@ const sensorCount =
       feedIssueCount={feedIssueCount}
       feedCount={feedHealth.statuses.length}
       alertsEnabled={alertSettings.enabled}
+      lastAlertLabel={lastAlertAt ? lastAlertAge.label : null}
     />
 
     <DashboardOnboarding
@@ -122,6 +135,7 @@ const sensorCount =
       hasHistory={history.totalCount > 0}
       hasAlertsConfigured={hasAlertsConfigured}
       hasHouseholdMembers={hasHouseholdMembers}
+      dismissed={onboardingDismissed}
     />
 
     <DisplayPreferences preferences={preferences} redirectTo="/dashboard" />

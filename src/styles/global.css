@@ -766,6 +766,15 @@
     color: #fcd34d;
   }
 
+  .share-link-new {
+    background: linear-gradient(
+      160deg,
+      rgb(34 197 94 / 0.1),
+      var(--color-bg-elevated)
+    );
+    border: 1px solid rgb(34 197 94 / 0.35);
+  }
+
   .data-table {
     @apply w-full min-w-[36rem] text-left text-sm;
     border-collapse: collapse;
