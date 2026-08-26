@@ -123,6 +123,8 @@ self.addEventListener("push", (event) => {
       body,
       icon: "/favicon.svg",
       badge: "/favicon.svg",
+      tag: "garage-temp-alert",
+      renotify: true,
     }),
   );
 });

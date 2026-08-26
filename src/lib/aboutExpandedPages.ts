@@ -506,5 +506,41 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     title: "Display preferences deep dive",
     description: "Choose Fahrenheit or Celsius defaults, stat card ordering, and per-feed visibility on the signed-in home experience.",
     summary: "Display prefs persist per account so shared JSON feeds render in your preferred units.",
-  }
+  },
+  {
+    slug: "kit-qr-onboarding",
+    parentSlug: "ingest-and-webhooks",
+    title: "Kit QR onboarding",
+    description:
+      "Sticker a QR code on your probe enclosure for one-scan ingest setup and faster device onboarding.",
+    summary:
+      "Encode the ingest URL on a label so new hardware setup is a single phone scan.",
+  },
+  {
+    slug: "esp32-ota-firmware",
+    parentSlug: "ingest-and-webhooks",
+    title: "ESP32 OTA and battery reporting",
+    description:
+      "Over-the-air firmware updates and optional battery/RSSI fields for push ingest devices.",
+    summary:
+      "Keep ESP32 firmware current on your LAN while telemetry posts to the ingest API.",
+  },
+  {
+    slug: "zapier-make-recipes",
+    parentSlug: "ingest-and-webhooks",
+    title: "Zapier and Make.com recipes",
+    description:
+      "Connect Garage Temp outbound webhooks and inbound snooze actions to no-code automations.",
+    summary:
+      "Route alerts to Zapier/Make and pause notifications from other smart-home flows.",
+  },
+  {
+    slug: "probe-demo",
+    parentSlug: "temperature-probes",
+    title: "Interactive temperature probe demo",
+    description:
+      "Simulate garage probe readings by changing outdoor temperature, sun load, and door state.",
+    summary:
+      "See live JSON output like the real monitoring feed with three probe zones.",
+  },
 ];

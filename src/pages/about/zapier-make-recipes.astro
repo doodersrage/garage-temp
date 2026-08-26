@@ -1,11 +1,12 @@
 ---
+export const prerender = true;
+
 import AboutArticle from "../../components/AboutArticle.astro";
+import { getAboutPage } from "../../lib/aboutPages";
+
+const page = getAboutPage("zapier-make-recipes")!;
 ---
-<AboutArticle
-  slug="zapier-make-recipes"
-  title="Zapier and Make.com recipes"
-  summary="Connect Garage Temp outbound webhooks and inbound snooze actions to no-code automations."
->
+<AboutArticle slug={page.slug} title={page.title} description={page.description}>
   <h2>Outbound: alert → Zapier</h2>
   <ol>
     <li>Create a Zap with trigger <strong>Webhooks by Zapier → Catch Hook</strong>.</li>

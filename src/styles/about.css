@@ -594,7 +594,9 @@
 }
 
 @media (min-width: 1024px) {
-  .about-article-layout {
+  /* Only split columns when the sidebar is present; otherwise the main
+     column was squeezed into the narrow first track (~15–18rem). */
+  .about-article-layout:has(.about-topic-sidebar) {
     grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr);
     gap: 2.5rem;
   }

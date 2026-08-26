@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
-import { createServerClient } from "../../../lib/supabase";
+import { createAdminClient } from "../../../lib/supabase";
 import { getUserEntitlements } from "../../../lib/entitlements";
 
 export const POST: APIRoute = async ({ request, cookies }) => {
@@ -37,7 +37,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
-  const supabase = createServerClient();
+  const supabase = createAdminClient();
   const { error } = await supabase.from("push_subscriptions").upsert(
     {
       user_id: user.id,
@@ -87,7 +87,7 @@ export const DELETE: APIRoute = async ({ request, cookies }) => {
     });
   }
 
-  const supabase = createServerClient();
+  const supabase = createAdminClient();
   await supabase
     .from("push_subscriptions")
     .delete()

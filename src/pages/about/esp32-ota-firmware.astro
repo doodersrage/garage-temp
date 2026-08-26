@@ -1,11 +1,12 @@
 ---
+export const prerender = true;
+
 import AboutArticle from "../../components/AboutArticle.astro";
+import { getAboutPage } from "../../lib/aboutPages";
+
+const page = getAboutPage("esp32-ota-firmware")!;
 ---
-<AboutArticle
-  slug="esp32-ota-firmware"
-  title="ESP32 OTA and battery reporting"
-  summary="Over-the-air updates and health fields for push ingest devices."
->
+<AboutArticle slug={page.slug} title={page.title} description={page.description}>
   <h2>OTA updates</h2>
   <p>
     Use the Arduino OTA or ESP-IDF HTTPS OTA libraries on your LAN, then POST readings to Garage Temp

@@ -34,6 +34,11 @@ const channelLabels: Record<string, string> = {
   push: "browser push",
   webhook: "webhook",
   quiet_hours: "quiet hours",
+  push_not_configured: "push (server VAPID keys missing)",
+  push_no_subscription: "push (subscribe this browser first)",
+  push_delivery_failed: "push (delivery failed — re-subscribe)",
+  push_load_failed: "push (could not load subscriptions)",
+  push_send_failed: "push (send error)",
 };
 
 function formatChannels(raw: string | null): string {

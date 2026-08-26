@@ -1,11 +1,12 @@
 ---
+export const prerender = true;
+
 import AboutArticle from "../../components/AboutArticle.astro";
+import { getAboutPage } from "../../lib/aboutPages";
+
+const page = getAboutPage("kit-qr-onboarding")!;
 ---
-<AboutArticle
-  slug="kit-qr-onboarding"
-  title="Kit QR onboarding"
-  summary="Sticker a QR code on your probe enclosure for one-scan ingest setup."
->
+<AboutArticle slug={page.slug} title={page.title} description={page.description}>
   <h2>What to encode</h2>
   <p>
     After creating a push device (Dashboard → Devices), encode the ingest URL:

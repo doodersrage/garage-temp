@@ -15,6 +15,7 @@ import { shouldSuppressForSnoozeOrVacation } from "./alertSnooze";
 import { applyAlertTemplates } from "./alertTemplates";
 import { createServerClient } from "./supabase";
 import { getUserEntitlements } from "./entitlements";
+import { sendWebPushToUser } from "./webPush";
 
 export type NotifyPayload = {
   title: string;
@@ -175,71 +176,6 @@ async function sendOutboundWebhook(
     await fetch(url, { method: "POST", headers, body });
   } catch (error) {
     console.error("Failed to send outbound webhook:", error);
-  }
-}
-
-function base64UrlToUint8Array(base64Url: string): Uint8Array {
-  const padding = "=".repeat((4 - (base64Url.length % 4)) % 4);
-  const base64 = (base64Url + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const raw = atob(base64);
-  const output = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) {
-    output[i] = raw.charCodeAt(i);
-  }
-  return output;
-}
-
-async function sendWebPushToUser(userId: string, payload: NotifyPayload): Promise<void> {
-  const publicKey = import.meta.env.VAPID_PUBLIC_KEY;
-  const privateKey = import.meta.env.VAPID_PRIVATE_KEY;
-  const subject = import.meta.env.VAPID_SUBJECT ?? "mailto:admin@example.com";
-
-  if (!publicKey || !privateKey) {
-    console.warn("VAPID keys not configured; skipping web push");
-    return;
-  }
-
-  const supabase = createServerClient();
-  const { data: subs } = await supabase
-    .from("push_subscriptions")
-    .select("endpoint, p256dh, auth")
-    .eq("user_id", userId);
-
-  if (!subs || subs.length === 0) return;
-
-  try {
-    const { buildPushPayload } = await import("@block65/webcrypto-web-push");
-
-    for (const sub of subs) {
-      try {
-        const pushPayload = await buildPushPayload(
-          {
-            data: JSON.stringify({ title: payload.title, body: payload.body }),
-            options: { ttl: 60 * 60 },
-          },
-          {
-            endpoint: sub.endpoint,
-            expirationTime: null,
-            keys: {
-              p256dh: sub.p256dh,
-              auth: sub.auth,
-            },
-          },
-          {
-            subject,
-            publicKey,
-            privateKey,
-          },
-        );
-
-        await fetch(sub.endpoint, pushPayload);
-      } catch (error) {
-        console.error("Web push send failed:", error);
-      }
-    }
-  } catch {
-    void base64UrlToUint8Array;
-    console.warn("webcrypto-web-push not available; skipping encrypted web push");
   }
 }
 
@@ -428,8 +364,15 @@ export async function notifyUser(
 
   if (settings.channelPush && allowChannel("push")) {
     if (entitlements.canUsePush) {
-      await sendWebPushToUser(userId, payload);
-      sent.push("push");
+      const pushResult = await sendWebPushToUser(userId, {
+        title: payloadResolved.title,
+        body: bodyWithSnooze,
+      });
+      if (pushResult.delivered > 0) {
+        sent.push("push");
+      } else {
+        skipped.push(pushResult.skippedReason ?? "push");
+      }
     } else {
       skipped.push("push");
     }
