@@ -61,6 +61,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         request,
         "/dashboard/history?subscription=cancelled",
       ),
+      allow_promotion_codes: true,
     });
 
     if (!checkoutSession.url) {

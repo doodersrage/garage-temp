@@ -1,5 +1,5 @@
 /* Garage Temp PWA service worker */
-const CACHE = "garage-temp-v2";
+const CACHE = "garage-temp-v3";
 const PRECACHE = ["/manifest.webmanifest", "/favicon.svg", "/logo.svg"];
 
 self.addEventListener("install", (event) => {
@@ -56,7 +56,16 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         })
-        .catch(() => caches.match(request).then((cached) => cached || Response.error())),
+        .catch(() =>
+          caches.match(request).then((cached) => {
+            if (cached) {
+              const stale = cached.clone();
+              stale.headers.set("X-Garage-Temp-Stale", "1");
+              return stale;
+            }
+            return Response.error();
+          }),
+        ),
     );
     return;
   }

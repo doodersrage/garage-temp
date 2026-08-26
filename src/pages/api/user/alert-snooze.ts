@@ -9,6 +9,11 @@ import {
   vacationUntilFromDays,
 } from "../../../lib/alertSnooze";
 
+import {
+  redirectUnlessEditor,
+  requireHouseholdEditor,
+} from "../../../lib/householdAuth";
+
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
   if (!session || !user) {
@@ -16,8 +21,13 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const formData = await request.formData();
-  const action = formData.get("action")?.toString();
   const redirectTo = formData.get("redirect")?.toString() || "/dashboard/alerts";
+
+  const editor = await requireHouseholdEditor(user.id);
+  const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
+  if (blocked) return blocked;
+
+  const action = formData.get("action")?.toString();
   const settings = await getAlertSettingsForUser(
     user.id,
     user.user_metadata as Record<string, unknown>,

@@ -3,6 +3,11 @@ import { getAuthFromCookies } from "../../../lib/auth";
 import { getOrCreateHouseholdForUser } from "../../../lib/households";
 import { getUserEntitlements } from "../../../lib/entitlements";
 import { createServerClient } from "../../../lib/supabase";
+import {
+  redirectUnlessEditor,
+  requireHouseholdEditor,
+} from "../../../lib/householdAuth";
+import { recordHouseholdActivity } from "../../../lib/householdActivity";
 
 function randomToken(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(24));
@@ -57,6 +62,10 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const redirectTo = formData.get("redirect")?.toString() || "/dashboard/share";
   const action = formData.get("action")?.toString() ?? "create";
 
+  const editor = await requireHouseholdEditor(user.id);
+  const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
+  if (blocked) return blocked;
+
   if (!entitlements.canCreateShareLinks) {
     return redirect(`${redirectTo}?error=pro_required`);
   }
@@ -107,6 +116,13 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   if (error) {
     return redirect(`${redirectTo}?error=1`);
   }
+
+  await recordHouseholdActivity({
+    householdId: household.householdId,
+    userId: user.id,
+    action: "share_link_created",
+    detail: scope,
+  });
 
   return redirect(
     `${redirectTo}?created=1&new_token=${encodeURIComponent(token)}`,

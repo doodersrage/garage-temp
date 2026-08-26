@@ -14,23 +14,33 @@ import { evaluateAlertRules, type RuleEvalContext } from "./alertRules";
 import {
   getAlertSettingsForUser,
   markCooldown,
+  markEscalation,
   notifyUser,
   saveAlertSettingsForUser,
 } from "./notify";
 import type { DeviceWithSensors } from "./devices";
 import {
   fetchLatestSensorValues,
+  fetchRecentBoolReadings,
   getRecentNumericReadings,
 } from "./sensorReadings";
+import {
+  detectBatteryTrendDrop,
+  type BatterySample,
+} from "./batteryTrend";
+import {
+  deviceHealthFromDevices,
+  readDeviceMetaNumber,
+} from "./deviceHealth";
 import {
   buildAlertReadingsFromLatestSensors,
   buildReadingsFromResults,
   mergeAlertReadings,
 } from "./alertReadings";
 import { fetchForecastMinTemp } from "./FetchWeather";
-import { deviceHealthFromDevices } from "./deviceHealth";
 import { buildSnoozeUrl } from "./alertSnoozeTokens";
 import { buildSiteUrl } from "./siteUrl";
+import { computeDoorOpenSessions } from "./doorDuration";
 
 export {
   buildAlertReadingsFromLatestSensors,
@@ -45,9 +55,36 @@ export async function sendThresholdAlertsIfNeeded(
   readings: AlertReading[],
 ): Promise<void> {
   if (!settings.enabled || readings.length === 0) return;
-  if (isAlertCooldownActive(settings.lastAlertSentAt)) return;
 
   const messages = evaluateAlerts(settings, readings);
+  if (messages.length > 0 && settings.escalationEnabled && settings.channelSms) {
+    const lastAlert = settings.lastAlertSentAt
+      ? Date.parse(settings.lastAlertSentAt)
+      : NaN;
+    const lastEsc = settings.lastEscalationAt
+      ? Date.parse(settings.lastEscalationAt)
+      : 0;
+    const elapsedOk =
+      Number.isFinite(lastAlert) &&
+      Date.now() - lastAlert >= settings.escalationMinutes * 60 * 1000;
+    const notEscalatedYet = !Number.isFinite(lastEsc) || lastEsc < lastAlert;
+    if (elapsedOk && notEscalatedYet) {
+      await notifyUser(
+        userId,
+        email,
+        settings,
+        {
+          title: "Escalated: Garage temperature alert",
+          body: messages.join("\n"),
+          kind: "threshold",
+        },
+        { smsOnly: true },
+      );
+      await markEscalation(userId);
+    }
+  }
+
+  if (isAlertCooldownActive(settings.lastAlertSentAt)) return;
   if (messages.length === 0) return;
 
   await notifyUser(userId, email, settings, {
@@ -134,6 +171,9 @@ async function buildRuleContext(
   householdId?: string | null,
 ): Promise<RuleEvalContext> {
   const boolSensors: RuleEvalContext["boolSensors"] = [];
+  const doorOpenSessions: RuleEvalContext["doorOpenSessions"] = [];
+  const doorSince = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
   if (householdId) {
     const latest = await fetchLatestSensorValues(householdId);
     for (const row of latest) {
@@ -149,6 +189,22 @@ async function buildRuleContext(
             value: row.value_bool,
           });
         }
+      }
+    }
+
+    for (const device of devices) {
+      for (const sensor of device.sensors) {
+        if (sensor.kind !== "door") continue;
+        const readings = await fetchRecentBoolReadings(sensor.id, doorSince);
+        const sessions = computeDoorOpenSessions(
+          readings.map((r) => ({
+            label: sensor.label,
+            kind: "door",
+            value: r.value,
+            recordedAt: r.recordedAt,
+          })),
+        );
+        doorOpenSessions.push(...sessions);
       }
     }
   }
@@ -185,6 +241,7 @@ async function buildRuleContext(
   return {
     readings,
     boolSensors,
+    doorOpenSessions,
     rateDrops,
     outages,
     freezeThresholdF: settings.freezeThresholdF,
@@ -320,6 +377,24 @@ export async function maybeSendDeviceHealthAlerts(
       notifyOpts,
     );
     await markCooldown(userId, "last_rssi_alert_at");
+  }
+
+  if (settings.batteryAlertsEnabled) {
+    for (const device of devices) {
+      const history = device.meta?.battery_history as BatterySample[] | undefined;
+      const trend = detectBatteryTrendDrop(Array.isArray(history) ? history : []);
+      if (trend && !isAlertCooldownActive(settings.lastBatteryAlertAt)) {
+        await notifyUser(
+          userId,
+          email,
+          settings,
+          { title: "Battery trend alert", body: `${device.name}: ${trend}`, kind: "battery" },
+          notifyOpts,
+        );
+        await markCooldown(userId, "last_battery_alert_at");
+        break;
+      }
+    }
   }
 }
 

@@ -211,6 +211,36 @@ export function canEditHousehold(role: HouseholdRole | null): boolean {
   return role === "owner" || role === "member";
 }
 
+export async function createAdditionalHouseholdForUser(
+  userId: string,
+  name: string,
+): Promise<{ householdId: string; error: string | null }> {
+  const supabase = createServerClient();
+  const trimmed = name.trim() || "My property";
+  const { data: household, error: createError } = await supabase
+    .from("households")
+    .insert({ name: trimmed })
+    .select("id")
+    .single();
+
+  if (createError || !household) {
+    return { householdId: "", error: createError?.message ?? "Failed to create household" };
+  }
+
+  const { error: memberError } = await supabase.from("household_members").insert({
+    household_id: household.id,
+    user_id: userId,
+    role: "owner",
+  });
+
+  if (memberError) {
+    return { householdId: "", error: memberError.message };
+  }
+
+  await setActiveHouseholdForUser(userId, household.id);
+  return { householdId: household.id, error: null };
+}
+
 export async function isUserInHousehold(
   userId: string,
   householdId: string,

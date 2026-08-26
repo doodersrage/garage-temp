@@ -2,6 +2,11 @@ import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import { getAlertSettingsForUser, markCooldown, notifyUser } from "../../../lib/notify";
 
+import {
+  redirectUnlessEditor,
+  requireHouseholdEditor,
+} from "../../../lib/householdAuth";
+
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
 
@@ -11,6 +16,10 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   const formData = await request.formData();
   const redirectTo = formData.get("redirect")?.toString() || "/dashboard/alerts";
+
+  const editor = await requireHouseholdEditor(user.id);
+  const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
+  if (blocked) return blocked;
 
   try {
     const settings = await getAlertSettingsForUser(

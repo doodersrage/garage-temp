@@ -1,0 +1,70 @@
+---
+import { computeDoorOpenSessions, formatDurationMs } from "../lib/doorDuration";
+import { fetchRecentBoolReadings } from "../lib/sensorReadings";
+import type { DeviceWithSensors } from "../lib/devices";
+
+interface Props {
+  devices: DeviceWithSensors[];
+}
+
+const { devices } = Astro.props;
+const doorSince = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+const sessions = [];
+
+for (const device of devices) {
+  for (const sensor of device.sensors) {
+    if (sensor.kind !== "door") continue;
+    const readings = await fetchRecentBoolReadings(sensor.id, doorSince);
+    sessions.push(
+      ...computeDoorOpenSessions(
+        readings.map((r) => ({
+          label: sensor.label,
+          kind: "door",
+          value: r.value,
+          recordedAt: r.recordedAt,
+        })),
+      ),
+    );
+  }
+}
+
+const openNow = sessions.filter((s) => s.stillOpen);
+const recentClosed = sessions
+  .filter((s) => !s.stillOpen && s.durationMs != null)
+  .slice(-3)
+  .reverse();
+---
+{(openNow.length > 0 || recentClosed.length > 0) && (
+  <section class="card">
+    <h2 class="card-title">Door duration</h2>
+    <p class="card-subtitle mb-4">Open sessions in the last 24 hours.</p>
+    {openNow.length > 0 && (
+      <div class="alert-warning mb-4">
+        {openNow.map((session) => (
+          <p class="m-0 mb-1">
+            <strong>{session.label}</strong> open since{" "}
+            {new Date(session.openedAt).toLocaleString()}
+          </p>
+        ))}
+      </div>
+    )}
+    {recentClosed.length > 0 ? (
+      <ul class="space-y-2 mb-0">
+        {recentClosed.map((session) => (
+          <li class="text-sm">
+            <strong>{session.label}</strong> was open{" "}
+            {formatDurationMs(session.durationMs!)}
+            {" · "}
+            {new Date(session.openedAt).toLocaleString()}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      openNow.length === 0 && (
+        <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+          No door sessions recorded in the last 24 hours.
+        </p>
+      )
+    )}
+  </section>
+)}

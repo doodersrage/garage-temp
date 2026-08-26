@@ -5,6 +5,7 @@ import {
   getWeatherPresetLabel,
   uniqueWeatherCityPresets,
 } from "./weatherCities";
+import { getWeatherPresetCoords } from "./weatherCityCoords";
 
 export type FreezeMapSnapshot = {
   city_id: string;
@@ -86,10 +87,14 @@ export async function collectFreezeMapSnapshots(): Promise<{
 
     const lat =
       household.freeze_map_lat ??
-      parseGeoKeyLat(key);
+      parseGeoKeyLat(key) ??
+      getWeatherPresetCoords(household.freeze_map_city_id)?.lat ??
+      null;
     const lon =
       household.freeze_map_lon ??
-      parseGeoKeyLon(key);
+      parseGeoKeyLon(key) ??
+      getWeatherPresetCoords(household.freeze_map_city_id)?.lon ??
+      null;
 
     const latest = await fetchLatestSensorValues(household.id);
     const temps = latest

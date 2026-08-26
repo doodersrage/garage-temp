@@ -33,7 +33,7 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 - Per-kind severity routing (which channels fire for threshold vs rate vs outage, …)
 - Channels: email, Discord, Telegram, Slack; Pro adds SMS (Twilio), browser push, outbound webhooks
 - Test alert with per-channel sent/skipped feedback and alert activity audit trail
-- Weekly email digest (Mondays) and optional monthly freeze report (1st of month)
+- Weekly email digest (Mondays) and optional monthly freeze report (1st of month, HTML attachment)
 
 ### Accounts & collaboration
 - Email/password auth, password reset, optional OAuth (Google/GitHub/Discord when enabled in Supabase)
@@ -43,7 +43,16 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 - Inbound webhooks (Pro): snooze/vacation from HA, Zapier, or Make
 - Dashboard API keys (Pro) for `GET /api/v1/metrics`; downloadable Grafana dashboard JSON
 - JSON data export (`GET /api/user/export`)
-- Pro checkout includes 14-day trial
+- Pro checkout includes 14-day trial and Stripe promotion codes at checkout
+
+### Expansion pack 4 (dashboard polish)
+- **Viewer enforcement** on device, alert, feed, and share mutations
+- **Door duration** card, multi-probe history chart, freeze-hours score, indoor/outdoor delta chart
+- **Alert escalation** (SMS repeat), custom templates, Telegram bot commands (`/status`, `/snooze`, `/vacation`)
+- **Second property** households, device transfer between properties, activity audit log
+- **Public status pages** (`/status/<token>`), iCal freeze outlook feed, ingest stats panel
+- **Live SSE** stream (`/api/home/readings/stream`), 30s home polling, PWA offline stale cache (v3)
+- Freeze-map heatmap rings sized by sample count; HA entity naming YAML in `public/ha/`
 
 ### Ops & content
 - Hourly Worker cron for history collection and alert evaluation

@@ -112,6 +112,27 @@ export async function getRecentNumericReadings(
     .filter((v): v is number => typeof v === "number");
 }
 
+export async function fetchRecentBoolReadings(
+  sensorId: string,
+  sinceIso: string,
+): Promise<Array<{ value: boolean; recordedAt: string }>> {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from("sensor_readings")
+    .select("value_bool, recorded_at")
+    .eq("sensor_id", sensorId)
+    .gte("recorded_at", sinceIso)
+    .not("value_bool", "is", null)
+    .order("recorded_at", { ascending: true });
+
+  return (data ?? [])
+    .filter((row) => typeof row.value_bool === "boolean")
+    .map((row) => ({
+      value: row.value_bool as boolean,
+      recordedAt: row.recorded_at as string,
+    }));
+}
+
 export async function fetchLatestSensorValues(
   householdId: string,
 ): Promise<

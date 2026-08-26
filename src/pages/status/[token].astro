@@ -1,0 +1,69 @@
+---
+export const prerender = false;
+import Layout from "../../layouts/Layout.astro";
+import { resolveStatusPageToken, buildStatusPageSnapshot } from "../../lib/statusPage";
+
+const token = Astro.params.token;
+if (!token) {
+  return Astro.redirect("/");
+}
+
+const resolved = await resolveStatusPageToken(token);
+if (!resolved) {
+  return Astro.redirect("/");
+}
+
+const snapshot = await buildStatusPageSnapshot(resolved.householdId);
+---
+<Layout title="Garage status" description="Live household sensor status">
+  <div class="page-shell page-stack" style="max-width:640px">
+    <section class="card">
+      <h1 class="card-title">Household status</h1>
+      <p class="card-subtitle mb-4">
+        Read-only snapshot · Updated {snapshot.lastReadingLabel}
+        {snapshot.stale ? " · data may be stale" : ""}
+      </p>
+      <div class="stat-grid mb-4">
+        <article class="stat-item">
+          <span class="stat-label">Devices</span>
+          <p class="stat-value">{snapshot.deviceCount}</p>
+        </article>
+        <article class="stat-item">
+          <span class="stat-label">Sensors</span>
+          <p class="stat-value">{snapshot.sensorCount}</p>
+        </article>
+        <article class="stat-item">
+          <span class="stat-label">Stale</span>
+          <p class="stat-value">{snapshot.staleSensorCount}</p>
+        </article>
+      </div>
+      {snapshot.sensors.length === 0 ? (
+        <p class="mb-0 text-[var(--color-text-muted)]">No sensor readings yet.</p>
+      ) : (
+        <ul class="space-y-2 mb-0">
+          {snapshot.sensors.map((sensor) => (
+            <li class="flex justify-between gap-3 text-sm border-b border-[var(--color-border)] pb-2">
+              <span>
+                <strong>{sensor.label}</strong>
+                <span class="text-[var(--color-text-muted)]"> · {sensor.device}</span>
+              </span>
+              <span>
+                {sensor.value_num != null
+                  ? `${sensor.value_num.toFixed(1)}`
+                  : sensor.value_bool != null
+                    ? sensor.value_bool
+                      ? "Open"
+                      : "Closed"
+                    : "—"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  </div>
+</Layout>
+
+<script is:inline>
+  setInterval(() => location.reload(), 60000);
+</script>

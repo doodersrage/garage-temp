@@ -3,6 +3,11 @@ import { getAuthFromCookies } from "../../../lib/auth";
 import { parseTempProbesFromFormData } from "../../../lib/tempFeedConfig";
 import { getUserTempConfig, saveUserTempProbes } from "../../../lib/userTempConfig";
 
+import {
+  redirectUnlessEditor,
+  requireHouseholdEditor,
+} from "../../../lib/householdAuth";
+
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
 
@@ -12,6 +17,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   const formData = await request.formData();
   const redirectTo = formData.get("redirect")?.toString() || "/dashboard/temperature";
+
+  const editor = await requireHouseholdEditor(user.id);
+  const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
+  if (blocked) return blocked;
+
   const tempConfig = await getUserTempConfig(user);
   const tempProbes = parseTempProbesFromFormData(formData, tempConfig.feeds);
 

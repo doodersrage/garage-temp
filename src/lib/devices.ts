@@ -555,6 +555,47 @@ export async function savePullDevicesForHousehold(
   return { error: null };
 }
 
+export async function transferDeviceToHousehold(
+  deviceId: string,
+  fromHouseholdId: string,
+  toHouseholdId: string,
+): Promise<{ error: string | null }> {
+  if (fromHouseholdId === toHouseholdId) {
+    return { error: "Same household" };
+  }
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("devices")
+    .update({
+      household_id: toHouseholdId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", deviceId)
+    .eq("household_id", fromHouseholdId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    return { error: error?.message ?? "Device not found" };
+  }
+
+  await supabase
+    .from("sensor_readings")
+    .update({ household_id: toHouseholdId })
+    .eq("household_id", fromHouseholdId)
+    .in(
+      "sensor_id",
+      (
+        await supabase
+          .from("device_sensors")
+          .select("id")
+          .eq("device_id", deviceId)
+      ).data?.map((s) => s.id) ?? [],
+    );
+
+  return { error: null };
+}
+
 export async function getHouseholdIdForUser(userId: string): Promise<string | null> {
   return getUserHouseholdId(userId);
 }

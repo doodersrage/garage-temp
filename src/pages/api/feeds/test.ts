@@ -2,13 +2,22 @@ import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import { fetchTempFeed } from "../../../lib/FetchTemps";
 import { isValidFeedUrl } from "../../../lib/tempFeedConfig";
+import { requireHouseholdEditor } from "../../../lib/householdAuth";
 
 export const POST: APIRoute = async ({ request, cookies }) => {
-  const { session } = await getAuthFromCookies(cookies);
+  const { session, user } = await getAuthFromCookies(cookies);
 
-  if (!session) {
+  if (!session || !user) {
     return new Response(JSON.stringify({ ok: false, message: "Sign in required." }), {
       status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const editor = await requireHouseholdEditor(user.id);
+  if (!editor.ok) {
+    return new Response(JSON.stringify({ ok: false, message: "View-only access." }), {
+      status: 403,
       headers: { "Content-Type": "application/json" },
     });
   }

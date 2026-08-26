@@ -1,17 +1,26 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
-import { getOrCreateHouseholdForUser } from "../../../lib/households";
+import {
+  getOrCreateHouseholdForUser,
+  isUserInHousehold,
+} from "../../../lib/households";
 import {
   createPushDevice,
   deleteDeviceSensor,
   listHouseholdDevices,
   renamePushDevice,
   rotatePushDeviceKey,
+  transferDeviceToHousehold,
   updateDeviceSensor,
   updateDeviceSpace,
 } from "../../../lib/devices";
 import { getUserEntitlements } from "../../../lib/entitlements";
 import { createServerClient } from "../../../lib/supabase";
+import {
+  redirectUnlessEditor,
+  requireHouseholdEditor,
+} from "../../../lib/householdAuth";
+import { recordHouseholdActivity } from "../../../lib/householdActivity";
 
 async function sha256Hex(value: string): Promise<string> {
   const digest = await crypto.subtle.digest(
@@ -37,11 +46,41 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const formData = await request.formData();
   const redirectTo = formData.get("redirect")?.toString() || "/dashboard/temperature";
   const action = formData.get("action")?.toString() ?? "create_push";
+
+  const editor = await requireHouseholdEditor(user.id);
+  const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
+  if (blocked) return blocked;
+
   const entitlements = await getUserEntitlements(user.id);
   const household = await getOrCreateHouseholdForUser(user.id, user.email);
 
   if (!household.householdId) {
     return redirect(`${redirectTo}?error=1`);
+  }
+
+  const householdId = editor.ctx.householdId;
+
+  if (action === "transfer") {
+    const deviceId = formData.get("device_id")?.toString();
+    const targetId = formData.get("target_household_id")?.toString();
+    if (!deviceId || !targetId) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+    const canTarget = await isUserInHousehold(user.id, targetId);
+    if (!canTarget) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+    const result = await transferDeviceToHousehold(deviceId, householdId, targetId);
+    if (result.error) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+    await recordHouseholdActivity({
+      householdId,
+      userId: user.id,
+      action: "device_transfer",
+      detail: `${deviceId} → ${targetId}`,
+    });
+    return redirect(`${redirectTo}?device_transferred=1`);
   }
 
   if (action === "delete") {
@@ -52,7 +91,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         .from("devices")
         .delete()
         .eq("id", deviceId)
-        .eq("household_id", household.householdId);
+        .eq("household_id", householdId);
     }
     return redirect(`${redirectTo}?device_deleted=1`);
   }
@@ -63,7 +102,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     if (!deviceId) {
       return redirect(`${redirectTo}?error=1`);
     }
-    const result = await renamePushDevice(household.householdId, deviceId, name);
+    const result = await renamePushDevice(householdId, deviceId, name);
     if (result.error) {
       return redirect(`${redirectTo}?error=1`);
     }
@@ -77,7 +116,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       return redirect(`${redirectTo}?error=1`);
     }
     const result = await updateDeviceSpace(
-      household.householdId,
+      householdId,
       deviceId,
       space,
     );
@@ -97,7 +136,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     const hash = await sha256Hex(rawKey);
     const prefix = rawKey.slice(0, 8);
     const result = await rotatePushDeviceKey(
-      household.householdId,
+      householdId,
       deviceId,
       hash,
       prefix,
@@ -124,7 +163,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     }
 
     const supabase = createServerClient();
-    const owned = await listHouseholdDevices(household.householdId);
+    const owned = await listHouseholdDevices(householdId);
     if (!owned.devices.some((d) => d.id === deviceId)) {
       return redirect(`${redirectTo}?error=1`);
     }
@@ -153,7 +192,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       return redirect(`${redirectTo}?error=1`);
     }
 
-    const owned = await listHouseholdDevices(household.householdId);
+    const owned = await listHouseholdDevices(householdId);
     if (!owned.devices.some((d) => d.id === deviceId)) {
       return redirect(`${redirectTo}?error=1`);
     }
@@ -180,7 +219,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       return redirect(`${redirectTo}?error=1`);
     }
 
-    const owned = await listHouseholdDevices(household.householdId);
+    const owned = await listHouseholdDevices(householdId);
     if (!owned.devices.some((d) => d.id === deviceId)) {
       return redirect(`${redirectTo}?error=1`);
     }
@@ -190,7 +229,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   // create_push only — enforce device limit here
-  const existing = await listHouseholdDevices(household.householdId);
+  const existing = await listHouseholdDevices(householdId);
   const pushCount = existing.devices.filter((d) => d.source === "push").length;
   if (pushCount >= entitlements.maxDevices) {
     return redirect(`${redirectTo}?error=device_limit`);
@@ -202,7 +241,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const prefix = rawKey.slice(0, 8);
 
   const { device, error } = await createPushDevice(
-    household.householdId,
+    householdId,
     name,
     hash,
     prefix,

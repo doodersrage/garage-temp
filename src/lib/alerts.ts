@@ -107,6 +107,11 @@ export type AlertSettings = {
   lastBatteryAlertAt: string | null;
   lastRssiAlertAt: string | null;
   lastMonthlyReportAt: string | null;
+  escalationEnabled: boolean;
+  escalationMinutes: number;
+  alertTemplates: Record<string, { title?: string; body?: string }>;
+  telegramCommandSecret: string | null;
+  lastEscalationAt: string | null;
 };
 
 export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
@@ -155,6 +160,11 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   lastBatteryAlertAt: null,
   lastRssiAlertAt: null,
   lastMonthlyReportAt: null,
+  escalationEnabled: false,
+  escalationMinutes: 30,
+  alertTemplates: {},
+  telegramCommandSecret: null,
+  lastEscalationAt: null,
 };
 
 /** Minimum time between threshold alert notifications for the same account. */
@@ -310,6 +320,21 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
       typeof row.last_monthly_report_at === "string"
         ? row.last_monthly_report_at
         : null,
+    escalationEnabled: row.escalation_enabled === true,
+    escalationMinutes:
+      typeof row.escalation_minutes === "number"
+        ? row.escalation_minutes
+        : DEFAULT_ALERT_SETTINGS.escalationMinutes,
+    alertTemplates:
+      row.alert_templates && typeof row.alert_templates === "object"
+        ? (row.alert_templates as Record<string, { title?: string; body?: string }>)
+        : {},
+    telegramCommandSecret:
+      typeof row.telegram_command_secret === "string"
+        ? row.telegram_command_secret
+        : null,
+    lastEscalationAt:
+      typeof row.last_escalation_at === "string" ? row.last_escalation_at : null,
   };
 }
 
@@ -496,6 +521,11 @@ export function serializeAlertSettings(settings: AlertSettings): Record<string, 
     last_battery_alert_at: settings.lastBatteryAlertAt,
     last_rssi_alert_at: settings.lastRssiAlertAt,
     last_monthly_report_at: settings.lastMonthlyReportAt,
+    escalation_enabled: settings.escalationEnabled,
+    escalation_minutes: settings.escalationMinutes,
+    alert_templates: settings.alertTemplates,
+    telegram_command_secret: settings.telegramCommandSecret,
+    last_escalation_at: settings.lastEscalationAt,
   };
 }
 

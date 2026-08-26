@@ -6,8 +6,13 @@ import {
   type AlertSettings,
 } from "../../../lib/alerts";
 import { parseAlertRulesFromForm } from "../../../lib/alertRules";
+import { parseAlertTemplates } from "../../../lib/alertTemplates";
 import { getAlertSettingsForUser } from "../../../lib/notify";
 import { getUserEntitlements } from "../../../lib/entitlements";
+import {
+  redirectUnlessEditor,
+  requireHouseholdEditor,
+} from "../../../lib/householdAuth";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -18,6 +23,10 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   const formData = await request.formData();
   const redirectTo = formData.get("redirect")?.toString() || "/dashboard/alerts";
+
+  const editor = await requireHouseholdEditor(user.id);
+  const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
+  if (blocked) return blocked;
   const existing = await getAlertSettingsForUser(
     user.id,
     user.user_metadata as Record<string, unknown> | undefined,
@@ -96,6 +105,22 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     lastBatteryAlertAt: existing.lastBatteryAlertAt,
     lastRssiAlertAt: existing.lastRssiAlertAt,
     lastMonthlyReportAt: existing.lastMonthlyReportAt,
+    escalationEnabled: formData.has("escalation_enabled"),
+    escalationMinutes: Number(
+      formData.get("escalation_minutes") ?? existing.escalationMinutes,
+    ),
+    alertTemplates: (() => {
+      try {
+        const raw = formData.get("alert_templates_json")?.toString();
+        return raw ? parseAlertTemplates(JSON.parse(raw)) : existing.alertTemplates;
+      } catch {
+        return existing.alertTemplates;
+      }
+    })(),
+    telegramCommandSecret:
+      formData.get("telegram_command_secret")?.toString().trim() ||
+      existing.telegramCommandSecret,
+    lastEscalationAt: existing.lastEscalationAt,
     channelSeverity: (() => {
       try {
         const raw = formData.get("channel_severity_json")?.toString();

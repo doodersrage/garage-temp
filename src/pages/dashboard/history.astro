@@ -19,7 +19,9 @@ import {
 } from "../../lib/seasonalInsights";
 import { getUserDevicesAsTempConfig } from "../../lib/devices";
 import { getUserPreferences } from "../../lib/userPreferences";
-import { fetchIndoorOutdoorDelta } from "../../lib/indoorOutdoorDelta";
+import { fetchIndoorOutdoorDelta, buildIndoorOutdoorSeries } from "../../lib/indoorOutdoorDelta";
+import { computeFreezeHours } from "../../lib/freezeHours";
+import IndoorOutdoorChart from "../../components/IndoorOutdoorChart.tsx";
 import { RAW_READING_RETENTION_DAYS } from "../../lib/retentionSchedule";
 import { getUserEntitlements } from "../../lib/entitlements";
 
@@ -88,6 +90,10 @@ const outdoorDelta = await fetchIndoorOutdoorDelta(
   chartData.points,
   preferences.weatherCityId,
 );
+const indoorOutdoorSeries = outdoorDelta
+  ? buildIndoorOutdoorSeries(chartData.points, outdoorDelta.outdoorF)
+  : [];
+const freezeHours = computeFreezeHours(chartData.points, 34);
 
 if (history.totalPages > 0 && pageParam > history.totalPages) {
   return Astro.redirect(`/dashboard/history?page=${history.totalPages}`);
@@ -167,6 +173,39 @@ const showRetentionNote =
                 : outdoorDelta.deltaF < 0
                   ? "Garage cooler than outdoors"
                   : "Matched outdoors"}
+            </p>
+          </article>
+        </div>
+        {indoorOutdoorSeries.length >= 2 && (
+          <div class="mt-4">
+            <IndoorOutdoorChart client:visible points={indoorOutdoorSeries} />
+          </div>
+        )}
+        <p class="mt-4 mb-0 text-sm">
+          <a class="text-link" href="/api/ical/outlook">Subscribe to freeze outlook (iCal)</a>
+        </p>
+      </section>
+    )}
+
+    {chartData.points.length >= 2 && (
+      <section class="card">
+        <h2 class="card-title">Season freeze exposure</h2>
+        <p class="card-subtitle mb-4">
+          Estimated time below 34°F in the selected chart window.
+        </p>
+        <div class="stat-grid">
+          <article class="stat-item">
+            <span class="stat-label">Hours ≤ 34°F</span>
+            <p class="stat-value">{freezeHours.hoursBelow34.toFixed(1)}</p>
+          </article>
+          <article class="stat-item">
+            <span class="stat-label">Readings ≤ 34°F</span>
+            <p class="stat-value">{freezeHours.readingsBelow34}</p>
+          </article>
+          <article class="stat-item">
+            <span class="stat-label">Coldest</span>
+            <p class="stat-value">
+              {freezeHours.coldestF != null ? `${freezeHours.coldestF.toFixed(1)}°F` : "—"}
             </p>
           </article>
         </div>

@@ -12,6 +12,7 @@ import {
   shouldSuppressForQuietHours,
 } from "./quietHours";
 import { shouldSuppressForSnoozeOrVacation } from "./alertSnooze";
+import { applyAlertTemplates } from "./alertTemplates";
 import { createServerClient } from "./supabase";
 import { getUserEntitlements } from "./entitlements";
 
@@ -307,14 +308,28 @@ export async function markCooldown(
     .eq("user_id", userId);
 }
 
+export async function markEscalation(userId: string): Promise<void> {
+  const supabase = createServerClient();
+  await supabase
+    .from("alert_settings")
+    .update({
+      last_escalation_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", userId);
+}
+
 export async function notifyUser(
   userId: string,
   fallbackEmail: string | null | undefined,
   settings: AlertSettings,
   payload: NotifyPayload,
-  options?: { snoozeUrl?: string },
+  options?: { snoozeUrl?: string; smsOnly?: boolean },
 ): Promise<{ sent: string[]; skipped: string[] }> {
-  if (shouldSuppressForSnoozeOrVacation(settings, payload.kind)) {
+  if (
+    !options?.smsOnly &&
+    shouldSuppressForSnoozeOrVacation(settings, payload.kind)
+  ) {
     const skipped = ["snooze_or_vacation"];
     await recordAlertEvent({
       userId,
@@ -327,8 +342,13 @@ export async function notifyUser(
     return { sent: [], skipped };
   }
 
-  const smsCriticalOnly = quietHoursAllowsSmsCritical(settings, payload.kind);
-  if (shouldSuppressForQuietHours(settings, payload.kind) && !smsCriticalOnly) {
+  const smsCriticalOnly =
+    options?.smsOnly || quietHoursAllowsSmsCritical(settings, payload.kind);
+  if (
+    !options?.smsOnly &&
+    shouldSuppressForQuietHours(settings, payload.kind) &&
+    !smsCriticalOnly
+  ) {
     const skipped = ["quiet_hours"];
     await recordAlertEvent({
       userId,
@@ -343,20 +363,22 @@ export async function notifyUser(
 
   const entitlements = await getUserEntitlements(userId);
   const email = settings.email ?? fallbackEmail ?? null;
+  let payloadResolved = applyAlertTemplates(payload, settings.alertTemplates);
   const sent: string[] = [];
   const skipped: string[] = [];
-  const kind = payload.kind;
+  const kind = payloadResolved.kind;
   const bodyWithSnooze = options?.snoozeUrl
-    ? `${payload.body}\n\nSnooze 24h: ${options.snoozeUrl}`
-    : payload.body;
+    ? `${payloadResolved.body}\n\nSnooze 24h: ${options.snoozeUrl}`
+    : payloadResolved.body;
   const allowChannel = (channel: AlertChannelName) => {
+    if (options?.smsOnly) return channel === "sms";
     if (smsCriticalOnly) return channel === "sms";
     return channelAllowed(settings, kind, channel);
   };
 
   if (settings.channelEmail && allowChannel("email")) {
     if (email) {
-      await sendEmail(email, payload.title, bodyWithSnooze);
+      await sendEmail(email, payloadResolved.title, bodyWithSnooze);
       sent.push("email");
     } else {
       skipped.push("email");
@@ -365,7 +387,7 @@ export async function notifyUser(
 
   if (settings.channelDiscord && allowChannel("discord")) {
     if (settings.discordWebhookUrl) {
-      await sendDiscord(settings.discordWebhookUrl, payload.title, bodyWithSnooze);
+      await sendDiscord(settings.discordWebhookUrl, payloadResolved.title, bodyWithSnooze);
       sent.push("discord");
     } else {
       skipped.push("discord");
@@ -374,7 +396,7 @@ export async function notifyUser(
 
   if (settings.channelSlack && allowChannel("slack")) {
     if (settings.slackWebhookUrl) {
-      await sendSlack(settings.slackWebhookUrl, payload.title, bodyWithSnooze);
+      await sendSlack(settings.slackWebhookUrl, payloadResolved.title, bodyWithSnooze);
       sent.push("slack");
     } else {
       skipped.push("slack");
@@ -386,7 +408,7 @@ export async function notifyUser(
       await sendTelegram(
         settings.telegramBotToken,
         settings.telegramChatId,
-        payload.title,
+        payloadResolved.title,
         bodyWithSnooze,
       );
       sent.push("telegram");
@@ -397,7 +419,7 @@ export async function notifyUser(
 
   if (settings.channelSms && allowChannel("sms")) {
     if (settings.smsPhone && entitlements.canUseSms) {
-      await sendTwilioSms(settings.smsPhone, `${payload.title}: ${bodyWithSnooze}`);
+      await sendTwilioSms(settings.smsPhone, `${payloadResolved.title}: ${bodyWithSnooze}`);
       sent.push("sms");
     } else {
       skipped.push("sms");

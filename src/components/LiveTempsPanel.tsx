@@ -118,7 +118,7 @@ function formatSensorValue(sensor: LiveSensor): { primary: string; detail: strin
   return { primary: "—", detail: "No reading" };
 }
 
-export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
+export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
   const [groups, setGroups] = useState<FeedGroup[]>([]);
   const [sensors, setSensors] = useState<LiveSensor[]>([]);
   const [spaces, setSpaces] = useState<string[]>([]);
@@ -127,6 +127,7 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
   const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState(intervalMs / 1000);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [offlineStale, setOfflineStale] = useState(false);
 
   const loadReadings = useCallback(async () => {
     try {
@@ -152,6 +153,7 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
       setSensors(payload.sensors ?? []);
       if (payload.spaces) setSpaces(payload.spaces);
       setUpdatedAt(payload.updatedAt);
+      setOfflineStale(response.headers.get("X-Garage-Temp-Stale") === "1");
       setError(null);
       setCountdown(intervalMs / 1000);
     } catch (e) {
@@ -350,6 +352,9 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
       )}
 
       <p class="live-refresh-note">
+        {offlineStale && (
+          <span class="text-[var(--color-warning)]">Showing cached readings (offline). </span>
+        )}
         {updatedAt
           ? `Updated ${new Date(updatedAt).toLocaleTimeString()}. Next refresh in ${countdown}s.`
           : `Next refresh in ${countdown}s.`}

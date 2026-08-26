@@ -46,7 +46,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
 
   <label class="checkbox-row mb-4">
     <input type="checkbox" name="monthly_report_enabled" value="true" checked={settings.monthlyReportEnabled} />
-    <span>Monthly freeze report email (1st of month)</span>
+    <span>Monthly freeze report email (1st of month, with HTML attachment)</span>
   </label>
 
   <h3 class="text-base font-semibold mb-2">Snooze & vacation</h3>
@@ -105,6 +105,22 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
       <input class="form-input" type="number" id="rssi_threshold" name="rssi_threshold" value={settings.rssiThreshold} />
     </div>
   </div>
+
+  <h3 class="text-base font-semibold mb-2">Escalation</h3>
+  <p class="card-subtitle mb-3">
+    Re-send threshold alerts via SMS if the condition persists (requires SMS channel).
+  </p>
+  <div class="config-row-grid mb-4">
+    <label class="checkbox-row mb-0">
+      <input type="checkbox" name="escalation_enabled" value="true" checked={settings.escalationEnabled} />
+      <span>Escalate to SMS</span>
+    </label>
+    <div class="form-field mb-0">
+      <label class="form-label" for="escalation_minutes">After (minutes)</label>
+      <input class="form-input" type="number" id="escalation_minutes" name="escalation_minutes" value={settings.escalationMinutes} min="5" />
+    </div>
+  </div>
+  <input type="hidden" name="alert_templates_json" id="alert_templates_json" value={JSON.stringify(settings.alertTemplates ?? {})} />
 
   <div class="config-row-grid mb-4">
     <div class="form-field mb-0">
@@ -276,6 +292,14 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
   <div class="form-field">
     <label class="form-label" for="telegram_chat_id">Telegram chat ID</label>
     <input class="form-input" type="text" id="telegram_chat_id" name="telegram_chat_id" value={settings.telegramChatId ?? ""} placeholder="-100..." />
+  </div>
+
+  <div class="form-field">
+    <label class="form-label" for="telegram_command_secret">Telegram bot webhook secret</label>
+    <input class="form-input" type="text" id="telegram_command_secret" name="telegram_command_secret" value={settings.telegramCommandSecret ?? ""} placeholder="random-secret" autocomplete="off" />
+    <p class="form-hint mb-0">
+      Set bot webhook to <code>/api/telegram/webhook?secret=…</code> for /status, /snooze, /vacation commands.
+    </p>
   </div>
 
   <div class="form-field">

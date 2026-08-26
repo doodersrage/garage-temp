@@ -9,6 +9,28 @@ export type IndoorOutdoorDelta = {
   cityName: string | null;
 };
 
+export type IndoorOutdoorPoint = {
+  timestamp: string;
+  indoorF: number;
+  outdoorF: number;
+  deltaF: number;
+};
+
+export function buildIndoorOutdoorSeries(
+  points: ChartPoint[],
+  outdoorF: number,
+): IndoorOutdoorPoint[] {
+  if (!Number.isFinite(outdoorF)) return [];
+  return [...points]
+    .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
+    .map((point) => ({
+      timestamp: point.timestamp,
+      indoorF: point.tempf,
+      outdoorF,
+      deltaF: point.tempf - outdoorF,
+    }));
+}
+
 export function computeIndoorOutdoorDelta(
   points: ChartPoint[],
   outdoorF: number,

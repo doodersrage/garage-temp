@@ -1,11 +1,57 @@
 import { createAdminClient } from "./supabase";
-import { getAlertSettingsForUser, notifyUser } from "./notify";
+import { getAlertSettingsForUser } from "./notify";
+import { recordAlertEvent } from "./alertEvents";
 import { fetchGarageTempChartData } from "./garageTempsHistory";
 import { fetchNightsAtRisk } from "./FetchWeather";
 import { getUserPreferences } from "./userPreferences";
+import { computeFreezeHours } from "./freezeHours";
+import { resolveSiteUrl } from "./schemaMarkup";
+import {
+  buildMonthlyReportHtmlDocument,
+  buildMonthlyReportHtmlEmail,
+  buildMonthlyReportPlainText,
+  encodeBase64Utf8,
+  summarizeProbesForReport,
+  type MonthlyReportData,
+} from "./monthlyReportHtml";
 
 export function shouldSendMonthlyReport(now = new Date()): boolean {
   return now.getUTCDate() === 1 && now.getUTCHours() === 8;
+}
+
+async function sendMonthlyReportEmail(
+  to: string,
+  subject: string,
+  plainBody: string,
+  htmlBody: string,
+  attachmentHtml: string,
+): Promise<void> {
+  const { EmailMessage } = await import("cloudflare:email");
+  const { createMimeMessage } = await import("mimetext");
+  const { env } = await import("cloudflare:workers");
+
+  const msg = createMimeMessage();
+  msg.setSender({
+    name: "Garage Temp Monitor",
+    addr: import.meta.env.SMTP_MAIL_FROM,
+  });
+  msg.setRecipient(to);
+  msg.setSubject(subject);
+  msg.addMessage({ contentType: "text/plain", data: plainBody });
+  msg.addMessage({ contentType: "text/html", data: htmlBody });
+  msg.addAttachment({
+    filename: "garage-temp-monthly-report.html",
+    contentType: "text/html; charset=UTF-8",
+    data: encodeBase64Utf8(attachmentHtml),
+  });
+
+  const mail = new EmailMessage(
+    import.meta.env.SMTP_MAIL_FROM,
+    to,
+    msg.asRaw(),
+  );
+
+  await env.MAILER.send(mail);
 }
 
 export async function sendMonthlyReportsForAllUsers(): Promise<{
@@ -49,14 +95,14 @@ async function sendMonthlyReportForUser(userId: string): Promise<boolean> {
   if (!email || !authUser) return false;
 
   const preferences = await getUserPreferences(authUser);
-  const chart = await fetchGarageTempChartData(userId, 30);
+  const { points } = await fetchGarageTempChartData(userId, 30);
   const nights = await fetchNightsAtRisk({
     cityId: preferences.weatherCityId,
     freezeThresholdF: settings.freezeThresholdF,
   });
   const nightsAtRisk = nights.filter((n) => n.atRisk).length;
 
-  const temps = chart.map((p) => p.tempf);
+  const temps = points.map((p) => p.tempf);
   const minTemp = temps.length ? Math.min(...temps) : null;
   const maxTemp = temps.length ? Math.max(...temps) : null;
   const avgTemp = temps.length
@@ -69,26 +115,45 @@ async function sendMonthlyReportForUser(userId: string): Promise<boolean> {
     timeZone: "UTC",
   });
 
-  const lines = [
-    `Garage Temp monthly report — ${monthLabel}`,
-    "",
-    `Readings (30d): ${chart.length}`,
-    minTemp != null ? `Coldest: ${minTemp.toFixed(1)}°F` : "Coldest: —",
-    maxTemp != null ? `Warmest: ${maxTemp.toFixed(1)}°F` : "Warmest: —",
-    avgTemp != null ? `Average: ${avgTemp.toFixed(1)}°F` : "Average: —",
-    `Forecast nights at risk (next 7d): ${nightsAtRisk}`,
-    "",
-    "Manage alerts: https://garage-temp.robmcd.name/dashboard/alerts",
-  ];
+  const siteUrl = resolveSiteUrl(null);
+  const reportData: MonthlyReportData = {
+    monthLabel,
+    readingCount: points.length,
+    minTempF: minTemp,
+    maxTempF: maxTemp,
+    avgTempF: avgTemp,
+    freezeThresholdF: settings.freezeThresholdF,
+    nightsAtRisk,
+    nights,
+    freezeHours: computeFreezeHours(points, settings.freezeThresholdF),
+    probes: summarizeProbesForReport(points),
+    alertsUrl: `${siteUrl}/dashboard/alerts`,
+    historyUrl: `${siteUrl}/dashboard/history`,
+  };
 
-  await notifyUser(userId, email, settings, {
-    title: `Monthly garage report — ${monthLabel}`,
-    body: lines.join("\n"),
+  const subject = `Monthly garage report — ${monthLabel}`;
+  const plainBody = buildMonthlyReportPlainText(reportData);
+  const htmlBody = buildMonthlyReportHtmlEmail(reportData);
+  const attachmentHtml = buildMonthlyReportHtmlDocument(reportData);
+
+  await sendMonthlyReportEmail(
+    email,
+    subject,
+    plainBody,
+    htmlBody,
+    attachmentHtml,
+  );
+
+  await recordAlertEvent({
+    userId,
     kind: "digest",
+    title: subject,
+    body: plainBody,
+    channelsSent: ["email"],
+    channelsSkipped: [],
   });
 
-  const supabase = createAdminClient();
-  await supabase
+  await admin
     .from("alert_settings")
     .update({ last_monthly_report_at: new Date().toISOString() })
     .eq("user_id", userId);

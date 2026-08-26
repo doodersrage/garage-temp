@@ -61,6 +61,8 @@ const notice = Astro.url.searchParams.get("invited")
         ? "Invite cancelled."
       : Astro.url.searchParams.get("left")
         ? "You left the household."
+      : Astro.url.searchParams.get("property_created")
+        ? "New property created and set active."
       : null;
 
 const isOwner = Boolean(ownedId && ownedId === manageId);
@@ -81,6 +83,20 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
       {notice && <p class="alert-success mt-4">{notice}</p>}
       {errorMessage && <p class="alert-warning mt-4" role="alert">{errorMessage}</p>}
     </section>
+
+    <form action="/api/household" method="post" class="card">
+      <input type="hidden" name="action" value="create_property" />
+      <input type="hidden" name="redirect" value="/dashboard/household" />
+      <h2 class="card-title">Add another property</h2>
+      <p class="card-subtitle mb-4">
+        Create a second household (vacation home, rental, etc.) and switch between them from the dashboard.
+      </p>
+      <div class="form-field">
+        <label class="form-label" for="property-name">Property name</label>
+        <input class="form-input" id="property-name" name="name" placeholder="Lake house" required />
+      </div>
+      <button class="btn-secondary mt-2" type="submit">Create property</button>
+    </form>
 
     {isOwner && (
       <form action="/api/household" method="post" class="card">

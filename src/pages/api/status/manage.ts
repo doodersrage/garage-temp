@@ -1,17 +1,15 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
-import { getOrCreateHouseholdForUser } from "../../../lib/households";
 import { getUserEntitlements } from "../../../lib/entitlements";
-import {
-  createHouseholdApiKey,
-  revokeHouseholdApiKey,
-} from "../../../lib/apiKeys";
-
 import {
   redirectUnlessEditor,
   requireHouseholdEditor,
 } from "../../../lib/householdAuth";
 import { recordHouseholdActivity } from "../../../lib/householdActivity";
+import {
+  createStatusPageToken,
+  revokeStatusPageToken,
+} from "../../../lib/statusPage";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { user } = await getAuthFromCookies(cookies);
@@ -26,42 +24,40 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   if (blocked) return blocked;
 
   const entitlements = await getUserEntitlements(user.id);
-
   if (!entitlements.canCreateShareLinks) {
-    return redirect(`${redirectTo}?error=pro_required`);
+    return redirect(`${redirectTo}?status_error=pro`);
   }
 
-  const household = await getOrCreateHouseholdForUser(user.id, user.email);
-  if (!household.householdId) {
-    return redirect(`${redirectTo}?error=1`);
-  }
+  const householdId = editor.ctx.householdId;
 
   if (action === "revoke") {
     const id = formData.get("id")?.toString();
     if (id) {
-      await revokeHouseholdApiKey(household.householdId, id);
+      await revokeStatusPageToken(householdId, id);
+      await recordHouseholdActivity({
+        householdId,
+        userId: user.id,
+        action: "status_page_revoked",
+        detail: id,
+      });
     }
-    return redirect(`${redirectTo}?api_key_revoked=1`);
+    return redirect(`${redirectTo}?status_revoked=1`);
   }
 
-  const name = formData.get("name")?.toString() ?? "Metrics key";
-  const result = await createHouseholdApiKey({
-    householdId: household.householdId,
-    name,
-    createdBy: user.id,
-  });
-  if (result.error || !result.plaintext) {
-    return redirect(`${redirectTo}?error=1`);
+  const label = formData.get("label")?.toString() || "Status page";
+  const { token, error } = await createStatusPageToken(householdId, label);
+  if (error || !token) {
+    return redirect(`${redirectTo}?status_error=1`);
   }
 
   await recordHouseholdActivity({
-    householdId: household.householdId,
+    householdId,
     userId: user.id,
-    action: "api_key_created",
-    detail: name,
+    action: "status_page_created",
+    detail: label,
   });
 
   return redirect(
-    `${redirectTo}?api_key_created=1&new_api_key=${encodeURIComponent(result.plaintext)}`,
+    `${redirectTo}?status_created=1&status_token=${encodeURIComponent(token)}`,
   );
 };

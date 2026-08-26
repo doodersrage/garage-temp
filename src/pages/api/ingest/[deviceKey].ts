@@ -15,6 +15,8 @@ import {
   checkIngestRateLimit,
   readJsonBodyWithLimit,
 } from "../../../lib/ingestLimits";
+import { recordIngestStat } from "../../../lib/ingestStats";
+import { appendBatterySample } from "../../../lib/batteryTrend";
 
 async function sha256Hex(value: string): Promise<string> {
   const digest = await crypto.subtle.digest(
@@ -58,12 +60,27 @@ export const POST: APIRoute = async ({ params, request }) => {
     });
   }
 
+  const finish = async (
+    response: Response,
+    success: boolean,
+  ): Promise<Response> => {
+    try {
+      await recordIngestStat(device.id, success);
+    } catch (statError) {
+      console.error("Ingest stat failed:", statError);
+    }
+    return response;
+  };
+
   const body = await readJsonBodyWithLimit(request);
   if (!body.ok) {
-    return new Response(JSON.stringify({ error: body.error }), {
-      status: body.status,
-      headers: { "Content-Type": "application/json" },
-    });
+    return finish(
+      new Response(JSON.stringify({ error: body.error }), {
+        status: body.status,
+        headers: { "Content-Type": "application/json" },
+      }),
+      false,
+    );
   }
 
   const payload = body.payload;
@@ -142,18 +159,24 @@ export const POST: APIRoute = async ({ params, request }) => {
   }
 
   if (rows.length === 0) {
-    return new Response(JSON.stringify({ error: "No sensor values found" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return finish(
+      new Response(JSON.stringify({ error: "No sensor values found" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      }),
+      false,
+    );
   }
 
   const { error } = await insertSensorReadings(rows);
   if (error) {
-    return new Response(JSON.stringify({ error }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return finish(
+      new Response(JSON.stringify({ error }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }),
+      false,
+    );
   }
 
   const metaPatch: Record<string, unknown> = {};
@@ -162,7 +185,14 @@ export const POST: APIRoute = async ({ params, request }) => {
       (payload as Record<string, unknown>).battery_pct,
   );
   const rssi = Number((payload as Record<string, unknown>).rssi);
-  if (Number.isFinite(battery)) metaPatch.battery_pct = battery;
+  if (Number.isFinite(battery)) {
+    metaPatch.battery_pct = battery;
+    metaPatch.battery_history = appendBatterySample(
+      device.meta?.battery_history,
+      battery,
+      recordedAt,
+    );
+  }
   if (Number.isFinite(rssi)) metaPatch.rssi = rssi;
 
   if (Object.keys(metaPatch).length > 0) {
@@ -217,11 +247,14 @@ export const POST: APIRoute = async ({ params, request }) => {
     console.error("Ingest alert evaluation failed:", alertError);
   }
 
-  return new Response(
-    JSON.stringify({ ok: true, readings: rows.length }),
-    {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    },
+  return finish(
+    new Response(
+      JSON.stringify({ ok: true, readings: rows.length }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    ),
+    true,
   );
 };

@@ -2,6 +2,7 @@ export type AlertConditionType =
   | "temp_below"
   | "humidity_above"
   | "door_open"
+  | "door_open_duration"
   | "rate_drop"
   | "outage"
   | "flood"
@@ -25,6 +26,11 @@ export type AlertRule = {
 export type RuleEvalContext = {
   readings: Array<{ label: string; tempf: number; humidity: number }>;
   boolSensors: Array<{ label: string; kind: string; value: boolean }>;
+  doorOpenSessions: Array<{
+    label: string;
+    durationMs: number | null;
+    stillOpen: boolean;
+  }>;
   rateDrops: Array<{ label: string; dropF: number }>;
   outages: Array<{ deviceName: string; hoursSilent: number }>;
   freezeThresholdF: number;
@@ -63,6 +69,15 @@ function evaluateCondition(
           s.value === true &&
           matchesLabel(s.label, condition.labelIncludes),
       );
+    case "door_open_duration": {
+      const minMinutes = condition.value ?? 30;
+      const minMs = minMinutes * 60 * 1000;
+      return ctx.doorOpenSessions.some((session) => {
+        if (!matchesLabel(session.label, condition.labelIncludes)) return false;
+        if (session.stillOpen) return true;
+        return (session.durationMs ?? 0) >= minMs;
+      });
+    }
     case "flood":
       return ctx.boolSensors.some(
         (s) =>
@@ -150,6 +165,7 @@ export const CONDITION_OPTIONS: Array<{ value: AlertConditionType; label: string
   { value: "temp_below", label: "Temperature below threshold" },
   { value: "humidity_above", label: "Humidity above threshold" },
   { value: "door_open", label: "Door open" },
+  { value: "door_open_duration", label: "Door open longer than (minutes)" },
   { value: "rate_drop", label: "Rapid temperature drop" },
   { value: "outage", label: "Device outage" },
   { value: "flood", label: "Flood detected" },

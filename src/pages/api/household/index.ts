@@ -10,6 +10,7 @@ import {
   removeHouseholdMember,
   setActiveHouseholdForUser,
   updateHouseholdName,
+  createAdditionalHouseholdForUser,
 } from "../../../lib/households";
 import {
   createHouseholdInvite,
@@ -19,6 +20,11 @@ import {
 } from "../../../lib/householdInvites";
 import { buildSiteUrl } from "../../../lib/stripe";
 import { updateHouseholdFreezeMapSettings } from "../../../lib/freezeMap";
+import {
+  redirectUnlessEditor,
+  requireHouseholdEditor,
+} from "../../../lib/householdAuth";
+import { recordHouseholdActivity } from "../../../lib/householdActivity";
 
 export const GET: APIRoute = async ({ cookies }) => {
   const { user } = await getAuthFromCookies(cookies);
@@ -89,6 +95,25 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     }
     return redirect(`${redirectTo}?left=1`);
   }
+
+  if (action === "create_property") {
+    const name = formData.get("name")?.toString() ?? "My property";
+    const result = await createAdditionalHouseholdForUser(user.id, name);
+    if (result.error) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+    await recordHouseholdActivity({
+      householdId: result.householdId,
+      userId: user.id,
+      action: "household_created",
+      detail: name,
+    });
+    return redirect(`${redirectTo}?property_created=1`);
+  }
+
+  const editor = await requireHouseholdEditor(user.id);
+  const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
+  if (blocked) return blocked;
 
   const ownedId = await getOwnedHouseholdId(user.id);
   const household = await getOrCreateHouseholdForUser(user.id, user.email);

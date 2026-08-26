@@ -7,6 +7,13 @@ import { createServerClient } from "../../lib/supabase";
 import { getSiteUrl } from "../../lib/stripe";
 import { listHouseholdApiKeys } from "../../lib/apiKeys";
 import { listInboundWebhooks } from "../../lib/inboundWebhooks";
+import { listStatusPageTokens } from "../../lib/statusPage";
+import { listIngestStatsForHousehold } from "../../lib/ingestStats";
+import { listHouseholdActivity } from "../../lib/householdActivity";
+import {
+  getUserHouseholdRole,
+  canEditHousehold,
+} from "../../lib/households";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
@@ -34,8 +41,26 @@ const inboundWebhooks = household.householdId
   ? (await listInboundWebhooks(household.householdId)).webhooks
   : [];
 
+const statusPages = household.householdId
+  ? await listStatusPageTokens(household.householdId)
+  : [];
+
+const ingestStats = household.householdId
+  ? await listIngestStatsForHousehold(household.householdId, 7)
+  : [];
+
+const activity = household.householdId
+  ? await listHouseholdActivity(household.householdId, 15)
+  : [];
+
+const householdRole = household.householdId
+  ? await getUserHouseholdRole(user.id, household.householdId)
+  : null;
+const canEdit = canEditHousehold(householdRole);
+
 const siteUrl = getSiteUrl(Astro.request);
 const newToken = Astro.url.searchParams.get("new_token");
+const statusToken = Astro.url.searchParams.get("status_token");
 const newHref = newToken ? `${siteUrl}/share/${newToken}` : null;
 const newApiKey = Astro.url.searchParams.get("new_api_key");
 const notice = Astro.url.searchParams.get("created")
@@ -46,6 +71,10 @@ const notice = Astro.url.searchParams.get("created")
       ? "API key created — copy it now; it will not be shown again."
       : Astro.url.searchParams.get("api_key_revoked")
         ? "API key revoked."
+        : Astro.url.searchParams.get("status_created")
+          ? "Status page created — copy the link below."
+          : Astro.url.searchParams.get("status_revoked")
+            ? "Status page revoked."
         : Astro.url.searchParams.get("error") === "pro_required"
           ? "Pro plan required for share links and API keys."
           : null;
@@ -58,6 +87,11 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
       <p class="card-subtitle">Read-only live views for family without accounts. Pro feature.</p>
       {notice && (
         <p class:list={[noticeIsError ? "alert-warning" : "alert-success", "mt-4"]}>{notice}</p>
+      )}
+      {!canEdit && (
+        <p class="alert-warning mt-4 mb-0" role="status">
+          View-only — you cannot create or revoke share links.
+        </p>
       )}
     </section>
 
@@ -88,7 +122,7 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
           <button class="btn-primary" type="submit">Upgrade to Pro</button>
         </form>
       </section>
-    ) : (
+    ) : canEdit ? (
       <form action="/api/share/manage" method="post" class="card">
         <input type="hidden" name="action" value="create" />
         <input type="hidden" name="redirect" value="/dashboard/share" />
@@ -117,6 +151,12 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
         </div>
         <button class="btn-primary mt-4" type="submit">Create</button>
       </form>
+    ) : (
+      <section class="card">
+        <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+          Share link creation requires editor access.
+        </p>
+      </section>
     )}
 
     <section class="card">
@@ -197,7 +237,55 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
       )}
     </section>
 
-    {entitlements.canCreateShareLinks && (
+    {entitlements.canCreateShareLinks && canEdit && (
+      <section class="card">
+        <h2 class="card-title">Public status pages</h2>
+        <p class="card-subtitle mb-4">
+          Minimal read-only status board at <code>/status/&lt;token&gt;</code> — no login required.
+        </p>
+        {statusToken && (
+          <div class="ingest-key-callout mb-4">
+            <p class="ingest-key-value break-all text-sm mb-2">{siteUrl}/status/{statusToken}</p>
+            <button type="button" class="btn-primary" data-copy={`${siteUrl}/status/${statusToken}`} data-copy-label="Copy link">
+              Copy status URL
+            </button>
+          </div>
+        )}
+        <form action="/api/status/manage" method="post" class="mb-4 flex flex-wrap gap-2 items-end">
+          <input type="hidden" name="action" value="create" />
+          <input type="hidden" name="redirect" value="/dashboard/share" />
+          <div class="form-field mb-0">
+            <label class="form-label" for="status-label">Label</label>
+            <input class="form-input" id="status-label" name="label" value="Household status" />
+          </div>
+          <button class="btn-secondary" type="submit">Create status page</button>
+        </form>
+        {statusPages.length === 0 ? (
+          <p class="mb-0 text-sm text-[var(--color-text-muted)]">No status pages yet.</p>
+        ) : (
+          <ul class="space-y-3">
+            {statusPages.map((page) => (
+              <li class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <strong>{page.label}</strong>
+                  <p class="m-0 text-sm break-all">
+                    <a href={`${siteUrl}/status/${page.token}`}>{siteUrl}/status/{page.token}</a>
+                  </p>
+                </div>
+                <form action="/api/status/manage" method="post">
+                  <input type="hidden" name="action" value="revoke" />
+                  <input type="hidden" name="id" value={page.id} />
+                  <input type="hidden" name="redirect" value="/dashboard/share" />
+                  <button class="btn-ghost" type="submit">Revoke</button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    )}
+
+    {entitlements.canCreateShareLinks && canEdit && (
       <section class="card">
         <h2 class="card-title">Dashboard API keys</h2>
         <p class="card-subtitle mb-4">
@@ -295,6 +383,53 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
             ))}
           </ul>
         )}
+      </section>
+    )}
+
+    {ingestStats.length > 0 && (
+      <section class="card">
+        <h2 class="card-title">Ingest stats (7 days)</h2>
+        <p class="card-subtitle mb-4">Daily POST success and error counts per push device.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-[var(--color-text-muted)]">
+                <th class="py-2 pr-3">Device</th>
+                <th class="py-2 pr-3">Day</th>
+                <th class="py-2 pr-3">OK</th>
+                <th class="py-2">Errors</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ingestStats.slice(0, 20).map((row) => (
+                <tr class="border-t border-[var(--color-border)]">
+                  <td class="py-2 pr-3">{row.device_name}</td>
+                  <td class="py-2 pr-3">{row.day}</td>
+                  <td class="py-2 pr-3">{row.success_count}</td>
+                  <td class="py-2">{row.error_count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )}
+
+    {activity.length > 0 && (
+      <section class="card">
+        <h2 class="card-title">Recent activity</h2>
+        <ul class="space-y-2 mb-0 text-sm">
+          {activity.map((row) => (
+            <li>
+              <strong>{row.action}</strong>
+              {row.detail ? `: ${row.detail}` : ""}
+              <span class="text-[var(--color-text-muted)]">
+                {" · "}
+                {new Date(row.created_at).toLocaleString()}
+              </span>
+            </li>
+          ))}
+        </ul>
       </section>
     )}
 

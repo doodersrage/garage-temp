@@ -18,8 +18,11 @@ import {
   listHouseholdMembers,
   listUserHouseholds,
   getUserHouseholdId,
+  getUserHouseholdRole,
+  canEditHousehold,
 } from "../lib/households";
 import HouseholdSwitcher from "../components/HouseholdSwitcher.astro";
+import DoorDurationCard from "../components/DoorDurationCard.astro";
 import { checkFeedHealth } from "../lib/collectHistory";
 import { fetchLatestSensorValues } from "../lib/sensorReadings";
 import { formatRelativeAge, STALE_MS } from "../lib/relativeTime";
@@ -123,6 +126,11 @@ const weatherHasCoords =
 const nwsAlerts = weatherHasCoords
   ? await fetchNwsAlerts(weatherSnapshot!.lat!, weatherSnapshot!.lon!)
   : null;
+
+const householdRole = activeHouseholdId
+  ? await getUserHouseholdRole(user.id, activeHouseholdId)
+  : null;
+const canEdit = canEditHousehold(householdRole);
 ---
 <DashboardLayout title="Dashboard">
   <div class="space-y-6">
@@ -150,6 +158,14 @@ const nwsAlerts = weatherHasCoords
       households={userHouseholds.households}
       activeHouseholdId={activeHouseholdId}
     />
+
+    {!canEdit && (
+      <p class="alert-warning mb-0" role="status">
+        View-only access — you can see live data but cannot change devices, alerts, or sharing.
+      </p>
+    )}
+
+    <DoorDurationCard devices={devices} />
 
     {nightsAtRisk.length > 0 && (
       <section class="card">

@@ -24,7 +24,11 @@ const publicApiExactPaths = new Set([
 ]);
 
 /** Public API path prefixes (e.g. token-based inbound webhooks). */
-const publicApiPrefixes = ["/api/inbound/", "/api/alerts/snooze"];
+const publicApiPrefixes = [
+  "/api/inbound/",
+  "/api/alerts/snooze",
+  "/api/telegram/webhook",
+];
 
 export function pathRequiresAuth(pathname: string): boolean {
   if (publicApiExactPaths.has(pathname)) {
@@ -32,6 +36,10 @@ export function pathRequiresAuth(pathname: string): boolean {
   }
 
   if (publicApiPrefixes.some((prefix) => pathname.startsWith(prefix))) {
+    return false;
+  }
+
+  if (pathname.startsWith("/status/")) {
     return false;
   }
 

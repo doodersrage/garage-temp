@@ -13,12 +13,15 @@ interface Props {
   title?: string;
 }
 
+const PROBE_COLORS = ["#60a5fa", "#34d399", "#f472b6", "#fbbf24", "#a78bfa", "#fb7185"];
+
 export default function HistoryChart({
   points,
   priorYearPoints = [],
   title = "Temperature trend (last 7 days)",
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const probeLabels = [...new Set(points.map((p) => p.probeLabel || "Probe"))];
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -37,6 +40,13 @@ export default function HistoryChart({
     const pad = { top: 16, right: 16, bottom: 28, left: 44 };
     const innerW = width - pad.left - pad.right;
     const innerH = height - pad.top - pad.bottom;
+
+    const sortedPoints = [...points].sort(
+      (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+    );
+    const minTs = Date.parse(sortedPoints[0]!.timestamp);
+    const maxTs = Date.parse(sortedPoints[sortedPoints.length - 1]!.timestamp);
+    const tsRange = maxTs - minTs || 1;
 
     const allTemps = [
       ...points.map((p) => p.tempf),
@@ -67,11 +77,16 @@ export default function HistoryChart({
 
     function drawSeries(series: Point[], color: string) {
       if (series.length < 2) return;
+      const ordered = [...series].sort(
+        (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+      );
       ctx.strokeStyle = color;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      series.forEach((point, i) => {
-        const x = pad.left + (i / (series.length - 1)) * innerW;
+      ordered.forEach((point, i) => {
+        const x =
+          pad.left +
+          ((Date.parse(point.timestamp) - minTs) / tsRange) * innerW;
         const y = pad.top + innerH - ((point.tempf - min) / range) * innerH;
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
@@ -82,27 +97,30 @@ export default function HistoryChart({
     if (priorYearPoints.length >= 2) {
       drawSeries(priorYearPoints, "rgba(148, 163, 184, 0.55)");
     }
-    drawSeries(points, "#60a5fa");
 
-    const last = points[points.length - 1];
-    const lastX = pad.left + innerW;
-    const lastY = pad.top + innerH - ((last.tempf - min) / range) * innerH;
-    ctx.fillStyle = "#60a5fa";
-    ctx.beginPath();
-    ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
-    ctx.fill();
+    const byProbe = new Map<string, Point[]>();
+    for (const point of points) {
+      const label = point.probeLabel || "Probe";
+      const list = byProbe.get(label) ?? [];
+      list.push(point);
+      byProbe.set(label, list);
+    }
+
+    [...byProbe.entries()].forEach(([, series], index) => {
+      drawSeries(series, PROBE_COLORS[index % PROBE_COLORS.length]!);
+    });
 
     ctx.fillStyle = "#94a3b8";
     ctx.font = "10px system-ui, sans-serif";
     ctx.textAlign = "left";
     ctx.fillText(
-      new Date(points[0].timestamp).toLocaleDateString(),
+      new Date(minTs).toLocaleDateString(),
       pad.left,
       height - 8,
     );
     ctx.textAlign = "right";
     ctx.fillText(
-      new Date(last.timestamp).toLocaleDateString(),
+      new Date(maxTs).toLocaleDateString(),
       width - pad.right,
       height - 8,
     );
@@ -122,9 +140,21 @@ export default function HistoryChart({
   return (
     <div class="history-chart-wrap">
       <p class="history-chart-title">{title}</p>
+      {probeLabels.length > 1 && (
+        <p class="m-0 mb-2 text-xs text-[var(--color-text-muted)]">
+          {probeLabels.map((label, i) => (
+            <span key={label}>
+              {i > 0 ? " · " : ""}
+              <span style={{ color: PROBE_COLORS[i % PROBE_COLORS.length] }}>
+                {label}
+              </span>
+            </span>
+          ))}
+        </p>
+      )}
       {priorYearPoints.length >= 2 && (
         <p class="m-0 mb-2 text-xs text-[var(--color-text-muted)]">
-          Blue = this year · Gray = same window last year
+          Gray = same window last year
         </p>
       )}
       <canvas

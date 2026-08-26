@@ -86,6 +86,7 @@ describe("alert rules", () => {
     const miss = evaluateAlertRules(rules, {
       readings: [{ label: "G", tempf: 30, humidity: 40 }],
       boolSensors: [{ label: "Door", kind: "door", value: false }],
+      doorOpenSessions: [],
       rateDrops: [],
       outages: [],
       freezeThresholdF: 34,
@@ -98,6 +99,7 @@ describe("alert rules", () => {
     const hit = evaluateAlertRules(rules, {
       readings: [{ label: "G", tempf: 30, humidity: 40 }],
       boolSensors: [{ label: "Door", kind: "door", value: true }],
+      doorOpenSessions: [],
       rateDrops: [],
       outages: [],
       freezeThresholdF: 34,
