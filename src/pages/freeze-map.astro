@@ -202,5 +202,51 @@ function sparkPath(values: number[]): string {
         </div>
       )}
     </section>
+
+    <section class="card">
+      <h2 class="card-title">Find your city</h2>
+      <p class="card-subtitle mb-4">
+        Search OpenWeather geocoding to see if your metro is on the map. Household owners opt in under Dashboard → Household.
+      </p>
+      <div class="form-field mb-0">
+        <label class="form-label" for="freeze-map-search">City search</label>
+        <input class="form-input" id="freeze-map-search" type="search" placeholder="Asheville, NC" autocomplete="off" />
+      </div>
+      <ul id="freeze-map-search-results" class="space-y-2 text-sm mt-3 mb-0"></ul>
+    </section>
   </div>
 </Layout>
+
+<script is:inline>
+  (() => {
+    const input = document.getElementById("freeze-map-search");
+    const results = document.getElementById("freeze-map-search-results");
+    if (!(input instanceof HTMLInputElement) || !results) return;
+
+    let timer = null;
+    input.addEventListener("input", () => {
+      clearTimeout(timer);
+      const q = input.value.trim();
+      if (q.length < 2) {
+        results.innerHTML = "";
+        return;
+      }
+      timer = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/weather/city-search?q=${encodeURIComponent(q)}`);
+          const data = await res.json();
+          const rows = Array.isArray(data.results) ? data.results : [];
+          results.innerHTML = rows
+            .slice(0, 6)
+            .map(
+              (row) =>
+                `<li><strong>${row.label}</strong> · ${row.lat?.toFixed?.(2) ?? "?"}, ${row.lon?.toFixed?.(2) ?? "?"} · ID ${row.id}</li>`,
+            )
+            .join("");
+        } catch {
+          results.innerHTML = "<li>Search failed.</li>";
+        }
+      }, 300);
+    });
+  })();
+</script>

@@ -4,6 +4,7 @@ import '../styles/global.css'
 const currentYear = new Date().getFullYear();
 import logo from '../assets/gtm.svg';
 import { getAuthFromCookies } from "../lib/auth";
+import { resolveTheme } from "../lib/userPreferences";
 import SchemaMarkup from "../components/SchemaMarkup.astro";
 import {
   getDefaultDescription,
@@ -30,6 +31,16 @@ const { user } = skipAuth
   ? { user: null }
   : await getAuthFromCookies(Astro.cookies);
 
+const themeCookie = Astro.cookies.get("theme")?.value;
+const userTheme = (user?.user_metadata as Record<string, unknown> | undefined)?.theme;
+const themePref =
+  themeCookie === "light" || themeCookie === "system" || themeCookie === "dark"
+    ? themeCookie
+    : userTheme === "light" || userTheme === "system"
+      ? userTheme
+      : "dark";
+const resolvedTheme = resolveTheme(themePref);
+
 const currentPath = Astro.url.pathname;
 const pageUrl = resolvePageUrl(siteUrl, currentPath);
 const extraSchemas = schema
@@ -54,7 +65,7 @@ const navItems = [
 const isDashboard = currentPath.startsWith("/dashboard");
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme={resolvedTheme}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />

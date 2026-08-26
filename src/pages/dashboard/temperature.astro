@@ -10,6 +10,7 @@ import { getOrCreateHouseholdForUser, listUserHouseholds, getUserHouseholdRole, 
 import { getUserEntitlements } from "../../lib/entitlements";
 import { fetchLatestSensorValues } from "../../lib/sensorReadings";
 import { formatRelativeAge } from "../../lib/relativeTime";
+import { batterySparklinePath, parseBatteryHistory } from "../../lib/batterySparkline";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -199,6 +200,7 @@ const ingestCurlExample = ingestKey
                 const age = formatRelativeAge(device.last_seen_at);
                 const battery = formatDeviceBattery(device.meta);
                 const rssi = formatDeviceRssi(device.meta);
+                const sparkPath = batterySparklinePath(parseBatteryHistory(device.meta));
                 const pullHealth = feedHealth.statuses.find((f) => f.feedId === device.id);
                 return (
                   <tr class="border-t border-[var(--color-border)]">
@@ -223,7 +225,20 @@ const ingestCurlExample = ingestKey
                       {age.label}
                     </td>
                     <td class="py-2 pr-3">{device.sensors.length}</td>
-                    <td class="py-2 pr-3">{battery}</td>
+                    <td class="py-2 pr-3">
+                      {battery}
+                      {sparkPath && (
+                        <svg
+                          class="block mt-1 text-[var(--color-accent)]"
+                          width="64"
+                          height="20"
+                          viewBox="0 0 64 20"
+                          aria-hidden="true"
+                        >
+                          <path d={sparkPath} fill="none" stroke="currentColor" stroke-width="1.5" />
+                        </svg>
+                      )}
+                    </td>
                     <td class="py-2">{rssi}</td>
                   </tr>
                 );

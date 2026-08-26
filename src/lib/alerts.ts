@@ -1,4 +1,5 @@
 import type { AlertRule } from "./alertRules";
+import { parseSpaceChannelRouting, type SpaceChannelRouting } from "./spaceChannelRouting";
 
 export type AlertChannelName =
   | "email"
@@ -114,6 +115,9 @@ export type AlertSettings = {
   alertTemplates: Record<string, { title?: string; body?: string }>;
   telegramCommandSecret: string | null;
   lastEscalationAt: string | null;
+  readingWebhookUrl: string | null;
+  readingWebhookSecret: string | null;
+  spaceChannelRouting: SpaceChannelRouting;
 };
 
 export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
@@ -169,6 +173,9 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   alertTemplates: {},
   telegramCommandSecret: null,
   lastEscalationAt: null,
+  readingWebhookUrl: null,
+  readingWebhookSecret: null,
+  spaceChannelRouting: {},
 };
 
 /** Minimum time between threshold alert notifications for the same account. */
@@ -344,6 +351,13 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
         : null,
     lastEscalationAt:
       typeof row.last_escalation_at === "string" ? row.last_escalation_at : null,
+    readingWebhookUrl:
+      typeof row.reading_webhook_url === "string" ? row.reading_webhook_url : null,
+    readingWebhookSecret:
+      typeof row.reading_webhook_secret === "string"
+        ? row.reading_webhook_secret
+        : null,
+    spaceChannelRouting: parseSpaceChannelRouting(row.space_channel_routing),
   };
 }
 
@@ -537,6 +551,9 @@ export function serializeAlertSettings(settings: AlertSettings): Record<string, 
     alert_templates: settings.alertTemplates,
     telegram_command_secret: settings.telegramCommandSecret,
     last_escalation_at: settings.lastEscalationAt,
+    reading_webhook_url: settings.readingWebhookUrl,
+    reading_webhook_secret: settings.readingWebhookSecret,
+    space_channel_routing: settings.spaceChannelRouting,
   };
 }
 

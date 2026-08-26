@@ -201,6 +201,35 @@ export const POST: APIRoute = async ({ params, request }) => {
     await touchDeviceLastSeen(device.id);
   }
 
+  try {
+    const { listHouseholdMembers } = await import("../../../lib/households");
+    const { getAlertSettingsForUser } = await import("../../../lib/notify");
+    const { sendReadingWebhook } = await import("../../../lib/readingWebhook");
+    const { createAdminClient } = await import("../../../lib/supabase");
+    const members = await listHouseholdMembers(device.household_id);
+    const admin = createAdminClient();
+    for (const member of members.members) {
+      const { data } = await admin.auth.admin.getUserById(member.user_id);
+      const settings = await getAlertSettingsForUser(
+        member.user_id,
+        data.user?.user_metadata as Record<string, unknown> | undefined,
+      );
+      if (settings.readingWebhookUrl) {
+        await sendReadingWebhook(settings, {
+          device_id: device.id,
+          device_name: device.name,
+          household_id: device.household_id,
+          recorded_at: recordedAt,
+          reading_count: rows.length,
+          battery_pct: metaPatch.battery_pct ?? null,
+          rssi: metaPatch.rssi ?? null,
+        });
+      }
+    }
+  } catch (webhookError) {
+    console.error("Reading webhook failed:", webhookError);
+  }
+
   // Best-effort immediate alerts (cooldowns still apply)
   try {
     const { listHouseholdMembers } = await import("../../../lib/households");

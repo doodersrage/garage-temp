@@ -21,6 +21,7 @@ if (!session || !user) {
 }
 
 const inboundToken = Astro.url.searchParams.get("inbound_token");
+const inboundSigningSecret = Astro.url.searchParams.get("inbound_signing_secret");
 
 const entitlements = await getUserEntitlements(user.id);
 const household = await getOrCreateHouseholdForUser(user.id, user.email);
@@ -352,6 +353,12 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
           <div class="ingest-key-callout mb-4">
             <p class="text-sm mb-2">New webhook URL (copy now):</p>
             <p class="ingest-key-value break-all text-sm mb-2">{siteUrl}/api/inbound/{inboundToken}</p>
+            {inboundSigningSecret && (
+              <>
+                <p class="text-sm mb-2">Signing secret (for X-GarageTemp-Signature, copy now):</p>
+                <p class="ingest-key-value break-all text-sm mb-2">{inboundSigningSecret}</p>
+              </>
+            )}
             <button type="button" class="btn-primary" data-copy={`${siteUrl}/api/inbound/${inboundToken}`} data-copy-label="Copy URL">
               Copy URL
             </button>

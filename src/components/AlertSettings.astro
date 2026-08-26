@@ -370,6 +370,30 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     <p class="form-hint">Used to verify requests from this site (HMAC). Leave blank if your automation does not need it.</p>
   </div>
 
+  <div class="form-field">
+    <label class="form-label" for="reading_webhook_url">Reading webhook URL (optional)</label>
+    <input class="form-input" type="url" id="reading_webhook_url" name="reading_webhook_url" value={settings.readingWebhookUrl ?? ""} placeholder="https://hooks.example.com/readings" disabled={!entitlements.canUseOutboundWebhook} />
+    <p class="form-hint">POST on every successful device ingest with latest readings JSON.</p>
+  </div>
+
+  <div class="form-field">
+    <label class="form-label" for="reading_webhook_secret">Reading webhook secret (optional)</label>
+    <input class="form-input" type="text" id="reading_webhook_secret" name="reading_webhook_secret" value={settings.readingWebhookSecret ?? ""} disabled={!entitlements.canUseOutboundWebhook} />
+  </div>
+
+  <div class="form-field">
+    <label class="form-label" for="space_channel_routing_json">Per-space channel routing (JSON)</label>
+    <textarea
+      class="form-textarea font-mono text-xs"
+      id="space_channel_routing_json"
+      name="space_channel_routing_json"
+      rows={4}
+      placeholder={'{"garage":{"threshold":["telegram","sms"]}}'}
+      disabled={!canEdit}
+    >{JSON.stringify(settings.spaceChannelRouting ?? {}, null, 2)}</textarea>
+    <p class="form-hint">Optional. Restrict alert kinds to specific channels by device space label (garage, attic, …).</p>
+  </div>
+
   <button type="submit" class="btn-primary" hidden={!canEdit}>Save alert settings</button>
   <p class="form-hint mt-2 mb-0" id="channel-incomplete-hint" hidden>
     A checked channel needs its destination filled in, or it will be skipped when alerts fire.

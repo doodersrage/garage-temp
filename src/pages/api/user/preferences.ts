@@ -4,7 +4,10 @@ import {
   getAuthFromCookies,
   setAuthCookies,
 } from "../../../lib/auth";
-import { updateUserDisplayPreferences } from "../../../lib/userPreferences";
+import {
+  updateUserDisplayPreferences,
+  type ThemePreference,
+} from "../../../lib/userPreferences";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -17,6 +20,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const redirectTo = formData.get("redirect")?.toString() || "/dashboard";
   const weatherCityIdRaw = formData.get("weather_city_id")?.toString().trim() ?? "";
   const weatherCityId = /^\d+$/.test(weatherCityIdRaw) ? weatherCityIdRaw : null;
+  const themeRaw = formData.get("theme")?.toString();
+  const theme: ThemePreference =
+    themeRaw === "light" || themeRaw === "system" ? themeRaw : "dark";
 
   const accessToken = cookies.get("sb-access-token")!.value;
   const refreshToken = cookies.get("sb-refresh-token")!.value;
@@ -28,12 +34,21 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       showGarageTemps: formData.has("show_garage_temps"),
       showWeather: formData.has("show_weather"),
       weatherCityId,
+      useCelsius: formData.has("use_celsius"),
+      theme,
     },
   );
 
   if (error) {
     return redirect(`${redirectTo}?prefs_error=1`);
   }
+
+  cookies.set("theme", theme, {
+    path: "/",
+    httpOnly: false,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 365,
+  });
 
   const { data: refreshedSession } = await supabase.auth.refreshSession({
     refresh_token: refreshToken,

@@ -74,3 +74,30 @@ export async function listIngestStatsForHousehold(
     device_name: nameById.get(row.device_id) ?? "Device",
   })) as IngestStatRow[];
 }
+
+export async function listRecentIngestStatsAdmin(days = 7): Promise<IngestStatRow[]> {
+  const supabase = createServerClient();
+  const since = new Date();
+  since.setUTCDate(since.getUTCDate() - days);
+  const sinceDay = since.toISOString().slice(0, 10);
+
+  const { data: stats } = await supabase
+    .from("ingest_stats")
+    .select("device_id, day, success_count, error_count")
+    .gte("day", sinceDay)
+    .order("day", { ascending: false });
+
+  if (!stats?.length) return [];
+
+  const deviceIds = [...new Set(stats.map((s) => s.device_id))];
+  const { data: devices } = await supabase
+    .from("devices")
+    .select("id, name")
+    .in("id", deviceIds);
+
+  const nameById = new Map((devices ?? []).map((d) => [d.id, d.name]));
+  return stats.map((row) => ({
+    ...row,
+    device_name: nameById.get(row.device_id) ?? "Device",
+  })) as IngestStatRow[];
+}

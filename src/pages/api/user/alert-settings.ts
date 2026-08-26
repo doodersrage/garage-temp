@@ -6,7 +6,7 @@ import {
   type AlertSettings,
 } from "../../../lib/alerts";
 import { parseAlertRulesFromForm } from "../../../lib/alertRules";
-import { parseAlertTemplates } from "../../../lib/alertTemplates";
+import { parseSpaceChannelRouting } from "../../../lib/spaceChannelRouting";
 import { getAlertSettingsForUser } from "../../../lib/notify";
 import { getUserEntitlements } from "../../../lib/entitlements";
 import {
@@ -133,6 +133,21 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         return parsed && typeof parsed === "object" ? parsed : existing.channelSeverity;
       } catch {
         return existing.channelSeverity;
+      }
+    })(),
+    readingWebhookUrl:
+      formData.get("reading_webhook_url")?.toString().trim() || null,
+    readingWebhookSecret:
+      formData.get("reading_webhook_secret")?.toString().trim() ||
+      existing.readingWebhookSecret,
+    spaceChannelRouting: (() => {
+      try {
+        const raw = formData.get("space_channel_routing_json")?.toString();
+        return raw
+          ? parseSpaceChannelRouting(JSON.parse(raw))
+          : existing.spaceChannelRouting;
+      } catch {
+        return existing.spaceChannelRouting;
       }
     })(),
   };

@@ -83,6 +83,20 @@ const selectValue = !currentId ? "" : isCustom ? "custom" : currentId;
         </p>
       </div>
     </fieldset>
+
+    <label class="checkbox-row">
+      <input type="checkbox" name="use_celsius" value="true" checked={preferences.useCelsius} />
+      <span>Show temperatures in Celsius (°C) where supported</span>
+    </label>
+
+    <div class="form-field mb-0">
+      <label class="form-label" for="theme">Theme</label>
+      <select class="form-input" id="theme" name="theme">
+        <option value="dark" selected={preferences.theme === "dark"}>Dark</option>
+        <option value="light" selected={preferences.theme === "light"}>Light</option>
+        <option value="system" selected={preferences.theme === "system"}>System</option>
+      </select>
+    </div>
   </div>
 
   <button type="submit" class="btn-primary">

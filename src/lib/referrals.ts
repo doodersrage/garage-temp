@@ -77,6 +77,14 @@ export function referralBonusTrialDays(referredByCode: string | null | undefined
   return referredByCode ? 7 : 0;
 }
 
+/** Extra trial days earned when friends subscribe (stored in referrer metadata). */
+export function referralRewardTrialDays(metadata: Record<string, unknown> | null | undefined): number {
+  const raw = metadata?.referral_reward_days;
+  const days = typeof raw === "number" ? raw : Number(raw);
+  if (!Number.isFinite(days) || days <= 0) return 0;
+  return Math.min(Math.floor(days), 28);
+}
+
 export const PRO_TRIAL_DAYS = 14;
 
 /** OAuth/email signups within this window can still receive a referral code. */
@@ -105,4 +113,72 @@ export async function applyReferralForNewUser(
       referred_by: normalized,
     },
   });
+}
+
+export type ReferralStats = {
+  totalSignups: number;
+  rewardedSignups: number;
+  topReferrers: { userId: string; count: number }[];
+};
+
+export async function grantReferrerRewardOnSubscription(
+  referredUserId: string,
+): Promise<void> {
+  const admin = createAdminClient();
+  const { data: signup } = await admin
+    .from("referral_signups")
+    .select("referrer_user_id, referrer_rewarded_at")
+    .eq("referred_user_id", referredUserId)
+    .maybeSingle();
+
+  if (!signup || signup.referrer_rewarded_at) return;
+
+  await admin
+    .from("referral_signups")
+    .update({ referrer_rewarded_at: new Date().toISOString() })
+    .eq("referred_user_id", referredUserId);
+
+  const { data: referrerUser } = await admin.auth.admin.getUserById(
+    signup.referrer_user_id,
+  );
+  const meta = referrerUser.user?.user_metadata ?? {};
+  const current = referralRewardTrialDays(meta);
+  await admin.auth.admin.updateUserById(signup.referrer_user_id, {
+    user_metadata: {
+      ...meta,
+      referral_reward_days: current + 7,
+    },
+  });
+}
+
+export async function fetchReferralAdminStats(): Promise<ReferralStats> {
+  const supabase = createServerClient();
+  const { count: totalSignups } = await supabase
+    .from("referral_signups")
+    .select("id", { count: "exact", head: true });
+
+  const { count: rewardedSignups } = await supabase
+    .from("referral_signups")
+    .select("id", { count: "exact", head: true })
+    .not("referrer_rewarded_at", "is", null);
+
+  const { data: rows } = await supabase
+    .from("referral_signups")
+    .select("referrer_user_id");
+
+  const counts = new Map<string, number>();
+  for (const row of rows ?? []) {
+    counts.set(row.referrer_user_id, (counts.get(row.referrer_user_id) ?? 0) + 1);
+  }
+
+  const topReferrers = [...counts.entries()]
+    .map(([userId, count]) => ({ userId, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+
+  return {
+    totalSignups: totalSignups ?? 0,
+    rewardedSignups: rewardedSignups ?? 0,
+    topReferrers,
+  };
 }

@@ -1,0 +1,26 @@
+---
+---
+<section class="card">
+  <h2 class="card-title">Home Assistant setup</h2>
+  <p class="card-subtitle mb-4">
+    Import entity naming and inbound webhook recipes into Home Assistant.
+  </p>
+  <ul class="text-sm space-y-2 mb-0">
+    <li>
+      <a class="text-link" href="/ha/garage_temp_entities.yaml" download>
+        Download entity naming YAML
+      </a>
+    </li>
+    <li>
+      <a class="text-link" href="/ha/garage_temp_webhook.yaml" download>
+        Download webhook automation YAML
+      </a>
+    </li>
+    <li>
+      Create an inbound webhook under Share, then POST <code>{"{\"action\":\"status\"}"}</code> from an HA rest_command.
+    </li>
+    <li>
+      Scrape Prometheus metrics at <code>/api/v1/metrics</code> with a Pro API key.
+    </li>
+  </ul>
+</section>

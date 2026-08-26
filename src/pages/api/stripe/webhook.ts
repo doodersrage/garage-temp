@@ -5,6 +5,7 @@ import {
   findUserIdByStripeSubscriptionId,
   upsertUserSubscription,
 } from "../../../lib/stripeSubscriptions";
+import { grantReferrerRewardOnSubscription } from "../../../lib/referrals";
 
 export const prerender = false;
 
@@ -47,6 +48,12 @@ async function handleCheckoutCompleted(
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
   await upsertUserSubscription(userId, subscription, customerId);
+
+  const planTier =
+    session.metadata?.plan_tier ?? subscription.metadata?.plan_tier;
+  if (planTier === "pro") {
+    await grantReferrerRewardOnSubscription(userId);
+  }
 }
 
 async function handleSubscriptionChange(

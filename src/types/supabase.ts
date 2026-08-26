@@ -41,6 +41,7 @@ export type Database = {
     Tables: {
       alert_events: {
         Row: {
+          acknowledged_at: string | null
           body: string
           channels_sent: string[]
           channels_skipped: string[]
@@ -51,6 +52,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          acknowledged_at?: string | null
           body: string
           channels_sent?: string[]
           channels_skipped?: string[]
@@ -61,6 +63,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          acknowledged_at?: string | null
           body?: string
           channels_sent?: string[]
           channels_skipped?: string[]
@@ -117,11 +120,14 @@ export type Database = {
           quiet_hours_start: string
           quiet_hours_timezone: string
           rate_change_f: number
+          reading_webhook_secret: string | null
+          reading_webhook_url: string | null
           rssi_alerts_enabled: boolean
           rssi_threshold: number
           slack_webhook_url: string | null
           sms_phone: string | null
           snooze_until: string | null
+          space_channel_routing: Json
           telegram_bot_token: string | null
           telegram_chat_id: string | null
           telegram_command_secret: string | null
@@ -173,11 +179,14 @@ export type Database = {
           quiet_hours_start?: string
           quiet_hours_timezone?: string
           rate_change_f?: number
+          reading_webhook_secret?: string | null
+          reading_webhook_url?: string | null
           rssi_alerts_enabled?: boolean
           rssi_threshold?: number
           slack_webhook_url?: string | null
           sms_phone?: string | null
           snooze_until?: string | null
+          space_channel_routing?: Json
           telegram_bot_token?: string | null
           telegram_chat_id?: string | null
           telegram_command_secret?: string | null
@@ -229,11 +238,14 @@ export type Database = {
           quiet_hours_start?: string
           quiet_hours_timezone?: string
           rate_change_f?: number
+          reading_webhook_secret?: string | null
+          reading_webhook_url?: string | null
           rssi_alerts_enabled?: boolean
           rssi_threshold?: number
           slack_webhook_url?: string | null
           sms_phone?: string | null
           snooze_until?: string | null
+          space_channel_routing?: Json
           telegram_bot_token?: string | null
           telegram_chat_id?: string | null
           telegram_command_secret?: string | null
@@ -769,6 +781,7 @@ export type Database = {
           id: string
           last_used_at: string | null
           name: string
+          signing_secret: string | null
           token_hash: string
           token_prefix: string
         }
@@ -779,6 +792,7 @@ export type Database = {
           id?: string
           last_used_at?: string | null
           name?: string
+          signing_secret?: string | null
           token_hash: string
           token_prefix: string
         }
@@ -789,6 +803,7 @@ export type Database = {
           id?: string
           last_used_at?: string | null
           name?: string
+          signing_secret?: string | null
           token_hash?: string
           token_prefix?: string
         }
@@ -908,18 +923,21 @@ export type Database = {
           created_at: string
           id: string
           referred_user_id: string
+          referrer_rewarded_at: string | null
           referrer_user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           referred_user_id: string
+          referrer_rewarded_at?: string | null
           referrer_user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           referred_user_id?: string
+          referrer_rewarded_at?: string | null
           referrer_user_id?: string
         }
         Relationships: []

@@ -58,11 +58,12 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   if (action === "create") {
     const name = formData.get("name")?.toString() || "Inbound webhook";
-    const { token, error } = await createInboundWebhook(householdId, user.id, name);
+    const { token, signingSecret, error } = await createInboundWebhook(householdId, user.id, name);
     if (error || !token) {
       return redirect(`${redirectTo}?inbound_error=1`);
     }
     const params = new URLSearchParams({ inbound_created: "1", inbound_token: token });
+    if (signingSecret) params.set("inbound_signing_secret", signingSecret);
     return redirect(`${redirectTo}?${params.toString()}`);
   }
 

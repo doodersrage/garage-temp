@@ -25,7 +25,15 @@ import HouseholdSwitcher from "../components/HouseholdSwitcher.astro";
 import DoorDurationCard from "../components/DoorDurationCard.astro";
 import DoorEventHistory from "../components/DoorEventHistory.astro";
 import ReferralCard from "../components/ReferralCard.astro";
+import TimeToFreezeCard from "../components/TimeToFreezeCard.astro";
+import WeekCompareCard from "../components/WeekCompareCard.astro";
+import HaSetupCard from "../components/HaSetupCard.astro";
 import { getSiteUrl } from "../lib/stripe";
+import {
+  fetchWeekCompare,
+  buildTimeToFreezeFromPoints,
+} from "../lib/dashboardInsights";
+import { fetchGarageTempChartData } from "../lib/garageTempsHistory";
 import { checkFeedHealth } from "../lib/collectHistory";
 import { fetchLatestSensorValues } from "../lib/sensorReadings";
 import { formatRelativeAge, STALE_MS } from "../lib/relativeTime";
@@ -136,6 +144,19 @@ const householdRole = activeHouseholdId
   ? await getUserHouseholdRole(user.id, activeHouseholdId)
   : null;
 const canEdit = canEditHousehold(householdRole);
+
+const useCelsius = preferences.useCelsius;
+const [weekCompareResult, chartWeek] = await Promise.all([
+  fetchWeekCompare(user.id),
+  fetchGarageTempChartData(user.id, 7),
+]);
+const timeToFreeze = buildTimeToFreezeFromPoints(
+  chartWeek.points,
+  alertSettings.freezeThresholdF,
+);
+const referralRewardDays = Number(
+  (user.user_metadata as Record<string, unknown> | undefined)?.referral_reward_days ?? 0,
+);
 ---
 <DashboardLayout title="Dashboard">
   <div class="space-y-6">
@@ -174,7 +195,17 @@ const canEdit = canEditHousehold(householdRole);
 
     <DoorEventHistory householdId={household.householdId} />
 
-    <ReferralCard siteUrl={siteUrl} />
+    <TimeToFreezeCard
+      estimate={timeToFreeze}
+      freezeThresholdF={alertSettings.freezeThresholdF}
+      useCelsius={useCelsius}
+    />
+
+    <WeekCompareCard compare={weekCompareResult.compare} useCelsius={useCelsius} />
+
+    <ReferralCard siteUrl={siteUrl} rewardDays={referralRewardDays} />
+
+    <HaSetupCard />
 
     {nightsAtRisk.length > 0 && (
       <section class="card">

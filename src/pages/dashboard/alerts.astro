@@ -85,7 +85,11 @@ const alertNotice = Astro.url.searchParams.get("alert_saved")
           : testReason === "none"
             ? "No alert channels are enabled. Turn on at least one channel, save, then retry."
             : "Could not send test alert. Check channel settings and try again."
-        : null;
+        : Astro.url.searchParams.get("ack_ok")
+          ? "Alert marked as handled."
+          : Astro.url.searchParams.get("ack_error")
+            ? "Could not acknowledge alert."
+            : null;
 
 const alertNoticeIsError =
   Boolean(Astro.url.searchParams.get("alert_error")) ||
@@ -180,7 +184,8 @@ const lastAlertAge = formatRelativeAge(lastAlertAt);
                 <th class="py-2 pr-3">Kind</th>
                 <th class="py-2 pr-3">Title</th>
                 <th class="py-2 pr-3">Sent</th>
-                <th class="py-2">Skipped</th>
+                <th class="py-2 pr-3">Skipped</th>
+                <th class="py-2">Ack</th>
               </tr>
             </thead>
             <tbody>
@@ -192,7 +197,20 @@ const lastAlertAge = formatRelativeAge(lastAlertAt);
                     <td class="py-2 pr-3">{event.kind}</td>
                     <td class="py-2 pr-3">{event.title}</td>
                     <td class="py-2 pr-3">{formatChannelList(event.channels_sent) || "—"}</td>
-                    <td class="py-2">{formatChannelList(event.channels_skipped) || "—"}</td>
+                    <td class="py-2 pr-3">{formatChannelList(event.channels_skipped) || "—"}</td>
+                    <td class="py-2">
+                      {event.acknowledged_at ? (
+                        <span class="text-[var(--color-text-muted)]">Handled</span>
+                      ) : event.channels_sent.length > 0 && canEdit ? (
+                        <form action="/api/user/alert-events/ack" method="post" class="inline">
+                          <input type="hidden" name="event_id" value={event.id} />
+                          <input type="hidden" name="redirect" value="/dashboard/alerts" />
+                          <button class="btn-ghost text-xs" type="submit">I'm on it</button>
+                        </form>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                   </tr>
                 );
               })}

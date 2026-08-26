@@ -1,8 +1,12 @@
 ---
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import { listRecentJobRuns } from "../../lib/jobRuns";
+import { listRecentIngestStatsAdmin } from "../../lib/ingestStats";
+import { flagIngestAbuse } from "../../lib/ingestAbuse";
 
 const { runs, error } = await listRecentJobRuns(40);
+const ingestStats = await listRecentIngestStatsAdmin(7);
+const ingestAbuse = flagIngestAbuse(ingestStats);
 ---
 <DashboardLayout title="Jobs" requireAdmin={true}>
   <div class="space-y-6">
@@ -13,6 +17,23 @@ const { runs, error } = await listRecentJobRuns(40);
         recorded by the Worker. Look for job names like <code>collect-history</code>,
         <code>freeze-map</code>, and <code>retention</code> in the table below.
       </p>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Ingest abuse watch</h2>
+      <p class="card-subtitle mb-4">Devices with ≥50% ingest errors over the last 7 days (minimum 5 posts).</p>
+      {ingestAbuse.length === 0 ? (
+        <p class="mb-0 text-sm text-[var(--color-text-muted)]">No suspicious ingest patterns right now.</p>
+      ) : (
+        <ul class="space-y-2 text-sm mb-0">
+          {ingestAbuse.slice(0, 10).map((row) => (
+            <li>
+              <strong>{row.device_name}</strong> on {row.day}: {row.error_count} errors / {row.total} total (
+              {Math.round(row.errorRate * 100)}%)
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
 
     <section class="card">

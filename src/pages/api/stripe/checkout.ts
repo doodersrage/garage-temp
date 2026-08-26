@@ -2,7 +2,11 @@ import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import { createStripeClient, buildSiteUrl } from "../../../lib/stripe";
 import { resolveStripePriceId } from "../../../lib/planTier";
-import { PRO_TRIAL_DAYS, referralBonusTrialDays } from "../../../lib/referrals";
+import {
+  PRO_TRIAL_DAYS,
+  referralBonusTrialDays,
+  referralRewardTrialDays,
+} from "../../../lib/referrals";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -33,7 +37,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     typeof metadata?.referred_by === "string" ? metadata.referred_by : null;
   const proTrialDays =
     plan === "pro"
-      ? PRO_TRIAL_DAYS + referralBonusTrialDays(referredBy)
+      ? PRO_TRIAL_DAYS +
+        referralBonusTrialDays(referredBy) +
+        referralRewardTrialDays(metadata)
       : undefined;
 
   try {

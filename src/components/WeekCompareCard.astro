@@ -1,0 +1,43 @@
+---
+import { formatDeltaF, formatTemperature } from "../lib/temperatureFormat";
+import type { WeekCompareResult } from "../lib/weekCompare";
+
+interface Props {
+  compare: WeekCompareResult;
+  useCelsius?: boolean;
+}
+
+const { compare, useCelsius = false } = Astro.props;
+---
+<section class="card">
+  <h2 class="card-title">This week vs last year</h2>
+  <p class="card-subtitle mb-4">7-day average indoor temperature compared to the same window one year ago.</p>
+  {compare.thisWeekAvgF == null ? (
+    <p class="mb-0 text-sm text-[var(--color-text-muted)]">Not enough readings this week yet.</p>
+  ) : (
+    <div class="stat-grid">
+      <article class="stat-item">
+        <span class="stat-label">This week</span>
+        <p class="stat-value">{formatTemperature(compare.thisWeekAvgF, useCelsius, 1)}</p>
+        <p class="stat-detail">{compare.sampleCount} samples</p>
+      </article>
+      <article class="stat-item">
+        <span class="stat-label">Same week last year</span>
+        <p class="stat-value">
+          {compare.priorYearAvgF != null
+            ? formatTemperature(compare.priorYearAvgF, useCelsius, 1)
+            : "—"}
+        </p>
+      </article>
+      <article class="stat-item">
+        <span class="stat-label">Change</span>
+        <p class="stat-value">
+          {compare.deltaF != null ? formatDeltaF(compare.deltaF, useCelsius) : "—"}
+        </p>
+        <p class="stat-detail">
+          {compare.deltaF != null && compare.deltaF < 0 ? "Colder than last year" : "Warmer or similar"}
+        </p>
+      </article>
+    </div>
+  )}
+</section>

@@ -65,6 +65,20 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 - **Grafana setup** card on Share page with dashboard JSON download
 - **Activity + ingest stats** — always visible with empty states on Share page
 
+### Kitchen sink (depth, rewards, operator polish)
+- **Time-to-freeze estimate** — trend card on dashboard from recent readings
+- **Week vs last year** — 7-day average comparison card on dashboard
+- **Referrer rewards** — +7 Pro trial days for referrers when a friend subscribes
+- **Alert acknowledgment** — “I'm on it” on recent alert activity
+- **Reading webhooks** — POST on every successful ingest (optional HMAC secret)
+- **Per-space channel routing** — JSON rules to route garage/attic alerts to specific channels
+- **Signed inbound webhooks** — optional `X-GarageTemp-Signature` HMAC verification
+- **Battery sparklines** — 14-sample history on Devices health table
+- **Light theme + °C preference** — display preferences (dark / light / system)
+- **Home Assistant setup card** — YAML downloads + inbound status recipe on dashboard
+- **Freeze-map city search** — public geocode lookup on `/freeze-map`
+- **Admin referral stats + ingest abuse watch** — Users and Jobs admin pages
+
 ### Ops & content
 - Hourly Worker cron for history collection and alert evaluation
 - Admin tools: users, contact inbox, jobs

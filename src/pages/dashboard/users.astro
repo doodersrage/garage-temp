@@ -3,6 +3,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import UserManager from "../../components/UserManager.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { fetchManagedUsers } from "../../lib/userManager";
+import { fetchReferralAdminStats } from "../../lib/referrals";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -17,6 +18,7 @@ if (pageParam < 1 || Number.isNaN(pageParam)) {
 }
 
 const users = await fetchManagedUsers(user.id, pageParam);
+const referralStats = await fetchReferralAdminStats();
 const status = Astro.url.searchParams.get("status");
 
 if (users.totalPages > 0 && pageParam > users.totalPages) {
@@ -31,6 +33,30 @@ if (users.totalPages > 0 && pageParam > users.totalPages) {
       <p class="mb-0">
         Manage registered accounts and admin group membership. New signups are automatically added to the user group.
       </p>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Referral program</h2>
+      <p class="card-subtitle mb-4">Signups and referrer rewards granted on Pro subscription.</p>
+      <div class="stat-grid mb-4">
+        <article class="stat-item">
+          <span class="stat-label">Total signups</span>
+          <p class="stat-value">{referralStats.totalSignups}</p>
+        </article>
+        <article class="stat-item">
+          <span class="stat-label">Referrer rewards granted</span>
+          <p class="stat-value">{referralStats.rewardedSignups}</p>
+        </article>
+      </div>
+      {referralStats.topReferrers.length > 0 && (
+        <ul class="space-y-2 text-sm mb-0">
+          {referralStats.topReferrers.map((row) => (
+            <li>
+              <code>{row.userId.slice(0, 8)}…</code> — {row.count} signup{row.count === 1 ? "" : "s"}
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
 
     <UserManager

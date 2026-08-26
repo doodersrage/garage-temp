@@ -1,14 +1,18 @@
 ---
 interface Props {
   siteUrl: string;
+  rewardDays?: number;
 }
 
-const { siteUrl } = Astro.props;
+const { siteUrl, rewardDays = 0 } = Astro.props;
 ---
 <section class="card" id="referral-card">
   <h2 class="card-title">Invite friends</h2>
   <p class="card-subtitle mb-4">
-    Share your link — new signups get <strong>7 extra days</strong> on Pro trial. Track how many friends joined below.
+    Share your link — new signups get <strong>7 extra days</strong> on Pro trial.
+    {rewardDays > 0
+      ? ` You have ${rewardDays} bonus trial day${rewardDays === 1 ? "" : "s"} from successful referrals.`
+      : " You earn +7 trial days when a referred friend subscribes to Pro."}
   </p>
   <p class="ingest-key-value break-all text-sm mb-2" id="referral-url">Loading referral link…</p>
   <p class="text-sm text-[var(--color-text-muted)] mb-3" id="referral-stats"></p>

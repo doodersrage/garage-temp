@@ -12,7 +12,7 @@ import {
   shouldSuppressForQuietHours,
 } from "./quietHours";
 import { shouldSuppressForSnoozeOrVacation } from "./alertSnooze";
-import { applyAlertTemplates } from "./alertTemplates";
+import { filterChannelsForSpace } from "./spaceChannelRouting";
 import { createServerClient } from "./supabase";
 import { getUserEntitlements } from "./entitlements";
 import { sendWebPushToUser } from "./webPush";
@@ -261,7 +261,7 @@ export async function notifyUser(
   fallbackEmail: string | null | undefined,
   settings: AlertSettings,
   payload: NotifyPayload,
-  options?: { snoozeUrl?: string; smsOnly?: boolean },
+  options?: { snoozeUrl?: string; smsOnly?: boolean; space?: string | null },
 ): Promise<{ sent: string[]; skipped: string[] }> {
   if (
     !options?.smsOnly &&
@@ -304,10 +304,20 @@ export async function notifyUser(
   const sent: string[] = [];
   const skipped: string[] = [];
   const kind = payloadResolved.kind;
+  const routedChannels = kind
+    ? filterChannelsForSpace(
+        settings,
+        options?.space,
+        kind,
+        ["email", "sms", "discord", "push", "webhook", "telegram", "slack"],
+      )
+    : null;
+  const routedSet = routedChannels ? new Set(routedChannels) : null;
   const bodyWithSnooze = options?.snoozeUrl
     ? `${payloadResolved.body}\n\nSnooze 24h: ${options.snoozeUrl}`
     : payloadResolved.body;
   const allowChannel = (channel: AlertChannelName) => {
+    if (routedSet && !routedSet.has(channel)) return false;
     if (options?.smsOnly) return channel === "sms";
     if (smsCriticalOnly) return channel === "sms";
     return channelAllowed(settings, kind, channel);

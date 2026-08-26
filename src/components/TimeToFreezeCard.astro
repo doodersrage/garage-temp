@@ -1,0 +1,28 @@
+---
+interface Props {
+  estimate: {
+    hours: number | null;
+    rateFPerHour: number | null;
+    message: string;
+  };
+  freezeThresholdF: number;
+  useCelsius?: boolean;
+}
+
+const { estimate, freezeThresholdF, useCelsius = false } = Astro.props;
+const thresholdLabel = useCelsius
+  ? `${(((freezeThresholdF - 32) * 5) / 9).toFixed(0)}°C`
+  : `${freezeThresholdF}°F`;
+---
+<section class="card">
+  <h2 class="card-title">Time to freeze</h2>
+  <p class="card-subtitle mb-3">
+    Trend-based estimate using recent readings vs your {thresholdLabel} threshold.
+  </p>
+  <p class="mb-0 text-sm">{estimate.message}</p>
+  {estimate.hours != null && estimate.hours > 0 && estimate.rateFPerHour != null && (
+    <p class="mt-2 mb-0 text-sm text-[var(--color-text-muted)]">
+      Cooling rate: {Math.abs(estimate.rateFPerHour).toFixed(1)}°F/hr
+    </p>
+  )}
+</section>
