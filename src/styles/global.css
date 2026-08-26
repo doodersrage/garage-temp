@@ -700,9 +700,37 @@
     color: #fcd34d;
   }
 
-  .table-wrap {
-    @apply mb-6 overflow-x-auto rounded-xl;
+  .history-mobile-list {
+    @apply mb-6 grid gap-3;
+  }
+
+  .history-mobile-card {
+    @apply rounded-xl p-4;
+    background-color: var(--color-bg-elevated);
     border: 1px solid var(--color-border);
+  }
+
+  .history-mobile-time {
+    @apply mb-1 text-xs;
+    color: var(--color-text-muted);
+  }
+
+  .history-desktop-table {
+    @apply hidden;
+  }
+
+  @media (min-width: 768px) {
+    .history-mobile-list {
+      @apply hidden;
+    }
+
+    .history-desktop-table {
+      @apply block mb-6;
+    }
+  }
+
+  .stat-item-stale {
+    border-color: rgb(251 191 36 / 0.35);
   }
 
   .data-table {

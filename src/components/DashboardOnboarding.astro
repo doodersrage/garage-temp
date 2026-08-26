@@ -3,11 +3,19 @@ interface Props {
   hasDevices: boolean;
   hasSensors: boolean;
   hasHistory: boolean;
+  hasAlertsConfigured?: boolean;
+  hasHouseholdMembers?: boolean;
 }
 
-const { hasDevices, hasSensors, hasHistory } = Astro.props;
+const {
+  hasDevices,
+  hasSensors,
+  hasHistory,
+  hasAlertsConfigured = false,
+  hasHouseholdMembers = false,
+} = Astro.props;
 
-const steps = [
+const coreSteps = [
   {
     done: hasDevices,
     href: "/dashboard/temperature",
@@ -28,17 +36,45 @@ const steps = [
   },
 ];
 
-const completedCount = steps.filter((step) => step.done).length;
+const nextSteps = [
+  {
+    done: hasAlertsConfigured,
+    href: "/dashboard/alerts",
+    title: "Set up alerts",
+    detail: "Get freeze, humidity, and outage notifications.",
+  },
+  {
+    done: hasHouseholdMembers,
+    href: "/dashboard/household",
+    title: "Invite your household",
+    detail: "Share devices and history with family by email.",
+  },
+  {
+    done: false,
+    href: "/dashboard#plans",
+    title: "Explore Pro features",
+    detail: "SMS, browser push, share links, and more devices.",
+    optional: true,
+  },
+];
+
+const coreDone = coreSteps.every((step) => step.done);
+const completedCount = coreSteps.filter((step) => step.done).length;
+const steps = coreDone ? nextSteps : coreSteps;
 ---
 <section class="card animate-slide-up-fade">
-  <h2 class="card-title">Getting started</h2>
+  <h2 class="card-title">{coreDone ? "Next steps" : "Getting started"}</h2>
   <p class="card-subtitle">
-    {completedCount} of {steps.length} setup steps complete
+    {coreDone
+      ? "Core setup is done. Optional polish:"
+      : `${completedCount} of ${coreSteps.length} setup steps complete`}
   </p>
   <div class="dashboard-onboarding">
     {steps.map((step, index) => (
       <a class="dashboard-onboarding-item" href={step.href}>
-        <span class="dashboard-onboarding-step">{step.done ? "✓" : index + 1}</span>
+        <span class="dashboard-onboarding-step">
+          {step.done ? "✓" : "optional" in step && step.optional ? "★" : index + 1}
+        </span>
         <span>
           <strong>{step.title}</strong>
           <span class="block text-sm text-[var(--color-text-muted)]">{step.detail}</span>
@@ -46,4 +82,13 @@ const completedCount = steps.filter((step) => step.done).length;
       </a>
     ))}
   </div>
+  {coreDone && (
+    <p class="mt-4 mb-0 text-sm text-[var(--color-text-muted)]">
+      Quick links:
+      <a class="text-link" href="/dashboard/share">Share</a> ·
+      <a class="text-link" href="/dashboard/alerts">Alerts</a> ·
+      <a class="text-link" href="/dashboard/household">Household</a> ·
+      <a class="text-link" href="/dashboard#plans">Plans</a>
+    </p>
+  )}
 </section>

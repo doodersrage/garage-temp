@@ -296,6 +296,79 @@ export async function createPushDevice(
   return { device: data as Device, error: null };
 }
 
+export async function rotatePushDeviceKey(
+  householdId: string,
+  deviceId: string,
+  ingestKeyHash: string,
+  ingestKeyPrefix: string,
+): Promise<{ error: string | null }> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("devices")
+    .update({
+      ingest_key_hash: ingestKeyHash,
+      ingest_key_prefix: ingestKeyPrefix,
+    })
+    .eq("id", deviceId)
+    .eq("household_id", householdId)
+    .eq("source", "push")
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    return { error: error?.message ?? "Failed to rotate key" };
+  }
+
+  return { error: null };
+}
+
+export async function updateDeviceSensor(
+  sensorId: string,
+  deviceId: string,
+  patch: {
+    key: string;
+    label: string;
+    kind: SensorKind;
+    unit?: string | null;
+  },
+): Promise<{ error: string | null }> {
+  const supabase = createServerClient();
+  const { error } = await supabase
+    .from("device_sensors")
+    .update({
+      key: patch.key,
+      label: patch.label,
+      kind: patch.kind,
+      unit: patch.unit ?? null,
+    })
+    .eq("id", sensorId)
+    .eq("device_id", deviceId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { error: null };
+}
+
+export async function deleteDeviceSensor(
+  sensorId: string,
+  deviceId: string,
+): Promise<{ error: string | null }> {
+  const supabase = createServerClient();
+  const { error } = await supabase
+    .from("device_sensors")
+    .delete()
+    .eq("id", sensorId)
+    .eq("device_id", deviceId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { error: null };
+}
+
 export async function upsertDeviceSensor(
   deviceId: string,
   key: string,

@@ -17,27 +17,29 @@ const errorMessage = getRegisterErrorMessage(Astro.url.searchParams.get("error")
   description="Create a free account to personalize garage readings, save history, configure probes, and unlock dashboard tools."
 >
   <div class="page-shell page-grid auth-page-grid items-start">
-    <form class="form-panel auth-form animate-blurred-fade-in" action="/api/auth/register" method="post">
-      {safeNext && <input type="hidden" name="next" value={safeNext} />}
-      {errorMessage && (
-        <div class="alert-warning mb-4" role="alert">
-          <p class="m-0">{errorMessage}</p>
+    <div class="auth-form animate-blurred-fade-in space-y-4">
+      <form class="form-panel" action="/api/auth/register" method="post">
+        {safeNext && <input type="hidden" name="next" value={safeNext} />}
+        {errorMessage && (
+          <div class="alert-warning mb-4" role="alert">
+            <p class="m-0">{errorMessage}</p>
+          </div>
+        )}
+        <div class="form-field">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-input" type="email" name="email" id="email" required />
         </div>
-      )}
-      <div class="form-field">
-        <label class="form-label" for="email">Email</label>
-        <input class="form-input" type="email" name="email" id="email" required />
-      </div>
-      <div class="form-field">
-        <label class="form-label" for="password">Password</label>
-        <input class="form-input" type="password" name="password" id="password" required />
-      </div>
-      <div class="form-field">
-        <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
-      </div>
-      <button class="btn-primary" type="submit">Create account</button>
-      <OAuthButtons action="/api/auth/signin" />
-    </form>
+        <div class="form-field">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-input" type="password" name="password" id="password" required />
+        </div>
+        <div class="form-field">
+          <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
+        </div>
+        <button class="btn-primary" type="submit">Create account</button>
+      </form>
+      <OAuthButtons action="/api/auth/signin" next={safeNext} />
+    </div>
 
     <section class="card auth-aside animate-zoom-in">
       <h1 class="card-title">Create an account</h1>

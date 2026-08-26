@@ -13,6 +13,7 @@ import {
 import {
   createHouseholdInvite,
   listPendingInvites,
+  revokeHouseholdInvite,
   sendInviteEmail,
 } from "../../../lib/householdInvites";
 import { buildSiteUrl } from "../../../lib/stripe";
@@ -97,6 +98,18 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       return redirect(`${redirectTo}?error=${encodeURIComponent(result.error)}`);
     }
     return redirect(`${redirectTo}?removed=1`);
+  }
+
+  if (action === "revoke_invite") {
+    const inviteId = formData.get("invite_id")?.toString();
+    if (!inviteId) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+    const result = await revokeHouseholdInvite(manageId, inviteId);
+    if (result.error) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+    return redirect(`${redirectTo}?invite_revoked=1`);
   }
 
   // Email invite link (does not require existing account)

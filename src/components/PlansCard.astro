@@ -1,0 +1,101 @@
+---
+import type { UserSubscription } from "../lib/stripeSubscriptions";
+import { isActiveSubscriptionStatus } from "../lib/stripe";
+import type { Entitlements } from "../lib/entitlements";
+
+interface Props {
+  canDownloadCsv: boolean;
+  subscription: UserSubscription | null;
+  entitlements?: Entitlements | null;
+  subscriptionNotice?: string | null;
+  title?: string;
+  showCsvNote?: boolean;
+}
+
+const {
+  canDownloadCsv,
+  subscription,
+  entitlements = null,
+  subscriptionNotice = null,
+  title = "Plans",
+  showCsvNote = true,
+} = Astro.props;
+
+const hasActiveSubscription =
+  subscription !== null && isActiveSubscriptionStatus(subscription.status);
+const isPro =
+  entitlements?.tier === "pro" ||
+  entitlements?.tier === "admin" ||
+  subscription?.plan_tier === "pro";
+const tierLabel = entitlements?.tier ?? (isPro ? "pro" : canDownloadCsv ? "member" : "free");
+---
+
+<section class="card" id="plans">
+  <h2 class="card-title">{title}</h2>
+  <p class="card-subtitle">
+    Member unlocks CSV export. Pro adds SMS, browser push, share links, outbound webhooks, and more devices.
+  </p>
+
+  {subscriptionNotice === "success" && (
+    <div class="alert-success mb-4" role="status">
+      <p class="m-0">Subscription activated.</p>
+    </div>
+  )}
+
+  {subscriptionNotice === "cancelled" && (
+    <div class="alert-warning mb-4" role="status">
+      <p class="m-0">Checkout was cancelled. You can subscribe whenever you are ready.</p>
+    </div>
+  )}
+
+  <p class="mb-4 text-sm text-[var(--color-text-muted)]">
+    Current plan: <strong class="text-[var(--color-text)]">{tierLabel}</strong>
+    {entitlements ? ` · up to ${entitlements.maxDevices} push devices` : ""}
+  </p>
+
+  {canDownloadCsv || isPro ? (
+    <div class="card-muted">
+      {showCsvNote && (
+        <p class="m-0 mb-3 text-sm">
+          {hasActiveSubscription
+            ? `Your ${isPro ? "Pro" : "Member"} subscription is active.`
+            : "Your account includes CSV export access."}
+        </p>
+      )}
+      {hasActiveSubscription && (
+        <form action="/api/stripe/portal" method="post" class="inline-block mr-3">
+          <button class="btn-secondary" type="submit">
+            Manage billing
+          </button>
+        </form>
+      )}
+      {hasActiveSubscription && !isPro && (
+        <form action="/api/stripe/checkout" method="post" class="inline-block mt-3 sm:mt-0">
+          <input type="hidden" name="plan" value="pro" />
+          <button class="btn-primary" type="submit">Upgrade to Pro</button>
+        </form>
+      )}
+      {!hasActiveSubscription && !isPro && (
+        <form action="/api/stripe/checkout" method="post">
+          <input type="hidden" name="plan" value="pro" />
+          <button class="btn-primary" type="submit">Upgrade to Pro</button>
+        </form>
+      )}
+    </div>
+  ) : (
+    <div class="card-muted flex flex-wrap gap-3">
+      <form action="/api/stripe/checkout" method="post">
+        <input type="hidden" name="plan" value="member" />
+        <button class="btn-primary" type="submit">
+          Member (CSV)
+        </button>
+      </form>
+      <form action="/api/stripe/checkout" method="post">
+        <input type="hidden" name="plan" value="pro" />
+        <button class="btn-secondary" type="submit">
+          Pro (alerts + share)
+        </button>
+      </form>
+    </div>
+  )}
+</section>

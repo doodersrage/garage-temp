@@ -16,6 +16,7 @@ interface Props {
   probeFilter?: string;
   fromDate?: string;
   toDate?: string;
+  days?: number;
   anomalies?: { probeLabel: string; message: string; severity: string }[];
   filterOptions?: {
     feeds: string[];
@@ -32,6 +33,7 @@ const {
   probeFilter = "",
   fromDate = "",
   toDate = "",
+  days = 7,
   anomalies = [],
   filterOptions = { feeds: [], probes: [] },
 } = Astro.props;
@@ -49,6 +51,7 @@ function buildFilterUrl(nextFeed: string, nextProbe: string, nextPage = 1): stri
   if (nextProbe) params.set("probe", nextProbe);
   if (fromDate) params.set("from", fromDate);
   if (toDate) params.set("to", toDate);
+  if (days && days !== 7) params.set("days", String(days));
   return `${basePath}?${params.toString()}`;
 }
 
@@ -61,6 +64,11 @@ function buildExportUrl(): string {
   const query = params.toString();
   return query ? `/api/garage-temps/export.csv?${query}` : "/api/garage-temps/export.csv";
 }
+
+const chartTitle =
+  fromDate || toDate
+    ? "Temperature trend (selected dates)"
+    : `Temperature trend (last ${days} days)`;
 ---
 
 <section class="card">
@@ -80,7 +88,7 @@ function buildExportUrl(): string {
 
   {anomalies.length > 0 && (
     <div class="alert-warning mb-4">
-      <p class="m-0 font-medium">Unusual patterns detected in the last 7 days</p>
+      <p class="m-0 font-medium">Unusual patterns detected in the chart window</p>
       <ul class="mb-0 mt-2 pl-5">
         {anomalies.map((notice) => (
           <li>{notice.message}</li>
@@ -89,47 +97,49 @@ function buildExportUrl(): string {
     </div>
   )}
 
-  {(filterOptions.feeds.length > 0 || filterOptions.probes.length > 0) && (
-    <form class="history-filters" method="get" action={basePath}>
-      <div class="form-field mb-0">
-        <label class="form-label" for="feed-filter">Feed</label>
-        <select class="form-input" id="feed-filter" name="feed">
-          <option value="">All feeds</option>
-          {filterOptions.feeds.map((feed) => (
-            <option value={feed} selected={feedFilter === feed}>{feed}</option>
-          ))}
-        </select>
-      </div>
-      <div class="form-field mb-0">
-        <label class="form-label" for="probe-filter">Probe</label>
-        <select class="form-input" id="probe-filter" name="probe">
-          <option value="">All probes</option>
-          {filterOptions.probes.map((probe) => (
-            <option value={probe.key} selected={probeFilter === probe.key}>{probe.label}</option>
-          ))}
-        </select>
-      </div>
-      <button type="submit" class="btn-secondary self-end">Apply filters</button>
-    </form>
-  )}
+  <form class="history-filters" method="get" action={basePath}>
+    {(filterOptions.feeds.length > 0 || filterOptions.probes.length > 0) && (
+      <>
+        <div class="form-field mb-0">
+          <label class="form-label" for="feed-filter">Feed</label>
+          <select class="form-input" id="feed-filter" name="feed">
+            <option value="">All feeds</option>
+            {filterOptions.feeds.map((feed) => (
+              <option value={feed} selected={feedFilter === feed}>{feed}</option>
+            ))}
+          </select>
+        </div>
+        <div class="form-field mb-0">
+          <label class="form-label" for="probe-filter">Probe</label>
+          <select class="form-input" id="probe-filter" name="probe">
+            <option value="">All probes</option>
+            {filterOptions.probes.map((probe) => (
+              <option value={probe.key} selected={probeFilter === probe.key}>{probe.label}</option>
+            ))}
+          </select>
+        </div>
+      </>
+    )}
+    <div class="form-field mb-0">
+      <label class="form-label" for="from-date">From</label>
+      <input class="form-input" type="date" id="from-date" name="from" value={fromDate} />
+    </div>
+    <div class="form-field mb-0">
+      <label class="form-label" for="to-date">To</label>
+      <input class="form-input" type="date" id="to-date" name="to" value={toDate} />
+    </div>
+    <div class="form-field mb-0">
+      <label class="form-label" for="days-filter">Chart range</label>
+      <select class="form-input" id="days-filter" name="days">
+        <option value="7" selected={days === 7}>Last 7 days</option>
+        <option value="30" selected={days === 30}>Last 30 days</option>
+      </select>
+      <p class="form-hint">Used when From/To are empty.</p>
+    </div>
+    <button type="submit" class="btn-secondary self-end">Apply</button>
+  </form>
 
-  {(filterOptions.feeds.length > 0 || canDownloadCsv) && (
-    <form class="history-filters history-date-filters" method="get" action={basePath}>
-      <input type="hidden" name="feed" value={feedFilter} />
-      <input type="hidden" name="probe" value={probeFilter} />
-      <div class="form-field mb-0">
-        <label class="form-label" for="from-date">From</label>
-        <input class="form-input" type="date" id="from-date" name="from" value={fromDate} />
-      </div>
-      <div class="form-field mb-0">
-        <label class="form-label" for="to-date">To</label>
-        <input class="form-input" type="date" id="to-date" name="to" value={toDate} />
-      </div>
-      <button type="submit" class="btn-secondary self-end">Apply dates</button>
-    </form>
-  )}
-
-  <HistoryChart client:visible points={chartPoints} />
+  <HistoryChart client:visible points={chartPoints} title={chartTitle} />
 
   {error ? (
     <div class="empty-state">
@@ -148,7 +158,23 @@ function buildExportUrl(): string {
     </div>
   ) : (
     <>
-      <div class="table-wrap">
+      <div class="history-mobile-list">
+        {readings.map((reading) => (
+          <article class="history-mobile-card">
+            <p class="history-mobile-time m-0">{formatReadingTimestamp(reading.timestamp)}</p>
+            <p class="m-0 font-medium">{getReadingProbeLabel(reading)}</p>
+            <p class="m-0 text-sm text-[var(--color-text-muted)]">{getReadingFeedName(reading)}</p>
+            <p class="m-0 mt-2">
+              {Number(reading.tempf).toFixed(1)}°F
+              <span class="text-[var(--color-text-muted)]">
+                {" "}({Number(reading.tempc).toFixed(1)}°C) · {Number(reading.humidity).toFixed(1)}% RH
+              </span>
+            </p>
+          </article>
+        ))}
+      </div>
+
+      <div class="table-wrap history-desktop-table">
         <table class="data-table data-table-history">
           <thead>
             <tr>

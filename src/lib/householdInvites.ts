@@ -128,6 +128,25 @@ export async function acceptHouseholdInvite(
   return { householdId: invite.household_id, error: null };
 }
 
+export async function revokeHouseholdInvite(
+  householdId: string,
+  inviteId: string,
+): Promise<{ error: string | null }> {
+  const supabase = createServerClient();
+  const { error } = await supabase
+    .from("household_invites")
+    .delete()
+    .eq("id", inviteId)
+    .eq("household_id", householdId)
+    .is("accepted_at", null);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { error: null };
+}
+
 export async function sendInviteEmail(
   to: string,
   acceptUrl: string,

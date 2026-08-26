@@ -1,6 +1,6 @@
 ---
+import PlansCard from "./PlansCard.astro";
 import type { UserSubscription } from "../lib/stripeSubscriptions";
-import { isActiveSubscriptionStatus } from "../lib/stripe";
 
 interface Props {
   canDownloadCsv: boolean;
@@ -13,65 +13,12 @@ const {
   subscription,
   subscriptionNotice = null,
 } = Astro.props;
-
-const hasActiveSubscription =
-  subscription !== null && isActiveSubscriptionStatus(subscription.status);
-const isPro = subscription?.plan_tier === "pro";
 ---
 
-<section class="card">
-  <h2 class="card-title">Plans & CSV export</h2>
-  <p class="card-subtitle">
-    Member unlocks CSV export. Pro adds SMS, web push, share links, outbound webhooks, and more devices.
-  </p>
-
-  {subscriptionNotice === "success" && (
-    <div class="alert-success mb-4" role="status">
-      <p class="m-0">Subscription activated.</p>
-    </div>
-  )}
-
-  {subscriptionNotice === "cancelled" && (
-    <div class="alert-warning mb-4" role="status">
-      <p class="m-0">Checkout was cancelled. You can subscribe whenever you are ready.</p>
-    </div>
-  )}
-
-  {canDownloadCsv ? (
-    <div class="card-muted">
-      <p class="m-0 mb-3 text-sm">
-        {hasActiveSubscription
-          ? `Your ${isPro ? "Pro" : "Member"} subscription is active.`
-          : "Your account includes CSV export access."}
-      </p>
-      {hasActiveSubscription && (
-        <form action="/api/stripe/portal" method="post">
-          <button class="btn-secondary" type="submit">
-            Manage subscription
-          </button>
-        </form>
-      )}
-      {hasActiveSubscription && !isPro && (
-        <form action="/api/stripe/checkout" method="post" class="mt-3">
-          <input type="hidden" name="plan" value="pro" />
-          <button class="btn-primary" type="submit">Upgrade to Pro</button>
-        </form>
-      )}
-    </div>
-  ) : (
-    <div class="card-muted flex flex-wrap gap-3">
-      <form action="/api/stripe/checkout" method="post">
-        <input type="hidden" name="plan" value="member" />
-        <button class="btn-primary" type="submit">
-          Member (CSV)
-        </button>
-      </form>
-      <form action="/api/stripe/checkout" method="post">
-        <input type="hidden" name="plan" value="pro" />
-        <button class="btn-secondary" type="submit">
-          Pro (alerts + share)
-        </button>
-      </form>
-    </div>
-  )}
-</section>
+<PlansCard
+  canDownloadCsv={canDownloadCsv}
+  subscription={subscription}
+  subscriptionNotice={subscriptionNotice}
+  title="Plans & CSV export"
+  showCsvNote={true}
+/>

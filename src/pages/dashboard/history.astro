@@ -29,6 +29,8 @@ const feedFilter = Astro.url.searchParams.get("feed")?.trim() ?? "";
 const probeFilter = Astro.url.searchParams.get("probe")?.trim() ?? "";
 const fromDate = Astro.url.searchParams.get("from")?.trim() ?? "";
 const toDate = Astro.url.searchParams.get("to")?.trim() ?? "";
+const daysParam = Number(Astro.url.searchParams.get("days") ?? "7");
+const chartDays = daysParam === 30 ? 30 : 7;
 
 if (pageParam < 1 || Number.isNaN(pageParam)) {
   return Astro.redirect("/dashboard/history?page=1");
@@ -43,10 +45,21 @@ const filters = {
 
 const preferences = await getUserPreferences(user);
 
+const chartWindowDays =
+  fromDate && toDate
+    ? Math.max(
+        1,
+        Math.ceil(
+          (Date.parse(`${toDate}T23:59:59`) - Date.parse(`${fromDate}T00:00:00`)) /
+            (24 * 60 * 60 * 1000),
+        ),
+      )
+    : chartDays;
+
 const [history, chartData, filterOptions, canDownloadCsv, subscription, insights] =
   await Promise.all([
     fetchGarageTempHistory(user.id, pageParam, undefined, filters),
-    fetchGarageTempChartData(user.id, 7, filters),
+    fetchGarageTempChartData(user.id, chartWindowDays, filters),
     fetchHistoryFilterOptions(user.id),
     canDownloadHistoryCsv(user.id),
     getUserSubscription(user.id),
@@ -146,6 +159,7 @@ const probeCompare = compareProbeAverages(chartData.points);
       probeFilter={probeFilter}
       fromDate={fromDate}
       toDate={toDate}
+      days={chartDays}
       anomalies={anomalies}
       filterOptions={filterOptions}
     />

@@ -60,10 +60,9 @@ const notice = Astro.url.searchParams.get("created")
           <div class="form-field mb-0">
             <label class="form-label" for="scope">Scope</label>
             <select class="form-input" id="scope" name="scope">
-              <option value="live">Live</option>
-              <option value="history">History</option>
+              <option value="live">Live sensors</option>
             </select>
-            <p class="form-hint">Live = current sensors only. History marks the link for future history views.</p>
+            <p class="form-hint">Shows current sensor values only. History share views are coming later.</p>
           </div>
           <div class="form-field mb-0">
             <label class="form-label" for="expires_days">Expires (days, 0 = never)</label>

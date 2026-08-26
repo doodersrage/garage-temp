@@ -54,10 +54,7 @@ const readingsUrl = `/api/share/${token}/readings`;
     function render(data) {
       if (titleEl && data.label) titleEl.textContent = data.label;
       if (subtitleEl) {
-        subtitleEl.textContent =
-          data.scope === "history"
-            ? "Shared history scope (current sensors shown)"
-            : "Live read-only view";
+        subtitleEl.textContent = "Live read-only view";
       }
       if (metaEl) {
         const parts = [];

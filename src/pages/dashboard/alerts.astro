@@ -1,9 +1,12 @@
 ---
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import AlertSettings from "../../components/AlertSettings.astro";
+import PlansCard from "../../components/PlansCard.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getAlertSettingsForUser } from "../../lib/notify";
 import { getUserEntitlements } from "../../lib/entitlements";
+import { getUserSubscription } from "../../lib/stripeSubscriptions";
+import { canDownloadHistoryCsv } from "../../lib/adminAccess";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -11,9 +14,11 @@ if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const [alertSettings, entitlements] = await Promise.all([
+const [alertSettings, entitlements, subscription, canDownloadCsv] = await Promise.all([
   getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
   getUserEntitlements(user.id),
+  getUserSubscription(user.id),
+  canDownloadHistoryCsv(user.id),
 ]);
 
 const alertNotice = Astro.url.searchParams.get("alert_saved")
@@ -21,6 +26,11 @@ const alertNotice = Astro.url.searchParams.get("alert_saved")
   : Astro.url.searchParams.get("alert_error")
     ? "Unable to save alert settings."
     : null;
+
+const needsPro =
+  !entitlements.canUseSms ||
+  !entitlements.canUsePush ||
+  !entitlements.canUseOutboundWebhook;
 ---
 <DashboardLayout title="Alerts">
   <div class="space-y-6">
@@ -32,6 +42,16 @@ const alertNotice = Astro.url.searchParams.get("alert_saved")
       </p>
       {alertNotice && <p class="alert-success mt-4">{alertNotice}</p>}
     </section>
+
+    {needsPro && (
+      <PlansCard
+        canDownloadCsv={canDownloadCsv}
+        subscription={subscription}
+        entitlements={entitlements}
+        title="Unlock Pro alert channels"
+        showCsvNote={false}
+      />
+    )}
 
     <AlertSettings
       userEmail={user.email ?? ""}

@@ -23,46 +23,48 @@ const safeNext =
   description="Sign in to your dashboard to manage display preferences, probe feeds, reading history, and CSV export."
 >
   <div class="page-shell page-grid auth-page-grid items-start">
-    <form class="form-panel auth-form animate-blurred-fade-in" action="/api/auth/signin" method="post">
-      {safeNext && <input type="hidden" name="next" value={safeNext} />}
-      {registered && (
-        <div class="alert-success mb-4" role="status">
-          <p class="m-0">
-            Account created. Check your email to confirm, then sign in below.
+    <div class="auth-form animate-blurred-fade-in space-y-4">
+      <form class="form-panel" action="/api/auth/signin" method="post">
+        {safeNext && <input type="hidden" name="next" value={safeNext} />}
+        {registered && (
+          <div class="alert-success mb-4" role="status">
+            <p class="m-0">
+              Account created. Check your email to confirm, then sign in below.
+            </p>
+          </div>
+        )}
+        {errorMessage && (
+          <div class="alert-warning mb-4" role="alert">
+            <p class="m-0">{errorMessage}</p>
+          </div>
+        )}
+        <div class="form-field">
+          <label class="form-label" for="email">Email</label>
+          <input
+            class="form-input"
+            type="email"
+            name="email"
+            id="email"
+            value={emailValue}
+            required
+          />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-input" type="password" name="password" id="password" required />
+        </div>
+        <div class="form-field">
+          <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
+        </div>
+        <div class="flex flex-col gap-3">
+          <button class="btn-primary" type="submit">Sign in</button>
+          <p class="m-0 text-sm">
+            <a class="text-link" href="/forgot-password">Forgot password?</a>
           </p>
         </div>
-      )}
-      {errorMessage && (
-        <div class="alert-warning mb-4" role="alert">
-          <p class="m-0">{errorMessage}</p>
-        </div>
-      )}
-      <div class="form-field">
-        <label class="form-label" for="email">Email</label>
-        <input
-          class="form-input"
-          type="email"
-          name="email"
-          id="email"
-          value={emailValue}
-          required
-        />
-      </div>
-      <div class="form-field">
-        <label class="form-label" for="password">Password</label>
-        <input class="form-input" type="password" name="password" id="password" required />
-      </div>
-      <div class="form-field">
-        <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
-      </div>
-      <div class="flex flex-col gap-3">
-        <button class="btn-primary" type="submit">Sign in</button>
-        <p class="m-0 text-sm">
-          <a class="text-link" href="/forgot-password">Forgot password?</a>
-        </p>
-      </div>
-      <OAuthButtons />
-    </form>
+      </form>
+      <OAuthButtons next={safeNext} />
+    </div>
 
     <section class="card auth-aside animate-zoom-in">
       <h1 class="card-title">Sign in</h1>

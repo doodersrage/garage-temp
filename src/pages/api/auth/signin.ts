@@ -17,7 +17,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress
 
   const validProviders = ["google", "github", "discord"];
 
-  if (provider && validProviders.includes(provider)) {
+  // OAuth only when a provider is set and this is not an email/password submit
+  // (nested OAuth fields used to leak into the email form in some browsers).
+  if (provider && validProviders.includes(provider) && !password) {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: provider as Provider,
       options: {

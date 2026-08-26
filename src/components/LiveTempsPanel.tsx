@@ -115,6 +115,25 @@ function formatSensorValue(sensor: LiveSensor): { primary: string; detail: strin
   return { primary: "—", detail: "No reading" };
 }
 
+const STALE_MS = 2 * 60 * 60 * 1000; // 2 hours
+
+function formatAge(recordedAt: string | null): { label: string; stale: boolean } | null {
+  if (!recordedAt) return null;
+  const ms = Date.now() - Date.parse(recordedAt);
+  if (Number.isNaN(ms) || ms < 0) return null;
+
+  const minutes = Math.floor(ms / 60000);
+  let label: string;
+  if (minutes < 1) label = "Updated just now";
+  else if (minutes < 60) label = `Updated ${minutes}m ago`;
+  else {
+    const hours = Math.floor(minutes / 60);
+    label = hours < 48 ? `Updated ${hours}h ago` : `Updated ${Math.floor(hours / 24)}d ago`;
+  }
+
+  return { label, stale: ms >= STALE_MS };
+}
+
 export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
   const [groups, setGroups] = useState<FeedGroup[]>([]);
   const [sensors, setSensors] = useState<LiveSensor[]>([]);
@@ -205,14 +224,23 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
         <div class="stat-grid mb-6">
           {temperatureCards.map((sensor) => {
             const display = formatSensorValue(sensor);
+            const age = formatAge(sensor.recorded_at);
             return (
-              <article class="stat-item" key={`${sensor.deviceId}:${sensor.key}:temp`}>
+              <article
+                class={`stat-item${age?.stale ? " stat-item-stale" : ""}`}
+                key={`${sensor.deviceId}:${sensor.key}:temp`}
+              >
                 <span class="stat-label">{sensor.label}</span>
                 <p class="stat-value">{display.primary}</p>
                 <p class="stat-detail">
                   {display.detail}
                   {sensor.deviceName ? ` · ${sensor.deviceName}` : ""}
                 </p>
+                {age && (
+                  <p class={`stat-detail m-0${age.stale ? " text-amber-300" : ""}`}>
+                    {age.stale ? `Stale · ${age.label}` : age.label}
+                  </p>
+                )}
               </article>
             );
           })}
@@ -271,9 +299,10 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
           <div class="stat-grid">
             {nonTempSensors.map((sensor) => {
               const display = formatSensorValue(sensor);
+              const age = formatAge(sensor.recorded_at);
               return (
                 <article
-                  class="stat-item"
+                  class={`stat-item${age?.stale ? " stat-item-stale" : ""}`}
                   key={`${sensor.deviceId}:${sensor.key}:${sensor.kind}`}
                 >
                   <span class="stat-label">{sensor.label}</span>
@@ -281,6 +310,11 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
                   <p class="stat-detail">
                     {display.detail} · {sensor.deviceName}
                   </p>
+                  {age && (
+                    <p class={`stat-detail m-0${age.stale ? " text-amber-300" : ""}`}>
+                      {age.stale ? `Stale · ${age.label}` : age.label}
+                    </p>
+                  )}
                 </article>
               );
             })}

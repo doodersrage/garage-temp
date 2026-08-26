@@ -53,6 +53,19 @@ const tempConfig = isAuthenticated
 			)}
 		</div>
 
+		{!isAuthenticated && (
+			<section class="card animate-slide-up-fade">
+				<h2 class="card-title">Make it yours</h2>
+				<p class="card-subtitle">
+					The readings above are a public demo. Create a free account to connect your own probes, save history, set alerts, and share with family.
+				</p>
+				<div class="flex flex-wrap gap-3 mt-4">
+					<a class="btn-primary" href="/register">Create free account</a>
+					<a class="btn-secondary" href="/signin">Sign in</a>
+				</div>
+			</section>
+		)}
+
 		<section class="card animate-slide-up-fade">
 			<h2 class="card-title">About these readings</h2>
 			<p class="card-subtitle">Probes, weather, history, and the technology behind this site.</p>
