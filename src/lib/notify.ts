@@ -1,16 +1,20 @@
 import {
+  type AlertChannelName,
   type AlertSettings,
+  type NotifyKind,
   alertSettingsToRow,
   getAlertSettingsFromMetadata,
   rowToAlertSettings,
 } from "./alerts";
+import { recordAlertEvent } from "./alertEvents";
+import { shouldSuppressForQuietHours } from "./quietHours";
 import { createServerClient } from "./supabase";
 import { getUserEntitlements } from "./entitlements";
 
 export type NotifyPayload = {
   title: string;
   body: string;
-  kind?: "threshold" | "rate" | "outage" | "digest" | "generic";
+  kind?: NotifyKind;
 };
 
 async function sendEmail(to: string, subject: string, body: string): Promise<void> {
@@ -51,6 +55,44 @@ async function sendDiscord(webhookUrl: string, title: string, body: string): Pro
     });
   } catch (error) {
     console.error("Failed to send Discord webhook:", error);
+  }
+}
+
+async function sendSlack(webhookUrl: string, title: string, body: string): Promise<void> {
+  try {
+    await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: `*${title}*\n${body}`,
+      }),
+    });
+  } catch (error) {
+    console.error("Failed to send Slack webhook:", error);
+  }
+}
+
+async function sendTelegram(
+  botToken: string,
+  chatId: string,
+  title: string,
+  body: string,
+): Promise<void> {
+  try {
+    const url = `https://api.telegram.org/bot${encodeURIComponent(botToken)}/sendMessage`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: `${title}\n${body}`.slice(0, 4000),
+      }),
+    });
+    if (!response.ok) {
+      console.error("Telegram send failed:", await response.text());
+    }
+  } catch (error) {
+    console.error("Failed to send Telegram message:", error);
   }
 }
 
@@ -160,10 +202,6 @@ async function sendWebPushToUser(userId: string, payload: NotifyPayload): Promis
 
   if (!subs || subs.length === 0) return;
 
-  // Minimal Web Push: many Workers runtimes lack full web-push libs.
-  // Store subscription and attempt a standard POST; full VAPID encryption
-  // requires additional crypto. Prefer Discord/SMS/email as primary.
-  // When @block65/webcrypto-web-push is unavailable, notify via endpoint ping is skipped.
   try {
     const { buildPushPayload } = await import("@block65/webcrypto-web-push");
 
@@ -200,6 +238,17 @@ async function sendWebPushToUser(userId: string, payload: NotifyPayload): Promis
   }
 }
 
+function channelAllowed(
+  settings: AlertSettings,
+  kind: NotifyKind | undefined,
+  channel: AlertChannelName,
+): boolean {
+  if (!kind) return true;
+  const override = settings.channelSeverity?.[kind];
+  if (!override || override.length === 0) return true;
+  return override.includes(channel);
+}
+
 export async function getAlertSettingsForUser(
   userId: string,
   metadata?: Record<string, unknown>,
@@ -215,7 +264,6 @@ export async function getAlertSettingsForUser(
     return rowToAlertSettings(data as Record<string, unknown>);
   }
 
-  // Fallback to legacy metadata, then seed table
   const fromMeta = getAlertSettingsFromMetadata(metadata);
   await supabase.from("alert_settings").upsert({
     user_id: userId,
@@ -240,7 +288,11 @@ export async function saveAlertSettingsForUser(
 
 export async function markCooldown(
   userId: string,
-  field: "last_alert_sent_at" | "last_outage_alert_at" | "last_rate_alert_at",
+  field:
+    | "last_alert_sent_at"
+    | "last_outage_alert_at"
+    | "last_rate_alert_at"
+    | "last_forecast_alert_at",
 ): Promise<void> {
   const supabase = createServerClient();
   await supabase
@@ -255,12 +307,26 @@ export async function notifyUser(
   settings: AlertSettings,
   payload: NotifyPayload,
 ): Promise<{ sent: string[]; skipped: string[] }> {
+  if (shouldSuppressForQuietHours(settings, payload.kind)) {
+    const skipped = ["quiet_hours"];
+    await recordAlertEvent({
+      userId,
+      kind: payload.kind ?? "generic",
+      title: payload.title,
+      body: payload.body,
+      channelsSent: [],
+      channelsSkipped: skipped,
+    });
+    return { sent: [], skipped };
+  }
+
   const entitlements = await getUserEntitlements(userId);
   const email = settings.email ?? fallbackEmail ?? null;
   const sent: string[] = [];
   const skipped: string[] = [];
+  const kind = payload.kind;
 
-  if (settings.channelEmail) {
+  if (settings.channelEmail && channelAllowed(settings, kind, "email")) {
     if (email) {
       await sendEmail(email, payload.title, payload.body);
       sent.push("email");
@@ -269,7 +335,7 @@ export async function notifyUser(
     }
   }
 
-  if (settings.channelDiscord) {
+  if (settings.channelDiscord && channelAllowed(settings, kind, "discord")) {
     if (settings.discordWebhookUrl) {
       await sendDiscord(settings.discordWebhookUrl, payload.title, payload.body);
       sent.push("discord");
@@ -278,7 +344,30 @@ export async function notifyUser(
     }
   }
 
-  if (settings.channelSms) {
+  if (settings.channelSlack && channelAllowed(settings, kind, "slack")) {
+    if (settings.slackWebhookUrl) {
+      await sendSlack(settings.slackWebhookUrl, payload.title, payload.body);
+      sent.push("slack");
+    } else {
+      skipped.push("slack");
+    }
+  }
+
+  if (settings.channelTelegram && channelAllowed(settings, kind, "telegram")) {
+    if (settings.telegramBotToken && settings.telegramChatId) {
+      await sendTelegram(
+        settings.telegramBotToken,
+        settings.telegramChatId,
+        payload.title,
+        payload.body,
+      );
+      sent.push("telegram");
+    } else {
+      skipped.push("telegram");
+    }
+  }
+
+  if (settings.channelSms && channelAllowed(settings, kind, "sms")) {
     if (settings.smsPhone && entitlements.canUseSms) {
       await sendTwilioSms(settings.smsPhone, `${payload.title}: ${payload.body}`);
       sent.push("sms");
@@ -287,7 +376,7 @@ export async function notifyUser(
     }
   }
 
-  if (settings.channelPush) {
+  if (settings.channelPush && channelAllowed(settings, kind, "push")) {
     if (entitlements.canUsePush) {
       await sendWebPushToUser(userId, payload);
       sent.push("push");
@@ -296,7 +385,7 @@ export async function notifyUser(
     }
   }
 
-  if (settings.channelWebhook) {
+  if (settings.channelWebhook && channelAllowed(settings, kind, "webhook")) {
     if (settings.outboundWebhookUrl && entitlements.canUseOutboundWebhook) {
       await sendOutboundWebhook(
         settings.outboundWebhookUrl,
@@ -308,6 +397,15 @@ export async function notifyUser(
       skipped.push("webhook");
     }
   }
+
+  await recordAlertEvent({
+    userId,
+    kind: payload.kind ?? "generic",
+    title: payload.title,
+    body: payload.body,
+    channelsSent: sent,
+    channelsSkipped: skipped,
+  });
 
   return { sent, skipped };
 }

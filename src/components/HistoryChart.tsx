@@ -9,11 +9,13 @@ type Point = {
 
 interface Props {
   points: Point[];
+  priorYearPoints?: Point[];
   title?: string;
 }
 
 export default function HistoryChart({
   points,
+  priorYearPoints = [],
   title = "Temperature trend (last 7 days)",
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -36,9 +38,12 @@ export default function HistoryChart({
     const innerW = width - pad.left - pad.right;
     const innerH = height - pad.top - pad.bottom;
 
-    const temps = points.map((p) => p.tempf);
-    const min = Math.min(...temps) - 2;
-    const max = Math.max(...temps) + 2;
+    const allTemps = [
+      ...points.map((p) => p.tempf),
+      ...priorYearPoints.map((p) => p.tempf),
+    ];
+    const min = Math.min(...allTemps) - 2;
+    const max = Math.max(...allTemps) + 2;
     const range = max - min || 1;
 
     ctx.clearRect(0, 0, width, height);
@@ -60,16 +65,24 @@ export default function HistoryChart({
       ctx.fillText(`${val.toFixed(0)}°F`, pad.left - 6, y + 3);
     }
 
-    ctx.strokeStyle = "#60a5fa";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    points.forEach((point, i) => {
-      const x = pad.left + (i / (points.length - 1)) * innerW;
-      const y = pad.top + innerH - ((point.tempf - min) / range) * innerH;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
+    function drawSeries(series: Point[], color: string) {
+      if (series.length < 2) return;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      series.forEach((point, i) => {
+        const x = pad.left + (i / (series.length - 1)) * innerW;
+        const y = pad.top + innerH - ((point.tempf - min) / range) * innerH;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    if (priorYearPoints.length >= 2) {
+      drawSeries(priorYearPoints, "rgba(148, 163, 184, 0.55)");
+    }
+    drawSeries(points, "#60a5fa");
 
     const last = points[points.length - 1];
     const lastX = pad.left + innerW;
@@ -93,7 +106,7 @@ export default function HistoryChart({
       width - pad.right,
       height - 8,
     );
-  }, [points]);
+  }, [points, priorYearPoints]);
 
   if (points.length < 2) {
     return (
@@ -109,6 +122,11 @@ export default function HistoryChart({
   return (
     <div class="history-chart-wrap">
       <p class="history-chart-title">{title}</p>
+      {priorYearPoints.length >= 2 && (
+        <p class="m-0 mb-2 text-xs text-[var(--color-text-muted)]">
+          Blue = this year · Gray = same window last year
+        </p>
+      )}
       <canvas
         ref={canvasRef}
         class="w-full"

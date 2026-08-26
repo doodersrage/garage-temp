@@ -11,6 +11,7 @@ import { listPendingInvites } from "../../lib/householdInvites";
 import { getHouseholdErrorMessage } from "../../lib/householdErrors";
 import { createAdminClient, createServerClient } from "../../lib/supabase";
 import { buildSiteUrl } from "../../lib/stripe";
+import { WEATHER_CITY_PRESETS } from "../../lib/weatherCities";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
@@ -26,7 +27,11 @@ const [membersResult, householdsResult, invitesResult, householdRow] = await Pro
   listUserHouseholds(user.id),
   manageId ? listPendingInvites(manageId) : Promise.resolve({ invites: [], error: null }),
   manageId
-    ? createServerClient().from("households").select("name").eq("id", manageId).maybeSingle()
+    ? createServerClient()
+        .from("households")
+        .select("name, freeze_map_opt_in, freeze_map_city_id")
+        .eq("id", manageId)
+        .maybeSingle()
     : Promise.resolve({ data: null }),
 ]);
 
@@ -91,6 +96,45 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
           />
         </div>
         <button class="btn-secondary" type="submit">Save name</button>
+      </form>
+    )}
+
+    {isOwner && (
+      <form action="/api/household" method="post" class="card">
+        <input type="hidden" name="action" value="freeze_map" />
+        <input type="hidden" name="redirect" value="/dashboard/household" />
+        <h2 class="card-title">Public freeze-risk map</h2>
+        <p class="card-subtitle mb-4">
+          Opt in to contribute anonymized indoor temperature averages for your city.
+          No household, device, or address is shown on the public map.
+        </p>
+        <label class="checkbox-row mb-3">
+          <input
+            type="checkbox"
+            name="freeze_map_opt_in"
+            value="true"
+            checked={householdRow.data?.freeze_map_opt_in === true}
+          />
+          <span>Include this household in city aggregates</span>
+        </label>
+        <div class="form-field">
+          <label class="form-label" for="freeze_map_city_id">City</label>
+          <select class="form-input" id="freeze_map_city_id" name="freeze_map_city_id">
+            <option value="">Select a city</option>
+            {WEATHER_CITY_PRESETS.map((city) => (
+              <option
+                value={city.id}
+                selected={householdRow.data?.freeze_map_city_id === city.id}
+              >
+                {city.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button class="btn-secondary" type="submit">Save freeze map settings</button>
+        <p class="form-hint mt-2 mb-0">
+          View the public list at <a class="text-link" href="/freeze-map">/freeze-map</a>.
+        </p>
       </form>
     )}
 

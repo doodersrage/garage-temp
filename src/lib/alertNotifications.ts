@@ -1,12 +1,14 @@
 import type { TempFeedConfig, TempFeedResult, TempProbeConfig } from "./tempFeedConfig";
 import {
   evaluateAlerts,
+  evaluateForecastFreeze,
   evaluateOutage,
   evaluateRateChange,
   isAlertCooldownActive,
   type AlertReading,
   type AlertSettings,
 } from "./alerts";
+import { evaluateAlertRules, type RuleEvalContext } from "./alertRules";
 import {
   getAlertSettingsForUser,
   markCooldown,
@@ -23,6 +25,7 @@ import {
   buildReadingsFromResults,
   mergeAlertReadings,
 } from "./alertReadings";
+import { fetchForecastMinTemp } from "./FetchWeather";
 
 export {
   buildAlertReadingsFromLatestSensors,
@@ -48,6 +51,38 @@ export async function sendThresholdAlertsIfNeeded(
     kind: "threshold",
   });
   await markCooldown(userId, "last_alert_sent_at");
+}
+
+export async function maybeSendForecastFreezeAlert(
+  userId: string,
+  email: string | null | undefined,
+  settings: AlertSettings,
+  weatherCityId?: string | null,
+): Promise<void> {
+  if (!settings.enabled || !settings.forecastFreezeEnabled) return;
+  if (isAlertCooldownActive(settings.lastForecastAlertAt)) return;
+
+  const prefs = weatherCityId
+    ? { weatherCityId }
+    : null;
+  // Prefer explicit city; otherwise fall back to OpenWeather default via null.
+  const window = await fetchForecastMinTemp(
+    prefs?.weatherCityId ?? weatherCityId ?? null,
+    settings.forecastHoursAhead,
+  );
+  const message = evaluateForecastFreeze(
+    settings,
+    window?.minTempF ?? null,
+    settings.forecastHoursAhead,
+  );
+  if (!message) return;
+
+  await notifyUser(userId, email, settings, {
+    title: "Forecast freeze risk",
+    body: message,
+    kind: "forecast",
+  });
+  await markCooldown(userId, "last_forecast_alert_at");
 }
 
 export async function maybeSendThresholdAlerts(
@@ -84,6 +119,97 @@ export async function maybeSendThresholdAlerts(
 
   const readings = mergeAlertReadings(feedReadings, sensorReadings);
   await sendThresholdAlertsIfNeeded(userId, email, settings, readings);
+  await maybeSendForecastFreezeAlert(userId, email, settings);
+}
+
+async function buildRuleContext(
+  settings: AlertSettings,
+  devices: DeviceWithSensors[],
+  readings: AlertReading[],
+  householdId?: string | null,
+): Promise<RuleEvalContext> {
+  const boolSensors: RuleEvalContext["boolSensors"] = [];
+  if (householdId) {
+    const latest = await fetchLatestSensorValues(householdId);
+    for (const row of latest) {
+      if (
+        row.sensor.kind === "door" ||
+        row.sensor.kind === "flood" ||
+        row.sensor.kind === "power"
+      ) {
+        if (typeof row.value_bool === "boolean") {
+          boolSensors.push({
+            label: row.sensor.label,
+            kind: row.sensor.kind,
+            value: row.value_bool,
+          });
+        }
+      }
+    }
+  }
+
+  const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const rateDrops: RuleEvalContext["rateDrops"] = [];
+  for (const device of devices) {
+    for (const sensor of device.sensors) {
+      if (sensor.kind !== "temperature" || !sensor.visible) continue;
+      const values = await getRecentNumericReadings(sensor.id, since);
+      if (values.length < 2) continue;
+      const drop = values[0]! - values[values.length - 1]!;
+      if (drop > 0) {
+        rateDrops.push({ label: sensor.label, dropF: drop });
+      }
+    }
+  }
+
+  const now = Date.now();
+  const outages: RuleEvalContext["outages"] = [];
+  for (const device of devices.filter((d) => d.enabled)) {
+    if (!device.last_seen_at) {
+      outages.push({ deviceName: device.name, hoursSilent: 999 });
+      continue;
+    }
+    const last = Date.parse(device.last_seen_at);
+    if (Number.isNaN(last)) continue;
+    outages.push({
+      deviceName: device.name,
+      hoursSilent: (now - last) / (60 * 60 * 1000),
+    });
+  }
+
+  return {
+    readings,
+    boolSensors,
+    rateDrops,
+    outages,
+    freezeThresholdF: settings.freezeThresholdF,
+    humidityThreshold: settings.humidityThreshold,
+    rateChangeF: settings.rateChangeF,
+    outageHours: settings.outageHours,
+  };
+}
+
+export async function maybeSendRuleAlerts(
+  userId: string,
+  email: string | null | undefined,
+  devices: DeviceWithSensors[],
+  settings: AlertSettings,
+  readings: AlertReading[],
+  householdId?: string | null,
+): Promise<void> {
+  if (!settings.enabled || settings.alertRules.length === 0) return;
+  if (isAlertCooldownActive(settings.lastAlertSentAt)) return;
+
+  const ctx = await buildRuleContext(settings, devices, readings, householdId);
+  const messages = evaluateAlertRules(settings.alertRules, ctx);
+  if (messages.length === 0) return;
+
+  await notifyUser(userId, email, settings, {
+    title: "Garage alert rule matched",
+    body: messages.join("\n"),
+    kind: "rule",
+  });
+  await markCooldown(userId, "last_alert_sent_at");
 }
 
 export async function maybeSendRateAndOutageAlerts(
@@ -91,6 +217,8 @@ export async function maybeSendRateAndOutageAlerts(
   email: string | null | undefined,
   devices: DeviceWithSensors[],
   settings: AlertSettings,
+  householdId?: string | null,
+  readings: AlertReading[] = [],
 ): Promise<void> {
   if (!settings.enabled) return;
 
@@ -129,6 +257,15 @@ export async function maybeSendRateAndOutageAlerts(
     });
     await markCooldown(userId, "last_rate_alert_at");
   }
+
+  await maybeSendRuleAlerts(
+    userId,
+    email,
+    devices,
+    settings,
+    readings,
+    householdId,
+  );
 }
 
 export async function updateUserAlertSettings(

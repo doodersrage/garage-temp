@@ -14,15 +14,19 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 
 ### Monitoring
 - Live readings on Home (temperature, humidity, door, flood, power, CO₂, and generic sensors)
-- Pull JSON feeds and push ingest devices in one Devices page
+- Pull JSON feeds and push ingest devices in one Devices page (device health, battery/RSSI)
 - Feed health checks and relative “last seen” / staleness indicators
 - OpenWeather outdoor comparison on the home page
-- Historic readings with chart, filters, anomaly hints, and CSV export (Member/Pro)
+- Historic readings with chart, YoY overlay, filters, anomaly hints, and CSV export (Member/Pro)
+- Opt-in public city freeze-risk map (`/freeze-map`)
 
 ### Alerts & digests
 - Threshold alerts (freeze, humidity, rate-of-change, outage)
-- Channels: email, Discord webhook; Pro adds SMS (Twilio), browser push, outbound webhooks
-- Test alert with per-channel sent/skipped feedback
+- Forecast freeze risk (OpenWeather 3h forecast look-ahead)
+- Composite AND rules (door + temp drop, flood, power, outage, …)
+- Quiet hours with optional freeze/forecast bypass
+- Channels: email, Discord, Telegram, Slack; Pro adds SMS (Twilio), browser push, outbound webhooks
+- Test alert with per-channel sent/skipped feedback and alert activity audit trail
 - Weekly email digest (Mondays)
 
 ### Accounts & collaboration
@@ -61,6 +65,7 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 | Extra push devices | limited | limited | higher limit |
 | SMS, browser push, outbound webhook | | | ✓ |
 | Public share links | | | ✓ |
+| Metrics share (Prometheus/Grafana) | | | ✓ |
 
 Exact device limits live in `src/lib/entitlements.ts`.
 

@@ -220,16 +220,22 @@ export type Database = {
           id: string
           name: string
           created_at: string
+          freeze_map_opt_in: boolean
+          freeze_map_city_id: string | null
         }
         Insert: {
           id?: string
           name?: string
           created_at?: string
+          freeze_map_opt_in?: boolean
+          freeze_map_city_id?: string | null
         }
         Update: {
           id?: string
           name?: string
           created_at?: string
+          freeze_map_opt_in?: boolean
+          freeze_map_city_id?: string | null
         }
         Relationships: []
       }
@@ -271,6 +277,7 @@ export type Database = {
           sort_order: number
           created_at: string
           updated_at: string
+          meta: Json
         }
         Insert: {
           id?: string
@@ -285,6 +292,7 @@ export type Database = {
           sort_order?: number
           created_at?: string
           updated_at?: string
+          meta?: Json
         }
         Update: {
           id?: string
@@ -299,6 +307,7 @@ export type Database = {
           sort_order?: number
           created_at?: string
           updated_at?: string
+          meta?: Json
         }
         Relationships: []
       }
@@ -394,6 +403,21 @@ export type Database = {
           last_outage_alert_at: string | null
           last_rate_alert_at: string | null
           updated_at: string
+          forecast_freeze_enabled: boolean
+          forecast_hours_ahead: number
+          last_forecast_alert_at: string | null
+          quiet_hours_enabled: boolean
+          quiet_hours_start: string
+          quiet_hours_end: string
+          quiet_hours_timezone: string
+          quiet_hours_bypass_freeze: boolean
+          channel_telegram: boolean
+          telegram_bot_token: string | null
+          telegram_chat_id: string | null
+          channel_slack: boolean
+          slack_webhook_url: string | null
+          alert_rules: Json
+          channel_severity: Json
         }
         Insert: {
           user_id: string
@@ -417,6 +441,21 @@ export type Database = {
           last_outage_alert_at?: string | null
           last_rate_alert_at?: string | null
           updated_at?: string
+          forecast_freeze_enabled?: boolean
+          forecast_hours_ahead?: number
+          last_forecast_alert_at?: string | null
+          quiet_hours_enabled?: boolean
+          quiet_hours_start?: string
+          quiet_hours_end?: string
+          quiet_hours_timezone?: string
+          quiet_hours_bypass_freeze?: boolean
+          channel_telegram?: boolean
+          telegram_bot_token?: string | null
+          telegram_chat_id?: string | null
+          channel_slack?: boolean
+          slack_webhook_url?: string | null
+          alert_rules?: Json
+          channel_severity?: Json
         }
         Update: {
           user_id?: string
@@ -440,6 +479,21 @@ export type Database = {
           last_outage_alert_at?: string | null
           last_rate_alert_at?: string | null
           updated_at?: string
+          forecast_freeze_enabled?: boolean
+          forecast_hours_ahead?: number
+          last_forecast_alert_at?: string | null
+          quiet_hours_enabled?: boolean
+          quiet_hours_start?: string
+          quiet_hours_end?: string
+          quiet_hours_timezone?: string
+          quiet_hours_bypass_freeze?: boolean
+          channel_telegram?: boolean
+          telegram_bot_token?: string | null
+          telegram_chat_id?: string | null
+          channel_slack?: boolean
+          slack_webhook_url?: string | null
+          alert_rules?: Json
+          channel_severity?: Json
         }
         Relationships: []
       }
@@ -500,6 +554,72 @@ export type Database = {
           expires_at?: string | null
           created_by?: string | null
           created_at?: string
+        }
+        Relationships: []
+      }
+      alert_events: {
+        Row: {
+          id: number
+          user_id: string
+          kind: string
+          title: string
+          body: string
+          channels_sent: string[]
+          channels_skipped: string[]
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          user_id: string
+          kind: string
+          title: string
+          body: string
+          channels_sent?: string[]
+          channels_skipped?: string[]
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          user_id?: string
+          kind?: string
+          title?: string
+          body?: string
+          channels_sent?: string[]
+          channels_skipped?: string[]
+          created_at?: string
+        }
+        Relationships: []
+      }
+      freeze_map_snapshots: {
+        Row: {
+          id: number
+          city_id: string
+          city_label: string
+          sample_count: number
+          avg_temp_f: number | null
+          min_temp_f: number | null
+          freeze_risk_count: number
+          captured_at: string
+        }
+        Insert: {
+          id?: number
+          city_id: string
+          city_label: string
+          sample_count?: number
+          avg_temp_f?: number | null
+          min_temp_f?: number | null
+          freeze_risk_count?: number
+          captured_at?: string
+        }
+        Update: {
+          id?: number
+          city_id?: string
+          city_label?: string
+          sample_count?: number
+          avg_temp_f?: number | null
+          min_temp_f?: number | null
+          freeze_risk_count?: number
+          captured_at?: string
         }
         Relationships: []
       }

@@ -60,14 +60,35 @@ export function compareProbeAverages(points: ChartPoint[]): string[] {
   ];
 }
 
+export function compareYearOverYear(
+  current: ChartPoint[],
+  priorYear: ChartPoint[],
+): SeasonalInsight | null {
+  if (current.length === 0 || priorYear.length === 0) return null;
+  const avg = (pts: ChartPoint[]) =>
+    pts.reduce((sum, p) => sum + p.tempf, 0) / pts.length;
+  const currentAvg = avg(current);
+  const priorAvg = avg(priorYear);
+  const delta = currentAvg - priorAvg;
+  return {
+    title: "Year-over-year",
+    detail: `This window averages ${currentAvg.toFixed(1)}°F vs ${priorAvg.toFixed(1)}°F last year (${delta >= 0 ? "+" : ""}${delta.toFixed(1)}°F).`,
+  };
+}
+
 export async function computeSeasonalInsights(
   userId: string,
   days = 30,
 ): Promise<SeasonalInsight[]> {
-  const { fetchGarageTempChartData } = await import("./garageTempsHistory");
+  const { fetchGarageTempChartData, fetchGarageTempChartDataPriorYear } =
+    await import("./garageTempsHistory");
   const chart = await fetchGarageTempChartData(userId, days);
   if (chart.error || chart.points.length === 0) {
     return [];
   }
-  return summarizeSeasonal(chart.points, days);
+  const insights = summarizeSeasonal(chart.points, days);
+  const prior = await fetchGarageTempChartDataPriorYear(userId, days);
+  const yoy = compareYearOverYear(chart.points, prior.points);
+  if (yoy) insights.push(yoy);
+  return insights;
 }

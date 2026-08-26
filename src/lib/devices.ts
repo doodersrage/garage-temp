@@ -28,6 +28,7 @@ export type Device = {
   enabled: boolean;
   last_seen_at: string | null;
   sort_order: number;
+  meta?: Record<string, unknown>;
 };
 
 export type DeviceSensor = {
@@ -44,7 +45,7 @@ export type DeviceSensor = {
 export type DeviceWithSensors = Device & { sensors: DeviceSensor[] };
 
 const DEVICE_SELECT =
-  "id, household_id, name, source, pull_url, ingest_key_prefix, enabled, last_seen_at, sort_order";
+  "id, household_id, name, source, pull_url, ingest_key_prefix, enabled, last_seen_at, sort_order, meta";
 const SENSOR_SELECT =
   "id, device_id, key, label, kind, unit, visible, sort_order";
 
@@ -243,6 +244,30 @@ export async function touchDeviceLastSeen(deviceId: string): Promise<void> {
   await supabase
     .from("devices")
     .update({ last_seen_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq("id", deviceId);
+}
+
+export async function updateDeviceMeta(
+  deviceId: string,
+  patch: Record<string, unknown>,
+): Promise<void> {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from("devices")
+    .select("meta")
+    .eq("id", deviceId)
+    .maybeSingle();
+  const existing =
+    data?.meta && typeof data.meta === "object" && !Array.isArray(data.meta)
+      ? (data.meta as Record<string, unknown>)
+      : {};
+  await supabase
+    .from("devices")
+    .update({
+      meta: { ...existing, ...patch },
+      last_seen_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", deviceId);
 }
 

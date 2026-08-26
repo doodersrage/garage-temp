@@ -1,0 +1,80 @@
+---
+export const prerender = false;
+import Layout from "../layouts/Layout.astro";
+import { listLatestFreezeMapSnapshots } from "../lib/freezeMap";
+import { formatRelativeAge } from "../lib/relativeTime";
+
+const snapshots = await listLatestFreezeMapSnapshots();
+const capturedAt = snapshots[0]?.captured_at ?? null;
+const captureAge = formatRelativeAge(capturedAt, "not yet");
+---
+<Layout
+  title="Freeze-risk map"
+  description="Opt-in, city-level garage temperature aggregates — anonymized freeze risk across contributing households."
+>
+  <div class="page-shell page-stack">
+    <section class="card animate-slide-in-left">
+      <h1 class="card-title">Freeze-risk map</h1>
+      <p class="card-subtitle">
+        Anonymized indoor garage temperatures by city from households that opt in.
+        No addresses, device names, or household identifiers are published.
+      </p>
+      <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+        Latest aggregate: {captureAge.label}
+        {captureAge.absolute ? ` (${captureAge.absolute})` : ""}.
+        Household owners can opt in under Dashboard → Household.
+      </p>
+    </section>
+
+    <section class="card">
+      {snapshots.length === 0 ? (
+        <p class="mb-0 text-[var(--color-text-muted)]">
+          No city samples yet. Be the first to opt in from your household settings.
+        </p>
+      ) : (
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-[var(--color-text-muted)]">
+                <th class="py-2 pr-3">City</th>
+                <th class="py-2 pr-3">Samples</th>
+                <th class="py-2 pr-3">Avg °F</th>
+                <th class="py-2 pr-3">Min °F</th>
+                <th class="py-2">Freeze-risk share</th>
+              </tr>
+            </thead>
+            <tbody>
+              {snapshots.map((row) => {
+                const riskPct =
+                  row.sample_count > 0
+                    ? Math.round((row.freeze_risk_count / row.sample_count) * 100)
+                    : 0;
+                const sparse = row.sample_count < 3;
+                return (
+                  <tr class="border-t border-[var(--color-border)]">
+                    <td class="py-2 pr-3">
+                      <strong>{row.city_label}</strong>
+                      {sparse && (
+                        <span class="block text-xs text-[var(--color-text-muted)]">
+                          Sparse sample
+                        </span>
+                      )}
+                    </td>
+                    <td class="py-2 pr-3">{row.sample_count}</td>
+                    <td class="py-2 pr-3">
+                      {row.avg_temp_f != null ? row.avg_temp_f.toFixed(1) : "—"}
+                    </td>
+                    <td class="py-2 pr-3">
+                      {row.min_temp_f != null ? row.min_temp_f.toFixed(1) : "—"}
+                    </td>
+                    <td class="py-2">{riskPct}% ({row.freeze_risk_count})</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  </div>
+</Layout>

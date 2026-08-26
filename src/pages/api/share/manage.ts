@@ -80,7 +80,13 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?revoked=1`);
   }
 
-  const scope = formData.get("scope")?.toString() === "history" ? "history" : "live";
+  const scopeRaw = formData.get("scope")?.toString() ?? "live";
+  const scope =
+    scopeRaw === "history"
+      ? "history"
+      : scopeRaw === "metrics"
+        ? "metrics"
+        : "live";
   const label = formData.get("label")?.toString().trim() || null;
   const expiresDays = Number(formData.get("expires_days") ?? 0);
   const expires_at =

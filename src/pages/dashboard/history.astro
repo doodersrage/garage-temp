@@ -6,6 +6,7 @@ import { getAuthFromCookies } from "../../lib/auth";
 import { canDownloadHistoryCsv } from "../../lib/adminAccess";
 import {
   fetchGarageTempChartData,
+  fetchGarageTempChartDataPriorYear,
   fetchGarageTempHistory,
   fetchHistoryFilterOptions,
 } from "../../lib/garageTempsHistory";
@@ -17,6 +18,8 @@ import {
 } from "../../lib/seasonalInsights";
 import { getUserPreferences } from "../../lib/userPreferences";
 import { fetchIndoorOutdoorDelta } from "../../lib/indoorOutdoorDelta";
+import { RAW_READING_RETENTION_DAYS } from "../../lib/retentionSchedule";
+import { getUserEntitlements } from "../../lib/entitlements";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -31,6 +34,7 @@ const fromDate = Astro.url.searchParams.get("from")?.trim() ?? "";
 const toDate = Astro.url.searchParams.get("to")?.trim() ?? "";
 const daysParam = Number(Astro.url.searchParams.get("days") ?? "7");
 const chartDays = daysParam === 30 ? 30 : 7;
+const compareYoy = Astro.url.searchParams.get("yoy") === "1";
 
 if (pageParam < 1 || Number.isNaN(pageParam)) {
   return Astro.redirect("/dashboard/history?page=1");
@@ -56,15 +60,27 @@ const chartWindowDays =
       )
     : chartDays;
 
-const [history, chartData, filterOptions, canDownloadCsv, subscription, insights] =
-  await Promise.all([
-    fetchGarageTempHistory(user.id, pageParam, undefined, filters),
-    fetchGarageTempChartData(user.id, chartWindowDays, filters),
-    fetchHistoryFilterOptions(user.id),
-    canDownloadHistoryCsv(user.id),
-    getUserSubscription(user.id),
-    computeSeasonalInsights(user.id, 30),
-  ]);
+const [
+  history,
+  chartData,
+  priorYearData,
+  filterOptions,
+  canDownloadCsv,
+  subscription,
+  insights,
+  entitlements,
+] = await Promise.all([
+  fetchGarageTempHistory(user.id, pageParam, undefined, filters),
+  fetchGarageTempChartData(user.id, chartWindowDays, filters),
+  compareYoy
+    ? fetchGarageTempChartDataPriorYear(user.id, chartWindowDays, filters)
+    : Promise.resolve({ points: [], error: null }),
+  fetchHistoryFilterOptions(user.id),
+  canDownloadHistoryCsv(user.id),
+  getUserSubscription(user.id),
+  computeSeasonalInsights(user.id, 30),
+  getUserEntitlements(user.id),
+]);
 
 const outdoorDelta = await fetchIndoorOutdoorDelta(
   chartData.points,
@@ -78,6 +94,10 @@ if (history.totalPages > 0 && pageParam > history.totalPages) {
 const subscriptionNotice = Astro.url.searchParams.get("subscription");
 const anomalies = detectTemperatureAnomalies(chartData.points);
 const probeCompare = compareProbeAverages(chartData.points);
+const showRetentionNote =
+  entitlements.tier === "member" ||
+  entitlements.tier === "pro" ||
+  entitlements.tier === "admin";
 ---
 <DashboardLayout title="Reading History">
   <div class="space-y-6">
@@ -90,6 +110,17 @@ const probeCompare = compareProbeAverages(chartData.points);
         {canDownloadCsv
           ? " Download the full record as CSV below."
           : " Subscribe to unlock CSV export of your saved history."}
+      </p>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Data retention</h2>
+      <p class="mb-0 text-sm">
+        Raw readings are kept for <strong>{RAW_READING_RETENTION_DAYS} days</strong>, then rolled into hourly averages.
+        Year-over-year compare uses those rollups when raw rows have aged out.
+        {showRetentionNote
+          ? " Member and Pro plans unlock CSV export of the retained window."
+          : ""}
       </p>
     </section>
 
@@ -153,6 +184,8 @@ const probeCompare = compareProbeAverages(chartData.points);
     <GarageTempHistory
       history={history}
       chartPoints={chartData.points}
+      priorYearPoints={priorYearData.points}
+      compareYoy={compareYoy}
       basePath="/dashboard/history"
       canDownloadCsv={canDownloadCsv}
       feedFilter={feedFilter}

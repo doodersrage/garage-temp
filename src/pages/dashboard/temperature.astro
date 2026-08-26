@@ -146,6 +146,67 @@ const ingestCurlExample = ingestKey
       </section>
     )}
 
+    <section class="card" id="device-health">
+      <h2 class="card-title">Device health</h2>
+      <p class="card-subtitle mb-4">
+        Last seen, staleness, and optional battery/RSSI from ingest payloads.
+      </p>
+      {devices.length === 0 ? (
+        <p class="mb-0 text-sm text-[var(--color-text-muted)]">No devices yet.</p>
+      ) : (
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-[var(--color-text-muted)]">
+                <th class="py-2 pr-3">Device</th>
+                <th class="py-2 pr-3">Source</th>
+                <th class="py-2 pr-3">Last seen</th>
+                <th class="py-2 pr-3">Sensors</th>
+                <th class="py-2 pr-3">Battery</th>
+                <th class="py-2">RSSI</th>
+              </tr>
+            </thead>
+            <tbody>
+              {devices.map((device) => {
+                const age = formatRelativeAge(device.last_seen_at);
+                const meta = (device.meta ?? {}) as Record<string, unknown>;
+                const battery =
+                  typeof meta.battery_pct === "number" ? `${meta.battery_pct}%` : "—";
+                const rssi = typeof meta.rssi === "number" ? `${meta.rssi} dBm` : "—";
+                const pullHealth = feedHealth.statuses.find((f) => f.feedId === device.id);
+                return (
+                  <tr class="border-t border-[var(--color-border)]">
+                    <td class="py-2 pr-3">
+                      <strong>{device.name}</strong>
+                      {device.ingest_key_prefix && (
+                        <span class="block text-xs text-[var(--color-text-muted)]">
+                          key {device.ingest_key_prefix}…
+                        </span>
+                      )}
+                    </td>
+                    <td class="py-2 pr-3">
+                      {device.source === "push" ? "Push" : "Pull"}
+                      {pullHealth && (
+                        <span class="block text-xs text-[var(--color-text-muted)]">
+                          {pullHealth.ok ? "Reachable" : pullHealth.message}
+                        </span>
+                      )}
+                    </td>
+                    <td class:list={["py-2 pr-3", age.stale && "text-[var(--color-danger)]"]}>
+                      {age.label}
+                    </td>
+                    <td class="py-2 pr-3">{device.sensors.length}</td>
+                    <td class="py-2 pr-3">{battery}</td>
+                    <td class="py-2">{rssi}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+
     {showVerifyIngest && !ingestKey && (
       <section class="card ingest-key-callout" id="verify-ingest-step">
         <h2 class="card-title">Next: verify ingest</h2>

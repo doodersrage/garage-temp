@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import {
   findDeviceByIngestKeyHash,
   touchDeviceLastSeen,
+  updateDeviceMeta,
   upsertDeviceSensor,
 } from "../../../lib/devices";
 import { insertSensorReadings } from "../../../lib/sensorReadings";
@@ -155,7 +156,20 @@ export const POST: APIRoute = async ({ params, request }) => {
     });
   }
 
-  await touchDeviceLastSeen(device.id);
+  const metaPatch: Record<string, unknown> = {};
+  const battery = Number(
+    (payload as Record<string, unknown>).battery ??
+      (payload as Record<string, unknown>).battery_pct,
+  );
+  const rssi = Number((payload as Record<string, unknown>).rssi);
+  if (Number.isFinite(battery)) metaPatch.battery_pct = battery;
+  if (Number.isFinite(rssi)) metaPatch.rssi = rssi;
+
+  if (Object.keys(metaPatch).length > 0) {
+    await updateDeviceMeta(device.id, metaPatch);
+  } else {
+    await touchDeviceLastSeen(device.id);
+  }
 
   return new Response(
     JSON.stringify({ ok: true, readings: rows.length }),

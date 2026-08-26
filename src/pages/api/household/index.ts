@@ -18,6 +18,7 @@ import {
   sendInviteEmail,
 } from "../../../lib/householdInvites";
 import { buildSiteUrl } from "../../../lib/stripe";
+import { updateHouseholdFreezeMapSettings } from "../../../lib/freezeMap";
 
 export const GET: APIRoute = async ({ cookies }) => {
   const { user } = await getAuthFromCookies(cookies);
@@ -100,6 +101,19 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   if (action === "rename") {
     const name = formData.get("name")?.toString() ?? "";
     await updateHouseholdName(manageId, name);
+    return redirect(`${redirectTo}?saved=1`);
+  }
+
+  if (action === "freeze_map") {
+    if (!ownedId || ownedId !== manageId) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+    const optIn = formData.has("freeze_map_opt_in");
+    const cityId = formData.get("freeze_map_city_id")?.toString().trim() || null;
+    const result = await updateHouseholdFreezeMapSettings(manageId, optIn, cityId);
+    if (result.error) {
+      return redirect(`${redirectTo}?error=1`);
+    }
     return redirect(`${redirectTo}?saved=1`);
   }
 

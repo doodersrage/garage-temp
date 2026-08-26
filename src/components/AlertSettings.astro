@@ -1,6 +1,7 @@
 ---
 import type { AlertSettings } from "../lib/alerts";
 import type { Entitlements } from "../lib/entitlements";
+import { CONDITION_OPTIONS } from "../lib/alertRules";
 
 interface Props {
   userEmail: string;
@@ -22,12 +23,15 @@ const needsPro =
   !entitlements.canUseSms ||
   !entitlements.canUsePush ||
   !entitlements.canUseOutboundWebhook;
+
+const rulesJson = JSON.stringify(settings.alertRules ?? []);
 ---
 <form action="/api/user/alert-settings" method="post" class="card animate-slide-up-fade" id="alert-settings-form">
   <input type="hidden" name="redirect" value={redirectTo} />
+  <input type="hidden" name="alert_rules_json" id="alert_rules_json" value={rulesJson} />
   <h2 class="card-title">When to notify you</h2>
   <p class="card-subtitle">
-    Choose thresholds and channels. Free plans include email and Discord; SMS, browser push, and outbound webhooks need Pro.
+    Choose thresholds, rules, and channels. Free plans include email, Discord, Telegram, and Slack; SMS, browser push, and outbound webhooks need Pro.
   </p>
 
   <label class="checkbox-row mb-3">
@@ -59,6 +63,47 @@ const needsPro =
     </div>
   </div>
 
+  <h3 class="text-base font-semibold mb-2">Forecast freeze risk</h3>
+  <label class="checkbox-row mb-2">
+    <input type="checkbox" name="forecast_freeze_enabled" value="true" checked={settings.forecastFreezeEnabled} />
+    <span>Warn when outdoor forecast may hit freeze threshold</span>
+  </label>
+  <div class="form-field mb-4">
+    <label class="form-label" for="forecast_hours_ahead">Look-ahead hours</label>
+    <input class="form-input" type="number" min="3" max="48" step="1" id="forecast_hours_ahead" name="forecast_hours_ahead" value={settings.forecastHoursAhead} />
+  </div>
+
+  <h3 class="text-base font-semibold mb-2">Quiet hours</h3>
+  <label class="checkbox-row mb-2">
+    <input type="checkbox" name="quiet_hours_enabled" value="true" checked={settings.quietHoursEnabled} />
+    <span>Suppress non-critical alerts during quiet hours</span>
+  </label>
+  <label class="checkbox-row mb-3">
+    <input type="checkbox" name="quiet_hours_bypass_freeze" value="true" checked={settings.quietHoursBypassFreeze} />
+    <span>Always deliver freeze / forecast freeze alerts</span>
+  </label>
+  <div class="config-row-grid mb-4">
+    <div class="form-field mb-0">
+      <label class="form-label" for="quiet_hours_start">Quiet start (HH:MM)</label>
+      <input class="form-input" type="text" id="quiet_hours_start" name="quiet_hours_start" value={settings.quietHoursStart} placeholder="22:00" />
+    </div>
+    <div class="form-field mb-0">
+      <label class="form-label" for="quiet_hours_end">Quiet end (HH:MM)</label>
+      <input class="form-input" type="text" id="quiet_hours_end" name="quiet_hours_end" value={settings.quietHoursEnd} placeholder="07:00" />
+    </div>
+    <div class="form-field mb-0">
+      <label class="form-label" for="quiet_hours_timezone">Timezone (IANA)</label>
+      <input class="form-input" type="text" id="quiet_hours_timezone" name="quiet_hours_timezone" value={settings.quietHoursTimezone} placeholder="America/New_York" />
+    </div>
+  </div>
+
+  <h3 class="text-base font-semibold mb-2">Composite rules (AND)</h3>
+  <p class="card-subtitle mb-3">
+    Fire when every condition in a rule is true (e.g. door open AND temperature drop).
+  </p>
+  <div id="alert-rules-list" class="space-y-3 mb-3"></div>
+  <button type="button" class="btn-secondary mb-4" id="add-alert-rule">Add rule</button>
+
   <h3 class="text-base font-semibold mb-2">How to reach you</h3>
   <div class="space-y-2 mb-4">
     <label class="checkbox-row">
@@ -68,6 +113,14 @@ const needsPro =
     <label class="checkbox-row">
       <input type="checkbox" name="channel_discord" value="true" checked={settings.channelDiscord} />
       <span>Discord webhook</span>
+    </label>
+    <label class="checkbox-row">
+      <input type="checkbox" name="channel_telegram" value="true" checked={settings.channelTelegram} />
+      <span>Telegram (your bot token)</span>
+    </label>
+    <label class="checkbox-row">
+      <input type="checkbox" name="channel_slack" value="true" checked={settings.channelSlack} />
+      <span>Slack Incoming Webhook</span>
     </label>
     <label class="checkbox-row">
       <input type="checkbox" name="channel_sms" value="true" checked={settings.channelSms} disabled={!entitlements.canUseSms} />
@@ -116,6 +169,21 @@ const needsPro =
   </div>
 
   <div class="form-field">
+    <label class="form-label" for="telegram_bot_token">Telegram bot token</label>
+    <input class="form-input" type="text" id="telegram_bot_token" name="telegram_bot_token" value={settings.telegramBotToken ?? ""} placeholder="123456:ABC..." autocomplete="off" />
+  </div>
+
+  <div class="form-field">
+    <label class="form-label" for="telegram_chat_id">Telegram chat ID</label>
+    <input class="form-input" type="text" id="telegram_chat_id" name="telegram_chat_id" value={settings.telegramChatId ?? ""} placeholder="-100..." />
+  </div>
+
+  <div class="form-field">
+    <label class="form-label" for="slack_webhook_url">Slack Incoming Webhook URL</label>
+    <input class="form-input" type="url" id="slack_webhook_url" name="slack_webhook_url" value={settings.slackWebhookUrl ?? ""} placeholder="https://hooks.slack.com/services/..." />
+  </div>
+
+  <div class="form-field">
     <label class="form-label" for="sms_phone">SMS phone number</label>
     <input class="form-input" type="tel" id="sms_phone" name="sms_phone" value={settings.smsPhone ?? ""} placeholder="+15551234567" disabled={!entitlements.canUseSms} />
     <p class="form-hint">Use international format, e.g. +1 for US numbers.</p>
@@ -134,7 +202,7 @@ const needsPro =
 
   <button type="submit" class="btn-primary">Save alert settings</button>
   <p class="form-hint mt-2 mb-0" id="channel-incomplete-hint" hidden>
-    A checked channel needs its destination filled in (email, Discord URL, SMS number, or webhook URL), or it will be skipped when alerts fire.
+    A checked channel needs its destination filled in, or it will be skipped when alerts fire.
   </p>
 
   {entitlements.canUsePush && vapidPublicKey && (
@@ -148,25 +216,117 @@ const needsPro =
   )}
 </form>
 
-<script is:inline>
+<script is:inline define:vars={{ conditionOptions: CONDITION_OPTIONS, initialRules: settings.alertRules }}>
   (() => {
     const form = document.getElementById("alert-settings-form");
     if (!(form instanceof HTMLFormElement)) return;
     const hint = document.getElementById("channel-incomplete-hint");
+    const list = document.getElementById("alert-rules-list");
+    const hidden = document.getElementById("alert_rules_json");
+    const addBtn = document.getElementById("add-alert-rule");
+    let rules = Array.isArray(initialRules) ? structuredClone(initialRules) : [];
+
+    function syncRulesHidden() {
+      if (hidden) hidden.value = JSON.stringify(rules);
+    }
+
+    function renderRules() {
+      if (!list) return;
+      list.innerHTML = "";
+      rules.forEach((rule, ruleIndex) => {
+        const wrap = document.createElement("div");
+        wrap.className = "rounded border border-[var(--color-border)] p-3";
+        const condOptions = conditionOptions
+          .map((o) => `<option value="${o.value}">${o.label}</option>`)
+          .join("");
+        const conditionsHtml = (rule.all || [])
+          .map((c, ci) => {
+            const opts = conditionOptions
+              .map(
+                (o) =>
+                  `<option value="${o.value}" ${o.value === c.type ? "selected" : ""}>${o.label}</option>`,
+              )
+              .join("");
+            return `<div class="flex flex-wrap gap-2 mb-2 items-center" data-ci="${ci}">
+              <select data-field="type" class="form-input">${opts}</select>
+              <button type="button" class="btn-secondary text-sm" data-remove-cond>Remove</button>
+            </div>`;
+          })
+          .join("");
+        wrap.innerHTML = `
+          <div class="flex flex-wrap gap-2 mb-2 items-center">
+            <label class="checkbox-row mb-0"><input type="checkbox" data-field="enabled" ${rule.enabled !== false ? "checked" : ""} /> <span>On</span></label>
+            <input class="form-input flex-1" data-field="name" value="${(rule.name || "").replace(/"/g, "&quot;")}" placeholder="Rule name" />
+            <button type="button" class="btn-secondary text-sm" data-remove-rule>Delete rule</button>
+          </div>
+          <p class="text-sm text-[var(--color-text-muted)] mb-2">All of:</p>
+          <div data-conditions>${conditionsHtml}</div>
+          <button type="button" class="btn-secondary text-sm" data-add-cond>Add condition</button>
+        `;
+        wrap.querySelector("[data-remove-rule]")?.addEventListener("click", () => {
+          rules.splice(ruleIndex, 1);
+          renderRules();
+        });
+        wrap.querySelector('[data-field="enabled"]')?.addEventListener("change", (e) => {
+          rules[ruleIndex].enabled = e.target.checked;
+          syncRulesHidden();
+        });
+        wrap.querySelector('[data-field="name"]')?.addEventListener("input", (e) => {
+          rules[ruleIndex].name = e.target.value;
+          syncRulesHidden();
+        });
+        wrap.querySelector("[data-add-cond]")?.addEventListener("click", () => {
+          if (!rules[ruleIndex].all) rules[ruleIndex].all = [];
+          rules[ruleIndex].all.push({ type: "door_open" });
+          renderRules();
+        });
+        wrap.querySelectorAll("[data-conditions] > div").forEach((row) => {
+          const ci = Number(row.getAttribute("data-ci"));
+          row.querySelector('[data-field="type"]')?.addEventListener("change", (e) => {
+            rules[ruleIndex].all[ci].type = e.target.value;
+            syncRulesHidden();
+          });
+          row.querySelector("[data-remove-cond]")?.addEventListener("click", () => {
+            rules[ruleIndex].all.splice(ci, 1);
+            renderRules();
+          });
+        });
+        void condOptions;
+        list.appendChild(wrap);
+      });
+      syncRulesHidden();
+    }
+
+    addBtn?.addEventListener("click", () => {
+      rules.push({
+        id: crypto.randomUUID(),
+        enabled: true,
+        name: "New rule",
+        all: [{ type: "door_open" }, { type: "temp_below" }],
+      });
+      renderRules();
+    });
 
     function syncIncompleteHint() {
       if (!hint) return;
       const discordOn = form.querySelector('[name="channel_discord"]')?.checked;
+      const telegramOn = form.querySelector('[name="channel_telegram"]')?.checked;
+      const slackOn = form.querySelector('[name="channel_slack"]')?.checked;
       const smsOn = form.querySelector('[name="channel_sms"]')?.checked;
       const webhookOn = form.querySelector('[name="channel_webhook"]')?.checked;
       const emailOn = form.querySelector('[name="channel_email"]')?.checked;
       const discordUrl = form.querySelector("#discord_webhook_url")?.value?.trim();
+      const tgToken = form.querySelector("#telegram_bot_token")?.value?.trim();
+      const tgChat = form.querySelector("#telegram_chat_id")?.value?.trim();
+      const slackUrl = form.querySelector("#slack_webhook_url")?.value?.trim();
       const smsPhone = form.querySelector("#sms_phone")?.value?.trim();
       const webhookUrl = form.querySelector("#outbound_webhook_url")?.value?.trim();
       const alertEmail = form.querySelector("#alert_email")?.value?.trim();
       const incomplete =
         (emailOn && !alertEmail) ||
         (discordOn && !discordUrl) ||
+        (telegramOn && (!tgToken || !tgChat)) ||
+        (slackOn && !slackUrl) ||
         (smsOn && !smsPhone) ||
         (webhookOn && !webhookUrl);
       hint.hidden = !incomplete;
@@ -174,7 +334,9 @@ const needsPro =
 
     form.addEventListener("change", syncIncompleteHint);
     form.addEventListener("input", syncIncompleteHint);
+    form.addEventListener("submit", syncRulesHidden);
     syncIncompleteHint();
+    renderRules();
   })();
 </script>
 

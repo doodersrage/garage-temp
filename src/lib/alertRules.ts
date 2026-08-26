@@ -1,0 +1,157 @@
+export type AlertConditionType =
+  | "temp_below"
+  | "humidity_above"
+  | "door_open"
+  | "rate_drop"
+  | "outage"
+  | "flood"
+  | "power_off";
+
+export type AlertCondition = {
+  type: AlertConditionType;
+  /** Optional threshold override (°F, %, hours depending on type). */
+  value?: number;
+  /** Optional sensor/device label match (substring, case-insensitive). */
+  labelIncludes?: string;
+};
+
+export type AlertRule = {
+  id: string;
+  enabled: boolean;
+  name: string;
+  all: AlertCondition[];
+};
+
+export type RuleEvalContext = {
+  readings: Array<{ label: string; tempf: number; humidity: number }>;
+  boolSensors: Array<{ label: string; kind: string; value: boolean }>;
+  rateDrops: Array<{ label: string; dropF: number }>;
+  outages: Array<{ deviceName: string; hoursSilent: number }>;
+  freezeThresholdF: number;
+  humidityThreshold: number;
+  rateChangeF: number;
+  outageHours: number;
+};
+
+function matchesLabel(label: string, includes?: string): boolean {
+  if (!includes) return true;
+  return label.toLowerCase().includes(includes.toLowerCase());
+}
+
+function evaluateCondition(
+  condition: AlertCondition,
+  ctx: RuleEvalContext,
+): boolean {
+  switch (condition.type) {
+    case "temp_below": {
+      const threshold = condition.value ?? ctx.freezeThresholdF;
+      return ctx.readings.some(
+        (r) => matchesLabel(r.label, condition.labelIncludes) && r.tempf <= threshold,
+      );
+    }
+    case "humidity_above": {
+      const threshold = condition.value ?? ctx.humidityThreshold;
+      return ctx.readings.some(
+        (r) =>
+          matchesLabel(r.label, condition.labelIncludes) && r.humidity >= threshold,
+      );
+    }
+    case "door_open":
+      return ctx.boolSensors.some(
+        (s) =>
+          s.kind === "door" &&
+          s.value === true &&
+          matchesLabel(s.label, condition.labelIncludes),
+      );
+    case "flood":
+      return ctx.boolSensors.some(
+        (s) =>
+          s.kind === "flood" &&
+          s.value === true &&
+          matchesLabel(s.label, condition.labelIncludes),
+      );
+    case "power_off":
+      return ctx.boolSensors.some(
+        (s) =>
+          s.kind === "power" &&
+          s.value === false &&
+          matchesLabel(s.label, condition.labelIncludes),
+      );
+    case "rate_drop": {
+      const threshold = condition.value ?? ctx.rateChangeF;
+      return ctx.rateDrops.some(
+        (r) =>
+          matchesLabel(r.label, condition.labelIncludes) && r.dropF >= threshold,
+      );
+    }
+    case "outage": {
+      const threshold = condition.value ?? ctx.outageHours;
+      return ctx.outages.some(
+        (o) =>
+          matchesLabel(o.deviceName, condition.labelIncludes) &&
+          o.hoursSilent >= threshold,
+      );
+    }
+    default:
+      return false;
+  }
+}
+
+export function evaluateAlertRules(
+  rules: AlertRule[],
+  ctx: RuleEvalContext,
+): string[] {
+  const messages: string[] = [];
+
+  for (const rule of rules) {
+    if (!rule.enabled || !rule.all?.length) continue;
+    const allMatch = rule.all.every((c) => evaluateCondition(c, ctx));
+    if (allMatch) {
+      const parts = rule.all.map((c) => c.type.replace(/_/g, " ")).join(" AND ");
+      messages.push(`Rule "${rule.name}" matched (${parts}).`);
+    }
+  }
+
+  return messages;
+}
+
+export function parseAlertRulesFromForm(raw: string | null | undefined): AlertRule[] {
+  if (!raw?.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((item): item is AlertRule => {
+        if (!item || typeof item !== "object") return false;
+        const rule = item as Partial<AlertRule>;
+        return (
+          typeof rule.id === "string" &&
+          typeof rule.name === "string" &&
+          Array.isArray(rule.all)
+        );
+      })
+      .map((rule) => ({
+        id: rule.id,
+        enabled: rule.enabled !== false,
+        name: rule.name.slice(0, 80),
+        all: rule.all.slice(0, 8).map((c) => ({
+          type: c.type,
+          value: typeof c.value === "number" ? c.value : undefined,
+          labelIncludes:
+            typeof c.labelIncludes === "string" ? c.labelIncludes : undefined,
+        })),
+      }));
+  } catch {
+    return [];
+  }
+}
+
+export const CONDITION_OPTIONS: Array<{ value: AlertConditionType; label: string }> = [
+  { value: "temp_below", label: "Temperature below threshold" },
+  { value: "humidity_above", label: "Humidity above threshold" },
+  { value: "door_open", label: "Door open" },
+  { value: "rate_drop", label: "Rapid temperature drop" },
+  { value: "outage", label: "Device outage" },
+  { value: "flood", label: "Flood detected" },
+  { value: "power_off", label: "Power off" },
+];

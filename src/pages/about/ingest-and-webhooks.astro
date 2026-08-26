@@ -40,11 +40,14 @@ Content-Type: application/json</code></pre>
     { "key": "garage_rh", "kind": "humidity", "value": 42, "unit": "%" },
     { "key": "door1", "kind": "door", "bool": true },
     { "key": "co2", "kind": "co2", "value": 820, "unit": "ppm" }
-  ]
+  ],
+  "battery": 87,
+  "rssi": -62
 }`}</code></pre>
   <p>
     Supported kinds: <code>temperature</code>, <code>humidity</code>, <code>co2</code>,
     <code>door</code>, <code>power</code>, <code>flood</code>, <code>generic</code>.
+    Optional top-level <code>battery</code> / <code>battery_pct</code> and <code>rssi</code> update device health metadata.
   </p>
 
   <h2>Outbound alert webhooks</h2>
@@ -58,6 +61,8 @@ Content-Type: application/json</code></pre>
   "sent_at": "2026-08-25T12:00:00.000Z"
 }`}</code></pre>
   <p>
+    <code>kind</code> may be <code>threshold</code>, <code>rate</code>, <code>outage</code>,
+    <code>forecast</code>, <code>rule</code>, <code>digest</code>, or <code>generic</code>.
     When a webhook secret is set, the request includes
     <code>X-Signature</code> as a hex HMAC-SHA256 of the raw body. Use that in Home Assistant
     or IFTTT Webhooks to verify authenticity.
@@ -90,14 +95,29 @@ Content-Type: application/json</code></pre>
     while Garage Temp stays on HTTPS.
   </p>
 
-  <h2>Other Pro channels</h2>
+  <h2>Grafana / Prometheus metrics</h2>
+  <p>
+    Pro share links can use the <strong>Metrics</strong> scope. Scrape:
+  </p>
+  <pre><code>GET /api/share/&lt;token&gt;/readings?format=prometheus</code></pre>
+  <p>
+    Or <code>?format=grafana</code> for a simple JSON datapoints array. Pair with the live share page for humans.
+  </p>
+
+  <h2>Alert channels</h2>
   <ul>
-    <li>Discord webhook URL</li>
-    <li>Twilio SMS (requires Twilio env vars on the Worker)</li>
-    <li>Web Push (VAPID keys + browser permission)</li>
+    <li>Email and Discord (all plans)</li>
+    <li>Telegram bot token + chat id (your credentials)</li>
+    <li>Slack Incoming Webhook URL (your credentials)</li>
+    <li>Twilio SMS, browser push, outbound webhook (Pro)</li>
   </ul>
   <p>
+    Alerts also support forecast freeze risk, quiet hours, and composite AND rules
+    (for example door open + temperature drop). See Dashboard → Alerts.
+  </p>
+  <p>
     Email alerts remain available on all plans. Weekly digests can be enabled independently
-    of freeze/humidity threshold alerts.
+    of freeze/humidity threshold alerts. Opt-in city aggregates appear on
+    <a href="/freeze-map">/freeze-map</a>.
   </p>
 </AboutArticle>

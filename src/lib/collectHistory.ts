@@ -167,6 +167,7 @@ export async function collectHistoryForAllUsers(): Promise<{
           memberUser?.email,
           config.devices,
           settings,
+          config.householdId || householdId,
         );
         usersProcessed += 1;
       }

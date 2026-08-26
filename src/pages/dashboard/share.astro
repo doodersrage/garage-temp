@@ -85,8 +85,11 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
             <label class="form-label" for="scope">Scope</label>
             <select class="form-input" id="scope" name="scope">
               <option value="live">Live sensors</option>
+              <option value="metrics">Metrics (Prometheus / Grafana)</option>
             </select>
-            <p class="form-hint">Shows current sensor values only. History share views are coming later.</p>
+            <p class="form-hint">
+              Metrics links expose scrape URLs at <code>/api/share/&lt;token&gt;/readings?format=prometheus</code>.
+            </p>
           </div>
           <div class="form-field mb-0">
             <label class="form-label" for="expires_days">Expires (days, 0 = never)</label>
@@ -137,6 +140,11 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
                         : ` · Expires ${new Date(link.expires_at).toLocaleDateString()}`
                       : " · No expiry"}
                   </p>
+                  {link.scope === "metrics" && !expired && (
+                    <p class="m-0 text-sm break-all text-[var(--color-text-muted)]">
+                      Scrape: {siteUrl}/api/share/{link.token}/readings?format=prometheus
+                    </p>
+                  )}
                 </div>
                 <div class="flex flex-wrap gap-2">
                   {!expired && (

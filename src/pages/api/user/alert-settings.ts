@@ -5,6 +5,7 @@ import {
   DEFAULT_ALERT_SETTINGS,
   type AlertSettings,
 } from "../../../lib/alerts";
+import { parseAlertRulesFromForm } from "../../../lib/alertRules";
 import { getAlertSettingsForUser } from "../../../lib/notify";
 import { getUserEntitlements } from "../../../lib/entitlements";
 
@@ -40,6 +41,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     channelEmail: formData.has("channel_email"),
     channelSms: formData.has("channel_sms") && entitlements.canUseSms,
     channelDiscord: formData.has("channel_discord"),
+    channelTelegram: formData.has("channel_telegram"),
+    channelSlack: formData.has("channel_slack"),
     channelPush: formData.has("channel_push") && entitlements.canUsePush,
     channelWebhook:
       formData.has("channel_webhook") && entitlements.canUseOutboundWebhook,
@@ -51,9 +54,35 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     outboundWebhookSecret:
       formData.get("outbound_webhook_secret")?.toString().trim() ||
       existing.outboundWebhookSecret,
+    telegramBotToken:
+      formData.get("telegram_bot_token")?.toString().trim() ||
+      existing.telegramBotToken,
+    telegramChatId:
+      formData.get("telegram_chat_id")?.toString().trim() || null,
+    slackWebhookUrl:
+      formData.get("slack_webhook_url")?.toString().trim() || null,
     lastAlertSentAt: existing.lastAlertSentAt,
     lastOutageAlertAt: existing.lastOutageAlertAt,
     lastRateAlertAt: existing.lastRateAlertAt,
+    lastForecastAlertAt: existing.lastForecastAlertAt,
+    forecastFreezeEnabled: formData.has("forecast_freeze_enabled"),
+    forecastHoursAhead: Number(
+      formData.get("forecast_hours_ahead") ?? existing.forecastHoursAhead,
+    ),
+    quietHoursEnabled: formData.has("quiet_hours_enabled"),
+    quietHoursStart:
+      formData.get("quiet_hours_start")?.toString().trim() ||
+      existing.quietHoursStart,
+    quietHoursEnd:
+      formData.get("quiet_hours_end")?.toString().trim() || existing.quietHoursEnd,
+    quietHoursTimezone:
+      formData.get("quiet_hours_timezone")?.toString().trim() ||
+      existing.quietHoursTimezone,
+    quietHoursBypassFreeze: formData.has("quiet_hours_bypass_freeze"),
+    alertRules: parseAlertRulesFromForm(
+      formData.get("alert_rules_json")?.toString(),
+    ),
+    channelSeverity: existing.channelSeverity,
   };
 
   const { error } = await updateUserAlertSettings(
@@ -70,6 +99,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const incomplete =
     (settings.channelEmail && !settings.email) ||
     (settings.channelDiscord && !settings.discordWebhookUrl) ||
+    (settings.channelTelegram &&
+      (!settings.telegramBotToken || !settings.telegramChatId)) ||
+    (settings.channelSlack && !settings.slackWebhookUrl) ||
     (settings.channelSms && !settings.smsPhone) ||
     (settings.channelWebhook && !settings.outboundWebhookUrl);
 

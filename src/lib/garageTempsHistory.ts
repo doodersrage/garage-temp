@@ -303,6 +303,128 @@ export async function fetchGarageTempChartData(
     probeLabel: row.probe_label?.trim() || row.probe_key || "Probe",
   }));
 
+  // For windows beyond raw retention, fill gaps from hourly rollups.
+  if (days > 90 || points.length < 10) {
+    const rollupPoints = await fetchRollupChartPoints(userId, sinceIso, filters);
+    if (rollupPoints.length > 0) {
+      const byTs = new Map(points.map((p) => [p.timestamp, p]));
+      for (const point of rollupPoints) {
+        if (!byTs.has(point.timestamp)) byTs.set(point.timestamp, point);
+      }
+      const merged = [...byTs.values()].sort(
+        (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+      );
+      return { points: merged, error: null };
+    }
+  }
+
+  return { points, error: null };
+}
+
+async function fetchRollupChartPoints(
+  userId: string,
+  sinceIso: string,
+  filters: HistoryFilters,
+): Promise<ChartPoint[]> {
+  const householdId = await getUserHouseholdId(userId);
+  if (!householdId) return [];
+
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("sensor_reading_rollups")
+    .select(
+      `
+      bucket_start,
+      avg_num,
+      device_sensors!inner (
+        key,
+        label,
+        kind,
+        devices!inner ( name )
+      )
+    `,
+    )
+    .eq("household_id", householdId)
+    .gte("bucket_start", sinceIso)
+    .order("bucket_start", { ascending: true })
+    .limit(2000);
+
+  if (error || !data) return [];
+
+  const points: ChartPoint[] = [];
+  for (const row of data as Array<{
+    bucket_start: string;
+    avg_num: number | null;
+    device_sensors: {
+      key: string;
+      label: string;
+      kind: string;
+      devices: { name: string } | null;
+    } | null;
+  }>) {
+    if (row.avg_num == null || row.device_sensors?.kind !== "temperature") continue;
+    const probeLabel =
+      row.device_sensors.label.replace(/ humidity$/i, "") ||
+      row.device_sensors.key ||
+      "Probe";
+    const feedName = row.device_sensors.devices?.name ?? "Device";
+    if (filters.feedName && feedName !== filters.feedName) continue;
+    if (filters.probeKey && row.device_sensors.key !== filters.probeKey) continue;
+    points.push({
+      timestamp: row.bucket_start,
+      tempf: Number(row.avg_num),
+      humidity: 0,
+      probeLabel,
+    });
+  }
+  return points;
+}
+
+/** Chart points from the same calendar window one year earlier (rollups + raw). */
+export async function fetchGarageTempChartDataPriorYear(
+  userId: string,
+  days = 30,
+  filters: HistoryFilters = {},
+): Promise<{ points: ChartPoint[]; error: string | null }> {
+  const end = new Date();
+  end.setFullYear(end.getFullYear() - 1);
+  const start = new Date(end);
+  start.setDate(start.getDate() - days);
+
+  const priorFilters: HistoryFilters = {
+    ...filters,
+    from: start.toISOString(),
+    to: end.toISOString(),
+  };
+
+  const fromSensor = await fetchPairedFromSensorReadings(userId, priorFilters, {
+    ascending: true,
+    limit: 500,
+  });
+  if (fromSensor.error) {
+    return { points: [], error: fromSensor.error };
+  }
+
+  let points: ChartPoint[] = fromSensor.readings.map((row) => ({
+    timestamp: row.timestamp,
+    tempf: Number(row.tempf),
+    humidity: Number(row.humidity),
+    probeLabel: row.probe_label?.trim() || row.probe_key || "Probe",
+  }));
+
+  const rollups = await fetchRollupChartPoints(userId, start.toISOString(), priorFilters);
+  const endMs = end.getTime();
+  const filteredRollups = rollups.filter((p) => Date.parse(p.timestamp) <= endMs);
+  if (filteredRollups.length > 0) {
+    const byTs = new Map(points.map((p) => [p.timestamp, p]));
+    for (const point of filteredRollups) {
+      if (!byTs.has(point.timestamp)) byTs.set(point.timestamp, point);
+    }
+    points = [...byTs.values()].sort(
+      (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+    );
+  }
+
   return { points, error: null };
 }
 

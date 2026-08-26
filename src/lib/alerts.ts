@@ -1,3 +1,25 @@
+import type { AlertRule } from "./alertRules";
+
+export type AlertChannelName =
+  | "email"
+  | "sms"
+  | "discord"
+  | "push"
+  | "webhook"
+  | "telegram"
+  | "slack";
+
+export type NotifyKind =
+  | "threshold"
+  | "rate"
+  | "outage"
+  | "digest"
+  | "generic"
+  | "forecast"
+  | "rule";
+
+export type ChannelSeverityMap = Partial<Record<NotifyKind, AlertChannelName[]>>;
+
 export type AlertSettings = {
   enabled: boolean;
   digestEnabled: boolean;
@@ -11,13 +33,28 @@ export type AlertSettings = {
   channelDiscord: boolean;
   channelPush: boolean;
   channelWebhook: boolean;
+  channelTelegram: boolean;
+  channelSlack: boolean;
   discordWebhookUrl: string | null;
   smsPhone: string | null;
   outboundWebhookUrl: string | null;
   outboundWebhookSecret: string | null;
+  telegramBotToken: string | null;
+  telegramChatId: string | null;
+  slackWebhookUrl: string | null;
   lastAlertSentAt: string | null;
   lastOutageAlertAt: string | null;
   lastRateAlertAt: string | null;
+  lastForecastAlertAt: string | null;
+  forecastFreezeEnabled: boolean;
+  forecastHoursAhead: number;
+  quietHoursEnabled: boolean;
+  quietHoursStart: string;
+  quietHoursEnd: string;
+  quietHoursTimezone: string;
+  quietHoursBypassFreeze: boolean;
+  alertRules: AlertRule[];
+  channelSeverity: ChannelSeverityMap;
 };
 
 export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
@@ -33,17 +70,50 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   channelDiscord: false,
   channelPush: false,
   channelWebhook: false,
+  channelTelegram: false,
+  channelSlack: false,
   discordWebhookUrl: null,
   smsPhone: null,
   outboundWebhookUrl: null,
   outboundWebhookSecret: null,
+  telegramBotToken: null,
+  telegramChatId: null,
+  slackWebhookUrl: null,
   lastAlertSentAt: null,
   lastOutageAlertAt: null,
   lastRateAlertAt: null,
+  lastForecastAlertAt: null,
+  forecastFreezeEnabled: false,
+  forecastHoursAhead: 12,
+  quietHoursEnabled: false,
+  quietHoursStart: "22:00",
+  quietHoursEnd: "07:00",
+  quietHoursTimezone: "America/New_York",
+  quietHoursBypassFreeze: true,
+  alertRules: [],
+  channelSeverity: {},
 };
 
 /** Minimum time between threshold alert notifications for the same account. */
 export const ALERT_COOLDOWN_MS = 4 * 60 * 60 * 1000;
+
+function parseAlertRules(raw: unknown): AlertRule[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((item): item is AlertRule => {
+    if (!item || typeof item !== "object") return false;
+    const rule = item as Record<string, unknown>;
+    return (
+      typeof rule.id === "string" &&
+      typeof rule.name === "string" &&
+      Array.isArray(rule.all)
+    );
+  }) as AlertRule[];
+}
+
+function parseChannelSeverity(raw: unknown): ChannelSeverityMap {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  return raw as ChannelSeverityMap;
+}
 
 export function getAlertSettingsFromMetadata(
   metadata: Record<string, unknown> | undefined,
@@ -108,6 +178,8 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
     channelDiscord: row.channel_discord === true,
     channelPush: row.channel_push === true,
     channelWebhook: row.channel_webhook === true,
+    channelTelegram: row.channel_telegram === true,
+    channelSlack: row.channel_slack === true,
     discordWebhookUrl:
       typeof row.discord_webhook_url === "string" ? row.discord_webhook_url : null,
     smsPhone: typeof row.sms_phone === "string" ? row.sms_phone : null,
@@ -117,12 +189,43 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
       typeof row.outbound_webhook_secret === "string"
         ? row.outbound_webhook_secret
         : null,
+    telegramBotToken:
+      typeof row.telegram_bot_token === "string" ? row.telegram_bot_token : null,
+    telegramChatId:
+      typeof row.telegram_chat_id === "string" ? row.telegram_chat_id : null,
+    slackWebhookUrl:
+      typeof row.slack_webhook_url === "string" ? row.slack_webhook_url : null,
     lastAlertSentAt:
       typeof row.last_alert_sent_at === "string" ? row.last_alert_sent_at : null,
     lastOutageAlertAt:
       typeof row.last_outage_alert_at === "string" ? row.last_outage_alert_at : null,
     lastRateAlertAt:
       typeof row.last_rate_alert_at === "string" ? row.last_rate_alert_at : null,
+    lastForecastAlertAt:
+      typeof row.last_forecast_alert_at === "string"
+        ? row.last_forecast_alert_at
+        : null,
+    forecastFreezeEnabled: row.forecast_freeze_enabled === true,
+    forecastHoursAhead:
+      typeof row.forecast_hours_ahead === "number"
+        ? row.forecast_hours_ahead
+        : DEFAULT_ALERT_SETTINGS.forecastHoursAhead,
+    quietHoursEnabled: row.quiet_hours_enabled === true,
+    quietHoursStart:
+      typeof row.quiet_hours_start === "string"
+        ? row.quiet_hours_start
+        : DEFAULT_ALERT_SETTINGS.quietHoursStart,
+    quietHoursEnd:
+      typeof row.quiet_hours_end === "string"
+        ? row.quiet_hours_end
+        : DEFAULT_ALERT_SETTINGS.quietHoursEnd,
+    quietHoursTimezone:
+      typeof row.quiet_hours_timezone === "string"
+        ? row.quiet_hours_timezone
+        : DEFAULT_ALERT_SETTINGS.quietHoursTimezone,
+    quietHoursBypassFreeze: row.quiet_hours_bypass_freeze !== false,
+    alertRules: parseAlertRules(row.alert_rules),
+    channelSeverity: parseChannelSeverity(row.channel_severity),
   };
 }
 
@@ -176,6 +279,17 @@ export function evaluateAlerts(
   return messages;
 }
 
+export function evaluateForecastFreeze(
+  settings: AlertSettings,
+  forecastMinF: number | null,
+  hoursAhead: number,
+): string | null {
+  if (!settings.enabled || !settings.forecastFreezeEnabled) return null;
+  if (forecastMinF == null || !Number.isFinite(forecastMinF)) return null;
+  if (forecastMinF > settings.freezeThresholdF) return null;
+  return `Outdoor forecast reaches ${forecastMinF.toFixed(1)}°F within ${hoursAhead}h (freeze threshold ${settings.freezeThresholdF}°F).`;
+}
+
 export function evaluateRateChange(
   settings: AlertSettings,
   label: string,
@@ -224,37 +338,34 @@ export function serializeAlertSettings(settings: AlertSettings): Record<string, 
     channel_discord: settings.channelDiscord,
     channel_push: settings.channelPush,
     channel_webhook: settings.channelWebhook,
+    channel_telegram: settings.channelTelegram,
+    channel_slack: settings.channelSlack,
     discord_webhook_url: settings.discordWebhookUrl,
     sms_phone: settings.smsPhone,
     outbound_webhook_url: settings.outboundWebhookUrl,
     outbound_webhook_secret: settings.outboundWebhookSecret,
+    telegram_bot_token: settings.telegramBotToken,
+    telegram_chat_id: settings.telegramChatId,
+    slack_webhook_url: settings.slackWebhookUrl,
     last_alert_sent_at: settings.lastAlertSentAt,
     last_outage_alert_at: settings.lastOutageAlertAt,
     last_rate_alert_at: settings.lastRateAlertAt,
+    last_forecast_alert_at: settings.lastForecastAlertAt,
+    forecast_freeze_enabled: settings.forecastFreezeEnabled,
+    forecast_hours_ahead: settings.forecastHoursAhead,
+    quiet_hours_enabled: settings.quietHoursEnabled,
+    quiet_hours_start: settings.quietHoursStart,
+    quiet_hours_end: settings.quietHoursEnd,
+    quiet_hours_timezone: settings.quietHoursTimezone,
+    quiet_hours_bypass_freeze: settings.quietHoursBypassFreeze,
+    alert_rules: settings.alertRules,
+    channel_severity: settings.channelSeverity,
   };
 }
 
 export function alertSettingsToRow(settings: AlertSettings): Record<string, unknown> {
   return {
-    enabled: settings.enabled,
-    digest_enabled: settings.digestEnabled,
-    freeze_threshold_f: settings.freezeThresholdF,
-    humidity_threshold: settings.humidityThreshold,
-    rate_change_f: settings.rateChangeF,
-    outage_hours: settings.outageHours,
-    email: settings.email,
-    channel_email: settings.channelEmail,
-    channel_sms: settings.channelSms,
-    channel_discord: settings.channelDiscord,
-    channel_push: settings.channelPush,
-    channel_webhook: settings.channelWebhook,
-    discord_webhook_url: settings.discordWebhookUrl,
-    sms_phone: settings.smsPhone,
-    outbound_webhook_url: settings.outboundWebhookUrl,
-    outbound_webhook_secret: settings.outboundWebhookSecret,
-    last_alert_sent_at: settings.lastAlertSentAt,
-    last_outage_alert_at: settings.lastOutageAlertAt,
-    last_rate_alert_at: settings.lastRateAlertAt,
+    ...serializeAlertSettings(settings),
     updated_at: new Date().toISOString(),
   };
 }

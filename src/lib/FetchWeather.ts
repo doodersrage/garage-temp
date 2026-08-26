@@ -93,3 +93,72 @@ export async function fetchWeatherSnapshot(
   if (!raw) return null;
   return normalizeWeatherPayload(raw);
 }
+
+export async function fetchWeatherForecastRaw(
+  cityId?: string | null,
+): Promise<any | null> {
+  const apiKey = cleanEnv(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY);
+  const city = resolveWeatherCityId(cityId);
+
+  if (!apiKey || !city) return null;
+
+  const url = `https://api.openweathermap.org/data/2.5/forecast?id=${city}&appid=${apiKey}&units=imperial`;
+
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(WEATHER_FETCH_TIMEOUT_MS),
+    });
+    if (!response.ok) {
+      console.error(`Forecast request failed (${response.status})`);
+      return null;
+    }
+    return await response.json();
+  } catch (e) {
+    console.error("Forecast fetch error:", e);
+    return null;
+  }
+}
+
+export type ForecastWindow = {
+  minTempF: number;
+  cityName: string | null;
+  hoursAhead: number;
+};
+
+/** Lowest forecast temp (°F) within the next `hoursAhead` hours (3h steps). */
+export function minForecastTempInWindow(
+  raw: Record<string, any> | null | undefined,
+  hoursAhead: number,
+  now = Date.now(),
+): ForecastWindow | null {
+  const list = raw?.list;
+  if (!Array.isArray(list) || list.length === 0) return null;
+
+  const cutoff = now + Math.max(1, hoursAhead) * 60 * 60 * 1000;
+  let minTemp = Number.POSITIVE_INFINITY;
+
+  for (const entry of list) {
+    const ts = Number(entry?.dt) * 1000;
+    if (!Number.isFinite(ts) || ts < now || ts > cutoff) continue;
+    const temp = Number(entry?.main?.temp);
+    if (Number.isFinite(temp) && temp < minTemp) {
+      minTemp = temp;
+    }
+  }
+
+  if (!Number.isFinite(minTemp)) return null;
+
+  return {
+    minTempF: minTemp,
+    cityName: typeof raw?.city?.name === "string" ? raw.city.name : null,
+    hoursAhead,
+  };
+}
+
+export async function fetchForecastMinTemp(
+  cityId: string | null | undefined,
+  hoursAhead: number,
+): Promise<ForecastWindow | null> {
+  const raw = await fetchWeatherForecastRaw(cityId);
+  return minForecastTempInWindow(raw, hoursAhead);
+}

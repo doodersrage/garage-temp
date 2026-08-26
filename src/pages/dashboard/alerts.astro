@@ -8,6 +8,7 @@ import { getUserEntitlements } from "../../lib/entitlements";
 import { getUserSubscription } from "../../lib/stripeSubscriptions";
 import { canDownloadHistoryCsv } from "../../lib/adminAccess";
 import { formatRelativeAge } from "../../lib/relativeTime";
+import { listRecentAlertEvents } from "../../lib/alertEvents";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -15,19 +16,24 @@ if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const [alertSettings, entitlements, subscription, canDownloadCsv] = await Promise.all([
-  getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
-  getUserEntitlements(user.id),
-  getUserSubscription(user.id),
-  canDownloadHistoryCsv(user.id),
-]);
+const [alertSettings, entitlements, subscription, canDownloadCsv, recentEvents] =
+  await Promise.all([
+    getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
+    getUserEntitlements(user.id),
+    getUserSubscription(user.id),
+    canDownloadHistoryCsv(user.id),
+    listRecentAlertEvents(user.id, 15),
+  ]);
 
 const channelLabels: Record<string, string> = {
   email: "email",
   discord: "Discord",
+  telegram: "Telegram",
+  slack: "Slack",
   sms: "SMS",
   push: "browser push",
   webhook: "webhook",
+  quiet_hours: "quiet hours",
 };
 
 function formatChannels(raw: string | null): string {
@@ -37,6 +43,10 @@ function formatChannels(raw: string | null): string {
     .filter(Boolean)
     .map((key) => channelLabels[key] ?? key)
     .join(", ");
+}
+
+function formatChannelList(channels: string[]): string {
+  return channels.map((key) => channelLabels[key] ?? key).join(", ");
 }
 
 const sentChannels = formatChannels(Astro.url.searchParams.get("sent"));
@@ -55,7 +65,7 @@ const alertNotice = Astro.url.searchParams.get("alert_saved")
         : `Test alert sent via ${sentChannels || "your enabled channels"}.`
       : Astro.url.searchParams.get("test_error")
         ? testReason === "incomplete"
-          ? "No channels could send — enable a channel and fill in its destination (email, Discord URL, SMS, or webhook), then try again."
+          ? "No channels could send — enable a channel and fill in its destination, then try again."
           : testReason === "none"
             ? "No alert channels are enabled. Turn on at least one channel, save, then retry."
             : "Could not send test alert. Check channel settings and try again."
@@ -75,6 +85,7 @@ const lastAlertCandidates = [
   alertSettings.lastAlertSentAt,
   alertSettings.lastOutageAlertAt,
   alertSettings.lastRateAlertAt,
+  alertSettings.lastForecastAlertAt,
 ].filter(Boolean) as string[];
 const lastAlertAt =
   lastAlertCandidates.sort((a, b) => Date.parse(b) - Date.parse(a))[0] ?? null;
@@ -86,7 +97,7 @@ const lastAlertAge = formatRelativeAge(lastAlertAt);
       <h1 class="card-title">Alerts & digests</h1>
       <p class="card-subtitle">{user.email}</p>
       <p class="mb-0">
-        Get notified when temperatures drop, humidity spikes, feeds go quiet, or conditions change quickly.
+        Get notified when temperatures drop, humidity spikes, feeds go quiet, forecast freeze risk rises, or composite rules match.
       </p>
       <p class="mt-3 mb-0 text-sm text-[var(--color-text-muted)]">
         Status: <strong>{alertSettings.enabled ? "On" : "Off"}</strong>
@@ -127,13 +138,49 @@ const lastAlertAge = formatRelativeAge(lastAlertAt);
     <section class="card">
       <h2 class="card-title">Send a test alert</h2>
       <p class="card-subtitle mb-4">
-        Fires a sample message to every channel you currently have enabled (email, Discord, SMS, push, webhook).
+        Fires a sample message to every channel you currently have enabled.
         Save settings first if you just changed them.
       </p>
       <form action="/api/user/alert-test" method="post">
         <input type="hidden" name="redirect" value="/dashboard/alerts" />
         <button class="btn-secondary" type="submit">Send test now</button>
       </form>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Recent alert activity</h2>
+      <p class="card-subtitle mb-4">Audit trail of delivered and skipped channels.</p>
+      {recentEvents.length === 0 ? (
+        <p class="mb-0 text-sm text-[var(--color-text-muted)]">No alert events yet.</p>
+      ) : (
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-[var(--color-text-muted)]">
+                <th class="py-2 pr-3">When</th>
+                <th class="py-2 pr-3">Kind</th>
+                <th class="py-2 pr-3">Title</th>
+                <th class="py-2 pr-3">Sent</th>
+                <th class="py-2">Skipped</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentEvents.map((event) => {
+                const age = formatRelativeAge(event.created_at);
+                return (
+                  <tr class="border-t border-[var(--color-border)] align-top">
+                    <td class="py-2 pr-3 whitespace-nowrap">{age.label}</td>
+                    <td class="py-2 pr-3">{event.kind}</td>
+                    <td class="py-2 pr-3">{event.title}</td>
+                    <td class="py-2 pr-3">{formatChannelList(event.channels_sent) || "—"}</td>
+                    <td class="py-2">{formatChannelList(event.channels_skipped) || "—"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   </div>
 </DashboardLayout>

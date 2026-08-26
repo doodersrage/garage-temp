@@ -11,6 +11,7 @@ import {
   startJobRun,
 } from "./lib/jobRuns";
 import { formatJobFailureBody, notifyOps } from "./lib/opsNotify";
+import { collectFreezeMapSnapshots } from "./lib/freezeMap";
 
 export default {
   fetch(request: Request, env: unknown, ctx: ExecutionContext) {
@@ -139,6 +140,39 @@ export default {
               formatJobFailureBody("sensor-retention", details),
             );
           }
+        }
+
+        const freezeMapJobId = await startJobRun("freeze-map");
+        try {
+          const freezeMap = await collectFreezeMapSnapshots();
+          if (freezeMap.error) {
+            await finishJobRun(freezeMapJobId, "error", {
+              cities: freezeMap.cities,
+              error: freezeMap.error,
+            });
+            await notifyOps(
+              "Garage Temp job failed: freeze-map",
+              formatJobFailureBody("freeze-map", {
+                message: freezeMap.error,
+                cities: freezeMap.cities,
+              }),
+            );
+          } else {
+            await finishJobRun(freezeMapJobId, "success", {
+              cities: freezeMap.cities,
+              error: null,
+            });
+            console.info(`Freeze map finished: ${freezeMap.cities} city aggregate(s)`);
+          }
+        } catch (error) {
+          const details = {
+            message: error instanceof Error ? error.message : "Unknown error",
+          };
+          await finishJobRun(freezeMapJobId, "error", details);
+          await notifyOps(
+            "Garage Temp job failed: freeze-map",
+            formatJobFailureBody("freeze-map", details),
+          );
         }
       })(),
     );
