@@ -38,7 +38,7 @@ create policy referral_signups_referrer_select on public.referral_signups
 create table if not exists public.door_open_events (
   id uuid primary key default gen_random_uuid(),
   household_id uuid not null references public.households (id) on delete cascade,
-  sensor_id uuid references public.sensors (id) on delete set null,
+  sensor_id uuid references public.device_sensors (id) on delete set null,
   label text not null,
   opened_at timestamptz not null,
   closed_at timestamptz,
