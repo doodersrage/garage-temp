@@ -191,17 +191,23 @@ const ingestCurlExample = ingestKey
       <section class="card">
         <h2 class="card-title">Latest sensor values</h2>
         <div class="feed-health-grid">
-          {latest.map((row) => (
-            <div class="feed-health-item">
-              <div>
-                <strong>{row.sensor.label}</strong>
-                <p class="m-0 text-sm text-[var(--color-text-muted)]">
-                  {row.deviceName} · {kindLabels[row.sensor.kind] ?? row.sensor.kind}
-                </p>
+          {latest.map((row) => {
+            const age = formatRelativeAge(row.recorded_at);
+            return (
+              <div class="feed-health-item">
+                <div>
+                  <strong>{row.sensor.label}</strong>
+                  <p class="m-0 text-sm text-[var(--color-text-muted)]">
+                    {row.deviceName} · {kindLabels[row.sensor.kind] ?? row.sensor.kind}
+                  </p>
+                  <p class:list={["m-0 mt-1 text-sm", age.stale && "text-amber-300"]}>
+                    {age.stale ? `Stale · ${age.label}` : age.label}
+                  </p>
+                </div>
+                <span>{formatLatestValue(row)}</span>
               </div>
-              <span>{formatLatestValue(row)}</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     )}

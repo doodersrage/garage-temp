@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import GetTemps from '../components/GetTemps.astro';
-import Weather from '../components/Weather.astro';
+import WeatherPanel from '../components/WeatherPanel';
 import LiveTempsPanel from '../components/LiveTempsPanel';
 import { getAuthFromCookies } from '../lib/auth';
 import { getUserPreferences } from '../lib/userPreferences';
@@ -41,9 +41,7 @@ const tempConfig = isAuthenticated
 				</GetTemps>
 			)}
 			{showWeather && (
-				<Weather cityId={preferences?.weatherCityId} server:defer>
-					<div slot="fallback" class="loading-state"><LoaderCircle class="h-8 w-8 animate-spin text-blue-500" /></div>
-				</Weather>
+				<WeatherPanel client:visible cityId={preferences?.weatherCityId ?? null} />
 			)}
 			{isAuthenticated && !showGarageTemps && !showWeather && (
 				<div class="empty-state">

@@ -202,6 +202,9 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
       {error && (
         <div class="alert-warning mb-4">
           <p class="m-0">{error}</p>
+          <button type="button" class="btn-secondary mt-3" onClick={() => void loadReadings()}>
+            Retry now
+          </button>
         </div>
       )}
 

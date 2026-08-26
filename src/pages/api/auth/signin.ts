@@ -6,7 +6,11 @@ import {
   buildSignInRedirectUrl,
   mapSignInError,
 } from "../../../lib/signInErrors";
-import { buildOAuthCallbackUrl } from "../../../lib/siteUrl";
+import {
+  buildOAuthCallbackUrl,
+  OAUTH_NEXT_COOKIE,
+  sanitizeNextPath,
+} from "../../../lib/siteUrl";
 import { getTurnstileToken, verifyTurnstileToken } from "../../../lib/turnstile";
 
 export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress, site }) => {
@@ -14,12 +18,26 @@ export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
   const provider = formData.get("provider")?.toString();
+  const safeNext = sanitizeNextPath(formData.get("next")?.toString());
 
   const validProviders = ["google", "github", "discord"];
 
   // OAuth only when a provider is set and this is not an email/password submit
   // (nested OAuth fields used to leak into the email form in some browsers).
   if (provider && validProviders.includes(provider) && !password) {
+    const secure = import.meta.env.PROD;
+    if (safeNext) {
+      cookies.set(OAUTH_NEXT_COOKIE, safeNext, {
+        path: "/",
+        httpOnly: true,
+        secure,
+        sameSite: "lax",
+        maxAge: 60 * 10,
+      });
+    } else {
+      cookies.delete(OAUTH_NEXT_COOKIE, { path: "/" });
+    }
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: provider as Provider,
       options: {
@@ -58,7 +76,5 @@ export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress
 
   const { access_token, refresh_token } = data.session;
   setAuthCookies(cookies, access_token, refresh_token);
-  const next = formData.get("next")?.toString() ?? "";
-  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
-  return redirect(safeNext);
+  return redirect(safeNext ?? "/dashboard");
 };

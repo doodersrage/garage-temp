@@ -1,4 +1,4 @@
-import { fetchWeather } from "./FetchWeather";
+import { fetchWeatherSnapshot } from "./FetchWeather";
 import type { ChartPoint } from "./garageTempsHistory";
 
 export type IndoorOutdoorDelta = {
@@ -35,15 +35,13 @@ export async function fetchIndoorOutdoorDelta(
 ): Promise<IndoorOutdoorDelta | null> {
   if (points.length === 0) return null;
 
-  const weather = await fetchWeather(weatherCityId);
-  if (!weather?.main?.temp) return null;
+  const weather = await fetchWeatherSnapshot(weatherCityId);
+  if (!weather) return null;
 
   return computeIndoorOutdoorDelta(
     points,
-    Number(weather.main.temp),
-    typeof weather.weather?.[0]?.description === "string"
-      ? weather.weather[0].description
-      : "Outdoor",
-    typeof weather.name === "string" ? weather.name : null,
+    weather.temp,
+    weather.description,
+    weather.name,
   );
 }

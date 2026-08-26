@@ -1,6 +1,6 @@
 ---
 import {
-  fetchWeather,
+  fetchWeatherSnapshot,
   getDefaultWeatherCityId,
   resolveWeatherCityId,
 } from '../lib/FetchWeather';
@@ -19,26 +19,28 @@ if (resolvedCityId === getDefaultWeatherCityId()) {
   });
 }
 
-const weatherData = await fetchWeather(resolvedCityId);
-const weatherError = weatherData
+const weather = await fetchWeatherSnapshot(resolvedCityId);
+const weatherError = weather
   ? null
   : "Unable to load weather for this location.";
 
-const locationLabel = weatherData
-  ? `${weatherData.name}${weatherData.sys?.country ? `, ${weatherData.sys.country}` : ""}`
+const locationLabel = weather
+  ? `${weather.name}${weather.country ? `, ${weather.country}` : ""}`
   : "";
 
-const weatherStats = weatherData
+const weatherStats = weather
   ? [
-      { label: 'Temperature', value: `${weatherData.main.temp}°F` },
-      { label: 'Humidity', value: `${weatherData.main.humidity}%` },
-      { label: 'Feels Like', value: `${weatherData.main.feels_like}°F` },
-      { label: 'Wind Speed', value: `${weatherData.wind.speed} mph` },
-      { label: 'Wind Gusts', value: `${weatherData.wind.gust} mph` },
-      { label: 'Cloud Cover', value: `${weatherData.clouds.all}%` },
+      { label: 'Temperature', value: `${weather.temp}°F` },
+      { label: 'Humidity', value: `${weather.humidity}%` },
+      { label: 'Feels Like', value: `${weather.feelsLike}°F` },
+      { label: 'Wind Speed', value: `${weather.windSpeed} mph` },
+      ...(weather.windGust != null
+        ? [{ label: 'Wind Gusts', value: `${weather.windGust} mph` }]
+        : []),
+      { label: 'Cloud Cover', value: `${weather.cloudCover}%` },
       {
         label: 'Condition',
-        value: weatherData.weather[0].description,
+        value: weather.description,
         detail: true,
       },
     ]
@@ -46,7 +48,7 @@ const weatherStats = weatherData
 ---
 
 <section class="card animate-slide-in-right">
-  {weatherData ? (
+  {weather ? (
     <>
       <h2 class="card-title">Current Weather</h2>
       <p class="card-subtitle">{locationLabel}</p>
@@ -63,13 +65,11 @@ const weatherStats = weatherData
         ))}
       </div>
     </>
-  ) : weatherError ? (
+  ) : (
     <div class="empty-state">
       <h2 class="card-title">Current Weather</h2>
       <p class="mb-4">{weatherError}</p>
       <a class="btn-secondary" href="/dashboard#weather">Change weather location</a>
     </div>
-  ) : (
-    <p class="loading-state">Loading weather data...</p>
   )}
 </section>
