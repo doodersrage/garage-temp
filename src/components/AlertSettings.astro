@@ -23,7 +23,7 @@ const needsPro =
   !entitlements.canUsePush ||
   !entitlements.canUseOutboundWebhook;
 ---
-<form action="/api/user/alert-settings" method="post" class="card animate-slide-up-fade">
+<form action="/api/user/alert-settings" method="post" class="card animate-slide-up-fade" id="alert-settings-form">
   <input type="hidden" name="redirect" value={redirectTo} />
   <h2 class="card-title">When to notify you</h2>
   <p class="card-subtitle">
@@ -133,6 +133,9 @@ const needsPro =
   </div>
 
   <button type="submit" class="btn-primary">Save alert settings</button>
+  <p class="form-hint mt-2 mb-0" id="channel-incomplete-hint" hidden>
+    A checked channel needs its destination filled in (email, Discord URL, SMS number, or webhook URL), or it will be skipped when alerts fire.
+  </p>
 
   {entitlements.canUsePush && vapidPublicKey && (
     <div class="mt-4 border-t border-[var(--color-border)] pt-4">
@@ -144,6 +147,36 @@ const needsPro =
     </div>
   )}
 </form>
+
+<script is:inline>
+  (() => {
+    const form = document.getElementById("alert-settings-form");
+    if (!(form instanceof HTMLFormElement)) return;
+    const hint = document.getElementById("channel-incomplete-hint");
+
+    function syncIncompleteHint() {
+      if (!hint) return;
+      const discordOn = form.querySelector('[name="channel_discord"]')?.checked;
+      const smsOn = form.querySelector('[name="channel_sms"]')?.checked;
+      const webhookOn = form.querySelector('[name="channel_webhook"]')?.checked;
+      const emailOn = form.querySelector('[name="channel_email"]')?.checked;
+      const discordUrl = form.querySelector("#discord_webhook_url")?.value?.trim();
+      const smsPhone = form.querySelector("#sms_phone")?.value?.trim();
+      const webhookUrl = form.querySelector("#outbound_webhook_url")?.value?.trim();
+      const alertEmail = form.querySelector("#alert_email")?.value?.trim();
+      const incomplete =
+        (emailOn && !alertEmail) ||
+        (discordOn && !discordUrl) ||
+        (smsOn && !smsPhone) ||
+        (webhookOn && !webhookUrl);
+      hint.hidden = !incomplete;
+    }
+
+    form.addEventListener("change", syncIncompleteHint);
+    form.addEventListener("input", syncIncompleteHint);
+    syncIncompleteHint();
+  })();
+</script>
 
 {entitlements.canUsePush && vapidPublicKey && (
   <script is:inline define:vars={{ vapidPublicKey }}>

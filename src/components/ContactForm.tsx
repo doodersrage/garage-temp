@@ -2,21 +2,35 @@ import { useState } from "preact/hooks";
 
 export default function Form() {
   const [responseMessage, setResponseMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   async function submit(e: SubmitEvent) {
     e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const response = await fetch("/api/contact", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      setResponseMessage(data.message ?? "Something went wrong. Please try again.");
-      return;
-    }
-    if (data.message) {
-      setResponseMessage(data.message);
+    setSubmitting(true);
+    setResponseMessage("");
+    setIsError(false);
+
+    try {
+      const formData = new FormData(e.target as HTMLFormElement);
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setIsError(true);
+        setResponseMessage(data.message ?? "Something went wrong. Please try again.");
+        return;
+      }
+      setIsError(false);
+      setResponseMessage(data.message ?? "Message sent.");
+      (e.target as HTMLFormElement).reset();
+    } catch {
+      setIsError(true);
+      setResponseMessage("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -43,9 +57,11 @@ export default function Form() {
       <div class="form-field">
         <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
       </div>
-      <button class="btn-primary" type="submit">Send message</button>
+      <button class="btn-primary" type="submit" disabled={submitting}>
+        {submitting ? "Sending…" : "Send message"}
+      </button>
       {responseMessage && (
-        <p class="alert-success">
+        <p class={isError ? "alert-warning" : "alert-success"} role="status">
           {responseMessage}
         </p>
       )}

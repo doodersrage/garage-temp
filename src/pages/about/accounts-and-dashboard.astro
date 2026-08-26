@@ -8,50 +8,91 @@ const page = getAboutPage("accounts-and-dashboard")!;
 ---
 <AboutArticle slug={page.slug} title={page.title} description={page.description}>
   <p>
-    Creating an account unlocks personalization, saved history, and optional subscription features.
-    The dashboard sidebar groups tools so you can adjust the home page, manage feeds, review logs,
+    Creating an account unlocks personalization, devices, history, alerts, and optional paid features.
+    The dashboard groups tools so you can watch live sensors, manage hardware, invite household members,
     and—when permitted—administer users or contact submissions.
   </p>
 
-  <h2>Account creation and groups</h2>
+  <h2>Account creation</h2>
   <p>
-    Registration uses email and password via Supabase Auth. New users are automatically added to the
-    default <code>user</code> group. Administrators belong to a separate <code>admin</code> group with
-    access to user management and contact form review. Stripe subscribers join the <code>member</code> group
-    for CSV export privileges.
+    Registration uses email and password via Supabase Auth. Password reset and (when enabled in Supabase)
+    OAuth providers such as Google, GitHub, or Discord are available from the sign-in page. New users start
+    on the Free plan with a default household.
+  </p>
+
+  <h2>Getting started checklist</h2>
+  <p>
+    The overview dashboard shows a short checklist: create a device or feed, confirm live readings, then
+    optional steps for alerts and household invites. When core and optional steps are done—or you dismiss
+    it—the checklist hides; use <strong>Show checklist</strong> to bring it back.
+  </p>
+
+  <h2>Devices &amp; sensors</h2>
+  <p>
+    Under <a class="text-link" href="/dashboard/temperature">Devices</a> you can:
+  </p>
+  <ul>
+    <li><strong>Push devices</strong> — ESP/Arduino POSTs JSON to a unique ingest URL. Save the one-time key, add sensor keys that match your payload, rename devices without rotating keys, and rotate keys when needed.</li>
+    <li><strong>Pull feeds</strong> — HTTPS JSON URLs we fetch on a schedule, with probe labels and feed health.</li>
+  </ul>
+  <p>
+    After sensors are added, verify ingest (or wait for the next pull), then open
+    <a class="text-link" href="/">Home</a> to confirm live values. See
+    <a class="text-link" href="/about/ingest-and-webhooks">ingest &amp; webhooks</a> for payload examples.
   </p>
 
   <h2>Display preferences</h2>
   <p>
-    Choose whether the home page shows garage temperatures, weather, or both. Preferences live in your
-    user profile metadata and apply immediately after saving—no redeploy required.
+    Choose whether Home shows garage sensors, outdoor weather, or both. Preferences live in your profile
+    metadata and apply immediately after saving.
   </p>
 
-  <h2>Temperature feed configuration</h2>
+  <h2>History</h2>
   <p>
-    Add HTTPS JSON feeds, name them, enable or disable individually, and map probe keys to friendly labels.
-    Multiple feeds appear as grouped cards on the home page. Misconfigured URLs surface fetch errors inline
-    so you can fix typos quickly.
+    Paginated history lists temperature/humidity snapshots for your household. Filter by feed, probe, and
+    date range; clear filters if a query returns no rows. Browsing is included for all signed-in users;
+    CSV download requires Member/Pro (or admin). Background collection runs hourly; refreshing Home while
+    signed in can also record snapshots.
   </p>
 
-  <h2>Reading history and CSV export</h2>
+  <h2>Alerts</h2>
   <p>
-    Paginated history lists every snapshot stored for your account. Browsing is included for all signed-in
-    users; downloading the full CSV requires an active subscription or admin access. Subscribe from the
-    history page when export is locked.
+    Configure freeze, humidity, rate-of-change, and outage thresholds on
+    <a class="text-link" href="/dashboard/alerts">Alerts</a>. Free plans include email and Discord; Pro
+    unlocks SMS, browser push, and outbound webhooks. Enable a channel only when its destination is filled
+    in—incomplete channels are skipped. Use <strong>Send test now</strong> to see which channels actually fired.
+  </p>
+
+  <h2>Households &amp; share links</h2>
+  <p>
+    Invite family by email from <a class="text-link" href="/dashboard/household">Household</a>. Members share
+    devices and history for that household. Pro users can create read-only
+    <a class="text-link" href="/dashboard/share">share links</a> for people without accounts; revoke or remove
+    expired links anytime.
+  </p>
+
+  <h2>Plans</h2>
+  <ul>
+    <li><strong>Free</strong> — live sensors, devices (limited), history browse, email/Discord alerts.</li>
+    <li><strong>Member</strong> — CSV export.</li>
+    <li><strong>Pro</strong> — higher device limits, SMS, push, outbound webhooks, public share links.</li>
+  </ul>
+  <p>
+    Upgrade from the Plans card on the dashboard or Alerts page.
   </p>
 
   <h2>Admin-only tools</h2>
   <ul>
     <li><strong>User manager</strong> — review accounts and grant or revoke admin membership.</li>
-    <li><strong>Contact submissions</strong> — read messages from the public contact form and export CSV.</li>
+    <li><strong>Contact submissions</strong> — read messages from the public contact form.</li>
+    <li><strong>Jobs</strong> — operational job visibility when enabled.</li>
   </ul>
 
-  <h2>Getting started</h2>
-  <p>
-    <a class="text-link" href="/register">Create an account</a>,
-    configure feeds under <a class="text-link" href="/dashboard/temperature">Temperature settings</a>,
-    load the <a class="text-link" href="/">home page</a> while signed in to begin saving history, and visit
-    <a class="text-link" href="/dashboard/history">Reading history</a> to confirm snapshots appear.
-  </p>
+  <h2>Suggested first path</h2>
+  <ol>
+    <li><a class="text-link" href="/register">Create an account</a>.</li>
+    <li>Add a push device or pull feed under <a class="text-link" href="/dashboard/temperature">Devices</a>.</li>
+    <li>Confirm readings on <a class="text-link" href="/">Home</a>.</li>
+    <li>Turn on alerts and optionally invite household members.</li>
+  </ol>
 </AboutArticle>

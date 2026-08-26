@@ -64,10 +64,14 @@ const deviceNotice =
                     ? "Could not save changes. Please try again."
                     : noticeParam === "device_limit"
                       ? `Push device limit reached (${entitlements.maxDevices}). Upgrade to add more.`
-                      : null;
+                      : noticeParam === "1" || noticeParam === "true"
+                        ? "Could not complete that device action. Check the form and try again."
+                        : noticeParam
+                          ? `Could not complete that action (${noticeParam}). Please try again.`
+                          : null;
 
 const noticeIsError =
-  noticeParam === "device_limit" ||
+  Astro.url.searchParams.has("error") ||
   Boolean(Astro.url.searchParams.get("feeds_error")) ||
   Boolean(Astro.url.searchParams.get("probes_error"));
 
@@ -78,6 +82,11 @@ const showAddSensorNudge =
   Boolean(Astro.url.searchParams.get("device_created")) && Boolean(focusDevice);
 
 const pushDevices = devices.filter((d) => d.source === "push");
+const neverSeenWithSensors = pushDevices.some(
+  (d) => !d.last_seen_at && d.sensors.length > 0,
+);
+const showVerifyIngest =
+  Boolean(Astro.url.searchParams.get("sensor_added")) || neverSeenWithSensors;
 const kindLabels: Record<string, string> = {
   temperature: "Temperature",
   humidity: "Humidity",
@@ -134,6 +143,20 @@ const ingestCurlExample = ingestKey
           Your push device is ready. Add at least one sensor key so readings show up on Home.
         </p>
         <a class="btn-primary" href="#add-sensor">Add a sensor</a>
+      </section>
+    )}
+
+    {showVerifyIngest && !ingestKey && (
+      <section class="card ingest-key-callout" id="verify-ingest-step">
+        <h2 class="card-title">Next: verify ingest</h2>
+        <p class="mb-4">
+          Sensors are configured. Point your firmware at the ingest URL and POST sample JSON, then open Home to confirm live values.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a class="btn-primary" href="/">Open Home</a>
+          <a class="btn-secondary" href="/about/ingest-and-webhooks">Ingest docs</a>
+          <a class="btn-ghost" href="#push-devices">Review devices</a>
+        </div>
       </section>
     )}
 
@@ -416,6 +439,21 @@ const ingestCurlExample = ingestKey
         url.searchParams.delete("key_rotated");
         window.history.replaceState({}, "", url.pathname + (url.search || ""));
         document.getElementById("ingest-key-callout")?.remove();
+      });
+      document.getElementById("ingest-key-callout")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    })();
+  </script>
+)}
+
+{!ingestKey && Astro.url.searchParams.get("sensor_added") && (
+  <script is:inline>
+    (() => {
+      document.getElementById("verify-ingest-step")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
       });
     })();
   </script>

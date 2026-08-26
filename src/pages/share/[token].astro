@@ -32,6 +32,7 @@ const readingsUrl = `/api/share/${token}/readings`;
     if (!root) return;
     const url = root.getAttribute("data-url");
     const STALE_MS = 2 * 60 * 60 * 1000;
+    let pollTimer = null;
 
     function formatAge(iso) {
       if (!iso) return null;
@@ -78,6 +79,17 @@ const readingsUrl = `/api/share/${token}/readings`;
       );
     }
 
+    function retryButtonHtml() {
+      return '<p class="mt-4 mb-0"><button type="button" class="btn-secondary" id="share-retry">Retry</button></p>';
+    }
+
+    function bindRetry() {
+      document.getElementById("share-retry")?.addEventListener("click", () => {
+        root.innerHTML = "<p>Loading…</p>";
+        load();
+      });
+    }
+
     function render(data) {
       if (titleEl && data.label) titleEl.textContent = data.label;
       if (subtitleEl) subtitleEl.textContent = "Live read-only view";
@@ -92,7 +104,19 @@ const readingsUrl = `/api/share/${token}/readings`;
         metaEl.textContent = parts.join(" · ");
       }
 
-      root.innerHTML = (data.readings || [])
+      const readings = data.readings || [];
+      if (readings.length === 0) {
+        root.innerHTML =
+          '<div class="empty-state">' +
+          "<p>No readings yet. Sensors on this link may not have posted data.</p>" +
+          '<p class="text-sm text-[var(--color-text-muted)] mb-0">This page keeps checking automatically.</p>' +
+          retryButtonHtml() +
+          "</div>";
+        bindRetry();
+        return;
+      }
+
+      root.innerHTML = readings
         .map((r) => {
           const age = formatAge(r.recorded_at);
           const staleClass = age && age.stale ? " stat-item-stale" : "";
@@ -110,7 +134,7 @@ const readingsUrl = `/api/share/${token}/readings`;
             ${ageHtml}
           </div>`;
         })
-        .join("") || '<div class="empty-state"><p>No readings yet.</p></div>';
+        .join("");
     }
 
     async function load() {
@@ -118,20 +142,25 @@ const readingsUrl = `/api/share/${token}/readings`;
         const res = await fetch(url);
         const data = await res.json();
         if (!res.ok) {
-          root.innerHTML = `<div class="empty-state"><p>${
-            data.error || "Unable to load"
-          }</p></div>`;
+          root.innerHTML =
+            `<div class="empty-state"><p>${
+              data.error || "Unable to load this share link."
+            }</p>${retryButtonHtml()}</div>`;
           if (metaEl) metaEl.textContent = "";
+          bindRetry();
           return;
         }
         render(data);
       } catch {
         root.innerHTML =
-          '<div class="empty-state"><p>Failed to load shared readings.</p></div>';
+          '<div class="empty-state"><p>Failed to load shared readings.</p>' +
+          retryButtonHtml() +
+          "</div>";
+        bindRetry();
       }
     }
 
     load();
-    setInterval(load, 90000);
+    pollTimer = setInterval(load, 90000);
   })();
 </script>

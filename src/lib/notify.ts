@@ -254,35 +254,60 @@ export async function notifyUser(
   fallbackEmail: string | null | undefined,
   settings: AlertSettings,
   payload: NotifyPayload,
-): Promise<void> {
+): Promise<{ sent: string[]; skipped: string[] }> {
   const entitlements = await getUserEntitlements(userId);
   const email = settings.email ?? fallbackEmail ?? null;
+  const sent: string[] = [];
+  const skipped: string[] = [];
 
-  if (settings.channelEmail && email) {
-    await sendEmail(email, payload.title, payload.body);
+  if (settings.channelEmail) {
+    if (email) {
+      await sendEmail(email, payload.title, payload.body);
+      sent.push("email");
+    } else {
+      skipped.push("email");
+    }
   }
 
-  if (settings.channelDiscord && settings.discordWebhookUrl) {
-    await sendDiscord(settings.discordWebhookUrl, payload.title, payload.body);
+  if (settings.channelDiscord) {
+    if (settings.discordWebhookUrl) {
+      await sendDiscord(settings.discordWebhookUrl, payload.title, payload.body);
+      sent.push("discord");
+    } else {
+      skipped.push("discord");
+    }
   }
 
-  if (settings.channelSms && settings.smsPhone && entitlements.canUseSms) {
-    await sendTwilioSms(settings.smsPhone, `${payload.title}: ${payload.body}`);
+  if (settings.channelSms) {
+    if (settings.smsPhone && entitlements.canUseSms) {
+      await sendTwilioSms(settings.smsPhone, `${payload.title}: ${payload.body}`);
+      sent.push("sms");
+    } else {
+      skipped.push("sms");
+    }
   }
 
-  if (settings.channelPush && entitlements.canUsePush) {
-    await sendWebPushToUser(userId, payload);
+  if (settings.channelPush) {
+    if (entitlements.canUsePush) {
+      await sendWebPushToUser(userId, payload);
+      sent.push("push");
+    } else {
+      skipped.push("push");
+    }
   }
 
-  if (
-    settings.channelWebhook &&
-    settings.outboundWebhookUrl &&
-    entitlements.canUseOutboundWebhook
-  ) {
-    await sendOutboundWebhook(
-      settings.outboundWebhookUrl,
-      settings.outboundWebhookSecret,
-      payload,
-    );
+  if (settings.channelWebhook) {
+    if (settings.outboundWebhookUrl && entitlements.canUseOutboundWebhook) {
+      await sendOutboundWebhook(
+        settings.outboundWebhookUrl,
+        settings.outboundWebhookSecret,
+        payload,
+      );
+      sent.push("webhook");
+    } else {
+      skipped.push("webhook");
+    }
   }
+
+  return { sent, skipped };
 }

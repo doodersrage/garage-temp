@@ -67,5 +67,13 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?alert_error=1`);
   }
 
-  return redirect(`${redirectTo}?alert_saved=1`);
+  const incomplete =
+    (settings.channelEmail && !settings.email) ||
+    (settings.channelDiscord && !settings.discordWebhookUrl) ||
+    (settings.channelSms && !settings.smsPhone) ||
+    (settings.channelWebhook && !settings.outboundWebhookUrl);
+
+  const params = new URLSearchParams({ alert_saved: "1" });
+  if (incomplete) params.set("channels_incomplete", "1");
+  return redirect(`${redirectTo}?${params.toString()}`);
 };

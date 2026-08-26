@@ -775,6 +775,16 @@
     border: 1px solid rgb(34 197 94 / 0.35);
   }
 
+  .share-link-expired {
+    opacity: 0.85;
+    border: 1px solid rgb(248 113 113 / 0.35);
+    background: linear-gradient(
+      160deg,
+      rgb(248 113 113 / 0.08),
+      var(--color-bg-elevated)
+    );
+  }
+
   .data-table {
     @apply w-full min-w-[36rem] text-left text-sm;
     border-collapse: collapse;

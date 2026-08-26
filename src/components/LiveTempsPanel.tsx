@@ -176,11 +176,13 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
     [sensors],
   );
 
-  // Prefer kind-aware temperature cards when present; fall back to feed groups
+  // Prefer kind-aware climate cards when present; fall back to feed groups
   const temperatureCards = useMemo(() => {
-    const temps = sensors.filter((s) => s.kind === "temperature");
-    return temps;
+    return sensors.filter((s) => s.kind === "temperature" || s.kind === "humidity");
   }, [sensors]);
+
+  const hasAnySensors =
+    temperatureCards.length > 0 || groups.length > 0 || sensors.length > 0;
 
   if (loading && groups.length === 0 && sensors.length === 0) {
     return (
@@ -271,14 +273,14 @@ export default function LiveTempsPanel({ intervalMs = 90000 }: Props) {
             </section>
           ))}
         </div>
-      ) : (
+      ) : !hasAnySensors ? (
         <div class="empty-state">
           <p class="mb-4">No sensors available yet.</p>
           <a class="btn-primary" href="/dashboard/temperature">
             Configure devices
           </a>
         </div>
-      )}
+      ) : null}
 
       {nonTempSensors.length > 0 && (
         <>

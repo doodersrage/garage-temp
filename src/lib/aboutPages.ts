@@ -101,9 +101,9 @@ export const coreAboutPages: AboutPage[] = [
     slug: "accounts-and-dashboard",
     title: "Accounts, subscriptions, and dashboard tools",
     description:
-      "Signed-in preferences, feed configuration, Stripe CSV export access, and admin features on the dashboard.",
+      "Signed-in setup checklist, devices and sensors, alerts, households, share links, Stripe plans, and admin tools.",
     summary:
-      "Personalize the home page, manage probes, review history, and unlock export with a subscription.",
+      "Create an account, connect hardware, configure alerts, invite household members, and upgrade when you need Pro channels.",
   },
   {
     slug: "ingest-and-webhooks",
