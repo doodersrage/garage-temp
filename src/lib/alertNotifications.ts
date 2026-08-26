@@ -14,19 +14,21 @@ import {
   saveAlertSettingsForUser,
 } from "./notify";
 import type { DeviceWithSensors } from "./devices";
-import { getRecentNumericReadings } from "./sensorReadings";
+import {
+  fetchLatestSensorValues,
+  getRecentNumericReadings,
+} from "./sensorReadings";
+import {
+  buildAlertReadingsFromLatestSensors,
+  buildReadingsFromResults,
+  mergeAlertReadings,
+} from "./alertReadings";
 
-function buildReadingsFromResults(
-  results: TempFeedResult[],
-  probes: TempProbeConfig[],
-): AlertReading[] {
-  return probes.flatMap((probe) => {
-    const feed = results.find((result) => result.id === probe.feedId);
-    const data = feed?.probes[probe.key];
-    if (!feed || feed.error || !data) return [];
-    return [{ label: probe.label, tempf: data.f, humidity: data.h }];
-  });
-}
+export {
+  buildAlertReadingsFromLatestSensors,
+  buildReadingsFromResults,
+  mergeAlertReadings,
+} from "./alertReadings";
 
 export async function sendThresholdAlertsIfNeeded(
   userId: string,
@@ -55,22 +57,32 @@ export async function maybeSendThresholdAlerts(
   feeds: TempFeedConfig[],
   probes: TempProbeConfig[],
   existingResults?: TempFeedResult[],
+  householdId?: string | null,
 ): Promise<void> {
   const settings = await getAlertSettingsForUser(userId, userMetadata);
   const visibleProbes = probes.filter((probe) => probe.visible);
-  if (visibleProbes.length === 0) return;
 
-  let results = existingResults;
-  if (!results) {
-    const { fetchTemps } = await import("./FetchTemps");
-    results = await fetchTemps({
-      feeds,
-      probes: visibleProbes,
-      saveToDatabase: false,
-    });
+  let feedReadings: AlertReading[] = [];
+  if (visibleProbes.length > 0 && feeds.length > 0) {
+    let results = existingResults;
+    if (!results) {
+      const { fetchTemps } = await import("./FetchTemps");
+      results = await fetchTemps({
+        feeds,
+        probes: visibleProbes,
+        saveToDatabase: false,
+      });
+    }
+    feedReadings = buildReadingsFromResults(results, visibleProbes);
   }
 
-  const readings = buildReadingsFromResults(results, visibleProbes);
+  let sensorReadings: AlertReading[] = [];
+  if (householdId) {
+    const latest = await fetchLatestSensorValues(householdId);
+    sensorReadings = buildAlertReadingsFromLatestSensors(latest);
+  }
+
+  const readings = mergeAlertReadings(feedReadings, sensorReadings);
   await sendThresholdAlertsIfNeeded(userId, email, settings, readings);
 }
 

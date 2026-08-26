@@ -120,6 +120,7 @@ Configure in `.env` (local) and Cloudflare Worker secrets / vars (production). S
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` | Pro browser push |
 | `SITE_URL` / `ORIGIN` | OAuth, password reset, Stripe redirects |
 | `CRON_SECRET` | Bearer token for manual history cron |
+| `OPS_DISCORD_WEBHOOK_URL` | Optional Discord webhook when cron jobs fail (email uses `SMTP_MAIL_TO`) |
 
 Do **not** commit `.env`.
 
@@ -133,7 +134,11 @@ Migrations cover devices/sensors, households/invites, share links, alert metadat
 
 Hourly history collection and alert evaluation run via the Worker `scheduled` handler (`src/worker.ts`, cron `0 * * * *` in `wrangler.jsonc`).
 
+Threshold alerts use live pull-feed readings when available and otherwise fall back to latest stored sensor values (so push-only devices are covered). Push-only households no longer fall back to the public demo feed for cron alerts.
+
 Weekly digest emails send Monday 08:00 UTC to users with digests enabled.
+
+Failed jobs record to the Jobs admin UI and notify ops via `SMTP_MAIL_TO` and optional `OPS_DISCORD_WEBHOOK_URL`.
 
 Manual collection (optional):
 
@@ -142,6 +147,7 @@ curl -X POST https://your-domain/api/cron/collect-history \
   -H "Authorization: Bearer $CRON_SECRET"
 ```
 
+Push ingest (`POST /api/ingest/<key>`) accepts at most 64KB payloads and about 60 requests/minute/device (per Worker isolate).
 ## Connecting hardware
 
 1. Create a push device under **Dashboard → Devices**.

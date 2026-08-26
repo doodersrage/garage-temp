@@ -155,6 +155,7 @@ export async function collectHistoryForAllUsers(): Promise<{
           config.feeds,
           config.probes,
           results,
+          config.householdId || householdId,
         );
 
         const settings = await getAlertSettingsForUser(

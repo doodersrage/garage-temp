@@ -227,11 +227,13 @@ export async function getUserDevicesAsTempConfig(userId: string, email?: string 
   }
 
   const { feeds, probes } = devicesToTempConfig(ensured.devices);
+  const hasDevices = ensured.devices.length > 0;
   return {
     householdId: ensured.householdId,
     devices: ensured.devices,
-    feeds: feeds.length > 0 ? feeds : getDefaultTempFeeds(),
-    probes: probes.length > 0 ? probes : getDefaultTempProbes(),
+    // Push-only households must not fall back to the public demo feed.
+    feeds: feeds.length > 0 ? feeds : hasDevices ? [] : getDefaultTempFeeds(),
+    probes: probes.length > 0 ? probes : hasDevices ? [] : getDefaultTempProbes(),
     error: null as string | null,
   };
 }

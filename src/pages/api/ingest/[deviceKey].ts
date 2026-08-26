@@ -4,14 +4,16 @@ import {
   touchDeviceLastSeen,
   upsertDeviceSensor,
 } from "../../../lib/devices";
-import {
-  insertSensorReadings,
-} from "../../../lib/sensorReadings";
+import { insertSensorReadings } from "../../../lib/sensorReadings";
 import {
   inferSensorKind,
   parseIngestPayload,
 } from "../../../lib/ingestPayload";
 import { parseTempFeedPayload } from "../../../lib/tempFeedConfig";
+import {
+  checkIngestRateLimit,
+  readJsonBodyWithLimit,
+} from "../../../lib/ingestLimits";
 
 async function sha256Hex(value: string): Promise<string> {
   const digest = await crypto.subtle.digest(
@@ -33,6 +35,19 @@ export const POST: APIRoute = async ({ params, request }) => {
   }
 
   const keyHash = await sha256Hex(deviceKey);
+  const rate = checkIngestRateLimit(keyHash);
+  if (!rate.ok) {
+    return new Response(JSON.stringify({ error: rate.error }), {
+      status: 429,
+      headers: {
+        "Content-Type": "application/json",
+        ...(rate.retryAfterSec
+          ? { "Retry-After": String(rate.retryAfterSec) }
+          : {}),
+      },
+    });
+  }
+
   const device = await findDeviceByIngestKeyHash(keyHash);
 
   if (!device) {
@@ -42,16 +57,15 @@ export const POST: APIRoute = async ({ params, request }) => {
     });
   }
 
-  let payload: unknown;
-  try {
-    payload = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ error: "Invalid JSON" }), {
-      status: 400,
+  const body = await readJsonBodyWithLimit(request);
+  if (!body.ok) {
+    return new Response(JSON.stringify({ error: body.error }), {
+      status: body.status,
       headers: { "Content-Type": "application/json" },
     });
   }
 
+  const payload = body.payload;
   const { tempProbes, typed } = parseIngestPayload(payload);
   const recordedAt = new Date().toISOString();
   const rows = [];
