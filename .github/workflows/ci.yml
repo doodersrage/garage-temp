@@ -83,6 +83,5 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm build || (rm -rf node_modules/.vite && pnpm build)
+      # Do not set PLAYWRIGHT_BASE_URL here — that disables webServer and nothing listens on :4321.
       - run: pnpm test:e2e
-        env:
-          PLAYWRIGHT_BASE_URL: http://127.0.0.1:4321
