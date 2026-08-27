@@ -71,7 +71,7 @@ export default defineConfig({
 
   fonts: [{
     provider: fontProviders.google(),
-    name: 'Inter',
+    name: 'Plus Jakarta Sans',
     cssVariable: "--font-sans",
     subsets: ['latin'],
     weights: ['400', '500', '600', '700'],

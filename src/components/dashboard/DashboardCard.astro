@@ -10,8 +10,7 @@ const { class: className, id, muted = false } = Astro.props;
 <section
   id={id}
   class:list={[
-    "rounded-xl border border-border bg-card p-4 md:p-6 shadow-[var(--shadow-card)]",
-    muted && "bg-muted",
+    muted ? "card-muted card-compact" : "card card-compact",
     className,
   ]}
 >

@@ -76,7 +76,7 @@ const isDashboard = currentPath.startsWith("/dashboard");
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<link rel="manifest" href="/manifest.webmanifest" />
-		<meta name="theme-color" content="#090b0f" />
+		<meta name="theme-color" content={resolvedTheme === "light" ? "#f1f5f9" : "#090b0f"} />
 		<link rel="canonical" href={pageUrl} />
 		<meta name="generator" content={Astro.generator} />
 		<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap-index.xml" />
@@ -99,13 +99,13 @@ const isDashboard = currentPath.startsWith("/dashboard");
 		gtag('config', 'G-YKDZ0787JG');
 		</script>
 	</head>
-	<body>
+	<body class:list={[isDashboard && "is-dashboard"]}>
 		<a class="skip-link" href="#main-content">Skip to content</a>
 		<div class="flex min-h-screen flex-col">
 			<header class="site-header">
 				<div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
 					<a href="/" class="site-logo-link flex items-center gap-3">
-						<Image src={logo} height={48} width={311} alt="Garage Temperature Probe" class="site-logo" />
+						<Image src={logo} height={48} width={311} alt="Garage Temperature Monitor" class="site-logo" />
 					</a>
 					<button
 						type="button"
@@ -117,7 +117,7 @@ const isDashboard = currentPath.startsWith("/dashboard");
 						Menu
 					</button>
 					<nav id="site-nav" class="site-nav" aria-label="Main">
-						{navItems.map(({ href, label }) => (
+						{!isDashboard && navItems.map(({ href, label }) => (
 							<a
 								href={href}
 								class:list={["nav-link", currentPath === href && "nav-link-active"]}
@@ -137,9 +137,7 @@ const isDashboard = currentPath.startsWith("/dashboard");
 								>
 									Dashboard
 								</a>
-								{!isDashboard && (
-									<a href="/api/auth/signout" class="nav-link">Sign out</a>
-								)}
+								<a href="/api/auth/signout" class="nav-link">Sign out</a>
 							</>
 						) : (
 							<a href="/signin" class:list={["nav-link", currentPath === "/signin" && "nav-link-active"]}>Sign in</a>

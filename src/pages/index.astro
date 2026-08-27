@@ -16,6 +16,20 @@ const showWeather = !isAuthenticated || preferences!.showWeather;
 
 <Layout description="Live garage temperature and humidity readings with local weather, saved history, and a configurable dashboard.">
 	<div class="page-shell page-stack">
+		{!isAuthenticated && (
+			<section class="home-hero animate-slide-up-fade">
+				<p class="home-hero-brand">Garage Temperature Monitor</p>
+				<p class="home-hero-lead">
+					Watch freeze risk in real time, compare indoor conditions with outdoor weather,
+					and get alerts before pipes and storage take damage.
+				</p>
+				<div class="home-hero-actions">
+					<a class="btn-primary" href="/register">Create free account</a>
+					<a class="btn-secondary" href="/pricing">See plans</a>
+				</div>
+			</section>
+		)}
+
 		<div class="grid gap-6">
 			{showGarageTemps && isAuthenticated && (
 				<LiveTempsPanel client:visible />
@@ -28,14 +42,17 @@ const showWeather = !isAuthenticated || preferences!.showWeather;
 			)}
 			{isAuthenticated && !showGarageTemps && !showWeather && (
 				<div class="empty-state">
-					<p class="mb-4">All home page blocks are hidden. Update your display preferences to show them again.</p>
-					<a class="btn-primary" href="/dashboard">Open display preferences</a>
+					<p class="empty-state-title">Home panels are hidden</p>
+					<p class="mb-0">Update your display preferences to show live readings again.</p>
+					<div class="empty-state-actions">
+						<a class="btn-primary" href="/dashboard">Open display preferences</a>
+					</div>
 				</div>
 			)}
 		</div>
 
 		{!isAuthenticated && (
-			<section class="card animate-slide-up-fade">
+			<section class="card">
 				<h2 class="card-title">Make it yours</h2>
 				<p class="card-subtitle">
 					The readings above are a public demo. Create a free account to connect your own probes, save history, set alerts, and share with family.
@@ -47,7 +64,7 @@ const showWeather = !isAuthenticated || preferences!.showWeather;
 			</section>
 		)}
 
-		<section class="card animate-slide-up-fade">
+		<section class="card">
 			<h2 class="card-title">About these readings</h2>
 			<p class="card-subtitle">Probes, weather, history, and the technology behind this site.</p>
 			<div class="grid gap-4 leading-relaxed">

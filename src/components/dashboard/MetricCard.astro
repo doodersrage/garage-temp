@@ -21,7 +21,7 @@ const toneClass =
   tone === "success"
     ? "text-[var(--color-success-text)]"
     : tone === "warning"
-      ? "text-amber-400"
+      ? "text-[var(--color-warning-text)]"
       : tone === "danger"
         ? "text-[var(--color-danger)]"
         : "text-foreground";
@@ -31,16 +31,12 @@ const Tag = href ? "a" : "article";
 <Tag
   href={href ?? undefined}
   class:list={[
-    "col-span-12 sm:col-span-6 lg:col-span-3 rounded-xl border border-border bg-card p-4",
-    href && "transition-colors hover:border-[var(--color-border-strong)]",
+    "stat-item col-span-12 sm:col-span-6 lg:col-span-3",
+    href && "no-underline transition-colors hover:border-[var(--color-border-strong)]",
     className,
   ]}
 >
-  <span class="block text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">
-    {label}
-  </span>
-  <p class:list={["m-0 text-lg font-semibold leading-tight", toneClass]}>{value}</p>
-  {detail && (
-    <p class="m-0 mt-1 text-sm text-muted-foreground">{detail}</p>
-  )}
+  <span class="stat-label">{label}</span>
+  <p class:list={["stat-value !text-lg", toneClass]}>{value}</p>
+  {detail && <p class="stat-detail">{detail}</p>}
 </Tag>
