@@ -12,6 +12,7 @@ import { getHouseholdErrorMessage } from "../../lib/householdErrors";
 import { createAdminClient, createServerClient } from "../../lib/supabase";
 import { buildSiteUrl } from "../../lib/stripe";
 import { uniqueWeatherCityPresets } from "../../lib/weatherCities";
+import DashboardCard from "../../components/dashboard/DashboardCard.astro";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
@@ -75,16 +76,17 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
 ---
 <DashboardLayout title="Household">
   <div class="space-y-6">
-    <section class="card">
+    <DashboardCard>
       <h1 class="card-title">Household sharing</h1>
       <p class="card-subtitle">
         Share devices and history. Invite by email — recipients get a link and don’t need an account yet.
       </p>
       {notice && <p class="alert-success mt-4">{notice}</p>}
       {errorMessage && <p class="alert-warning mt-4" role="alert">{errorMessage}</p>}
-    </section>
+    </DashboardCard>
 
-    <form action="/api/household" method="post" class="card">
+    <DashboardCard>
+    <form action="/api/household" method="post">
       <input type="hidden" name="action" value="create_property" />
       <input type="hidden" name="redirect" value="/dashboard/household" />
       <h2 class="card-title">Add another property</h2>
@@ -97,9 +99,11 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
       </div>
       <button class="btn-secondary mt-2" type="submit">Create property</button>
     </form>
+    </DashboardCard>
 
     {isOwner && (
-      <form action="/api/household" method="post" class="card">
+      <DashboardCard>
+    <form action="/api/household" method="post">
         <input type="hidden" name="action" value="rename" />
         <input type="hidden" name="redirect" value="/dashboard/household" />
         <h2 class="card-title">Household name</h2>
@@ -115,10 +119,12 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
         </div>
         <button class="btn-secondary" type="submit">Save name</button>
       </form>
+      </DashboardCard>
     )}
 
     {isOwner && (
-      <form action="/api/household" method="post" class="card" id="freeze-map-form">
+      <DashboardCard>
+      <form action="/api/household" method="post" id="freeze-map-form">
         <input type="hidden" name="action" value="freeze_map" />
         <input type="hidden" name="redirect" value="/dashboard/household" />
         <input
@@ -247,10 +253,11 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
           });
         })();
       </script>
+      </DashboardCard>
     )}
 
     {householdsResult.households.length > 1 && (
-      <section class="card">
+      <DashboardCard>
         <h2 class="card-title">Active household</h2>
         <p class="card-subtitle">Choose which household’s devices and history you see.</p>
         <ul class="space-y-3">
@@ -274,41 +281,45 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
             </li>
           ))}
         </ul>
-      </section>
+      </DashboardCard>
     )}
 
     {isOwner ? (
-      <form action="/api/household" method="post" class="card">
-        <input type="hidden" name="action" value="invite" />
-        <input type="hidden" name="redirect" value="/dashboard/household" />
-        <h2 class="card-title">Invite by email</h2>
-        <p class="card-subtitle mb-4">
-          Invites go to your owned household{householdRow.data?.name ? ` (${householdRow.data.name})` : ""}.
-        </p>
-        <div class="form-field">
-          <label class="form-label" for="email">Invitee email</label>
-          <input class="form-input" type="email" id="email" name="email" required />
-        </div>
-        <div class="form-field">
-          <label class="form-label" for="invite_role">Role</label>
-          <select class="form-input" id="invite_role" name="role">
-            <option value="member">Member (can edit devices & alerts)</option>
-            <option value="viewer">Viewer (read-only dashboard)</option>
-          </select>
-        </div>
-        <button class="btn-primary" type="submit">Send invite link</button>
-      </form>
+      <DashboardCard>
+        <form method="POST" id="household-invite-form" data-invite-form>
+          <input type="hidden" name="action" value="invite" />
+          <input type="hidden" name="redirect" value="/dashboard/household" />
+          <h2 class="card-title">Invite by email</h2>
+          <p class="card-subtitle mb-4">
+            Invites go to your owned household{householdRow.data?.name ? ` (${householdRow.data.name})` : ""}.
+          </p>
+          <p class="alert-success mt-0 mb-4 hidden" id="invite-status" role="status"></p>
+          <p class="alert-warning mt-0 mb-4 hidden" id="invite-error" role="alert"></p>
+          <div class="form-field">
+            <label class="form-label" for="email">Invitee email</label>
+            <input class="form-input" type="email" id="email" name="email" required />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="invite_role">Role</label>
+            <select class="form-input" id="invite_role" name="role">
+              <option value="member">Member (can edit devices & alerts)</option>
+              <option value="viewer">Viewer (read-only dashboard)</option>
+            </select>
+          </div>
+          <button class="btn-primary" type="submit" id="invite-submit">Send invite link</button>
+        </form>
+      </DashboardCard>
     ) : (
-      <section class="card">
+      <DashboardCard>
         <h2 class="card-title">Invites</h2>
         <p class="mb-0 text-sm text-[var(--color-text-muted)]">
           Only the household owner can send invites.
         </p>
-      </section>
+      </DashboardCard>
     )}
 
     {isOwner && (invitesResult.invites ?? []).length > 0 && (
-      <section class="card">
+      <DashboardCard>
         <h2 class="card-title">Pending invites</h2>
         <ul class="space-y-3">
           {invitesResult.invites.map((invite) => {
@@ -344,10 +355,10 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
             );
           })}
         </ul>
-      </section>
+      </DashboardCard>
     )}
 
-    <section class="card">
+    <DashboardCard>
       <h2 class="card-title">Members</h2>
       <ul class="space-y-3">
         {membersWithEmail.map((member) => (
@@ -387,6 +398,49 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
           <button class="btn-ghost" type="submit">Leave household</button>
         </form>
       )}
-    </section>
+    </DashboardCard>
   </div>
 </DashboardLayout>
+
+<script>
+  import { actions } from "astro:actions";
+
+  const form = document.querySelector<HTMLFormElement>("[data-invite-form]");
+  const statusEl = document.getElementById("invite-status");
+  const errorEl = document.getElementById("invite-error");
+  const submitBtn = document.getElementById("invite-submit");
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!(form instanceof HTMLFormElement)) return;
+
+    statusEl?.classList.add("hidden");
+    errorEl?.classList.add("hidden");
+    if (submitBtn instanceof HTMLButtonElement) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending…";
+    }
+
+    const { data, error } = await actions.inviteHouseholdMember(new FormData(form));
+
+    if (submitBtn instanceof HTMLButtonElement) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Send invite link";
+    }
+
+    if (error) {
+      if (errorEl) {
+        errorEl.textContent = error.message || "Could not send invite.";
+        errorEl.classList.remove("hidden");
+      }
+      return;
+    }
+
+    if (statusEl) {
+      statusEl.textContent = data?.message ?? "Invite sent.";
+      statusEl.classList.remove("hidden");
+    }
+    form.reset();
+    window.setTimeout(() => window.location.reload(), 800);
+  });
+</script>

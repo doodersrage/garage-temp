@@ -1,5 +1,6 @@
 ---
 import type { WebhookDeliveryRow } from "../lib/webhookDeliveries";
+import DashboardCard from "./dashboard/DashboardCard.astro";
 
 interface Props {
   deliveries: WebhookDeliveryRow[];
@@ -13,7 +14,7 @@ function typeLabel(type: string): string {
   return type;
 }
 ---
-<section class="card">
+<DashboardCard>
   <h2 class="card-title">Webhook delivery log</h2>
   <p class="card-subtitle mb-4">
     Recent POST attempts for outbound alert and reading webhooks (host only — URLs are not stored).
@@ -54,4 +55,4 @@ function typeLabel(type: string): string {
       </table>
     </div>
   )}
-</section>
+</DashboardCard>

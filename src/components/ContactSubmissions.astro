@@ -4,6 +4,7 @@ import {
   formatContactTimestamp,
   getContactMessageText,
 } from "../lib/contactSubmissions";
+import DashboardCard from "./dashboard/DashboardCard.astro";
 
 interface Props {
   submissions: PaginatedContactSubmissions;
@@ -35,7 +36,7 @@ function buildPageUrl(nextPage: number): string {
 }
 ---
 
-<section class="card">
+<DashboardCard>
   <div class="card-header-row">
     <div>
       <h2 class="card-title">Contact form submissions</h2>
@@ -165,7 +166,7 @@ function buildPageUrl(nextPage: number): string {
       </div>
     </>
   )}
-</section>
+</DashboardCard>
 
 <style>
   .contact-message-cell {

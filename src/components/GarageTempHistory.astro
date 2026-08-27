@@ -6,6 +6,7 @@ import {
   getReadingFeedName,
   getReadingProbeLabel,
 } from "../lib/garageTempsHistory";
+import DashboardCard from "./dashboard/DashboardCard.astro";
 
 interface Props {
   history: PaginatedGarageTemps;
@@ -79,7 +80,7 @@ const hasActiveFilters = Boolean(feedFilter || probeFilter || fromDate || toDate
 const clearFiltersHref = basePath;
 ---
 
-<section class="card">
+<DashboardCard>
   <div class="card-header-row">
     <div>
       <h2 class="card-title">Historic probe readings</h2>
@@ -253,4 +254,4 @@ const clearFiltersHref = basePath;
       </div>
     </>
   )}
-</section>
+</DashboardCard>

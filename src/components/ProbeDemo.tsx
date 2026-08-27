@@ -67,7 +67,7 @@ export default function ProbeDemo() {
 
   return (
     <div class="probe-demo">
-      <section class="card">
+      <section class="rounded-xl border border-border bg-card p-4 md:p-6 shadow-[var(--shadow-card)]">
         <h2 class="card-title">Garage conditions</h2>
         <p class="card-subtitle">
           Adjust the environment and watch three probe zones respond, just like the live JSON feed on the home page.
@@ -135,7 +135,7 @@ export default function ProbeDemo() {
         </div>
       </section>
 
-      <section class="card">
+      <section class="rounded-xl border border-border bg-card p-4 md:p-6 shadow-[var(--shadow-card)]">
         <h2 class="card-title">Live probe readings</h2>
         <p class="card-subtitle">Each card mirrors a probe key in the JSON feed below.</p>
 
@@ -161,7 +161,7 @@ export default function ProbeDemo() {
         </div>
       </section>
 
-      <section class="card">
+      <section class="rounded-xl border border-border bg-card p-4 md:p-6 shadow-[var(--shadow-card)]">
         <h2 class="card-title">Probe comparison</h2>
         <p class="card-subtitle">Relative temperature by zone for the current simulation.</p>
         <div class="probe-demo-bars" role="img" aria-label="Bar chart comparing probe temperatures">
@@ -180,7 +180,7 @@ export default function ProbeDemo() {
         </div>
       </section>
 
-      <section class="card">
+      <section class="rounded-xl border border-border bg-card p-4 md:p-6 shadow-[var(--shadow-card)]">
         <h2 class="card-title">JSON feed preview</h2>
         <p class="card-subtitle">
           This is the shape returned by the Arduino sketch and consumed by the website fetch layer.

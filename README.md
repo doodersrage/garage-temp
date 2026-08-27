@@ -1,100 +1,112 @@
 # Garage Temperature Monitor
 
-Live garage temperature, humidity, and multi-sensor monitoring built with Astro, Cloudflare Workers, Supabase, and Stripe.
+Live garage (and multi-space) temperature, humidity, and sensor monitoring — built with **Astro 6**, **Cloudflare Workers**, **Supabase**, and **Stripe**.
 
-**Live site:** [garage-temp.robmcd.name](https://garage-temp.robmcd.name)
+**Production:** [garage-temp.robmcd.name](https://garage-temp.robmcd.name)  
+**Workers preview:** [garage-temp.doodersrage.workers.dev](https://garage-temp.doodersrage.workers.dev)  
+**API docs:** [/docs/api](https://garage-temp.robmcd.name/docs/api) · [OpenAPI](https://garage-temp.robmcd.name/openapi.yaml)
+
+---
+
+## Contents
+
+- [What it does](#what-it-does)
+- [Features](#features)
+- [Plans](#plans-entitlements)
+- [Stack](#stack)
+- [Architecture](#architecture)
+- [Quick start](#quick-start)
+- [Project layout](#project-layout)
+- [Environment variables](#environment-variables)
+- [Database](#database)
+- [Background jobs](#background-jobs)
+- [Outbound email](#outbound-email-cloudflare-email)
+- [Connecting hardware](#connecting-hardware)
+- [Documentation (in-app)](#documentation-in-app)
+- [Deploy & ops](#deploy--ops)
+- [Development tips](#development-tips)
+- [License](#license)
+
+---
 
 ## What it does
 
-Track probes in a garage (or any space), compare them with outdoor weather, keep history, and get alerted when something goes wrong—freeze risk, humidity spikes, silent feeds, or rapid temperature drops.
+Track probes in a garage (or attic, shed, basement, …), compare them with outdoor weather, keep history, and get alerted when something goes wrong — freeze risk, humidity spikes, silent feeds, door left open, or rapid temperature drops.
 
-You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devices **push** readings to a per-device ingest URL. Households can share devices, invite family, and (on Pro) publish read-only share links.
+You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devices **push** readings to a per-device ingest URL. Households share devices, invite family (including read-only viewers), and (on Pro) publish share links, metrics, and inbound automation webhooks.
+
+---
 
 ## Features
 
-### Monitoring
+### Monitoring & history
+
 - Live readings on Home (temperature, humidity, door, flood, power, CO₂, and generic sensors)
-- Pull JSON feeds and push ingest devices in one Devices page (device health, battery/RSSI)
-- Feed health checks and relative “last seen” / staleness indicators
-- OpenWeather outdoor comparison on the home page
-- Historic readings with chart, YoY overlay, filters, anomaly hints, and CSV export (Member/Pro)
-- Opt-in public city freeze-risk map (`/freeze-map`) with geographic map, presets, geocode search, sparklines; embed at `/embed/freeze-map`
-- Public `/system-status` job health page and `/docs/api` + `public/openapi.yaml`
-- Customer story landing page at `/stories/garage-freeze-alert`
-- Device space labels (garage / attic / …), home filter, and space comparison on history
-- “Nights at risk” outlook on the dashboard with weather map and NWS freeze alerts (US)
-- Embeddable live widget (`/embed/<token>`) for share links
+- Pull JSON feeds and push ingest devices on one Devices page (battery / RSSI health, sparklines)
+- Feed health, relative “last seen,” and staleness indicators
+- OpenWeather outdoor comparison; optional °C and light / dark / system theme
+- History with chart, YoY overlay, filters, anomaly hints, space comparison, CSV export (Member/Pro)
+- Dashboard cards: nights-at-risk, time-to-freeze estimate, week vs last year, door duration & history
+- Opt-in public city freeze-risk map ([/freeze-map](https://garage-temp.robmcd.name/freeze-map)); embed at `/embed/freeze-map`
+- Live SSE stream + polling fallback; PWA offline stale cache
+- Embeddable live widget for share links (`/embed/<token>`)
 
 ### Alerts & digests
-- Threshold alerts (freeze, humidity, rate-of-change, outage); also evaluated on push ingest
-- Battery/RSSI device health alerts
-- Alert snooze (24h) and vacation mode (7d); one-click snooze links in Telegram/Slack messages
-- Forecast freeze risk (OpenWeather 3h forecast look-ahead)
-- Composite AND rules (door + temp drop, flood, power, outage, …) with optional value/label filters
-- Quiet hours with optional freeze/forecast bypass and Pro SMS-critical override
-- Per-kind severity routing (which channels fire for threshold vs rate vs outage, …)
-- Channels: email, Discord, Telegram, Slack; Pro adds SMS (Twilio), browser push, outbound webhooks
-- Test alert with per-channel sent/skipped feedback and alert activity audit trail
-- Weekly email digest (Mondays) and optional monthly freeze report (1st of month, HTML attachment)
-- Quarterly seasonal report (Jan/Apr/Jul/Oct) and onboarding drip emails (days 1, 3, 7)
-- Trial-ending reminders at 3 and 1 days for Stripe trialing subscriptions
-- Per-space channel routing UI; webhook delivery log for Pro outbound/reading webhooks
+
+- Threshold alerts (freeze, humidity, rate-of-change, outage) on cron **and** push ingest
+- Battery / RSSI / battery-trend device health alerts
+- Snooze (24h) and vacation (7d); clear actions; one-click links in Telegram/Slack
+- Forecast freeze look-ahead (OpenWeather 3h steps)
+- Composite AND rules (door + temp, flood, power, …) with optional value/label filters
+- Quiet hours (optional freeze bypass; Pro SMS-critical override)
+- Per-kind severity routing and per-space channel routing
+- Channels: email, Discord, Telegram, Slack; Pro adds SMS (Twilio), browser push, outbound / reading webhooks
+- Custom alert templates (`{{kind}}`, `{{title}}`, `{{body}}`) and acknowledgment on recent activity
+- Escalation (SMS repeat), test alert with per-channel feedback, activity audit trail
+- Weekly digest (Mondays), monthly freeze report (1st + HTML attachment), quarterly seasonal report
+- Onboarding drip emails (days 1 / 3 / 7) and Stripe trial reminders (3d / 1d)
+
+Display preferences, alert settings, snooze/vacation, and household invites save via **Astro Actions** (no full page reload). Legacy form POST routes remain as fallbacks.
 
 ### Accounts & collaboration
-- Email/password auth, password reset, optional OAuth (Google/GitHub/Discord when enabled in Supabase)
-- **Plans & pricing** — public `/pricing` with monthly/annual toggle (defaults to annual), env-driven display prices, `/compare` vs alternatives, upgrade nudges with checkout source analytics
-- Contextual **upgrade nudges** on dashboard, alerts, history, devices, and share when a feature needs Member or Pro
-- Households: invite members (including read-only **viewer** role), rename, leave, revoke
-- Multi-household switcher when you belong to more than one property
-- Public share links (Pro): live, history (7d), metrics, or embed scopes
-- Inbound webhooks (Pro): snooze/vacation from HA, Zapier, or Make
-- Dashboard API keys (Pro) for `GET /api/v1/metrics`; downloadable Grafana dashboard JSON
-- JSON data export (`GET /api/user/export`)
-- Pro checkout includes 14-day trial and Stripe promotion codes at checkout
 
-### Expansion pack 4 (dashboard polish)
-- **Viewer enforcement** on device, alert, feed, and share mutations
-- **Door duration** card, multi-probe history chart, freeze-hours score, indoor/outdoor delta chart
-- **Alert escalation** (SMS repeat), custom templates, Telegram bot commands (`/status`, `/snooze`, `/vacation`)
-- **Second property** households, device transfer between properties, activity audit log
-- **Public status pages** (`/status/<token>`), iCal freeze outlook feed, ingest stats panel
-- **Live SSE** stream (`/api/home/readings/stream`), 30s home polling, PWA offline stale cache (v3)
-- Freeze-map heatmap rings sized by sample count; HA entity naming YAML in `public/ha/`
-
-### Final expansion (referrals, polish, operator tools)
-- **Referral program** — invite link on dashboard; referred signups get +7 days Pro trial (email or OAuth)
-- **Alert template editor** — per-kind title/body overrides with `{{kind}}`, `{{title}}`, `{{body}}`
-- **Battery trend alerts** — separate toggle from low-battery threshold; own cooldown
-- **Door open history** — persisted closed sessions on dashboard
-- **Inbound webhook actions** — `clear_snooze`, `clear_vacation`, `status` in addition to snooze/vacation
-- **Viewer read-only alerts** — form disabled for viewer role; test alert hidden
-- **SSE-triggered live refresh** — home panel reloads on stream events (polling fallback)
-- **Grafana setup** card on Share page with dashboard JSON download
-- **Activity + ingest stats** — always visible with empty states on Share page
-
-### Kitchen sink (depth, rewards, operator polish)
-- **Time-to-freeze estimate** — trend card on dashboard from recent readings
-- **Week vs last year** — 7-day average comparison card on dashboard
-- **Referrer rewards** — +7 Pro trial days for referrers when a friend subscribes
-- **Alert acknowledgment** — “I'm on it” on recent alert activity
-- **Reading webhooks** — POST on every successful ingest (optional HMAC secret)
-- **Per-space channel routing** — JSON rules to route garage/attic alerts to specific channels
-- **Signed inbound webhooks** — optional `X-GarageTemp-Signature` HMAC verification
-- **Battery sparklines** — 14-sample history on Devices health table
-- **Light theme + °C preference** — display preferences (dark / light / system)
-- **Home Assistant setup card** — YAML downloads + inbound status recipe on dashboard
-- **Freeze-map city search** — public geocode lookup on `/freeze-map`
-- **Admin referral stats + ingest abuse watch** — Users and Jobs admin pages
+- Email/password auth, password reset, optional OAuth (Google / GitHub / Discord in Supabase)
+- Public [/pricing](https://garage-temp.robmcd.name/pricing) (monthly/annual toggle, env-driven display prices) and [/compare](https://garage-temp.robmcd.name/compare)
+- Contextual upgrade nudges where Member/Pro unlocks a feature
+- Households: invite by email (member or viewer), rename, leave, revoke, multi-property switcher
+- Device transfer between properties; household activity log
+- Pro: public share links (live / history / metrics / embed), inbound webhooks (snooze, vacation, status, …), dashboard API keys (`GET /api/v1/metrics`), Grafana dashboard JSON
+- Public status pages (`/status/<token>`), iCal freeze outlook, JSON export (`GET /api/user/export`)
+- Referral program: invite link; referred signups get +7 Pro trial days; referrer rewarded on Pro subscribe
+- Pro checkout: 14-day trial + Stripe promotion codes
 
 ### Ops & content
-- Hourly Worker cron for history collection and alert evaluation
-- Admin tools: users, contact inbox, jobs, **ops dashboard** (`/dashboard/ops`) — checkout funnel, Stripe price audit, referral stats, email smoke tests, recent page errors
-- Middleware error logging to `server_errors` with ops email/Discord notify (5 min cooldown per path)
-- Public `/system-status` and friendly `/500` error page
-- Prerendered About / docs hub with search, wiring guides, firmware notes, case study
+
+- Hourly Worker cron: history, alerts, freeze-map snapshots, drips, trial mail, monthly/quarterly reports
+- Admin: users, contacts, jobs, **ops dashboard** (`/dashboard/ops`) — checkout funnel, Stripe price audit, referrals, email smoke tests, page errors
+- Middleware → `server_errors` + ops email/Discord notify (cooldown per path)
+- Public [/system-status](https://garage-temp.robmcd.name/system-status), friendly `/500`, case study `/stories/garage-freeze-alert`
+- About / docs hub with search, wiring guides, firmware notes
 - Contact form (Cloudflare Email + Turnstile)
-- GitHub Actions CI (`typecheck` + `build` + `vitest` + Playwright E2E)
-- Astro import guard tests on all pages (catches missing component imports before deploy)
+- CI: full-repo `tsc`, Vitest, Astro build, Playwright E2E; Astro import-guard tests on all pages
+
+---
+
+## Plans (entitlements)
+
+| Capability | Free | Member | Pro |
+|------------|:----:|:------:|:---:|
+| Live readings, devices, history browse | ✓ | ✓ | ✓ |
+| Email + Discord + Telegram + Slack alerts | ✓ | ✓ | ✓ |
+| CSV history export | | ✓ | ✓ |
+| Push devices | 2 | 6 | 24 |
+| SMS, browser push, outbound / reading webhooks | | | ✓ |
+| Public share links, status pages, metrics API | | | ✓ |
+| Dashboard API keys + Grafana JSON | | | ✓ |
+
+Exact limits live in [`src/lib/entitlements.ts`](src/lib/entitlements.ts). Display prices on `/pricing` must match live Stripe unit amounts (see [Deploy & ops](#deploy--ops)).
+
+---
 
 ## Stack
 
@@ -103,135 +115,188 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 | Frontend | Astro 6, Preact islands, Tailwind CSS v4 |
 | Deploy | Cloudflare Workers (`@astrojs/cloudflare`) |
 | Auth & DB | Supabase (Auth, Postgres, RLS) |
-| Billing | Stripe (Free / Member / Pro; monthly + annual prices) |
-| Email | Cloudflare Email binding |
+| Billing | Stripe (Free / Member / Pro; monthly + annual) |
+| Email | Cloudflare Email Sending (`MAILER` binding) |
 | SMS | Twilio (Pro) |
 | Push | Web Push + VAPID (Pro) |
+| Forms | Astro Actions (+ form POST fallbacks) |
 
-## Plans (entitlements)
+Requires **Node.js `>=22.12.0`** and **pnpm**.
 
-| Capability | Free | Member | Pro |
-|------------|------|--------|-----|
-| Live readings, devices, history browse | ✓ | ✓ | ✓ |
-| Email + Discord alerts | ✓ | ✓ | ✓ |
-| CSV history export | | ✓ | ✓ |
-| Extra push devices | limited | limited | higher limit |
-| SMS, browser push, outbound webhook | | | ✓ |
-| Public share links | | | ✓ |
-| Metrics share (Prometheus/Grafana) | | | ✓ |
-| Dashboard API keys (`/api/v1/metrics`) | | | ✓ |
-| History share links | | | ✓ |
+---
 
-Exact device limits live in `src/lib/entitlements.ts`.
+## Architecture
+
+### App shape
+
+- **SSR by default** (`output: 'server'`) on Cloudflare Workers
+- Dashboard uses a fixed **app shell** (`DashboardLayout`): sidebar + header + `<main>`
+- Prefer **Astro components** for structure; hydrate Preact only where client state is required (`client:visible` / `client:load`)
+- Shared dashboard chrome: `src/components/dashboard/` (`DashboardCard`, `MetricCard`, grids, skeletons)
+
+### Mutations
+
+| Flow | Mechanism |
+|------|-----------|
+| Display prefs, alert settings, snooze/vacation, household invite | `src/actions/index.ts` (Astro Actions) |
+| Devices, feeds, Stripe, ingest, most admin forms | `src/pages/api/**` form/JSON routes |
+| Background work | `src/worker.ts` `scheduled` handler |
+
+### Data
+
+- Canonical storage is **household devices + sensors + readings** (legacy temp-feed rows auto-migrate into Devices)
+- Alert settings live in Postgres (`alert_settings`) with metadata helpers in `src/lib/alerts.ts` / `notify.ts`
+- Shared form parsing for alerts: `src/lib/alertSettingsForm.ts`
+
+### Conventions
+
+Cursor rules under [`.cursor/rules/`](.cursor/rules/) cover Astro architecture, design tokens, dashboard hydration, and performance. Prefer them when editing UI.
+
+---
 
 ## Quick start
 
 ```bash
 pnpm install
 cp .env.example .env   # fill in values
-pnpm dev
+pnpm dev               # http://localhost:4321
 pnpm test
-pnpm typecheck
+pnpm typecheck         # full-repo tsc --noEmit
+pnpm build
 ```
-
-Open [http://localhost:4321](http://localhost:4321).
 
 ```bash
-pnpm build
-pnpm deploy             # Astro build + wrangler deploy
+pnpm deploy            # astro build + wrangler deploy (dist/server/wrangler.json)
+pnpm test:e2e          # Playwright (needs build / local server per config)
+pnpm audit:stripe      # compare STRIPE_DISPLAY_* to live Stripe prices
 ```
 
-Requires Node.js `>=22.12.0`.
+---
 
 ## Project layout
 
 ```
 src/
-  components/     UI (dashboard cards, history, alerts, about)
-  layouts/        Site + dashboard shells
-  lib/            Auth, devices, households, alerts, Stripe, ingest helpers
-  pages/          Routes + API endpoints under pages/api/
-  styles/         global.css, about.css
-  worker.ts       Cloudflare scheduled handler (cron)
-supabase/migrations/   Postgres schema & RLS
+  actions/          Astro Actions (prefs, alerts, invites)
+  components/       UI (dashboard/*, history, alerts, about)
+  layouts/          Site + dashboard shells
+  lib/              Auth, devices, households, alerts, Stripe, mailer, ingest
+  pages/            Routes; API under pages/api/
+  styles/           global.css, about.css
+  worker.ts         Cloudflare fetch + scheduled (cron) entry
+supabase/migrations/  Postgres schema & RLS (apply in order)
+public/             OpenAPI, HA YAML, Grafana JSON, static assets
+scripts/            Operator helpers (e.g. Stripe price audit)
+.cursor/rules/      Agent / editor conventions for this repo
 ```
 
 Useful entry points:
 
-- Home live panel: `src/components/LiveTempsPanel.tsx`
-- Push ingest: `src/pages/api/ingest/[key].ts`
-- Devices API: `src/pages/api/devices/index.ts`
-- Cron / alerts: `src/worker.ts`, `src/lib/collectHistory.ts`, `src/lib/alertNotifications.ts`
+| Area | Path |
+|------|------|
+| Home live panel | `src/components/LiveTempsPanel.tsx` |
+| Push ingest | `src/pages/api/ingest/[key].ts` |
+| Devices API | `src/pages/api/devices/index.ts` |
+| Cron / alerts | `src/worker.ts`, `src/lib/collectHistory.ts`, `src/lib/alertNotifications.ts` |
+| Mail helper | `src/lib/mailer.ts` |
+| Actions | `src/actions/index.ts` |
+
+---
 
 ## Environment variables
 
-Configure in `.env` (local) and Cloudflare Worker secrets / vars (production). See `.env.example` for the full list.
+Configure in `.env` (local) and Cloudflare Worker secrets / vars (production). Full list: [`.env.example`](.env.example).
 
 | Variable | Purpose |
 |----------|---------|
 | `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_ANON_KEY` | Browser/auth flows |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server DB/auth (required with RLS) |
+| `SUPABASE_ANON_KEY` | Browser / auth flows |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server DB / auth (required with RLS) |
 | `GARAGE_TEMP_FEED_URL` | Default public probe JSON feed |
 | `NEXT_PUBLIC_OPENWEATHER_API_KEY` / `NEXT_PUBLIC_OPENWEATHER_CITY_ID` | Outdoor weather |
 | `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_TOKEN` | Contact form bot protection |
-| `SMTP_MAIL_FROM` / `SMTP_MAIL_TO` | Contact + alert From/To |
-| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `STRIPE_PRICE_ID` / `STRIPE_PRICE_ID_PRO` | Billing (monthly) |
-| `STRIPE_PRICE_ID_ANNUAL` / `STRIPE_PRICE_ID_PRO_ANNUAL` | Billing (annual Member/Pro; create prices in Stripe Dashboard) |
-| `STRIPE_DISPLAY_MEMBER_MONTHLY` / `STRIPE_DISPLAY_MEMBER_ANNUAL` | Display-only USD prices on `/pricing` (not charged — Stripe prices are authoritative) |
-| `STRIPE_DISPLAY_PRO_MONTHLY` / `STRIPE_DISPLAY_PRO_ANNUAL` | Display-only Pro prices on `/pricing` |
-| `PRICING_DEFAULT_INTERVAL` | Default billing toggle on `/pricing` (`annual` or `monthly`) |
-| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER` | Pro SMS |
-| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` | Pro browser push |
+| `SMTP_MAIL_FROM` / `SMTP_MAIL_TO` | From address + ops/contact To |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | Billing + webhooks |
+| `STRIPE_PRICE_ID` / `STRIPE_PRICE_ID_PRO` | Monthly Member / Pro price IDs |
+| `STRIPE_PRICE_ID_ANNUAL` / `STRIPE_PRICE_ID_PRO_ANNUAL` | Annual Member / Pro price IDs |
+| `STRIPE_DISPLAY_MEMBER_*` / `STRIPE_DISPLAY_PRO_*` | Display-only USD amounts on `/pricing` (must match Stripe) |
+| `PRICING_DEFAULT_INTERVAL` | `annual` or `monthly` default on `/pricing` |
+| `TWILIO_*` | Pro SMS |
+| `VAPID_*` | Pro browser push |
 | `SITE_URL` / `ORIGIN` | OAuth, password reset, Stripe redirects |
-| `CRON_SECRET` | Bearer token for manual history cron |
-| `OPS_DISCORD_WEBHOOK_URL` | Optional Discord webhook when cron jobs fail (email uses `SMTP_MAIL_TO`) |
+| `CRON_SECRET` | Bearer for manual history cron |
+| `OPS_DISCORD_WEBHOOK_URL` | Optional Discord when jobs / pages fail |
 
 Do **not** commit `.env`.
 
+---
+
 ## Database
 
-Apply SQL in `supabase/migrations/` in order against your Supabase project (SQL editor or CLI). Enable RLS only after `SUPABASE_SERVICE_ROLE_KEY` is set in production.
+Apply SQL in [`supabase/migrations/`](supabase/migrations/) **in order** (SQL editor or Supabase CLI). Enable RLS only after `SUPABASE_SERVICE_ROLE_KEY` is set in production.
 
-Migrations cover devices/sensors, households/invites, share links, alert metadata, contact status, and related indexes/policies.
+Migrations cover devices/sensors, households/invites, share links, alert settings, contacts, job runs, referrals, server errors, and related indexes/policies.
+
+Regenerate types after schema changes:
+
+```bash
+pnpm generate-types
+```
+
+---
 
 ## Background jobs
 
-Hourly history collection and alert evaluation run via the Worker `scheduled` handler (`src/worker.ts`, cron `0 * * * *` in `wrangler.jsonc`). The same cron also snapshots opt-in freeze-map city aggregates, sends trial reminders and onboarding drip emails, and runs monthly/quarterly reports on schedule.
+Hourly cron (`0 * * * *` in [`wrangler.jsonc`](wrangler.jsonc)) runs via `src/worker.ts`:
 
-Threshold alerts use live pull-feed readings when available and otherwise fall back to latest stored sensor values (so push-only devices are covered). Push ingest also evaluates threshold/rule alerts immediately (with the same cooldowns as cron). Push-only households no longer fall back to the public demo feed for cron alerts.
+- Collect history snapshots
+- Evaluate alerts (pull feeds when available; otherwise latest stored readings — push-only households included)
+- Freeze-map city aggregates (opt-in)
+- Trial reminders and onboarding drips
+- Monthly / quarterly reports on schedule
+- Retention / housekeeping as configured
 
-Weekly digest emails send Monday 08:00 UTC to users with digests enabled.
+Push ingest also evaluates threshold/rule alerts immediately (same cooldowns as cron).
 
-### Outbound email (Cloudflare Email)
+Weekly digests send **Monday 08:00 UTC** when enabled.
 
-`wrangler.jsonc` uses an unrestricted `MAILER` send_email binding so drip, trial, alert, and digest mail can reach user addresses. That requires **Email Sending** enabled for the `SMTP_MAIL_FROM` domain (e.g. `robmcd.name`) in the Cloudflare dashboard (Email → Email Sending), or:
+Failed jobs appear on the Jobs admin UI and notify ops via `SMTP_MAIL_TO` and optional `OPS_DISCORD_WEBHOOK_URL`.
 
-```bash
-wrangler login   # refresh token if enable fails with auth error
-wrangler email sending enable robmcd.name
-```
-
-If the binding is locked with `destination_address`, drips to other inboxes fail with `email to … not allowed`. The drip cron treats that as restricted (job stays success) until Email Sending is enabled.
-
-Failed jobs record to the Jobs admin UI and notify ops via `SMTP_MAIL_TO` and optional `OPS_DISCORD_WEBHOOK_URL`.
-
-Manual collection (optional):
+Manual history collection:
 
 ```bash
 curl -X POST https://your-domain/api/cron/collect-history \
   -H "Authorization: Bearer $CRON_SECRET"
 ```
 
-Push ingest (`POST /api/ingest/<key>`) accepts at most 64KB payloads and about 60 requests/minute/device (per Worker isolate).
+Push ingest (`POST /api/ingest/<key>`): ~64KB max payload, ~60 req/min/device (per Worker isolate).
+
+---
+
+## Outbound email (Cloudflare Email)
+
+`wrangler.jsonc` uses an **unrestricted** `MAILER` `send_email` binding so drip, trial, alert, and digest mail can reach user addresses. That requires **Email Sending** enabled for the `SMTP_MAIL_FROM` domain (e.g. `robmcd.name`):
+
+1. Cloudflare Dashboard → **Email** → **Email Sending**, or  
+2. CLI:
+
+```bash
+wrangler login
+wrangler email sending enable robmcd.name
+```
+
+If the binding is locked with `destination_address`, mail to other inboxes fails with `email to … not allowed`. Drip cron treats that as **restricted** (job stays success) until Email Sending is enabled. Contact form still targets `SMTP_MAIL_TO`.
+
+Shared send helpers: [`src/lib/mailer.ts`](src/lib/mailer.ts) (`sendPlainEmail`, `sendMailerRaw`).
+
+---
+
 ## Connecting hardware
 
-1. Create a push device under **Dashboard → Devices**.
-2. Copy the one-time ingest key.
-3. Add sensor keys that match your JSON payload (`door1`, `temp1`, …).
-4. `POST` JSON to `/api/ingest/<key>`.
-
-Example:
+1. **Dashboard → Devices** → create a push device  
+2. Copy the one-time ingest key  
+3. Add sensor keys that match your JSON (`door1`, `temp1`, …)  
+4. `POST` JSON to `/api/ingest/<key>`
 
 ```bash
 curl -X POST "https://your-domain/api/ingest/YOUR_KEY" \
@@ -244,13 +309,19 @@ Optional top-level `battery` / `battery_pct` and `rssi` update device health met
 Guides:
 
 - [Ingest & webhooks](https://garage-temp.robmcd.name/about/ingest-and-webhooks)
-- [Home Assistant blueprint](https://garage-temp.robmcd.name/ha/garage_temp_webhook.yaml)
+- [Home Assistant webhook YAML](https://garage-temp.robmcd.name/ha/garage_temp_webhook.yaml)
 - [Accounts & dashboard](https://garage-temp.robmcd.name/about/accounts-and-dashboard)
-- Full About hub: [/about](https://garage-temp.robmcd.name/about)
+- Full hub: [/about](https://garage-temp.robmcd.name/about)
+
+### Open-source firmware & relays
+
+- [arduino-network-json-temperature-sever](https://github.com/doodersrage/arduino-network-json-temperature-sever) — probe JSON server  
+- [garage-temp](https://github.com/doodersrage/garage-temp) — this site  
+- [fast-api-relay](https://github.com/doodersrage/fast-api-relay) — optional Python relay  
+
+---
 
 ## Documentation (in-app)
-
-The prerendered **About** section is the product docs hub:
 
 | Topic | Path |
 |-------|------|
@@ -260,48 +331,58 @@ The prerendered **About** section is the product docs hub:
 | Historical data | `/about/historical-data` |
 | Probe case study | `/about/temperature-probe-case-study` |
 | Arduino wiring / sketches | `/about/arduino-*` |
+| Display preferences | `/about/display-preferences-deep-dive` |
 | PWA install | `/about/install-pwa` |
+| HTTP API reference | `/docs/api` |
+| System status | `/system-status` |
 
-## Open-source firmware & relays
+---
 
-- [arduino-network-json-temperature-sever](https://github.com/doodersrage/arduino-network-json-temperature-sever) — probe JSON server
-- [garage-temp](https://github.com/doodersrage/garage-temp) — this site
-- [fast-api-relay](https://github.com/doodersrage/fast-api-relay) — optional Python relay
-
-## Deploy
+## Deploy & ops
 
 ```bash
-pnpm test && pnpm build && pnpm deploy
+pnpm test && pnpm typecheck && pnpm build && pnpm deploy
 ```
 
-After deploy, set Cloudflare Worker secrets (Dashboard → Workers → garage-temp → Settings → Variables) including `STRIPE_DISPLAY_*` for pricing copy and confirm hourly cron is enabled (`0 * * * *` in `wrangler.jsonc`).
+After deploy:
+
+1. Set Worker secrets / vars (Dashboard → Workers → **garage-temp** → Settings → Variables), including `STRIPE_DISPLAY_*`
+2. Confirm hourly cron (`0 * * * *`) is active
+3. Confirm Email Sending for `SMTP_MAIL_FROM` (see [Outbound email](#outbound-email-cloudflare-email))
+4. Point Stripe webhooks at `/api/stripe/webhook` with `STRIPE_WEBHOOK_SECRET`
 
 Keep display amounts aligned with live Stripe:
 
 ```bash
-node --env-file=.env scripts/audit-stripe-prices.mjs
+pnpm audit:stripe
+# or open /dashboard/ops → Stripe display price audit
 ```
 
-Or open `/dashboard/ops` (admin) and check the Stripe display price audit table.
+### Post-deploy smoke checklist
 
-**Post-deploy smoke checklist**
+- [ ] `/system-status` — healthy + recent cron runs  
+- [ ] `/pricing` — amounts match Stripe (monthly/annual toggle)  
+- [ ] `/compare`, `/docs/api`, case study CTAs → `/pricing`  
+- [ ] Dashboard → **Ops** (admin) — health, price audit Match, funnel, email smoke test  
+- [ ] Save display prefs / alert settings (Actions) without full reload  
+- [ ] Optional: `OPS_DISCORD_WEBHOOK_URL` for failure Discord  
+- [ ] Test alert → Share page webhook delivery log (Pro)  
 
-- `/system-status` — healthy + recent cron runs
-- `/pricing` — display prices match Stripe (monthly/annual toggle)
-- `/compare`, `/docs/api`, `/stories/garage-freeze-alert` — CTAs to `/pricing`
-- Dashboard → **Ops** (admin) — health, price audit Match, checkout funnel, email smoke test
-- Optional: set `OPS_DISCORD_WEBHOOK_URL` so cron/page failures notify Discord (email uses `SMTP_MAIL_TO`)
-- Trigger a test alert → Share page webhook delivery log
+CI on every push to `main`: typecheck, unit tests, build, Playwright smoke.
 
-CI runs typecheck, unit tests, build, and Playwright smoke tests on every push to `main`.
+---
 
 ## Development tips
 
-- Prefer `pnpm test` and `pnpm test:e2e` before deploy; CI runs build, vitest, and Playwright.
-- OAuth providers must be enabled in the Supabase dashboard; otherwise email sign-in should stay form-first (password present) so unused providers are not submitted.
-- Stripe webhooks should point at `/api/stripe/webhook` with `STRIPE_WEBHOOK_SECRET`.
-- VAPID keys are required for Pro push; generate once and store as secrets.
+- Run `pnpm test` and `pnpm typecheck` before deploy; use `pnpm test:e2e` for browser smoke
+- Prefer pure Astro for dashboard structure; islands only for interactive charts/forms that need client state
+- New dashboard panels should use `DashboardCard` / tokens in `src/styles/global.css`
+- OAuth providers must be enabled in Supabase; keep password sign-in form-first when providers are unused
+- VAPID keys are required for Pro push — generate once and store as secrets
+- Import-guard Vitest suite fails the build if a page renders a component it never imports
+
+---
 
 ## License
 
-Released under the [MIT License](LICENSE). Contributions and forks welcome; open an issue if you hit a rough edge in setup or docs.
+Released under the [MIT License](LICENSE). Contributions and forks welcome — open an issue if you hit a rough edge in setup or docs.

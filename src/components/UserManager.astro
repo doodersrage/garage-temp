@@ -4,6 +4,7 @@ import {
   formatUserGroups,
   formatUserTimestamp,
 } from "../lib/userManager";
+import DashboardCard from "./dashboard/DashboardCard.astro";
 
 interface Props {
   users: PaginatedManagedUsers;
@@ -27,7 +28,7 @@ const nextPage = page < totalPages ? page + 1 : null;
 const redirectTo = page > 1 ? `${basePath}?page=${page}` : basePath;
 ---
 
-<section class="card">
+<DashboardCard>
   <div class="card-header-row">
     <div>
       <h2 class="card-title">Registered users</h2>
@@ -139,7 +140,7 @@ const redirectTo = page > 1 ? `${basePath}?page=${page}` : basePath;
       </div>
     </>
   )}
-</section>
+</DashboardCard>
 
 <style>
   .data-table-users {

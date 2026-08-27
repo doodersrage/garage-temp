@@ -56,8 +56,9 @@ function importedNames(frontmatter: string): Set<string> {
 }
 
 function usedComponents(body: string): Set<string> {
+  const withoutScripts = body.replace(/<script\b[\s\S]*?<\/script>/gi, "");
   const tags = new Set<string>();
-  for (const match of body.matchAll(/<([A-Z][A-Za-z0-9_]*)/g)) {
+  for (const match of withoutScripts.matchAll(/<([A-Z][A-Za-z0-9_]*)/g)) {
     tags.add(match[1]);
   }
   return tags;

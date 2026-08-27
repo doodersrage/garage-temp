@@ -1,4 +1,6 @@
 ---
+import DashboardCard from "./dashboard/DashboardCard.astro";
+
 interface Props {
   siteUrl: string;
   apiKeyPrefix?: string | null;
@@ -8,7 +10,7 @@ const { siteUrl, apiKeyPrefix } = Astro.props;
 const metricsUrl = `${siteUrl}/api/v1/metrics`;
 const dashboardJsonUrl = `${siteUrl}/grafana/garage-temp-dashboard.json`;
 ---
-<section class="card">
+<DashboardCard>
   <h2 class="card-title">Grafana setup wizard</h2>
   <p class="card-subtitle mb-4">
     Scrape Prometheus metrics from Garage Temp with a Pro API key, then import the bundled dashboard JSON.
@@ -37,4 +39,4 @@ const dashboardJsonUrl = `${siteUrl}/grafana/garage-temp-dashboard.json`;
     Dashboard JSON URL for automation:
     <code class="text-xs break-all">{dashboardJsonUrl}</code>
   </p>
-</section>
+</DashboardCard>

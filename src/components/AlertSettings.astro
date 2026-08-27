@@ -2,6 +2,7 @@
 import type { AlertSettings } from "../lib/alerts";
 import type { Entitlements } from "../lib/entitlements";
 import { CONDITION_OPTIONS } from "../lib/alertRules";
+import DashboardCard from "./dashboard/DashboardCard.astro";
 
 interface Props {
   userEmail: string;
@@ -50,13 +51,15 @@ const needsPro =
 
 const rulesJson = JSON.stringify(settings.alertRules ?? []);
 ---
-<div class="card animate-slide-up-fade">
+<DashboardCard class="animate-slide-up-fade">
 {!canEdit && (
   <p class="alert-warning mb-4" role="status">
     View-only — alert settings cannot be changed on this account.
   </p>
 )}
-<form action="/api/user/alert-settings" method="post" id="alert-settings-form">
+<p class="alert-success mt-0 mb-4 hidden" id="alert-action-status" role="status"></p>
+<p class="alert-warning mt-0 mb-4 hidden" id="alert-action-error" role="alert"></p>
+<form method="POST" id="alert-settings-form" data-alert-settings-form>
   <fieldset disabled={!canEdit} class="border-0 p-0 m-0 min-w-0">
   <input type="hidden" name="redirect" value={redirectTo} />
   <input type="hidden" name="alert_rules_json" id="alert_rules_json" value={rulesJson} />
@@ -101,13 +104,13 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     )}
   </p>
   <div class="flex flex-wrap gap-2 mb-4">
-    <button type="submit" class="btn-secondary" form="alert-snooze-24-form">Snooze 24h</button>
-    <button type="submit" class="btn-secondary" form="alert-snooze-vacation-form">Vacation 7d</button>
+    <button type="button" class="btn-secondary" data-snooze-action="snooze_24">Snooze 24h</button>
+    <button type="button" class="btn-secondary" data-snooze-action="vacation_7">Vacation 7d</button>
     {settings.snoozeUntil && (
-      <button type="submit" class="btn-secondary" form="alert-snooze-clear-form">Clear snooze</button>
+      <button type="button" class="btn-secondary" data-snooze-action="clear_snooze">Clear snooze</button>
     )}
     {settings.vacationUntil && (
-      <button type="submit" class="btn-secondary" form="alert-vacation-clear-form">End vacation</button>
+      <button type="button" class="btn-secondary" data-snooze-action="clear_vacation">End vacation</button>
     )}
   </div>
 
@@ -445,7 +448,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     >{JSON.stringify(settings.spaceChannelRouting ?? {}, null, 2)}</textarea>
   </div>
 
-  <button type="submit" class="btn-primary" hidden={!canEdit}>Save alert settings</button>
+  <button type="submit" class="btn-primary" id="alert-settings-submit" hidden={!canEdit}>Save alert settings</button>
   <p class="form-hint mt-2 mb-0" id="channel-incomplete-hint" hidden>
     A checked channel needs its destination filled in, or it will be skipped when alerts fire.
   </p>
@@ -470,28 +473,72 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
   )}
   </fieldset>
 </form>
+</DashboardCard>
 
-<form id="alert-snooze-24-form" action="/api/user/alert-snooze" method="post" hidden>
-  <input type="hidden" name="redirect" value={redirectTo} />
-  <input type="hidden" name="action" value="snooze_24" />
-</form>
-<form id="alert-snooze-vacation-form" action="/api/user/alert-snooze" method="post" hidden>
-  <input type="hidden" name="redirect" value={redirectTo} />
-  <input type="hidden" name="action" value="vacation_7" />
-</form>
-{settings.snoozeUntil && (
-  <form id="alert-snooze-clear-form" action="/api/user/alert-snooze" method="post" hidden>
-    <input type="hidden" name="redirect" value={redirectTo} />
-    <input type="hidden" name="action" value="clear_snooze" />
-  </form>
-)}
-{settings.vacationUntil && (
-  <form id="alert-vacation-clear-form" action="/api/user/alert-snooze" method="post" hidden>
-    <input type="hidden" name="redirect" value={redirectTo} />
-    <input type="hidden" name="action" value="clear_vacation" />
-  </form>
-)}
-</div>
+<script>
+  import { actions } from "astro:actions";
+
+  const form = document.querySelector<HTMLFormElement>("[data-alert-settings-form]");
+  const statusEl = document.getElementById("alert-action-status");
+  const errorEl = document.getElementById("alert-action-error");
+  const submitBtn = document.getElementById("alert-settings-submit");
+
+  function showStatus(message: string) {
+    statusEl?.classList.remove("hidden");
+    errorEl?.classList.add("hidden");
+    if (statusEl) statusEl.textContent = message;
+  }
+
+  function showError(message: string) {
+    errorEl?.classList.remove("hidden");
+    statusEl?.classList.add("hidden");
+    if (errorEl) errorEl.textContent = message;
+  }
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!(form instanceof HTMLFormElement)) return;
+
+    statusEl?.classList.add("hidden");
+    errorEl?.classList.add("hidden");
+    if (submitBtn instanceof HTMLButtonElement) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Saving…";
+    }
+
+    const { data, error } = await actions.updateAlertSettings(new FormData(form));
+
+    if (submitBtn instanceof HTMLButtonElement) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Save alert settings";
+    }
+
+    if (error) {
+      showError(error.message || "Could not save alert settings.");
+      return;
+    }
+
+    showStatus(data?.message ?? "Alert settings saved.");
+  });
+
+  document.querySelectorAll<HTMLButtonElement>("[data-snooze-action]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const action = btn.dataset.snoozeAction;
+      if (!action) return;
+      btn.disabled = true;
+      const formData = new FormData();
+      formData.set("action", action);
+      const { data, error } = await actions.updateAlertSnooze(formData);
+      btn.disabled = false;
+      if (error) {
+        showError(error.message || "Could not update snooze.");
+        return;
+      }
+      showStatus(data?.message ?? "Updated.");
+      window.setTimeout(() => window.location.reload(), 600);
+    });
+  });
+</script>
 
 <script is:inline define:vars={{ conditionOptions: CONDITION_OPTIONS, initialRules: settings.alertRules }}>
   (() => {

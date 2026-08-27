@@ -5,7 +5,62 @@ import {
   updateUserDisplayPreferences,
   type ThemePreference,
 } from "../lib/userPreferences";
-import { supabase } from "../lib/supabase";
+import { supabase, createServerClient } from "../lib/supabase";
+import { updateUserAlertSettings } from "../lib/alertNotifications";
+import {
+  alertChannelsIncomplete,
+  buildAlertSettingsFromFormData,
+  objectToFormData,
+} from "../lib/alertSettingsForm";
+import {
+  getAlertSettingsForUser,
+  saveAlertSettingsForUser,
+} from "../lib/notify";
+import {
+  snoozeUntilFromHours,
+  vacationUntilFromDays,
+} from "../lib/alertSnooze";
+import { getUserEntitlements } from "../lib/entitlements";
+import {
+  householdEditorCtx,
+  requireHouseholdEditor,
+} from "../lib/householdAuth";
+import { recordHouseholdActivity } from "../lib/householdActivity";
+import {
+  getOwnedHouseholdId,
+  getOrCreateHouseholdForUser,
+  getUserHouseholdId,
+} from "../lib/households";
+import {
+  createHouseholdInvite,
+  sendInviteEmail,
+} from "../lib/householdInvites";
+import { buildSiteUrl } from "../lib/stripe";
+
+async function requireAuthed(cookies: Parameters<typeof getAuthFromCookies>[0]) {
+  const { session, user } = await getAuthFromCookies(cookies);
+  if (!session || !user) {
+    throw new ActionError({
+      code: "UNAUTHORIZED",
+      message: "Sign in to continue.",
+    });
+  }
+  return { session, user };
+}
+
+async function requireEditor(userId: string) {
+  const editor = await requireHouseholdEditor(userId);
+  if (!editor.ok) {
+    throw new ActionError({
+      code: "FORBIDDEN",
+      message:
+        editor.error === "viewer"
+          ? "View-only members cannot change this."
+          : "No household found.",
+    });
+  }
+  return householdEditorCtx(editor);
+}
 
 export const server = {
   updateDisplayPreferences: defineAction({
@@ -19,13 +74,7 @@ export const server = {
       redirect: z.string().optional(),
     }),
     handler: async (input, context) => {
-      const { session, user } = await getAuthFromCookies(context.cookies);
-      if (!session || !user) {
-        throw new ActionError({
-          code: "UNAUTHORIZED",
-          message: "Sign in to save preferences.",
-        });
-      }
+      await requireAuthed(context.cookies);
 
       const accessToken = context.cookies.get("sb-access-token")?.value;
       const refreshToken = context.cookies.get("sb-refresh-token")?.value;
@@ -79,6 +128,190 @@ export const server = {
         ok: true as const,
         theme,
         message: "Display preferences saved.",
+      };
+    },
+  }),
+
+  updateAlertSettings: defineAction({
+    accept: "form",
+    input: z.record(z.string(), z.union([z.string(), z.array(z.string())])),
+    handler: async (input, context) => {
+      const { session, user } = await requireAuthed(context.cookies);
+      await requireEditor(user.id);
+
+      const formData = objectToFormData(input as Record<string, unknown>);
+      const existing = await getAlertSettingsForUser(
+        user.id,
+        user.user_metadata as Record<string, unknown> | undefined,
+      );
+      const entitlements = await getUserEntitlements(user.id);
+      const settings = buildAlertSettingsFromFormData(
+        formData,
+        existing,
+        entitlements,
+      );
+
+      const { error } = await updateUserAlertSettings(
+        session.access_token,
+        session.refresh_token,
+        user.id,
+        settings,
+      );
+
+      if (error) {
+        throw new ActionError({
+          code: "BAD_REQUEST",
+          message: error.message || "Could not save alert settings.",
+        });
+      }
+
+      const householdId = await getUserHouseholdId(user.id);
+      if (householdId) {
+        await recordHouseholdActivity({
+          householdId,
+          userId: user.id,
+          action: "alert_settings_saved",
+          detail: settings.enabled ? "alerts on" : "alerts off",
+        });
+      }
+
+      return {
+        ok: true as const,
+        channelsIncomplete: alertChannelsIncomplete(settings),
+        message: alertChannelsIncomplete(settings)
+          ? "Alert settings saved — some channels are missing destinations."
+          : "Alert settings saved.",
+        snoozeUntil: settings.snoozeUntil,
+        vacationUntil: settings.vacationUntil,
+      };
+    },
+  }),
+
+  updateAlertSnooze: defineAction({
+    accept: "form",
+    input: z.object({
+      action: z.enum([
+        "snooze_24",
+        "vacation_7",
+        "clear_snooze",
+        "clear_vacation",
+      ]),
+      redirect: z.string().optional(),
+    }),
+    handler: async (input, context) => {
+      const { user } = await requireAuthed(context.cookies);
+      await requireEditor(user.id);
+
+      const settings = await getAlertSettingsForUser(
+        user.id,
+        user.user_metadata as Record<string, unknown>,
+      );
+
+      if (input.action === "snooze_24") {
+        await saveAlertSettingsForUser(user.id, {
+          ...settings,
+          snoozeUntil: snoozeUntilFromHours(24),
+        });
+        return {
+          ok: true as const,
+          kind: "snooze" as const,
+          message: "Alerts snoozed for 24 hours.",
+        };
+      }
+
+      if (input.action === "vacation_7") {
+        await saveAlertSettingsForUser(user.id, {
+          ...settings,
+          vacationUntil: vacationUntilFromDays(7),
+        });
+        return {
+          ok: true as const,
+          kind: "vacation" as const,
+          message: "Vacation mode on for 7 days.",
+        };
+      }
+
+      if (input.action === "clear_snooze") {
+        await saveAlertSettingsForUser(user.id, {
+          ...settings,
+          snoozeUntil: null,
+        });
+        return {
+          ok: true as const,
+          kind: "snooze_cleared" as const,
+          message: "Snooze cleared.",
+        };
+      }
+
+      await saveAlertSettingsForUser(user.id, {
+        ...settings,
+        vacationUntil: null,
+      });
+      return {
+        ok: true as const,
+        kind: "vacation_cleared" as const,
+        message: "Vacation ended.",
+      };
+    },
+  }),
+
+  inviteHouseholdMember: defineAction({
+    accept: "form",
+    input: z.object({
+      email: z.string().email("Enter a valid email."),
+      role: z.enum(["member", "viewer"]).optional(),
+      redirect: z.string().optional(),
+      action: z.string().optional(),
+    }),
+    handler: async (input, context) => {
+      const { user } = await requireAuthed(context.cookies);
+      await requireEditor(user.id);
+
+      const ownedId = await getOwnedHouseholdId(user.id);
+      const household = await getOrCreateHouseholdForUser(user.id, user.email);
+      const manageId = ownedId ?? household.householdId;
+      if (!manageId || !ownedId || ownedId !== manageId) {
+        throw new ActionError({
+          code: "FORBIDDEN",
+          message: "Only the household owner can send invites.",
+        });
+      }
+
+      const email = input.email.trim().toLowerCase();
+      const role = input.role === "viewer" ? "viewer" : "member";
+      const { invite, error } = await createHouseholdInvite(
+        manageId,
+        email,
+        user.id,
+        7,
+        role,
+      );
+      if (error || !invite) {
+        throw new ActionError({
+          code: "BAD_REQUEST",
+          message: error || "Could not create invite.",
+        });
+      }
+
+      const db = createServerClient();
+      const { data: householdRow } = await db
+        .from("households")
+        .select("name")
+        .eq("id", manageId)
+        .maybeSingle();
+
+      const acceptUrl = buildSiteUrl(context.request, `/invite/${invite.token}`);
+      await sendInviteEmail(
+        email,
+        acceptUrl,
+        householdRow?.name ?? "a household",
+        user.email ?? null,
+      );
+
+      return {
+        ok: true as const,
+        message: `Invite sent to ${email}.`,
+        email,
       };
     },
   }),
