@@ -154,15 +154,14 @@ const ingestKeyDeviceName =
 ---
 <DashboardLayout title="Devices">
   <div class="space-y-6">
-    <section class="card animate-slide-in-left">
+    <section class="card">
       <h1 class="card-title">Devices & sensors</h1>
-      <p class="card-subtitle">{user.email}</p>
-      <p class="mb-0">
+      <p class="card-subtitle">
         Connect hardware that <strong>pushes</strong> readings to this site, or configure HTTPS JSON feeds that we
         <strong>pull</strong> on a schedule.
       </p>
       {deviceNotice && (
-        <p class:list={[noticeIsError ? "alert-warning" : "alert-success", "mt-4"]}>
+        <p class:list={[noticeIsError ? "alert-warning" : "alert-success", "mt-0"]}>
           {deviceNotice}
           {noticeParam === "device_limit" && (
             <>

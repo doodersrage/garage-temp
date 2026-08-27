@@ -3,13 +3,14 @@ import Layout from "./Layout.astro";
 import DashboardSidebar from "../components/DashboardSidebar.astro";
 import { getAuthFromCookies } from "../lib/auth";
 import { isUserAdmin } from "../lib/adminAccess";
+import { getUserEntitlements } from "../lib/entitlements";
 
 interface Props {
   title?: string;
   requireAdmin?: boolean;
 }
 
-const { title, requireAdmin = false } = Astro.props;
+const { title = "Dashboard", requireAdmin = false } = Astro.props;
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -23,17 +24,37 @@ if (requireAdmin && !admin) {
   return Astro.redirect("/dashboard");
 }
 
+const entitlements = await getUserEntitlements(user.id);
 const currentPath = Astro.url.pathname;
+const planLabel =
+  entitlements.tier === "admin"
+    ? "Admin"
+    : entitlements.tier.charAt(0).toUpperCase() + entitlements.tier.slice(1);
 ---
 <Layout title={title}>
   <div class="dashboard-shell">
-    <div class="dashboard-main">
-      <slot />
-    </div>
     <DashboardSidebar
       currentPath={currentPath}
       isAdmin={admin}
       email={user.email}
+      planLabel={planLabel}
     />
+    <div class="dashboard-main">
+      <header class="dashboard-topbar">
+        <div class="dashboard-topbar-text">
+          <h1 class="dashboard-topbar-title">{title}</h1>
+          {user.email && (
+            <p class="dashboard-topbar-meta">{user.email}</p>
+          )}
+        </div>
+        <div class="dashboard-topbar-actions">
+          <span class:list={["plan-badge", `plan-badge--${entitlements.tier}`]}>
+            {planLabel}
+          </span>
+          <a class="btn-ghost dashboard-topbar-home" href="/">Live home</a>
+        </div>
+      </header>
+      <slot />
+    </div>
   </div>
 </Layout>

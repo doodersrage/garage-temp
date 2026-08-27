@@ -178,8 +178,8 @@ const feedsValue =
       ? `${feedIssueCount} issue${feedIssueCount === 1 ? "" : "s"}`
       : `${feedHealth.statuses.length} online`;
 ---
-<DashboardLayout title="Dashboard">
-  <div class="grid grid-cols-12 gap-4">
+<DashboardLayout title="Overview">
+  <div class="dashboard-stack">
     <WelcomeHeader
       email={user.email}
       planTier={entitlements.tier}
@@ -188,125 +188,113 @@ const feedsValue =
       prefsError={prefsError}
     />
 
-    <div class="col-span-12">
-      <HouseholdSwitcher
-        households={userHouseholds.households}
-        activeHouseholdId={activeHouseholdId}
-      />
-    </div>
+    <HouseholdSwitcher
+      households={userHouseholds.households}
+      activeHouseholdId={activeHouseholdId}
+    />
 
     {!canEdit && (
-      <p class="col-span-12 alert-warning mb-0" role="status">
+      <p class="alert-warning mt-0 mb-0" role="status">
         View-only access — you can see live data but cannot change devices, alerts, or sharing.
       </p>
     )}
 
     {nextUpgradeTier(entitlements.tier) === "member" && (
-      <div class="col-span-12">
-        <UpgradeNudge feature="csv_export" tier={entitlements.tier} compact />
-      </div>
+      <UpgradeNudge feature="csv_export" tier={entitlements.tier} compact />
     )}
     {nextUpgradeTier(entitlements.tier) === "pro" && (
-      <div class="col-span-12">
-        <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} compact />
-      </div>
+      <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} compact />
     )}
 
-    <DashboardMetricGrid class="col-span-12" id="status">
-      <MetricCard
-        label="Last reading"
-        value={newestReading ? lastAge.label : "None yet"}
-        href="/"
-        tone={!newestReading || lastAge.stale ? "warning" : "success"}
-      />
-      <MetricCard
-        label="Sensors"
-        value={sensorsValue}
-        detail={sensorCount > 0 ? `${sensorCount} total` : null}
-        href="/dashboard/temperature"
-        tone={staleSensorCount > 0 ? "warning" : "neutral"}
-      />
-      <MetricCard
-        label="Feeds"
-        value={feedsValue}
-        href="/dashboard/temperature#pull-feeds"
-        tone={feedIssueCount > 0 ? "warning" : "neutral"}
-      />
-      <MetricCard
-        label="Alerts"
-        value={alertSettings.enabled ? "On" : "Off"}
-        detail={lastAlertAt ? `Last ${lastAlertAge.label}` : null}
-        href="/dashboard/alerts"
-        tone={alertSettings.enabled ? "success" : "neutral"}
-      />
-    </DashboardMetricGrid>
+    <section class="dashboard-section" id="status" aria-labelledby="status-heading">
+      <div class="dashboard-section-head">
+        <h2 id="status-heading" class="dashboard-section-title">System status</h2>
+        <p class="dashboard-section-desc">Sensor freshness, feed health, and alert state.</p>
+      </div>
+      <DashboardMetricGrid>
+        <MetricCard
+          label="Last reading"
+          value={newestReading ? lastAge.label : "None yet"}
+          href="/"
+          tone={!newestReading || lastAge.stale ? "warning" : "success"}
+        />
+        <MetricCard
+          label="Sensors"
+          value={sensorsValue}
+          detail={sensorCount > 0 ? `${sensorCount} total` : null}
+          href="/dashboard/temperature"
+          tone={staleSensorCount > 0 ? "warning" : "neutral"}
+        />
+        <MetricCard
+          label="Feeds"
+          value={feedsValue}
+          href="/dashboard/temperature#pull-feeds"
+          tone={feedIssueCount > 0 ? "warning" : "neutral"}
+        />
+        <MetricCard
+          label="Alerts"
+          value={alertSettings.enabled ? "On" : "Off"}
+          detail={lastAlertAt ? `Last ${lastAlertAge.label}` : null}
+          href="/dashboard/alerts"
+          tone={alertSettings.enabled ? "success" : "neutral"}
+        />
+      </DashboardMetricGrid>
+    </section>
 
-    <div class="col-span-12">
-      <DoorDurationCard devices={devices} />
-    </div>
+    <section class="dashboard-section" aria-labelledby="insights-heading">
+      <div class="dashboard-section-head">
+        <h2 id="insights-heading" class="dashboard-section-title">Insights</h2>
+        <p class="dashboard-section-desc">Freeze risk, door activity, and week-over-week trends.</p>
+      </div>
+      <div class="dashboard-section-grid">
+        <DoorDurationCard devices={devices} />
+        <DoorEventHistory householdId={household.householdId} />
+        <TimeToFreezeCard
+          estimate={timeToFreeze}
+          freezeThresholdF={alertSettings.freezeThresholdF}
+          useCelsius={useCelsius}
+        />
+        <WeekCompareCard compare={weekCompareResult.compare} useCelsius={useCelsius} />
+        <DashboardWeekChart points={chartWeek.points} />
+        <NightsAtRiskCard
+          nightsAtRisk={nightsAtRisk}
+          nightsRiskCount={nightsRiskCount}
+          freezeThresholdF={alertSettings.freezeThresholdF}
+          weatherSnapshot={weatherSnapshot}
+          weatherHasCoords={weatherHasCoords}
+          nwsAlerts={nwsAlerts}
+        />
+      </div>
+    </section>
 
-    <div class="col-span-12">
-      <DoorEventHistory householdId={household.householdId} />
-    </div>
-
-    <div class="col-span-12">
-      <TimeToFreezeCard
-        estimate={timeToFreeze}
-        freezeThresholdF={alertSettings.freezeThresholdF}
-        useCelsius={useCelsius}
-      />
-    </div>
-
-    <div class="col-span-12">
-      <WeekCompareCard compare={weekCompareResult.compare} useCelsius={useCelsius} />
-    </div>
-
-    <DashboardWeekChart points={chartWeek.points} />
-
-    <div class="col-span-12">
-      <ReferralCard siteUrl={siteUrl} rewardDays={referralRewardDays} />
-    </div>
-
-    <div class="col-span-12">
-      <HaSetupCard />
-    </div>
-
-    <NightsAtRiskCard
-      nightsAtRisk={nightsAtRisk}
-      nightsRiskCount={nightsRiskCount}
-      freezeThresholdF={alertSettings.freezeThresholdF}
-      weatherSnapshot={weatherSnapshot}
-      weatherHasCoords={weatherHasCoords}
-      nwsAlerts={nwsAlerts}
-    />
-
-    <div class="col-span-12">
-      <DashboardOnboarding
-        hasDevices={hasDevices}
-        hasSensors={hasSensors}
-        hasHistory={history.totalCount > 0}
-        hasAlertsConfigured={hasAlertsConfigured}
-        hasHouseholdMembers={hasHouseholdMembers}
-        hasLiveSensors={latest.length > 0}
-        hasHousehold={Boolean(household.householdId)}
-        dismissed={onboardingDismissed}
-      />
-    </div>
-
-    <div class="col-span-12">
-      <DisplayPreferences preferences={preferences} redirectTo="/dashboard" />
-    </div>
-
-    <div class="col-span-12">
-      <PlansCard
-        canDownloadCsv={canDownloadCsv}
-        subscription={subscription}
-        entitlements={entitlements}
-        subscriptionNotice={subscriptionNotice}
-      />
-    </div>
-
-    <AlertsShortcutCard />
-    <PwaInstallCard />
+    <section class="dashboard-section" aria-labelledby="setup-heading">
+      <div class="dashboard-section-head">
+        <h2 id="setup-heading" class="dashboard-section-title">Setup & account</h2>
+        <p class="dashboard-section-desc">Onboarding, preferences, billing, and integrations.</p>
+      </div>
+      <div class="dashboard-section-grid">
+        <DashboardOnboarding
+          hasDevices={hasDevices}
+          hasSensors={hasSensors}
+          hasHistory={history.totalCount > 0}
+          hasAlertsConfigured={hasAlertsConfigured}
+          hasHouseholdMembers={hasHouseholdMembers}
+          hasLiveSensors={latest.length > 0}
+          hasHousehold={Boolean(household.householdId)}
+          dismissed={onboardingDismissed}
+        />
+        <DisplayPreferences preferences={preferences} redirectTo="/dashboard" />
+        <PlansCard
+          canDownloadCsv={canDownloadCsv}
+          subscription={subscription}
+          entitlements={entitlements}
+          subscriptionNotice={subscriptionNotice}
+        />
+        <ReferralCard siteUrl={siteUrl} rewardDays={referralRewardDays} />
+        <HaSetupCard />
+        <PwaInstallCard />
+        <AlertsShortcutCard />
+      </div>
+    </section>
   </div>
 </DashboardLayout>

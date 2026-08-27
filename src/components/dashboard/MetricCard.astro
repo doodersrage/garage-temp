@@ -31,12 +31,13 @@ const Tag = href ? "a" : "article";
 <Tag
   href={href ?? undefined}
   class:list={[
-    "stat-item col-span-12 sm:col-span-6 lg:col-span-3",
-    href && "no-underline transition-colors hover:border-[var(--color-border-strong)]",
+    "metric-card",
+    `metric-card--${tone}`,
+    href && "metric-card--link",
     className,
   ]}
 >
-  <span class="stat-label">{label}</span>
-  <p class:list={["stat-value !text-lg", toneClass]}>{value}</p>
-  {detail && <p class="stat-detail">{detail}</p>}
+  <span class="metric-card-label">{label}</span>
+  <p class:list={["metric-card-value", toneClass]}>{value}</p>
+  {detail && <p class="metric-card-detail">{detail}</p>}
 </Tag>

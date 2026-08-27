@@ -1,94 +1,134 @@
 ---
+import LayoutDashboard from "@lucide/astro/icons/layout-dashboard";
+import Cpu from "@lucide/astro/icons/cpu";
+import Bell from "@lucide/astro/icons/bell";
+import History from "@lucide/astro/icons/history";
+import Users from "@lucide/astro/icons/users";
+import Share2 from "@lucide/astro/icons/share-2";
+import CreditCard from "@lucide/astro/icons/credit-card";
+import Activity from "@lucide/astro/icons/activity";
+import Radio from "@lucide/astro/icons/radio";
+import Timer from "@lucide/astro/icons/timer";
+import UserCog from "@lucide/astro/icons/user-cog";
+import Mail from "@lucide/astro/icons/mail";
+
 interface Props {
   currentPath: string;
   isAdmin: boolean;
   email?: string | null;
+  planLabel?: string;
 }
 
-const { currentPath, isAdmin, email } = Astro.props;
+const { currentPath, isAdmin, email, planLabel } = Astro.props;
 
 type NavItem = {
   href: string;
   label: string;
   isActive: boolean;
+  Icon: typeof LayoutDashboard;
 };
 
-const navItems: NavItem[] = [
+const monitorItems: NavItem[] = [
   {
     href: "/dashboard",
     label: "Overview",
     isActive: currentPath === "/dashboard",
-  },
-  {
-    href: "/dashboard/plans",
-    label: "Plans",
-    isActive: currentPath.startsWith("/dashboard/plans"),
+    Icon: LayoutDashboard,
   },
   {
     href: "/dashboard/temperature",
     label: "Devices",
     isActive: currentPath.startsWith("/dashboard/temperature"),
+    Icon: Cpu,
   },
   {
     href: "/dashboard/alerts",
     label: "Alerts",
     isActive: currentPath.startsWith("/dashboard/alerts"),
+    Icon: Bell,
   },
   {
     href: "/dashboard/history",
     label: "History",
     isActive: currentPath.startsWith("/dashboard/history"),
+    Icon: History,
   },
+];
+
+const accountItems: NavItem[] = [
   {
     href: "/dashboard/household",
     label: "Household",
     isActive: currentPath.startsWith("/dashboard/household"),
+    Icon: Users,
   },
   {
     href: "/dashboard/share",
     label: "Share",
     isActive: currentPath.startsWith("/dashboard/share"),
+    Icon: Share2,
+  },
+  {
+    href: "/dashboard/plans",
+    label: "Plans",
+    isActive: currentPath.startsWith("/dashboard/plans"),
+    Icon: CreditCard,
   },
 ];
 
-if (isAdmin) {
-  navItems.push({
-    href: "/dashboard/ops",
-    label: "Ops",
-    isActive: currentPath.startsWith("/dashboard/ops"),
-  });
-  navItems.push({
-    href: "/dashboard/feeds",
-    label: "Feed health",
-    isActive: currentPath.startsWith("/dashboard/feeds"),
-  });
-  navItems.push({
-    href: "/dashboard/jobs",
-    label: "Jobs",
-    isActive: currentPath.startsWith("/dashboard/jobs"),
-  });
-  navItems.push({
-    href: "/dashboard/users",
-    label: "Users",
-    isActive: currentPath.startsWith("/dashboard/users"),
-  });
-  navItems.push({
-    href: "/dashboard/contacts",
-    label: "Contacts",
-    isActive: currentPath.startsWith("/dashboard/contacts"),
-  });
-}
+const adminItems: NavItem[] = isAdmin
+  ? [
+      {
+        href: "/dashboard/ops",
+        label: "Ops",
+        isActive: currentPath.startsWith("/dashboard/ops"),
+        Icon: Activity,
+      },
+      {
+        href: "/dashboard/feeds",
+        label: "Feed health",
+        isActive: currentPath.startsWith("/dashboard/feeds"),
+        Icon: Radio,
+      },
+      {
+        href: "/dashboard/jobs",
+        label: "Jobs",
+        isActive: currentPath.startsWith("/dashboard/jobs"),
+        Icon: Timer,
+      },
+      {
+        href: "/dashboard/users",
+        label: "Users",
+        isActive: currentPath.startsWith("/dashboard/users"),
+        Icon: UserCog,
+      },
+      {
+        href: "/dashboard/contacts",
+        label: "Contacts",
+        isActive: currentPath.startsWith("/dashboard/contacts"),
+        Icon: Mail,
+      },
+    ]
+  : [];
 
+const allItems = [...monitorItems, ...accountItems, ...adminItems];
 const activeLabel =
-  navItems.find((item) => item.isActive)?.label ?? "Dashboard";
+  allItems.find((item) => item.isActive)?.label ?? "Dashboard";
+
+const groups = [
+  { label: "Monitor", items: monitorItems },
+  { label: "Account", items: accountItems },
+  ...(adminItems.length > 0 ? [{ label: "Admin", items: adminItems }] : []),
+];
 ---
 
 <aside class="dashboard-sidebar">
   <nav class="dashboard-sidebar-inner" aria-label="Dashboard" id="dashboard-nav">
     <div class="dashboard-sidebar-top">
-      <div>
-        <p class="dashboard-sidebar-label">Dashboard</p>
-        {email && <p class="dashboard-sidebar-email">{email}</p>}
+      <div class="dashboard-sidebar-identity">
+        <p class="dashboard-sidebar-label">Workspace</p>
+        {email && <p class="dashboard-sidebar-email" title={email}>{email}</p>}
+        {planLabel && <span class="plan-badge plan-badge--sidebar">{planLabel}</span>}
       </div>
       <button
         type="button"
@@ -101,19 +141,25 @@ const activeLabel =
       </button>
     </div>
     <div id="dashboard-nav-panel" class="dashboard-nav-panel">
-      <ul class="dashboard-nav-list">
-        {navItems.map(({ href, label, isActive }) => (
-          <li>
-            <a
-              href={href}
-              class:list={["dashboard-nav-link", isActive && "dashboard-nav-link-active"]}
-              aria-current={isActive ? "page" : undefined}
-            >
-              {label}
-            </a>
-          </li>
-        ))}
-      </ul>
+      {groups.map((group) => (
+        <div class="dashboard-nav-group">
+          <p class="dashboard-nav-group-label">{group.label}</p>
+          <ul class="dashboard-nav-list">
+            {group.items.map(({ href, label, isActive, Icon }) => (
+              <li>
+                <a
+                  href={href}
+                  class:list={["dashboard-nav-link", isActive && "dashboard-nav-link-active"]}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  <Icon class="dashboard-nav-icon" size={16} strokeWidth={2} aria-hidden="true" />
+                  <span>{label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
       <div class="dashboard-sidebar-footer">
         <a class="dashboard-nav-link" href="/">Back to site</a>
         <a class="dashboard-nav-link" href="/api/auth/signout">Sign out</a>
