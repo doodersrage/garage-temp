@@ -33,6 +33,13 @@ test.describe("public smoke", () => {
   test("compare page loads", async ({ page }) => {
     await page.goto("/compare");
     await expect(page.getByRole("heading", { name: /Compare options/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /See plans & pricing/i }).first()).toBeVisible();
+  });
+
+  test("case study CTA links to pricing", async ({ page }) => {
+    await page.goto("/stories/garage-freeze-alert");
+    await expect(page.getByRole("heading", { name: /pipes froze/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /See plans & pricing/i })).toBeVisible();
   });
 
   test("system status page loads", async ({ page }) => {
@@ -43,10 +50,5 @@ test.describe("public smoke", () => {
   test("API docs page loads", async ({ page }) => {
     await page.goto("/docs/api");
     await expect(page.getByRole("heading", { name: /API documentation/i })).toBeVisible();
-  });
-
-  test("case study page loads", async ({ page }) => {
-    await page.goto("/stories/garage-freeze-alert");
-    await expect(page.getByRole("heading", { name: /pipes froze/i })).toBeVisible();
   });
 });

@@ -7,6 +7,7 @@ import {
   rowToAlertSettings,
 } from "./alerts";
 import { recordAlertEvent } from "./alertEvents";
+import { applyAlertTemplates } from "./alertTemplates";
 import {
   quietHoursAllowsSmsCritical,
   shouldSuppressForQuietHours,

@@ -1,6 +1,11 @@
+function cleanPriceId(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
 export function resolvePlanTierFromPriceId(priceId: string | null | undefined): "member" | "pro" {
-  const proMonthly = import.meta.env.STRIPE_PRICE_ID_PRO?.trim();
-  const proAnnual = import.meta.env.STRIPE_PRICE_ID_PRO_ANNUAL?.trim();
+  const proMonthly = cleanPriceId(import.meta.env.STRIPE_PRICE_ID_PRO);
+  const proAnnual = cleanPriceId(import.meta.env.STRIPE_PRICE_ID_PRO_ANNUAL);
   if (
     priceId &&
     ((proMonthly && priceId === proMonthly) || (proAnnual && priceId === proAnnual))
@@ -14,10 +19,10 @@ export function resolveStripePriceId(
   plan: "member" | "pro",
   interval: "monthly" | "annual",
 ): string | undefined {
-  const memberMonthly = import.meta.env.STRIPE_PRICE_ID?.trim();
-  const memberAnnual = import.meta.env.STRIPE_PRICE_ID_ANNUAL?.trim();
-  const proMonthly = import.meta.env.STRIPE_PRICE_ID_PRO?.trim();
-  const proAnnual = import.meta.env.STRIPE_PRICE_ID_PRO_ANNUAL?.trim();
+  const memberMonthly = cleanPriceId(import.meta.env.STRIPE_PRICE_ID);
+  const memberAnnual = cleanPriceId(import.meta.env.STRIPE_PRICE_ID_ANNUAL);
+  const proMonthly = cleanPriceId(import.meta.env.STRIPE_PRICE_ID_PRO);
+  const proAnnual = cleanPriceId(import.meta.env.STRIPE_PRICE_ID_PRO_ANNUAL);
 
   if (plan === "pro") {
     if (interval === "annual") {

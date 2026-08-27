@@ -265,15 +265,24 @@ pnpm test && pnpm build && pnpm deploy
 
 After deploy, set Cloudflare Worker secrets (Dashboard → Workers → garage-temp → Settings → Variables) including `STRIPE_DISPLAY_*` for pricing copy and confirm hourly cron is enabled (`0 * * * *` in `wrangler.jsonc`).
 
+Keep display amounts aligned with live Stripe:
+
+```bash
+node --env-file=.env scripts/audit-stripe-prices.mjs
+```
+
+Or open `/dashboard/ops` (admin) and check the Stripe display price audit table.
+
 **Post-deploy smoke checklist**
 
 - `/system-status` — healthy + recent cron runs
-- `/pricing` — display prices render
-- `/compare`, `/docs/api`, `/stories/garage-freeze-alert`
-- Dashboard → **Ops** (admin) — checkout funnel table
+- `/pricing` — display prices match Stripe (monthly/annual toggle)
+- `/compare`, `/docs/api`, `/stories/garage-freeze-alert` — CTAs to `/pricing`
+- Dashboard → **Ops** (admin) — health, price audit Match, checkout funnel, email smoke test
+- Optional: set `OPS_DISCORD_WEBHOOK_URL` so cron/page failures notify Discord (email uses `SMTP_MAIL_TO`)
 - Trigger a test alert → Share page webhook delivery log
 
-CI runs unit tests, build, and Playwright smoke tests on every push to `main`.
+CI runs typecheck, unit tests, build, and Playwright smoke tests on every push to `main`.
 
 ## Development tips
 

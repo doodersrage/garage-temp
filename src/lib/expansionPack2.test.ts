@@ -100,7 +100,24 @@ describe("annual stripe price mapping", () => {
   });
 
   it("resolveStripePriceId falls back when annual unset", () => {
-    // Without env vars in vitest, monthly/annual both may be undefined.
+    const env = import.meta.env as Record<string, string | undefined>;
+    const prev = {
+      memberM: env.STRIPE_PRICE_ID,
+      memberA: env.STRIPE_PRICE_ID_ANNUAL,
+      proM: env.STRIPE_PRICE_ID_PRO,
+      proA: env.STRIPE_PRICE_ID_PRO_ANNUAL,
+    };
+    env.STRIPE_PRICE_ID = "";
+    env.STRIPE_PRICE_ID_ANNUAL = "";
+    env.STRIPE_PRICE_ID_PRO = "";
+    env.STRIPE_PRICE_ID_PRO_ANNUAL = "";
+
     expect(resolveStripePriceId("member", "monthly")).toBeUndefined();
+    expect(resolveStripePriceId("member", "annual")).toBeUndefined();
+
+    env.STRIPE_PRICE_ID = prev.memberM;
+    env.STRIPE_PRICE_ID_ANNUAL = prev.memberA;
+    env.STRIPE_PRICE_ID_PRO = prev.proM;
+    env.STRIPE_PRICE_ID_PRO_ANNUAL = prev.proA;
   });
 });

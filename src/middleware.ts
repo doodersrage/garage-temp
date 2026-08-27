@@ -26,18 +26,25 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     return await next();
   } catch (error) {
-    await recordServerError({
-      path: pathname,
-      method: context.request.method,
-      error,
-      userId,
-    });
+    // Avoid recursive logging when serving the error page itself.
+    if (pathname !== "/500") {
+      await recordServerError({
+        path: pathname,
+        method: context.request.method,
+        error,
+        userId,
+      });
+    }
 
     if (pathname.startsWith("/api/")) {
       return new Response(JSON.stringify({ error: "Internal server error" }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
       });
+    }
+
+    if (pathname === "/500") {
+      return new Response("Internal Server Error", { status: 500 });
     }
 
     try {

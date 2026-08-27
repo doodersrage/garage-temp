@@ -73,7 +73,7 @@ export async function countUnacknowledgedAlerts(userId: string): Promise<number>
     .select("id", { count: "exact", head: true })
     .eq("user_id", userId)
     .is("acknowledged_at", null)
-    .neq("channels_sent", "{}");
+    .not("channels_sent", "eq", "{}");
 
   return count ?? 0;
 }

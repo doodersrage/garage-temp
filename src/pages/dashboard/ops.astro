@@ -32,6 +32,12 @@ function formatUsd(amount: number | null): string {
   if (amount == null) return "—";
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
 }
+
+const priceMismatches = priceAudit.rows.filter((row) => row.match === false);
+const opsDiscordConfigured = Boolean(
+  import.meta.env.OPS_DISCORD_WEBHOOK_URL?.trim() ||
+    import.meta.env.DISCORD_OPS_WEBHOOK_URL?.trim(),
+);
 ---
 <DashboardLayout title="Ops" requireAdmin>
   <div class="space-y-6">
@@ -41,6 +47,25 @@ function formatUsd(amount: number | null): string {
       {emailTestOk && (
         <p class="alert-success mt-4 mb-0" role="status">Test email sent to {user.email}.</p>
       )}
+      {priceMismatches.length > 0 && (
+        <p class="alert-warning mt-4 mb-0" role="alert">
+          {priceMismatches.length} Stripe display price(s) do not match live Stripe amounts — update Worker `STRIPE_DISPLAY_*` secrets.
+        </p>
+      )}
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Weekly checklist</h2>
+      <ol class="text-sm space-y-2 mb-0 list-decimal pl-5">
+        <li>Scan <strong>Platform health</strong> and recent page errors below.</li>
+        <li>Confirm Stripe display audit shows Match for all four prices.</li>
+        <li>Review checkout funnel sources — double down on winning nudges.</li>
+        <li>Send one drip/trial email smoke test after template changes.</li>
+        <li>
+          Ops notify: email uses `SMTP_MAIL_TO`
+          {opsDiscordConfigured ? " · Discord webhook configured" : " · set optional `OPS_DISCORD_WEBHOOK_URL` for Discord"}.
+        </li>
+      </ol>
     </section>
 
     <section class="card">

@@ -1,4 +1,9 @@
-import type { TempFeedResult, TempProbeConfig, TempReading } from "./tempFeedConfig";
+import type {
+  TempFeedConfig,
+  TempFeedResult,
+  TempProbeConfig,
+  TempReading,
+} from "./tempFeedConfig";
 import {
   getDefaultTempFeeds,
   getDefaultTempProbes,
