@@ -9,7 +9,7 @@
   "scripts": {
     "deploy": "astro build && wrangler deploy --config dist/server/wrangler.json",
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro sync && astro build",
     "preview": "astro preview",
     "test": "vitest run",
     "test:e2e": "playwright test",

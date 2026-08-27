@@ -34,7 +34,17 @@ export default defineConfig({
   },
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    // Pre-warm Astro Actions runtime so Cloudflare prerender doesn't race
+    // a mid-build optimizeDeps reload (missing chunk-*.js in CI).
+    optimizeDeps: {
+      include: ["astro/actions/runtime/entrypoints/route.js"],
+    },
+    ssr: {
+      optimizeDeps: {
+        include: ["astro/actions/runtime/entrypoints/route.js"],
+      },
+    },
   },
 
   security: {

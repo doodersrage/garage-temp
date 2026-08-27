@@ -65,7 +65,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
-      - run: pnpm build
+      # Vite may discover Actions mid-build and reload optimizeDeps; retry once if so.
+      - run: pnpm build || (rm -rf node_modules/.vite && pnpm build)
 
   e2e:
     runs-on: ubuntu-latest
@@ -81,7 +82,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm build
+      - run: pnpm build || (rm -rf node_modules/.vite && pnpm build)
       - run: pnpm test:e2e
         env:
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:4321
