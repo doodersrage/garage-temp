@@ -30,12 +30,15 @@ import {
   getOwnedHouseholdId,
   getOrCreateHouseholdForUser,
   getUserHouseholdId,
+  updateHouseholdName,
 } from "../lib/households";
 import {
   createHouseholdInvite,
   sendInviteEmail,
 } from "../lib/householdInvites";
 import { buildSiteUrl } from "../lib/stripe";
+import { updateHouseholdFreezeMapSettings } from "../lib/freezeMap";
+import { renamePushDevice, updateDeviceSpace } from "../lib/devices";
 
 async function requireAuthed(cookies: Parameters<typeof getAuthFromCookies>[0]) {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -312,6 +315,149 @@ export const server = {
         ok: true as const,
         message: `Invite sent to ${email}.`,
         email,
+      };
+    },
+  }),
+
+  renameHousehold: defineAction({
+    accept: "form",
+    input: z.object({
+      name: z.string().min(1, "Name is required."),
+      redirect: z.string().optional(),
+      action: z.string().optional(),
+    }),
+    handler: async (input, context) => {
+      const { user } = await requireAuthed(context.cookies);
+      await requireEditor(user.id);
+
+      const ownedId = await getOwnedHouseholdId(user.id);
+      if (!ownedId) {
+        throw new ActionError({
+          code: "FORBIDDEN",
+          message: "Only the household owner can rename it.",
+        });
+      }
+
+      const name = input.name.trim();
+      await updateHouseholdName(ownedId, name);
+      return {
+        ok: true as const,
+        message: "Household name saved.",
+        name,
+      };
+    },
+  }),
+
+  updateFreezeMapSettings: defineAction({
+    accept: "form",
+    input: z.object({
+      freeze_map_opt_in: z.string().optional(),
+      freeze_map_city_id: z.string().optional(),
+      freeze_map_label: z.string().optional(),
+      freeze_map_lat: z.string().optional(),
+      freeze_map_lon: z.string().optional(),
+      redirect: z.string().optional(),
+      action: z.string().optional(),
+    }),
+    handler: async (input, context) => {
+      const { user } = await requireAuthed(context.cookies);
+      await requireEditor(user.id);
+
+      const ownedId = await getOwnedHouseholdId(user.id);
+      if (!ownedId) {
+        throw new ActionError({
+          code: "FORBIDDEN",
+          message: "Only the household owner can update freeze-map settings.",
+        });
+      }
+
+      const latRaw = input.freeze_map_lat?.trim();
+      const lonRaw = input.freeze_map_lon?.trim();
+      const lat = latRaw ? Number(latRaw) : null;
+      const lon = lonRaw ? Number(lonRaw) : null;
+      const result = await updateHouseholdFreezeMapSettings(ownedId, {
+        optIn:
+          input.freeze_map_opt_in === "true" || input.freeze_map_opt_in === "on",
+        cityId: input.freeze_map_city_id?.trim() || null,
+        lat: Number.isFinite(lat) ? lat : null,
+        lon: Number.isFinite(lon) ? lon : null,
+        label: input.freeze_map_label?.trim() || null,
+      });
+
+      if (result.error) {
+        throw new ActionError({
+          code: "BAD_REQUEST",
+          message: result.error,
+        });
+      }
+
+      return {
+        ok: true as const,
+        message: "Freeze map settings saved.",
+      };
+    },
+  }),
+
+  renameDevice: defineAction({
+    accept: "form",
+    input: z.object({
+      device_id: z.string().min(1),
+      name: z.string().min(1, "Name is required."),
+      redirect: z.string().optional(),
+      action: z.string().optional(),
+    }),
+    handler: async (input, context) => {
+      const { user } = await requireAuthed(context.cookies);
+      const { householdId } = await requireEditor(user.id);
+
+      const result = await renamePushDevice(
+        householdId,
+        input.device_id,
+        input.name.trim(),
+      );
+      if (result.error) {
+        throw new ActionError({
+          code: "BAD_REQUEST",
+          message: result.error,
+        });
+      }
+
+      return {
+        ok: true as const,
+        message: "Device renamed.",
+        name: input.name.trim(),
+      };
+    },
+  }),
+
+  updateDeviceSpaceAction: defineAction({
+    accept: "form",
+    input: z.object({
+      device_id: z.string().min(1),
+      space: z.string().optional(),
+      redirect: z.string().optional(),
+      action: z.string().optional(),
+    }),
+    handler: async (input, context) => {
+      const { user } = await requireAuthed(context.cookies);
+      const { householdId } = await requireEditor(user.id);
+
+      const result = await updateDeviceSpace(
+        householdId,
+        input.device_id,
+        input.space?.trim() ?? "",
+      );
+      if (result.error) {
+        throw new ActionError({
+          code: "BAD_REQUEST",
+          message: result.error,
+        });
+      }
+
+      return {
+        ok: true as const,
+        message: "Device space saved.",
+        space: input.space?.trim() ?? "",
       };
     },
   }),

@@ -74,7 +74,7 @@ describe("serverErrors", () => {
 
 describe("stripePriceAudit", () => {
   it("builds audit rows from display env without Stripe", async () => {
-    const env = import.meta.env as Record<string, string | undefined>;
+    const env = import.meta.env as unknown as Record<string, string | undefined>;
     const prev = {
       key: env.STRIPE_SECRET_KEY,
       memberM: env.STRIPE_DISPLAY_MEMBER_MONTHLY,

@@ -103,30 +103,34 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
 
     {isOwner && (
       <DashboardCard>
-    <form action="/api/household" method="post">
-        <input type="hidden" name="action" value="rename" />
-        <input type="hidden" name="redirect" value="/dashboard/household" />
-        <h2 class="card-title">Household name</h2>
-        <div class="form-field">
-          <label class="form-label" for="household-name">Name</label>
-          <input
-            class="form-input"
-            id="household-name"
-            name="name"
-            value={householdRow.data?.name ?? ""}
-            required
-          />
-        </div>
-        <button class="btn-secondary" type="submit">Save name</button>
-      </form>
+        <form method="POST" data-rename-household-form>
+          <input type="hidden" name="action" value="rename" />
+          <input type="hidden" name="redirect" value="/dashboard/household" />
+          <h2 class="card-title">Household name</h2>
+          <p class="alert-success mt-0 mb-3 hidden" data-form-status role="status"></p>
+          <p class="alert-warning mt-0 mb-3 hidden" data-form-error role="alert"></p>
+          <div class="form-field">
+            <label class="form-label" for="household-name">Name</label>
+            <input
+              class="form-input"
+              id="household-name"
+              name="name"
+              value={householdRow.data?.name ?? ""}
+              required
+            />
+          </div>
+          <button class="btn-secondary" type="submit" data-form-submit>Save name</button>
+        </form>
       </DashboardCard>
     )}
 
     {isOwner && (
       <DashboardCard>
-      <form action="/api/household" method="post" id="freeze-map-form">
+      <form method="POST" id="freeze-map-form" data-freeze-map-form>
         <input type="hidden" name="action" value="freeze_map" />
         <input type="hidden" name="redirect" value="/dashboard/household" />
+        <p class="alert-success mt-0 mb-3 hidden" data-form-status role="status"></p>
+        <p class="alert-warning mt-0 mb-3 hidden" data-form-error role="alert"></p>
         <input
           type="hidden"
           name="freeze_map_lat"
@@ -189,7 +193,7 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
           </p>
           <ul id="city-search-results" class="space-y-2 text-sm"></ul>
         </div>
-        <button class="btn-secondary" type="submit">Save freeze map settings</button>
+        <button class="btn-secondary" type="submit" data-form-submit>Save freeze map settings</button>
         <p class="form-hint mt-2 mb-0">
           View the public list at <a class="text-link" href="/freeze-map">/freeze-map</a>.
         </p>
@@ -405,42 +409,93 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
 <script>
   import { actions } from "astro:actions";
 
-  const form = document.querySelector<HTMLFormElement>("[data-invite-form]");
-  const statusEl = document.getElementById("invite-status");
-  const errorEl = document.getElementById("invite-error");
-  const submitBtn = document.getElementById("invite-submit");
+  const inviteForm = document.querySelector<HTMLFormElement>("[data-invite-form]");
+  const inviteStatus = document.getElementById("invite-status");
+  const inviteError = document.getElementById("invite-error");
+  const inviteSubmit = document.getElementById("invite-submit");
 
-  form?.addEventListener("submit", async (event) => {
+  inviteForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (!(form instanceof HTMLFormElement)) return;
+    if (!(inviteForm instanceof HTMLFormElement)) return;
 
-    statusEl?.classList.add("hidden");
-    errorEl?.classList.add("hidden");
-    if (submitBtn instanceof HTMLButtonElement) {
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Sending…";
+    inviteStatus?.classList.add("hidden");
+    inviteError?.classList.add("hidden");
+    if (inviteSubmit instanceof HTMLButtonElement) {
+      inviteSubmit.disabled = true;
+      inviteSubmit.textContent = "Sending…";
     }
 
-    const { data, error } = await actions.inviteHouseholdMember(new FormData(form));
+    const { data, error } = await actions.inviteHouseholdMember(new FormData(inviteForm));
 
-    if (submitBtn instanceof HTMLButtonElement) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Send invite link";
+    if (inviteSubmit instanceof HTMLButtonElement) {
+      inviteSubmit.disabled = false;
+      inviteSubmit.textContent = "Send invite link";
     }
 
     if (error) {
-      if (errorEl) {
-        errorEl.textContent = error.message || "Could not send invite.";
-        errorEl.classList.remove("hidden");
+      if (inviteError) {
+        inviteError.textContent = error.message || "Could not send invite.";
+        inviteError.classList.remove("hidden");
       }
       return;
     }
 
-    if (statusEl) {
-      statusEl.textContent = data?.message ?? "Invite sent.";
-      statusEl.classList.remove("hidden");
+    if (inviteStatus) {
+      inviteStatus.textContent = data?.message ?? "Invite sent.";
+      inviteStatus.classList.remove("hidden");
     }
-    form.reset();
+    inviteForm.reset();
     window.setTimeout(() => window.location.reload(), 800);
   });
+
+  function wireStatusForm(
+    selector: string,
+    run: (formData: FormData) => Promise<{ data?: { message?: string } | null; error?: { message?: string } | null }>,
+    idleLabel: string,
+  ) {
+    const form = document.querySelector<HTMLFormElement>(selector);
+    if (!form) return;
+    const statusEl = form.querySelector<HTMLElement>("[data-form-status]");
+    const errorEl = form.querySelector<HTMLElement>("[data-form-error]");
+    const submitBtn = form.querySelector<HTMLButtonElement>("[data-form-submit]");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      statusEl?.classList.add("hidden");
+      errorEl?.classList.add("hidden");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Saving…";
+      }
+      const formData = new FormData(form);
+      if (!formData.has("freeze_map_opt_in")) formData.set("freeze_map_opt_in", "");
+      const { data, error } = await run(formData);
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = idleLabel;
+      }
+      if (error) {
+        if (errorEl) {
+          errorEl.textContent = error.message || "Could not save.";
+          errorEl.classList.remove("hidden");
+        }
+        return;
+      }
+      if (statusEl) {
+        statusEl.textContent = data?.message ?? "Saved.";
+        statusEl.classList.remove("hidden");
+      }
+    });
+  }
+
+  wireStatusForm(
+    "[data-rename-household-form]",
+    (formData) => actions.renameHousehold(formData),
+    "Save name",
+  );
+  wireStatusForm(
+    "[data-freeze-map-form]",
+    (formData) => actions.updateFreezeMapSettings(formData),
+    "Save freeze map settings",
+  );
 </script>

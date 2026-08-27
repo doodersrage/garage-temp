@@ -397,7 +397,7 @@ const ingestCurlExample = ingestKey
                   )}
                 </div>
                 <div class="flex flex-wrap gap-2">
-                  <form action="/api/devices" method="post" class="flex flex-wrap items-end gap-2">
+                  <form method="POST" class="flex flex-wrap items-end gap-2" data-device-rename-form>
                     <input type="hidden" name="action" value="rename" />
                     <input type="hidden" name="device_id" value={device.id} />
                     <input type="hidden" name="redirect" value={redirectTo} />
@@ -412,8 +412,10 @@ const ingestCurlExample = ingestKey
                       />
                     </div>
                     <button class="btn-secondary" type="submit">Rename</button>
+                    <p class="m-0 text-sm text-[var(--color-success)] hidden" data-device-status></p>
+                    <p class="m-0 text-sm text-[var(--color-danger)] hidden" data-device-error></p>
                   </form>
-                  <form action="/api/devices" method="post" class="flex flex-wrap items-end gap-2">
+                  <form method="POST" class="flex flex-wrap items-end gap-2" data-device-space-form>
                     <input type="hidden" name="action" value="set_space" />
                     <input type="hidden" name="device_id" value={device.id} />
                     <input type="hidden" name="redirect" value={redirectTo} />
@@ -429,6 +431,8 @@ const ingestCurlExample = ingestKey
                       />
                     </div>
                     <button class="btn-secondary" type="submit">Save space</button>
+                    <p class="m-0 text-sm text-[var(--color-success)] hidden" data-device-status></p>
+                    <p class="m-0 text-sm text-[var(--color-danger)] hidden" data-device-error></p>
                   </form>
                   <form action="/api/devices" method="post" onsubmit="return confirm('Rotate this ingest key? The old key stops working immediately.');">
                     <input type="hidden" name="action" value="rotate_key" />
@@ -627,3 +631,46 @@ const ingestCurlExample = ingestKey
     })();
   </script>
 )}
+
+<script>
+  import { actions } from "astro:actions";
+
+  async function handleDeviceForm(
+    form: HTMLFormElement,
+    run: (formData: FormData) => Promise<{ data?: { message?: string } | null; error?: { message?: string } | null }>,
+  ) {
+    const statusEl = form.querySelector<HTMLElement>("[data-device-status]");
+    const errorEl = form.querySelector<HTMLElement>("[data-device-error]");
+    const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    statusEl?.classList.add("hidden");
+    errorEl?.classList.add("hidden");
+    if (submitBtn) submitBtn.disabled = true;
+    const { data, error } = await run(new FormData(form));
+    if (submitBtn) submitBtn.disabled = false;
+    if (error) {
+      if (errorEl) {
+        errorEl.textContent = error.message || "Could not save.";
+        errorEl.classList.remove("hidden");
+      }
+      return;
+    }
+    if (statusEl) {
+      statusEl.textContent = data?.message ?? "Saved.";
+      statusEl.classList.remove("hidden");
+    }
+  }
+
+  document.querySelectorAll<HTMLFormElement>("[data-device-rename-form]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      void handleDeviceForm(form, (formData) => actions.renameDevice(formData));
+    });
+  });
+
+  document.querySelectorAll<HTMLFormElement>("[data-device-space-form]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      void handleDeviceForm(form, (formData) => actions.updateDeviceSpaceAction(formData));
+    });
+  });
+</script>

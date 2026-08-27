@@ -368,7 +368,7 @@ pnpm audit:stripe
 - [ ] Optional: `OPS_DISCORD_WEBHOOK_URL` for failure Discord  
 - [ ] Test alert → Share page webhook delivery log (Pro)  
 
-CI on every push to `main`: typecheck, unit tests, build, Playwright smoke.
+CI on every push to `main`: `astro sync` + typecheck, unit tests, build, Playwright smoke.
 
 ---
 

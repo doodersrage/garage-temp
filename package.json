@@ -13,7 +13,7 @@
     "preview": "astro preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "astro sync && tsc --noEmit",
     "audit:stripe": "node --env-file=.env scripts/audit-stripe-prices.mjs",
     "astro": "astro",
     "generate-types": "supabase gen types typescript --linked > src/types/supabase.ts && wrangler types"

@@ -100,7 +100,7 @@ describe("annual stripe price mapping", () => {
   });
 
   it("resolveStripePriceId falls back when annual unset", () => {
-    const env = import.meta.env as Record<string, string | undefined>;
+    const env = import.meta.env as unknown as Record<string, string | undefined>;
     const prev = {
       memberM: env.STRIPE_PRICE_ID,
       memberA: env.STRIPE_PRICE_ID_ANNUAL,
