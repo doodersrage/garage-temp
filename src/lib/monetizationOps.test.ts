@@ -23,7 +23,14 @@ describe("stripePricing", () => {
   });
 
   it("returns null prices when env is unset", () => {
+    const env = import.meta.env as Record<string, string | undefined>;
+    const prevM = env.STRIPE_DISPLAY_PRO_MONTHLY;
+    const prevA = env.STRIPE_DISPLAY_PRO_ANNUAL;
+    env.STRIPE_DISPLAY_PRO_MONTHLY = "";
+    env.STRIPE_DISPLAY_PRO_ANNUAL = "";
     expect(getProPriceDisplay().monthly).toBeNull();
+    env.STRIPE_DISPLAY_PRO_MONTHLY = prevM;
+    env.STRIPE_DISPLAY_PRO_ANNUAL = prevA;
   });
 });
 

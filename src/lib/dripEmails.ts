@@ -1,5 +1,10 @@
 import { createAdminClient } from "./supabase";
 import { resolveSiteUrl } from "./schemaMarkup";
+import {
+  isMailerRecipientNotAllowed,
+  partitionMailErrors,
+  sendPlainEmail,
+} from "./mailer";
 
 type DripStage = {
   day: number;
@@ -45,34 +50,17 @@ const DRIP_STAGES: DripStage[] = [
   },
 ];
 
-async function sendPlainEmail(to: string, subject: string, body: string): Promise<void> {
-  const { EmailMessage } = await import("cloudflare:email");
-  const { createMimeMessage } = await import("mimetext");
-  const { env } = await import("cloudflare:workers");
-
-  const msg = createMimeMessage();
-  msg.setSender({
-    name: "Garage Temp Monitor",
-    addr: import.meta.env.SMTP_MAIL_FROM,
-  });
-  msg.setRecipient(to);
-  msg.setSubject(subject);
-  msg.addMessage({ contentType: "text/plain", data: body });
-
-  await env.MAILER.send(
-    new EmailMessage(import.meta.env.SMTP_MAIL_FROM, to, msg.asRaw()),
-  );
-}
-
 export async function sendDripEmailsForAllUsers(): Promise<{
   sent: number;
   skipped: number;
   errors: string[];
+  restricted: number;
 }> {
   const admin = createAdminClient();
   const siteUrl = resolveSiteUrl(null);
   let sent = 0;
   let skipped = 0;
+  let restricted = 0;
   const errors: string[] = [];
 
   const { data: settingsRows } = await admin
@@ -119,11 +107,23 @@ export async function sendDripEmailsForAllUsers(): Promise<{
         .eq("user_id", row.user_id);
       sent += 1;
     } catch (error) {
+      if (isMailerRecipientNotAllowed(error)) {
+        // Cloudflare Email binding is destination-restricted; do not fail the cron.
+        restricted += 1;
+        errors.push(
+          `${row.user_id}: ${error instanceof Error ? error.message : "recipient not allowed"}`,
+        );
+        continue;
+      }
       errors.push(
         `${row.user_id}: ${error instanceof Error ? error.message : "unknown"}`,
       );
     }
   }
 
-  return { sent, skipped, errors };
+  return { sent, skipped, errors, restricted };
+}
+
+export function dripJobShouldFail(errors: string[]): boolean {
+  return partitionMailErrors(errors).hardErrors.length > 0;
 }

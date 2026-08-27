@@ -12,8 +12,8 @@ import {
   sendQuarterlyReportsForAllUsers,
   shouldSendQuarterlyReport,
 } from "./lib/quarterlyReportEmails";
-import { sendTrialRemindersForAllUsers } from "./lib/trialEmails";
-import { sendDripEmailsForAllUsers } from "./lib/dripEmails";
+import { sendTrialRemindersForAllUsers, trialJobShouldFail } from "./lib/trialEmails";
+import { dripJobShouldFail, sendDripEmailsForAllUsers } from "./lib/dripEmails";
 import {
   finishJobRun,
   runSensorReadingRetention,
@@ -171,9 +171,11 @@ export default {
         const trialJobId = await startJobRun("trial-reminders");
         try {
           const trial = await sendTrialRemindersForAllUsers();
-          await finishJobRun(trialJobId, trial.errors.length ? "error" : "success", {
+          const failed = trialJobShouldFail(trial.errors);
+          await finishJobRun(trialJobId, failed ? "error" : "success", {
             sent: trial.sent,
             skipped: trial.skipped,
+            restricted: trial.restricted,
             errors: trial.errors.slice(0, 20),
           });
         } catch (error) {
@@ -185,11 +187,27 @@ export default {
         const dripJobId = await startJobRun("drip-emails");
         try {
           const drip = await sendDripEmailsForAllUsers();
-          await finishJobRun(dripJobId, drip.errors.length ? "error" : "success", {
+          const failed = dripJobShouldFail(drip.errors);
+          await finishJobRun(dripJobId, failed ? "error" : "success", {
             sent: drip.sent,
             skipped: drip.skipped,
+            restricted: drip.restricted,
             errors: drip.errors.slice(0, 20),
+            ...(drip.restricted > 0
+              ? {
+                  hint: "MAILER binding blocked some recipients. Enable Email Sending for your from-domain and keep send_email unrestricted in wrangler.jsonc.",
+                }
+              : {}),
           });
+          if (failed) {
+            await notifyOps(
+              "Garage Temp job failed: drip-emails",
+              formatJobFailureBody("drip-emails", {
+                message: "Hard drip email failures",
+                errors: drip.errors.slice(0, 10),
+              }),
+            );
+          }
         } catch (error) {
           await finishJobRun(dripJobId, "error", {
             message: error instanceof Error ? error.message : "Unknown error",

@@ -203,6 +203,17 @@ Threshold alerts use live pull-feed readings when available and otherwise fall b
 
 Weekly digest emails send Monday 08:00 UTC to users with digests enabled.
 
+### Outbound email (Cloudflare Email)
+
+`wrangler.jsonc` uses an unrestricted `MAILER` send_email binding so drip, trial, alert, and digest mail can reach user addresses. That requires **Email Sending** enabled for the `SMTP_MAIL_FROM` domain (e.g. `robmcd.name`) in the Cloudflare dashboard (Email → Email Sending), or:
+
+```bash
+wrangler login   # refresh token if enable fails with auth error
+wrangler email sending enable robmcd.name
+```
+
+If the binding is locked with `destination_address`, drips to other inboxes fail with `email to … not allowed`. The drip cron treats that as restricted (job stays success) until Email Sending is enabled.
+
 Failed jobs record to the Jobs admin UI and notify ops via `SMTP_MAIL_TO` and optional `OPS_DISCORD_WEBHOOK_URL`.
 
 Manual collection (optional):

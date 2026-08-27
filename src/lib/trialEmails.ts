@@ -1,26 +1,12 @@
 import { createAdminClient } from "./supabase";
 import { resolveSiteUrl } from "./schemaMarkup";
+import {
+  isMailerRecipientNotAllowed,
+  partitionMailErrors,
+  sendPlainEmail,
+} from "./mailer";
 
 const REMINDER_DAYS = [3, 1] as const;
-
-async function sendPlainEmail(to: string, subject: string, body: string): Promise<void> {
-  const { EmailMessage } = await import("cloudflare:email");
-  const { createMimeMessage } = await import("mimetext");
-  const { env } = await import("cloudflare:workers");
-
-  const msg = createMimeMessage();
-  msg.setSender({
-    name: "Garage Temp Monitor",
-    addr: import.meta.env.SMTP_MAIL_FROM,
-  });
-  msg.setRecipient(to);
-  msg.setSubject(subject);
-  msg.addMessage({ contentType: "text/plain", data: body });
-
-  await env.MAILER.send(
-    new EmailMessage(import.meta.env.SMTP_MAIL_FROM, to, msg.asRaw()),
-  );
-}
 
 export function daysUntil(iso: string | null | undefined): number | null {
   if (!iso) return null;
@@ -29,10 +15,15 @@ export function daysUntil(iso: string | null | undefined): number | null {
   return Math.ceil((end - Date.now()) / (24 * 60 * 60 * 1000));
 }
 
+export function trialJobShouldFail(errors: string[]): boolean {
+  return partitionMailErrors(errors).hardErrors.length > 0;
+}
+
 export async function sendTrialRemindersForAllUsers(): Promise<{
   sent: number;
   skipped: number;
   errors: string[];
+  restricted: number;
 }> {
   const supabase = createAdminClient();
   const { data: subs } = await supabase
@@ -42,6 +33,7 @@ export async function sendTrialRemindersForAllUsers(): Promise<{
 
   let sent = 0;
   let skipped = 0;
+  let restricted = 0;
   const errors: string[] = [];
   const siteUrl = resolveSiteUrl(null);
 
@@ -99,11 +91,18 @@ export async function sendTrialRemindersForAllUsers(): Promise<{
         .eq("user_id", sub.user_id);
       sent += 1;
     } catch (error) {
+      if (isMailerRecipientNotAllowed(error)) {
+        restricted += 1;
+        errors.push(
+          `${sub.user_id}: ${error instanceof Error ? error.message : "recipient not allowed"}`,
+        );
+        continue;
+      }
       errors.push(
         `${sub.user_id}: ${error instanceof Error ? error.message : "unknown"}`,
       );
     }
   }
 
-  return { sent, skipped, errors };
+  return { sent, skipped, errors, restricted };
 }

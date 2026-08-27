@@ -19,10 +19,13 @@
 	},
 	"send_email": [
 		{
-		"name": "MAILER",
-		"destination_address": "doodersrage@gmail.com"
+			"name": "MAILER"
+			// Unrestricted: required for drip/trial/alert mail to arbitrary user addresses.
+			// Requires Cloudflare Email Sending enabled for the SMTP_MAIL_FROM domain
+			// (Dashboard → Email → Email Sending, or: wrangler email sending enable <domain>).
+			// Contact form still sends to SMTP_MAIL_TO.
 		}
-  	],
+	],
 	"triggers": {
 		"crons": ["0 * * * *"]
 	}
