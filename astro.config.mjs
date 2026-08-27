@@ -69,12 +69,21 @@ export default defineConfig({
     },
   },
 
-  fonts: [{
-    provider: fontProviders.google(),
-    name: 'Plus Jakarta Sans',
-    cssVariable: "--font-sans",
-    subsets: ['latin'],
-    weights: ['400', '500', '600', '700'],
-  }],
+  fonts: [
+    {
+      provider: fontProviders.google(),
+      name: 'Plus Jakarta Sans',
+      cssVariable: "--font-sans",
+      subsets: ['latin'],
+      weights: ['400', '500', '600', '700'],
+    },
+    {
+      provider: fontProviders.google(),
+      name: 'Sora',
+      cssVariable: "--font-display",
+      subsets: ['latin'],
+      weights: ['500', '600', '700'],
+    },
+  ],
   
 });

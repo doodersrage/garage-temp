@@ -76,8 +76,8 @@ export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
 
   return (
     <section class="card animate-slide-in-left">
-      <h2 class="card-title">Garage Temperatures</h2>
-      <p class="card-subtitle">Live readings from the site’s demo temperature feeds.</p>
+      <h2 class="card-title">Live demo readings</h2>
+      <p class="card-subtitle">Public garage temperatures — create an account to connect your own probes.</p>
 
       {error && (
         <div class="alert-warning mb-4">

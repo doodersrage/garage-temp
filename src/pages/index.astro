@@ -15,75 +15,80 @@ const showWeather = !isAuthenticated || preferences!.showWeather;
 ---
 
 <Layout description="Live garage temperature and humidity readings with local weather, saved history, and a configurable dashboard.">
-	<div class="page-shell page-stack">
-		{!isAuthenticated && (
-			<section class="home-hero">
-				<p class="home-hero-brand">Garage Temperature Monitor</p>
-				<p class="home-hero-lead">
-					Watch freeze risk in real time, compare indoor conditions with outdoor weather,
-					and get alerts before pipes and storage take damage.
-				</p>
-				<div class="home-hero-actions">
-					<a class="btn-primary" href="/register">Create free account</a>
-					<a class="btn-secondary" href="/pricing">See plans</a>
-					<a class="btn-ghost" href="/signin">Sign in</a>
-				</div>
-				<div class="home-proof">
-					<p class="home-proof-item">
-						<strong>Live demo below</strong>
-						Public readings so you can see the product before signing up.
+	{!isAuthenticated ? (
+		<div class="home-marketing">
+			<section class="home-hero home-hero--bleed">
+				<div class="home-hero-inner">
+					<p class="home-hero-brand">Garage Temperature Monitor</p>
+					<p class="home-hero-lead">
+						Watch freeze risk in real time, compare indoor conditions with outdoor weather,
+						and get alerts before pipes and storage take damage.
 					</p>
-					<p class="home-proof-item">
-						<strong>Alerts that matter</strong>
-						Freeze, humidity, outage, and forecast risk across email, SMS, and push.
-					</p>
-					<p class="home-proof-item">
-						<strong>Your hardware</strong>
-						ESP/Arduino push ingest or HTTPS JSON feeds — your sensors, your dashboard.
-					</p>
-				</div>
-			</section>
-		)}
-
-		<div class="grid gap-6">
-			{showGarageTemps && isAuthenticated && (
-				<LiveTempsPanel client:visible />
-			)}
-			{showGarageTemps && !isAuthenticated && (
-				<DemoTempsPanel client:visible />
-			)}
-			{showWeather && (
-				<WeatherPanel client:visible cityId={preferences?.weatherCityId ?? null} />
-			)}
-			{isAuthenticated && !showGarageTemps && !showWeather && (
-				<div class="empty-state">
-					<p class="empty-state-title">Home panels are hidden</p>
-					<p class="mb-0">Update your display preferences to show live readings again.</p>
-					<div class="empty-state-actions">
-						<a class="btn-primary" href="/dashboard/settings">Open settings</a>
+					<div class="home-hero-actions">
+						<a class="btn-primary" href="/register">Create free account</a>
+						<a class="btn-secondary" href="/pricing">See plans</a>
 					</div>
 				</div>
-			)}
-		</div>
+			</section>
 
-		<section class="card">
-			<h2 class="card-title">Built for cold-weather garages</h2>
-			<p class="card-subtitle">
-				Probes, weather comparison, history, and the technology behind the monitors.
-			</p>
-			<div class="grid gap-4 leading-relaxed">
-				<p>
-					Combine DHT22 probes, JSON feeds, and local weather so you can compare garage conditions
-					with the outdoors. Start with
-					<a class="text-link" href="/about/temperature-probes">probe placement</a>,
-					<a class="text-link" href="/about/temperature-changes">what drives swings</a>, and the
-					<a class="text-link" href="/about/data-flow">path from sensor to screen</a>.
-				</p>
+			<div class="page-shell page-stack">
+				<div class="home-live" aria-label="Live demo readings">
+					{showGarageTemps && <DemoTempsPanel client:visible />}
+					{showWeather && <WeatherPanel client:visible cityId={null} />}
+				</div>
+
+				<section class="home-features" aria-label="Product highlights">
+					<article class="home-feature">
+						<p class="home-feature-title">Freeze-aware alerts</p>
+						<p class="home-feature-copy">
+							Threshold, forecast, and NWS-backed cold risk across email, SMS, push, and webhooks.
+						</p>
+					</article>
+					<article class="home-feature">
+						<p class="home-feature-title">Your sensors</p>
+						<p class="home-feature-copy">
+							ESP/Arduino push ingest or HTTPS JSON feeds — map spaces, doors, flood, and power too.
+						</p>
+					</article>
+					<article class="home-feature">
+						<p class="home-feature-title">Household ready</p>
+						<p class="home-feature-copy">
+							Share access, history, and status pages without handing out a login password.
+						</p>
+					</article>
+				</section>
+
+				<section class="card home-guides">
+					<div class="home-guides-copy">
+						<h2 class="card-title">Built for cold-weather garages</h2>
+						<p class="card-subtitle mb-0">
+							Probe placement, wiring, firmware, and the data path from sensor wire to screen.
+						</p>
+					</div>
+					<div class="home-guides-actions">
+						<a class="btn-primary" href="/about">Explore the guides</a>
+						<a class="btn-secondary" href="/about/probe-demo">Probe demo</a>
+					</div>
+				</section>
 			</div>
-			<div class="flex flex-wrap gap-3 mt-6">
-				<a class="btn-primary" href="/about">Explore the guides</a>
-				<a class="btn-secondary" href="/about/probe-demo">Try the probe demo</a>
+		</div>
+	) : (
+		<div class="page-shell page-stack">
+			<div class="grid gap-6">
+				{showGarageTemps && <LiveTempsPanel client:visible />}
+				{showWeather && (
+					<WeatherPanel client:visible cityId={preferences?.weatherCityId ?? null} />
+				)}
+				{!showGarageTemps && !showWeather && (
+					<div class="empty-state">
+						<p class="empty-state-title">Home panels are hidden</p>
+						<p class="mb-0">Update your display preferences to show live readings again.</p>
+						<div class="empty-state-actions">
+							<a class="btn-primary" href="/dashboard/settings">Open settings</a>
+						</div>
+					</div>
+				)}
 			</div>
-		</section>
-	</div>
+		</div>
+	)}
 </Layout>
