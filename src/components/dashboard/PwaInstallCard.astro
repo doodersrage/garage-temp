@@ -1,0 +1,49 @@
+---
+import DashboardCard from "./DashboardCard.astro";
+---
+<DashboardCard class="col-span-12" id="pwa-install">
+  <h2 class="card-title">Install the app</h2>
+  <p class="card-subtitle mb-3">
+    Add Garage Temp to your home screen for faster access.
+  </p>
+  <div class="flex flex-wrap gap-3">
+    <button type="button" class="btn-primary" id="pwa-install-btn" hidden>
+      Install app
+    </button>
+    <a class="btn-secondary" href="/about/install-pwa">PWA install guide</a>
+  </div>
+  <p class="card-subtitle mt-2 mb-0" id="pwa-install-status"></p>
+</DashboardCard>
+
+<script is:inline>
+  (() => {
+    const btn = document.getElementById("pwa-install-btn");
+    const status = document.getElementById("pwa-install-status");
+    let deferredPrompt = null;
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredPrompt = event;
+      if (btn) btn.hidden = false;
+    });
+
+    btn?.addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (status) {
+        status.textContent =
+          choice.outcome === "accepted"
+            ? "Install started."
+            : "Install dismissed. You can still use the guide below.";
+      }
+      deferredPrompt = null;
+      if (btn) btn.hidden = true;
+    });
+
+    window.addEventListener("appinstalled", () => {
+      if (status) status.textContent = "App installed.";
+      if (btn) btn.hidden = true;
+    });
+  })();
+</script>

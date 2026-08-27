@@ -1,0 +1,34 @@
+---
+import DashboardCard from "./DashboardCard.astro";
+import ChartSkeleton from "./ChartSkeleton.astro";
+import HistoryChart from "../HistoryChart";
+import type { ChartPoint } from "../../lib/garageTempsHistory";
+
+interface Props {
+  points: ChartPoint[];
+  title?: string;
+}
+
+const { points, title = "Temperature trend (7 days)" } = Astro.props;
+---
+<DashboardCard class="col-span-12">
+  <h2 class="card-title">Week at a glance</h2>
+  <p class="card-subtitle mb-4">
+    Recent probe temperatures. Open History for filters, YoY overlay, and CSV export.
+  </p>
+  {points.length < 2 ? (
+    <p class="mb-0 text-sm text-muted-foreground">
+      Not enough history yet for a chart.
+      <a class="text-link" href="/dashboard/history">View history</a>
+    </p>
+  ) : (
+    <div class="relative min-h-[300px]">
+      <HistoryChart client:visible points={points} title={title}>
+        <ChartSkeleton slot="fallback" />
+      </HistoryChart>
+    </div>
+  )}
+  <p class="mt-4 mb-0 text-sm">
+    <a class="text-link" href="/dashboard/history">Open full history</a>
+  </p>
+</DashboardCard>

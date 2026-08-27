@@ -1,0 +1,94 @@
+---
+import DashboardCard from "./DashboardCard.astro";
+import type { NightRisk, WeatherSnapshot } from "../../lib/FetchWeather";
+import {
+  weatherMapEmbedUrl,
+  weatherMapExternalUrl,
+} from "../../lib/FetchWeather";
+import type { NwsAlertSummary } from "../../lib/nwsAlerts";
+
+interface Props {
+  nightsAtRisk: NightRisk[];
+  nightsRiskCount: number;
+  freezeThresholdF: number;
+  weatherSnapshot: WeatherSnapshot | null;
+  weatherHasCoords: boolean;
+  nwsAlerts: NwsAlertSummary | null;
+}
+
+const {
+  nightsAtRisk,
+  nightsRiskCount,
+  freezeThresholdF,
+  weatherSnapshot,
+  weatherHasCoords,
+  nwsAlerts,
+} = Astro.props;
+---
+{nightsAtRisk.length > 0 && (
+  <DashboardCard class="col-span-12">
+    <h2 class="card-title">Nights at risk this week</h2>
+    <p class="card-subtitle mb-4">
+      Forecast overnight lows vs your freeze threshold ({freezeThresholdF}°F).
+      {nightsRiskCount > 0
+        ? ` ${nightsRiskCount} night(s) look at risk.`
+        : " No nights currently forecast below threshold."}
+    </p>
+    {weatherHasCoords && weatherSnapshot && (
+      <figure class="weather-map mb-6">
+        <iframe
+          class="weather-map-frame"
+          title={`Map of ${weatherSnapshot.name}`}
+          src={weatherMapEmbedUrl(weatherSnapshot.lat!, weatherSnapshot.lon!)}
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        />
+        <figcaption class="weather-map-caption">
+          <a
+            class="text-link"
+            href={weatherMapExternalUrl(weatherSnapshot.lat!, weatherSnapshot.lon!)}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open larger map
+          </a>
+          <span class="text-muted-foreground"> · © OpenStreetMap</span>
+        </figcaption>
+      </figure>
+    )}
+    {nwsAlerts && nwsAlerts.alerts.length > 0 && (
+      <div class="alert-warning mb-4">
+        <p class="m-0 mb-2"><strong>NWS freeze-related alerts</strong></p>
+        <ul class="m-0 pl-5">
+          {nwsAlerts.alerts.slice(0, 3).map((alert) => (
+            <li>
+              {alert.event}: {alert.headline.slice(0, 120)}
+              {alert.headline.length > 120 ? "…" : ""}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+    <div class="grid grid-cols-12 gap-3">
+      {nightsAtRisk.map((night) => (
+        <article
+          class:list={[
+            "col-span-6 sm:col-span-4 lg:col-span-2 rounded-lg border border-border bg-muted/50 p-3",
+            night.atRisk && "border-[var(--color-danger-border)]",
+          ]}
+        >
+          <span class="block text-xs text-muted-foreground">{night.dateLabel}</span>
+          <p class="m-0 mt-1 text-base font-semibold text-foreground">
+            {night.minTempF.toFixed(0)}°F
+          </p>
+          <p class:list={[
+            "m-0 mt-0.5 text-sm",
+            night.atRisk ? "text-[var(--color-danger)]" : "text-muted-foreground",
+          ]}>
+            {night.atRisk ? "At risk" : "OK"}
+          </p>
+        </article>
+      ))}
+    </div>
+  </DashboardCard>
+)}

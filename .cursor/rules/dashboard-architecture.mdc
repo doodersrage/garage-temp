@@ -1,0 +1,32 @@
+---
+description: Architectural standards for Astro dashboard layouts, middleware, and data fetching
+globs: src/layouts/DashboardLayout.astro, src/pages/dashboard/**/*.astro, src/components/dashboard/**/*.astro
+alwaysApply: false
+---
+
+# Astro Dashboard Architecture Rules
+
+## Layout Shell Strategy
+- Enforce a fixed **App Shell** layout: persistent Sidebar, Top Header, and dynamic `<main>` viewport.
+- Render all structural components (Sidebar navigation, Header profile, Metric Cards) strictly server-side using pure Astro components (`.astro`).
+- Do NOT wrap entire dashboard pages in client framework boundaries (React/Svelte/Vue). Keep page structures static and hydrate only dynamic widgets.
+
+## Server-Side Data Loading
+- Load primary metrics, user permissions, and initial dataset summaries directly inside the Astro frontmatter (`---` block) via Server-Side Rendering (SSR) or Astro Actions.
+- Wrap data fetching in typed DTO getters (e.g., `getDashboardStats(Astro.locals)`).
+
+```astro
+---
+// GOOD: Server-side data fetching in Astro frontmatter
+import { getAnalyticsSummary } from '@/lib/api/analytics';
+import MetricCard from '@/components/dashboard/MetricCard.astro';
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/login');
+
+const stats = await getAnalyticsSummary(user.tenantId);
+---
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+  <MetricCard title="Revenue" trend="{stats.revenueTrend}" value="{stats.formattedRevenue}"/>
+</div>

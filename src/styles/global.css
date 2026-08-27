@@ -20,6 +20,13 @@
   --color-text: #f8fafc;
   --color-text-secondary: #e2e8f0;
   --color-text-muted: #94a3b8;
+
+  /* Dashboard token aliases (bg-card, text-foreground, etc.) */
+  --color-card: var(--color-surface);
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
+  --color-muted: var(--color-surface-muted);
+  --color-muted-foreground: var(--color-text-muted);
   --color-accent: #3b82f6;
   --color-accent-hover: #2563eb;
   --color-accent-soft: rgb(59 130 246 / 0.14);

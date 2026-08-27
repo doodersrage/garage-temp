@@ -1,0 +1,18 @@
+---
+
+### 2. Design System & Styling (`astro-design-system.mdc`)
+
+```markdown
+---
+description: Styling refactoring rules targeting token usage, responsive UI, and component encapsulation
+globs: src/**/*.astro, src/**/*.css, src/**/*.scss, src/**/*.tsx
+alwaysApply: false
+---
+
+# Astro Design System & Styling Rules
+
+## Styling & Tokens
+- **No Hardcoded Values:** Never use arbitrary pixel sizes, inline styles, or arbitrary color hex codes. Use CSS variables or design system tokens (e.g., Tailwind classes).
+- Favor scoped styling via Astro's built-in `<style>` tags or Tailwind CSS classes. Use the `class:list` directive for dynamic conditional classes:
+  ```astro
+  <div class:list={['card', { 'is-active': isActive }]} />

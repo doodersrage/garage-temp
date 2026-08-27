@@ -1,0 +1,11 @@
+---
+interface Props {
+  class?: string;
+  id?: string;
+}
+
+const { class: className, id } = Astro.props;
+---
+<div id={id} class:list={["grid grid-cols-12 gap-4", className]}>
+  <slot />
+</div>

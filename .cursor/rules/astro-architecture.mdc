@@ -1,0 +1,21 @@
+---
+description: Structural and architectural rules for refactoring Astro components and pages
+globs: src/**/*.astro, src/**/*.ts, src/**/*.tsx
+alwaysApply: true
+---
+
+# Astro Component Architecture Rules
+
+## Component Rules (.astro)
+- Default to pure HTML output. Do NOT add interactive client frameworks (React, Vue, Svelte) unless client-side state is required.
+- Maintain a strict multi-part component structure:
+  1. Component Script (`---` frontmatter) at top for imports, props, and build-time fetching.
+  2. HTML Template structure in the body.
+  3. Scoped `<style>` tag or Tailwind classes at the bottom.
+- Explicitly define component props using TypeScript interfaces:
+  ```ts
+  interface Props {
+    title: string;
+    description?: string;
+  }
+  const { title, description } = Astro.props;

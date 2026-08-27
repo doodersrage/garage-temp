@@ -1,0 +1,31 @@
+---
+description: Rules for charts, client-side filtering, data tables, and state isolation
+globs: src/components/dashboard/**/*.{tsx,jsx,vue,svelte}
+alwaysApply: false
+---
+
+# Dashboard Hydration & Interactive Widgets
+
+## Client Island Isolation
+- Keep interactive islands atomic. Isolate interactive state (e.g., date pickers, real-time charts, filter dropdowns) to the smallest possible client component.
+- Use the correct `client:` directive based on component necessity:
+  - `client:visible`: Interactive charts or heavy data tables located below the primary fold.
+  - `client:idle`: Non-critical background widgets, secondary analytics filters.
+  - `client:load`: Primary date-range filter or global dashboard control bar (only if immediate interactivity is needed).
+
+## Chart & Data Heavy Utilities
+- Heavy charting libraries (Chart.js, Recharts, ECharts) MUST be lazy-loaded or hydrated with `client:visible`.
+- Provide zero-layout-shift (CLS) skeletal placeholders while client charts load:
+
+```astro
+---
+import InteractiveChart from '@/components/dashboard/InteractiveChart.tsx';
+import ChartSkeleton from '@/components/dashboard/ChartSkeleton.astro';
+---
+
+<div class="relative min-h-[300px]">
+  <InteractiveChart client:visible data="{Astro.props.chartData}">
+    <!-- Astro fallback slotted content rendered server-side before hydration -->
+    <ChartSkeleton slot="fallback"/>
+  </InteractiveChart>
+</div>

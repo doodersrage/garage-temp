@@ -1,0 +1,26 @@
+---
+
+### 2. UI Density & Design Tokens (`dashboard-ui-tokens.mdc`)
+
+```markdown
+---
+description: Styling and design rules for high-density dashboard UIs, charts, and tables
+globs: src/**/*.astro, src/**/*.tsx, src/**/*.vue
+alwaysApply: false
+---
+
+# Dashboard UI & Design Tokens
+
+## Layout Density & Spacing
+- Use compact, high-density spacing tokens. Dashboard cards should use tight padding (`p-4` to `p-6`).
+- Grid Layouts: Standardize on a responsive 12-column grid system (`grid grid-cols-12 gap-4`).
+- Card Consistency: Every dashboard widget must sit inside a uniform `Card` container featuring subtle borders, background contrast, and standardized rounded corners (`rounded-xl border border-border bg-card`).
+
+## Color System & Visual Status
+- Semantic Indicators: Use semantic colors exclusively for dynamic statuses (Success: Green, Warning: Amber, Error: Red, Neutral: Slate/Zinc).
+- Dark Mode Native: Ensure all layout background and text classes utilize CSS variables or Tailwind dark mode utilities (`bg-background text-foreground`).
+- Never use raw hex values (`#1e293b`). Use design tokens (`bg-muted/50`, `border-border/60`).
+
+## Tables & Lists
+- Wrap data tables inside responsive overflow shells (`overflow-x-auto`).
+- Use sticky headers (`sticky top-0`) for long tabular lists.

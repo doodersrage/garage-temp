@@ -1,0 +1,23 @@
+---
+
+### 3. Performance & Hydration Hygiene (`astro-performance.mdc`)
+
+```markdown
+---
+description: Rules for optimizing client hydration, asset pipeline, and performance during refactor passes
+globs: src/**/*
+alwaysApply: false
+---
+
+# Astro Performance & Hydration Rules
+
+## Hydration Directives (`client:*`)
+- Choose the least intrusive hydration directive when interactive framework components (React, Svelte, Vue) are required:
+  - `client:load`: Only for critical above-the-fold UI interactivity (e.g., global navigation toggles).
+  - `client:idle`: For non-critical interactive elements lower on the page.
+  - `client:visible`: For elements below the fold that only need JS when scrolled into view.
+  - `client:media`: For component triggers that depend on media queries (e.g., mobile sidebar drawer).
+
+## Asset & Image Optimization
+- Replace standard `<img>` HTML elements with Astro's built-in `<Image />` or `<Picture />` components from `astro:assets` to automatically handle WebP conversion, sizing, and explicit aspect ratios.
+- Inline static asset scripts using `<script>` tags without `is:inline` unless explicitly required, allowing Astro to bundle and defer JavaScript delivery.
