@@ -1,10 +1,10 @@
 ---
-import DashboardLayout from "../layouts/DashboardLayout.astro";
-import DisplayPreferences from "../components/DisplayPreferences.astro";
-import PwaInstallCard from "../components/dashboard/PwaInstallCard.astro";
-import DashboardCard from "../components/dashboard/DashboardCard.astro";
-import { getAuthFromCookies } from "../lib/auth";
-import { getUserPreferences } from "../lib/userPreferences";
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import DisplayPreferences from "../../components/DisplayPreferences.astro";
+import PwaInstallCard from "../../components/dashboard/PwaInstallCard.astro";
+import DashboardCard from "../../components/dashboard/DashboardCard.astro";
+import { getAuthFromCookies } from "../../lib/auth";
+import { getUserPreferences } from "../../lib/userPreferences";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
