@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
 import OAuthButtons from "../components/OAuthButtons.astro";
 import { getAuthFromCookies } from "../lib/auth";
 import { getSignInErrorMessage } from "../lib/signInErrors";
@@ -22,75 +23,61 @@ const safeNext =
   title="Sign in"
   description="Sign in to your dashboard to manage display preferences, probe feeds, reading history, and CSV export."
 >
-  <div class="page-shell page-grid auth-page-grid items-start">
-    <div class="auth-form animate-blurred-fade-in space-y-4">
-      <form class="form-panel" action="/api/auth/signin" method="post">
-        {safeNext && <input type="hidden" name="next" value={safeNext} />}
-        {registered && (
-          <div class="alert-success mb-4" role="status">
-            <p class="m-0">
-              Account created. Check your email to confirm, then sign in below.
-            </p>
-          </div>
-        )}
-        {errorMessage && (
-          <div class="alert-warning mb-4" role="alert">
-            <p class="m-0">{errorMessage}</p>
-          </div>
-        )}
-        <div class="form-field">
-          <label class="form-label" for="email">Email</label>
-          <input
-            class="form-input"
-            type="email"
-            name="email"
-            id="email"
-            value={emailValue}
-            required
-          />
-        </div>
-        <div class="form-field">
-          <label class="form-label" for="password">Password</label>
-          <input class="form-input" type="password" name="password" id="password" required />
-        </div>
-        <div class="form-field">
-          <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
-        </div>
-        <div class="flex flex-col gap-3">
-          <button class="btn-primary" type="submit">Sign in</button>
-          <p class="m-0 text-sm">
-            <a class="text-link" href="/forgot-password">Forgot password?</a>
+  <div class="auth-page">
+    <header class="auth-intro page-header">
+      <h1 class="page-header-title">Sign in</h1>
+      <p class="page-header-lede">
+        Pick up where you left off — preferences, feeds, and saved readings are in your dashboard.
+      </p>
+    </header>
+
+    <form class="form-panel" action="/api/auth/signin" method="post">
+      {safeNext && <input type="hidden" name="next" value={safeNext} />}
+      {registered && (
+        <div class="alert-success mb-4" role="status">
+          <p class="m-0">
+            Account created. Check your email to confirm, then sign in below.
           </p>
         </div>
-      </form>
+      )}
+      {errorMessage && (
+        <div class="alert-warning mb-4" role="alert">
+          <p class="m-0">{errorMessage}</p>
+        </div>
+      )}
+      <div class="form-field">
+        <label class="form-label" for="email">Email</label>
+        <input
+          class="form-input"
+          type="email"
+          name="email"
+          id="email"
+          value={emailValue}
+          required
+        />
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-input" type="password" name="password" id="password" required />
+      </div>
+      <div class="form-field">
+        <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
+      </div>
+      <div class="flex flex-col gap-3">
+        <button class="btn-primary" type="submit">Sign in</button>
+        <p class="m-0 text-sm text-center">
+          <a class="text-link" href="/forgot-password">Forgot password?</a>
+        </p>
+      </div>
+    </form>
+
+    <div class="mt-4">
       <OAuthButtons next={safeNext} />
     </div>
 
-    <section class="card auth-aside animate-zoom-in">
-      <h1 class="card-title">Sign in</h1>
-      <p class="card-subtitle">
-        Pick up where you left off—your preferences, feeds, and saved readings are waiting in the dashboard.
-      </p>
-      <details class="auth-aside-details">
-        <summary>Why create an account?</summary>
-        <div class="grid gap-4 leading-relaxed mt-3">
-          <p>
-            A signed-in account keeps the home page yours: show or hide garage temperatures and weather, wire up HTTPS
-            JSON feeds, and label each probe so the cards make sense at a glance. Everything you configure is described in
-            <a class="text-link" href="/about/accounts-and-dashboard">accounts and dashboard tools</a>.
-          </p>
-          <p>
-            The dashboard also stores a running history of probe snapshots so you can spot drift, cold snaps, and seasonal
-            patterns over time—see
-            <a class="text-link" href="/about/historical-data">historical data usage</a> for how that data is used.
-          </p>
-        </div>
-      </details>
-      <p class="mt-6 mb-0">
-        New here?
-        <a class="text-link" href={safeNext ? `/register?next=${encodeURIComponent(safeNext)}` : "/register"}>Create a free account</a>
-        · <a class="text-link" href="/contact">Contact us</a>
-      </p>
-    </section>
+    <p class="auth-switch">
+      New here?
+      <a class="text-link" href={safeNext ? `/register?next=${encodeURIComponent(safeNext)}` : "/register"}>Create a free account</a>
+    </p>
   </div>
 </Layout>

@@ -327,13 +327,6 @@
     height: 3rem;
   }
 
-  .site-footer {
-    @apply text-sm;
-    background-color: var(--color-bg-elevated);
-    border-top: 1px solid var(--color-border);
-    color: var(--color-text-muted);
-  }
-
   .nav-link {
     @apply rounded-md px-3 py-2 text-sm font-medium;
     color: var(--color-text-muted);
@@ -354,21 +347,234 @@
   }
 
   .page-shell {
-    @apply mx-auto w-full max-w-6xl px-5 py-10 sm:px-8 lg:max-w-7xl lg:py-14;
+    @apply mx-auto w-full max-w-6xl px-5 py-10 sm:px-8 lg:max-w-7xl lg:py-12;
   }
 
   .page-stack {
     display: flex;
     flex-direction: column;
-    gap: 3rem;
-  }
-
-  .page-stack-tight {
     gap: 2rem;
   }
 
+  .page-stack-tight {
+    gap: 1.25rem;
+  }
+
   .page-stack-relaxed {
-    gap: 4.5rem;
+    gap: 2.75rem;
+  }
+
+  .page-header {
+    margin-bottom: 0.25rem;
+  }
+
+  .page-header-kicker {
+    margin: 0 0 0.45rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent-muted);
+  }
+
+  .page-header-title {
+    margin: 0;
+    font-size: clamp(1.85rem, 4vw, 2.45rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    color: var(--color-text);
+  }
+
+  .page-header-lede {
+    margin: 0.75rem 0 0;
+    max-width: 40rem;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--color-text-secondary);
+  }
+
+  .page-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1.25rem;
+  }
+
+  .page-header-actions:empty {
+    display: none;
+  }
+
+  .page-header-meta {
+    margin: 0.85rem 0 0;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  .home-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 2.25rem 1.5rem;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    background:
+      linear-gradient(145deg, rgb(59 130 246 / 0.18), transparent 52%),
+      linear-gradient(320deg, rgb(37 99 235 / 0.08), transparent 45%),
+      var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  @media (min-width: 768px) {
+    .home-hero {
+      padding: 3rem 2.75rem;
+    }
+  }
+
+  .home-hero-brand {
+    margin: 0 0 0.85rem;
+    font-size: clamp(2.1rem, 5.5vw, 3.15rem);
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 1.02;
+    color: var(--color-text);
+  }
+
+  .home-hero-lead {
+    margin: 0 0 1.5rem;
+    max-width: 34rem;
+    font-size: 1.1rem;
+    line-height: 1.65;
+    color: var(--color-text-secondary);
+  }
+
+  .home-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .home-proof {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  @media (min-width: 640px) {
+    .home-proof {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .home-proof-item {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  .home-proof-item strong {
+    display: block;
+    margin-bottom: 0.15rem;
+    color: var(--color-text);
+    font-weight: 600;
+  }
+
+  .site-footer {
+    @apply text-sm;
+    background-color: var(--color-bg-elevated);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+  }
+
+  .site-footer-inner {
+    @apply mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8;
+  }
+
+  .site-footer-grid {
+    display: grid;
+    gap: 1.75rem;
+    margin-bottom: 1.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .site-footer-grid {
+      grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .site-footer-brand {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 650;
+    color: var(--color-text);
+  }
+
+  .site-footer-copy {
+    margin: 0;
+    max-width: 18rem;
+    line-height: 1.55;
+  }
+
+  .site-footer-heading {
+    margin: 0 0 0.65rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .site-footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer-links a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+  }
+
+  .site-footer-links a:hover {
+    color: var(--color-accent-muted);
+  }
+
+  .site-footer-legal {
+    margin: 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-border);
+    font-size: 0.8125rem;
+  }
+
+  .auth-page {
+    @apply mx-auto w-full max-w-md px-5 py-10 sm:px-6 lg:py-14;
+  }
+
+  .auth-page-wide {
+    max-width: 28rem;
+  }
+
+  .auth-intro {
+    margin-bottom: 1.25rem;
+  }
+
+  .auth-intro .page-header-title {
+    font-size: clamp(1.6rem, 3vw, 1.9rem);
+  }
+
+  .auth-intro .page-header-lede {
+    font-size: 0.975rem;
+  }
+
+  .auth-switch {
+    margin: 1.25rem 0 0;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    text-align: center;
   }
 
   .page-grid {
@@ -657,47 +863,6 @@
     font-weight: 400;
     line-height: 1.6;
     color: var(--color-text-muted);
-  }
-
-  .home-hero {
-    position: relative;
-    overflow: hidden;
-    padding: 2rem 1.5rem;
-    border-radius: var(--radius-xl);
-    border: 1px solid var(--color-border);
-    background:
-      linear-gradient(145deg, rgb(59 130 246 / 0.16), transparent 55%),
-      var(--color-surface);
-    box-shadow: var(--shadow-card);
-  }
-
-  @media (min-width: 768px) {
-    .home-hero {
-      padding: 2.75rem 2.5rem;
-    }
-  }
-
-  .home-hero-brand {
-    margin: 0 0 0.75rem;
-    font-size: clamp(2rem, 5vw, 3rem);
-    font-weight: 700;
-    letter-spacing: -0.04em;
-    line-height: 1.05;
-    color: var(--color-text);
-  }
-
-  .home-hero-lead {
-    margin: 0 0 1.5rem;
-    max-width: 36rem;
-    font-size: 1.0625rem;
-    line-height: 1.65;
-    color: var(--color-text-secondary);
-  }
-
-  .home-hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
   }
 
   .dashboard-page-header {

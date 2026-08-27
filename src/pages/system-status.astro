@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
 import { fetchAppStatus } from "../lib/appStatus";
 import { formatRelativeAge } from "../lib/relativeTime";
 
@@ -13,12 +14,14 @@ const cronAge = formatRelativeAge(status.lastCronAt, "never");
   description="Garage Temp background job health and ingest activity summary."
 >
   <div class="page-shell page-stack">
-    <section class="card animate-slide-in-left">
-      <h1 class="card-title">System status</h1>
-      <p class="card-subtitle mb-4">
-        Public health summary for scheduled jobs and ingest monitoring. Updated on each page load.
-      </p>
-      <p class:list={["text-lg font-semibold mb-2", status.healthy ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"]}>
+    <PageHeader
+      kicker="Status"
+      title="System status"
+      lede="Public health summary for scheduled jobs and ingest monitoring. Updated on each page load."
+    />
+
+    <section class="card">
+      <p class:list={["text-lg font-semibold mb-2", status.healthy ? "text-[var(--color-success-text)]" : "text-[var(--color-danger)]"]}>
         {status.healthy ? "All systems operational" : "Degraded — investigating"}
       </p>
       <dl class="text-sm space-y-2 mb-0">
