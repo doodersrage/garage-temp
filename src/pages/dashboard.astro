@@ -28,7 +28,9 @@ import ReferralCard from "../components/ReferralCard.astro";
 import TimeToFreezeCard from "../components/TimeToFreezeCard.astro";
 import WeekCompareCard from "../components/WeekCompareCard.astro";
 import UpgradeNudge from "../components/UpgradeNudge.astro";
+import HaSetupCard from "../components/HaSetupCard.astro";
 import { nextUpgradeTier } from "../lib/planComparison";
+import { getSiteUrl } from "../lib/stripe";
 import {
   fetchWeekCompare,
   buildTimeToFreezeFromPoints,
