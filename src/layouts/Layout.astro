@@ -145,7 +145,7 @@ const isDashboard = currentPath.startsWith("/dashboard");
 							<>
 								<a href="/signin" class:list={["nav-link", currentPath === "/signin" && "nav-link-active"]}>Sign in</a>
 								{!isDashboard && (
-									<a href="/register" class:list={["nav-link", currentPath === "/register" && "nav-link-active"]}>Register</a>
+									<a href="/register" class="nav-cta">Register</a>
 								)}
 							</>
 						)}
@@ -217,6 +217,7 @@ const isDashboard = currentPath.startsWith("/dashboard");
 				const setOpen = (open) => {
 					nav.classList.toggle("site-nav-open", open);
 					toggle.setAttribute("aria-expanded", open ? "true" : "false");
+					toggle.textContent = open ? "Close" : "Menu";
 				};
 
 				toggle.addEventListener("click", (event) => {

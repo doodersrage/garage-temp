@@ -17,51 +17,50 @@ import PlanComparisonTable from "../components/PlanComparisonTable.astro";
     >
       <a slot="actions" class="btn-primary" href="/pricing">See plans &amp; pricing</a>
       <a slot="actions" class="btn-secondary" href="/register">Start free</a>
-      <a slot="actions" class="btn-ghost" href="/stories/garage-freeze-alert">Customer story</a>
     </PageHeader>
 
     <section class="card">
       <h2 class="card-title">Garage Temp vs alternatives</h2>
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="plan-comparison-table">
           <thead>
-            <tr class="text-left text-[var(--color-text-muted)]">
-              <th class="py-2 pr-3">Capability</th>
-              <th class="py-2 pr-3">Garage Temp</th>
-              <th class="py-2 pr-3">DIY script + cron</th>
-              <th class="py-2">Generic IoT app</th>
+            <tr>
+              <th>Capability</th>
+              <th>Garage Temp</th>
+              <th>DIY script + cron</th>
+              <th>Generic IoT app</th>
             </tr>
           </thead>
           <tbody>
-            <tr class="border-t border-[var(--color-border)]">
-              <td class="py-2 pr-3">Freeze alerts (email/SMS/push)</td>
-              <td class="py-2 pr-3">Built-in, per-household</td>
-              <td class="py-2 pr-3">You wire Twilio + cron</td>
-              <td class="py-2">Varies; often push-only</td>
+            <tr>
+              <td>Freeze alerts (email/SMS/push)</td>
+              <td>Built-in, per-household</td>
+              <td>You wire Twilio + cron</td>
+              <td>Varies; often push-only</td>
             </tr>
-            <tr class="border-t border-[var(--color-border)]">
-              <td class="py-2 pr-3">ESP/Arduino push ingest</td>
-              <td class="py-2 pr-3">One-time device key</td>
-              <td class="py-2 pr-3">Custom endpoint</td>
-              <td class="py-2">Often cloud-vendor lock-in</td>
+            <tr>
+              <td>ESP/Arduino push ingest</td>
+              <td>One-time device key</td>
+              <td>Custom endpoint</td>
+              <td>Often cloud-vendor lock-in</td>
             </tr>
-            <tr class="border-t border-[var(--color-border)]">
-              <td class="py-2 pr-3">History & CSV export</td>
-              <td class="py-2 pr-3">Member+</td>
-              <td class="py-2 pr-3">Self-hosted DB</td>
-              <td class="py-2">Subscription tiers</td>
+            <tr>
+              <td>History & CSV export</td>
+              <td>Member+</td>
+              <td>Self-hosted DB</td>
+              <td>Subscription tiers</td>
             </tr>
-            <tr class="border-t border-[var(--color-border)]">
-              <td class="py-2 pr-3">Share links & Grafana</td>
-              <td class="py-2 pr-3">Pro</td>
-              <td class="py-2 pr-3">Manual setup</td>
-              <td class="py-2">Rare on consumer apps</td>
+            <tr>
+              <td>Share links & Grafana</td>
+              <td>Pro</td>
+              <td>Manual setup</td>
+              <td>Rare on consumer apps</td>
             </tr>
-            <tr class="border-t border-[var(--color-border)]">
-              <td class="py-2 pr-3">Household multi-user</td>
-              <td class="py-2 pr-3">Free</td>
-              <td class="py-2 pr-3">N/A</td>
-              <td class="py-2">Family plans extra</td>
+            <tr>
+              <td>Household multi-user</td>
+              <td>Free</td>
+              <td>N/A</td>
+              <td>Family plans extra</td>
             </tr>
           </tbody>
         </table>
@@ -75,11 +74,10 @@ import PlanComparisonTable from "../components/PlanComparisonTable.astro";
         <li><strong>Member</strong> — CSV history and more devices through a cold season.</li>
         <li><strong>Pro</strong> — SMS, push, share links, and webhooks when someone needs to wake up at 2 a.m.</li>
       </ul>
-      <p class="mb-0">
+      <div class="flex flex-wrap gap-3">
         <a class="btn-primary" href="/pricing">Compare Free, Member, and Pro</a>
-        {" "}
-        <a class="text-link" href="/register">Create free account</a>
-      </p>
+        <a class="btn-secondary" href="/register">Create free account</a>
+      </div>
     </section>
 
     <section class="card">

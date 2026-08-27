@@ -5,9 +5,11 @@ import { weatherMapEmbedUrl, weatherMapExternalUrl } from "../lib/FetchWeather";
 interface Props {
   cityId?: string | null;
   intervalMs?: number;
+  /** Guest marketing home — avoid dashboard-only CTAs */
+  guest?: boolean;
 }
 
-export default function WeatherPanel({ cityId = null, intervalMs = 300000 }: Props) {
+export default function WeatherPanel({ cityId = null, intervalMs = 300000, guest = false }: Props) {
   const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,7 +52,9 @@ export default function WeatherPanel({ cityId = null, intervalMs = 300000 }: Pro
   if (loading && !weather) {
     return (
       <section class="card animate-slide-in-right">
-        <p class="live-refresh-note m-0">Loading outdoor weather…</p>
+        <div class="loading-state">
+          <p class="m-0">Loading outdoor weather…</p>
+        </div>
       </section>
     );
   }
@@ -59,7 +63,7 @@ export default function WeatherPanel({ cityId = null, intervalMs = 300000 }: Pro
     return (
       <section class="card animate-slide-in-right">
         <div class="empty-state">
-          <h2 class="card-title">Current Weather</h2>
+          <h2 class="card-title">Current weather</h2>
           <p class="mb-4">{error}</p>
           <div class="flex flex-wrap justify-center gap-3">
             <button type="button" class="btn-secondary" onClick={() => {
@@ -68,9 +72,15 @@ export default function WeatherPanel({ cityId = null, intervalMs = 300000 }: Pro
             }}>
               Retry
             </button>
-            <a class="btn-ghost" href="/dashboard#weather">
-              Change location
-            </a>
+            {guest ? (
+              <a class="btn-ghost" href="/register">
+                Create account to set location
+              </a>
+            ) : (
+              <a class="btn-ghost" href="/dashboard#weather">
+                Change location
+              </a>
+            )}
           </div>
         </div>
       </section>
@@ -101,7 +111,7 @@ export default function WeatherPanel({ cityId = null, intervalMs = 300000 }: Pro
 
   return (
     <section class="card animate-slide-in-right">
-      <h2 class="card-title">Current Weather</h2>
+      <h2 class="card-title">Current weather</h2>
       <p class="card-subtitle">{locationLabel}</p>
       {error && (
         <div class="alert-warning mb-4">

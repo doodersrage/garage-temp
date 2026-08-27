@@ -69,7 +69,9 @@ export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
   if (loading && groups.length === 0) {
     return (
       <section class="card animate-slide-in-left">
-        <p class="live-refresh-note m-0">Loading garage temperatures…</p>
+        <div class="loading-state">
+          <p class="m-0">Loading garage temperatures…</p>
+        </div>
       </section>
     );
   }
@@ -91,8 +93,8 @@ export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
       {!error && groups.length === 0 ? (
         <div class="empty-state">
           <p class="mb-4">No temperature feeds are available yet.</p>
-          <a class="btn-primary" href="/signin">
-            Sign in to connect your probes
+          <a class="btn-primary" href="/register">
+            Create an account to connect probes
           </a>
         </div>
       ) : (

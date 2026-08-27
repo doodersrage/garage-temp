@@ -7,7 +7,9 @@ import {
   listLatestFreezeMapSnapshots,
 } from "../lib/freezeMap";
 import { formatRelativeAge } from "../lib/relativeTime";
+import { getAuthFromCookies } from "../lib/auth";
 
+const { user } = await getAuthFromCookies(Astro.cookies);
 const showSparse = Astro.url.searchParams.get("sparse") === "1";
 const snapshots = await listLatestFreezeMapSnapshots();
 const sparklines = await listFreezeMapSparklines(7);
@@ -59,7 +61,14 @@ function sparkPath(values: number[]): string {
       title="Freeze-risk map"
       lede="Anonymized indoor garage temperatures by city from households that opt in. No addresses, device names, or household identifiers — only city-level averages."
     >
-      <a slot="actions" class="btn-secondary" href="/dashboard/household">Opt in from Household</a>
+      {user ? (
+        <a slot="actions" class="btn-secondary" href="/dashboard/household">Opt in from Household</a>
+      ) : (
+        <>
+          <a slot="actions" class="btn-primary" href="/register?next=/dashboard/household">Create account to opt in</a>
+          <a slot="actions" class="btn-secondary" href="/signin?next=/dashboard/household">Sign in</a>
+        </>
+      )}
       <a slot="actions" class="btn-ghost" href="/embed/freeze-map">Embed</a>
     </PageHeader>
 
@@ -92,7 +101,11 @@ function sparkPath(values: number[]): string {
         <p class="card-subtitle mb-4">
           Pin color reflects freeze-risk share (green = low, red = high). Only cities with coordinates are shown.
         </p>
-        <div id="freeze-map-leaflet" class="weather-map-frame" style="height:22rem"></div>
+        <div id="freeze-map-leaflet" class="weather-map-frame freeze-map-frame" style="height:22rem">
+          <div class="loading-state freeze-map-loading" id="freeze-map-loading">
+            <p class="m-0">Loading map…</p>
+          </div>
+        </div>
         <link
           rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -103,11 +116,14 @@ function sparkPath(values: number[]): string {
             const pins = JSON.parse(mapPinsJson);
             function init() {
               const el = document.getElementById("freeze-map-leaflet");
+              const loading = document.getElementById("freeze-map-loading");
               if (!el || typeof L === "undefined" || pins.length === 0) return;
+              if (loading) loading.remove();
               const map = L.map(el).setView([pins[0].lat, pins[0].lon], 4);
-              L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                attribution: "© OpenStreetMap",
+              L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
                 maxZoom: 18,
+                subdomains: "abcd",
               }).addTo(map);
               for (const pin of pins) {
                 const color =
@@ -154,19 +170,21 @@ function sparkPath(values: number[]): string {
       {visible.length === 0 ? (
         <p class="mb-0 text-[var(--color-text-muted)]">
           No city samples yet{!showSparse && sparseHidden > 0 ? " that meet the sample floor" : ""}.
-          Be the first to opt in from your household settings.
+          {user
+            ? " Be the first to opt in from your household settings."
+            : " Create an account and opt in from Household settings to contribute."}
         </p>
       ) : (
         <div class="overflow-x-auto">
-          <table class="w-full text-sm">
+          <table class="data-table">
             <thead>
-              <tr class="text-left text-[var(--color-text-muted)]">
-                <th class="py-2 pr-3">City</th>
-                <th class="py-2 pr-3">Trend</th>
-                <th class="py-2 pr-3">Samples</th>
-                <th class="py-2 pr-3">Avg °F</th>
-                <th class="py-2 pr-3">Min °F</th>
-                <th class="py-2">Freeze-risk share</th>
+              <tr>
+                <th>City</th>
+                <th>Trend</th>
+                <th>Samples</th>
+                <th>Avg °F</th>
+                <th>Min °F</th>
+                <th>Freeze-risk share</th>
               </tr>
             </thead>
             <tbody>
@@ -179,8 +197,8 @@ function sparkPath(values: number[]): string {
                 const spark = sparklines.get(row.city_id) ?? [];
                 const path = sparkPath(spark);
                 return (
-                  <tr class="border-t border-[var(--color-border)]">
-                    <td class="py-2 pr-3">
+                  <tr>
+                    <td>
                       <strong>{row.city_label}</strong>
                       {sparse && (
                         <span class="block text-xs text-[var(--color-text-muted)]">
@@ -188,7 +206,7 @@ function sparkPath(values: number[]): string {
                         </span>
                       )}
                     </td>
-                    <td class="py-2 pr-3">
+                    <td>
                       {path ? (
                         <svg width="80" height="24" aria-hidden="true">
                           <path d={path} fill="none" stroke="currentColor" stroke-width="1.5" />
@@ -197,14 +215,14 @@ function sparkPath(values: number[]): string {
                         "—"
                       )}
                     </td>
-                    <td class="py-2 pr-3">{row.sample_count}</td>
-                    <td class="py-2 pr-3">
+                    <td>{row.sample_count}</td>
+                    <td>
                       {row.avg_temp_f != null ? row.avg_temp_f.toFixed(1) : "—"}
                     </td>
-                    <td class="py-2 pr-3">
+                    <td>
                       {row.min_temp_f != null ? row.min_temp_f.toFixed(1) : "—"}
                     </td>
-                    <td class="py-2">{riskPct}% ({row.freeze_risk_count})</td>
+                    <td>{riskPct}% ({row.freeze_risk_count})</td>
                   </tr>
                 );
               })}
@@ -217,7 +235,10 @@ function sparkPath(values: number[]): string {
     <section class="card">
       <h2 class="card-title">Find your city</h2>
       <p class="card-subtitle mb-4">
-        Search OpenWeather geocoding to see if your metro is on the map. Household owners opt in under Dashboard → Household.
+        Search OpenWeather geocoding to see if your metro is on the map.
+        {user
+          ? " Household owners opt in under Dashboard → Household."
+          : " Sign in to opt your household in."}
       </p>
       <div class="form-field mb-0">
         <label class="form-label" for="freeze-map-search">City search</label>
@@ -249,10 +270,12 @@ function sparkPath(values: number[]): string {
           const rows = Array.isArray(data.results) ? data.results : [];
           results.innerHTML = rows
             .slice(0, 6)
-            .map(
-              (row) =>
-                `<li><strong>${row.label}</strong> · ${row.lat?.toFixed?.(2) ?? "?"}, ${row.lon?.toFixed?.(2) ?? "?"} · ID ${row.id}</li>`,
-            )
+            .map((row) => {
+              const lat = row.lat?.toFixed?.(2) ?? "?";
+              const lon = row.lon?.toFixed?.(2) ?? "?";
+              const label = String(row.label ?? "").replace(/</g, "&lt;");
+              return `<li><strong>${label}</strong> · ${lat}, ${lon}</li>`;
+            })
             .join("");
         } catch {
           results.innerHTML = "<li>Search failed.</li>";

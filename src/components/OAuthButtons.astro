@@ -16,7 +16,7 @@ const providers = [
 ];
 ---
 
-<div class="oauth-buttons form-panel">
+<div class="oauth-buttons">
   <p class="oauth-divider"><span>or continue with</span></p>
   <div class="flex flex-col gap-2">
     {providers.map(({ id, label }) => (
@@ -32,7 +32,9 @@ const providers = [
 
 <style>
   .oauth-buttons {
-    margin-top: 0;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-border);
   }
 
   .oauth-divider {

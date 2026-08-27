@@ -19,7 +19,7 @@ const showWeather = !isAuthenticated || preferences!.showWeather;
 		<div class="home-marketing">
 			<section class="home-hero home-hero--bleed">
 				<div class="home-hero-inner">
-					<p class="home-hero-brand">Garage Temperature Monitor</p>
+					<h1 class="home-hero-brand">Garage Temperature Monitor</h1>
 					<p class="home-hero-lead">
 						Watch freeze risk in real time, compare indoor conditions with outdoor weather,
 						and get alerts before pipes and storage take damage.
@@ -34,24 +34,24 @@ const showWeather = !isAuthenticated || preferences!.showWeather;
 			<div class="page-shell page-stack">
 				<div class="home-live" aria-label="Live demo readings">
 					{showGarageTemps && <DemoTempsPanel client:visible />}
-					{showWeather && <WeatherPanel client:visible cityId={null} />}
+					{showWeather && <WeatherPanel client:visible cityId={null} guest />}
 				</div>
 
 				<section class="home-features" aria-label="Product highlights">
 					<article class="home-feature">
-						<p class="home-feature-title">Freeze-aware alerts</p>
+						<h2 class="home-feature-title">Freeze-aware alerts</h2>
 						<p class="home-feature-copy">
 							Threshold, forecast, and NWS-backed cold risk across email, SMS, push, and webhooks.
 						</p>
 					</article>
 					<article class="home-feature">
-						<p class="home-feature-title">Your sensors</p>
+						<h2 class="home-feature-title">Your sensors</h2>
 						<p class="home-feature-copy">
 							ESP/Arduino push ingest or HTTPS JSON feeds — map spaces, doors, flood, and power too.
 						</p>
 					</article>
 					<article class="home-feature">
-						<p class="home-feature-title">Household ready</p>
+						<h2 class="home-feature-title">Household ready</h2>
 						<p class="home-feature-copy">
 							Share access, history, and status pages without handing out a login password.
 						</p>

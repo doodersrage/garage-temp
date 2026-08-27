@@ -78,7 +78,7 @@ const proAnnual = priceForInterval(proPrices, "annual");
       )}
     </PageHeader>
 
-    <section class="card plan-tier-cards">
+    <section class="plan-tier-section">
       <div class="billing-interval-toggle" role="group" aria-label="Billing interval">
         <button
           type="button"
@@ -103,120 +103,140 @@ const proAnnual = priceForInterval(proPrices, "annual");
 
       <div class="plan-tier-grid">
         <article class="plan-tier-card">
+          <div class="plan-tier-badge-slot" aria-hidden="true"></div>
           <h2 class="plan-tier-name">Free</h2>
           <p class="plan-tier-price">$0</p>
+          <div class="plan-tier-meta">
+            <p class="plan-tier-savings">&nbsp;</p>
+            <p class="plan-tier-sub">&nbsp;</p>
+          </div>
           <p class="plan-tier-tagline">Live monitoring for one garage</p>
           <ul class="plan-tier-list">
             <li>2 push devices</li>
             <li>Email & chat alerts</li>
             <li>Charts & dashboard</li>
           </ul>
-          {!user && (
-            <a class="btn-secondary w-full" href="/register">Get started</a>
-          )}
+          <div class="plan-tier-footer">
+            {!user ? (
+              <a class="btn-secondary" href="/register">Get started</a>
+            ) : currentTier === "free" ? (
+              <p>Current plan</p>
+            ) : (
+              <p>Included in your plan</p>
+            )}
+          </div>
         </article>
 
         <article class="plan-tier-card plan-tier-card-featured">
-          <p class="plan-tier-badge">Most popular</p>
+          <div class="plan-tier-badge-slot">
+            <p class="plan-tier-badge">Most popular</p>
+          </div>
           <h2 class="plan-tier-name">Member</h2>
           <p
             class="plan-tier-price"
             data-price-monthly={memberMonthly.main}
             data-price-annual={memberAnnual.main}
-            data-sub-monthly=""
-            data-sub-annual={memberAnnual.sub ?? ""}
           >
             {defaultInterval === "annual" ? memberAnnual.main : memberMonthly.main}
           </p>
-          <p
-            class="plan-tier-savings text-sm text-[var(--color-text-muted)] mb-2"
-            data-savings-monthly=""
-            data-savings-annual={memberPrices.annualSavingsPct != null && memberPrices.annualSavingsPct > 0
-              ? `Save ${memberPrices.annualSavingsPct}% with annual billing`
-              : ""}
-          >
-            {defaultInterval === "annual" && memberPrices.annualSavingsPct != null && memberPrices.annualSavingsPct > 0
-              ? `Save ${memberPrices.annualSavingsPct}% with annual billing`
-              : "\u00a0"}
-          </p>
-          <p
-            class="plan-tier-sub text-sm text-[var(--color-text-muted)] mb-2"
-            data-sub-monthly=""
-            data-sub-annual={memberAnnual.sub ?? ""}
-          >
-            {defaultInterval === "annual" ? (memberAnnual.sub ?? "\u00a0") : "\u00a0"}
-          </p>
+          <div class="plan-tier-meta">
+            <p
+              class="plan-tier-savings"
+              data-savings-monthly=""
+              data-savings-annual={memberPrices.annualSavingsPct != null && memberPrices.annualSavingsPct > 0
+                ? `Save ${memberPrices.annualSavingsPct}% with annual billing`
+                : ""}
+            >
+              {defaultInterval === "annual" && memberPrices.annualSavingsPct != null && memberPrices.annualSavingsPct > 0
+                ? `Save ${memberPrices.annualSavingsPct}% with annual billing`
+                : "\u00a0"}
+            </p>
+            <p
+              class="plan-tier-sub"
+              data-sub-monthly=""
+              data-sub-annual={memberAnnual.sub ?? ""}
+            >
+              {defaultInterval === "annual" ? (memberAnnual.sub ?? "\u00a0") : "\u00a0"}
+            </p>
+          </div>
           <p class="plan-tier-tagline">History export & more headroom</p>
           <ul class="plan-tier-list">
             <li>6 push devices</li>
             <li>CSV history export</li>
             <li>Everything in Free</li>
           </ul>
-          {user ? (
-            currentTier === "free" ? (
-              <form action="/api/stripe/checkout" method="post" class="checkout-form">
-                <input type="hidden" name="plan" value="member" />
-                <input type="hidden" name="interval" value={defaultInterval} data-interval-input />
-                <button class="btn-primary w-full" type="submit">Upgrade to Member</button>
-              </form>
+          <div class="plan-tier-footer">
+            {user ? (
+              currentTier === "free" ? (
+                <form action="/api/stripe/checkout" method="post" class="checkout-form">
+                  <input type="hidden" name="plan" value="member" />
+                  <input type="hidden" name="interval" value={defaultInterval} data-interval-input />
+                  <button class="btn-primary" type="submit">Upgrade to Member</button>
+                </form>
+              ) : (
+                <p>Included in your plan</p>
+              )
             ) : (
-              <p class="text-sm text-[var(--color-text-muted)] mb-0">Included in your plan</p>
-            )
-          ) : (
-            <a class="btn-primary w-full" href="/signin?next=/pricing">Sign in to subscribe</a>
-          )}
+              <a class="btn-primary" href="/signin?next=/pricing">Sign in to subscribe</a>
+            )}
+          </div>
         </article>
 
         <article class="plan-tier-card">
+          <div class="plan-tier-badge-slot" aria-hidden="true"></div>
           <h2 class="plan-tier-name">Pro</h2>
           <p
             class="plan-tier-price"
-            data-price-monthly={proMonthly.main === "Contact us" ? proMonthly.main : `${proMonthly.main}/mo · 14-day trial`}
-            data-price-annual={proAnnual.main === "Contact us" ? proAnnual.main : `${proAnnual.main}/yr · 14-day trial`}
-            data-sub-monthly=""
-            data-sub-annual={proAnnual.sub ?? ""}
+            data-price-monthly={proMonthly.main === "Contact us" ? proMonthly.main : `${proMonthly.main}/mo`}
+            data-price-annual={proAnnual.main === "Contact us" ? proAnnual.main : `${proAnnual.main}/yr`}
           >
             {defaultInterval === "annual"
-              ? (proAnnual.main === "Contact us" ? proAnnual.main : `${proAnnual.main}/yr · 14-day trial`)
-              : (proMonthly.main === "Contact us" ? proMonthly.main : `${proMonthly.main}/mo · 14-day trial`)}
+              ? (proAnnual.main === "Contact us" ? proAnnual.main : `${proAnnual.main}/yr`)
+              : (proMonthly.main === "Contact us" ? proMonthly.main : `${proMonthly.main}/mo`)}
           </p>
-          <p
-            class="plan-tier-savings text-sm text-[var(--color-text-muted)] mb-2"
-            data-savings-monthly=""
-            data-savings-annual={proPrices.annualSavingsPct != null && proPrices.annualSavingsPct > 0
-              ? `Save ${proPrices.annualSavingsPct}% annually`
-              : ""}
-          >
-            {defaultInterval === "annual" && proPrices.annualSavingsPct != null && proPrices.annualSavingsPct > 0
-              ? `Save ${proPrices.annualSavingsPct}% annually`
-              : "\u00a0"}
-          </p>
-          <p
-            class="plan-tier-sub text-sm text-[var(--color-text-muted)] mb-2"
-            data-sub-monthly=""
-            data-sub-annual={proAnnual.sub ?? ""}
-          >
-            {defaultInterval === "annual" ? (proAnnual.sub ?? "\u00a0") : "\u00a0"}
-          </p>
+          <div class="plan-tier-meta">
+            <p
+              class="plan-tier-savings"
+              data-savings-monthly=""
+              data-savings-annual={proPrices.annualSavingsPct != null && proPrices.annualSavingsPct > 0
+                ? `Save ${proPrices.annualSavingsPct}% annually`
+                : ""}
+            >
+              {defaultInterval === "annual" && proPrices.annualSavingsPct != null && proPrices.annualSavingsPct > 0
+                ? `Save ${proPrices.annualSavingsPct}% annually`
+                : "\u00a0"}
+            </p>
+            <p
+              class="plan-tier-sub"
+              data-sub-monthly="14-day free trial"
+              data-sub-annual={proAnnual.sub ? `${proAnnual.sub} · 14-day free trial` : "14-day free trial"}
+            >
+              {defaultInterval === "annual"
+                ? (proAnnual.sub ? `${proAnnual.sub} · 14-day free trial` : "14-day free trial")
+                : "14-day free trial"}
+            </p>
+          </div>
           <p class="plan-tier-tagline">Alerts anywhere + integrations</p>
           <ul class="plan-tier-list">
             <li>24 push devices</li>
             <li>SMS, push, webhooks</li>
             <li>Share links & API keys</li>
           </ul>
-          {user ? (
-            currentTier !== "pro" ? (
-              <form action="/api/stripe/checkout" method="post" class="checkout-form">
-                <input type="hidden" name="plan" value="pro" />
-                <input type="hidden" name="interval" value={defaultInterval} data-interval-input />
-                <button class="btn-primary w-full" type="submit">Start Pro trial</button>
-              </form>
+          <div class="plan-tier-footer">
+            {user ? (
+              currentTier !== "pro" ? (
+                <form action="/api/stripe/checkout" method="post" class="checkout-form">
+                  <input type="hidden" name="plan" value="pro" />
+                  <input type="hidden" name="interval" value={defaultInterval} data-interval-input />
+                  <button class="btn-primary" type="submit">Start Pro trial</button>
+                </form>
+              ) : (
+                <p>You're on Pro</p>
+              )
             ) : (
-              <p class="text-sm text-[var(--color-text-muted)] mb-0">You're on Pro</p>
-            )
-          ) : (
-            <a class="btn-primary w-full" href="/signin?next=/pricing">Sign in for Pro trial</a>
-          )}
+              <a class="btn-primary" href="/signin?next=/pricing">Sign in for Pro trial</a>
+            )}
+          </div>
         </article>
       </div>
       {user && hasBilling && (
