@@ -1337,6 +1337,30 @@
     gap: 1rem;
   }
 
+  .dashboard-insights {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 1024px) {
+    .dashboard-insights {
+      grid-template-columns: minmax(0, 1.6fr) minmax(17rem, 0.9fr);
+      align-items: start;
+    }
+  }
+
+  .dashboard-insights-primary,
+  .dashboard-insights-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .dashboard-flash {
+    display: grid;
+    gap: 0.5rem;
+  }
+
   .dashboard-overview-header {
     display: grid;
     gap: 1rem;

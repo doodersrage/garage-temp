@@ -1,0 +1,70 @@
+---
+import DashboardLayout from "../layouts/DashboardLayout.astro";
+import DisplayPreferences from "../components/DisplayPreferences.astro";
+import PwaInstallCard from "../components/dashboard/PwaInstallCard.astro";
+import DashboardCard from "../components/dashboard/DashboardCard.astro";
+import { getAuthFromCookies } from "../lib/auth";
+import { getUserPreferences } from "../lib/userPreferences";
+
+const { session, user } = await getAuthFromCookies(Astro.cookies);
+if (!session || !user) {
+  return Astro.redirect("/signin");
+}
+
+const preferences = await getUserPreferences(user);
+const prefsSaved = Astro.url.searchParams.get("prefs_saved");
+const prefsError = Astro.url.searchParams.get("prefs_error");
+const passwordUpdated = Astro.url.searchParams.get("password") === "updated";
+const onboardingDismissed =
+  (user.user_metadata as Record<string, unknown> | undefined)?.onboarding_dismissed ===
+  true;
+---
+<DashboardLayout title="Settings">
+  <div class="space-y-6">
+    <section class="card">
+      <h1 class="card-title">Settings</h1>
+      <p class="card-subtitle mb-0">
+        Home page display, theme, and install options for this account.
+      </p>
+      {passwordUpdated && (
+        <p class="alert-success" role="status">Password updated.</p>
+      )}
+      {prefsSaved && (
+        <p class="alert-success" role="status">Display preferences saved.</p>
+      )}
+      {prefsError && (
+        <p class="alert-warning" role="alert">Could not save display preferences.</p>
+      )}
+    </section>
+
+    <DisplayPreferences preferences={preferences} redirectTo="/dashboard/settings" />
+
+    <PwaInstallCard />
+
+    <DashboardCard>
+      <h2 class="card-title">Getting started checklist</h2>
+      <p class="card-subtitle mb-3">
+        {onboardingDismissed
+          ? "The overview checklist is currently hidden."
+          : "The overview checklist shows until setup is complete."}
+      </p>
+      <form action="/api/user/onboarding" method="post">
+        <input type="hidden" name="action" value={onboardingDismissed ? "reset" : "dismiss"} />
+        <input type="hidden" name="redirect" value="/dashboard/settings" />
+        <button type="submit" class="btn-secondary">
+          {onboardingDismissed ? "Show checklist on overview" : "Hide checklist on overview"}
+        </button>
+      </form>
+    </DashboardCard>
+
+    <DashboardCard>
+      <h2 class="card-title">Related</h2>
+      <div class="flex flex-wrap gap-2">
+        <a class="btn-secondary" href="/dashboard/plans">Plans & billing</a>
+        <a class="btn-secondary" href="/dashboard/household">Household</a>
+        <a class="btn-secondary" href="/dashboard/share">Share & integrations</a>
+        <a class="btn-secondary" href="/dashboard/alerts">Alerts</a>
+      </div>
+    </DashboardCard>
+  </div>
+</DashboardLayout>

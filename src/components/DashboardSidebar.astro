@@ -6,6 +6,7 @@ import History from "@lucide/astro/icons/history";
 import Users from "@lucide/astro/icons/users";
 import Share2 from "@lucide/astro/icons/share-2";
 import CreditCard from "@lucide/astro/icons/credit-card";
+import Settings from "@lucide/astro/icons/settings";
 import Activity from "@lucide/astro/icons/activity";
 import Radio from "@lucide/astro/icons/radio";
 import Timer from "@lucide/astro/icons/timer";
@@ -73,6 +74,12 @@ const accountItems: NavItem[] = [
     label: "Plans",
     isActive: currentPath.startsWith("/dashboard/plans"),
     Icon: CreditCard,
+  },
+  {
+    href: "/dashboard/settings",
+    label: "Settings",
+    isActive: currentPath.startsWith("/dashboard/settings"),
+    Icon: Settings,
   },
 ];
 

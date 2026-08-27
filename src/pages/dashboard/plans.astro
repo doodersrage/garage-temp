@@ -3,11 +3,13 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import PlansCard from "../../components/PlansCard.astro";
 import PlanComparisonTable from "../../components/PlanComparisonTable.astro";
 import UpgradeNudge from "../../components/UpgradeNudge.astro";
+import ReferralCard from "../../components/ReferralCard.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { canDownloadHistoryCsv } from "../../lib/adminAccess";
 import { getUserSubscription } from "../../lib/stripeSubscriptions";
 import { normalizeComparisonTier, nextUpgradeTier } from "../../lib/planComparison";
+import { getSiteUrl } from "../../lib/stripe";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
@@ -23,6 +25,10 @@ const [entitlements, subscription, canDownloadCsv] = await Promise.all([
 const currentTier = normalizeComparisonTier(entitlements.tier);
 const upgradeTarget = nextUpgradeTier(entitlements.tier);
 const subscriptionNotice = Astro.url.searchParams.get("subscription");
+const siteUrl = getSiteUrl(Astro.request);
+const referralRewardDays = Number(
+  (user.user_metadata as Record<string, unknown> | undefined)?.referral_reward_days ?? 0,
+);
 ---
 <DashboardLayout title="Plans">
   <div class="space-y-6">
@@ -48,6 +54,8 @@ const subscriptionNotice = Astro.url.searchParams.get("subscription");
       entitlements={entitlements}
       subscriptionNotice={subscriptionNotice}
     />
+
+    <ReferralCard siteUrl={siteUrl} rewardDays={referralRewardDays} />
 
     <section class="card">
       <h2 class="card-title">Feature comparison</h2>

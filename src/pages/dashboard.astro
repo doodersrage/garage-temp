@@ -1,8 +1,6 @@
 ---
 import DashboardLayout from "../layouts/DashboardLayout.astro";
-import DisplayPreferences from "../components/DisplayPreferences.astro";
 import DashboardOnboarding from "../components/DashboardOnboarding.astro";
-import PlansCard from "../components/PlansCard.astro";
 import { getAuthFromCookies } from "../lib/auth";
 import { getUserPreferences } from "../lib/userPreferences";
 import { fetchGarageTempHistory } from "../lib/garageTempsHistory";
@@ -10,8 +8,6 @@ import { fetchUserTempConfig } from "../lib/userTempConfig";
 import { getUserEntitlements } from "../lib/entitlements";
 import { getUserDevicesAsTempConfig, listHouseholdDevices } from "../lib/devices";
 import { getAlertSettingsForUser } from "../lib/notify";
-import { getUserSubscription } from "../lib/stripeSubscriptions";
-import { canDownloadHistoryCsv } from "../lib/adminAccess";
 import {
   getOrCreateHouseholdForUser,
   listHouseholdMembers,
@@ -23,13 +19,10 @@ import {
 import HouseholdSwitcher from "../components/HouseholdSwitcher.astro";
 import DoorDurationCard from "../components/DoorDurationCard.astro";
 import DoorEventHistory from "../components/DoorEventHistory.astro";
-import ReferralCard from "../components/ReferralCard.astro";
 import TimeToFreezeCard from "../components/TimeToFreezeCard.astro";
 import WeekCompareCard from "../components/WeekCompareCard.astro";
 import UpgradeNudge from "../components/UpgradeNudge.astro";
-import HaSetupCard from "../components/HaSetupCard.astro";
 import { nextUpgradeTier } from "../lib/planComparison";
-import { getSiteUrl } from "../lib/stripe";
 import {
   fetchWeekCompare,
   buildTimeToFreezeFromPoints,
@@ -44,13 +37,10 @@ import {
 } from "../lib/FetchWeather";
 import { fetchNwsAlerts } from "../lib/nwsAlerts";
 
-import WelcomeHeader from "../components/dashboard/WelcomeHeader.astro";
 import DashboardMetricGrid from "../components/dashboard/DashboardMetricGrid.astro";
 import MetricCard from "../components/dashboard/MetricCard.astro";
 import DashboardWeekChart from "../components/dashboard/DashboardWeekChart.astro";
 import NightsAtRiskCard from "../components/dashboard/NightsAtRiskCard.astro";
-import AlertsShortcutCard from "../components/dashboard/AlertsShortcutCard.astro";
-import PwaInstallCard from "../components/dashboard/PwaInstallCard.astro";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -58,21 +48,29 @@ if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const [preferences, tempConfig, history, entitlements, deviceConfig, alertSettings, subscription, canDownloadCsv, household, feedHealth, userHouseholds, activeHouseholdId] =
-  await Promise.all([
-    getUserPreferences(user),
-    fetchUserTempConfig(user.id),
-    fetchGarageTempHistory(user.id, 1, 1),
-    getUserEntitlements(user.id),
-    getUserDevicesAsTempConfig(user.id, user.email),
-    getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
-    getUserSubscription(user.id),
-    canDownloadHistoryCsv(user.id),
-    getOrCreateHouseholdForUser(user.id, user.email),
-    checkFeedHealth(user.id),
-    listUserHouseholds(user.id),
-    getUserHouseholdId(user.id),
-  ]);
+const [
+  preferences,
+  tempConfig,
+  history,
+  entitlements,
+  deviceConfig,
+  alertSettings,
+  household,
+  feedHealth,
+  userHouseholds,
+  activeHouseholdId,
+] = await Promise.all([
+  getUserPreferences(user),
+  fetchUserTempConfig(user.id),
+  fetchGarageTempHistory(user.id, 1, 1),
+  getUserEntitlements(user.id),
+  getUserDevicesAsTempConfig(user.id, user.email),
+  getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
+  getOrCreateHouseholdForUser(user.id, user.email),
+  checkFeedHealth(user.id),
+  listUserHouseholds(user.id),
+  getUserHouseholdId(user.id),
+]);
 
 const members = household.householdId
   ? await listHouseholdMembers(household.householdId)
@@ -100,12 +98,9 @@ const onboardingDismissed =
   (user.user_metadata as Record<string, unknown> | undefined)?.onboarding_dismissed ===
   true;
 
-const siteUrl = getSiteUrl(Astro.request);
-
-const subscriptionNotice = Astro.url.searchParams.get("subscription");
+const passwordUpdated = Astro.url.searchParams.get("password") === "updated";
 const prefsSaved = Astro.url.searchParams.get("prefs_saved");
 const prefsError = Astro.url.searchParams.get("prefs_error");
-const passwordUpdated = Astro.url.searchParams.get("password") === "updated";
 
 const newestReading = latest
   .map((row) => row.recorded_at)
@@ -161,9 +156,6 @@ const timeToFreeze = buildTimeToFreezeFromPoints(
   chartWeek.points,
   alertSettings.freezeThresholdF,
 );
-const referralRewardDays = Number(
-  (user.user_metadata as Record<string, unknown> | undefined)?.referral_reward_days ?? 0,
-);
 
 const sensorsValue =
   sensorCount === 0
@@ -177,15 +169,42 @@ const feedsValue =
     : feedIssueCount > 0
       ? `${feedIssueCount} issue${feedIssueCount === 1 ? "" : "s"}`
       : `${feedHealth.statuses.length} online`;
+
+const upgradeTarget = nextUpgradeTier(entitlements.tier);
 ---
 <DashboardLayout title="Overview">
   <div class="dashboard-stack">
-    <WelcomeHeader
-      email={user.email}
-      planTier={entitlements.tier}
-      passwordUpdated={passwordUpdated}
-      prefsSaved={prefsSaved}
-      prefsError={prefsError}
+    {(passwordUpdated || prefsSaved || prefsError) && (
+      <div class="dashboard-flash">
+        {passwordUpdated && (
+          <p class="alert-success mt-0 mb-0" role="status">Password updated.</p>
+        )}
+        {prefsSaved && (
+          <p class="alert-success mt-0 mb-0" role="status">
+            Display preferences saved.
+            {" "}
+            <a class="text-link" href="/dashboard/settings">Open settings</a>
+          </p>
+        )}
+        {prefsError && (
+          <p class="alert-warning mt-0 mb-0" role="alert">
+            Could not save display preferences.
+            {" "}
+            <a class="text-link" href="/dashboard/settings">Try again in settings</a>
+          </p>
+        )}
+      </div>
+    )}
+
+    <DashboardOnboarding
+      hasDevices={hasDevices}
+      hasSensors={hasSensors}
+      hasHistory={history.totalCount > 0}
+      hasAlertsConfigured={hasAlertsConfigured}
+      hasHouseholdMembers={hasHouseholdMembers}
+      hasLiveSensors={latest.length > 0}
+      hasHousehold={Boolean(household.householdId)}
+      dismissed={onboardingDismissed}
     />
 
     <HouseholdSwitcher
@@ -199,17 +218,16 @@ const feedsValue =
       </p>
     )}
 
-    {nextUpgradeTier(entitlements.tier) === "member" && (
+    {upgradeTarget === "member" && (
       <UpgradeNudge feature="csv_export" tier={entitlements.tier} compact />
     )}
-    {nextUpgradeTier(entitlements.tier) === "pro" && (
+    {upgradeTarget === "pro" && (
       <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} compact />
     )}
 
     <section class="dashboard-section" id="status" aria-labelledby="status-heading">
       <div class="dashboard-section-head">
-        <h2 id="status-heading" class="dashboard-section-title">System status</h2>
-        <p class="dashboard-section-desc">Sensor freshness, feed health, and alert state.</p>
+        <h2 id="status-heading" class="dashboard-section-title">Status</h2>
       </div>
       <DashboardMetricGrid>
         <MetricCard
@@ -244,56 +262,29 @@ const feedsValue =
     <section class="dashboard-section" aria-labelledby="insights-heading">
       <div class="dashboard-section-head">
         <h2 id="insights-heading" class="dashboard-section-title">Insights</h2>
-        <p class="dashboard-section-desc">Freeze risk, door activity, and week-over-week trends.</p>
       </div>
-      <div class="dashboard-section-grid">
-        <DoorDurationCard devices={devices} />
-        <DoorEventHistory householdId={household.householdId} />
-        <TimeToFreezeCard
-          estimate={timeToFreeze}
-          freezeThresholdF={alertSettings.freezeThresholdF}
-          useCelsius={useCelsius}
-        />
-        <WeekCompareCard compare={weekCompareResult.compare} useCelsius={useCelsius} />
-        <DashboardWeekChart points={chartWeek.points} />
-        <NightsAtRiskCard
-          nightsAtRisk={nightsAtRisk}
-          nightsRiskCount={nightsRiskCount}
-          freezeThresholdF={alertSettings.freezeThresholdF}
-          weatherSnapshot={weatherSnapshot}
-          weatherHasCoords={weatherHasCoords}
-          nwsAlerts={nwsAlerts}
-        />
-      </div>
-    </section>
-
-    <section class="dashboard-section" aria-labelledby="setup-heading">
-      <div class="dashboard-section-head">
-        <h2 id="setup-heading" class="dashboard-section-title">Setup & account</h2>
-        <p class="dashboard-section-desc">Onboarding, preferences, billing, and integrations.</p>
-      </div>
-      <div class="dashboard-section-grid">
-        <DashboardOnboarding
-          hasDevices={hasDevices}
-          hasSensors={hasSensors}
-          hasHistory={history.totalCount > 0}
-          hasAlertsConfigured={hasAlertsConfigured}
-          hasHouseholdMembers={hasHouseholdMembers}
-          hasLiveSensors={latest.length > 0}
-          hasHousehold={Boolean(household.householdId)}
-          dismissed={onboardingDismissed}
-        />
-        <DisplayPreferences preferences={preferences} redirectTo="/dashboard" />
-        <PlansCard
-          canDownloadCsv={canDownloadCsv}
-          subscription={subscription}
-          entitlements={entitlements}
-          subscriptionNotice={subscriptionNotice}
-        />
-        <ReferralCard siteUrl={siteUrl} rewardDays={referralRewardDays} />
-        <HaSetupCard />
-        <PwaInstallCard />
-        <AlertsShortcutCard />
+      <div class="dashboard-insights">
+        <div class="dashboard-insights-primary">
+          <DashboardWeekChart points={chartWeek.points} />
+          <NightsAtRiskCard
+            nightsAtRisk={nightsAtRisk}
+            nightsRiskCount={nightsRiskCount}
+            freezeThresholdF={alertSettings.freezeThresholdF}
+            weatherSnapshot={weatherSnapshot}
+            weatherHasCoords={weatherHasCoords}
+            nwsAlerts={nwsAlerts}
+          />
+        </div>
+        <aside class="dashboard-insights-side">
+          <TimeToFreezeCard
+            estimate={timeToFreeze}
+            freezeThresholdF={alertSettings.freezeThresholdF}
+            useCelsius={useCelsius}
+          />
+          <WeekCompareCard compare={weekCompareResult.compare} useCelsius={useCelsius} />
+          <DoorDurationCard devices={devices} />
+          <DoorEventHistory householdId={household.householdId} />
+        </aside>
       </div>
     </section>
   </div>

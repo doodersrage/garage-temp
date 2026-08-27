@@ -26,7 +26,7 @@ const {
 } = Astro.props;
 ---
 {nightsAtRisk.length > 0 && (
-  <DashboardCard class="col-span-12">
+  <DashboardCard>
     <h2 class="card-title">Nights at risk this week</h2>
     <p class="card-subtitle mb-4">
       Forecast overnight lows vs your freeze threshold ({freezeThresholdF}°F).

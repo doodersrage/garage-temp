@@ -9,28 +9,26 @@ interface Props {
 
 const { householdId } = Astro.props;
 const events = householdId ? await listDoorEvents(householdId, 12) : [];
+
+if (events.length === 0) {
+  return null;
+}
 ---
 <DashboardCard>
   <h2 class="card-title">Door open history</h2>
-  <p class="card-subtitle mb-4">Recent closed door sessions (last 48h window, persisted on alert cron).</p>
-  {events.length === 0 ? (
-    <p class="mb-0 text-sm text-muted-foreground">
-      No closed door sessions recorded yet. Open/close a door sensor to populate this log.
-    </p>
-  ) : (
-    <ul class="space-y-2 mb-0 text-sm">
-      {events.map((event) => (
-        <li class="flex flex-wrap justify-between gap-2 border-b border-border pb-2">
-          <span>
-            <strong>{event.label}</strong>
-            {" · "}
-            {new Date(event.opened_at).toLocaleString()}
-          </span>
-          <span class="text-muted-foreground">
-            {event.duration_ms != null ? formatDurationMs(event.duration_ms) : "—"}
-          </span>
-        </li>
-      ))}
-    </ul>
-  )}
+  <p class="card-subtitle mb-4">Recent closed door sessions (last 48h).</p>
+  <ul class="space-y-2 mb-0 text-sm">
+    {events.map((event) => (
+      <li class="flex flex-wrap justify-between gap-2 border-b border-border pb-2 last:border-0 last:pb-0">
+        <span>
+          <strong>{event.label}</strong>
+          {" · "}
+          {new Date(event.opened_at).toLocaleString()}
+        </span>
+        <span class="text-muted-foreground">
+          {event.duration_ms != null ? formatDurationMs(event.duration_ms) : "—"}
+        </span>
+      </li>
+    ))}
+  </ul>
 </DashboardCard>
