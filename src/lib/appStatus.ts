@@ -1,6 +1,7 @@
-import { createServerClient } from "./supabase";
+import { createAdminClient } from "./supabase";
 import { listRecentIngestStatsAdmin } from "./ingestStats";
 import { flagIngestAbuse } from "./ingestAbuse";
+import { listRecentJobRuns, type JobRun } from "./jobRuns";
 
 export type AppStatus = {
   healthy: boolean;
@@ -10,13 +11,14 @@ export type AppStatus = {
   recentJobErrors: number;
   ingestAbuseCount: number;
   checkedAt: string;
+  recentJobRuns: JobRun[];
 };
 
 export async function fetchAppStatus(): Promise<AppStatus> {
-  const supabase = createServerClient();
+  const admin = createAdminClient();
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-  const { data: jobs } = await supabase
+  const { data: jobs } = await admin
     .from("job_runs")
     .select("job_name, status, started_at")
     .gte("started_at", since)
@@ -28,6 +30,7 @@ export async function fetchAppStatus(): Promise<AppStatus> {
     jobs?.filter((job) => job.status === "error").length ?? 0;
   const ingestStats = await listRecentIngestStatsAdmin(1);
   const ingestAbuseCount = flagIngestAbuse(ingestStats).length;
+  const { runs: recentJobRuns } = await listRecentJobRuns(14);
 
   const healthy =
     recentJobErrors === 0 &&
@@ -43,5 +46,6 @@ export async function fetchAppStatus(): Promise<AppStatus> {
     recentJobErrors,
     ingestAbuseCount,
     checkedAt: new Date().toISOString(),
+    recentJobRuns,
   };
 }

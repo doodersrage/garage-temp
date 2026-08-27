@@ -20,4 +20,14 @@ test.describe("public smoke", () => {
     await page.goto("/system-status");
     await expect(page.getByRole("heading", { name: /System status/i })).toBeVisible();
   });
+
+  test("API docs page loads", async ({ page }) => {
+    await page.goto("/docs/api");
+    await expect(page.getByRole("heading", { name: /API documentation/i })).toBeVisible();
+  });
+
+  test("case study page loads", async ({ page }) => {
+    await page.goto("/stories/garage-freeze-alert");
+    await expect(page.getByRole("heading", { name: /pipes froze/i })).toBeVisible();
+  });
 });

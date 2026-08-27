@@ -27,6 +27,24 @@ import Layout from "../../layouts/Layout.astro";
     </section>
 
     <section class="card">
+      <h2 class="card-title">Timeline</h2>
+      <ol class="text-sm space-y-3 mb-0 list-decimal pl-5">
+        <li><strong>Day −30:</strong> ESP32 installed, freeze threshold set to 34°F, Pro trial started.</li>
+        <li><strong>Day −7:</strong> SMS + Telegram tested with a manual “test alert” from the dashboard.</li>
+        <li><strong>2:14 a.m.:</strong> Garage hits 33°F — SMS to both owners, Telegram to family channel.</li>
+        <li><strong>2:22 a.m.:</strong> Smart plug restarted; dashboard confirms recovery above 38°F.</li>
+        <li><strong>Next morning:</strong> CSV export reviewed; subscribed to Member for winter history.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <blockquote class="border-l-4 border-[var(--color-accent)] pl-4 my-0">
+        <p class="mb-2 italic">“We would have lost a full day of workshop time — and maybe a pipe — if the text hadn’t woken us up.”</p>
+        <footer class="text-sm text-[var(--color-text-muted)]">— Homeowner, Minneapolis metro (name withheld)</footer>
+      </blockquote>
+    </section>
+
+    <section class="card">
       <h2 class="card-title">What happened</h2>
       <p class="mb-4">
         At 2:14 a.m. the garage reading crossed 33°F. SMS fired to both owners; Telegram posted to a family channel.

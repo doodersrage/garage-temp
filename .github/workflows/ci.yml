@@ -24,6 +24,10 @@ env:
   STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
   STRIPE_PRICE_ID: price_ci_placeholder
   STRIPE_PRICE_ID_PRO: price_ci_placeholder_pro
+  STRIPE_DISPLAY_MEMBER_MONTHLY: "6"
+  STRIPE_DISPLAY_MEMBER_ANNUAL: "60"
+  STRIPE_DISPLAY_PRO_MONTHLY: "12"
+  STRIPE_DISPLAY_PRO_ANNUAL: "120"
   CRON_SECRET: ci-cron-secret
   VAPID_PUBLIC_KEY: ci-placeholder
   VAPID_PRIVATE_KEY: ci-placeholder
@@ -44,3 +48,22 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: pnpm build
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm build
+      - run: pnpm test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:4321

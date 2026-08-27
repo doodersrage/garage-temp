@@ -28,3 +28,7 @@ pnpm-debug.log*
 .wrangler/
 .wrangler-home/
 .wrangler-local/
+
+# playwright
+test-results/
+playwright-report/

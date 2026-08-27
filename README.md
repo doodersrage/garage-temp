@@ -174,6 +174,8 @@ Configure in `.env` (local) and Cloudflare Worker secrets / vars (production). S
 | `SMTP_MAIL_FROM` / `SMTP_MAIL_TO` | Contact + alert From/To |
 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `STRIPE_PRICE_ID` / `STRIPE_PRICE_ID_PRO` | Billing (monthly) |
 | `STRIPE_PRICE_ID_ANNUAL` / `STRIPE_PRICE_ID_PRO_ANNUAL` | Billing (annual Member/Pro; create prices in Stripe Dashboard) |
+| `STRIPE_DISPLAY_MEMBER_MONTHLY` / `STRIPE_DISPLAY_MEMBER_ANNUAL` | Display-only USD prices on `/pricing` (not charged — Stripe prices are authoritative) |
+| `STRIPE_DISPLAY_PRO_MONTHLY` / `STRIPE_DISPLAY_PRO_ANNUAL` | Display-only Pro prices on `/pricing` |
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER` | Pro SMS |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` | Pro browser push |
 | `SITE_URL` / `ORIGIN` | OAuth, password reset, Stripe redirects |
@@ -250,9 +252,27 @@ The prerendered **About** section is the product docs hub:
 - [garage-temp](https://github.com/doodersrage/garage-temp) — this site
 - [fast-api-relay](https://github.com/doodersrage/fast-api-relay) — optional Python relay
 
+## Deploy
+
+```bash
+pnpm test && pnpm build && pnpm deploy
+```
+
+After deploy, set Cloudflare Worker secrets (Dashboard → Workers → garage-temp → Settings → Variables) including `STRIPE_DISPLAY_*` for pricing copy and confirm hourly cron is enabled (`0 * * * *` in `wrangler.jsonc`).
+
+**Post-deploy smoke checklist**
+
+- `/system-status` — healthy + recent cron runs
+- `/pricing` — display prices render
+- `/compare`, `/docs/api`, `/stories/garage-freeze-alert`
+- Dashboard → **Ops** (admin) — checkout funnel table
+- Trigger a test alert → Share page webhook delivery log
+
+CI runs unit tests, build, and Playwright smoke tests on every push to `main`.
+
 ## Development tips
 
-- Prefer `pnpm test` before deploy; CI runs build + vitest.
+- Prefer `pnpm test` and `pnpm test:e2e` before deploy; CI runs build, vitest, and Playwright.
 - OAuth providers must be enabled in the Supabase dashboard; otherwise email sign-in should stay form-first (password present) so unused providers are not submitted.
 - Stripe webhooks should point at `/api/stripe/webhook` with `STRIPE_WEBHOOK_SECRET`.
 - VAPID keys are required for Pro push; generate once and store as secrets.
