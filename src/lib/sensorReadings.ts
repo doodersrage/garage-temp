@@ -139,6 +139,7 @@ export async function fetchLatestSensorValues(
   Array<{
     sensor: DeviceSensor;
     deviceName: string;
+    deviceSpace?: string | null;
     value_num: number | null;
     value_bool: boolean | null;
     value_text: string | null;
@@ -148,7 +149,7 @@ export async function fetchLatestSensorValues(
   const supabase = createServerClient();
   const { data: devices } = await supabase
     .from("devices")
-    .select("id, name")
+    .select("id, name, space")
     .eq("household_id", householdId)
     .eq("enabled", true);
 
@@ -166,6 +167,9 @@ export async function fetchLatestSensorValues(
   if (!sensors || sensors.length === 0) return [];
 
   const deviceName = new Map(devices.map((d) => [d.id, d.name]));
+  const deviceSpace = new Map(
+    devices.map((d) => [d.id, typeof d.space === "string" ? d.space : null]),
+  );
   const results = [];
 
   for (const sensor of sensors) {
@@ -182,6 +186,7 @@ export async function fetchLatestSensorValues(
     results.push({
       sensor: sensor as DeviceSensor,
       deviceName: deviceName.get(sensor.device_id) ?? "Device",
+      deviceSpace: deviceSpace.get(sensor.device_id) ?? null,
       value_num: reading.value_num,
       value_bool: reading.value_bool,
       value_text: reading.value_text,

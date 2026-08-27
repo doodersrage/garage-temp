@@ -6,6 +6,7 @@ import PlanComparisonTable from "../components/PlanComparisonTable.astro";
 import { getAuthFromCookies } from "../lib/auth";
 import { getUserEntitlements } from "../lib/entitlements";
 import { normalizeComparisonTier } from "../lib/planComparison";
+import { getMemberPriceDisplay, getProPriceDisplay } from "../lib/stripePricing";
 import { getUserSubscription } from "../lib/stripeSubscriptions";
 import { isActiveSubscriptionStatus } from "../lib/stripe";
 
@@ -15,6 +16,18 @@ const subscription = user ? await getUserSubscription(user.id) : null;
 const currentTier = entitlements ? normalizeComparisonTier(entitlements.tier) : null;
 const hasBilling =
   subscription !== null && isActiveSubscriptionStatus(subscription.status);
+const memberPrices = getMemberPriceDisplay();
+const proPrices = getProPriceDisplay();
+
+function tierPriceLabel(prices: ReturnType<typeof getMemberPriceDisplay>): string {
+  if (prices.monthly) {
+    return prices.annualMonthlyEquivalent
+      ? `${prices.monthly}/mo · ${prices.annualMonthlyEquivalent}/mo billed annually`
+      : `${prices.monthly}/mo`;
+  }
+  if (prices.annual) return `${prices.annual}/yr`;
+  return "Monthly or annual";
+}
 ---
 <Layout
   title="Plans & pricing"
@@ -66,7 +79,10 @@ const hasBilling =
 
         <article class="plan-tier-card plan-tier-card-featured">
           <h2 class="plan-tier-name">Member</h2>
-          <p class="plan-tier-price">Monthly or annual</p>
+          <p class="plan-tier-price">{tierPriceLabel(memberPrices)}</p>
+          {memberPrices.annualSavingsPct != null && memberPrices.annualSavingsPct > 0 && (
+            <p class="text-sm text-[var(--color-text-muted)] mb-2">Save {memberPrices.annualSavingsPct}% with annual billing</p>
+          )}
           <p class="plan-tier-tagline">History export & more headroom</p>
           <ul class="plan-tier-list">
             <li>6 push devices</li>
@@ -90,7 +106,10 @@ const hasBilling =
 
         <article class="plan-tier-card">
           <h2 class="plan-tier-name">Pro</h2>
-          <p class="plan-tier-price">14-day trial</p>
+          <p class="plan-tier-price">{proPrices.monthly ? `${proPrices.monthly}/mo · 14-day trial` : "14-day trial"}</p>
+          {proPrices.annualSavingsPct != null && proPrices.annualSavingsPct > 0 && (
+            <p class="text-sm text-[var(--color-text-muted)] mb-2">Save {proPrices.annualSavingsPct}% annually</p>
+          )}
           <p class="plan-tier-tagline">Alerts anywhere + integrations</p>
           <ul class="plan-tier-list">
             <li>24 push devices</li>

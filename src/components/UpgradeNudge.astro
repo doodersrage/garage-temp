@@ -13,6 +13,7 @@ const nudge = getNudgeContent(tier, feature);
 if (!nudge) return null;
 
 const checkoutPlan = nudge.targetTier === "member" ? "member" : "pro";
+const checkoutSource = `nudge_${feature}`;
 ---
 <aside
   class:list={["upgrade-nudge", compact && "upgrade-nudge-compact"]}
@@ -28,6 +29,7 @@ const checkoutPlan = nudge.targetTier === "member" ? "member" : "pro";
     <form action="/api/stripe/checkout" method="post">
       <input type="hidden" name="plan" value={checkoutPlan} />
       <input type="hidden" name="interval" value="monthly" />
+      <input type="hidden" name="source" value={checkoutSource} />
       <button class="btn-primary" type="submit">
         {nudge.targetTier === "member" ? "Upgrade to Member" : "Upgrade to Pro"}
       </button>

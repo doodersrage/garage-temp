@@ -12,6 +12,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "astro": "astro",
     "generate-types": "supabase gen types typescript --linked > src/types/supabase.ts && wrangler types"
   },
@@ -32,6 +33,7 @@
     "wrangler": "^4.86.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "supabase": "^2.108.0",
     "vitest": "^3.2.4"
   },

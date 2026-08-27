@@ -7,6 +7,7 @@ import {
 } from "../../../lib/alerts";
 import { parseAlertRulesFromForm } from "../../../lib/alertRules";
 import { parseSpaceChannelRouting } from "../../../lib/spaceChannelRouting";
+import { parseAlertTemplates } from "../../../lib/alertTemplates";
 import { getAlertSettingsForUser } from "../../../lib/notify";
 import { getUserEntitlements } from "../../../lib/entitlements";
 import {
@@ -96,6 +97,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       formData.get("alert_rules_json")?.toString(),
     ),
     monthlyReportEnabled: formData.has("monthly_report_enabled"),
+    quarterlyReportEnabled: formData.has("quarterly_report_enabled"),
+    dripEmailsEnabled: formData.has("drip_emails_enabled"),
     batteryAlertsEnabled: formData.has("battery_alerts_enabled"),
     batteryTrendAlertsEnabled: formData.has("battery_trend_alerts_enabled"),
     batteryThresholdPct: Number(

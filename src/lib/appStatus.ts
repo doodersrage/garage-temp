@@ -1,0 +1,47 @@
+import { createServerClient } from "./supabase";
+import { listRecentIngestStatsAdmin } from "./ingestStats";
+import { flagIngestAbuse } from "./ingestAbuse";
+
+export type AppStatus = {
+  healthy: boolean;
+  lastCronAt: string | null;
+  lastCronJob: string | null;
+  lastCronStatus: string | null;
+  recentJobErrors: number;
+  ingestAbuseCount: number;
+  checkedAt: string;
+};
+
+export async function fetchAppStatus(): Promise<AppStatus> {
+  const supabase = createServerClient();
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+  const { data: jobs } = await supabase
+    .from("job_runs")
+    .select("job_name, status, started_at")
+    .gte("started_at", since)
+    .order("started_at", { ascending: false })
+    .limit(50);
+
+  const latest = jobs?.[0] ?? null;
+  const recentJobErrors =
+    jobs?.filter((job) => job.status === "error").length ?? 0;
+  const ingestStats = await listRecentIngestStatsAdmin(1);
+  const ingestAbuseCount = flagIngestAbuse(ingestStats).length;
+
+  const healthy =
+    recentJobErrors === 0 &&
+    latest != null &&
+    latest.status === "success" &&
+    Date.now() - Date.parse(latest.started_at) < 2 * 60 * 60 * 1000;
+
+  return {
+    healthy,
+    lastCronAt: latest?.started_at ?? null,
+    lastCronJob: latest?.job_name ?? null,
+    lastCronStatus: latest?.status ?? null,
+    recentJobErrors,
+    ingestAbuseCount,
+    checkedAt: new Date().toISOString(),
+  };
+}

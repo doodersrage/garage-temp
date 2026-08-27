@@ -90,8 +90,12 @@ const coreDone = coreSteps.every((step) => step.done);
 const kitDone = kitSteps.every((step) => step.done);
 const optionalDone = nextSteps.every((step) => step.done);
 const fullyDone = coreDone && optionalDone && kitDone;
-const completedCount = coreSteps.filter((step) => step.done).length;
-const steps = !coreDone ? coreSteps : !kitDone ? kitSteps : nextSteps;
+const activeSteps = !coreDone ? coreSteps : !kitDone ? kitSteps : nextSteps;
+const completedCount = activeSteps.filter((step) => step.done).length;
+const progressPct = activeSteps.length
+  ? Math.round((completedCount / activeSteps.length) * 100)
+  : 100;
+const steps = activeSteps;
 const sectionTitle = !coreDone
   ? "Getting started"
   : !kitDone
@@ -100,8 +104,8 @@ const sectionTitle = !coreDone
 const sectionSubtitle = !coreDone
   ? `${completedCount} of ${coreSteps.length} setup steps complete`
   : !kitDone
-    ? "Finish the ESP/Arduino path: key → sensors → verify → freeze alert."
-    : "Core setup is done. Optional polish:";
+    ? `${completedCount} of ${kitSteps.length} kit steps complete`
+    : `${completedCount} of ${nextSteps.length} optional steps complete`;
 const hidden = dismissed || fullyDone;
 ---
 
@@ -127,6 +131,9 @@ const hidden = dismissed || fullyDone;
       <div>
         <h2 class="card-title">{sectionTitle}</h2>
         <p class="card-subtitle mb-0">{sectionSubtitle}</p>
+        <div class="onboarding-progress mt-3" role="progressbar" aria-valuenow={progressPct} aria-valuemin={0} aria-valuemax={100}>
+          <div class="onboarding-progress-bar" style={`width: ${progressPct}%`}></div>
+        </div>
       </div>
       {(coreDone || kitDone) && (
         <form action="/api/user/onboarding" method="post">

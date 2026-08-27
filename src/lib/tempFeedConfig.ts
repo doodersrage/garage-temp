@@ -24,6 +24,7 @@ export type TempFeedResult = {
   name: string;
   url: string;
   probes: Record<string, TempReading>;
+  deviceMeta?: Record<string, unknown>;
   error?: string;
 };
 
@@ -120,6 +121,21 @@ export function parseTempFeedPayload(payload: unknown): Record<string, TempReadi
   }
 
   return ensureAverageProbe(probes);
+}
+
+export function parseFeedDeviceMeta(payload: unknown): Record<string, unknown> {
+  if (!payload || typeof payload !== "object") return {};
+  const root = payload as Record<string, unknown>;
+  const meta: Record<string, unknown> = {};
+  if (typeof root.battery_pct === "number") meta.battery_pct = root.battery_pct;
+  if (typeof root.rssi === "number") meta.rssi = root.rssi;
+  const nested = root.meta;
+  if (nested && typeof nested === "object" && !Array.isArray(nested)) {
+    const m = nested as Record<string, unknown>;
+    if (typeof m.battery_pct === "number") meta.battery_pct = m.battery_pct;
+    if (typeof m.rssi === "number") meta.rssi = m.rssi;
+  }
+  return meta;
 }
 
 export function ensureAverageProbe(

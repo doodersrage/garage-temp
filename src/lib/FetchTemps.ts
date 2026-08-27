@@ -1,7 +1,8 @@
-import type { TempFeedConfig, TempFeedResult, TempProbeConfig, TempReading } from "./tempFeedConfig";
+import type { TempFeedResult, TempProbeConfig, TempReading } from "./tempFeedConfig";
 import {
   getDefaultTempFeeds,
   getDefaultTempProbes,
+  parseFeedDeviceMeta,
   parseTempFeedPayload,
 } from "./tempFeedConfig";
 import { maybeSendThresholdAlerts } from "./alertNotifications";
@@ -13,6 +14,7 @@ import {
   ensureDefaultPullDevice,
   getUserDevicesAsTempConfig,
   touchDeviceLastSeen,
+  updateDeviceMeta,
   type DeviceWithSensors,
 } from "./devices";
 
@@ -40,12 +42,14 @@ export async function fetchTempFeed(feed: TempFeedConfig): Promise<TempFeedResul
 
     const payload = await response.json();
     const probes = parseTempFeedPayload(payload);
+    const deviceMeta = parseFeedDeviceMeta(payload);
 
     return {
       id: feed.id,
       name: feed.name,
       url: feed.url,
       probes,
+      deviceMeta,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown feed error";
@@ -116,6 +120,9 @@ export async function fetchTemps(
       for (const result of results) {
         if (!result.error) {
           await touchDeviceLastSeen(result.id);
+          if (result.deviceMeta && Object.keys(result.deviceMeta).length > 0) {
+            await updateDeviceMeta(result.id, result.deviceMeta);
+          }
         }
       }
     }
@@ -128,6 +135,8 @@ export async function fetchTemps(
         feeds,
         visibleProbes,
         results,
+        householdId ?? undefined,
+        devices,
       );
     }
   }

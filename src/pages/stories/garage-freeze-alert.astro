@@ -1,0 +1,52 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+---
+<Layout
+  title="Garage freeze alert case study"
+  description="How a Minnesota homeowner avoided pipe damage with Garage Temp freeze alerts and SMS notifications."
+>
+  <div class="page-shell page-stack">
+    <section class="card animate-slide-in-left">
+      <p class="text-sm text-[var(--color-text-muted)] mb-2">Customer story</p>
+      <h1 class="card-title">“We got the text before the pipes froze”</h1>
+      <p class="card-subtitle">
+        A detached garage workshop in Minneapolis — unheated except for a small space heater on a timer.
+        When a polar vortex dropped outdoor temps to −15°F, the heater failed overnight.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">The setup</h2>
+      <ul class="text-sm space-y-2 mb-0">
+        <li>ESP32 + DHT22 pushing every 5 minutes to Garage Temp ingest</li>
+        <li>Freeze threshold at 34°F with Pro SMS + Telegram routing</li>
+        <li>Weekly digest for the household; share link for a neighbor who watches the house</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">What happened</h2>
+      <p class="mb-4">
+        At 2:14 a.m. the garage reading crossed 33°F. SMS fired to both owners; Telegram posted to a family channel.
+        They restarted the heater remotely via a smart plug and confirmed recovery on the live dashboard before pipes in the shared wall had time to freeze.
+      </p>
+      <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+        Typical Pro trial → Member or Pro subscription after winter. Your results depend on sensor placement and alert thresholds.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Try it on your garage</h2>
+      <p class="mb-4">
+        Start with the free tier — live charts and email alerts. Add SMS and share links when you're ready for Pro.
+      </p>
+      <p class="mb-0">
+        <a class="btn-primary" href="/register">Create free account</a>
+        {" "}
+        <a class="text-link" href="/about/temperature-probe-case-study">Technical probe case study</a>
+      </p>
+    </section>
+  </div>
+</Layout>

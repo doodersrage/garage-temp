@@ -1,16 +1,26 @@
 import type { TempFeedResult, TempProbeConfig } from "./tempFeedConfig";
 import type { AlertReading } from "./alerts";
-import type { DeviceSensor } from "./devices";
+import type { DeviceSensor, DeviceWithSensors } from "./devices";
 
 export function buildReadingsFromResults(
   results: TempFeedResult[],
   probes: TempProbeConfig[],
+  devices: DeviceWithSensors[] = [],
 ): AlertReading[] {
+  const spaceByFeedId = new Map(
+    devices.filter((d) => d.pull_url).map((d) => [d.id, d.space ?? null]),
+  );
+
   return probes.flatMap((probe) => {
     const feed = results.find((result) => result.id === probe.feedId);
     const data = feed?.probes[probe.key];
     if (!feed || feed.error || !data) return [];
-    return [{ label: probe.label, tempf: data.f, humidity: data.h }];
+    return [{
+      label: probe.label,
+      tempf: data.f,
+      humidity: data.h,
+      space: spaceByFeedId.get(probe.feedId) ?? null,
+    }];
   });
 }
 
@@ -19,10 +29,11 @@ export function buildAlertReadingsFromLatestSensors(
   latest: Array<{
     sensor: DeviceSensor;
     deviceName: string;
+    deviceSpace?: string | null;
     value_num: number | null;
   }>,
 ): AlertReading[] {
-  type Acc = { label: string; tempf?: number; humidity?: number };
+  type Acc = { label: string; tempf?: number; humidity?: number; space?: string | null };
   const byKey = new Map<string, Acc>();
 
   for (const row of latest) {
@@ -34,6 +45,7 @@ export function buildAlertReadingsFromLatestSensors(
     const mapKey = `${row.sensor.device_id}:${row.sensor.key}`;
     const entry = byKey.get(mapKey) ?? {
       label: row.sensor.label.replace(/\s+humidity$/i, "") || row.sensor.label,
+      space: row.deviceSpace ?? null,
     };
 
     if (row.sensor.kind === "temperature") {
@@ -52,6 +64,7 @@ export function buildAlertReadingsFromLatestSensors(
       label: entry.label,
       tempf: entry.tempf!,
       humidity: entry.humidity ?? 0,
+      space: entry.space ?? null,
     }));
 }
 

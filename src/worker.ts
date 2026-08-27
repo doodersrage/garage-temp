@@ -9,6 +9,12 @@ import {
   shouldSendMonthlyReport,
 } from "./lib/monthlyReportEmails";
 import {
+  sendQuarterlyReportsForAllUsers,
+  shouldSendQuarterlyReport,
+} from "./lib/quarterlyReportEmails";
+import { sendTrialRemindersForAllUsers } from "./lib/trialEmails";
+import { sendDripEmailsForAllUsers } from "./lib/dripEmails";
+import {
   finishJobRun,
   runSensorReadingRetention,
   shouldRunDailyRetention,
@@ -132,6 +138,62 @@ export default {
             };
             await finishJobRun(monthlyJobId, "error", details);
           }
+        }
+
+        if (shouldSendQuarterlyReport()) {
+          const quarterlyJobId = await startJobRun("quarterly-report");
+          try {
+            const quarterly = await sendQuarterlyReportsForAllUsers();
+            if (quarterly.errors.length > 0) {
+              await finishJobRun(quarterlyJobId, "error", {
+                sent: quarterly.sent,
+                skipped: quarterly.skipped,
+                errors: quarterly.errors.slice(0, 20),
+              });
+            } else {
+              await finishJobRun(quarterlyJobId, "success", {
+                sent: quarterly.sent,
+                skipped: quarterly.skipped,
+                errors: [],
+              });
+              console.info(
+                `Quarterly report finished: ${quarterly.sent} sent, ${quarterly.skipped} skipped`,
+              );
+            }
+          } catch (error) {
+            const details = {
+              message: error instanceof Error ? error.message : "Unknown error",
+            };
+            await finishJobRun(quarterlyJobId, "error", details);
+          }
+        }
+
+        const trialJobId = await startJobRun("trial-reminders");
+        try {
+          const trial = await sendTrialRemindersForAllUsers();
+          await finishJobRun(trialJobId, trial.errors.length ? "error" : "success", {
+            sent: trial.sent,
+            skipped: trial.skipped,
+            errors: trial.errors.slice(0, 20),
+          });
+        } catch (error) {
+          await finishJobRun(trialJobId, "error", {
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+
+        const dripJobId = await startJobRun("drip-emails");
+        try {
+          const drip = await sendDripEmailsForAllUsers();
+          await finishJobRun(dripJobId, drip.errors.length ? "error" : "success", {
+            sent: drip.sent,
+            skipped: drip.skipped,
+            errors: drip.errors.slice(0, 20),
+          });
+        } catch (error) {
+          await finishJobRun(dripJobId, "error", {
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
         }
 
         if (shouldRunDailyRetention()) {

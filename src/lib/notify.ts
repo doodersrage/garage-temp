@@ -13,6 +13,7 @@ import {
 } from "./quietHours";
 import { shouldSuppressForSnoozeOrVacation } from "./alertSnooze";
 import { filterChannelsForSpace } from "./spaceChannelRouting";
+import { deliverWebhookPost } from "./webhookDeliveries";
 import { createServerClient } from "./supabase";
 import { getUserEntitlements } from "./entitlements";
 import { sendWebPushToUser } from "./webPush";
@@ -153,29 +154,35 @@ async function hmacSha256Hex(secret: string, payload: string): Promise<string> {
 }
 
 async function sendOutboundWebhook(
+  userId: string,
   url: string,
   secret: string | null,
   payload: NotifyPayload,
 ): Promise<void> {
-  try {
-    const body = JSON.stringify({
-      title: payload.title,
-      body: payload.body,
-      kind: payload.kind ?? "generic",
-      sent_at: new Date().toISOString(),
-    });
+  const body = JSON.stringify({
+    title: payload.title,
+    body: payload.body,
+    kind: payload.kind ?? "generic",
+    sent_at: new Date().toISOString(),
+  });
 
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
 
-    if (secret) {
-      headers["X-Signature"] = await hmacSha256Hex(secret, body);
-    }
+  if (secret) {
+    headers["X-Signature"] = await hmacSha256Hex(secret, body);
+  }
 
-    await fetch(url, { method: "POST", headers, body });
-  } catch (error) {
-    console.error("Failed to send outbound webhook:", error);
+  const response = await deliverWebhookPost(
+    userId,
+    "outbound_alert",
+    url,
+    headers,
+    body,
+  );
+  if (response && !response.ok) {
+    console.error("Outbound webhook failed:", response.status);
   }
 }
 
@@ -392,6 +399,7 @@ export async function notifyUser(
   if (settings.channelWebhook && allowChannel("webhook")) {
     if (settings.outboundWebhookUrl && entitlements.canUseOutboundWebhook) {
       await sendOutboundWebhook(
+        userId,
         settings.outboundWebhookUrl,
         settings.outboundWebhookSecret,
         payload,

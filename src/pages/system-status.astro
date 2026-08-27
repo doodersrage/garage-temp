@@ -1,0 +1,58 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import { fetchAppStatus } from "../lib/appStatus";
+import { formatRelativeAge } from "../lib/relativeTime";
+
+const status = await fetchAppStatus();
+const cronAge = formatRelativeAge(status.lastCronAt, "never");
+---
+<Layout
+  title="System status"
+  description="Garage Temp background job health and ingest activity summary."
+>
+  <div class="page-shell page-stack">
+    <section class="card animate-slide-in-left">
+      <h1 class="card-title">System status</h1>
+      <p class="card-subtitle mb-4">
+        Public health summary for scheduled jobs and ingest monitoring. Updated on each page load.
+      </p>
+      <p class:list={["text-lg font-semibold mb-2", status.healthy ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"]}>
+        {status.healthy ? "All systems operational" : "Degraded — investigating"}
+      </p>
+      <dl class="text-sm space-y-2 mb-0">
+        <div class="flex flex-wrap gap-x-2">
+          <dt class="text-[var(--color-text-muted)]">Last cron job</dt>
+          <dd>{status.lastCronJob ?? "—"} ({cronAge.label})</dd>
+        </div>
+        <div class="flex flex-wrap gap-x-2">
+          <dt class="text-[var(--color-text-muted)]">Last job status</dt>
+          <dd>{status.lastCronStatus ?? "—"}</dd>
+        </div>
+        <div class="flex flex-wrap gap-x-2">
+          <dt class="text-[var(--color-text-muted)]">Job errors (24h)</dt>
+          <dd>{status.recentJobErrors}</dd>
+        </div>
+        <div class="flex flex-wrap gap-x-2">
+          <dt class="text-[var(--color-text-muted)]">Ingest abuse flags (24h)</dt>
+          <dd>{status.ingestAbuseCount}</dd>
+        </div>
+        <div class="flex flex-wrap gap-x-2">
+          <dt class="text-[var(--color-text-muted)]">Checked at</dt>
+          <dd>{new Date(status.checkedAt).toLocaleString()}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">What we monitor</h2>
+      <ul class="text-sm space-y-2 mb-0">
+        <li>Hourly history collection and alert evaluation</li>
+        <li>Weekly digest and monthly/quarterly report emails</li>
+        <li>Sensor reading retention and freeze-map aggregates</li>
+        <li>Trial reminders and onboarding drip emails</li>
+      </ul>
+    </section>
+  </div>
+</Layout>

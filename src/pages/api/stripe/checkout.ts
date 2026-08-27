@@ -7,6 +7,8 @@ import {
   referralBonusTrialDays,
   referralRewardTrialDays,
 } from "../../../lib/referrals";
+import { getUserHouseholdId } from "../../../lib/households";
+import { recordHouseholdActivity } from "../../../lib/householdActivity";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -19,6 +21,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const plan = formData?.get("plan")?.toString() === "pro" ? "pro" : "member";
   const interval =
     formData?.get("interval")?.toString() === "annual" ? "annual" : "monthly";
+  const checkoutSource = formData?.get("source")?.toString().trim() || null;
   const priceId = resolveStripePriceId(plan, interval);
 
   if (!priceId) {
@@ -60,6 +63,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
           supabase_user_id: user.id,
           plan_tier: plan,
           billing_interval: interval,
+          checkout_source: checkoutSource ?? "",
         },
         trial_period_days: proTrialDays,
       },
@@ -67,6 +71,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         supabase_user_id: user.id,
         plan_tier: plan,
         billing_interval: interval,
+        checkout_source: checkoutSource ?? "",
       },
       success_url: buildSiteUrl(
         request,
@@ -81,6 +86,16 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
     if (!checkoutSession.url) {
       return new Response("Unable to create checkout session", { status: 500 });
+    }
+
+    const householdId = await getUserHouseholdId(user.id);
+    if (householdId) {
+      await recordHouseholdActivity({
+        householdId,
+        userId: user.id,
+        action: "checkout_started",
+        detail: `${plan}/${interval}${checkoutSource ? ` via ${checkoutSource}` : ""}`,
+      });
     }
 
     return redirect(checkoutSession.url);

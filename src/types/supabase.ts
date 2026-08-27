@@ -92,6 +92,8 @@ export type Database = {
           channel_webhook: boolean
           digest_enabled: boolean
           discord_webhook_url: string | null
+          drip_email_stage: number
+          drip_emails_enabled: boolean
           email: string | null
           enabled: boolean
           escalation_enabled: boolean
@@ -103,16 +105,20 @@ export type Database = {
           last_alert_sent_at: string | null
           last_battery_alert_at: string | null
           last_battery_trend_alert_at: string | null
+          last_drip_email_at: string | null
           last_escalation_at: string | null
           last_forecast_alert_at: string | null
           last_monthly_report_at: string | null
           last_outage_alert_at: string | null
+          last_quarterly_report_at: string | null
           last_rate_alert_at: string | null
           last_rssi_alert_at: string | null
+          last_trial_reminder_at: string | null
           monthly_report_enabled: boolean
           outage_hours: number
           outbound_webhook_secret: string | null
           outbound_webhook_url: string | null
+          quarterly_report_enabled: boolean
           quiet_hours_bypass_freeze: boolean
           quiet_hours_enabled: boolean
           quiet_hours_end: string
@@ -151,6 +157,8 @@ export type Database = {
           channel_webhook?: boolean
           digest_enabled?: boolean
           discord_webhook_url?: string | null
+          drip_email_stage?: number
+          drip_emails_enabled?: boolean
           email?: string | null
           enabled?: boolean
           escalation_enabled?: boolean
@@ -162,16 +170,20 @@ export type Database = {
           last_alert_sent_at?: string | null
           last_battery_alert_at?: string | null
           last_battery_trend_alert_at?: string | null
+          last_drip_email_at?: string | null
           last_escalation_at?: string | null
           last_forecast_alert_at?: string | null
           last_monthly_report_at?: string | null
           last_outage_alert_at?: string | null
+          last_quarterly_report_at?: string | null
           last_rate_alert_at?: string | null
           last_rssi_alert_at?: string | null
+          last_trial_reminder_at?: string | null
           monthly_report_enabled?: boolean
           outage_hours?: number
           outbound_webhook_secret?: string | null
           outbound_webhook_url?: string | null
+          quarterly_report_enabled?: boolean
           quiet_hours_bypass_freeze?: boolean
           quiet_hours_enabled?: boolean
           quiet_hours_end?: string
@@ -210,6 +222,8 @@ export type Database = {
           channel_webhook?: boolean
           digest_enabled?: boolean
           discord_webhook_url?: string | null
+          drip_email_stage?: number
+          drip_emails_enabled?: boolean
           email?: string | null
           enabled?: boolean
           escalation_enabled?: boolean
@@ -221,16 +235,20 @@ export type Database = {
           last_alert_sent_at?: string | null
           last_battery_alert_at?: string | null
           last_battery_trend_alert_at?: string | null
+          last_drip_email_at?: string | null
           last_escalation_at?: string | null
           last_forecast_alert_at?: string | null
           last_monthly_report_at?: string | null
           last_outage_alert_at?: string | null
+          last_quarterly_report_at?: string | null
           last_rate_alert_at?: string | null
           last_rssi_alert_at?: string | null
+          last_trial_reminder_at?: string | null
           monthly_report_enabled?: boolean
           outage_hours?: number
           outbound_webhook_secret?: string | null
           outbound_webhook_url?: string | null
+          quarterly_report_enabled?: boolean
           quiet_hours_bypass_freeze?: boolean
           quiet_hours_enabled?: boolean
           quiet_hours_end?: string
@@ -1210,6 +1228,42 @@ export type Database = {
           sort_order?: number
           user_id?: string
           visible?: boolean
+        }
+        Relationships: []
+      }
+      webhook_deliveries: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          status_code: number | null
+          success: boolean
+          url_host: string
+          user_id: string | null
+          webhook_type: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          status_code?: number | null
+          success?: boolean
+          url_host: string
+          user_id?: string | null
+          webhook_type: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          status_code?: number | null
+          success?: boolean
+          url_host?: string
+          user_id?: string | null
+          webhook_type?: string
         }
         Relationships: []
       }

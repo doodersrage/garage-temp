@@ -1,0 +1,79 @@
+openapi: 3.1.0
+info:
+  title: Garage Temp API
+  version: 1.0.0
+  description: |
+    HTTP endpoints for device ingest, share links, metrics, and inbound automations.
+    Authenticated dashboard routes use Supabase session cookies; programmatic access uses API keys (Pro).
+servers:
+  - url: https://garage-temp.example.com
+paths:
+  /api/ingest/{deviceKey}:
+    post:
+      summary: Push sensor readings
+      parameters:
+        - name: deviceKey
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Readings accepted
+        "401":
+          description: Invalid device key
+  /api/v1/metrics:
+    get:
+      summary: Prometheus metrics (Pro API key)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Prometheus text format
+  /api/inbound/{token}:
+    post:
+      summary: Inbound webhook actions
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [snooze, vacation, clear_snooze, clear_vacation, status]
+                hours:
+                  type: integer
+      responses:
+        "200":
+          description: Action applied
+  /api/share/{token}/readings:
+    get:
+      summary: Public share link readings
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: JSON readings payload
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

@@ -1,4 +1,5 @@
 import type { AlertSettings } from "./alerts";
+import { deliverWebhookPost } from "./webhookDeliveries";
 
 async function hmacSha256Hex(secret: string, body: string): Promise<string> {
   const key = await crypto.subtle.importKey(
@@ -13,6 +14,7 @@ async function hmacSha256Hex(secret: string, body: string): Promise<string> {
 }
 
 export async function sendReadingWebhook(
+  userId: string | null | undefined,
   settings: Pick<AlertSettings, "readingWebhookUrl" | "readingWebhookSecret">,
   payload: Record<string, unknown>,
 ): Promise<void> {
@@ -31,9 +33,5 @@ export async function sendReadingWebhook(
     headers["X-GarageTemp-Signature"] = `sha256=${signature}`;
   }
 
-  try {
-    await fetch(url, { method: "POST", headers, body });
-  } catch (error) {
-    console.error("Reading webhook failed:", error);
-  }
+  await deliverWebhookPost(userId, "reading", url, headers, body);
 }

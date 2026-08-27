@@ -1,0 +1,67 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+---
+<Layout
+  title="API documentation"
+  description="Garage Temp HTTP API — ingest, metrics, share links, and inbound webhooks."
+>
+  <div class="page-shell page-stack">
+    <section class="card animate-slide-in-left">
+      <h1 class="card-title">API documentation</h1>
+      <p class="card-subtitle mb-4">
+        OpenAPI spec for programmatic integrations. Pro plans include API keys for Prometheus metrics;
+        push ingest uses per-device keys from the dashboard.
+      </p>
+      <p class="mb-0">
+        <a class="btn-primary" href="/openapi.yaml" download>Download openapi.yaml</a>
+        {" "}
+        <a class="text-link" href="/dashboard/share">Manage API keys</a>
+      </p>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Quick reference</h2>
+      <dl class="text-sm space-y-3 mb-0">
+        <div>
+          <dt class="font-semibold">POST /api/ingest/&lt;deviceKey&gt;</dt>
+          <dd class="text-[var(--color-text-muted)]">Push JSON readings from ESP/Arduino firmware. Optional top-level <code>battery_pct</code> and <code>rssi</code>.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold">GET /api/v1/metrics</dt>
+          <dd class="text-[var(--color-text-muted)]">Prometheus scrape target. Header <code>Authorization: Bearer &lt;api-key&gt;</code> (Pro).</dd>
+        </div>
+        <div>
+          <dt class="font-semibold">POST /api/inbound/&lt;token&gt;</dt>
+          <dd class="text-[var(--color-text-muted)]">Home Assistant / Zapier actions: snooze, vacation, status. Optional HMAC signature.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold">GET /api/share/&lt;token&gt;/readings</dt>
+          <dd class="text-[var(--color-text-muted)]">Public JSON for share links (Pro).</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">OpenAPI preview</h2>
+      <pre class="text-xs overflow-x-auto p-4 rounded-lg bg-[var(--color-surface-muted)]"><code>{`openapi: 3.1.0
+info:
+  title: Garage Temp API
+  version: 1.0.0
+paths:
+  /api/ingest/{deviceKey}:
+    post:
+      summary: Push sensor readings
+  /api/v1/metrics:
+    get:
+      summary: Prometheus metrics (Bearer API key)
+  /api/inbound/{token}:
+    post:
+      summary: Inbound webhook actions`}</code></pre>
+      <p class="mb-0 text-sm">
+        Full spec: <a class="text-link" href="/openapi.yaml">/openapi.yaml</a>
+      </p>
+    </section>
+  </div>
+</Layout>

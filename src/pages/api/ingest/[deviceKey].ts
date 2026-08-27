@@ -215,7 +215,7 @@ export const POST: APIRoute = async ({ params, request }) => {
         data.user?.user_metadata as Record<string, unknown> | undefined,
       );
       if (settings.readingWebhookUrl) {
-        await sendReadingWebhook(settings, {
+        await sendReadingWebhook(member.user_id, settings, {
           device_id: device.id,
           device_name: device.name,
           household_id: device.household_id,

@@ -55,7 +55,7 @@ describe("buildAlertReadingsFromLatestSensors", () => {
       },
     ]);
 
-    expect(readings).toEqual([{ label: "Probe 0", tempf: 31, humidity: 80 }]);
+    expect(readings).toEqual([{ label: "Probe 0", tempf: 31, humidity: 80, space: null }]);
   });
 
   it("includes temperature-only probes with humidity 0", () => {
@@ -73,7 +73,7 @@ describe("buildAlertReadingsFromLatestSensors", () => {
       },
     ]);
 
-    expect(readings).toEqual([{ label: "Bay", tempf: 40, humidity: 0 }]);
+    expect(readings).toEqual([{ label: "Bay", tempf: 40, humidity: 0, space: null }]);
   });
 });
 

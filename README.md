@@ -18,7 +18,9 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 - Feed health checks and relative “last seen” / staleness indicators
 - OpenWeather outdoor comparison on the home page
 - Historic readings with chart, YoY overlay, filters, anomaly hints, and CSV export (Member/Pro)
-- Opt-in public city freeze-risk map (`/freeze-map`) with geographic map, presets, geocode search, sparklines
+- Opt-in public city freeze-risk map (`/freeze-map`) with geographic map, presets, geocode search, sparklines; embed at `/embed/freeze-map`
+- Public `/system-status` job health page and `/docs/api` + `public/openapi.yaml`
+- Customer story landing page at `/stories/garage-freeze-alert`
 - Device space labels (garage / attic / …), home filter, and space comparison on history
 - “Nights at risk” outlook on the dashboard with weather map and NWS freeze alerts (US)
 - Embeddable live widget (`/embed/<token>`) for share links
@@ -34,10 +36,13 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 - Channels: email, Discord, Telegram, Slack; Pro adds SMS (Twilio), browser push, outbound webhooks
 - Test alert with per-channel sent/skipped feedback and alert activity audit trail
 - Weekly email digest (Mondays) and optional monthly freeze report (1st of month, HTML attachment)
+- Quarterly seasonal report (Jan/Apr/Jul/Oct) and onboarding drip emails (days 1, 3, 7)
+- Trial-ending reminders at 3 and 1 days for Stripe trialing subscriptions
+- Per-space channel routing UI; webhook delivery log for Pro outbound/reading webhooks
 
 ### Accounts & collaboration
 - Email/password auth, password reset, optional OAuth (Google/GitHub/Discord when enabled in Supabase)
-- **Plans & pricing** — public `/pricing` comparison page plus dashboard `/dashboard/plans`
+- **Plans & pricing** — public `/pricing` with env-driven display prices, `/compare` vs alternatives, upgrade nudges with checkout source analytics
 - Contextual **upgrade nudges** on dashboard, alerts, history, devices, and share when a feature needs Member or Pro
 - Households: invite members (including read-only **viewer** role), rename, leave, revoke
 - Multi-household switcher when you belong to more than one property
@@ -185,7 +190,7 @@ Migrations cover devices/sensors, households/invites, share links, alert metadat
 
 ## Background jobs
 
-Hourly history collection and alert evaluation run via the Worker `scheduled` handler (`src/worker.ts`, cron `0 * * * *` in `wrangler.jsonc`). The same cron also snapshots opt-in freeze-map city aggregates (`freeze-map` job).
+Hourly history collection and alert evaluation run via the Worker `scheduled` handler (`src/worker.ts`, cron `0 * * * *` in `wrangler.jsonc`). The same cron also snapshots opt-in freeze-map city aggregates, sends trial reminders and onboarding drip emails, and runs monthly/quarterly reports on schedule.
 
 Threshold alerts use live pull-feed readings when available and otherwise fall back to latest stored sensor values (so push-only devices are covered). Push ingest also evaluates threshold/rule alerts immediately (with the same cooldowns as cron). Push-only households no longer fall back to the public demo feed for cron alerts.
 

@@ -118,6 +118,8 @@ export type AlertSettings = {
   readingWebhookUrl: string | null;
   readingWebhookSecret: string | null;
   spaceChannelRouting: SpaceChannelRouting;
+  dripEmailsEnabled: boolean;
+  quarterlyReportEnabled: boolean;
 };
 
 export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
@@ -176,6 +178,8 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   readingWebhookUrl: null,
   readingWebhookSecret: null,
   spaceChannelRouting: {},
+  dripEmailsEnabled: true,
+  quarterlyReportEnabled: false,
 };
 
 /** Minimum time between threshold alert notifications for the same account. */
@@ -358,6 +362,8 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
         ? row.reading_webhook_secret
         : null,
     spaceChannelRouting: parseSpaceChannelRouting(row.space_channel_routing),
+    dripEmailsEnabled: row.drip_emails_enabled !== false,
+    quarterlyReportEnabled: row.quarterly_report_enabled === true,
   };
 }
 
@@ -382,6 +388,7 @@ export type AlertReading = {
   tempf: number;
   humidity: number;
   sensorId?: string;
+  space?: string | null;
 };
 
 export function evaluateAlerts(
@@ -554,6 +561,8 @@ export function serializeAlertSettings(settings: AlertSettings): Record<string, 
     reading_webhook_url: settings.readingWebhookUrl,
     reading_webhook_secret: settings.readingWebhookSecret,
     space_channel_routing: settings.spaceChannelRouting,
+    drip_emails_enabled: settings.dripEmailsEnabled,
+    quarterly_report_enabled: settings.quarterlyReportEnabled,
   };
 }
 

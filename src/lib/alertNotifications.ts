@@ -88,11 +88,12 @@ export async function sendThresholdAlertsIfNeeded(
   if (isAlertCooldownActive(settings.lastAlertSentAt)) return;
   if (messages.length === 0) return;
 
+  const alertSpace = readings.find((r) => r.space)?.space ?? null;
   await notifyUser(userId, email, settings, {
     title: "Garage temperature alert",
     body: messages.join("\n"),
     kind: "threshold",
-  });
+  }, { space: alertSpace });
   await markCooldown(userId, "last_alert_sent_at");
 }
 
@@ -136,9 +137,17 @@ export async function maybeSendThresholdAlerts(
   probes: TempProbeConfig[],
   existingResults?: TempFeedResult[],
   householdId?: string | null,
+  devices?: DeviceWithSensors[],
 ): Promise<void> {
   const settings = await getAlertSettingsForUser(userId, userMetadata);
   const visibleProbes = probes.filter((probe) => probe.visible);
+
+  let deviceList = devices ?? [];
+  if (deviceList.length === 0 && householdId) {
+    const { listHouseholdDevices } = await import("./devices");
+    const listed = await listHouseholdDevices(householdId);
+    deviceList = listed.devices;
+  }
 
   let feedReadings: AlertReading[] = [];
   if (visibleProbes.length > 0 && feeds.length > 0) {
@@ -151,7 +160,7 @@ export async function maybeSendThresholdAlerts(
         saveToDatabase: false,
       });
     }
-    feedReadings = buildReadingsFromResults(results, visibleProbes);
+    feedReadings = buildReadingsFromResults(results, visibleProbes, deviceList);
   }
 
   let sensorReadings: AlertReading[] = [];

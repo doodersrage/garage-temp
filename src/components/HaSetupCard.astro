@@ -3,9 +3,9 @@
 <section class="card">
   <h2 class="card-title">Home Assistant setup</h2>
   <p class="card-subtitle mb-4">
-    Import entity naming and inbound webhook recipes into Home Assistant.
+    Import entity naming and inbound webhook recipes into Home Assistant — or paste the blueprint URL below.
   </p>
-  <ul class="text-sm space-y-2 mb-0">
+  <ul class="text-sm space-y-2 mb-4">
     <li>
       <a class="text-link" href="/ha/garage_temp_entities.yaml" download>
         Download entity naming YAML
@@ -17,10 +17,18 @@
       </a>
     </li>
     <li>
-      Create an inbound webhook under Share, then POST <code>{"{\"action\":\"status\"}"}</code> from an HA rest_command.
+      Blueprint-style import: copy
+      <code class="text-xs break-all">{Astro.url.origin}/ha/garage_temp_webhook.yaml</code>
+      into HA → Settings → Automations → Create → Import from YAML.
+    </li>
+    <li>
+      Create an inbound webhook under Share, then POST <code>{"{\"action\":\"status\"}"}</code> from a rest_command.
     </li>
     <li>
       Scrape Prometheus metrics at <code>/api/v1/metrics</code> with a Pro API key.
     </li>
   </ul>
+  <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+    See also <a class="text-link" href="/docs/api">API docs</a> and the Grafana wizard on this page.
+  </p>
 </section>

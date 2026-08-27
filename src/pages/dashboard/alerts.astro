@@ -12,6 +12,7 @@ import {
   getUserHouseholdRole,
   canEditHousehold,
 } from "../../lib/households";
+import { listHouseholdDevices } from "../../lib/devices";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -25,12 +26,23 @@ const householdRole = household.householdId
   : null;
 const canEdit = canEditHousehold(householdRole);
 
-const [alertSettings, entitlements, recentEvents] =
+const [alertSettings, entitlements, recentEvents, devicesResult] =
   await Promise.all([
     getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
     getUserEntitlements(user.id),
     listRecentAlertEvents(user.id, 15),
+    household.householdId
+      ? listHouseholdDevices(household.householdId)
+      : Promise.resolve({ devices: [] as Awaited<ReturnType<typeof listHouseholdDevices>>["devices"], error: null }),
   ]);
+
+const deviceSpaces = [
+  ...new Set(
+    (devicesResult.devices ?? [])
+      .map((device) => device.space?.trim())
+      .filter((space): space is string => Boolean(space)),
+  ),
+].sort((a, b) => a.localeCompare(b));
 
 const channelLabels: Record<string, string> = {
   email: "email",
@@ -144,6 +156,7 @@ const lastAlertAge = formatRelativeAge(lastAlertAt);
       vapidPublicKey={import.meta.env.VAPID_PUBLIC_KEY ?? ""}
       redirectTo="/dashboard/alerts"
       canEdit={canEdit}
+      deviceSpaces={deviceSpaces}
     />
 
     {canEdit && (

@@ -1,0 +1,40 @@
+---
+interface Props {
+  siteUrl: string;
+  apiKeyPrefix?: string | null;
+}
+
+const { siteUrl, apiKeyPrefix } = Astro.props;
+const metricsUrl = `${siteUrl}/api/v1/metrics`;
+const dashboardJsonUrl = `${siteUrl}/grafana/garage-temp-dashboard.json`;
+---
+<section class="card">
+  <h2 class="card-title">Grafana setup wizard</h2>
+  <p class="card-subtitle mb-4">
+    Scrape Prometheus metrics from Garage Temp with a Pro API key, then import the bundled dashboard JSON.
+  </p>
+  <ol class="text-sm space-y-3 mb-4 list-decimal pl-5">
+    <li>
+      Create an API key above (prefix {apiKeyPrefix ? `${apiKeyPrefix}…` : "shown after create"}).
+    </li>
+    <li>
+      In Grafana → Connections → Data sources → Add Prometheus, set URL to
+      <code class="text-xs break-all">{metricsUrl}</code>
+      and add header <code>Authorization: Bearer &lt;your-api-key&gt;</code>.
+    </li>
+    <li>
+      Download
+      <a class="text-link" href="/grafana/garage-temp-dashboard.json" download>
+        garage-temp-dashboard.json
+      </a>
+      and import via Dashboards → New → Import.
+    </li>
+    <li>
+      Optional: duplicate panels per probe label or household device name.
+    </li>
+  </ol>
+  <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+    Dashboard JSON URL for automation:
+    <code class="text-xs break-all">{dashboardJsonUrl}</code>
+  </p>
+</section>
