@@ -11,6 +11,25 @@ test.describe("public smoke", () => {
     await expect(page.getByRole("heading", { name: /Plans & pricing/i })).toBeVisible();
   });
 
+  test("pricing page billing interval toggle", async ({ page }) => {
+    await page.goto("/pricing");
+    const monthlyBtn = page.getByRole("button", { name: "Monthly" });
+    const annualBtn = page.getByRole("button", { name: /Annual/i });
+    await expect(monthlyBtn).toBeVisible();
+    await expect(annualBtn).toBeVisible();
+
+    await monthlyBtn.click();
+    await expect(monthlyBtn).toHaveAttribute("aria-pressed", "true");
+
+    await annualBtn.click();
+    await expect(annualBtn).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("500 error page loads", async ({ page }) => {
+    await page.goto("/500");
+    await expect(page.getByRole("heading", { name: /Something went wrong/i })).toBeVisible();
+  });
+
   test("compare page loads", async ({ page }) => {
     await page.goto("/compare");
     await expect(page.getByRole("heading", { name: /Compare options/i })).toBeVisible();

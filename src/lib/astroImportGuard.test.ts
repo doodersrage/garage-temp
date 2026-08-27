@@ -4,6 +4,10 @@ import { join, relative } from "node:path";
 
 const ROOT = join(import.meta.dirname, "..");
 
+function allPageAstroFiles(): string[] {
+  return listAstroFiles(join(ROOT, "pages"));
+}
+
 function dashboardAstroFiles(): string[] {
   return [
     join(ROOT, "pages/dashboard.astro"),
@@ -66,9 +70,9 @@ const IGNORE_TAGS = new Set([
 ]);
 
 describe("astro import guard", () => {
-  const dashboardFiles = dashboardAstroFiles();
+  const pageFiles = allPageAstroFiles();
 
-  for (const file of dashboardFiles) {
+  for (const file of pageFiles) {
     const rel = relative(join(ROOT, ".."), file);
     it(`${rel} imports every component it renders`, () => {
       const parsed = parseAstro(file);

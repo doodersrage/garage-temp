@@ -18,16 +18,34 @@ const hasBilling =
   subscription !== null && isActiveSubscriptionStatus(subscription.status);
 const memberPrices = getMemberPriceDisplay();
 const proPrices = getProPriceDisplay();
+const defaultInterval =
+  import.meta.env.PRICING_DEFAULT_INTERVAL === "monthly" ? "monthly" : "annual";
 
-function tierPriceLabel(prices: ReturnType<typeof getMemberPriceDisplay>): string {
-  if (prices.monthly) {
-    return prices.annualMonthlyEquivalent
-      ? `${prices.monthly}/mo · ${prices.annualMonthlyEquivalent}/mo billed annually`
-      : `${prices.monthly}/mo`;
+function priceForInterval(
+  prices: ReturnType<typeof getMemberPriceDisplay>,
+  interval: "monthly" | "annual",
+): { main: string; sub: string | null } {
+  if (interval === "monthly") {
+    return {
+      main: prices.monthly ?? "Contact us",
+      sub: null,
+    };
   }
-  if (prices.annual) return `${prices.annual}/yr`;
-  return "Monthly or annual";
+  if (prices.annual) {
+    return {
+      main: prices.annual,
+      sub: prices.annualMonthlyEquivalent
+        ? `${prices.annualMonthlyEquivalent}/mo billed annually`
+        : "Billed annually",
+    };
+  }
+  return { main: prices.monthly ?? "Contact us", sub: null };
 }
+
+const memberMonthly = priceForInterval(memberPrices, "monthly");
+const memberAnnual = priceForInterval(memberPrices, "annual");
+const proMonthly = priceForInterval(proPrices, "monthly");
+const proAnnual = priceForInterval(proPrices, "annual");
 ---
 <Layout
   title="Plans & pricing"
@@ -62,6 +80,28 @@ function tierPriceLabel(prices: ReturnType<typeof getMemberPriceDisplay>): strin
     </section>
 
     <section class="card plan-tier-cards">
+      <div class="billing-interval-toggle" role="group" aria-label="Billing interval">
+        <button
+          type="button"
+          class="billing-interval-btn"
+          data-interval="monthly"
+          aria-pressed={defaultInterval === "monthly" ? "true" : "false"}
+        >
+          Monthly
+        </button>
+        <button
+          type="button"
+          class="billing-interval-btn"
+          data-interval="annual"
+          aria-pressed={defaultInterval === "annual" ? "true" : "false"}
+        >
+          Annual
+          {(memberPrices.annualSavingsPct ?? proPrices.annualSavingsPct) != null && (
+            <span class="billing-interval-badge">Save up to {Math.max(memberPrices.annualSavingsPct ?? 0, proPrices.annualSavingsPct ?? 0)}%</span>
+          )}
+        </button>
+      </div>
+
       <div class="plan-tier-grid">
         <article class="plan-tier-card">
           <h2 class="plan-tier-name">Free</h2>
@@ -79,10 +119,33 @@ function tierPriceLabel(prices: ReturnType<typeof getMemberPriceDisplay>): strin
 
         <article class="plan-tier-card plan-tier-card-featured">
           <h2 class="plan-tier-name">Member</h2>
-          <p class="plan-tier-price">{tierPriceLabel(memberPrices)}</p>
-          {memberPrices.annualSavingsPct != null && memberPrices.annualSavingsPct > 0 && (
-            <p class="text-sm text-[var(--color-text-muted)] mb-2">Save {memberPrices.annualSavingsPct}% with annual billing</p>
-          )}
+          <p
+            class="plan-tier-price"
+            data-price-monthly={memberMonthly.main}
+            data-price-annual={memberAnnual.main}
+            data-sub-monthly=""
+            data-sub-annual={memberAnnual.sub ?? ""}
+          >
+            {defaultInterval === "annual" ? memberAnnual.main : memberMonthly.main}
+          </p>
+          <p
+            class="plan-tier-savings text-sm text-[var(--color-text-muted)] mb-2"
+            data-savings-monthly=""
+            data-savings-annual={memberPrices.annualSavingsPct != null && memberPrices.annualSavingsPct > 0
+              ? `Save ${memberPrices.annualSavingsPct}% with annual billing`
+              : ""}
+          >
+            {defaultInterval === "annual" && memberPrices.annualSavingsPct != null && memberPrices.annualSavingsPct > 0
+              ? `Save ${memberPrices.annualSavingsPct}% with annual billing`
+              : "\u00a0"}
+          </p>
+          <p
+            class="plan-tier-sub text-sm text-[var(--color-text-muted)] mb-2"
+            data-sub-monthly=""
+            data-sub-annual={memberAnnual.sub ?? ""}
+          >
+            {defaultInterval === "annual" ? (memberAnnual.sub ?? "\u00a0") : "\u00a0"}
+          </p>
           <p class="plan-tier-tagline">History export & more headroom</p>
           <ul class="plan-tier-list">
             <li>6 push devices</li>
@@ -91,9 +154,9 @@ function tierPriceLabel(prices: ReturnType<typeof getMemberPriceDisplay>): strin
           </ul>
           {user ? (
             currentTier === "free" ? (
-              <form action="/api/stripe/checkout" method="post">
+              <form action="/api/stripe/checkout" method="post" class="checkout-form">
                 <input type="hidden" name="plan" value="member" />
-                <input type="hidden" name="interval" value="monthly" />
+                <input type="hidden" name="interval" value={defaultInterval} data-interval-input />
                 <button class="btn-primary w-full" type="submit">Upgrade to Member</button>
               </form>
             ) : (
@@ -106,10 +169,35 @@ function tierPriceLabel(prices: ReturnType<typeof getMemberPriceDisplay>): strin
 
         <article class="plan-tier-card">
           <h2 class="plan-tier-name">Pro</h2>
-          <p class="plan-tier-price">{proPrices.monthly ? `${proPrices.monthly}/mo · 14-day trial` : "14-day trial"}</p>
-          {proPrices.annualSavingsPct != null && proPrices.annualSavingsPct > 0 && (
-            <p class="text-sm text-[var(--color-text-muted)] mb-2">Save {proPrices.annualSavingsPct}% annually</p>
-          )}
+          <p
+            class="plan-tier-price"
+            data-price-monthly={proMonthly.main === "Contact us" ? proMonthly.main : `${proMonthly.main}/mo · 14-day trial`}
+            data-price-annual={proAnnual.main === "Contact us" ? proAnnual.main : `${proAnnual.main}/yr · 14-day trial`}
+            data-sub-monthly=""
+            data-sub-annual={proAnnual.sub ?? ""}
+          >
+            {defaultInterval === "annual"
+              ? (proAnnual.main === "Contact us" ? proAnnual.main : `${proAnnual.main}/yr · 14-day trial`)
+              : (proMonthly.main === "Contact us" ? proMonthly.main : `${proMonthly.main}/mo · 14-day trial`)}
+          </p>
+          <p
+            class="plan-tier-savings text-sm text-[var(--color-text-muted)] mb-2"
+            data-savings-monthly=""
+            data-savings-annual={proPrices.annualSavingsPct != null && proPrices.annualSavingsPct > 0
+              ? `Save ${proPrices.annualSavingsPct}% annually`
+              : ""}
+          >
+            {defaultInterval === "annual" && proPrices.annualSavingsPct != null && proPrices.annualSavingsPct > 0
+              ? `Save ${proPrices.annualSavingsPct}% annually`
+              : "\u00a0"}
+          </p>
+          <p
+            class="plan-tier-sub text-sm text-[var(--color-text-muted)] mb-2"
+            data-sub-monthly=""
+            data-sub-annual={proAnnual.sub ?? ""}
+          >
+            {defaultInterval === "annual" ? (proAnnual.sub ?? "\u00a0") : "\u00a0"}
+          </p>
           <p class="plan-tier-tagline">Alerts anywhere + integrations</p>
           <ul class="plan-tier-list">
             <li>24 push devices</li>
@@ -118,9 +206,9 @@ function tierPriceLabel(prices: ReturnType<typeof getMemberPriceDisplay>): strin
           </ul>
           {user ? (
             currentTier !== "pro" ? (
-              <form action="/api/stripe/checkout" method="post">
+              <form action="/api/stripe/checkout" method="post" class="checkout-form">
                 <input type="hidden" name="plan" value="pro" />
-                <input type="hidden" name="interval" value="monthly" />
+                <input type="hidden" name="interval" value={defaultInterval} data-interval-input />
                 <button class="btn-primary w-full" type="submit">Start Pro trial</button>
               </form>
             ) : (
@@ -152,4 +240,63 @@ function tierPriceLabel(prices: ReturnType<typeof getMemberPriceDisplay>): strin
       </p>
     </section>
   </div>
+
+  <script define:vars={{ defaultInterval }}>
+    const STORAGE_KEY = "garage-temp-pricing-interval";
+
+    function readInterval() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored === "monthly" || stored === "annual") return stored;
+      } catch {
+        /* ignore */
+      }
+      return defaultInterval === "monthly" ? "monthly" : "annual";
+    }
+
+    function applyInterval(interval) {
+      document.querySelectorAll(".billing-interval-btn").forEach((btn) => {
+        const active = btn.getAttribute("data-interval") === interval;
+        btn.setAttribute("aria-pressed", active ? "true" : "false");
+        btn.classList.toggle("billing-interval-btn-active", active);
+      });
+
+      document.querySelectorAll("[data-price-monthly]").forEach((el) => {
+        const price = el.getAttribute(`data-price-${interval}`) ?? "";
+        el.textContent = price;
+      });
+
+      document.querySelectorAll(".plan-tier-sub").forEach((el) => {
+        const sub = el.getAttribute(`data-sub-${interval}`) ?? "\u00a0";
+        el.textContent = sub || "\u00a0";
+      });
+
+      document.querySelectorAll(".plan-tier-savings").forEach((el) => {
+        const savings = el.getAttribute(`data-savings-${interval}`) ?? "";
+        el.textContent = savings || "\u00a0";
+      });
+
+      document.querySelectorAll("[data-interval-input]").forEach((input) => {
+        input.value = interval;
+      });
+
+      try {
+        localStorage.setItem(STORAGE_KEY, interval);
+      } catch {
+        /* ignore */
+      }
+    }
+
+    const initial = readInterval();
+    applyInterval(initial);
+
+    document.querySelectorAll(".billing-interval-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const interval = btn.getAttribute("data-interval");
+        if (interval === "monthly" || interval === "annual") {
+          applyInterval(interval);
+        }
+      });
+    });
+  </script>
 </Layout>

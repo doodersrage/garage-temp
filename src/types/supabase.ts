@@ -1231,6 +1231,36 @@ export type Database = {
         }
         Relationships: []
       }
+      server_errors: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          method: string
+          path: string
+          stack: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          method?: string
+          path: string
+          stack?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          method?: string
+          path?: string
+          stack?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       webhook_deliveries: {
         Row: {
           created_at: string

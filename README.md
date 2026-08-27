@@ -42,7 +42,7 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 
 ### Accounts & collaboration
 - Email/password auth, password reset, optional OAuth (Google/GitHub/Discord when enabled in Supabase)
-- **Plans & pricing** — public `/pricing` with env-driven display prices, `/compare` vs alternatives, upgrade nudges with checkout source analytics
+- **Plans & pricing** — public `/pricing` with monthly/annual toggle (defaults to annual), env-driven display prices, `/compare` vs alternatives, upgrade nudges with checkout source analytics
 - Contextual **upgrade nudges** on dashboard, alerts, history, devices, and share when a feature needs Member or Pro
 - Households: invite members (including read-only **viewer** role), rename, leave, revoke
 - Multi-household switcher when you belong to more than one property
@@ -88,10 +88,13 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 
 ### Ops & content
 - Hourly Worker cron for history collection and alert evaluation
-- Admin tools: users, contact inbox, jobs
+- Admin tools: users, contact inbox, jobs, **ops dashboard** (`/dashboard/ops`) — checkout funnel, Stripe price audit, referral stats, email smoke tests, recent page errors
+- Middleware error logging to `server_errors` with ops email/Discord notify (5 min cooldown per path)
+- Public `/system-status` and friendly `/500` error page
 - Prerendered About / docs hub with search, wiring guides, firmware notes, case study
 - Contact form (Cloudflare Email + Turnstile)
-- GitHub Actions CI (`build` + `vitest`)
+- GitHub Actions CI (`typecheck` + `build` + `vitest` + Playwright E2E)
+- Astro import guard tests on all pages (catches missing component imports before deploy)
 
 ## Stack
 
@@ -128,6 +131,7 @@ pnpm install
 cp .env.example .env   # fill in values
 pnpm dev
 pnpm test
+pnpm typecheck
 ```
 
 Open [http://localhost:4321](http://localhost:4321).
@@ -176,6 +180,7 @@ Configure in `.env` (local) and Cloudflare Worker secrets / vars (production). S
 | `STRIPE_PRICE_ID_ANNUAL` / `STRIPE_PRICE_ID_PRO_ANNUAL` | Billing (annual Member/Pro; create prices in Stripe Dashboard) |
 | `STRIPE_DISPLAY_MEMBER_MONTHLY` / `STRIPE_DISPLAY_MEMBER_ANNUAL` | Display-only USD prices on `/pricing` (not charged — Stripe prices are authoritative) |
 | `STRIPE_DISPLAY_PRO_MONTHLY` / `STRIPE_DISPLAY_PRO_ANNUAL` | Display-only Pro prices on `/pricing` |
+| `PRICING_DEFAULT_INTERVAL` | Default billing toggle on `/pricing` (`annual` or `monthly`) |
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER` | Pro SMS |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` | Pro browser push |
 | `SITE_URL` / `ORIGIN` | OAuth, password reset, Stripe redirects |

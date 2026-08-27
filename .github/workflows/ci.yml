@@ -28,14 +28,32 @@ env:
   STRIPE_DISPLAY_MEMBER_ANNUAL: "60"
   STRIPE_DISPLAY_PRO_MONTHLY: "12"
   STRIPE_DISPLAY_PRO_ANNUAL: "120"
+  STRIPE_PRICE_ID_ANNUAL: price_ci_placeholder_annual
+  STRIPE_PRICE_ID_PRO_ANNUAL: price_ci_placeholder_pro_annual
+  PRICING_DEFAULT_INTERVAL: annual
   CRON_SECRET: ci-cron-secret
   VAPID_PUBLIC_KEY: ci-placeholder
   VAPID_PRIVATE_KEY: ci-placeholder
   VAPID_SUBJECT: mailto:ci@example.com
 
 jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
   build:
     runs-on: ubuntu-latest
+    needs: typecheck
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4

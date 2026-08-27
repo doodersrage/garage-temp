@@ -28,6 +28,9 @@ interface ImportMetaEnv {
   readonly VAPID_PUBLIC_KEY?: string;
   readonly VAPID_PRIVATE_KEY?: string;
   readonly VAPID_SUBJECT?: string;
+  readonly OPS_DISCORD_WEBHOOK_URL?: string;
+  readonly DISCORD_OPS_WEBHOOK_URL?: string;
+  readonly PRICING_DEFAULT_INTERVAL?: string;
   readonly PROD: boolean;
 }
 

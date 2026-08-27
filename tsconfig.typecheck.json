@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "types": ["astro/client"]
+  },
+  "include": [
+    "src/env.d.ts",
+    "src/typecheck-stubs.d.ts",
+    "src/lib/serverErrors.ts",
+    "src/lib/stripePriceAudit.ts",
+    "src/lib/stripePricing.ts",
+    "src/lib/planTier.ts",
+    "src/lib/stripe.ts",
+    "src/lib/supabase.ts",
+    "src/lib/opsNotify.ts",
+    "src/lib/adminAccess.ts",
+    "src/lib/auth.ts",
+    "src/lib/schemaMarkup.ts",
+    "src/pages/api/admin/email-test.ts",
+    "src/types/supabase.ts"
+  ]
+}

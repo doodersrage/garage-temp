@@ -2,6 +2,9 @@
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import { fetchCheckoutAnalyticsAdmin } from "../../lib/checkoutAnalytics";
 import { fetchAppStatus } from "../../lib/appStatus";
+import { fetchReferralAdminStats } from "../../lib/referrals";
+import { listRecentServerErrors } from "../../lib/serverErrors";
+import { auditStripeDisplayPrices } from "../../lib/stripePriceAudit";
 import { getAuthFromCookies } from "../../lib/auth";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
@@ -9,9 +12,14 @@ if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const [checkout, status] = await Promise.all([
+const emailTestOk = Astro.url.searchParams.get("email_test") === "1";
+
+const [checkout, status, referrals, serverErrors, priceAudit] = await Promise.all([
   fetchCheckoutAnalyticsAdmin(30, 30),
   fetchAppStatus(),
+  fetchReferralAdminStats(),
+  listRecentServerErrors(15),
+  auditStripeDisplayPrices(),
 ]);
 
 function sourceLabel(source: string): string {
@@ -19,12 +27,20 @@ function sourceLabel(source: string): string {
   if (source.startsWith("nudge_")) return source.replace("nudge_", "").replace(/_/g, " ");
   return source;
 }
+
+function formatUsd(amount: number | null): string {
+  if (amount == null) return "—";
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
+}
 ---
 <DashboardLayout title="Ops" requireAdmin>
   <div class="space-y-6">
     <section class="card animate-slide-in-left">
       <h1 class="card-title">Ops & conversion</h1>
-      <p class="card-subtitle mb-0">{user.email} — checkout funnel and platform health at a glance.</p>
+      <p class="card-subtitle mb-0">{user.email} — health, checkout funnel, pricing audit, and email tests.</p>
+      {emailTestOk && (
+        <p class="alert-success mt-4 mb-0" role="status">Test email sent to {user.email}.</p>
+      )}
     </section>
 
     <section class="card">
@@ -44,12 +60,106 @@ function sourceLabel(source: string): string {
           <span class="stat-label">Ingest abuse flags</span>
           <p class="stat-value">{status.ingestAbuseCount}</p>
         </article>
+        <article class="stat-item">
+          <span class="stat-label">Page errors (recent)</span>
+          <p class="stat-value">{serverErrors.length}</p>
+        </article>
       </div>
       <p class="mb-0 text-sm">
         <a class="text-link" href="/system-status">Public status page</a>
         {" · "}
-        <a class="text-link" href="/dashboard/jobs">Full job history</a>
+        <a class="text-link" href="/dashboard/jobs">Job history</a>
       </p>
+    </section>
+
+    {serverErrors.length > 0 && (
+      <section class="card">
+        <h2 class="card-title">Recent page errors</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-[var(--color-text-muted)]">
+                <th class="py-2 pr-3">When</th>
+                <th class="py-2 pr-3">Path</th>
+                <th class="py-2">Message</th>
+              </tr>
+            </thead>
+            <tbody>
+              {serverErrors.map((row) => (
+                <tr class="border-t border-[var(--color-border)]">
+                  <td class="py-2 pr-3 whitespace-nowrap">{new Date(row.created_at).toLocaleString()}</td>
+                  <td class="py-2 pr-3 font-mono text-xs">{row.method} {row.path}</td>
+                  <td class="py-2" title={row.stack ?? undefined}>{row.message}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )}
+
+    <section class="card">
+      <h2 class="card-title">Stripe display price audit</h2>
+      <p class="card-subtitle mb-4">Compare Worker display env vars with live Stripe price amounts.</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-[var(--color-text-muted)]">
+              <th class="py-2 pr-3">Plan</th>
+              <th class="py-2 pr-3">Interval</th>
+              <th class="py-2 pr-3">Display env</th>
+              <th class="py-2 pr-3">Stripe API</th>
+              <th class="py-2">Match</th>
+            </tr>
+          </thead>
+          <tbody>
+            {priceAudit.rows.map((row) => (
+              <tr class="border-t border-[var(--color-border)]">
+                <td class="py-2 pr-3 capitalize">{row.plan}</td>
+                <td class="py-2 pr-3">{row.interval}</td>
+                <td class="py-2 pr-3">{formatUsd(row.displayAmountUsd)}</td>
+                <td class="py-2 pr-3">{formatUsd(row.stripeAmountUsd)}</td>
+                <td class="py-2">
+                  {row.match == null ? "—" : row.match ? "✓" : "Mismatch"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Referrals</h2>
+      <div class="stat-grid mb-0">
+        <article class="stat-item">
+          <span class="stat-label">Total signups</span>
+          <p class="stat-value">{referrals.totalSignups}</p>
+        </article>
+        <article class="stat-item">
+          <span class="stat-label">Rewards granted</span>
+          <p class="stat-value">{referrals.rewardedSignups}</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Email smoke tests</h2>
+      <p class="card-subtitle mb-4">Send sample drip/trial templates to your admin email ({user.email}).</p>
+      <div class="flex flex-wrap gap-2">
+        <form action="/api/admin/email-test" method="post">
+          <input type="hidden" name="kind" value="drip_day1" />
+          <button class="btn-secondary" type="submit">Test drip day 1</button>
+        </form>
+        <form action="/api/admin/email-test" method="post">
+          <input type="hidden" name="kind" value="drip_day3" />
+          <button class="btn-secondary" type="submit">Test drip day 3</button>
+        </form>
+        <form action="/api/admin/email-test" method="post">
+          <input type="hidden" name="kind" value="trial_3d" />
+          <button class="btn-secondary" type="submit">Test trial reminder</button>
+        </form>
+      </div>
     </section>
 
     <section class="card">
