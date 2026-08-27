@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { createServerClient } from "./supabase";
+import { createServerClient, createAdminClient } from "./supabase";
 import type { TempFeedConfig, TempProbeConfig } from "./tempFeedConfig";
 import {
   getDefaultTempFeeds,
@@ -13,6 +13,11 @@ type TempConfigRow = {
   feeds: TempFeedConfig[];
   probes: TempProbeConfig[];
 };
+
+/** Normalize pull URLs for idempotent device matching. */
+export function normalizePullFeedUrl(url: string): string {
+  return url.trim().replace(/\/+$/, "") || url.trim();
+}
 
 export async function fetchUserTempConfig(userId: string): Promise<{
   feeds: TempFeedConfig[];
@@ -91,99 +96,298 @@ export async function fetchUserTempConfig(userId: string): Promise<{
   };
 }
 
-export async function saveUserTempConfig(
+/**
+ * Idempotently copy user_temp_feeds / user_temp_probes into household pull devices,
+ * then clear the legacy tables for that user.
+ */
+export async function migrateLegacyTempTablesToDevices(
   userId: string,
-  feeds: TempFeedConfig[],
-  probes: TempProbeConfig[],
-): Promise<{ error: Error | null }> {
+  email?: string | null,
+): Promise<{
+  migratedFeeds: number;
+  createdDevices: number;
+  ensuredSensors: number;
+  cleared: boolean;
+  error: string | null;
+}> {
+  const stored = await fetchUserTempConfig(userId);
+  if (stored.error) {
+    return {
+      migratedFeeds: 0,
+      createdDevices: 0,
+      ensuredSensors: 0,
+      cleared: false,
+      error: stored.error,
+    };
+  }
+  if (!stored.hasCustomConfig) {
+    return {
+      migratedFeeds: 0,
+      createdDevices: 0,
+      ensuredSensors: 0,
+      cleared: false,
+      error: null,
+    };
+  }
+
+  const feeds = sanitizeTempFeeds(stored.feeds);
+  const probes = sanitizeTempProbes(stored.probes, feeds);
+
+  const { getOrCreateHouseholdForUser } = await import("./households");
+  const { listHouseholdDevices } = await import("./devices");
+  const household = await getOrCreateHouseholdForUser(userId, email);
+  if (!household.householdId) {
+    return {
+      migratedFeeds: feeds.length,
+      createdDevices: 0,
+      ensuredSensors: 0,
+      cleared: false,
+      error: household.error || "No household for user",
+    };
+  }
+
+  const existing = await listHouseholdDevices(household.householdId);
+  if (existing.error) {
+    return {
+      migratedFeeds: feeds.length,
+      createdDevices: 0,
+      ensuredSensors: 0,
+      cleared: false,
+      error: existing.error,
+    };
+  }
+
   const supabase = createServerClient();
-  const sanitizedFeeds = sanitizeTempFeeds(feeds);
-  const sanitizedProbes = sanitizeTempProbes(probes, sanitizedFeeds);
+  let createdDevices = 0;
+  let ensuredSensors = 0;
 
-  const { error: deleteFeedsError } = await supabase
-    .from("user_temp_feeds")
-    .delete()
-    .eq("user_id", userId);
+  const pullByUrl = new Map(
+    existing.devices
+      .filter((d) => d.source === "pull_url" && d.pull_url)
+      .map((d) => [normalizePullFeedUrl(d.pull_url!), d]),
+  );
 
-  if (deleteFeedsError) {
-    return { error: new Error(deleteFeedsError.message) };
+  for (const [index, feed] of feeds.entries()) {
+    const urlKey = normalizePullFeedUrl(feed.url);
+    let device = pullByUrl.get(urlKey) ?? null;
+
+    if (!device) {
+      const { data: inserted, error } = await supabase
+        .from("devices")
+        .insert({
+          household_id: household.householdId,
+          name: feed.name,
+          source: "pull_url",
+          pull_url: feed.url,
+          enabled: feed.enabled,
+          sort_order: index,
+        })
+        .select("id")
+        .single();
+
+      if (error || !inserted) {
+        return {
+          migratedFeeds: feeds.length,
+          createdDevices,
+          ensuredSensors,
+          cleared: false,
+          error: error?.message ?? "Failed to create pull device",
+        };
+      }
+
+      device = {
+        id: inserted.id,
+        household_id: household.householdId,
+        name: feed.name,
+        source: "pull_url",
+        pull_url: feed.url,
+        enabled: feed.enabled,
+        sort_order: index,
+        meta: {},
+        space: null,
+        last_seen_at: null,
+        ingest_key_prefix: null,
+        sensors: [],
+      } as (typeof existing.devices)[number];
+      pullByUrl.set(urlKey, device);
+      createdDevices += 1;
+    } else {
+      await supabase
+        .from("devices")
+        .update({
+          name: feed.name,
+          enabled: feed.enabled,
+          sort_order: index,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", device.id);
+    }
+
+    const feedProbes = probes.filter((probe) => probe.feedId === feed.id);
+    const existingKeys = new Set(
+      (device.sensors ?? [])
+        .filter((s) => s.kind === "temperature")
+        .map((s) => s.key),
+    );
+
+    for (const [probeIndex, probe] of feedProbes.entries()) {
+      if (existingKeys.has(probe.key)) continue;
+
+      const rows = [
+        {
+          device_id: device.id,
+          key: probe.key,
+          label: probe.label,
+          kind: "temperature" as const,
+          unit: "F",
+          visible: probe.visible,
+          sort_order: probeIndex,
+        },
+        {
+          device_id: device.id,
+          key: probe.key,
+          label: `${probe.label} humidity`,
+          kind: "humidity" as const,
+          unit: "%",
+          visible: probe.visible,
+          sort_order: probeIndex,
+        },
+      ];
+
+      const { error: sensorError } = await supabase.from("device_sensors").insert(rows);
+      if (sensorError) {
+        // Conflict = already present; ignore unique violations
+        if (!/duplicate|conflict/i.test(sensorError.message)) {
+          return {
+            migratedFeeds: feeds.length,
+            createdDevices,
+            ensuredSensors,
+            cleared: false,
+            error: sensorError.message,
+          };
+        }
+      } else {
+        ensuredSensors += 1;
+        existingKeys.add(probe.key);
+      }
+    }
   }
 
   const { error: deleteProbesError } = await supabase
     .from("user_temp_probes")
     .delete()
     .eq("user_id", userId);
-
   if (deleteProbesError) {
-    return { error: new Error(deleteProbesError.message) };
+    return {
+      migratedFeeds: feeds.length,
+      createdDevices,
+      ensuredSensors,
+      cleared: false,
+      error: deleteProbesError.message,
+    };
   }
 
-  const feedRows = sanitizedFeeds.map((feed, index) => ({
-    user_id: userId,
-    feed_id: feed.id,
-    name: feed.name,
-    url: feed.url,
-    enabled: feed.enabled,
-    sort_order: index,
-  }));
+  const { error: deleteFeedsError } = await supabase
+    .from("user_temp_feeds")
+    .delete()
+    .eq("user_id", userId);
+  if (deleteFeedsError) {
+    return {
+      migratedFeeds: feeds.length,
+      createdDevices,
+      ensuredSensors,
+      cleared: false,
+      error: deleteFeedsError.message,
+    };
+  }
 
-  const probeRows = sanitizedProbes.map((probe, index) => ({
-    user_id: userId,
-    probe_id: probe.id,
-    feed_id: probe.feedId,
-    probe_key: probe.key,
-    label: probe.label,
-    visible: probe.visible,
-    sort_order: index,
-  }));
+  return {
+    migratedFeeds: feeds.length,
+    createdDevices,
+    ensuredSensors,
+    cleared: true,
+    error: null,
+  };
+}
 
-  if (feedRows.length > 0) {
-    const { error: insertFeedsError } = await supabase
-      .from("user_temp_feeds")
-      .insert(feedRows);
+/** Migrate every user that still has legacy feed rows (admin / one-shot). */
+export async function migrateAllLegacyTempTablesToDevices(): Promise<{
+  users: number;
+  cleared: number;
+  errors: string[];
+}> {
+  const admin = createAdminClient();
+  const { data: rows, error } = await admin
+    .from("user_temp_feeds")
+    .select("user_id");
 
-    if (insertFeedsError) {
-      return { error: new Error(insertFeedsError.message) };
+  if (error) {
+    return { users: 0, cleared: 0, errors: [error.message] };
+  }
+
+  const userIds = [...new Set((rows ?? []).map((r) => r.user_id))];
+  let cleared = 0;
+  const errors: string[] = [];
+
+  for (const userId of userIds) {
+    const result = await migrateLegacyTempTablesToDevices(userId);
+    if (result.error) {
+      errors.push(`${userId}: ${result.error}`);
+      continue;
     }
+    if (result.cleared) cleared += 1;
   }
 
-  if (probeRows.length > 0) {
-    const { error: insertProbesError } = await supabase
-      .from("user_temp_probes")
-      .insert(probeRows);
+  return { users: userIds.length, cleared, errors };
+}
 
-    if (insertProbesError) {
-      return { error: new Error(insertProbesError.message) };
-    }
-  }
+export async function saveUserTempConfig(
+  userId: string,
+  feeds: TempFeedConfig[],
+  probes: TempProbeConfig[],
+): Promise<{ error: Error | null }> {
+  const sanitizedFeeds = sanitizeTempFeeds(feeds);
+  const sanitizedProbes = sanitizeTempProbes(probes, sanitizedFeeds);
 
-  // Keep devices model in sync for cron / ingest / multi-sensor
+  // Devices are the source of truth — do not write legacy tables.
   try {
     const { getOrCreateHouseholdForUser } = await import("./households");
     const { savePullDevicesForHousehold } = await import("./devices");
     const household = await getOrCreateHouseholdForUser(userId);
     if (household.householdId) {
-      await savePullDevicesForHousehold(
+      const sync = await savePullDevicesForHousehold(
         household.householdId,
         sanitizedFeeds,
         sanitizedProbes,
       );
+      if (sync.error) {
+        return { error: new Error(sync.error) };
+      }
     }
   } catch (error) {
-    console.error("Failed to sync devices from temp config:", error);
+    return {
+      error: error instanceof Error ? error : new Error("Failed to save pull devices"),
+    };
   }
+
+  // Drop any leftover legacy rows for this user.
+  const supabase = createServerClient();
+  await supabase.from("user_temp_probes").delete().eq("user_id", userId);
+  await supabase.from("user_temp_feeds").delete().eq("user_id", userId);
 
   return { error: null };
 }
 
 async function getCurrentTempConfig(userId: string): Promise<TempConfigRow> {
-  const stored = await fetchUserTempConfig(userId);
+  const { getUserDevicesAsTempConfig } = await import("./devices");
+  const fromDevices = await getUserDevicesAsTempConfig(userId);
+  if (fromDevices.feeds.length > 0) {
+    return { feeds: fromDevices.feeds, probes: fromDevices.probes };
+  }
 
+  const stored = await fetchUserTempConfig(userId);
   if (stored.hasCustomConfig) {
-    return {
-      feeds: stored.feeds,
-      probes: stored.probes,
-    };
+    return { feeds: stored.feeds, probes: stored.probes };
   }
 
   return {
@@ -276,6 +480,19 @@ export async function getUserTempConfig(user: User): Promise<{
   probes: TempProbeConfig[];
   error: string | null;
 }> {
+  // Prefer devices model; migrate leftover legacy table rows first.
+  await migrateLegacyTempTablesToDevices(user.id, user.email);
+
+  const { getUserDevicesAsTempConfig } = await import("./devices");
+  const fromDevices = await getUserDevicesAsTempConfig(user.id, user.email);
+  if (fromDevices.feeds.length > 0 || fromDevices.devices.length > 0) {
+    return {
+      feeds: fromDevices.feeds.length > 0 ? fromDevices.feeds : getDefaultTempFeeds(),
+      probes: fromDevices.probes.length > 0 ? fromDevices.probes : getDefaultTempProbes(),
+      error: fromDevices.error,
+    };
+  }
+
   const stored = await fetchUserTempConfig(user.id);
 
   if (stored.error) {

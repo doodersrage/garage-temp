@@ -217,6 +217,14 @@ export function devicesToTempConfig(devices: DeviceWithSensors[]): {
 }
 
 export async function getUserDevicesAsTempConfig(userId: string, email?: string | null) {
+  // Auto-migrate leftover user_temp_feeds / user_temp_probes into pull devices.
+  try {
+    const { migrateLegacyTempTablesToDevices } = await import("./userTempConfig");
+    await migrateLegacyTempTablesToDevices(userId, email);
+  } catch (error) {
+    console.error("Legacy temp-config migration failed:", error);
+  }
+
   const ensured = await ensureDefaultPullDevice(userId, email);
   if (ensured.error) {
     return {
