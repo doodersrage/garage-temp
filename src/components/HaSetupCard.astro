@@ -1,6 +1,7 @@
 ---
+import DashboardCard from "./dashboard/DashboardCard.astro";
 ---
-<section class="card">
+<DashboardCard>
   <h2 class="card-title">Home Assistant setup</h2>
   <p class="card-subtitle mb-4">
     Import entity naming and inbound webhook recipes into Home Assistant — or paste the blueprint URL below.
@@ -28,7 +29,7 @@
       Scrape Prometheus metrics at <code>/api/v1/metrics</code> with a Pro API key.
     </li>
   </ul>
-  <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+  <p class="mb-0 text-sm text-muted-foreground">
     See also <a class="text-link" href="/docs/api">API docs</a> and the Grafana wizard on this page.
   </p>
-</section>
+</DashboardCard>

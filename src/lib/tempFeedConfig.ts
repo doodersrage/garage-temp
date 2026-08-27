@@ -110,9 +110,9 @@ export function parseTempFeedPayload(payload: unknown): Record<string, TempReadi
 
     const reading = value as Record<string, unknown>;
     probes[key] = normalizeReading({
-      c: coerceNumber(reading.c),
-      f: coerceNumber(reading.f),
-      h: coerceNumber(reading.h),
+      c: coerceNumber(reading.c) ?? undefined,
+      f: coerceNumber(reading.f) ?? undefined,
+      h: coerceNumber(reading.h) ?? undefined,
     });
   }
 

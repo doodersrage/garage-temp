@@ -29,13 +29,14 @@ export default function HistoryChart({
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    const g = ctx;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     canvas.width = width * dpr;
     canvas.height = height * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     const pad = { top: 16, right: 16, bottom: 28, left: 44 };
     const innerW = width - pad.left - pad.right;
@@ -56,23 +57,23 @@ export default function HistoryChart({
     const max = Math.max(...allTemps) + 2;
     const range = max - min || 1;
 
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = "#151b24";
-    ctx.fillRect(0, 0, width, height);
+    g.clearRect(0, 0, width, height);
+    g.fillStyle = "#151b24";
+    g.fillRect(0, 0, width, height);
 
-    ctx.strokeStyle = "rgba(255,255,255,0.06)";
-    ctx.lineWidth = 1;
+    g.strokeStyle = "rgba(255,255,255,0.06)";
+    g.lineWidth = 1;
     for (let i = 0; i <= 4; i++) {
       const y = pad.top + (innerH / 4) * i;
-      ctx.beginPath();
-      ctx.moveTo(pad.left, y);
-      ctx.lineTo(width - pad.right, y);
-      ctx.stroke();
+      g.beginPath();
+      g.moveTo(pad.left, y);
+      g.lineTo(width - pad.right, y);
+      g.stroke();
       const val = max - (range / 4) * i;
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = "10px system-ui, sans-serif";
-      ctx.textAlign = "right";
-      ctx.fillText(`${val.toFixed(0)}°F`, pad.left - 6, y + 3);
+      g.fillStyle = "#94a3b8";
+      g.font = "10px system-ui, sans-serif";
+      g.textAlign = "right";
+      g.fillText(`${val.toFixed(0)}°F`, pad.left - 6, y + 3);
     }
 
     function drawSeries(series: Point[], color: string) {
@@ -80,18 +81,18 @@ export default function HistoryChart({
       const ordered = [...series].sort(
         (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
       );
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
+      g.strokeStyle = color;
+      g.lineWidth = 2;
+      g.beginPath();
       ordered.forEach((point, i) => {
         const x =
           pad.left +
           ((Date.parse(point.timestamp) - minTs) / tsRange) * innerW;
         const y = pad.top + innerH - ((point.tempf - min) / range) * innerH;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        if (i === 0) g.moveTo(x, y);
+        else g.lineTo(x, y);
       });
-      ctx.stroke();
+      g.stroke();
     }
 
     if (priorYearPoints.length >= 2) {

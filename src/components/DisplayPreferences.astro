@@ -2,6 +2,7 @@
 import type { UserPreferences } from "../lib/userPreferences";
 import { WEATHER_CITY_PRESETS } from "../lib/weatherCities";
 import { getDefaultWeatherCityId } from "../lib/FetchWeather";
+import DashboardCard from "./dashboard/DashboardCard.astro";
 
 interface Props {
   preferences: UserPreferences;
@@ -16,102 +17,111 @@ const isCustom =
 const selectValue = !currentId ? "" : isCustom ? "custom" : currentId;
 ---
 
-<form action="/api/user/preferences" method="post" class="card animate-zoom-in" id="weather-prefs-form">
-  <input type="hidden" name="redirect" value={redirectTo} />
-  <input type="hidden" name="weather_city_id" id="weather_city_id_value" value={currentId} />
-  <h2 class="card-title">Home page display</h2>
-  <p class="card-subtitle">Choose which blocks appear on the home page while you are signed in.</p>
+<DashboardCard class="animate-zoom-in">
+  <form method="POST" id="weather-prefs-form" data-prefs-form>
+    <input type="hidden" name="redirect" value={redirectTo} />
+    <input type="hidden" name="weather_city_id" id="weather_city_id_value" value={currentId} />
+    <h2 class="card-title">Home page display</h2>
+    <p class="card-subtitle">Choose which blocks appear on the home page while you are signed in.</p>
+    <p class="alert-success mt-0 mb-4 hidden" id="prefs-status" role="status"></p>
+    <p class="alert-warning mt-0 mb-4 hidden" id="prefs-error" role="alert"></p>
 
-  <div class="mb-6 flex flex-col gap-4">
-    <label class="checkbox-row">
-      <input
-        type="checkbox"
-        name="show_garage_temps"
-        value="true"
-        checked={preferences.showGarageTemps}
-      />
-      <span>Show garage temperatures</span>
-    </label>
+    <div class="mb-6 flex flex-col gap-4">
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          name="show_garage_temps"
+          value="true"
+          checked={preferences.showGarageTemps}
+        />
+        <span>Show garage temperatures</span>
+      </label>
 
-    <label class="checkbox-row">
-      <input
-        type="checkbox"
-        name="show_weather"
-        value="true"
-        checked={preferences.showWeather}
-      />
-      <span>Show current weather</span>
-    </label>
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          name="show_weather"
+          value="true"
+          checked={preferences.showWeather}
+        />
+        <span>Show current weather</span>
+      </label>
 
-    <fieldset class="checkbox-group-nested" id="weather">
-      <legend class="checkbox-group-label">Weather location</legend>
-      <div class="form-field mb-0">
-        <label class="form-label" for="weather_city_preset">City</label>
-        <select class="form-input" id="weather_city_preset">
-          <option value="" selected={selectValue === ""}>
-            Site default{defaultCityId ? ` (${defaultCityId})` : ""}
-          </option>
-          {WEATHER_CITY_PRESETS.map((city) => (
-            <option value={city.id} selected={selectValue === city.id}>
-              {city.label}
+      <fieldset class="checkbox-group-nested" id="weather">
+        <legend class="checkbox-group-label">Weather location</legend>
+        <div class="form-field mb-0">
+          <label class="form-label" for="weather_city_preset">City</label>
+          <select class="form-input" id="weather_city_preset">
+            <option value="" selected={selectValue === ""}>
+              Site default{defaultCityId ? ` (${defaultCityId})` : ""}
             </option>
-          ))}
-          <option value="custom" selected={selectValue === "custom"}>Custom city ID…</option>
+            {WEATHER_CITY_PRESETS.map((city) => (
+              <option value={city.id} selected={selectValue === city.id}>
+                {city.label}
+              </option>
+            ))}
+            <option value="custom" selected={selectValue === "custom"}>Custom city ID…</option>
+          </select>
+        </div>
+        <div class="form-field mb-0 mt-3" id="weather-custom-field" hidden={selectValue !== "custom"}>
+          <label class="form-label" for="weather_city_custom">OpenWeather city ID</label>
+          <input
+            type="text"
+            id="weather_city_custom"
+            class="form-input"
+            value={isCustom ? currentId : ""}
+            placeholder="e.g. 5128581"
+            inputmode="numeric"
+            pattern="\d*"
+          />
+          <p class="preference-hint">
+            Find IDs in the
+            <a
+              class="text-link"
+              href="https://openweathermap.org/find"
+              target="_blank"
+              rel="noreferrer"
+            >
+              OpenWeather city list
+            </a>.
+          </p>
+        </div>
+      </fieldset>
+
+      <label class="checkbox-row">
+        <input type="checkbox" name="use_celsius" value="true" checked={preferences.useCelsius} />
+        <span>Show temperatures in Celsius (°C) where supported</span>
+      </label>
+
+      <div class="form-field mb-0">
+        <label class="form-label" for="theme">Theme</label>
+        <select class="form-input" id="theme" name="theme">
+          <option value="dark" selected={preferences.theme === "dark"}>Dark</option>
+          <option value="light" selected={preferences.theme === "light"}>Light</option>
+          <option value="system" selected={preferences.theme === "system"}>System</option>
         </select>
       </div>
-      <div class="form-field mb-0 mt-3" id="weather-custom-field" hidden={selectValue !== "custom"}>
-        <label class="form-label" for="weather_city_custom">OpenWeather city ID</label>
-        <input
-          type="text"
-          id="weather_city_custom"
-          class="form-input"
-          value={isCustom ? currentId : ""}
-          placeholder="e.g. 5128581"
-          inputmode="numeric"
-          pattern="\d*"
-        />
-        <p class="preference-hint">
-          Find IDs in the
-          <a
-            class="text-link"
-            href="https://openweathermap.org/find"
-            target="_blank"
-            rel="noreferrer"
-          >
-            OpenWeather city list
-          </a>.
-        </p>
-      </div>
-    </fieldset>
-
-    <label class="checkbox-row">
-      <input type="checkbox" name="use_celsius" value="true" checked={preferences.useCelsius} />
-      <span>Show temperatures in Celsius (°C) where supported</span>
-    </label>
-
-    <div class="form-field mb-0">
-      <label class="form-label" for="theme">Theme</label>
-      <select class="form-input" id="theme" name="theme">
-        <option value="dark" selected={preferences.theme === "dark"}>Dark</option>
-        <option value="light" selected={preferences.theme === "light"}>Light</option>
-        <option value="system" selected={preferences.theme === "system"}>System</option>
-      </select>
     </div>
-  </div>
 
-  <button type="submit" class="btn-primary">
-    Save display preferences
-  </button>
-</form>
+    <button type="submit" class="btn-primary" id="prefs-submit">
+      Save display preferences
+    </button>
+  </form>
+</DashboardCard>
 
-<script is:inline>
-  (() => {
-    const preset = document.getElementById("weather_city_preset");
-    const hidden = document.getElementById("weather_city_id_value");
-    const customField = document.getElementById("weather-custom-field");
-    const customInput = document.getElementById("weather_city_custom");
-    if (!(preset instanceof HTMLSelectElement) || !(hidden instanceof HTMLInputElement)) return;
+<script>
+  import { actions } from "astro:actions";
 
+  const form = document.querySelector<HTMLFormElement>("[data-prefs-form]");
+  const preset = document.getElementById("weather_city_preset");
+  const hidden = document.getElementById("weather_city_id_value");
+  const customField = document.getElementById("weather-custom-field");
+  const customInput = document.getElementById("weather_city_custom");
+  const statusEl = document.getElementById("prefs-status");
+  const errorEl = document.getElementById("prefs-error");
+  const submitBtn = document.getElementById("prefs-submit");
+
+  if (preset instanceof HTMLSelectElement && hidden instanceof HTMLInputElement) {
     const sync = () => {
       const value = preset.value;
       const showCustom = value === "custom";
@@ -122,9 +132,55 @@ const selectValue = !currentId ? "" : isCustom ? "custom" : currentId;
         hidden.value = value;
       }
     };
-
     preset.addEventListener("change", sync);
     customInput?.addEventListener("input", sync);
     sync();
-  })();
+  }
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!(form instanceof HTMLFormElement)) return;
+
+    statusEl?.classList.add("hidden");
+    errorEl?.classList.add("hidden");
+    if (submitBtn instanceof HTMLButtonElement) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Saving…";
+    }
+
+    // Ensure checkbox fields are present for unchecked boxes (FormData omits them).
+    const formData = new FormData(form);
+    for (const name of ["show_garage_temps", "show_weather", "use_celsius"]) {
+      if (!formData.has(name)) formData.set(name, "");
+    }
+
+    const { data, error } = await actions.updateDisplayPreferences(formData);
+
+    if (submitBtn instanceof HTMLButtonElement) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Save display preferences";
+    }
+
+    if (error) {
+      if (errorEl) {
+        errorEl.textContent = error.message || "Could not save display preferences.";
+        errorEl.classList.remove("hidden");
+      }
+      return;
+    }
+
+    if (data?.theme) {
+      document.documentElement.dataset.theme =
+        data.theme === "system"
+          ? window.matchMedia("(prefers-color-scheme: light)").matches
+            ? "light"
+            : "dark"
+          : data.theme;
+    }
+
+    if (statusEl) {
+      statusEl.textContent = data?.message ?? "Display preferences saved.";
+      statusEl.classList.remove("hidden");
+    }
+  });
 </script>

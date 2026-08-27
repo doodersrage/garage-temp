@@ -1,4 +1,5 @@
 import { createServerClient } from "./supabase";
+import type { Json } from "../types/supabase";
 import type { DeviceSensor, DeviceWithSensors } from "./devices";
 import type { TempFeedResult, TempProbeConfig } from "./tempFeedConfig";
 export type { TypedSensorValue } from "./ingestPayload";
@@ -39,7 +40,7 @@ export async function insertSensorReadings(
       value_num: row.value_num ?? null,
       value_bool: row.value_bool ?? null,
       value_text: row.value_text ?? null,
-      meta: row.meta ?? {},
+      meta: (row.meta ?? {}) as Json,
     })),
   );
 

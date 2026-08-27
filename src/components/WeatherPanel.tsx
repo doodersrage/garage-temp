@@ -20,11 +20,14 @@ export default function WeatherPanel({ cityId = null, intervalMs = 300000 }: Pro
       const response = await fetch(`/api/home/weather${query ? `?${query}` : ""}`, {
         credentials: "same-origin",
       });
-      const payload = await response.json();
+      const payload = (await response.json()) as {
+        error?: string;
+        weather?: WeatherSnapshot;
+      };
       if (!response.ok) {
         throw new Error(payload.error ?? "Unable to load weather");
       }
-      setWeather(payload.weather as WeatherSnapshot);
+      setWeather(payload.weather ?? null);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unable to load weather");

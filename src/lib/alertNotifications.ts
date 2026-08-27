@@ -222,7 +222,7 @@ async function buildRuleContext(
     }
 
     try {
-      await persistDoorSessions(householdId, doorOpenSessions, sensorIdByLabel);
+      await persistDoorSessions(householdId, doorOpenSessions as import("./doorDuration").DoorOpenSession[], sensorIdByLabel);
     } catch (err) {
       console.error("persistDoorSessions failed:", err);
     }

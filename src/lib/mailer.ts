@@ -1,34 +1,46 @@
 /** Shared outbound email via Cloudflare Email binding. */
 
+type MailerBinding = { send: (message: unknown) => Promise<void> };
+
 export function isMailerRecipientNotAllowed(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return /not allowed/i.test(message) || /recipient.*not.*allowed/i.test(message);
+}
+
+export function requireSmtpMailFrom(): string {
+  const from = import.meta.env.SMTP_MAIL_FROM?.trim();
+  if (!from) {
+    throw new Error("SMTP_MAIL_FROM is not configured");
+  }
+  return from;
+}
+
+/** Send a prebuilt cloudflare:email EmailMessage (avoids SendEmail type mismatch). */
+export async function sendMailerRaw(message: unknown): Promise<void> {
+  const { env } = await import("cloudflare:workers");
+  await (env.MAILER as unknown as MailerBinding).send(message);
 }
 
 export async function sendPlainEmail(
   to: string,
   subject: string,
   body: string,
+  options?: { fromName?: string },
 ): Promise<void> {
-  const from = import.meta.env.SMTP_MAIL_FROM?.trim();
-  if (!from) {
-    throw new Error("SMTP_MAIL_FROM is not configured");
-  }
-
+  const from = requireSmtpMailFrom();
   const { EmailMessage } = await import("cloudflare:email");
   const { createMimeMessage } = await import("mimetext");
-  const { env } = await import("cloudflare:workers");
 
   const msg = createMimeMessage();
   msg.setSender({
-    name: "Garage Temp Monitor",
+    name: options?.fromName ?? "Garage Temp Monitor",
     addr: from,
   });
   msg.setRecipient(to);
   msg.setSubject(subject);
   msg.addMessage({ contentType: "text/plain", data: body });
 
-  await env.MAILER.send(new EmailMessage(from, to, msg.asRaw()));
+  await sendMailerRaw(new EmailMessage(from, to, msg.asRaw()));
 }
 
 /** Hard errors fail the job; recipient-not-allowed is a binding/config limit. */

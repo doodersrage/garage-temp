@@ -157,20 +157,11 @@ export async function sendInviteEmail(
   invitedByEmail: string | null,
 ): Promise<void> {
   try {
-    const { EmailMessage } = await import("cloudflare:email");
-    const { createMimeMessage } = await import("mimetext");
-    const { env } = await import("cloudflare:workers");
-
-    const msg = createMimeMessage();
-    msg.setSender({
-      name: "Garage Temp Monitor",
-      addr: import.meta.env.SMTP_MAIL_FROM,
-    });
-    msg.setRecipient(to);
-    msg.setSubject(`You're invited to ${householdName}`);
-    msg.addMessage({
-      contentType: "text/plain",
-      data: [
+    const { sendPlainEmail } = await import("./mailer");
+    await sendPlainEmail(
+      to,
+      `You're invited to ${householdName}`,
+      [
         `${invitedByEmail ?? "Someone"} invited you to share garage sensors on Garage Temperature Monitor.`,
         "",
         `Household: ${householdName}`,
@@ -178,14 +169,7 @@ export async function sendInviteEmail(
         "",
         "This link expires in 7 days. Sign in (or register) with this email address to join.",
       ].join("\n"),
-    });
-
-    const mail = new EmailMessage(
-      import.meta.env.SMTP_MAIL_FROM,
-      to,
-      msg.asRaw(),
     );
-    await env.MAILER.send(mail);
   } catch (error) {
     console.error("Failed to send household invite email:", error);
   }

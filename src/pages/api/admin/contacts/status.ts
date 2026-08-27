@@ -22,7 +22,10 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?contact_error=1`);
   }
 
-  const updates: Record<string, string> = {};
+  const updates: {
+    status?: string;
+    admin_notes?: string;
+  } = {};
   if (status && ALLOWED_STATUSES.has(status)) {
     updates.status = status;
   }

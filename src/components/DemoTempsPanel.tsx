@@ -30,7 +30,11 @@ export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
       const response = await fetch("/api/home/demo-temps", {
         credentials: "same-origin",
       });
-      const payload = await response.json();
+      const payload = (await response.json()) as {
+        error?: string;
+        groups?: FeedGroup[];
+        updatedAt?: string;
+      };
       if (!response.ok) {
         throw new Error(payload.error ?? "Unable to load garage temperatures");
       }

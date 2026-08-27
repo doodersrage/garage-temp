@@ -6,26 +6,8 @@ import { summarizeSeasonal } from "./seasonalInsights";
 
 async function sendDigestEmail(to: string, subject: string, body: string): Promise<void> {
   try {
-    const { EmailMessage } = await import("cloudflare:email");
-    const { createMimeMessage } = await import("mimetext");
-    const { env } = await import("cloudflare:workers");
-
-    const msg = createMimeMessage();
-    msg.setSender({
-      name: "Garage Temp Monitor",
-      addr: import.meta.env.SMTP_MAIL_FROM,
-    });
-    msg.setRecipient(to);
-    msg.setSubject(subject);
-    msg.addMessage({ contentType: "text/plain", data: body });
-
-    const mail = new EmailMessage(
-      import.meta.env.SMTP_MAIL_FROM,
-      to,
-      msg.asRaw(),
-    );
-
-    await env.MAILER.send(mail);
+    const { sendPlainEmail } = await import("./mailer");
+    await sendPlainEmail(to, subject, body);
   } catch (error) {
     console.error("Failed to send digest email:", error);
   }

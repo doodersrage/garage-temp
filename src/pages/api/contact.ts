@@ -2,10 +2,10 @@
 export const prerender = false;
 import type { APIRoute } from "astro";
 import { EmailMessage } from "cloudflare:email";
-import { env } from "cloudflare:workers";
 import { createMimeMessage } from "mimetext";
 import { createServerClient } from "../../lib/supabase";
 import { getTurnstileToken, verifyTurnstileToken } from "../../lib/turnstile";
+import { requireSmtpMailFrom, sendMailerRaw } from "../../lib/mailer";
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {
   const data = await request.formData();
@@ -32,23 +32,28 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     );
   }
 
+  const from = requireSmtpMailFrom();
+  const to = import.meta.env.SMTP_MAIL_TO?.trim();
+  if (!to) {
+    return new Response(
+      JSON.stringify({ message: "Mail recipient is not configured." }),
+      { status: 503, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
   const msg = createMimeMessage();
-  msg.setSender({ name: "Garage Temp Monitor", addr: import.meta.env.SMTP_MAIL_FROM });
-  msg.setRecipient(import.meta.env.SMTP_MAIL_TO);
+  msg.setSender({ name: "Garage Temp Monitor", addr: from });
+  msg.setRecipient(to);
   msg.setSubject("Contact Form Submission");
   msg.addMessage({
     contentType: "text/plain",
     data: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
   });
 
-  const mailMessage = new EmailMessage(
-    import.meta.env.SMTP_MAIL_FROM,
-    import.meta.env.SMTP_MAIL_TO,
-    msg.asRaw(),
-  );
+  const mailMessage = new EmailMessage(from, to, msg.asRaw());
 
   try {
-    await env.MAILER.send(mailMessage);
+    await sendMailerRaw(mailMessage);
 
     const supabase = createServerClient();
     const { error } = await supabase.from("contacts").insert([
@@ -71,10 +76,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     console.error("Contact form error:", errorMessage);
 
     return new Response(
-      JSON.stringify({
-        success: false,
-        message: "Unable to send your message right now. Please try again later.",
-      }),
+      JSON.stringify({ message: "Failed to send message. Please try again." }),
       { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }

@@ -18,6 +18,8 @@ export default defineConfig({
   },
 
   adapter: cloudflare({
+    // platformProxy is supported at runtime; generated Options types lag behind.
+    // @ts-expect-error Astro Cloudflare Options may omit platformProxy
     platformProxy: {
       enabled: true,
     },

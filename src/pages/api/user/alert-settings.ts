@@ -119,7 +119,12 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     alertTemplates: (() => {
       try {
         const raw = formData.get("alert_templates_json")?.toString();
-        return raw ? parseAlertTemplates(JSON.parse(raw)) : existing.alertTemplates;
+        const parsed = raw ? parseAlertTemplates(JSON.parse(raw)) : existing.alertTemplates;
+        return Object.fromEntries(
+          Object.entries(parsed).filter((entry): entry is [string, { title?: string; body?: string }] =>
+            Boolean(entry[1]),
+          ),
+        );
       } catch {
         return existing.alertTemplates;
       }

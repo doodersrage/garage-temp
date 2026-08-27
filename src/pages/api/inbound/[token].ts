@@ -102,9 +102,11 @@ export const POST: APIRoute = async ({ params, request }) => {
   }
 
   if (action === "status") {
-    const devices = await listHouseholdDevices(resolved.householdId);
+    const { devices } = await listHouseholdDevices(resolved.householdId);
     const sensors = await fetchLatestSensorValues(resolved.householdId);
-    const temps = sensors.filter((s) => s.kind === "temperature" && s.value_num != null);
+    const temps = sensors.filter(
+      (s) => s.sensor.kind === "temperature" && s.value_num != null,
+    );
     return new Response(
       JSON.stringify({
         ok: true,
@@ -112,9 +114,9 @@ export const POST: APIRoute = async ({ params, request }) => {
         deviceCount: devices.length,
         sensorCount: sensors.length,
         temperatures: temps.slice(0, 8).map((s) => ({
-          label: s.label,
+          label: s.sensor.label,
           value: s.value_num,
-          unit: s.unit,
+          unit: s.sensor.unit,
           recorded_at: s.recorded_at,
         })),
       }),

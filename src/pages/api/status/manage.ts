@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import { getUserEntitlements } from "../../../lib/entitlements";
 import {
+  householdEditorCtx,
   redirectUnlessEditor,
   requireHouseholdEditor,
 } from "../../../lib/householdAuth";
@@ -28,7 +29,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?status_error=pro`);
   }
 
-  const householdId = editor.ctx.householdId;
+  const householdId = householdEditorCtx(editor).householdId;
 
   if (action === "revoke") {
     const id = formData.get("id")?.toString();

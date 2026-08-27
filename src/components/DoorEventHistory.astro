@@ -1,6 +1,7 @@
 ---
 import { listDoorEvents } from "../lib/doorEvents";
 import { formatDurationMs } from "../lib/doorDuration";
+import DashboardCard from "./dashboard/DashboardCard.astro";
 
 interface Props {
   householdId: string | null;
@@ -9,27 +10,27 @@ interface Props {
 const { householdId } = Astro.props;
 const events = householdId ? await listDoorEvents(householdId, 12) : [];
 ---
-<section class="card">
+<DashboardCard>
   <h2 class="card-title">Door open history</h2>
   <p class="card-subtitle mb-4">Recent closed door sessions (last 48h window, persisted on alert cron).</p>
   {events.length === 0 ? (
-    <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+    <p class="mb-0 text-sm text-muted-foreground">
       No closed door sessions recorded yet. Open/close a door sensor to populate this log.
     </p>
   ) : (
     <ul class="space-y-2 mb-0 text-sm">
       {events.map((event) => (
-        <li class="flex flex-wrap justify-between gap-2 border-b border-[var(--color-border)] pb-2">
+        <li class="flex flex-wrap justify-between gap-2 border-b border-border pb-2">
           <span>
             <strong>{event.label}</strong>
             {" · "}
             {new Date(event.opened_at).toLocaleString()}
           </span>
-          <span class="text-[var(--color-text-muted)]">
+          <span class="text-muted-foreground">
             {event.duration_ms != null ? formatDurationMs(event.duration_ms) : "—"}
           </span>
         </li>
       ))}
     </ul>
   )}
-</section>
+</DashboardCard>

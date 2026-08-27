@@ -51,20 +51,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   try {
-    const { EmailMessage } = await import("cloudflare:email");
-    const { createMimeMessage } = await import("mimetext");
-    const { env } = await import("cloudflare:workers");
-
-    const msg = createMimeMessage();
-    msg.setSender({
-      name: "Garage Temp Monitor",
-      addr: from,
-    });
-    msg.setRecipient(email);
-    msg.setSubject(template.subject);
-    msg.addMessage({ contentType: "text/plain", data: template.body });
-
-    await env.MAILER.send(new EmailMessage(from, email, msg.asRaw()));
+    const { sendPlainEmail } = await import("../../../lib/mailer");
+    await sendPlainEmail(email, template.subject, template.body);
 
     return new Response(null, {
       status: 302,

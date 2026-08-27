@@ -24,8 +24,9 @@ import { formatJobFailureBody, notifyOps } from "./lib/opsNotify";
 import { collectFreezeMapSnapshots } from "./lib/freezeMap";
 
 export default {
-  fetch(request: Request, env: unknown, ctx: ExecutionContext) {
-    return handle(request, env, ctx);
+  fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    // @astrojs/cloudflare handler Env typing differs from generated worker Env.
+    return handle(request, env as never, ctx);
   },
 
   async scheduled(_controller: ScheduledController, _env: unknown, ctx: ExecutionContext) {

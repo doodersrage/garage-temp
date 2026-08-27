@@ -36,7 +36,7 @@ describe("space channel routing", () => {
     const settings = {
       ...DEFAULT_ALERT_SETTINGS,
       spaceChannelRouting: {
-        garage: { threshold: ["telegram"] },
+        garage: { threshold: ["telegram" as const] },
       },
     };
     const filtered = filterChannelsForSpace(

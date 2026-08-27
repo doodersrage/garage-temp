@@ -17,6 +17,7 @@ import {
 import { getUserEntitlements } from "../../../lib/entitlements";
 import { createServerClient } from "../../../lib/supabase";
 import {
+  householdEditorCtx,
   redirectUnlessEditor,
   requireHouseholdEditor,
 } from "../../../lib/householdAuth";
@@ -58,7 +59,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?error=1`);
   }
 
-  const householdId = editor.ctx.householdId;
+  const householdId = householdEditorCtx(editor).householdId;
 
   if (action === "transfer") {
     const deviceId = formData.get("device_id")?.toString();

@@ -10,17 +10,8 @@ async function sendOpsEmail(subject: string, body: string): Promise<boolean> {
   if (!to || !from) return false;
 
   try {
-    const { EmailMessage } = await import("cloudflare:email");
-    const { createMimeMessage } = await import("mimetext");
-    const { env } = await import("cloudflare:workers");
-
-    const msg = createMimeMessage();
-    msg.setSender({ name: "Garage Temp Ops", addr: from });
-    msg.setRecipient(to);
-    msg.setSubject(subject);
-    msg.addMessage({ contentType: "text/plain", data: body });
-
-    await env.MAILER.send(new EmailMessage(from, to, msg.asRaw()));
+    const { sendPlainEmail } = await import("./mailer");
+    await sendPlainEmail(to, subject, body, { fromName: "Garage Temp Ops" });
     return true;
   } catch (error) {
     console.error("Failed to send ops email:", error);

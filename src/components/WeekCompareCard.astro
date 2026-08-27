@@ -1,6 +1,7 @@
 ---
 import { formatDeltaF, formatTemperature } from "../lib/temperatureFormat";
 import type { WeekCompareResult } from "../lib/weekCompare";
+import DashboardCard from "./dashboard/DashboardCard.astro";
 
 interface Props {
   compare: WeekCompareResult;
@@ -9,11 +10,11 @@ interface Props {
 
 const { compare, useCelsius = false } = Astro.props;
 ---
-<section class="card">
+<DashboardCard>
   <h2 class="card-title">This week vs last year</h2>
   <p class="card-subtitle mb-4">7-day average indoor temperature compared to the same window one year ago.</p>
   {compare.thisWeekAvgF == null ? (
-    <p class="mb-0 text-sm text-[var(--color-text-muted)]">Not enough readings this week yet.</p>
+    <p class="mb-0 text-sm text-muted-foreground">Not enough readings this week yet.</p>
   ) : (
     <div class="stat-grid">
       <article class="stat-item">
@@ -40,4 +41,4 @@ const { compare, useCelsius = false } = Astro.props;
       </article>
     </div>
   )}
-</section>
+</DashboardCard>

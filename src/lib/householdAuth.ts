@@ -45,3 +45,13 @@ export function redirectUnlessEditor(
   }
   return redirect(`${redirectTo}?error=1`);
 }
+
+/** Narrow after redirectUnlessEditor returns null. */
+export function householdEditorCtx(
+  editor: Awaited<ReturnType<typeof requireHouseholdEditor>>,
+): HouseholdEditorContext {
+  if (!editor.ok) {
+    throw new Error(editor.error || "Not a household editor");
+  }
+  return editor.ctx;
+}

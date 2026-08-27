@@ -2,6 +2,7 @@
 import type { UserSubscription } from "../lib/stripeSubscriptions";
 import { isActiveSubscriptionStatus } from "../lib/stripe";
 import type { Entitlements } from "../lib/entitlements";
+import DashboardCard from "./dashboard/DashboardCard.astro";
 
 interface Props {
   canDownloadCsv: boolean;
@@ -30,7 +31,7 @@ const isPro =
 const tierLabel = entitlements?.tier ?? (isPro ? "pro" : canDownloadCsv ? "member" : "free");
 ---
 
-<section class="card" id="plans">
+<DashboardCard id="plans">
   <h2 class="card-title">{title}</h2>
   <p class="card-subtitle">
     Member unlocks CSV export. Pro adds SMS, browser push, share links, inbound/outbound webhooks, embed widgets, and a 14-day free trial.
@@ -137,4 +138,4 @@ const tierLabel = entitlements?.tier ?? (isPro ? "pro" : canDownloadCsv ? "membe
       </div>
     </div>
   )}
-</section>
+</DashboardCard>

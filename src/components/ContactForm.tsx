@@ -17,7 +17,7 @@ export default function Form() {
         method: "POST",
         body: formData,
       });
-      const data = await response.json();
+      const data = (await response.json()) as { message?: string };
       if (!response.ok) {
         setIsError(true);
         setResponseMessage(data.message ?? "Something went wrong. Please try again.");

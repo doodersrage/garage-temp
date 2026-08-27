@@ -1,4 +1,6 @@
 ---
+import DashboardCard from "./dashboard/DashboardCard.astro";
+
 interface Props {
   lastReadingLabel: string | null;
   lastReadingStale: boolean;
@@ -22,7 +24,7 @@ const {
 } = Astro.props;
 ---
 
-<section class="card" id="status">
+<DashboardCard id="status">
   <h2 class="card-title">Status at a glance</h2>
   <p class="card-subtitle mb-4">Quick health check for your garage sensors.</p>
   <div class="status-strip">
@@ -60,4 +62,4 @@ const {
       </span>
     </a>
   </div>
-</section>
+</DashboardCard>

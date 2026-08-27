@@ -1,4 +1,6 @@
 ---
+import DashboardCard from "./dashboard/DashboardCard.astro";
+
 interface Props {
   households: Array<{ household_id: string; name: string; role: string }>;
   activeHouseholdId: string | null;
@@ -11,7 +13,7 @@ if (households.length <= 1) {
   return null;
 }
 ---
-<section class="card">
+<DashboardCard>
   <h2 class="card-title">Switch property</h2>
   <p class="card-subtitle mb-3">
     You belong to {households.length} households. Choose which one to manage.
@@ -30,4 +32,4 @@ if (households.length <= 1) {
     </div>
     <button type="submit" class="btn-secondary">Switch</button>
   </form>
-</section>
+</DashboardCard>

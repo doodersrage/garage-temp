@@ -1,4 +1,5 @@
 import { createServerClient } from "./supabase";
+import type { Json } from "../types/supabase";
 import {
   RAW_READING_RETENTION_DAYS,
   shouldRunDailyRetention,
@@ -26,7 +27,7 @@ export async function startJobRun(
     .insert({
       job_name: jobName,
       status: "running",
-      detail,
+      detail: detail as Json,
     })
     .select("id")
     .single();
@@ -51,7 +52,7 @@ export async function finishJobRun(
     .update({
       status,
       finished_at: new Date().toISOString(),
-      detail,
+      detail: detail as Json,
     })
     .eq("id", id);
 }

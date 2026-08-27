@@ -20,9 +20,14 @@ export async function recordIngestStat(
     .maybeSingle();
 
   if (existing) {
+    const nextCount = (existing[column] ?? 0) + 1;
     await supabase
       .from("ingest_stats")
-      .update({ [column]: (existing[column] ?? 0) + 1 })
+      .update(
+        success
+          ? { success_count: nextCount }
+          : { error_count: nextCount },
+      )
       .eq("device_id", deviceId)
       .eq("day", day);
   } else {

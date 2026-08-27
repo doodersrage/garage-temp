@@ -26,7 +26,7 @@ export default function FeedTestButton({ inputId }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
       });
-      const data = await response.json();
+      const data = (await response.json()) as { message?: string; ok?: boolean };
       setStatus(data.message ?? (data.ok ? "Feed OK" : "Feed test failed"));
     } catch {
       setStatus("Unable to test feed.");

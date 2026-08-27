@@ -2,6 +2,7 @@
 import { computeDoorOpenSessions, formatDurationMs } from "../lib/doorDuration";
 import { fetchRecentBoolReadings } from "../lib/sensorReadings";
 import type { DeviceWithSensors } from "../lib/devices";
+import DashboardCard from "./dashboard/DashboardCard.astro";
 
 interface Props {
   devices: DeviceWithSensors[];
@@ -35,7 +36,7 @@ const recentClosed = sessions
   .reverse();
 ---
 {(openNow.length > 0 || recentClosed.length > 0) && (
-  <section class="card">
+  <DashboardCard>
     <h2 class="card-title">Door duration</h2>
     <p class="card-subtitle mb-4">Open sessions in the last 24 hours.</p>
     {openNow.length > 0 && (
@@ -66,5 +67,5 @@ const recentClosed = sessions
         </p>
       )
     )}
-  </section>
+  </DashboardCard>
 )}

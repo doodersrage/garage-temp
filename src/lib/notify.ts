@@ -27,26 +27,8 @@ export type NotifyPayload = {
 
 async function sendEmail(to: string, subject: string, body: string): Promise<void> {
   try {
-    const { EmailMessage } = await import("cloudflare:email");
-    const { createMimeMessage } = await import("mimetext");
-    const { env } = await import("cloudflare:workers");
-
-    const msg = createMimeMessage();
-    msg.setSender({
-      name: "Garage Temp Monitor",
-      addr: import.meta.env.SMTP_MAIL_FROM,
-    });
-    msg.setRecipient(to);
-    msg.setSubject(subject);
-    msg.addMessage({ contentType: "text/plain", data: body });
-
-    const mail = new EmailMessage(
-      import.meta.env.SMTP_MAIL_FROM,
-      to,
-      msg.asRaw(),
-    );
-
-    await env.MAILER.send(mail);
+    const { sendPlainEmail } = await import("./mailer");
+    await sendPlainEmail(to, subject, body);
   } catch (error) {
     console.error("Failed to send alert email:", error);
   }
@@ -249,7 +231,27 @@ export async function markCooldown(
   const supabase = createServerClient();
   await supabase
     .from("alert_settings")
-    .update({ [field]: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .update(
+      field === "last_alert_sent_at"
+        ? { last_alert_sent_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+        : field === "last_outage_alert_at"
+          ? { last_outage_alert_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+          : field === "last_rate_alert_at"
+            ? { last_rate_alert_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+            : field === "last_forecast_alert_at"
+              ? { last_forecast_alert_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+              : field === "last_battery_alert_at"
+                ? { last_battery_alert_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+                : field === "last_battery_trend_alert_at"
+                  ? {
+                      last_battery_trend_alert_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString(),
+                    }
+                  : {
+                      last_rssi_alert_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString(),
+                    },
+    )
     .eq("user_id", userId);
 }
 

@@ -95,7 +95,7 @@ export async function buildStatusPageSnapshot(householdId: string) {
     sensors: latest.slice(0, 24).map((row) => ({
       label: row.sensor.label,
       kind: row.sensor.kind,
-      device: row.device.name,
+      device: row.deviceName,
       value_num: row.value_num,
       value_bool: row.value_bool,
       recorded_at: row.recorded_at,

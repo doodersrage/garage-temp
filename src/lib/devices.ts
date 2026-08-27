@@ -1,4 +1,5 @@
 import { createServerClient } from "./supabase";
+import type { Json } from "../types/supabase";
 import { getOrCreateHouseholdForUser, getUserHouseholdId } from "./households";
 import {
   getDefaultTempFeeds,
@@ -273,7 +274,7 @@ export async function updateDeviceMeta(
   await supabase
     .from("devices")
     .update({
-      meta: { ...existing, ...patch },
+      meta: { ...existing, ...patch } as Json,
       last_seen_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
