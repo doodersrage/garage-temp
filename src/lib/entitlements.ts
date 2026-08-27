@@ -18,11 +18,16 @@ export type Entitlements = {
   canUseOutboundWebhook: boolean;
   canCreateShareLinks: boolean;
   maxDevices: number;
+  maxOwnedHouseholds: number;
 };
 
 const FREE_MAX_DEVICES = 2;
 const MEMBER_MAX_DEVICES = 6;
 const PRO_MAX_DEVICES = 24;
+
+const FREE_MAX_OWNED_HOUSEHOLDS = 1;
+const MEMBER_MAX_OWNED_HOUSEHOLDS = 1;
+const PRO_MAX_OWNED_HOUSEHOLDS = 50;
 
 export async function getUserEntitlements(userId: string): Promise<Entitlements> {
   const [admin, pro, member] = await Promise.all([
@@ -40,6 +45,7 @@ export async function getUserEntitlements(userId: string): Promise<Entitlements>
       canUseOutboundWebhook: true,
       canCreateShareLinks: true,
       maxDevices: PRO_MAX_DEVICES,
+      maxOwnedHouseholds: PRO_MAX_OWNED_HOUSEHOLDS,
     };
   }
 
@@ -52,6 +58,7 @@ export async function getUserEntitlements(userId: string): Promise<Entitlements>
       canUseOutboundWebhook: true,
       canCreateShareLinks: true,
       maxDevices: PRO_MAX_DEVICES,
+      maxOwnedHouseholds: PRO_MAX_OWNED_HOUSEHOLDS,
     };
   }
 
@@ -64,6 +71,7 @@ export async function getUserEntitlements(userId: string): Promise<Entitlements>
       canUseOutboundWebhook: false,
       canCreateShareLinks: false,
       maxDevices: MEMBER_MAX_DEVICES,
+      maxOwnedHouseholds: MEMBER_MAX_OWNED_HOUSEHOLDS,
     };
   }
 
@@ -75,5 +83,6 @@ export async function getUserEntitlements(userId: string): Promise<Entitlements>
     canUseOutboundWebhook: false,
     canCreateShareLinks: false,
     maxDevices: FREE_MAX_DEVICES,
+    maxOwnedHouseholds: FREE_MAX_OWNED_HOUSEHOLDS,
   };
 }

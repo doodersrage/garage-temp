@@ -3,7 +3,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import AlertSettings from "../../components/AlertSettings.astro";
 import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import { getAuthFromCookies } from "../../lib/auth";
-import { getAlertSettingsForUser } from "../../lib/notify";
+import { getAlertSettingsForUser, isTwilioConfigured } from "../../lib/notify";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { formatRelativeAge } from "../../lib/relativeTime";
 import { listRecentAlertEvents } from "../../lib/alertEvents";
@@ -58,6 +58,7 @@ const channelLabels: Record<string, string> = {
   push_delivery_failed: "push (delivery failed — re-subscribe)",
   push_load_failed: "push (could not load subscriptions)",
   push_send_failed: "push (send error)",
+  sms_not_configured: "SMS (Twilio not configured)",
 };
 
 function formatChannels(raw: string | null): string {
@@ -154,6 +155,7 @@ const lastAlertAge = formatRelativeAge(lastAlertAt);
       settings={alertSettings}
       entitlements={entitlements}
       vapidPublicKey={import.meta.env.VAPID_PUBLIC_KEY ?? ""}
+      twilioConfigured={isTwilioConfigured()}
       redirectTo="/dashboard/alerts"
       canEdit={canEdit}
       deviceSpaces={deviceSpaces}

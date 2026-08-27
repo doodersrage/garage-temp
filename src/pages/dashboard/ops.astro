@@ -6,6 +6,8 @@ import { fetchReferralAdminStats } from "../../lib/referrals";
 import { listRecentServerErrors } from "../../lib/serverErrors";
 import { auditStripeDisplayPrices } from "../../lib/stripePriceAudit";
 import { getAuthFromCookies } from "../../lib/auth";
+import { isTwilioConfigured } from "../../lib/notify";
+import { isVapidConfigured } from "../../lib/webPush";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
@@ -13,6 +15,9 @@ if (!session || !user) {
 }
 
 const emailTestOk = Astro.url.searchParams.get("email_test") === "1";
+const channelTestOk = Astro.url.searchParams.get("channel_test") === "1";
+const twilioConfigured = isTwilioConfigured();
+const vapidConfigured = isVapidConfigured();
 
 const [checkout, status, referrals, serverErrors, priceAudit] = await Promise.all([
   fetchCheckoutAnalyticsAdmin(30, 30),
@@ -47,6 +52,9 @@ const opsDiscordConfigured = Boolean(
       {emailTestOk && (
         <p class="alert-success mt-4 mb-0" role="status">Test email sent to {user.email}.</p>
       )}
+      {channelTestOk && (
+        <p class="alert-success mt-4 mb-0" role="status">Channel smoke test succeeded.</p>
+      )}
       {priceMismatches.length > 0 && (
         <p class="alert-warning mt-4 mb-0" role="alert">
           {priceMismatches.length} Stripe display price(s) do not match live Stripe amounts — update Worker `STRIPE_DISPLAY_*` secrets.
@@ -61,6 +69,11 @@ const opsDiscordConfigured = Boolean(
         <li>Confirm Stripe display audit shows Match for all four prices.</li>
         <li>Review checkout funnel sources — double down on winning nudges.</li>
         <li>Send one drip/trial email smoke test after template changes.</li>
+        <li>
+          Verify Twilio + VAPID secrets
+          {twilioConfigured ? " · Twilio configured" : " · set `TWILIO_*`"}
+          {vapidConfigured ? " · VAPID configured" : " · set `VAPID_*` (run `pnpm generate:vapid`)"}.
+        </li>
         <li>
           Ops notify: email uses `SMTP_MAIL_TO`
           {opsDiscordConfigured ? " · Discord webhook configured" : " · set optional `OPS_DISCORD_WEBHOOK_URL` for Discord"}.
@@ -185,6 +198,45 @@ const opsDiscordConfigured = Boolean(
           <button class="btn-secondary" type="submit">Test trial reminder</button>
         </form>
       </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Channel smoke tests</h2>
+      <p class="card-subtitle mb-4">
+        Confirm Pro alert channels are wired. Twilio:
+        <strong>{twilioConfigured ? "configured" : "not configured"}</strong>
+        {" · "}
+        VAPID:
+        <strong>{vapidConfigured ? "configured" : "not configured"}</strong>.
+      </p>
+      <div class="flex flex-wrap gap-4 items-end">
+        <form action="/api/admin/channel-test" method="post" class="flex flex-wrap gap-2 items-end">
+          <input type="hidden" name="kind" value="sms" />
+          <div class="form-field mb-0">
+            <label class="form-label" for="channel-test-phone">SMS phone (optional override)</label>
+            <input
+              class="form-input"
+              id="channel-test-phone"
+              name="phone"
+              type="tel"
+              placeholder="+15551234567"
+              disabled={!twilioConfigured}
+            />
+          </div>
+          <button class="btn-secondary" type="submit" disabled={!twilioConfigured}>
+            Test SMS
+          </button>
+        </form>
+        <form action="/api/admin/channel-test" method="post">
+          <input type="hidden" name="kind" value="push" />
+          <button class="btn-secondary" type="submit" disabled={!vapidConfigured}>
+            Test browser push
+          </button>
+        </form>
+      </div>
+      <p class="form-hint mt-3 mb-0">
+        SMS uses your alert phone if the override is blank. Push requires this browser to be subscribed under Alerts.
+      </p>
     </section>
 
     <section class="card">

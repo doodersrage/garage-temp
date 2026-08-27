@@ -9,16 +9,19 @@ const page = getAboutPage("kit-qr-onboarding")!;
 <AboutArticle slug={page.slug} title={page.title} description={page.description}>
   <h2>What to encode</h2>
   <p>
-    After creating a push device (Dashboard → Devices), encode the ingest URL:
+    After creating or rotating a push key on <a class="text-link" href="/dashboard/temperature">Dashboard → Devices</a>,
+    the one-time key callout shows a QR for the full ingest URL:
   </p>
   <pre><code>{`https://your-domain/api/ingest/YOUR_DEVICE_KEY`}</code></pre>
   <p>
     Anyone scanning the QR on a phone sees the URL — keep devices physically secure; rotate keys if a sticker is lost.
   </p>
 
-  <h2>Generate a QR</h2>
+  <h2>QR on the Devices page</h2>
   <p>
-    Use any QR generator (or print from your label maker) with the curl test payload from
+    The QR is generated in-app when you create or rotate a push key — no external QR generators required.
+    You can download the SVG or print a simple label (device name + QR + URL) from that callout.
+    See also the curl test payload in
     <a class="text-link" href="/about/ingest-and-webhooks">Ingest & webhooks</a>.
   </p>
 

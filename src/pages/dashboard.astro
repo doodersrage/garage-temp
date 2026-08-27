@@ -287,6 +287,8 @@ const feedsValue =
         hasHistory={history.totalCount > 0}
         hasAlertsConfigured={hasAlertsConfigured}
         hasHouseholdMembers={hasHouseholdMembers}
+        hasLiveSensors={latest.length > 0}
+        hasHousehold={Boolean(household.householdId)}
         dismissed={onboardingDismissed}
       />
     </div>

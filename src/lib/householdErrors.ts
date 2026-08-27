@@ -6,6 +6,8 @@ const HOUSEHOLD_ERROR_MESSAGES: Record<string, string> = {
   expired: "This invite has expired. Ask for a new one.",
   invalid: "This invite link is invalid.",
   cannot_leave_owner: "Household owners cannot leave. Transfer ownership or delete the household instead.",
+  property_limit:
+    "You’ve reached the owned-property limit for your plan. Upgrade to Pro to manage multiple households.",
 };
 
 export function getHouseholdErrorMessage(code: string | null): string | null {

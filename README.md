@@ -221,8 +221,8 @@ Configure in `.env` (local) and Cloudflare Worker secrets / vars (production). F
 | `STRIPE_PRICE_ID_ANNUAL` / `STRIPE_PRICE_ID_PRO_ANNUAL` | Annual Member / Pro price IDs |
 | `STRIPE_DISPLAY_MEMBER_*` / `STRIPE_DISPLAY_PRO_*` | Display-only USD amounts on `/pricing` (must match Stripe) |
 | `PRICING_DEFAULT_INTERVAL` | `annual` or `monthly` default on `/pricing` |
-| `TWILIO_*` | Pro SMS |
-| `VAPID_*` | Pro browser push |
+| `TWILIO_*` | Pro SMS (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`) |
+| `VAPID_*` | Pro browser push — generate with `pnpm generate:vapid` |
 | `SITE_URL` / `ORIGIN` | OAuth, password reset, Stripe redirects |
 | `CRON_SECRET` | Bearer for manual history cron |
 | `OPS_DISCORD_WEBHOOK_URL` | Optional Discord when jobs / pages fail |
@@ -378,7 +378,7 @@ CI on every push to `main`: `astro sync` + typecheck, unit tests, build, Playwri
 - Prefer pure Astro for dashboard structure; islands only for interactive charts/forms that need client state
 - New dashboard panels should use `DashboardCard` / tokens in `src/styles/global.css`
 - OAuth providers must be enabled in Supabase; keep password sign-in form-first when providers are unused
-- VAPID keys are required for Pro push — generate once and store as secrets
+- VAPID keys are required for Pro push — run `pnpm generate:vapid` once and store the printed values as `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` secrets (format matches `@block65/webcrypto-web-push`)
 - Import-guard Vitest suite fails the build if a page renders a component it never imports
 
 ---

@@ -57,12 +57,12 @@ function sparkPath(values: number[]): string {
       <h1 class="card-title">Freeze-risk map</h1>
       <p class="card-subtitle">
         Anonymized indoor garage temperatures by city from households that opt in.
-        No addresses, device names, or household identifiers are published.
+        No addresses, device names, or household identifiers are published — only city-level averages.
       </p>
       <p class="mb-0 text-sm text-[var(--color-text-muted)]">
         Latest aggregate: {captureAge.label}
         {captureAge.absolute ? ` (${captureAge.absolute})` : ""}.
-        Household owners can opt in under Dashboard → Household (preset or city search).
+        Opt in or out anytime under Dashboard → Household.
       </p>
       <p class="mt-3 mb-0 text-sm">
         {showSparse ? (

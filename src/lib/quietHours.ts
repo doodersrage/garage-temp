@@ -66,7 +66,7 @@ export function quietHoursBypassed(
   kind: NotifyKind | undefined,
 ): boolean {
   if (!settings.quietHoursBypassFreeze) return false;
-  return kind === "threshold" || kind === "forecast";
+  return kind === "threshold" || kind === "forecast" || kind === "nws";
 }
 
 export function shouldSuppressForQuietHours(
@@ -91,5 +91,5 @@ export function quietHoursAllowsSmsCritical(
   if (!isInQuietHours(settings, now)) return false;
   if (quietHoursBypassed(settings, kind)) return false;
   if (!settings.quietHoursSmsCritical) return false;
-  return kind === "threshold" || kind === "forecast";
+  return kind === "threshold" || kind === "forecast" || kind === "nws";
 }

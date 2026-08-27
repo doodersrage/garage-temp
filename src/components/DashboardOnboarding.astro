@@ -7,6 +7,9 @@ interface Props {
   hasHistory: boolean;
   hasAlertsConfigured?: boolean;
   hasHouseholdMembers?: boolean;
+  /** Live sensors present — show optional freeze-map CTA. */
+  hasLiveSensors?: boolean;
+  hasHousehold?: boolean;
   dismissed?: boolean;
 }
 
@@ -16,8 +19,12 @@ const {
   hasHistory,
   hasAlertsConfigured = false,
   hasHouseholdMembers = false,
+  hasLiveSensors = false,
+  hasHousehold = false,
   dismissed = false,
 } = Astro.props;
+
+const showFreezeMapCta = hasLiveSensors && hasHousehold;
 
 const kitSteps = [
   {
@@ -40,9 +47,9 @@ const kitSteps = [
   },
   {
     done: hasHistory || hasSensors,
-    href: "/about/kit-qr-onboarding",
+    href: "/dashboard/temperature",
     title: "Optional: QR sticker",
-    detail: "Encode your ingest URL on a kit label for quick phone setup.",
+    detail: "After create/rotate on Devices, download or print the in-app ingest QR (no external generator).",
   },
   {
     done: hasAlertsConfigured,
@@ -165,6 +172,12 @@ const hidden = dismissed || fullyDone;
         <a class="text-link" href="/about/arduino-sketches">Arduino sketches</a> ·
         <a class="text-link" href="/about/arduino-circuit-wiring">Wiring</a> ·
         <a class="text-link" href="/freeze-map">Freeze map</a>
+        {showFreezeMapCta && (
+          <>
+            {" · "}
+            <a class="text-link" href="/dashboard/household">Freeze-map opt-in</a>
+          </>
+        )}
       </p>
     )}
   </DashboardCard>

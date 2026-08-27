@@ -15,15 +15,22 @@ export function isStalePushStatus(status: number): boolean {
   return status === 404 || status === 410;
 }
 
+export function isVapidConfigured(): boolean {
+  return Boolean(
+    import.meta.env.VAPID_PUBLIC_KEY?.trim() &&
+      import.meta.env.VAPID_PRIVATE_KEY?.trim(),
+  );
+}
+
 export async function sendWebPushToUser(
   userId: string,
   payload: WebPushPayload,
 ): Promise<WebPushDeliveryResult> {
-  const publicKey = import.meta.env.VAPID_PUBLIC_KEY;
-  const privateKey = import.meta.env.VAPID_PRIVATE_KEY;
+  const publicKey = import.meta.env.VAPID_PUBLIC_KEY?.trim();
+  const privateKey = import.meta.env.VAPID_PRIVATE_KEY?.trim();
   const subject = import.meta.env.VAPID_SUBJECT ?? "mailto:admin@example.com";
 
-  if (!publicKey || !privateKey) {
+  if (!isVapidConfigured() || !publicKey || !privateKey) {
     return { delivered: 0, failed: 0, skippedReason: "push_not_configured" };
   }
 

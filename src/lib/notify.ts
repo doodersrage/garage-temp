@@ -86,14 +86,22 @@ async function sendTelegram(
   }
 }
 
-async function sendTwilioSms(to: string, body: string): Promise<void> {
-  const sid = import.meta.env.TWILIO_ACCOUNT_SID;
-  const token = import.meta.env.TWILIO_AUTH_TOKEN;
-  const from = import.meta.env.TWILIO_FROM_NUMBER;
+export function isTwilioConfigured(): boolean {
+  return Boolean(
+    import.meta.env.TWILIO_ACCOUNT_SID?.trim() &&
+      import.meta.env.TWILIO_AUTH_TOKEN?.trim() &&
+      import.meta.env.TWILIO_FROM_NUMBER?.trim(),
+  );
+}
+
+export async function sendTwilioSms(to: string, body: string): Promise<boolean> {
+  const sid = import.meta.env.TWILIO_ACCOUNT_SID?.trim();
+  const token = import.meta.env.TWILIO_AUTH_TOKEN?.trim();
+  const from = import.meta.env.TWILIO_FROM_NUMBER?.trim();
 
   if (!sid || !token || !from) {
     console.warn("Twilio env vars not configured; skipping SMS");
-    return;
+    return false;
   }
 
   try {
@@ -118,9 +126,12 @@ async function sendTwilioSms(to: string, body: string): Promise<void> {
 
     if (!response.ok) {
       console.error("Twilio SMS failed:", await response.text());
+      return false;
     }
+    return true;
   } catch (error) {
     console.error("Failed to send Twilio SMS:", error);
+    return false;
   }
 }
 
@@ -226,32 +237,24 @@ export async function markCooldown(
     | "last_forecast_alert_at"
     | "last_battery_alert_at"
     | "last_battery_trend_alert_at"
-    | "last_rssi_alert_at",
+    | "last_rssi_alert_at"
+    | "last_nws_alert_at",
 ): Promise<void> {
   const supabase = createServerClient();
+  const now = new Date().toISOString();
   await supabase
     .from("alert_settings")
-    .update(
-      field === "last_alert_sent_at"
-        ? { last_alert_sent_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-        : field === "last_outage_alert_at"
-          ? { last_outage_alert_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-          : field === "last_rate_alert_at"
-            ? { last_rate_alert_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-            : field === "last_forecast_alert_at"
-              ? { last_forecast_alert_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-              : field === "last_battery_alert_at"
-                ? { last_battery_alert_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-                : field === "last_battery_trend_alert_at"
-                  ? {
-                      last_battery_trend_alert_at: new Date().toISOString(),
-                      updated_at: new Date().toISOString(),
-                    }
-                  : {
-                      last_rssi_alert_at: new Date().toISOString(),
-                      updated_at: new Date().toISOString(),
-                    },
-    )
+    .update({ [field]: now, updated_at: now } as {
+      last_alert_sent_at?: string;
+      last_outage_alert_at?: string;
+      last_rate_alert_at?: string;
+      last_forecast_alert_at?: string;
+      last_battery_alert_at?: string;
+      last_battery_trend_alert_at?: string;
+      last_rssi_alert_at?: string;
+      last_nws_alert_at?: string;
+      updated_at: string;
+    })
     .eq("user_id", userId);
 }
 
@@ -376,8 +379,15 @@ export async function notifyUser(
 
   if (settings.channelSms && allowChannel("sms")) {
     if (settings.smsPhone && entitlements.canUseSms) {
-      await sendTwilioSms(settings.smsPhone, `${payloadResolved.title}: ${bodyWithSnooze}`);
-      sent.push("sms");
+      const smsOk = await sendTwilioSms(
+        settings.smsPhone,
+        `${payloadResolved.title}: ${bodyWithSnooze}`,
+      );
+      if (smsOk) {
+        sent.push("sms");
+      } else {
+        skipped.push(isTwilioConfigured() ? "sms" : "sms_not_configured");
+      }
     } else {
       skipped.push("sms");
     }

@@ -4,11 +4,24 @@ import DashboardCard from "./dashboard/DashboardCard.astro";
 interface Props {
   siteUrl: string;
   apiKeyPrefix?: string | null;
+  /** Fresh API key from create flow — used only for a local scrape snippet. */
+  apiKey?: string | null;
 }
 
-const { siteUrl, apiKeyPrefix } = Astro.props;
+const { siteUrl, apiKeyPrefix = null, apiKey = null } = Astro.props;
 const metricsUrl = `${siteUrl}/api/v1/metrics`;
 const dashboardJsonUrl = `${siteUrl}/grafana/garage-temp-dashboard.json`;
+const host = siteUrl.replace(/^https?:\/\//, "");
+const scrapeSnippet = `# prometheus.yml
+scrape_configs:
+  - job_name: garage_temp
+    metrics_path: /api/v1/metrics
+    scheme: ${siteUrl.startsWith("https") ? "https" : "http"}
+    static_configs:
+      - targets: ["${host}"]
+    authorization:
+      type: Bearer
+      credentials: ${apiKey ?? "<your-api-key>"}`;
 ---
 <DashboardCard>
   <h2 class="card-title">Grafana setup wizard</h2>
@@ -35,6 +48,10 @@ const dashboardJsonUrl = `${siteUrl}/grafana/garage-temp-dashboard.json`;
       Optional: duplicate panels per probe label or household device name.
     </li>
   </ol>
+  <div class="mb-4">
+    <p class="form-label mb-1">Scrape config snippet</p>
+    <pre class="text-xs overflow-x-auto mb-0"><code>{scrapeSnippet}</code></pre>
+  </div>
   <p class="mb-0 text-sm text-[var(--color-text-muted)]">
     Dashboard JSON URL for automation:
     <code class="text-xs break-all">{dashboardJsonUrl}</code>

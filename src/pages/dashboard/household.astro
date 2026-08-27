@@ -2,6 +2,7 @@
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import {
+  countOwnedHouseholds,
   getOrCreateHouseholdForUser,
   getOwnedHouseholdId,
   listHouseholdMembers,
@@ -9,10 +10,12 @@ import {
 } from "../../lib/households";
 import { listPendingInvites } from "../../lib/householdInvites";
 import { getHouseholdErrorMessage } from "../../lib/householdErrors";
+import { getUserEntitlements } from "../../lib/entitlements";
 import { createAdminClient, createServerClient } from "../../lib/supabase";
 import { buildSiteUrl } from "../../lib/stripe";
 import { uniqueWeatherCityPresets } from "../../lib/weatherCities";
 import DashboardCard from "../../components/dashboard/DashboardCard.astro";
+import UpgradeNudge from "../../components/UpgradeNudge.astro";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
@@ -23,20 +26,26 @@ const active = await getOrCreateHouseholdForUser(user.id, user.email);
 const ownedId = await getOwnedHouseholdId(user.id);
 const manageId = ownedId ?? active.householdId;
 
-const [membersResult, householdsResult, invitesResult, householdRow] = await Promise.all([
-  manageId ? listHouseholdMembers(manageId) : Promise.resolve({ members: [], error: null }),
-  listUserHouseholds(user.id),
-  manageId ? listPendingInvites(manageId) : Promise.resolve({ invites: [], error: null }),
-  manageId
-    ? createServerClient()
-        .from("households")
-        .select(
-          "name, freeze_map_opt_in, freeze_map_city_id, freeze_map_lat, freeze_map_lon, freeze_map_label",
-        )
-        .eq("id", manageId)
-        .maybeSingle()
-    : Promise.resolve({ data: null }),
-]);
+const [membersResult, householdsResult, invitesResult, householdRow, entitlements, ownedCount] =
+  await Promise.all([
+    manageId ? listHouseholdMembers(manageId) : Promise.resolve({ members: [], error: null }),
+    listUserHouseholds(user.id),
+    manageId ? listPendingInvites(manageId) : Promise.resolve({ invites: [], error: null }),
+    manageId
+      ? createServerClient()
+          .from("households")
+          .select(
+            "name, freeze_map_opt_in, freeze_map_city_id, freeze_map_lat, freeze_map_lon, freeze_map_label",
+          )
+          .eq("id", manageId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    getUserEntitlements(user.id),
+    countOwnedHouseholds(user.id),
+  ]);
+
+const atPropertyLimit = ownedCount >= entitlements.maxOwnedHouseholds;
+const canCreateProperty = !atPropertyLimit;
 
 const admin = createAdminClient();
 const membersWithEmail = await Promise.all(
@@ -86,6 +95,7 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
     </DashboardCard>
 
     <DashboardCard>
+    {canCreateProperty ? (
     <form action="/api/household" method="post">
       <input type="hidden" name="action" value="create_property" />
       <input type="hidden" name="redirect" value="/dashboard/household" />
@@ -99,6 +109,17 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
       </div>
       <button class="btn-secondary mt-2" type="submit">Create property</button>
     </form>
+    ) : (
+      <>
+        <h2 class="card-title">Add another property</h2>
+        <p class="card-subtitle mb-4">
+          Your plan allows {entitlements.maxOwnedHouseholds} owned
+          {entitlements.maxOwnedHouseholds === 1 ? " household" : " households"}
+          ({ownedCount} in use). Upgrade to Pro for multiple properties.
+        </p>
+        <UpgradeNudge feature="multi_property" tier={entitlements.tier} />
+      </>
+    )}
     </DashboardCard>
 
     {isOwner && (

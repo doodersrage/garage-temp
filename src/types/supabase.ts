@@ -109,12 +109,14 @@ export type Database = {
           last_escalation_at: string | null
           last_forecast_alert_at: string | null
           last_monthly_report_at: string | null
+          last_nws_alert_at: string | null
           last_outage_alert_at: string | null
           last_quarterly_report_at: string | null
           last_rate_alert_at: string | null
           last_rssi_alert_at: string | null
           last_trial_reminder_at: string | null
           monthly_report_enabled: boolean
+          nws_freeze_alerts_enabled: boolean
           outage_hours: number
           outbound_webhook_secret: string | null
           outbound_webhook_url: string | null
@@ -174,12 +176,14 @@ export type Database = {
           last_escalation_at?: string | null
           last_forecast_alert_at?: string | null
           last_monthly_report_at?: string | null
+          last_nws_alert_at?: string | null
           last_outage_alert_at?: string | null
           last_quarterly_report_at?: string | null
           last_rate_alert_at?: string | null
           last_rssi_alert_at?: string | null
           last_trial_reminder_at?: string | null
           monthly_report_enabled?: boolean
+          nws_freeze_alerts_enabled?: boolean
           outage_hours?: number
           outbound_webhook_secret?: string | null
           outbound_webhook_url?: string | null
@@ -239,12 +243,14 @@ export type Database = {
           last_escalation_at?: string | null
           last_forecast_alert_at?: string | null
           last_monthly_report_at?: string | null
+          last_nws_alert_at?: string | null
           last_outage_alert_at?: string | null
           last_quarterly_report_at?: string | null
           last_rate_alert_at?: string | null
           last_rssi_alert_at?: string | null
           last_trial_reminder_at?: string | null
           monthly_report_enabled?: boolean
+          nws_freeze_alerts_enabled?: boolean
           outage_hours?: number
           outbound_webhook_secret?: string | null
           outbound_webhook_url?: string | null

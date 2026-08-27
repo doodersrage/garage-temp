@@ -118,6 +118,16 @@ function formatSensorValue(sensor: LiveSensor): { primary: string; detail: strin
   return { primary: "—", detail: "No reading" };
 }
 
+function isSensorAlert(sensor: LiveSensor): boolean {
+  if (sensor.kind === "door" && sensor.value_bool === true) return true;
+  if (sensor.kind === "flood" && sensor.value_bool === true) return true;
+  if (sensor.kind === "power" && sensor.value_bool === false) return true;
+  if (sensor.kind === "co2" && sensor.value_num != null && sensor.value_num >= 1000) {
+    return true;
+  }
+  return false;
+}
+
 export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
   const [groups, setGroups] = useState<FeedGroup[]>([]);
   const [sensors, setSensors] = useState<LiveSensor[]>([]);
@@ -345,13 +355,16 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
               const age = sensor.recorded_at
                 ? formatRelativeAge(sensor.recorded_at)
                 : null;
+              const alert = isSensorAlert(sensor);
               return (
                 <article
-                  class={`stat-item${age?.stale ? " stat-item-stale" : ""}`}
+                  class={`stat-item${age?.stale ? " stat-item-stale" : ""}${alert ? " stat-item-alert" : ""}`}
                   key={`${sensor.deviceId}:${sensor.key}:${sensor.kind}`}
                 >
                   <span class="stat-label">{sensor.label}</span>
-                  <p class="stat-value">{display.primary}</p>
+                  <p class={`stat-value${alert ? " text-[var(--color-danger)]" : ""}`}>
+                    {display.primary}
+                  </p>
                   <p class="stat-detail">
                     {display.detail} · {sensor.deviceName}
                   </p>

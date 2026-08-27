@@ -9,6 +9,7 @@ interface Props {
   settings: AlertSettings;
   entitlements: Entitlements;
   vapidPublicKey?: string;
+  twilioConfigured?: boolean;
   redirectTo?: string;
   canEdit?: boolean;
   deviceSpaces?: string[];
@@ -19,6 +20,7 @@ const {
   settings,
   entitlements,
   vapidPublicKey = "",
+  twilioConfigured = true,
   redirectTo = "/dashboard/alerts",
   canEdit = true,
   deviceSpaces = [],
@@ -34,9 +36,20 @@ const ALERT_CHANNELS = [
   { id: "slack", label: "Slack" },
 ] as const;
 
+/** Space routing matrix kinds (subset of NotifyKind; preserve others on merge). */
+const SPACE_ROUTING_KINDS = [
+  { id: "threshold", label: "Threshold" },
+  { id: "forecast", label: "Forecast" },
+  { id: "nws", label: "NWS" },
+  { id: "rule", label: "Rule" },
+  { id: "outage", label: "Outage" },
+  { id: "rate", label: "Rate drop" },
+] as const;
+
 const templateKinds = [
   "threshold",
   "forecast",
+  "nws",
   "rate",
   "outage",
   "rule",
@@ -178,6 +191,10 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     <input type="checkbox" name="forecast_freeze_enabled" value="true" checked={settings.forecastFreezeEnabled} />
     <span>Warn when outdoor forecast may hit freeze threshold</span>
   </label>
+  <label class="checkbox-row mb-2">
+    <input type="checkbox" name="nws_freeze_alerts_enabled" value="true" checked={settings.nwsFreezeAlertsEnabled} />
+    <span>Also notify on NWS official freeze / cold alerts for your weather city</span>
+  </label>
   <div class="form-field mb-4">
     <label class="form-label" for="forecast_hours_ahead">Look-ahead hours</label>
     <input class="form-input" type="number" min="3" max="48" step="1" id="forecast_hours_ahead" name="forecast_hours_ahead" value={settings.forecastHoursAhead} />
@@ -318,6 +335,11 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
         )}
       </span>
     </label>
+    {entitlements.canUseSms && !twilioConfigured && (
+      <p class="alert-warning mb-2 text-sm" role="status">
+        SMS is enabled on your plan, but Twilio is not configured on this server (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`). Messages will be skipped until those secrets are set.
+      </p>
+    )}
     <label class="checkbox-row">
       <input type="checkbox" name="channel_push" value="true" checked={settings.channelPush} disabled={!entitlements.canUsePush} />
       <span>
@@ -409,30 +431,46 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
   <div class="form-field">
     <label class="form-label" for="space_channel_routing_json">Per-space channel routing</label>
     {deviceSpaces.length === 0 ? (
-      <p class="form-hint mb-2">Assign a space label on devices (Dashboard → Temperature) to route threshold alerts by location.</p>
+      <p class="form-hint mb-2">
+        Assign a space label on devices (Dashboard → Devices) to route alerts by location.
+      </p>
     ) : (
       <div class="space-y-4 mb-2">
+        <p class="form-hint mb-0">
+          For each space and alert kind, pick channels. Leave a kind unchecked to use your global / severity routing.
+          Kinds not shown here (e.g. battery, digest) are preserved when you save.
+        </p>
         {deviceSpaces.map((space) => {
           const key = space.toLowerCase();
-          const selected = new Set(settings.spaceChannelRouting?.[key]?.threshold ?? []);
+          const spaceMap = settings.spaceChannelRouting?.[key] ?? {};
           return (
             <fieldset class="border border-[var(--color-border)] rounded-lg p-3">
               <legend class="text-sm font-semibold px-1 capitalize">{space}</legend>
-              <p class="form-hint mb-2">Threshold alerts — leave all unchecked to use your global channels.</p>
-              <div class="flex flex-wrap gap-3">
-                {ALERT_CHANNELS.map((channel) => (
-                  <label class="inline-flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      class="space-routing-checkbox"
-                      data-space={key}
-                      data-channel={channel.id}
-                      checked={selected.has(channel.id)}
-                      disabled={!canEdit}
-                    />
-                    {channel.label}
-                  </label>
-                ))}
+              <div class="space-y-3">
+                {SPACE_ROUTING_KINDS.map((kind) => {
+                  const selected = new Set(spaceMap[kind.id] ?? []);
+                  return (
+                    <div>
+                      <p class="form-hint mb-1 capitalize">{kind.label}</p>
+                      <div class="flex flex-wrap gap-3">
+                        {ALERT_CHANNELS.map((channel) => (
+                          <label class="inline-flex items-center gap-2 text-sm">
+                            <input
+                              type="checkbox"
+                              class="space-routing-checkbox"
+                              data-space={key}
+                              data-kind={kind.id}
+                              data-channel={channel.id}
+                              checked={selected.has(channel.id)}
+                              disabled={!canEdit}
+                            />
+                            {channel.label}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </fieldset>
           );
@@ -701,16 +739,49 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
       }
       const routingHidden = document.getElementById("space_channel_routing_json");
       if (routingHidden) {
-        const routing = {};
+        let routing = {};
+        try {
+          const parsed = JSON.parse(routingHidden.value || "{}");
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            routing = structuredClone(parsed);
+          }
+        } catch {
+          routing = {};
+        }
+        const uiKinds = new Set(["threshold", "forecast", "nws", "rule", "outage", "rate"]);
+        // Reset only kinds shown in the matrix for spaces that appear in checkboxes.
+        const spacesTouched = new Set();
+        document.querySelectorAll(".space-routing-checkbox").forEach((el) => {
+          const space = el.getAttribute("data-space");
+          if (space) spacesTouched.add(space);
+        });
+        for (const space of spacesTouched) {
+          if (!routing[space] || typeof routing[space] !== "object") routing[space] = {};
+          for (const kind of uiKinds) {
+            routing[space][kind] = [];
+          }
+        }
         document.querySelectorAll(".space-routing-checkbox").forEach((el) => {
           if (!el.checked) return;
           const space = el.getAttribute("data-space");
+          const kind = el.getAttribute("data-kind") || "threshold";
           const channel = el.getAttribute("data-channel");
           if (!space || !channel) return;
-          if (!routing[space]) routing[space] = { threshold: [] };
-          if (!routing[space].threshold) routing[space].threshold = [];
-          routing[space].threshold.push(channel);
+          if (!routing[space]) routing[space] = {};
+          if (!Array.isArray(routing[space][kind])) routing[space][kind] = [];
+          routing[space][kind].push(channel);
         });
+        // Drop empty arrays for UI kinds (means "use global").
+        for (const space of spacesTouched) {
+          for (const kind of uiKinds) {
+            if (Array.isArray(routing[space]?.[kind]) && routing[space][kind].length === 0) {
+              delete routing[space][kind];
+            }
+          }
+          if (routing[space] && Object.keys(routing[space]).length === 0) {
+            delete routing[space];
+          }
+        }
         routingHidden.value = JSON.stringify(routing);
       }
     });

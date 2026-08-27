@@ -12,6 +12,7 @@ import { fetchLatestSensorValues } from "../../lib/sensorReadings";
 import { formatRelativeAge } from "../../lib/relativeTime";
 import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import { batterySparklinePath, parseBatteryHistory } from "../../lib/batterySparkline";
+import { renderIngestQrSvg } from "../../lib/qrSvg";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -142,6 +143,14 @@ function formatDeviceRssi(meta: unknown): string {
 const ingestCurlExample = ingestKey
   ? `curl -X POST "${Astro.url.origin}/api/ingest/${ingestKey}" \\\n  -H "Content-Type: application/json" \\\n  -d '{"door1": true, "temp1": 42.5}'`
   : "";
+const ingestUrl = ingestKey
+  ? `${Astro.url.origin}/api/ingest/${ingestKey}`
+  : "";
+const ingestQrSvg = ingestUrl ? renderIngestQrSvg(ingestUrl, 180) : "";
+const ingestKeyDeviceName =
+  (focusDevice && devices.find((d) => d.id === focusDevice)?.name) ||
+  pushDevices[0]?.name ||
+  "Push device";
 ---
 <DashboardLayout title="Devices">
   <div class="space-y-6">
@@ -273,11 +282,24 @@ const ingestCurlExample = ingestKey
         <h2 class="card-title">{keyCalloutTitle}</h2>
         <p class="card-subtitle">
           This key is shown once. Copy it into your ESP/Arduino firmware now — you will not see the full key again.
+          The QR below is generated on this page (no third-party QR service).
         </p>
-        <p class="ingest-key-value break-all font-mono text-sm" id="ingest-key-value">{ingestKey}</p>
-        <p class="text-sm text-[var(--color-text-muted)] mb-4">
-          POST JSON to <code>/api/ingest/{ingestKey}</code>
-        </p>
+        <div class="flex flex-wrap gap-6 items-start mb-4">
+          <div
+            class="ingest-key-qr shrink-0 rounded-lg bg-white p-2"
+            id="ingest-key-qr"
+            aria-label="Ingest URL QR code"
+            set:html={ingestQrSvg}
+          />
+          <div class="min-w-0 flex-1">
+            <p class="form-label mb-1">Ingest URL</p>
+            <p class="ingest-key-value break-all font-mono text-sm mb-2" id="ingest-url-value">{ingestUrl}</p>
+            <p class="ingest-key-value break-all font-mono text-sm mb-0" id="ingest-key-value">{ingestKey}</p>
+            <p class="text-sm text-[var(--color-text-muted)] mt-2 mb-0">
+              POST JSON to <code>/api/ingest/{ingestKey}</code>
+            </p>
+          </div>
+        </div>
         <pre class="ingest-key-curl text-xs overflow-x-auto mb-4"><code>{ingestCurlExample}</code></pre>
         <div class="flex flex-wrap gap-3">
           <button
@@ -288,7 +310,26 @@ const ingestCurlExample = ingestKey
           >
             Copy key
           </button>
-          <button type="button" class="btn-secondary" id="ingest-key-dismiss">
+          <button
+            type="button"
+            class="btn-secondary"
+            data-copy={ingestUrl}
+            data-copy-label="Copy URL"
+          >
+            Copy URL
+          </button>
+          <a
+            class="btn-secondary"
+            id="ingest-qr-download"
+            href="#"
+            download="garage-temp-ingest-qr.svg"
+          >
+            Download SVG
+          </a>
+          <button type="button" class="btn-secondary" id="ingest-qr-print">
+            Print label
+          </button>
+          <button type="button" class="btn-ghost" id="ingest-key-dismiss">
             I've saved this
           </button>
         </div>
@@ -576,14 +617,23 @@ const ingestCurlExample = ingestKey
     </section>
 
     {canEdit ? (
-      <>
-        <TempFeedsSettings feeds={preferences.tempFeeds} redirectTo={redirectTo} />
-        <TempProbesSettings
-          feeds={preferences.tempFeeds}
-          probes={preferences.tempProbes}
-          redirectTo={redirectTo}
-        />
-      </>
+      <details class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4">
+        <summary class="cursor-pointer">
+          <span class="card-title text-base">Legacy pull-feed editor (optional)</span>
+          <p class="card-subtitle mb-0 mt-2">
+            Prefer <a class="text-link" href="#push-devices">Devices</a> above for new setups.
+            Expand to edit HTTPS JSON pull feeds and probe labels.
+          </p>
+        </summary>
+        <div class="mt-4 space-y-6">
+          <TempFeedsSettings feeds={preferences.tempFeeds} redirectTo={redirectTo} />
+          <TempProbesSettings
+            feeds={preferences.tempFeeds}
+            probes={preferences.tempProbes}
+            redirectTo={redirectTo}
+          />
+        </div>
+      </details>
     ) : (
       <section class="card">
         <p class="mb-0 text-sm text-[var(--color-text-muted)]">
@@ -602,7 +652,7 @@ const ingestCurlExample = ingestKey
 </DashboardLayout>
 
 {ingestKey && (
-  <script is:inline>
+  <script is:inline define:vars={{ ingestQrSvg, ingestUrl, ingestKeyDeviceName }}>
     (() => {
       const dismiss = document.getElementById("ingest-key-dismiss");
       dismiss?.addEventListener("click", () => {
@@ -613,6 +663,37 @@ const ingestCurlExample = ingestKey
         window.history.replaceState({}, "", url.pathname + (url.search || ""));
         document.getElementById("ingest-key-callout")?.remove();
       });
+
+      const download = document.getElementById("ingest-qr-download");
+      download?.addEventListener("click", (event) => {
+        event.preventDefault();
+        const blob = new Blob([ingestQrSvg], { type: "image/svg+xml;charset=utf-8" });
+        const href = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = href;
+        a.download = "garage-temp-ingest-qr.svg";
+        a.click();
+        URL.revokeObjectURL(href);
+      });
+
+      document.getElementById("ingest-qr-print")?.addEventListener("click", () => {
+        const w = window.open("", "_blank", "noopener,noreferrer,width=480,height=640");
+        if (!w) return;
+        w.document.write(`<!doctype html><html><head><title>Ingest label</title>
+          <style>
+            body { font-family: system-ui, sans-serif; padding: 1.5rem; text-align: center; }
+            h1 { font-size: 1.1rem; margin: 0 0 1rem; }
+            .qr { display: inline-block; margin: 0 auto 1rem; }
+            .url { font-family: ui-monospace, monospace; font-size: 0.75rem; word-break: break-all; }
+          </style></head><body>
+          <h1>${String(ingestKeyDeviceName).replace(/</g, "&lt;")}</h1>
+          <div class="qr">${ingestQrSvg}</div>
+          <p class="url">${String(ingestUrl).replace(/</g, "&lt;")}</p>
+          <script>window.onload=()=>{window.print();};<\/script>
+          </body></html>`);
+        w.document.close();
+      });
+
       document.getElementById("ingest-key-callout")?.scrollIntoView({
         behavior: "smooth",
         block: "start",

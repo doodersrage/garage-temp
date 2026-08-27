@@ -1,5 +1,36 @@
 ---
 import DashboardCard from "./dashboard/DashboardCard.astro";
+
+interface Props {
+  siteUrl?: string;
+  /** Full API key only when freshly minted (query param); otherwise omit secrets. */
+  apiKey?: string | null;
+  inboundWebhookUrl?: string | null;
+}
+
+const { siteUrl = Astro.url.origin, apiKey = null, inboundWebhookUrl = null } =
+  Astro.props;
+
+const metricsUrl = `${siteUrl}/api/v1/metrics`;
+const restCommandYaml = inboundWebhookUrl
+  ? `rest_command:
+  garage_temp_status:
+    url: "${inboundWebhookUrl}"
+    method: POST
+    headers:
+      Content-Type: application/json
+    payload: '{"action":"status"}'`
+  : null;
+
+const prometheusYaml = `scrape_configs:
+  - job_name: garage_temp
+    metrics_path: /api/v1/metrics
+    scheme: ${siteUrl.startsWith("https") ? "https" : "http"}
+    static_configs:
+      - targets: ["${siteUrl.replace(/^https?:\/\//, "")}"]
+    authorization:
+      type: Bearer
+      credentials: ${apiKey ? apiKey : "<your-api-key>"}`;
 ---
 <DashboardCard>
   <h2 class="card-title">Home Assistant setup</h2>
@@ -19,16 +50,28 @@ import DashboardCard from "./dashboard/DashboardCard.astro";
     </li>
     <li>
       Blueprint-style import: copy
-      <code class="text-xs break-all">{Astro.url.origin}/ha/garage_temp_webhook.yaml</code>
+      <code class="text-xs break-all">{siteUrl}/ha/garage_temp_webhook.yaml</code>
       into HA → Settings → Automations → Create → Import from YAML.
     </li>
     <li>
-      Create an inbound webhook under Share, then POST <code>{"{\"action\":\"status\"}"}</code> from a rest_command.
+      Create an inbound webhook under Share, then POST <code>{`{"action":"status"}`}</code> from a rest_command.
     </li>
     <li>
       Scrape Prometheus metrics at <code>/api/v1/metrics</code> with a Pro API key.
     </li>
   </ul>
+  {restCommandYaml && (
+    <div class="mb-4">
+      <p class="form-label mb-1">Prefill: rest_command</p>
+      <pre class="text-xs overflow-x-auto mb-0"><code>{restCommandYaml}</code></pre>
+    </div>
+  )}
+  {(apiKey || siteUrl) && (
+    <div class="mb-4">
+      <p class="form-label mb-1">Prefill: Prometheus scrape</p>
+      <pre class="text-xs overflow-x-auto mb-0"><code>{prometheusYaml}</code></pre>
+    </div>
+  )}
   <p class="mb-0 text-sm text-muted-foreground">
     See also <a class="text-link" href="/docs/api">API docs</a> and the Grafana wizard on this page.
   </p>

@@ -150,7 +150,28 @@ export async function collectFreezeMapSnapshots(): Promise<{
     }
   }
 
+  await pruneFreezeMapSnapshots(90);
+
   return { cities: rows.length, error: null };
+}
+
+/** Delete freeze-map snapshots older than retainDays (default 90). */
+export async function pruneFreezeMapSnapshots(
+  retainDays = 90,
+): Promise<{ deleted: number; error: string | null }> {
+  const supabase = createServerClient();
+  const cutoff = new Date(
+    Date.now() - Math.max(1, retainDays) * 24 * 60 * 60 * 1000,
+  ).toISOString();
+  const { data, error } = await supabase
+    .from("freeze_map_snapshots")
+    .delete()
+    .lt("captured_at", cutoff)
+    .select("city_id");
+  if (error) {
+    return { deleted: 0, error: error.message };
+  }
+  return { deleted: data?.length ?? 0, error: null };
 }
 
 export async function listLatestFreezeMapSnapshots(): Promise<FreezeMapSnapshot[]> {

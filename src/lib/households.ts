@@ -69,9 +69,43 @@ export async function getOwnedHouseholdId(userId: string): Promise<string | null
     .select("household_id")
     .eq("user_id", userId)
     .eq("role", "owner")
-    .maybeSingle();
+    .order("created_at", { ascending: true });
 
-  return data?.household_id ?? null;
+  if (!data || data.length === 0) return null;
+
+  // Prefer active household when the user owns multiple properties
+  try {
+    const { createAdminClient } = await import("./supabase");
+    const admin = createAdminClient();
+    const { data: authData } = await admin.auth.admin.getUserById(userId);
+    const active = authData.user?.user_metadata?.active_household_id;
+    if (
+      typeof active === "string" &&
+      data.some((row) => row.household_id === active)
+    ) {
+      return active;
+    }
+  } catch {
+    // fall through to first owned
+  }
+
+  return data[0]?.household_id ?? null;
+}
+
+export async function countOwnedHouseholds(userId: string): Promise<number> {
+  const supabase = createServerClient();
+  const { count, error } = await supabase
+    .from("household_members")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("role", "owner");
+
+  if (error) {
+    console.error("countOwnedHouseholds failed:", error.message);
+    return 0;
+  }
+
+  return count ?? 0;
 }
 
 export async function listUserHouseholds(

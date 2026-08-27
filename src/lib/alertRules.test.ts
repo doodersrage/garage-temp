@@ -86,6 +86,7 @@ describe("alert rules", () => {
     const miss = evaluateAlertRules(rules, {
       readings: [{ label: "G", tempf: 30, humidity: 40 }],
       boolSensors: [{ label: "Door", kind: "door", value: false }],
+      numericSensors: [],
       doorOpenSessions: [],
       rateDrops: [],
       outages: [],
@@ -99,6 +100,7 @@ describe("alert rules", () => {
     const hit = evaluateAlertRules(rules, {
       readings: [{ label: "G", tempf: 30, humidity: 40 }],
       boolSensors: [{ label: "Door", kind: "door", value: true }],
+      numericSensors: [],
       doorOpenSessions: [],
       rateDrops: [],
       outages: [],
@@ -108,6 +110,45 @@ describe("alert rules", () => {
       outageHours: 2,
     });
     expect(hit[0]).toContain("Door + cold");
+  });
+
+  it("matches co2_above against numeric sensors", () => {
+    const rules: AlertRule[] = [
+      {
+        id: "co2",
+        enabled: true,
+        name: "High CO2",
+        all: [{ type: "co2_above", value: 1000 }],
+      },
+    ];
+    expect(
+      evaluateAlertRules(rules, {
+        readings: [],
+        boolSensors: [],
+        numericSensors: [{ label: "Air", kind: "co2", value: 900 }],
+        doorOpenSessions: [],
+        rateDrops: [],
+        outages: [],
+        freezeThresholdF: 34,
+        humidityThreshold: 75,
+        rateChangeF: 15,
+        outageHours: 2,
+      }),
+    ).toHaveLength(0);
+    expect(
+      evaluateAlertRules(rules, {
+        readings: [],
+        boolSensors: [],
+        numericSensors: [{ label: "Air", kind: "co2", value: 1200 }],
+        doorOpenSessions: [],
+        rateDrops: [],
+        outages: [],
+        freezeThresholdF: 34,
+        humidityThreshold: 75,
+        rateChangeF: 15,
+        outageHours: 2,
+      })[0],
+    ).toContain("High CO2");
   });
 });
 

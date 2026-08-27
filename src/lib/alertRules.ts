@@ -6,11 +6,12 @@ export type AlertConditionType =
   | "rate_drop"
   | "outage"
   | "flood"
-  | "power_off";
+  | "power_off"
+  | "co2_above";
 
 export type AlertCondition = {
   type: AlertConditionType;
-  /** Optional threshold override (°F, %, hours depending on type). */
+  /** Optional threshold override (°F, %, hours, ppm depending on type). */
   value?: number;
   /** Optional sensor/device label match (substring, case-insensitive). */
   labelIncludes?: string;
@@ -26,6 +27,7 @@ export type AlertRule = {
 export type RuleEvalContext = {
   readings: Array<{ label: string; tempf: number; humidity: number }>;
   boolSensors: Array<{ label: string; kind: string; value: boolean }>;
+  numericSensors: Array<{ label: string; kind: string; value: number }>;
   doorOpenSessions: Array<{
     label: string;
     durationMs: number | null;
@@ -92,6 +94,15 @@ function evaluateCondition(
           s.value === false &&
           matchesLabel(s.label, condition.labelIncludes),
       );
+    case "co2_above": {
+      const threshold = condition.value ?? 1000;
+      return ctx.numericSensors.some(
+        (s) =>
+          s.kind === "co2" &&
+          matchesLabel(s.label, condition.labelIncludes) &&
+          s.value >= threshold,
+      );
+    }
     case "rate_drop": {
       const threshold = condition.value ?? ctx.rateChangeF;
       return ctx.rateDrops.some(
@@ -170,4 +181,5 @@ export const CONDITION_OPTIONS: Array<{ value: AlertConditionType; label: string
   { value: "outage", label: "Device outage" },
   { value: "flood", label: "Flood detected" },
   { value: "power_off", label: "Power off" },
+  { value: "co2_above", label: "CO₂ above (ppm)" },
 ];

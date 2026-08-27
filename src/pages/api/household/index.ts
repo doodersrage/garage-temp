@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import { createServerClient } from "../../../lib/supabase";
 import {
+  countOwnedHouseholds,
   getOwnedHouseholdId,
   getOrCreateHouseholdForUser,
   leaveHousehold,
@@ -12,6 +13,7 @@ import {
   updateHouseholdName,
   createAdditionalHouseholdForUser,
 } from "../../../lib/households";
+import { getUserEntitlements } from "../../../lib/entitlements";
 import {
   createHouseholdInvite,
   listPendingInvites,
@@ -97,6 +99,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   if (action === "create_property") {
+    const entitlements = await getUserEntitlements(user.id);
+    const ownedCount = await countOwnedHouseholds(user.id);
+    if (ownedCount >= entitlements.maxOwnedHouseholds) {
+      return redirect(`${redirectTo}?error=property_limit`);
+    }
     const name = formData.get("name")?.toString() ?? "My property";
     const result = await createAdditionalHouseholdForUser(user.id, name);
     if (result.error) {

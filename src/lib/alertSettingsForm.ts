@@ -74,6 +74,8 @@ export function buildAlertSettingsFromFormData(
     lastRateAlertAt: existing.lastRateAlertAt,
     lastForecastAlertAt: existing.lastForecastAlertAt,
     forecastFreezeEnabled: formHas(formData, "forecast_freeze_enabled"),
+    nwsFreezeAlertsEnabled: formHas(formData, "nws_freeze_alerts_enabled"),
+    lastNwsAlertAt: existing.lastNwsAlertAt,
     forecastHoursAhead: formNumber(
       formData,
       "forecast_hours_ahead",

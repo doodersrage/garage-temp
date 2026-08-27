@@ -7,6 +7,7 @@ import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import GrafanaWizard from "../../components/GrafanaWizard.astro";
 import WebhookDeliveryLog from "../../components/WebhookDeliveryLog.astro";
 import HaSetupCard from "../../components/HaSetupCard.astro";
+import ZapierSetupCard from "../../components/ZapierSetupCard.astro";
 import { listRecentWebhookDeliveries } from "../../lib/webhookDeliveries";
 import { createServerClient } from "../../lib/supabase";
 import { getSiteUrl } from "../../lib/stripe";
@@ -343,7 +344,7 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
     )}
 
     {entitlements.canUseOutboundWebhook && (
-      <section class="card">
+      <section class="card" id="inbound-webhooks">
         <h2 class="card-title">Inbound webhooks</h2>
         <p class="card-subtitle mb-4">
           Let Home Assistant or Zapier POST to Garage Temp. Actions:
@@ -434,13 +435,31 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
       )}
     </section>
 
-    <GrafanaWizard siteUrl={siteUrl} apiKeyPrefix={apiKeys[0]?.key_prefix ?? null} />
+    <GrafanaWizard
+      siteUrl={siteUrl}
+      apiKeyPrefix={apiKeys[0]?.key_prefix ?? null}
+      apiKey={newApiKey}
+    />
 
     {entitlements.canUseOutboundWebhook && (
       <WebhookDeliveryLog deliveries={webhookDeliveries} />
     )}
 
-    <HaSetupCard />
+    <ZapierSetupCard
+      siteUrl={siteUrl}
+      inboundWebhookUrl={
+        inboundToken ? `${siteUrl}/api/inbound/${inboundToken}` : null
+      }
+      hasInboundWebhook={inboundWebhooks.length > 0 || Boolean(inboundToken)}
+    />
+
+    <HaSetupCard
+      siteUrl={siteUrl}
+      apiKey={newApiKey}
+      inboundWebhookUrl={
+        inboundToken ? `${siteUrl}/api/inbound/${inboundToken}` : null
+      }
+    />
 
     <section class="card">
       <h2 class="card-title">Recent activity</h2>

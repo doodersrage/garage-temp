@@ -37,11 +37,13 @@ import {
   buildReadingsFromResults,
   mergeAlertReadings,
 } from "./alertReadings";
-import { fetchForecastMinTemp } from "./FetchWeather";
+import { fetchForecastMinTemp, fetchWeatherSnapshot } from "./FetchWeather";
+import { fetchNwsAlerts, hasFreezeRelatedNwsAlert } from "./nwsAlerts";
 import { buildSnoozeUrl } from "./alertSnoozeTokens";
 import { buildSiteUrl } from "./siteUrl";
 import { computeDoorOpenSessions } from "./doorDuration";
 import { persistDoorSessions } from "./doorEvents";
+import { createAdminClient } from "./supabase";
 
 export {
   buildAlertReadingsFromLatestSensors,
@@ -129,6 +131,61 @@ export async function maybeSendForecastFreezeAlert(
   await markCooldown(userId, "last_forecast_alert_at");
 }
 
+async function resolveWeatherCityIdForUser(
+  userId: string,
+  weatherCityId?: string | null,
+): Promise<string | null> {
+  if (weatherCityId) return weatherCityId;
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin.auth.admin.getUserById(userId);
+    const meta = data.user?.user_metadata;
+    if (typeof meta?.weather_city_id === "string" && meta.weather_city_id.trim()) {
+      return meta.weather_city_id.trim();
+    }
+  } catch {
+    // fall through to OpenWeather default
+  }
+  return null;
+}
+
+export async function maybeSendNwsFreezeAlert(
+  userId: string,
+  email: string | null | undefined,
+  settings: AlertSettings,
+  weatherCityId?: string | null,
+): Promise<void> {
+  if (!settings.enabled || !settings.nwsFreezeAlertsEnabled) return;
+  if (isAlertCooldownActive(settings.lastNwsAlertAt)) return;
+
+  const cityId = await resolveWeatherCityIdForUser(userId, weatherCityId);
+  const snapshot = await fetchWeatherSnapshot(cityId);
+  if (
+    snapshot?.lat == null ||
+    snapshot?.lon == null ||
+    !Number.isFinite(snapshot.lat) ||
+    !Number.isFinite(snapshot.lon)
+  ) {
+    return;
+  }
+
+  const summary = await fetchNwsAlerts(snapshot.lat, snapshot.lon);
+  if (!hasFreezeRelatedNwsAlert(summary)) return;
+
+  const first = summary!.alerts[0]!;
+  const body =
+    first.headline?.trim() ||
+    first.event ||
+    "National Weather Service freeze / cold advisory is active near your weather city.";
+
+  await notifyUser(userId, email, settings, {
+    title: "NWS freeze / cold alert",
+    body,
+    kind: "nws",
+  });
+  await markCooldown(userId, "last_nws_alert_at");
+}
+
 export async function maybeSendThresholdAlerts(
   userId: string,
   email: string | null | undefined,
@@ -172,6 +229,7 @@ export async function maybeSendThresholdAlerts(
   const readings = mergeAlertReadings(feedReadings, sensorReadings);
   await sendThresholdAlertsIfNeeded(userId, email, settings, readings);
   await maybeSendForecastFreezeAlert(userId, email, settings);
+  await maybeSendNwsFreezeAlert(userId, email, settings);
 }
 
 async function buildRuleContext(
@@ -181,6 +239,7 @@ async function buildRuleContext(
   householdId?: string | null,
 ): Promise<RuleEvalContext> {
   const boolSensors: RuleEvalContext["boolSensors"] = [];
+  const numericSensors: RuleEvalContext["numericSensors"] = [];
   const doorOpenSessions: RuleEvalContext["doorOpenSessions"] = [];
   const doorSince = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
@@ -199,6 +258,19 @@ async function buildRuleContext(
             value: row.value_bool,
           });
         }
+      }
+      if (
+        (row.sensor.kind === "co2" ||
+          row.sensor.kind === "humidity" ||
+          row.sensor.kind === "generic") &&
+        typeof row.value_num === "number" &&
+        Number.isFinite(row.value_num)
+      ) {
+        numericSensors.push({
+          label: row.sensor.label,
+          kind: row.sensor.kind,
+          value: row.value_num,
+        });
       }
     }
 
@@ -260,6 +332,7 @@ async function buildRuleContext(
   return {
     readings,
     boolSensors,
+    numericSensors,
     doorOpenSessions,
     rateDrops,
     outages,
