@@ -1,5 +1,15 @@
 /** Canonical public site URL — set SITE_URL or ORIGIN in Worker env / .env. */
-export const DEFAULT_SITE_URL = "https://garage-temp.robmcd.name";
+export const DEFAULT_SITE_URL = "https://thermaltrace.dev";
+
+export const CANONICAL_HOST = "thermaltrace.dev";
+
+/** Hostnames that should 301 to CANONICAL_HOST (apex). */
+export const LEGACY_HOSTS = new Set([
+  "garage-temp.robmcd.name",
+  "thermaltrace.robmcd.name",
+  "garage-temp.doodersrage.workers.dev",
+  "www.thermaltrace.dev",
+]);
 
 export function resolveConfiguredSiteUrl(
   siteUrl?: string | URL | null,

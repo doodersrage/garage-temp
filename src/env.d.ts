@@ -31,6 +31,9 @@ interface ImportMetaEnv {
   readonly OPS_DISCORD_WEBHOOK_URL?: string;
   readonly DISCORD_OPS_WEBHOOK_URL?: string;
   readonly PRICING_DEFAULT_INTERVAL?: string;
+  readonly GA_MEASUREMENT_ID?: string;
+  readonly SENTRY_DSN?: string;
+  readonly TWILIO_WHATSAPP_FROM?: string;
   readonly PROD: boolean;
 }
 

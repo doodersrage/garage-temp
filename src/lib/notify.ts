@@ -62,6 +62,114 @@ async function sendSlack(webhookUrl: string, title: string, body: string): Promi
   }
 }
 
+async function sendTeams(webhookUrl: string, title: string, body: string): Promise<void> {
+  try {
+    await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        "@type": "MessageCard",
+        summary: title,
+        themeColor: "0078D4",
+        title,
+        text: body,
+      }),
+    });
+  } catch (error) {
+    console.error("Failed to send Teams webhook:", error);
+  }
+}
+
+async function sendNtfy(
+  server: string,
+  topic: string,
+  title: string,
+  body: string,
+): Promise<void> {
+  try {
+    const base = server.replace(/\/$/, "");
+    await fetch(`${base}/${encodeURIComponent(topic)}`, {
+      method: "POST",
+      headers: {
+        Title: title.slice(0, 250),
+        Priority: "high",
+        Tags: "thermometer",
+      },
+      body: `${title}\n${body}`.slice(0, 4000),
+    });
+  } catch (error) {
+    console.error("Failed to send ntfy notification:", error);
+  }
+}
+
+async function sendPushover(
+  userKey: string,
+  appToken: string,
+  title: string,
+  body: string,
+): Promise<void> {
+  try {
+    const params = new URLSearchParams({
+      token: appToken,
+      user: userKey,
+      title: title.slice(0, 250),
+      message: body.slice(0, 1024),
+      priority: "1",
+    });
+    await fetch("https://api.pushover.net/1/messages.json", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params,
+    });
+  } catch (error) {
+    console.error("Failed to send Pushover notification:", error);
+  }
+}
+
+export async function sendTwilioWhatsApp(to: string, body: string): Promise<boolean> {
+  const sid = import.meta.env.TWILIO_ACCOUNT_SID?.trim();
+  const token = import.meta.env.TWILIO_AUTH_TOKEN?.trim();
+  const from =
+    import.meta.env.TWILIO_WHATSAPP_FROM?.trim() ||
+    import.meta.env.TWILIO_FROM_NUMBER?.trim();
+
+  if (!sid || !token || !from) {
+    console.warn("Twilio WhatsApp env vars not configured; skipping");
+    return false;
+  }
+
+  const whatsappFrom = from.startsWith("whatsapp:") ? from : `whatsapp:${from}`;
+  const whatsappTo = to.startsWith("whatsapp:") ? to : `whatsapp:${to}`;
+
+  try {
+    const auth = btoa(`${sid}:${token}`);
+    const params = new URLSearchParams({
+      To: whatsappTo,
+      From: whatsappFrom,
+      Body: body.slice(0, 1500),
+    });
+    const response = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${auth}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params,
+      },
+    );
+    if (!response.ok) {
+      console.error("Twilio WhatsApp failed:", await response.text());
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Failed to send Twilio WhatsApp:", error);
+    return false;
+  }
+}
+
 async function sendTelegram(
   botToken: string,
   chatId: string,
@@ -322,7 +430,7 @@ export async function notifyUser(
         settings,
         options?.space,
         kind,
-        ["email", "sms", "discord", "push", "webhook", "telegram", "slack"],
+        ["email", "sms", "discord", "push", "webhook", "telegram", "slack", "teams", "ntfy", "pushover", "whatsapp"],
       )
     : null;
   const routedSet = routedChannels ? new Set(routedChannels) : null;
@@ -360,6 +468,56 @@ export async function notifyUser(
       sent.push("slack");
     } else {
       skipped.push("slack");
+    }
+  }
+
+  if (settings.channelTeams && allowChannel("teams")) {
+    if (settings.teamsWebhookUrl) {
+      await sendTeams(settings.teamsWebhookUrl, payloadResolved.title, bodyWithSnooze);
+      sent.push("teams");
+    } else {
+      skipped.push("teams");
+    }
+  }
+
+  if (settings.channelNtfy && allowChannel("ntfy")) {
+    if (settings.ntfyTopic) {
+      await sendNtfy(
+        settings.ntfyServer,
+        settings.ntfyTopic,
+        payloadResolved.title,
+        bodyWithSnooze,
+      );
+      sent.push("ntfy");
+    } else {
+      skipped.push("ntfy");
+    }
+  }
+
+  if (settings.channelPushover && allowChannel("pushover")) {
+    if (settings.pushoverUserKey && settings.pushoverAppToken) {
+      await sendPushover(
+        settings.pushoverUserKey,
+        settings.pushoverAppToken,
+        payloadResolved.title,
+        bodyWithSnooze,
+      );
+      sent.push("pushover");
+    } else {
+      skipped.push("pushover");
+    }
+  }
+
+  if (settings.channelWhatsapp && allowChannel("whatsapp")) {
+    if (settings.whatsappPhone && entitlements.canUseSms) {
+      const ok = await sendTwilioWhatsApp(
+        settings.whatsappPhone,
+        `${payloadResolved.title}: ${bodyWithSnooze}`,
+      );
+      if (ok) sent.push("whatsapp");
+      else skipped.push("whatsapp");
+    } else {
+      skipped.push("whatsapp");
     }
   }
 

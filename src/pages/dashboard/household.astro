@@ -328,7 +328,9 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
             <label class="form-label" for="invite_role">Role</label>
             <select class="form-input" id="invite_role" name="role">
               <option value="member">Member (can edit devices & alerts)</option>
+              <option value="property_manager">Property manager (devices & alerts only)</option>
               <option value="viewer">Viewer (read-only dashboard)</option>
+              <option value="alert_only">Alert only (notifications, read-only)</option>
             </select>
           </div>
           <button class="btn-primary" type="submit" id="invite-submit">Send invite link</button>

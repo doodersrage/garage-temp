@@ -36,6 +36,8 @@ import {
   fetchWeatherSnapshot,
 } from "../lib/FetchWeather";
 import { fetchNwsAlerts } from "../lib/nwsAlerts";
+import { buildHeatingInsights } from "../lib/heatingInsights";
+import HeatingInsightsCard from "../components/HeatingInsightsCard.astro";
 
 import DashboardMetricGrid from "../components/dashboard/DashboardMetricGrid.astro";
 import MetricCard from "../components/dashboard/MetricCard.astro";
@@ -156,6 +158,11 @@ const timeToFreeze = buildTimeToFreezeFromPoints(
   chartWeek.points,
   alertSettings.freezeThresholdF,
 );
+const heatingInsights = buildHeatingInsights({
+  indoorPoints: chartWeek.points,
+  outdoorTempF: weatherSnapshot?.temp ?? null,
+  freezeThresholdF: alertSettings.freezeThresholdF,
+});
 
 const sensorsValue =
   sensorCount === 0
@@ -283,6 +290,7 @@ const upgradeTarget = nextUpgradeTier(entitlements.tier);
             useCelsius={useCelsius}
           />
           <WeekCompareCard compare={weekCompareResult.compare} useCelsius={useCelsius} />
+          <HeatingInsightsCard insights={heatingInsights} />
           <DoorDurationCard devices={devices} />
           <DoorEventHistory householdId={household.householdId} />
         </aside>

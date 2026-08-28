@@ -1,0 +1,51 @@
+---
+import DashboardCard from "./dashboard/DashboardCard.astro";
+
+interface Props {
+  userEmail: string;
+  dataRetentionDays: number | null;
+  tierLabel: string;
+  deleteError?: string | null;
+}
+const { userEmail, dataRetentionDays, tierLabel, deleteError } = Astro.props;
+---
+<DashboardCard>
+  <h2 class="card-title">Account & data</h2>
+  <p class="card-subtitle mb-3">
+    Export: <a class="text-link" href="/api/user/export">JSON export</a>.
+    Retention defaults by plan ({tierLabel}); override below (min 30 days).
+  </p>
+  <form action="/api/user/retention" method="post" class="mb-4">
+    <input type="hidden" name="redirect" value="/dashboard/settings" />
+    <div class="form-field mb-3">
+      <label class="form-label" for="data_retention_days">Custom retention (days)</label>
+      <input
+        class="form-input"
+        type="number"
+        min="30"
+        max="730"
+        id="data_retention_days"
+        name="data_retention_days"
+        value={dataRetentionDays ?? ""}
+        placeholder="Plan default"
+      />
+    </div>
+    <button type="submit" class="btn-secondary">Save retention</button>
+  </form>
+
+  <h3 class="text-base font-semibold mb-2 text-[var(--color-danger)]">Delete account</h3>
+  <p class="card-subtitle mb-3">
+    Permanently deletes {userEmail}, alert settings, and sole-owned households. Type DELETE to confirm.
+  </p>
+  {deleteError && (
+    <p class="alert-warning mb-3" role="alert">Could not delete account. Confirm with DELETE.</p>
+  )}
+  <form action="/api/user/account/delete" method="post">
+    <input type="hidden" name="redirect" value="/" />
+    <div class="form-field mb-3">
+      <label class="form-label" for="confirm_delete">Confirmation</label>
+      <input class="form-input" type="text" id="confirm_delete" name="confirm" placeholder="DELETE" required />
+    </div>
+    <button type="submit" class="btn-secondary">Delete my account</button>
+  </form>
+</DashboardCard>

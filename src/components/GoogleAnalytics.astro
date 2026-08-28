@@ -1,0 +1,44 @@
+---
+import {
+  resolveGaCookieDomain,
+  resolveGaMeasurementId,
+} from "../lib/analytics";
+
+interface Props {
+  pageTitle: string;
+  pageUrl: string;
+  hostname: string;
+}
+
+const { pageTitle, pageUrl, hostname } = Astro.props;
+const measurementId = resolveGaMeasurementId();
+const cookieDomain = resolveGaCookieDomain(hostname);
+
+if (!measurementId) {
+  return null;
+}
+---
+<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+<script
+  is:inline
+  async
+  src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}></script>
+<script is:inline define:vars={{ measurementId, pageTitle, pageUrl, cookieDomain }}>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() {
+    dataLayer.push(arguments);
+  }
+  gtag("js", new Date());
+  const gaConfig = {
+    page_title: pageTitle,
+    page_location: pageUrl,
+    cookie_flags: "SameSite=Lax;Secure",
+    send_page_view: true,
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+  };
+  if (cookieDomain) {
+    gaConfig.cookie_domain = cookieDomain;
+  }
+  gtag("config", measurementId, gaConfig);
+</script>

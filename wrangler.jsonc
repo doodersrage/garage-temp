@@ -6,6 +6,7 @@
 	],
 	"name": "garage-temp",
 	"main": "./src/worker.ts",
+	"workers_dev": true,
 	"assets": {
 		"directory": "./dist/client",
 		"binding": "ASSETS"
@@ -13,8 +14,20 @@
 	"observability": {
 		"enabled": true
 	},
-	// Custom domain — add CNAME thermaltrace → garage-temp.workers.dev in Cloudflare DNS, then deploy.
+	// Primary domain + legacy hostnames (middleware 301s legacy → apex).
 	"routes": [
+		{
+			"pattern": "thermaltrace.dev",
+			"custom_domain": true
+		},
+		{
+			"pattern": "www.thermaltrace.dev",
+			"custom_domain": true
+		},
+		{
+			"pattern": "garage-temp.robmcd.name",
+			"custom_domain": true
+		},
 		{
 			"pattern": "thermaltrace.robmcd.name",
 			"custom_domain": true

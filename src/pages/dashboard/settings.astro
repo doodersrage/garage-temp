@@ -3,21 +3,35 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import DisplayPreferences from "../../components/DisplayPreferences.astro";
 import PwaInstallCard from "../../components/dashboard/PwaInstallCard.astro";
 import DashboardCard from "../../components/dashboard/DashboardCard.astro";
+import AccountSecurity from "../../components/AccountSecurity.astro";
+import AccountLifecycle from "../../components/AccountLifecycle.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getUserPreferences } from "../../lib/userPreferences";
+import { getUserEntitlements } from "../../lib/entitlements";
+import { getAlertSettingsForUser } from "../../lib/notify";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const preferences = await getUserPreferences(user);
+const [preferences, entitlements, alertSettings] = await Promise.all([
+  getUserPreferences(user),
+  getUserEntitlements(user.id),
+  getAlertSettingsForUser(user.id, user.user_metadata),
+]);
 const prefsSaved = Astro.url.searchParams.get("prefs_saved");
 const prefsError = Astro.url.searchParams.get("prefs_error");
 const passwordUpdated = Astro.url.searchParams.get("password") === "updated";
+const deleteError = Astro.url.searchParams.get("delete_error");
+const retentionSaved = Astro.url.searchParams.get("retention_saved");
 const onboardingDismissed =
   (user.user_metadata as Record<string, unknown> | undefined)?.onboarding_dismissed ===
   true;
+const planLabel =
+  entitlements.tier === "admin"
+    ? "Admin"
+    : entitlements.tier.charAt(0).toUpperCase() + entitlements.tier.slice(1);
 ---
 <DashboardLayout title="Settings">
   <div class="space-y-6">
@@ -38,6 +52,19 @@ const onboardingDismissed =
     </section>
 
     <DisplayPreferences preferences={preferences} redirectTo="/dashboard/settings" />
+
+    <AccountSecurity />
+
+    <AccountLifecycle
+      userEmail={user.email ?? "your account"}
+      dataRetentionDays={alertSettings.dataRetentionDays}
+      tierLabel={planLabel}
+      deleteError={deleteError}
+    />
+
+    {retentionSaved && (
+      <p class="alert-success" role="status">Retention preference saved.</p>
+    )}
 
     <PwaInstallCard />
 
@@ -60,6 +87,7 @@ const onboardingDismissed =
     <DashboardCard>
       <h2 class="card-title">Related</h2>
       <div class="flex flex-wrap gap-2">
+        <a class="btn-secondary" href="/dashboard/portfolio">Portfolio</a>
         <a class="btn-secondary" href="/dashboard/plans">Plans & billing</a>
         <a class="btn-secondary" href="/dashboard/household">Household</a>
         <a class="btn-secondary" href="/dashboard/share">Share & integrations</a>

@@ -77,6 +77,7 @@ export type Database = {
       }
       alert_settings: {
         Row: {
+          alert_playbooks: Json
           alert_rules: Json
           alert_templates: Json
           battery_alerts_enabled: boolean
@@ -84,12 +85,17 @@ export type Database = {
           battery_trend_alerts_enabled: boolean
           channel_discord: boolean
           channel_email: boolean
+          channel_ntfy: boolean
           channel_push: boolean
+          channel_pushover: boolean
           channel_severity: Json
           channel_slack: boolean
           channel_sms: boolean
+          channel_teams: boolean
           channel_telegram: boolean
           channel_webhook: boolean
+          channel_whatsapp: boolean
+          data_retention_days: number | null
           digest_enabled: boolean
           discord_webhook_url: string | null
           drip_email_stage: number
@@ -98,6 +104,7 @@ export type Database = {
           enabled: boolean
           escalation_enabled: boolean
           escalation_minutes: number
+          feed_uptime_alerts_enabled: boolean
           forecast_freeze_enabled: boolean
           forecast_hours_ahead: number
           freeze_threshold_f: number
@@ -107,6 +114,7 @@ export type Database = {
           last_battery_trend_alert_at: string | null
           last_drip_email_at: string | null
           last_escalation_at: string | null
+          last_feed_uptime_alert_at: string | null
           last_forecast_alert_at: string | null
           last_monthly_report_at: string | null
           last_nws_alert_at: string | null
@@ -116,10 +124,14 @@ export type Database = {
           last_rssi_alert_at: string | null
           last_trial_reminder_at: string | null
           monthly_report_enabled: boolean
+          ntfy_server: string
+          ntfy_topic: string | null
           nws_freeze_alerts_enabled: boolean
           outage_hours: number
           outbound_webhook_secret: string | null
           outbound_webhook_url: string | null
+          pushover_app_token: string | null
+          pushover_user_key: string | null
           quarterly_report_enabled: boolean
           quiet_hours_bypass_freeze: boolean
           quiet_hours_enabled: boolean
@@ -136,14 +148,17 @@ export type Database = {
           sms_phone: string | null
           snooze_until: string | null
           space_channel_routing: Json
+          teams_webhook_url: string | null
           telegram_bot_token: string | null
           telegram_chat_id: string | null
           telegram_command_secret: string | null
           updated_at: string
           user_id: string
           vacation_until: string | null
+          whatsapp_phone: string | null
         }
         Insert: {
+          alert_playbooks?: Json
           alert_rules?: Json
           alert_templates?: Json
           battery_alerts_enabled?: boolean
@@ -151,12 +166,17 @@ export type Database = {
           battery_trend_alerts_enabled?: boolean
           channel_discord?: boolean
           channel_email?: boolean
+          channel_ntfy?: boolean
           channel_push?: boolean
+          channel_pushover?: boolean
           channel_severity?: Json
           channel_slack?: boolean
           channel_sms?: boolean
+          channel_teams?: boolean
           channel_telegram?: boolean
           channel_webhook?: boolean
+          channel_whatsapp?: boolean
+          data_retention_days?: number | null
           digest_enabled?: boolean
           discord_webhook_url?: string | null
           drip_email_stage?: number
@@ -165,6 +185,7 @@ export type Database = {
           enabled?: boolean
           escalation_enabled?: boolean
           escalation_minutes?: number
+          feed_uptime_alerts_enabled?: boolean
           forecast_freeze_enabled?: boolean
           forecast_hours_ahead?: number
           freeze_threshold_f?: number
@@ -174,6 +195,7 @@ export type Database = {
           last_battery_trend_alert_at?: string | null
           last_drip_email_at?: string | null
           last_escalation_at?: string | null
+          last_feed_uptime_alert_at?: string | null
           last_forecast_alert_at?: string | null
           last_monthly_report_at?: string | null
           last_nws_alert_at?: string | null
@@ -183,10 +205,14 @@ export type Database = {
           last_rssi_alert_at?: string | null
           last_trial_reminder_at?: string | null
           monthly_report_enabled?: boolean
+          ntfy_server?: string
+          ntfy_topic?: string | null
           nws_freeze_alerts_enabled?: boolean
           outage_hours?: number
           outbound_webhook_secret?: string | null
           outbound_webhook_url?: string | null
+          pushover_app_token?: string | null
+          pushover_user_key?: string | null
           quarterly_report_enabled?: boolean
           quiet_hours_bypass_freeze?: boolean
           quiet_hours_enabled?: boolean
@@ -203,14 +229,17 @@ export type Database = {
           sms_phone?: string | null
           snooze_until?: string | null
           space_channel_routing?: Json
+          teams_webhook_url?: string | null
           telegram_bot_token?: string | null
           telegram_chat_id?: string | null
           telegram_command_secret?: string | null
           updated_at?: string
           user_id: string
           vacation_until?: string | null
+          whatsapp_phone?: string | null
         }
         Update: {
+          alert_playbooks?: Json
           alert_rules?: Json
           alert_templates?: Json
           battery_alerts_enabled?: boolean
@@ -218,12 +247,17 @@ export type Database = {
           battery_trend_alerts_enabled?: boolean
           channel_discord?: boolean
           channel_email?: boolean
+          channel_ntfy?: boolean
           channel_push?: boolean
+          channel_pushover?: boolean
           channel_severity?: Json
           channel_slack?: boolean
           channel_sms?: boolean
+          channel_teams?: boolean
           channel_telegram?: boolean
           channel_webhook?: boolean
+          channel_whatsapp?: boolean
+          data_retention_days?: number | null
           digest_enabled?: boolean
           discord_webhook_url?: string | null
           drip_email_stage?: number
@@ -232,6 +266,7 @@ export type Database = {
           enabled?: boolean
           escalation_enabled?: boolean
           escalation_minutes?: number
+          feed_uptime_alerts_enabled?: boolean
           forecast_freeze_enabled?: boolean
           forecast_hours_ahead?: number
           freeze_threshold_f?: number
@@ -241,6 +276,7 @@ export type Database = {
           last_battery_trend_alert_at?: string | null
           last_drip_email_at?: string | null
           last_escalation_at?: string | null
+          last_feed_uptime_alert_at?: string | null
           last_forecast_alert_at?: string | null
           last_monthly_report_at?: string | null
           last_nws_alert_at?: string | null
@@ -250,10 +286,14 @@ export type Database = {
           last_rssi_alert_at?: string | null
           last_trial_reminder_at?: string | null
           monthly_report_enabled?: boolean
+          ntfy_server?: string
+          ntfy_topic?: string | null
           nws_freeze_alerts_enabled?: boolean
           outage_hours?: number
           outbound_webhook_secret?: string | null
           outbound_webhook_url?: string | null
+          pushover_app_token?: string | null
+          pushover_user_key?: string | null
           quarterly_report_enabled?: boolean
           quiet_hours_bypass_freeze?: boolean
           quiet_hours_enabled?: boolean
@@ -270,12 +310,14 @@ export type Database = {
           sms_phone?: string | null
           snooze_until?: string | null
           space_channel_routing?: Json
+          teams_webhook_url?: string | null
           telegram_bot_token?: string | null
           telegram_chat_id?: string | null
           telegram_command_secret?: string | null
           updated_at?: string
           user_id?: string
           vacation_until?: string | null
+          whatsapp_phone?: string | null
         }
         Relationships: []
       }
@@ -531,6 +573,42 @@ export type Database = {
           },
         ]
       }
+      feed_uptime_checks: {
+        Row: {
+          checked_at: string
+          feed_id: string
+          feed_name: string
+          id: number
+          latency_ms: number | null
+          message: string | null
+          ok: boolean
+          url: string
+          user_id: string
+        }
+        Insert: {
+          checked_at?: string
+          feed_id: string
+          feed_name: string
+          id?: number
+          latency_ms?: number | null
+          message?: string | null
+          ok: boolean
+          url: string
+          user_id: string
+        }
+        Update: {
+          checked_at?: string
+          feed_id?: string
+          feed_name?: string
+          id?: number
+          latency_ms?: number | null
+          message?: string | null
+          ok?: boolean
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       freeze_map_snapshots: {
         Row: {
           avg_temp_f: number | null
@@ -652,6 +730,44 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      history_archives: {
+        Row: {
+          created_at: string
+          household_id: string
+          id: string
+          object_key: string
+          period_end: string
+          period_start: string
+          row_count: number
+        }
+        Insert: {
+          created_at?: string
+          household_id: string
+          id?: string
+          object_key: string
+          period_end: string
+          period_start: string
+          row_count?: number
+        }
+        Update: {
+          created_at?: string
+          household_id?: string
+          id?: string
+          object_key?: string
+          period_end?: string
+          period_start?: string
+          row_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "history_archives_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       household_activity: {
         Row: {
@@ -1059,6 +1175,36 @@ export type Database = {
           },
         ]
       }
+      server_errors: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          method: string
+          path: string
+          stack: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          method?: string
+          path: string
+          stack?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          method?: string
+          path?: string
+          stack?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       share_links: {
         Row: {
           created_at: string
@@ -1134,6 +1280,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      status_subscriptions: {
+        Row: {
+          confirmed_at: string | null
+          created_at: string
+          email: string
+          id: string
+          token: string
+        }
+        Insert: {
+          confirmed_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          token: string
+        }
+        Update: {
+          confirmed_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          token?: string
+        }
+        Relationships: []
       }
       stripe_subscriptions: {
         Row: {
@@ -1234,36 +1404,6 @@ export type Database = {
           sort_order?: number
           user_id?: string
           visible?: boolean
-        }
-        Relationships: []
-      }
-      server_errors: {
-        Row: {
-          created_at: string
-          id: string
-          message: string
-          method: string
-          path: string
-          stack: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          message: string
-          method?: string
-          path: string
-          stack?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          message?: string
-          method?: string
-          path?: string
-          stack?: string | null
-          user_id?: string | null
         }
         Relationships: []
       }

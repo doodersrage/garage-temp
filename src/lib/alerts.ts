@@ -1,4 +1,5 @@
 import type { AlertRule } from "./alertRules";
+import { parseAlertPlaybooks, type AlertPlaybookStep } from "./alertPlaybooks";
 import { parseSpaceChannelRouting, type SpaceChannelRouting } from "./spaceChannelRouting";
 
 export type AlertChannelName =
@@ -8,7 +9,11 @@ export type AlertChannelName =
   | "push"
   | "webhook"
   | "telegram"
-  | "slack";
+  | "slack"
+  | "teams"
+  | "ntfy"
+  | "pushover"
+  | "whatsapp";
 
 export type NotifyKind =
   | "threshold"
@@ -32,6 +37,10 @@ const ALERT_CHANNEL_NAMES = new Set<AlertChannelName>([
   "webhook",
   "telegram",
   "slack",
+  "teams",
+  "ntfy",
+  "pushover",
+  "whatsapp",
 ]);
 
 const NOTIFY_KINDS = new Set<NotifyKind>([
@@ -79,7 +88,17 @@ export type AlertSettings = {
   channelWebhook: boolean;
   channelTelegram: boolean;
   channelSlack: boolean;
+  channelTeams: boolean;
+  channelNtfy: boolean;
+  channelPushover: boolean;
+  channelWhatsapp: boolean;
   discordWebhookUrl: string | null;
+  teamsWebhookUrl: string | null;
+  ntfyTopic: string | null;
+  ntfyServer: string;
+  pushoverUserKey: string | null;
+  pushoverAppToken: string | null;
+  whatsappPhone: string | null;
   smsPhone: string | null;
   outboundWebhookUrl: string | null;
   outboundWebhookSecret: string | null;
@@ -124,6 +143,10 @@ export type AlertSettings = {
   spaceChannelRouting: SpaceChannelRouting;
   dripEmailsEnabled: boolean;
   quarterlyReportEnabled: boolean;
+  alertPlaybooks: AlertPlaybookStep[];
+  dataRetentionDays: number | null;
+  feedUptimeAlertsEnabled: boolean;
+  lastFeedUptimeAlertAt: string | null;
 };
 
 export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
@@ -141,7 +164,17 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   channelWebhook: false,
   channelTelegram: false,
   channelSlack: false,
+  channelTeams: false,
+  channelNtfy: false,
+  channelPushover: false,
+  channelWhatsapp: false,
   discordWebhookUrl: null,
+  teamsWebhookUrl: null,
+  ntfyTopic: null,
+  ntfyServer: "https://ntfy.sh",
+  pushoverUserKey: null,
+  pushoverAppToken: null,
+  whatsappPhone: null,
   smsPhone: null,
   outboundWebhookUrl: null,
   outboundWebhookSecret: null,
@@ -186,6 +219,10 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   spaceChannelRouting: {},
   dripEmailsEnabled: true,
   quarterlyReportEnabled: false,
+  alertPlaybooks: [],
+  dataRetentionDays: null,
+  feedUptimeAlertsEnabled: false,
+  lastFeedUptimeAlertAt: null,
 };
 
 /** Minimum time between threshold alert notifications for the same account. */
@@ -269,8 +306,25 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
     channelWebhook: row.channel_webhook === true,
     channelTelegram: row.channel_telegram === true,
     channelSlack: row.channel_slack === true,
+    channelTeams: row.channel_teams === true,
+    channelNtfy: row.channel_ntfy === true,
+    channelPushover: row.channel_pushover === true,
+    channelWhatsapp: row.channel_whatsapp === true,
     discordWebhookUrl:
       typeof row.discord_webhook_url === "string" ? row.discord_webhook_url : null,
+    teamsWebhookUrl:
+      typeof row.teams_webhook_url === "string" ? row.teams_webhook_url : null,
+    ntfyTopic: typeof row.ntfy_topic === "string" ? row.ntfy_topic : null,
+    ntfyServer:
+      typeof row.ntfy_server === "string" && row.ntfy_server.trim()
+        ? row.ntfy_server.trim()
+        : DEFAULT_ALERT_SETTINGS.ntfyServer,
+    pushoverUserKey:
+      typeof row.pushover_user_key === "string" ? row.pushover_user_key : null,
+    pushoverAppToken:
+      typeof row.pushover_app_token === "string" ? row.pushover_app_token : null,
+    whatsappPhone:
+      typeof row.whatsapp_phone === "string" ? row.whatsapp_phone : null,
     smsPhone: typeof row.sms_phone === "string" ? row.sms_phone : null,
     outboundWebhookUrl:
       typeof row.outbound_webhook_url === "string" ? row.outbound_webhook_url : null,
@@ -373,6 +427,14 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
     spaceChannelRouting: parseSpaceChannelRouting(row.space_channel_routing),
     dripEmailsEnabled: row.drip_emails_enabled !== false,
     quarterlyReportEnabled: row.quarterly_report_enabled === true,
+    alertPlaybooks: parseAlertPlaybooks(row.alert_playbooks),
+    dataRetentionDays:
+      typeof row.data_retention_days === "number" ? row.data_retention_days : null,
+    feedUptimeAlertsEnabled: row.feed_uptime_alerts_enabled === true,
+    lastFeedUptimeAlertAt:
+      typeof row.last_feed_uptime_alert_at === "string"
+        ? row.last_feed_uptime_alert_at
+        : null,
   };
 }
 
@@ -529,7 +591,17 @@ export function serializeAlertSettings(settings: AlertSettings): Record<string, 
     channel_webhook: settings.channelWebhook,
     channel_telegram: settings.channelTelegram,
     channel_slack: settings.channelSlack,
+    channel_teams: settings.channelTeams,
+    channel_ntfy: settings.channelNtfy,
+    channel_pushover: settings.channelPushover,
+    channel_whatsapp: settings.channelWhatsapp,
     discord_webhook_url: settings.discordWebhookUrl,
+    teams_webhook_url: settings.teamsWebhookUrl,
+    ntfy_topic: settings.ntfyTopic,
+    ntfy_server: settings.ntfyServer,
+    pushover_user_key: settings.pushoverUserKey,
+    pushover_app_token: settings.pushoverAppToken,
+    whatsapp_phone: settings.whatsappPhone,
     sms_phone: settings.smsPhone,
     outbound_webhook_url: settings.outboundWebhookUrl,
     outbound_webhook_secret: settings.outboundWebhookSecret,
@@ -574,6 +646,10 @@ export function serializeAlertSettings(settings: AlertSettings): Record<string, 
     space_channel_routing: settings.spaceChannelRouting,
     drip_emails_enabled: settings.dripEmailsEnabled,
     quarterly_report_enabled: settings.quarterlyReportEnabled,
+    alert_playbooks: settings.alertPlaybooks,
+    data_retention_days: settings.dataRetentionDays,
+    feed_uptime_alerts_enabled: settings.feedUptimeAlertsEnabled,
+    last_feed_uptime_alert_at: settings.lastFeedUptimeAlertAt,
   };
 }
 

@@ -2,9 +2,9 @@
 
 Open-source dashboard to **track, log, and analyze temperature probe curves** — built with **Astro 6**, **Cloudflare Workers**, **Supabase**, and **Stripe**.
 
-**Production:** [garage-temp.robmcd.name](https://garage-temp.robmcd.name)  
-**Workers preview:** [garage-temp.doodersrage.workers.dev](https://garage-temp.doodersrage.workers.dev)  
-**API docs:** [/docs/api](https://garage-temp.robmcd.name/docs/api) · [OpenAPI](https://garage-temp.robmcd.name/openapi.yaml)
+**Production:** [thermaltrace.dev](https://thermaltrace.dev)  
+**Workers preview:** [garage-temp.doodersrage.workers.dev](https://garage-temp.doodersrage.workers.dev) (redirects to apex)  
+**API docs:** [/docs/api](https://thermaltrace.dev/docs/api) · [OpenAPI](https://thermaltrace.dev/openapi.yaml)
 
 ---
 
@@ -47,7 +47,7 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 - OpenWeather outdoor comparison; optional °C and light / dark / system theme
 - History with chart, YoY overlay, filters, anomaly hints, space comparison, CSV export (Member/Pro)
 - Dashboard cards: nights-at-risk, time-to-freeze estimate, week vs last year, door duration & history
-- Opt-in public city freeze-risk map ([/freeze-map](https://garage-temp.robmcd.name/freeze-map)); embed at `/embed/freeze-map`
+- Opt-in public city freeze-risk map ([/freeze-map](https://thermaltrace.dev/freeze-map)); embed at `/embed/freeze-map`
 - Live SSE stream + polling fallback; PWA offline stale cache
 - Embeddable live widget for share links (`/embed/<token>`)
 
@@ -71,7 +71,7 @@ Display preferences, alert settings, snooze/vacation, and household invites save
 ### Accounts & collaboration
 
 - Email/password auth, password reset, optional OAuth (Google / GitHub / Discord in Supabase)
-- Public [/pricing](https://garage-temp.robmcd.name/pricing) (monthly/annual toggle, env-driven display prices) and [/compare](https://garage-temp.robmcd.name/compare)
+- Public [/pricing](https://thermaltrace.dev/pricing) (monthly/annual toggle, env-driven display prices) and [/compare](https://thermaltrace.dev/compare)
 - Contextual upgrade nudges where Member/Pro unlocks a feature
 - Households: invite by email (member or viewer), rename, leave, revoke, multi-property switcher
 - Device transfer between properties; household activity log
@@ -85,7 +85,7 @@ Display preferences, alert settings, snooze/vacation, and household invites save
 - Hourly Worker cron: history, alerts, freeze-map snapshots, drips, trial mail, monthly/quarterly reports
 - Admin: users, contacts, jobs, **ops dashboard** (`/dashboard/ops`) — checkout funnel, Stripe price audit, referrals, email smoke tests, page errors
 - Middleware → `server_errors` + ops email/Discord notify (cooldown per path)
-- Public [/system-status](https://garage-temp.robmcd.name/system-status), friendly `/500`, case study `/stories/garage-freeze-alert`
+- Public [/system-status](https://thermaltrace.dev/system-status), friendly `/500`, case study `/stories/garage-freeze-alert`
 - About / docs hub with search, wiring guides, firmware notes
 - Contact form (Cloudflare Email + Turnstile)
 - CI: full-repo `tsc`, Vitest, Astro build, Playwright E2E; Astro import-guard tests on all pages
@@ -308,10 +308,10 @@ Optional top-level `battery` / `battery_pct` and `rssi` update device health met
 
 Guides:
 
-- [Ingest & webhooks](https://garage-temp.robmcd.name/about/ingest-and-webhooks)
-- [Home Assistant webhook YAML](https://garage-temp.robmcd.name/ha/garage_temp_webhook.yaml)
-- [Accounts & dashboard](https://garage-temp.robmcd.name/about/accounts-and-dashboard)
-- Full hub: [/about](https://garage-temp.robmcd.name/about)
+- [Ingest & webhooks](https://thermaltrace.dev/about/ingest-and-webhooks)
+- [Home Assistant webhook YAML](https://thermaltrace.dev/ha/garage_temp_webhook.yaml)
+- [Accounts & dashboard](https://thermaltrace.dev/about/accounts-and-dashboard)
+- Full hub: [/about](https://thermaltrace.dev/about)
 
 ### Open-source firmware & relays
 
@@ -374,13 +374,15 @@ CLOUDFLARE_API_TOKEN=... pnpm setup:github-secrets
 
 Or set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` manually under **Settings → Secrets → Actions**. Pushes to `main` run [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) when secrets exist; otherwise deploy is skipped (use `pnpm deploy` locally).
 
-### Custom domain (`thermaltrace.robmcd.name`)
+### Custom domain (`thermaltrace.dev`)
 
-1. In Cloudflare DNS for `robmcd.name`, add **CNAME** `thermaltrace` → `garage-temp.doodersrage.workers.dev` (proxied)
-2. `wrangler.jsonc` already declares the custom domain route — run `pnpm deploy`
-3. Update Worker secrets: `SITE_URL` and `ORIGIN` → `https://thermaltrace.robmcd.name`, then `pnpm secrets:push`
+The Worker binds **thermaltrace.dev** (and **www** → apex via middleware). Legacy hostnames redirect with 301:
 
-Until DNS is live, production stays at [garage-temp.robmcd.name](https://garage-temp.robmcd.name).
+- `garage-temp.robmcd.name`
+- `thermaltrace.robmcd.name`
+- `garage-temp.doodersrage.workers.dev`
+
+Set Worker secrets `SITE_URL` and `ORIGIN` to `https://thermaltrace.dev`, then `pnpm secrets:push`.
 
 ### Public smoke (no auth)
 

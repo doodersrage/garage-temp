@@ -1,5 +1,6 @@
 import {
   canEditHousehold,
+  canManageHousehold,
   getUserHouseholdId,
   getUserHouseholdRole,
   type HouseholdRole,
@@ -28,7 +29,20 @@ export async function requireHouseholdEditor(
     return { ok: false, error: "No household" };
   }
   if (!canEditHousehold(ctx.role)) {
-    return { ok: false, error: "viewer" };
+    return { ok: false, error: ctx.role === "alert_only" ? "alert_only" : "viewer" };
+  }
+  return { ok: true, ctx };
+}
+
+export async function requireHouseholdManager(
+  userId: string,
+): Promise<{ ok: true; ctx: HouseholdEditorContext } | { ok: false; error: string }> {
+  const ctx = await getHouseholdEditorContext(userId);
+  if (!ctx) {
+    return { ok: false, error: "No household" };
+  }
+  if (!canManageHousehold(ctx.role)) {
+    return { ok: false, error: "manager_required" };
   }
   return { ok: true, ctx };
 }
@@ -40,8 +54,11 @@ export function redirectUnlessEditor(
   redirect: (url: string) => Response,
 ): Response | null {
   if (editor.ok) return null;
-  if (editor.error === "viewer") {
+  if (editor.error === "viewer" || editor.error === "alert_only") {
     return redirect(`${redirectTo}?error=viewer`);
+  }
+  if (editor.error === "manager_required") {
+    return redirect(`${redirectTo}?error=manager_required`);
   }
   return redirect(`${redirectTo}?error=1`);
 }

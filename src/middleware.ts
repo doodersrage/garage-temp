@@ -2,9 +2,24 @@ import { defineMiddleware } from "astro:middleware";
 import { getAuthFromCookies } from "./lib/auth";
 import { pathRequiresAuth } from "./lib/routeAuth";
 import { recordServerError } from "./lib/serverErrors";
+import { CANONICAL_HOST, LEGACY_HOSTS } from "./lib/siteConfig";
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  const { pathname } = context.url;
+  const { pathname, hostname, protocol } = context.url;
+
+  if (LEGACY_HOSTS.has(hostname)) {
+    const dest = new URL(context.url);
+    dest.hostname = CANONICAL_HOST;
+    dest.protocol = "https:";
+    return context.redirect(dest.toString(), 301);
+  }
+
+  if (hostname === CANONICAL_HOST && protocol === "http:") {
+    const dest = new URL(context.url);
+    dest.protocol = "https:";
+    return context.redirect(dest.toString(), 301);
+  }
+
   let userId: string | null = null;
 
   try {

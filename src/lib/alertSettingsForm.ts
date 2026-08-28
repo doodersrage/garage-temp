@@ -3,6 +3,7 @@ import {
   type AlertSettings,
 } from "./alerts";
 import { parseAlertRulesFromForm } from "./alertRules";
+import { parseAlertPlaybooksFromForm } from "./alertPlaybooks";
 import { parseSpaceChannelRouting } from "./spaceChannelRouting";
 import { parseAlertTemplates } from "./alertTemplates";
 import type { Entitlements } from "./entitlements";
@@ -56,10 +57,22 @@ export function buildAlertSettingsFromFormData(
     channelDiscord: formHas(formData, "channel_discord"),
     channelTelegram: formHas(formData, "channel_telegram"),
     channelSlack: formHas(formData, "channel_slack"),
+    channelTeams: formHas(formData, "channel_teams"),
+    channelNtfy: formHas(formData, "channel_ntfy"),
+    channelPushover: formHas(formData, "channel_pushover"),
+    channelWhatsapp:
+      formHas(formData, "channel_whatsapp") && entitlements.canUseSms,
     channelPush: formHas(formData, "channel_push") && entitlements.canUsePush,
     channelWebhook:
       formHas(formData, "channel_webhook") && entitlements.canUseOutboundWebhook,
     discordWebhookUrl: formString(formData, "discord_webhook_url"),
+    teamsWebhookUrl: formString(formData, "teams_webhook_url"),
+    ntfyTopic: formString(formData, "ntfy_topic"),
+    ntfyServer: formString(formData, "ntfy_server") || existing.ntfyServer,
+    pushoverUserKey: formString(formData, "pushover_user_key"),
+    pushoverAppToken:
+      formString(formData, "pushover_app_token") || existing.pushoverAppToken,
+    whatsappPhone: formString(formData, "whatsapp_phone"),
     smsPhone: formString(formData, "sms_phone"),
     outboundWebhookUrl: formString(formData, "outbound_webhook_url"),
     outboundWebhookSecret:
@@ -169,6 +182,17 @@ export function buildAlertSettingsFromFormData(
         return existing.spaceChannelRouting;
       }
     })(),
+    alertPlaybooks: parseAlertPlaybooksFromForm(
+      formData.get("alert_playbooks_json")?.toString(),
+    ),
+    dataRetentionDays: (() => {
+      const raw = formData.get("data_retention_days");
+      if (raw == null || raw === "") return existing.dataRetentionDays;
+      const n = Number(raw);
+      return Number.isFinite(n) && n >= 30 ? Math.floor(n) : existing.dataRetentionDays;
+    })(),
+    feedUptimeAlertsEnabled: formHas(formData, "feed_uptime_alerts_enabled"),
+    lastFeedUptimeAlertAt: existing.lastFeedUptimeAlertAt,
   };
 }
 
@@ -179,6 +203,11 @@ export function alertChannelsIncomplete(settings: AlertSettings): boolean {
     (settings.channelTelegram &&
       (!settings.telegramBotToken || !settings.telegramChatId)) ||
     (settings.channelSlack && !settings.slackWebhookUrl) ||
+    (settings.channelTeams && !settings.teamsWebhookUrl) ||
+    (settings.channelNtfy && !settings.ntfyTopic) ||
+    (settings.channelPushover &&
+      (!settings.pushoverUserKey || !settings.pushoverAppToken)) ||
+    (settings.channelWhatsapp && !settings.whatsappPhone) ||
     (settings.channelSms && !settings.smsPhone) ||
     (settings.channelWebhook && !settings.outboundWebhookUrl)
   );

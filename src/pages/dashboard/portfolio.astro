@@ -1,0 +1,90 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import DashboardCard from "../../components/dashboard/DashboardCard.astro";
+import { getAuthFromCookies } from "../../lib/auth";
+import { fetchCrossPropertySnapshots } from "../../lib/crossProperty";
+import { listUserHouseholds } from "../../lib/households";
+import { getUserEntitlements } from "../../lib/entitlements";
+
+const { session, user } = await getAuthFromCookies(Astro.cookies);
+if (!session || !user) {
+  return Astro.redirect("/signin");
+}
+
+const entitlements = await getUserEntitlements(user.id);
+const { households } = await listUserHouseholds(user.id);
+const { properties, error } = await fetchCrossPropertySnapshots(user.id);
+const atRisk = properties.filter((p) => p.atRisk);
+---
+<DashboardLayout title="Portfolio">
+  <div class="space-y-6">
+    <section class="card">
+      <h1 class="card-title">All properties</h1>
+      <p class="card-subtitle mb-0">
+        Cross-property freeze risk at a glance
+        {entitlements.maxOwnedHouseholds > 1 ? "" : " — add more households on Pro"}.
+      </p>
+      {error && <p class="alert-warning mt-3" role="alert">{error}</p>}
+    </section>
+
+    {atRisk.length > 0 && (
+      <DashboardCard>
+        <h2 class="card-title text-[var(--color-warning)]">
+          {atRisk.length} propert{atRisk.length === 1 ? "y" : "ies"} at freeze risk
+        </h2>
+        <ul class="m-0 p-0 list-none space-y-2">
+          {atRisk.map((p) => (
+            <li class="text-sm">
+              <strong>{p.name}</strong> — {p.minTempF?.toFixed(1)}°F (threshold {p.freezeThresholdF}°F)
+            </li>
+          ))}
+        </ul>
+      </DashboardCard>
+    )}
+
+    <DashboardCard>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr>
+              <th class="text-left py-2">Property</th>
+              <th class="text-left py-2">Role</th>
+              <th class="text-left py-2">Min temp</th>
+              <th class="text-left py-2">Devices</th>
+              <th class="text-left py-2">Last reading</th>
+            </tr>
+          </thead>
+          <tbody>
+            {properties.map((p) => (
+              <tr class="border-t border-[var(--color-border)]">
+                <td class="py-2">
+                  <form action="/api/household/switch" method="post" class="inline">
+                    <input type="hidden" name="household_id" value={p.householdId} />
+                    <input type="hidden" name="redirect" value="/dashboard" />
+                    <button type="submit" class="text-link">{p.name}</button>
+                  </form>
+                  {p.atRisk && (
+                    <span class="ml-2 text-xs text-[var(--color-warning)]">At risk</span>
+                  )}
+                </td>
+                <td class="py-2 capitalize">{p.role.replace("_", " ")}</td>
+                <td class="py-2">
+                  {p.minTempF != null ? `${p.minTempF.toFixed(1)}°F` : "—"}
+                </td>
+                <td class="py-2">{p.deviceCount}</td>
+                <td class="py-2">
+                  {p.lastReadingAt
+                    ? new Date(p.lastReadingAt).toLocaleString()
+                    : "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {households.length === 0 && (
+        <p class="text-sm text-[var(--color-text-muted)] mb-0">No households yet.</p>
+      )}
+    </DashboardCard>
+  </div>
+</DashboardLayout>

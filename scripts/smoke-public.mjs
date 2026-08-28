@@ -3,7 +3,7 @@
  * Public post-deploy smoke checks (no auth).
  * Usage: pnpm smoke:public [baseUrl]
  */
-const base = (process.argv[2] ?? process.env.SMOKE_BASE_URL ?? "https://garage-temp.robmcd.name").replace(
+const base = (process.argv[2] ?? process.env.SMOKE_BASE_URL ?? "https://thermaltrace.dev").replace(
   /\/+$/,
   "",
 );

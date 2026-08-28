@@ -9,8 +9,8 @@ env:
   SUPABASE_URL: https://example.supabase.co
   SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ci-build-placeholder
   SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ci-build-placeholder
-  SITE_URL: https://garage-temp.robmcd.name
-  ORIGIN: https://garage-temp.robmcd.name
+  SITE_URL: https://thermaltrace.dev
+  ORIGIN: https://thermaltrace.dev
   GARAGE_TEMP_FEED_URL: https://example.com/feed.json
   NEXT_PUBLIC_OPENWEATHER_API_KEY: ci-placeholder
   NEXT_PUBLIC_OPENWEATHER_CITY_ID: "5128581"

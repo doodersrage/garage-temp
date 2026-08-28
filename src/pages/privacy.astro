@@ -1,0 +1,44 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { BRAND_NAME } from "../lib/brand";
+---
+<Layout title="Privacy" description={`Privacy and data handling for ${BRAND_NAME}.`}>
+  <article class="card max-w-3xl mx-auto my-8">
+    <h1 class="card-title">Privacy</h1>
+    <p class="card-subtitle">
+      How ThermalTrace handles your data, retention, and account deletion.
+    </p>
+
+    <h2 class="text-lg font-semibold mt-6 mb-2">What we store</h2>
+    <ul class="list-disc pl-5 space-y-1 text-sm">
+      <li>Account email and auth metadata (Supabase Auth)</li>
+      <li>Device and sensor configuration, temperature/humidity readings</li>
+      <li>Alert settings and delivery audit logs</li>
+      <li>Optional billing data via Stripe (we do not store card numbers)</li>
+    </ul>
+
+    <h2 class="text-lg font-semibold mt-6 mb-2">Retention</h2>
+    <p class="text-sm">
+      Raw sensor readings roll up and expire on a schedule (90 days default on Free; longer on paid plans).
+      You can set a custom retention window under Dashboard → Settings. Archived snapshots may be stored in
+      cold storage for Pro households.
+    </p>
+
+    <h2 class="text-lg font-semibold mt-6 mb-2">Export & deletion</h2>
+    <p class="text-sm">
+      Export JSON anytime from <a class="text-link" href="/api/user/export">/api/user/export</a> while signed in.
+      Delete your account under Dashboard → Settings — this removes alert settings and sole-owned households.
+    </p>
+
+    <h2 class="text-lg font-semibold mt-6 mb-2">Analytics</h2>
+    <p class="text-sm">
+      Public marketing pages may load Google Analytics (see cookie banner). Dashboard routes are excluded.
+      Product funnel events are anonymized and never include live temperature readings.
+    </p>
+
+    <h2 class="text-lg font-semibold mt-6 mb-2">Contact</h2>
+    <p class="text-sm mb-0">
+      Questions: <a class="text-link" href="/contact">contact form</a>.
+    </p>
+  </article>
+</Layout>

@@ -13,6 +13,9 @@ import {
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
 import { BRAND_NAME } from "../lib/brand";
+import GoogleAnalytics from "../components/GoogleAnalytics.astro";
+import SentryClient from "../components/SentryClient.astro";
+import { shouldLoadGoogleAnalytics } from "../lib/analytics";
 
 interface Props {
   title?: string;
@@ -67,6 +70,7 @@ const navItems = [
   { href: '/contact', label: 'Contact', match: (path: string) => path.startsWith('/contact') },
 ];
 const isDashboard = currentPath.startsWith("/dashboard");
+const loadAnalytics = shouldLoadGoogleAnalytics(currentPath);
 ---
 <!doctype html>
 <html lang="en" data-theme={resolvedTheme}>
@@ -94,13 +98,14 @@ const isDashboard = currentPath.startsWith("/dashboard");
 		<Font cssVariable="--font-sans" preload />
 		<Font cssVariable="--font-display" preload />
 		<SchemaMarkup schemas={schemas} />
-		<script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-YKDZ0787JG"></script>
-		<script is:inline>
-		window.dataLayer = window.dataLayer || [];
-		function gtag(){dataLayer.push(arguments);}
-		gtag('js', new Date());
-		gtag('config', 'G-YKDZ0787JG');
-		</script>
+		{loadAnalytics && (
+			<GoogleAnalytics
+				pageTitle={pageTitle}
+				pageUrl={pageUrl}
+				hostname={Astro.url.hostname}
+			/>
+		)}
+		<SentryClient />
 	</head>
 	<body class:list={[isDashboard && "is-dashboard"]}>
 		<a class="skip-link" href="#main-content">Skip to content</a>

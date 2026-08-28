@@ -1,12 +1,12 @@
 openapi: 3.1.0
 info:
   title: ThermalTrace API
-  version: 1.0.0
+  version: 1.1.0
   description: |
-    HTTP endpoints for device ingest, share links, metrics, and inbound automations.
+    HTTP endpoints for device ingest, share links, metrics, devices CRUD, MQTT bridge, and inbound automations.
     Authenticated dashboard routes use Supabase session cookies; programmatic access uses API keys (Pro).
 servers:
-  - url: https://garage-temp.example.com
+  - url: https://thermaltrace.dev
 paths:
   /api/ingest/{deviceKey}:
     post:
@@ -29,6 +29,55 @@ paths:
           description: Readings accepted
         "401":
           description: Invalid device key
+  /api/ingest/mqtt:
+    post:
+      summary: MQTT-over-HTTP bridge
+      parameters:
+        - name: X-Ingest-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                topic:
+                  type: string
+                payload:
+                  type: string
+                message:
+                  type: object
+      responses:
+        "200":
+          description: Forwarded to ingest
+  /api/v1/devices:
+    get:
+      summary: List household devices (Pro API key)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Device list
+    post:
+      summary: Create push device (Pro API key)
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                space:
+                  type: string
+      responses:
+        "201":
+          description: Device created with one-time ingest_key
   /api/v1/metrics:
     get:
       summary: Prometheus metrics (Pro API key)
@@ -39,7 +88,7 @@ paths:
           description: Prometheus text format
   /api/inbound/{token}:
     post:
-      summary: Inbound webhook actions
+      summary: Inbound webhook actions (Zapier / Home Assistant)
       parameters:
         - name: token
           in: path
@@ -72,6 +121,20 @@ paths:
       responses:
         "200":
           description: JSON readings payload
+  /api/status/subscribe:
+    post:
+      summary: Subscribe to system status emails
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        "200":
+          description: Subscribed
 components:
   securitySchemes:
     bearerAuth:

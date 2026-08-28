@@ -1,0 +1,33 @@
+---
+import DashboardCard from "./dashboard/DashboardCard.astro";
+import type { HeatingInsight } from "../lib/heatingInsights";
+
+interface Props {
+  insights: HeatingInsight[];
+}
+
+const { insights } = Astro.props;
+---
+{insights.length > 0 && (
+  <DashboardCard>
+    <h2 class="card-title">Heating insights</h2>
+    <p class="card-subtitle mb-3">
+      Correlates recent temperature trends with outdoor conditions and door activity.
+    </p>
+    <ul class="space-y-2 m-0 p-0 list-none">
+      {insights.map((item) => (
+        <li
+          class:list={[
+            "rounded border p-3 text-sm",
+            item.severity === "warning"
+              ? "border-[var(--color-warning)] bg-[var(--color-warning-muted)]"
+              : "border-[var(--color-border)]",
+          ]}
+        >
+          <p class="font-semibold m-0">{item.label}</p>
+          <p class="m-0 mt-1 text-[var(--color-text-muted)]">{item.detail}</p>
+        </li>
+      ))}
+    </ul>
+  </DashboardCard>
+)}

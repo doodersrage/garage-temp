@@ -22,6 +22,8 @@ import {
 } from "./lib/jobRuns";
 import { formatJobFailureBody, notifyOps } from "./lib/opsNotify";
 import { collectFreezeMapSnapshots } from "./lib/freezeMap";
+import { runFeedUptimeForAllUsers } from "./lib/feedUptimeMonitor";
+import { archiveOldReadings } from "./lib/archiveHistory";
 
 export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext) {
@@ -286,6 +288,38 @@ export default {
             "ThermalTrace job failed: freeze-map",
             formatJobFailureBody("freeze-map", details),
           );
+        }
+
+        const feedUptimeJobId = await startJobRun("feed-uptime");
+        try {
+          const uptime = await runFeedUptimeForAllUsers();
+          await finishJobRun(feedUptimeJobId, uptime.errors.length ? "error" : "success", {
+            checked: uptime.checked,
+            failed: uptime.failed,
+            alertsSent: uptime.alertsSent,
+            errors: uptime.errors.slice(0, 20),
+          });
+        } catch (error) {
+          await finishJobRun(feedUptimeJobId, "error", {
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+
+        if (shouldRunDailyRetention()) {
+          const archiveJobId = await startJobRun("history-archive");
+          try {
+            const env = _env as { HISTORY_ARCHIVE?: R2Bucket };
+            const archive = await archiveOldReadings({ r2: env.HISTORY_ARCHIVE });
+            await finishJobRun(archiveJobId, archive.error ? "error" : "success", {
+              archived: archive.archived,
+              skipped: archive.skipped,
+              error: archive.error,
+            });
+          } catch (error) {
+            await finishJobRun(archiveJobId, "error", {
+              message: error instanceof Error ? error.message : "Unknown error",
+            });
+          }
         }
       })(),
     );

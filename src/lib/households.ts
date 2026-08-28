@@ -1,6 +1,11 @@
 import { createServerClient } from "./supabase";
 
-export type HouseholdRole = "owner" | "member" | "viewer";
+export type HouseholdRole =
+  | "owner"
+  | "member"
+  | "viewer"
+  | "alert_only"
+  | "property_manager";
 
 export type Household = {
   id: string;
@@ -242,7 +247,16 @@ export async function getUserHouseholdRole(
 }
 
 export function canEditHousehold(role: HouseholdRole | null): boolean {
+  return role === "owner" || role === "member" || role === "property_manager";
+}
+
+/** Billing, invites, share links, API keys — owner and full members only. */
+export function canManageHousehold(role: HouseholdRole | null): boolean {
   return role === "owner" || role === "member";
+}
+
+export function canViewAlerts(role: HouseholdRole | null): boolean {
+  return role != null;
 }
 
 export async function createAdditionalHouseholdForUser(
