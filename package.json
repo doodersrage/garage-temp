@@ -11,6 +11,8 @@
     "db:push": "supabase db push --linked",
     "secrets:push": "node scripts/push-worker-secrets.mjs",
     "secrets:push:dry": "node scripts/push-worker-secrets.mjs --dry-run",
+    "setup:github-secrets": "node scripts/setup-github-secrets.mjs",
+    "smoke:public": "node scripts/smoke-public.mjs",
     "ops:check": "node scripts/ops-check.mjs",
     "stripe:rename": "node --env-file=.env scripts/rename-stripe-products.mjs",
     "dev": "astro dev",

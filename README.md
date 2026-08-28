@@ -366,7 +366,30 @@ pnpm audit:stripe
 
 ### GitHub Actions deploy
 
-Add repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Pushes to `main` run [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) after tests + build. Runtime secrets remain on the Worker (`pnpm secrets:push`), not in GitHub.
+Add repository secrets (one-time):
+
+```bash
+CLOUDFLARE_API_TOKEN=... pnpm setup:github-secrets
+```
+
+Or set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` manually under **Settings → Secrets → Actions**. Pushes to `main` run [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) when secrets exist; otherwise deploy is skipped (use `pnpm deploy` locally).
+
+### Custom domain (`thermaltrace.robmcd.name`)
+
+1. In Cloudflare DNS for `robmcd.name`, add **CNAME** `thermaltrace` → `garage-temp.doodersrage.workers.dev` (proxied)
+2. `wrangler.jsonc` already declares the custom domain route — run `pnpm deploy`
+3. Update Worker secrets: `SITE_URL` and `ORIGIN` → `https://thermaltrace.robmcd.name`, then `pnpm secrets:push`
+
+Until DNS is live, production stays at [garage-temp.robmcd.name](https://garage-temp.robmcd.name).
+
+### Public smoke (no auth)
+
+```bash
+pnpm smoke:public
+# or: pnpm smoke:public https://garage-temp.doodersrage.workers.dev
+```
+
+Admin channel tests (SMS/push) still run from **Dashboard → Ops** after sign-in.
 
 ### Post-deploy smoke checklist
 

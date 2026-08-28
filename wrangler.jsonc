@@ -13,6 +13,13 @@
 	"observability": {
 		"enabled": true
 	},
+	// Custom domain — add CNAME thermaltrace → garage-temp.workers.dev in Cloudflare DNS, then deploy.
+	"routes": [
+		{
+			"pattern": "thermaltrace.robmcd.name",
+			"custom_domain": true
+		}
+	],
 	"dev": {
 		"ip": "0.0.0.0",
 		"port": 8787
