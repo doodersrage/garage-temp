@@ -405,13 +405,15 @@ pnpm audit:stripe
 
 ### GitHub Actions deploy
 
-Add repository secrets (one-time):
+Astro **inlines** `import.meta.env` at build time. Deploy must use real production secrets — never CI placeholders — or auth breaks.
+
+One-time (requires a Cloudflare API token with Workers edit):
 
 ```bash
 CLOUDFLARE_API_TOKEN=... pnpm setup:github-secrets
 ```
 
-Or set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` manually under **Settings → Secrets → Actions**. Pushes to `main` run [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml); without secrets the workflow still succeeds and prints a skip notice (use `pnpm deploy` locally).
+That syncs `CLOUDFLARE_*` plus build secrets from `.env` (Supabase, Stripe, VAPID, `SITE_URL`, …) into GitHub Actions secrets. Pushes to `main` then run [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). Without those secrets the workflow succeeds with a skip notice (use `pnpm deploy` locally).
 
 ### Custom domain (`thermaltrace.dev`)
 
