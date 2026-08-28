@@ -34,4 +34,18 @@ describe("about gap guides", () => {
       expect(getAboutFaqs(slug).length).toBeGreaterThan(0);
     }
   });
+
+  it("ships FAQs for high-intent journey steps", () => {
+    for (const slug of [
+      "freeze-protection-thresholds",
+      "temperature-probe-case-study",
+      "dht22-sensor-overview",
+      "ingest-and-webhooks",
+      "kit-qr-onboarding",
+      "accounts-and-dashboard",
+      "install-pwa",
+    ]) {
+      expect(getAboutFaqs(slug).length).toBeGreaterThan(0);
+    }
+  });
 });

@@ -3,9 +3,16 @@ import Layout from '../layouts/Layout.astro';
 import DemoTempsPanel from '../components/DemoTempsPanel';
 import WeatherPanel from '../components/WeatherPanel';
 import LiveTempsPanel from '../components/LiveTempsPanel';
+import FaqSection from '../components/FaqSection.astro';
 import { BRAND_NAME_TM } from '../lib/brand';
 import { getAuthFromCookies } from '../lib/auth';
 import { getUserPreferences } from '../lib/userPreferences';
+import {
+  getBreadcrumbSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from '../lib/schemaMarkup';
+import { getMarketingFaqs, getMarketingFaqSchema } from '../lib/marketingFaqs';
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 const isAuthenticated = !!user;
@@ -13,17 +20,34 @@ const preferences = isAuthenticated ? await getUserPreferences(user) : null;
 
 const showGarageTemps = !isAuthenticated || preferences!.showGarageTemps;
 const showWeather = !isAuthenticated || preferences!.showWeather;
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/");
+const homeFaqs = getMarketingFaqs("home");
+const schema = [
+  getBreadcrumbSchema(siteUrl, [{ name: "Home", path: "/" }]),
+  getMarketingFaqSchema(pageUrl, "home"),
+].filter(Boolean) as Record<string, unknown>[];
+
+const homeDescription =
+  "ThermalTrace is an open-source temperature monitoring dashboard for garage and workshop probes—live curves, freeze alerts, ESP/Arduino ingest, and history you can chart and export.";
 ---
 
-<Layout description="ThermalTrace tracks, logs, and analyzes temperature probe curves with live dashboards, freeze alerts, and history.">
+<Layout
+  title="Temperature probe dashboard & freeze alerts"
+  description={homeDescription}
+  schema={schema}
+  softwareApplication
+  speakableSelectors={[".home-hero-brand", ".home-hero-lead", ".faq-answer"]}
+>
 	{!isAuthenticated ? (
 		<div class="home-marketing">
 			<section class="home-hero home-hero--bleed">
 				<div class="home-hero-inner">
 					<h1 class="home-hero-brand">{BRAND_NAME_TM}</h1>
 					<p class="home-hero-lead">
-						An open-source dashboard to track, log, and analyze temperature probe curves —
-						with freeze-aware alerts before pipes and storage take damage.
+						Open-source temperature monitoring for garage and workshop probes —
+						live curves, freeze-aware alerts, and history before pipes and storage take damage.
 					</p>
 					<div class="home-hero-actions">
 						<a class="btn-primary" href="/register">Create free account</a>
@@ -81,6 +105,11 @@ const showWeather = !isAuthenticated || preferences!.showWeather;
 						<a class="btn-secondary" href="/freeze-map">Freeze map</a>
 					</div>
 				</section>
+
+				<FaqSection
+					faqs={homeFaqs}
+					lede="Straight answers for homeowners wiring probes and setting freeze alerts."
+				/>
 			</div>
 		</div>
 	) : (

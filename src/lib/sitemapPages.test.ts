@@ -16,6 +16,7 @@ describe("sitemapPages", () => {
     expect(paths).not.toContain("/about/zapier-integration");
     expect(paths).not.toContain("/dashboard/alerts");
     expect(paths).not.toContain("/signin");
+    expect(paths).not.toContain("/embed/freeze-map");
   });
 
   it("builds absolute URLs from site origin", () => {

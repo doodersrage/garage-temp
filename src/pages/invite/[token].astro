@@ -37,7 +37,7 @@ const inviteEmail = invite?.email ?? "";
 const authQuery = new URLSearchParams({ next: nextPath });
 if (inviteEmail) authQuery.set("email", inviteEmail);
 ---
-<Layout title="Household invite" description="Accept a household sharing invite.">
+<Layout title="Household invite" description="Accept a household sharing invite." noindex>
   <div class="mx-auto w-full max-w-lg px-4 py-12 sm:px-6">
     <section class="card">
       <h1 class="card-title">Household invite</h1>

@@ -13,7 +13,6 @@ const STATIC_PUBLIC_PATHS = [
   "/privacy",
   "/terms",
   "/freeze-map",
-  "/embed/freeze-map",
   "/system-status",
   "/docs/api",
   "/stories/garage-freeze-alert",

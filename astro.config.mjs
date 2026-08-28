@@ -26,7 +26,7 @@ function isIndexablePublicPage(pageUrl) {
     !pageUrl.includes("/share/") &&
     !pageUrl.includes("/status/") &&
     !pageUrl.includes("/500") &&
-    !(pageUrl.includes("/embed/") && !pageUrl.includes("/embed/freeze-map"))
+    !pageUrl.includes("/embed/")
   );
 }
 

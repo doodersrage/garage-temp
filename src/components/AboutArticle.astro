@@ -86,7 +86,14 @@ const schema = [
   ...(faqSchema ? [faqSchema] : []),
 ];
 ---
-<Layout title={title} description={description} schema={schema} skipAuth>
+<Layout
+  title={title}
+  description={description}
+  schema={schema}
+  skipAuth
+  ogType="article"
+  speakableSelectors={[".card-title", ".card-subtitle", ".about-prose p"]}
+>
   <div class="page-shell page-stack">
     <div class="about-article-layout">
       <AboutTopicSidebar slug={slug} />

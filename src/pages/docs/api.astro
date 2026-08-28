@@ -2,10 +2,30 @@
 export const prerender = false;
 
 import Layout from "../../layouts/Layout.astro";
+import FaqSection from "../../components/FaqSection.astro";
+import {
+  getBreadcrumbSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../../lib/schemaMarkup";
+import { getMarketingFaqs, getMarketingFaqSchema } from "../../lib/marketingFaqs";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/docs/api");
+const docsFaqs = getMarketingFaqs("docsApi");
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "API documentation", path: "/docs/api" },
+  ]),
+  getMarketingFaqSchema(pageUrl, "docsApi"),
+].filter(Boolean) as Record<string, unknown>[];
 ---
 <Layout
   title="API documentation"
-  description="ThermalTrace HTTP API — ingest, metrics, share links, and inbound webhooks."
+  description="ThermalTrace HTTP API for ESP/Arduino ingest, Prometheus metrics, share-link JSON, and inbound Home Assistant webhooks—plus OpenAPI download."
+  schema={schema}
+  speakableSelectors={[".card-title", ".card-subtitle", ".faq-answer"]}
 >
   <div class="page-shell page-stack">
     <section class="card animate-slide-in-left">
@@ -67,5 +87,7 @@ paths:
         Full spec: <a class="text-link" href="/openapi.yaml">/openapi.yaml</a>
       </p>
     </section>
+
+    <FaqSection faqs={docsFaqs} />
   </div>
 </Layout>

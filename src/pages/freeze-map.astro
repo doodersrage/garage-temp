@@ -2,12 +2,19 @@
 export const prerender = false;
 import Layout from "../layouts/Layout.astro";
 import PageHeader from "../components/PageHeader.astro";
+import FaqSection from "../components/FaqSection.astro";
 import {
   listFreezeMapSparklines,
   listLatestFreezeMapSnapshots,
 } from "../lib/freezeMap";
 import { formatRelativeAge } from "../lib/relativeTime";
 import { getAuthFromCookies } from "../lib/auth";
+import {
+  getBreadcrumbSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+import { getMarketingFaqs, getMarketingFaqSchema } from "../lib/marketingFaqs";
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 const showSparse = Astro.url.searchParams.get("sparse") === "1";
@@ -35,6 +42,17 @@ const mapPins = visible
   }));
 const mapPinsJson = JSON.stringify(mapPins);
 
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/freeze-map");
+const freezeMapFaqs = getMarketingFaqs("freeze-map");
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "Freeze map", path: "/freeze-map" },
+  ]),
+  getMarketingFaqSchema(pageUrl, "freeze-map"),
+].filter(Boolean) as Record<string, unknown>[];
+
 function sparkPath(values: number[]): string {
   if (values.length < 2) return "";
   const min = Math.min(...values);
@@ -53,7 +71,9 @@ function sparkPath(values: number[]): string {
 ---
 <Layout
   title="Freeze-risk map"
-  description="Opt-in, city-level garage temperature aggregates — anonymized freeze risk across contributing households."
+  description="Opt-in city-level garage temperature aggregates from ThermalTrace households—anonymized freeze-risk context for your metro, not a personal live feed."
+  schema={schema}
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
   <div class="page-shell page-stack">
     <PageHeader
@@ -246,6 +266,11 @@ function sparkPath(values: number[]): string {
       </div>
       <ul id="freeze-map-search-results" class="space-y-2 text-sm mt-3 mb-0"></ul>
     </section>
+
+    <FaqSection
+      faqs={freezeMapFaqs}
+      lede="How the public map works and what stays private."
+    />
   </div>
 </Layout>
 

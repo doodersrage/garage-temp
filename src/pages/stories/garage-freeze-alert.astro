@@ -2,10 +2,56 @@
 export const prerender = false;
 
 import Layout from "../../layouts/Layout.astro";
+import {
+  getArticleSchema,
+  getBreadcrumbSchema,
+  getFaqPageSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../../lib/schemaMarkup";
+import FaqSection from "../../components/FaqSection.astro";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/stories/garage-freeze-alert");
+const headline = "Garage freeze alert case study";
+const description =
+  "How a Minneapolis homeowner avoided pipe damage with ThermalTrace freeze alerts, ESP32 ingest, and Pro SMS when a space heater failed overnight.";
+
+const storyFaqs = [
+  {
+    question: "What alert channels caught the freeze?",
+    answer:
+      "Pro SMS to both owners plus Telegram to a family channel when the garage crossed 33°F at 2:14 a.m.",
+  },
+  {
+    question: "What hardware was used?",
+    answer:
+      "An ESP32 with a DHT22 pushing every five minutes to ThermalTrace ingest, with a 34°F freeze threshold.",
+  },
+];
+
+const schema = [
+  getArticleSchema({
+    siteUrl,
+    pageUrl,
+    headline,
+    description,
+    articleSection: "Customer stories",
+    datePublished: "2025-11-01",
+  }),
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: headline, path: "/stories/garage-freeze-alert" },
+  ]),
+  getFaqPageSchema(pageUrl, storyFaqs),
+].filter(Boolean) as Record<string, unknown>[];
 ---
 <Layout
-  title="Garage freeze alert case study"
-  description="How a Minnesota homeowner avoided pipe damage with ThermalTrace freeze alerts and SMS notifications."
+  title={headline}
+  description={description}
+  schema={schema}
+  ogType="article"
+  speakableSelectors={[".card-title", ".card-subtitle", ".faq-answer"]}
 >
   <div class="page-shell page-stack">
     <section class="card animate-slide-in-left">
@@ -54,6 +100,8 @@ import Layout from "../../layouts/Layout.astro";
         Typical Pro trial → Member or Pro subscription after winter. Your results depend on sensor placement and alert thresholds.
       </p>
     </section>
+
+    <FaqSection faqs={storyFaqs} title="Story FAQ" />
 
     <section class="card">
       <h2 class="card-title">Try it on your garage</h2>

@@ -5,13 +5,27 @@ import Layout from "../layouts/Layout.astro";
 import PageHeader from "../components/PageHeader.astro";
 import { fetchAppStatus } from "../lib/appStatus";
 import { formatRelativeAge } from "../lib/relativeTime";
+import {
+  getBreadcrumbSchema,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
 
 const status = await fetchAppStatus();
 const cronAge = formatRelativeAge(status.lastCronAt, "never");
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "System status", path: "/system-status" },
+  ]),
+];
 ---
 <Layout
   title="System status"
-  description="ThermalTrace background job health and ingest activity summary."
+  description="Live ThermalTrace health: scheduled jobs, ingest activity, and whether alert/history crons are running on schedule."
+  schema={schema}
+  speakableSelectors={[".page-header-title", ".page-header-lede"]}
 >
   <div class="page-shell page-stack">
     <PageHeader

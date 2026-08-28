@@ -3,11 +3,31 @@ export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import PageHeader from "../components/PageHeader.astro";
 import ContactForm from "../components/ContactForm";
+import FaqSection from "../components/FaqSection.astro";
+import {
+  getBreadcrumbSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+import { getMarketingFaqs, getMarketingFaqSchema } from "../lib/marketingFaqs";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/contact");
+const contactFaqs = getMarketingFaqs("contact");
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "Contact", path: "/contact" },
+  ]),
+  getMarketingFaqSchema(pageUrl, "contact"),
+].filter(Boolean) as Record<string, unknown>[];
 ---
 
 <Layout
   title="Contact"
-  description="Questions about garage probes, Arduino wiring, the dashboard, or building your own monitor? Get in touch—or explore the about guides first."
+  description="Contact ThermalTrace about garage probes, Arduino/ESP ingest, freeze alerts, billing, or dashboard help—or start with the About guides."
+  schema={schema}
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
   <div class="page-shell page-stack">
     <PageHeader
@@ -44,5 +64,7 @@ import ContactForm from "../components/ContactForm";
 
       <ContactForm client:visible />
     </div>
+
+    <FaqSection faqs={contactFaqs} />
   </div>
 </Layout>

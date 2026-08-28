@@ -1,8 +1,24 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { BRAND_NAME } from "../lib/brand";
+import {
+  getBreadcrumbSchema,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "Terms of service", path: "/terms" },
+  ]),
+];
 ---
-<Layout title="Terms of service" description={`Terms of service for ${BRAND_NAME}.`}>
+<Layout
+  title="Terms of service"
+  description={`${BRAND_NAME} terms: accounts, sensor data license, billing via Stripe, monitoring disclaimer, and liability limits for garage freeze alerts.`}
+  schema={schema}
+>
   <article class="card max-w-3xl mx-auto my-8">
     <h1 class="card-title">Terms of service</h1>
     <p class="card-subtitle">

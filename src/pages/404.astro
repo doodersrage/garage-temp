@@ -4,7 +4,7 @@ export const prerender = false;
 import Layout from "../layouts/Layout.astro";
 import { BRAND_NAME } from "../lib/brand";
 ---
-<Layout title="Page not found" description={`That page is not on ${BRAND_NAME}.`}>
+<Layout title="Page not found" description={`That page is not on ${BRAND_NAME}.`} noindex>
   <div class="page-shell page-stack">
     <section class="card">
       <h1 class="card-title">Page not found</h1>

@@ -1,4 +1,4 @@
-import { BRAND_DESCRIPTION, BRAND_NAME } from "./brand";
+import { BRAND_DESCRIPTION, BRAND_NAME, BRAND_TAGLINE } from "./brand";
 import {
   resolveConfiguredSiteUrl as resolveSiteUrl,
   resolvePageUrl,
@@ -22,8 +22,23 @@ export function getOrganizationSchema(siteUrl: string) {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE_NAME,
+    alternateName: "ThermalTrace temperature dashboard",
     url: siteUrl,
-    logo: `${siteUrl}/logo.svg`,
+    logo: {
+      "@type": "ImageObject",
+      url: `${siteUrl}/logo.svg`,
+    },
+    image: `${siteUrl}/og-dashboard.jpg`,
+    description: DEFAULT_DESCRIPTION,
+    sameAs: [
+      "https://github.com/doodersrage/thermaltrace",
+      "https://doodersrage.github.io/thermaltrace/",
+    ],
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      url: `${siteUrl}/contact`,
+    },
   };
 }
 
@@ -34,9 +49,53 @@ export function getWebSiteSchema(siteUrl: string) {
     name: SITE_NAME,
     url: siteUrl,
     description: DEFAULT_DESCRIPTION,
+    inLanguage: "en-US",
     publisher: {
       "@type": "Organization",
       name: SITE_NAME,
+      url: siteUrl,
+    },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${siteUrl}/about?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
+export function getSoftwareApplicationSchema(siteUrl: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: SITE_NAME,
+    applicationCategory: "UtilitiesApplication",
+    applicationSubCategory: "IoT temperature monitoring",
+    operatingSystem: "Web",
+    url: siteUrl,
+    description: DEFAULT_DESCRIPTION,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      description: "Free plan available; Member and Pro paid tiers",
+      url: `${siteUrl}/pricing`,
+    },
+    featureList: [
+      "Live probe temperature and humidity curves",
+      "Freeze and humidity threshold alerts",
+      "ESP32 / Arduino push ingest",
+      "Household sharing",
+      "History charts and CSV export",
+      "SMS, push, and webhook channels on Pro",
+    ],
+    screenshot: `${siteUrl}/og-dashboard.jpg`,
+    author: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: siteUrl,
     },
   };
 }
@@ -46,19 +105,35 @@ export function getWebPageSchema(options: {
   pageUrl: string;
   name: string;
   description: string;
+  /** CSS selectors for AEO / speakable content */
+  speakableCssSelectors?: string[];
 }) {
-  return {
+  const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: options.name,
     description: options.description,
     url: options.pageUrl,
+    inLanguage: "en-US",
     isPartOf: {
       "@type": "WebSite",
       name: SITE_NAME,
       url: options.siteUrl,
     },
+    about: {
+      "@type": "Thing",
+      name: "Garage and workshop temperature monitoring",
+    },
   };
+
+  if (options.speakableCssSelectors?.length) {
+    schema.speakable = {
+      "@type": "SpeakableSpecification",
+      cssSelector: options.speakableCssSelectors,
+    };
+  }
+
+  return schema;
 }
 
 export function getArticleSchema(options: {
@@ -69,6 +144,7 @@ export function getArticleSchema(options: {
   imageUrl?: string;
   datePublished?: string;
   dateModified?: string;
+  articleSection?: string;
 }) {
   return {
     "@context": "https://schema.org",
@@ -76,13 +152,18 @@ export function getArticleSchema(options: {
     headline: options.headline,
     description: options.description,
     url: options.pageUrl,
-    mainEntityOfPage: options.pageUrl,
-    image: options.imageUrl ? [options.imageUrl] : undefined,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": options.pageUrl,
+    },
+    image: options.imageUrl ? [options.imageUrl] : [`${options.siteUrl}/og-dashboard.jpg`],
     datePublished: options.datePublished ?? "2024-01-01",
     dateModified: options.dateModified ?? new Date().toISOString().slice(0, 10),
+    articleSection: options.articleSection,
     author: {
       "@type": "Organization",
       name: SITE_NAME,
+      url: options.siteUrl,
     },
     publisher: {
       "@type": "Organization",
@@ -137,8 +218,10 @@ export function getSiteSchemas(options: {
   pageName: string;
   pageDescription: string;
   extraSchemas?: Record<string, unknown>[];
+  includeSoftwareApplication?: boolean;
+  speakableCssSelectors?: string[];
 }) {
-  return [
+  const schemas: Record<string, unknown>[] = [
     getOrganizationSchema(options.siteUrl),
     getWebSiteSchema(options.siteUrl),
     getWebPageSchema({
@@ -146,7 +229,19 @@ export function getSiteSchemas(options: {
       pageUrl: options.pageUrl,
       name: options.pageName,
       description: options.pageDescription,
+      speakableCssSelectors: options.speakableCssSelectors,
     }),
-    ...(options.extraSchemas ?? []),
   ];
+
+  if (options.includeSoftwareApplication) {
+    schemas.push(getSoftwareApplicationSchema(options.siteUrl));
+  }
+
+  schemas.push(...(options.extraSchemas ?? []).filter(Boolean) as Record<string, unknown>[]);
+  return schemas;
+}
+
+/** Short definition-style blurb for AEO (answer engines). */
+export function getBrandDefinition(): string {
+  return `${SITE_NAME}: ${BRAND_TAGLINE} Open-source live probe dashboards, freeze alerts, and history for garages and workshops.`;
 }

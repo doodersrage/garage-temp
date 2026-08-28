@@ -1,8 +1,24 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { BRAND_NAME } from "../lib/brand";
+import {
+  getBreadcrumbSchema,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "Privacy", path: "/privacy" },
+  ]),
+];
 ---
-<Layout title="Privacy" description={`Privacy and data handling for ${BRAND_NAME}.`}>
+<Layout
+  title="Privacy"
+  description={`${BRAND_NAME} privacy policy: what sensor and account data we store, retention windows, export, deletion, and analytics on marketing pages.`}
+  schema={schema}
+>
   <article class="card max-w-3xl mx-auto my-8">
     <h1 class="card-title">Privacy</h1>
     <p class="card-subtitle">
@@ -38,8 +54,7 @@ import { BRAND_NAME } from "../lib/brand";
 
     <h2 class="text-lg font-semibold mt-6 mb-2">Contact</h2>
     <p class="text-sm mb-0">
-      Questions: <a class="text-link" href="/contact">contact form</a>.
-      See also <a class="text-link" href="/terms">Terms of service</a>.
+      Privacy questions: <a class="text-link" href="/contact">Contact</a>.
     </p>
   </article>
 </Layout>

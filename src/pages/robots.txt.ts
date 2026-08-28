@@ -9,6 +9,32 @@ export const GET: APIRoute = ({ site }) => {
   const body = `User-agent: *
 Allow: /
 
+# App shell & auth (not for indexing)
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /signin
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /invite/
+Disallow: /share/
+Disallow: /status/
+Disallow: /embed/
+
+# Keep public docs and marketing crawlable
+Allow: /docs/api
+Allow: /docs/
+Allow: /about
+Allow: /pricing
+Allow: /compare
+Allow: /freeze-map
+Allow: /stories/
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /system-status
+Allow: /openapi.yaml
+
 Sitemap: ${sitemapURL.href}
 `;
   return new Response(body, {

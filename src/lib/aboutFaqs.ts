@@ -7,6 +7,58 @@ export type AboutFaqItem = {
 
 /** FAQ copy for high-intent guides (FAQPage JSON-LD + optional on-page list). */
 export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
+  "temperature-probes": [
+    {
+      question: "What temperature probes work with ThermalTrace?",
+      answer:
+        "Any sensor that can publish temperature (and optional humidity) as JSON—commonly DHT22, DS18B20, or similar on Arduino/ESP32. Map probe indexes in the dashboard after ingest.",
+    },
+    {
+      question: "How many probes do I need in a garage?",
+      answer:
+        "One probe is a start; two or three zones (door bay, north wall, workbench) catch freeze risk that a single average misses.",
+    },
+  ],
+  "temperature-changes": [
+    {
+      question: "Why does garage temperature swing so fast?",
+      answer:
+        "Door openings, sun load on walls, wind infiltration, and vehicle heat move indoor air quickly. Chart history overnight to separate weather from sensor noise.",
+    },
+  ],
+  "historical-data": [
+    {
+      question: "How long does ThermalTrace keep history?",
+      answer:
+        "Retention depends on plan and your Settings retention window. Free keeps shorter windows; paid tiers keep more history for charts and CSV export.",
+    },
+    {
+      question: "Can I export readings to a spreadsheet?",
+      answer:
+        "Yes on Member and Pro—download CSV from History and open it in Excel or Google Sheets for freeze audits and seasonal comparisons.",
+    },
+  ],
+  "arduino-sketches": [
+    {
+      question: "Where are sample Arduino sketches?",
+      answer:
+        "In the thermaltrace GitHub repo under sketches/, plus the Arduino guides in About. Copy the ingest URL with your device key into the sketch constants.",
+    },
+  ],
+  "arduino-pin-wiring": [
+    {
+      question: "Which pins should I use for a DHT22?",
+      answer:
+        "Use a free digital GPIO for the data line, 3.3V or 5V per your board and sensor rating, and a shared ground. Avoid pins reserved by Ethernet/SPI shields.",
+    },
+  ],
+  "arduino-dht22-lcd": [
+    {
+      question: "Do I need an LCD if I use ThermalTrace?",
+      answer:
+        "No—the cloud dashboard is enough. A local LCD is optional for workshop visibility when Wi‑Fi is down.",
+    },
+  ],
   "dht22-sensor-overview": [
     {
       question: "How accurate is a DHT22 in a garage?",
@@ -22,6 +74,13 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
       question: "Can one DHT22 cover a whole garage?",
       answer:
         "One sensor hides gradients. Door bays, north walls, and workbenches often differ by several degrees—use multiple probes when freeze risk or tools matter.",
+    },
+  ],
+  "dht22-data-line-wiring": [
+    {
+      question: "Why do DHT22 reads fail intermittently?",
+      answer:
+        "Long cables, missing pull-ups, shared power noise, and reading too often are common causes. Shorten the run, verify wiring, and add retries with backoff.",
     },
   ],
   "freeze-protection-thresholds": [
@@ -72,6 +131,13 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
         "Household sharing is available on free accounts so family can watch the same probes and alerts together.",
     },
   ],
+  "accounts-and-dashboard": [
+    {
+      question: "What should I configure after creating an account?",
+      answer:
+        "Add a device, map probes, set freeze thresholds, pick alert channels, invite household members, and optionally start a Pro trial for SMS or share links.",
+    },
+  ],
   "ingest-and-webhooks": [
     {
       question: "Do I need a public IP on the Arduino?",
@@ -82,6 +148,90 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
       question: "What belongs in an ingest payload?",
       answer:
         "Temperature (and humidity) keyed by probe index, plus optional door/power fields, battery, and RSSI. Keep keys stable so dashboard mappings stay valid.",
+    },
+  ],
+  "json-probe-output-schema": [
+    {
+      question: "What JSON shape does ThermalTrace expect?",
+      answer:
+        "Stable probe keys with numeric temperatures (and optional humidity). Optional battery_pct and rssi help diagnose weak devices. Match the OpenAPI ingest examples.",
+    },
+  ],
+  "kit-qr-onboarding": [
+    {
+      question: "What does a kit QR code contain?",
+      answer:
+        "Usually the ingest URL or onboarding deep link for that device so a phone scan finishes setup without typing long keys.",
+    },
+  ],
+  "esp32-ota-firmware": [
+    {
+      question: "Can ESP32 devices update firmware while posting to ThermalTrace?",
+      answer:
+        "Yes—run OTA on your LAN for firmware, and keep push ingest posting readings to the cloud API. Battery and RSSI fields are optional in the payload.",
+    },
+  ],
+  "install-pwa": [
+    {
+      question: "Does the PWA support freeze push alerts?",
+      answer:
+        "Browser push is a Pro channel. Install the PWA for faster dashboard access; enable push where the browser and OS allow it (iOS has extra limits).",
+    },
+  ],
+  "data-flow": [
+    {
+      question: "How do readings reach the dashboard?",
+      answer:
+        "Devices push or feeds are pulled, readings land in storage, charts poll or stream updates, and alert jobs evaluate thresholds on a schedule.",
+    },
+  ],
+  "debugging-stale-readings": [
+    {
+      question: "Why are my garage readings stale?",
+      answer:
+        "Check device power and Wi‑Fi, verify the ingest key, confirm cron/history jobs on System status, and look for gaps in History before replacing sensors.",
+    },
+  ],
+  "group-membership-model": [
+    {
+      question: "What is the difference between editor and view-only?",
+      answer:
+        "Editors can change devices, alerts, and sharing. View-only members watch live data and history without changing household configuration.",
+    },
+  ],
+  "temperature-probe-case-study": [
+    {
+      question: "What did the probe case study conclude?",
+      answer:
+        "Multi-zone probes plus freeze thresholds catch cold events single sensors miss—especially near doors and uninsulated walls during polar snaps.",
+    },
+  ],
+  "multi-zone-garage-layout": [
+    {
+      question: "Where should I place probes for freeze risk?",
+      answer:
+        "Prioritize the coldest expected zones: north walls, door tracks, and exterior corners—not only the workbench where you stand.",
+    },
+  ],
+  "probe-demo": [
+    {
+      question: "Is the probe demo real hardware?",
+      answer:
+        "No—it simulates three zones so you can see how outdoor air, sun load, and door state change JSON output like a live feed.",
+    },
+  ],
+  "zapier-make-recipes": [
+    {
+      question: "Can I connect ThermalTrace to Zapier or Make?",
+      answer:
+        "Yes on Pro via outbound webhooks for alerts and inbound tokens for actions like snooze. Recipes live in the Zapier/Make guides under About.",
+    },
+  ],
+  "csv-export-spreadsheet-analysis": [
+    {
+      question: "What can I do with CSV exports?",
+      answer:
+        "Audit overnight lows, compare seasons, and document freeze near-misses for insurance or workshop planning in any spreadsheet tool.",
     },
   ],
 };

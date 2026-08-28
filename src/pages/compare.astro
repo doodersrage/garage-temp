@@ -2,10 +2,30 @@
 import Layout from "../layouts/Layout.astro";
 import PageHeader from "../components/PageHeader.astro";
 import PlanComparisonTable from "../components/PlanComparisonTable.astro";
+import FaqSection from "../components/FaqSection.astro";
+import {
+  getBreadcrumbSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+import { getMarketingFaqs, getMarketingFaqSchema } from "../lib/marketingFaqs";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/compare");
+const compareFaqs = getMarketingFaqs("compare");
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "Compare", path: "/compare" },
+  ]),
+  getMarketingFaqSchema(pageUrl, "compare"),
+].filter(Boolean) as Record<string, unknown>[];
 ---
 <Layout
   title="Compare monitoring options"
-  description="How ThermalTrace compares to DIY scripts, Weather Underground, and generic IoT platforms for freeze alerts and history."
+  description="ThermalTrace vs DIY scripts and generic IoT apps for garage freeze alerts, ESP/Arduino ingest, history export, and household sharing—without running your own servers."
+  schema={schema}
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
   <div class="page-shell page-stack">
     <PageHeader
@@ -89,5 +109,7 @@ import PlanComparisonTable from "../components/PlanComparisonTable.astro";
         <a class="btn-secondary" href="/register">Create free account</a>
       </p>
     </section>
+
+    <FaqSection faqs={compareFaqs} />
   </div>
 </Layout>
