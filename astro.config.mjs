@@ -9,9 +9,29 @@ import cloudflare from '@astrojs/cloudflare';
 
 import preact from '@astrojs/preact';
 
+import { buildPublicSitemapUrls } from './src/lib/sitemapPages.ts';
+
+const site = process.env.SITE_URL?.replace(/\/+$/, "") || "https://thermaltrace.dev";
+
+function isIndexablePublicPage(pageUrl) {
+  return (
+    !pageUrl.includes("/dashboard") &&
+    !pageUrl.includes("/api/") &&
+    !pageUrl.includes("/signin") &&
+    !pageUrl.includes("/register") &&
+    !pageUrl.includes("/forgot-password") &&
+    !pageUrl.includes("/reset-password") &&
+    !pageUrl.includes("/invite/") &&
+    !pageUrl.includes("/share/") &&
+    !pageUrl.includes("/status/") &&
+    !pageUrl.includes("/500") &&
+    !(pageUrl.includes("/embed/") && !pageUrl.includes("/embed/freeze-map"))
+  );
+}
+
 // https://astro.build/config
 export default defineConfig({
-  site: process.env.SITE_URL?.replace(/\/+$/, "") || "https://thermaltrace.dev",
+  site,
 
   server: {
     host: true
@@ -54,11 +74,8 @@ export default defineConfig({
   output: 'server',
   integrations: [
     sitemap({
-      filter: (page) =>
-        !page.includes("/dashboard") &&
-        !page.includes("/api/") &&
-        !page.includes("/signin") &&
-        !page.includes("/register"),
+      filter: (page) => isIndexablePublicPage(page),
+      customPages: buildPublicSitemapUrls(site),
     }),
     preact(),
   ],

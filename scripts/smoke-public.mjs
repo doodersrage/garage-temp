@@ -8,7 +8,7 @@ const base = (process.argv[2] ?? process.env.SMOKE_BASE_URL ?? "https://thermalt
   "",
 );
 
-/** @type {Array<{ path: string; title?: RegExp; heading?: RegExp; json?: string; expect?: string }>} */
+/** @type {Array<{ path: string; title?: RegExp; heading?: RegExp; json?: string; expect?: string; bodyIncludes?: string }>} */
 const checks = [
   { path: "/", title: /ThermalTrace/i },
   { path: "/pricing", heading: /Plans that grow/i },
@@ -18,6 +18,7 @@ const checks = [
   { path: "/docs/api", heading: /API documentation/i },
   { path: "/privacy", heading: /Privacy/i },
   { path: "/about/zapier-make-recipes", heading: /Zapier.*Make/i },
+  { path: "/sitemap-0.xml", bodyIncludes: "dht22-sensor-overview" },
   { path: "/manifest.webmanifest", json: "name", expect: "ThermalTrace" },
 ];
 
@@ -45,7 +46,10 @@ for (const check of checks) {
     }
 
     const html = await res.text();
-    if (check.title && !check.title.test(html)) {
+    if (check.bodyIncludes && !html.includes(check.bodyIncludes)) {
+      console.log(`✗ ${check.path} — missing "${check.bodyIncludes}"`);
+      failed += 1;
+    } else if (check.title && !check.title.test(html)) {
       console.log(`✗ ${check.path} — title pattern missing`);
       failed += 1;
     } else if (check.heading && !check.heading.test(html)) {

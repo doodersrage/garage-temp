@@ -1,0 +1,24 @@
+import { describe, expect, it } from "vitest";
+import { buildPublicSitemapUrls, getPublicSitemapPaths } from "./sitemapPages";
+
+describe("sitemapPages", () => {
+  it("includes expanded about guides served by [slug].astro", () => {
+    const paths = getPublicSitemapPaths();
+    expect(paths).toContain("/about/dht22-sensor-overview");
+    expect(paths).toContain("/about/temperature-probes");
+    expect(paths).toContain("/docs/api");
+  });
+
+  it("excludes redirect-only and non-public routes", () => {
+    const paths = getPublicSitemapPaths();
+    expect(paths).not.toContain("/about/zapier-integration");
+    expect(paths).not.toContain("/dashboard/alerts");
+    expect(paths).not.toContain("/signin");
+  });
+
+  it("builds absolute URLs from site origin", () => {
+    const urls = buildPublicSitemapUrls("https://thermaltrace.dev");
+    expect(urls).toContain("https://thermaltrace.dev/about/dht22-sensor-overview");
+    expect(urls.every((url) => url.startsWith("https://thermaltrace.dev/"))).toBe(true);
+  });
+});
