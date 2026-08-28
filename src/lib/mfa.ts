@@ -140,3 +140,33 @@ export async function applySessionCookiesAfterAuth(
     redirectTo: stepUp ? buildMfaChallengeUrl(safeNext) : safeNext,
   };
 }
+
+/** Restore cookie session onto an ephemeral auth client for MFA admin APIs. */
+export async function createAuthClientFromSession(
+  accessToken: string,
+  refreshToken: string,
+): Promise<{ client: SupabaseClient<Database>; error: string | null }> {
+  const client = createAuthClient();
+  const { data, error } = await client.auth.setSession({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  });
+  if (error || !data.session) {
+    return { client, error: error?.message ?? "Session expired" };
+  }
+  return { client, error: null };
+}
+
+/** Refresh MFA-required cookie from the live assurance level (not just JWT claim). */
+export async function syncMfaRequiredCookieFromClient(
+  cookies: AstroCookies,
+  client: SupabaseClient<Database>,
+  accessToken?: string,
+): Promise<void> {
+  if (accessToken && getAalClaim(accessToken) === "aal2") {
+    setMfaRequiredCookie(cookies, false);
+    return;
+  }
+  const levels = await getAssuranceLevels(client);
+  setMfaRequiredCookie(cookies, needsMfaStepUp(levels));
+}

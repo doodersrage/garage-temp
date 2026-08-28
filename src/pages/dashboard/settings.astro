@@ -53,10 +53,7 @@ const planLabel =
 
     <DisplayPreferences preferences={preferences} redirectTo="/dashboard/settings" />
 
-    <AccountSecurity
-      accessToken={session.access_token}
-      refreshToken={session.refresh_token}
-    />
+    <AccountSecurity />
 
     <AccountLifecycle
       userEmail={user.email ?? "your account"}

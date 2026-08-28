@@ -3,11 +3,11 @@ import { getAuthFromCookies, setAuthCookies } from "../../../lib/auth";
 import {
   createAuthClient,
   getAalClaim,
-  setMfaRequiredCookie,
+  syncMfaRequiredCookieFromClient,
 } from "../../../lib/mfa";
 
 /**
- * Persist a client-upgraded session (e.g. after MFA enroll verify) into HttpOnly cookies.
+ * Persist a client-upgraded session (e.g. legacy MFA flows) into HttpOnly cookies.
  * Tokens must belong to the same user already signed in via cookies.
  */
 export const POST: APIRoute = async ({ request, cookies }) => {
@@ -52,7 +52,11 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   setAuthCookies(cookies, data.session.access_token, data.session.refresh_token);
-  setMfaRequiredCookie(cookies, getAalClaim(data.session.access_token) !== "aal2");
+  await syncMfaRequiredCookieFromClient(
+    cookies,
+    client,
+    data.session.access_token,
+  );
 
   return new Response(JSON.stringify({ ok: true, aal: getAalClaim(data.session.access_token) }), {
     status: 200,

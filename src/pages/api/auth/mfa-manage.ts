@@ -1,0 +1,155 @@
+import type { APIRoute } from "astro";
+import { getAuthFromCookies, setAuthCookies } from "../../../lib/auth";
+import {
+  createAuthClientFromSession,
+  syncMfaRequiredCookieFromClient,
+} from "../../../lib/mfa";
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+async function requireSession(cookies: Parameters<typeof getAuthFromCookies>[0]) {
+  const { session, user } = await getAuthFromCookies(cookies);
+  if (!session || !user) return null;
+  return { session, user };
+}
+
+/** List TOTP factors for the signed-in user (cookie session; no browser Supabase keys). */
+export const GET: APIRoute = async ({ cookies }) => {
+  const auth = await requireSession(cookies);
+  if (!auth) return json({ error: "Unauthorized" }, 401);
+
+  const { client, error } = await createAuthClientFromSession(
+    auth.session.access_token,
+    auth.session.refresh_token,
+  );
+  if (error) return json({ error }, 401);
+
+  const { data, error: factorsError } = await client.auth.mfa.listFactors();
+  if (factorsError) {
+    return json({ error: factorsError.message }, 400);
+  }
+
+  const factors = (data?.totp ?? []).map((factor) => ({
+    id: factor.id,
+    friendly_name: factor.friendly_name ?? null,
+    status: factor.status,
+  }));
+
+  return json({ factors });
+};
+
+type ManageBody = {
+  action?: string;
+  factorId?: string;
+  code?: string;
+  friendlyName?: string;
+};
+
+/**
+ * MFA enrollment management via HttpOnly cookies:
+ * - enroll → QR + factor id
+ * - verify → activate factor, refresh cookies to aal2 when possible
+ * - unenroll → remove factor
+ */
+export const POST: APIRoute = async ({ request, cookies }) => {
+  const auth = await requireSession(cookies);
+  if (!auth) return json({ error: "Unauthorized" }, 401);
+
+  let body: ManageBody;
+  try {
+    body = (await request.json()) as ManageBody;
+  } catch {
+    return json({ error: "Invalid JSON" }, 400);
+  }
+
+  const action = body.action?.trim();
+  if (!action) return json({ error: "Missing action" }, 400);
+
+  const { client, error } = await createAuthClientFromSession(
+    auth.session.access_token,
+    auth.session.refresh_token,
+  );
+  if (error) return json({ error }, 401);
+
+  if (action === "enroll") {
+    const { data, error: enrollError } = await client.auth.mfa.enroll({
+      factorType: "totp",
+      friendlyName:
+        body.friendlyName?.trim() ||
+        `Authenticator ${new Date().toLocaleDateString()}`,
+    });
+    if (enrollError) return json({ error: enrollError.message }, 400);
+
+    return json({
+      factorId: data?.id ?? null,
+      qrCode: data?.totp?.qr_code ?? null,
+    });
+  }
+
+  if (action === "verify") {
+    const factorId = body.factorId?.trim();
+    const code = body.code?.trim() ?? "";
+    if (!factorId || !/^\d{6}$/.test(code)) {
+      return json({ error: "Enter a valid 6-digit code" }, 400);
+    }
+
+    const { data, error: verifyError } = await client.auth.mfa.challengeAndVerify({
+      factorId,
+      code,
+    });
+    if (verifyError || !data?.access_token || !data.refresh_token) {
+      return json({ error: verifyError?.message ?? "Verification failed" }, 400);
+    }
+
+    setAuthCookies(cookies, data.access_token, data.refresh_token);
+    const refreshed = await createAuthClientFromSession(
+      data.access_token,
+      data.refresh_token,
+    );
+    if (!refreshed.error) {
+      await syncMfaRequiredCookieFromClient(
+        cookies,
+        refreshed.client,
+        data.access_token,
+      );
+    } else {
+      await syncMfaRequiredCookieFromClient(cookies, client, data.access_token);
+    }
+
+    return json({ ok: true });
+  }
+
+  if (action === "unenroll") {
+    const factorId = body.factorId?.trim();
+    if (!factorId) return json({ error: "Missing factorId" }, 400);
+
+    const { error: unenrollError } = await client.auth.mfa.unenroll({ factorId });
+    if (unenrollError) return json({ error: unenrollError.message }, 400);
+
+    // Refresh cookies if Supabase rotated the session; always recompute MFA gate.
+    const { data: sessionData } = await client.auth.getSession();
+    if (sessionData.session) {
+      setAuthCookies(
+        cookies,
+        sessionData.session.access_token,
+        sessionData.session.refresh_token,
+      );
+      await syncMfaRequiredCookieFromClient(
+        cookies,
+        client,
+        sessionData.session.access_token,
+      );
+    } else {
+      await syncMfaRequiredCookieFromClient(cookies, client);
+    }
+
+    return json({ ok: true });
+  }
+
+  return json({ error: "Unknown action" }, 400);
+};
