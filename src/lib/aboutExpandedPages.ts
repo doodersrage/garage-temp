@@ -56,28 +56,28 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "sun-load-garage-walls",
     parentSlug: "temperature-changes",
     title: "Sun load on garage walls",
-    description: "How solar gain on south- and west-facing garage walls creates afternoon heat lag and probe drift.",
+    description: "See how solar gain on south- and west-facing garage walls creates afternoon heat lag, probe drift, and false confidence vs outdoor weather.",
     summary: "Opaque wall heating, delayed interior peaks, and why outdoor weather alone misleads.",
   },
   {
     slug: "infiltration-wind-drafts",
     parentSlug: "temperature-changes",
     title: "Infiltration, wind, and drafts",
-    description: "How air leaks and wind pressure move garage air even when the main door stays shut.",
+    description: "Learn how air leaks and wind pressure move garage air—and probe temperatures—even when the main door stays shut on a cold night.",
     summary: "Chronic leaks versus door events, and what probes reveal about draft paths.",
   },
   {
     slug: "seasonal-garage-patterns",
     parentSlug: "temperature-changes",
     title: "Seasonal garage patterns",
-    description: "Read multi-month probe history for winter floors, summer peaks, and shoulder-season transitions.",
+    description: "Read multi-month ThermalTrace history for winter floors, summer peaks, and shoulder-season swings so one cold night does not skew decisions.",
     summary: "Long-horizon context so single-day spikes do not drive bad decisions.",
   },
   {
     slug: "history-dashboard-browsing",
     parentSlug: "historical-data",
     title: "History dashboard browsing",
-    description: "Navigate paginated probe history, interpret feed and probe columns, and spot gaps in saved data.",
+    description: "Navigate paginated ThermalTrace probe history, read feed and probe columns, and spot gaps before you trust a freeze-season CSV export.",
     summary: "Turn stored snapshots into a readable timeline inside the signed-in dashboard.",
   },
   {
@@ -105,7 +105,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "sketch-polling-main-loop",
     parentSlug: "arduino-sketches",
     title: "Sketch polling and main loop",
-    description: "How the firmware timer reads DHT22 probes, serves HTTP, and updates the LCD without blocking.",
+    description: "See how Arduino firmware timers read DHT22 probes, serve HTTP JSON, and refresh the LCD without blocking the garage controller loop.",
     summary: "Non-blocking loop design for sensors, network, and local display.",
   },
   {
@@ -140,28 +140,28 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "circuit-wiring-troubleshooting",
     parentSlug: "arduino-circuit-wiring",
     title: "Circuit wiring troubleshooting",
-    description: "Diagnose blank LCDs, missing probes, and intermittent reads with a multimeter and serial logging.",
+    description: "Diagnose blank LCDs, missing DHT22 probes, and intermittent garage reads with a multimeter, serial logs, and a power-to-data checklist.",
     summary: "Systematic checks from power to data lines before replacing parts.",
   },
   {
     slug: "liquid-crystal-gpio-map",
     parentSlug: "arduino-pin-wiring",
     title: "LiquidCrystal GPIO map",
-    description: "Pin assignments for RS, E, and data lines D4–D7 matching the LiquidCrystal constructor in firmware.",
+    description: "Match LiquidCrystal RS, E, and D4–D7 pins to your Arduino sketch constructor so the garage LCD lights up instead of staying blank.",
     summary: "LCD pins must match the sketch exactly or the display stays blank.",
   },
   {
     slug: "dht22-data-line-wiring",
     parentSlug: "arduino-pin-wiring",
     title: "DHT22 data line wiring",
-    description: "GPIO per sensor, 10 kΩ pull-ups, shared ground, and cable routing away from motor noise.",
+    description: "Wire each DHT22 with its own GPIO, 10 kΩ pull-up, and shared ground—and route cables away from garage door motors to cut read errors.",
     summary: "One data pin per probe with proper pull-up and length limits.",
   },
   {
     slug: "spi-pins-ethernet-reserved",
     parentSlug: "arduino-pin-wiring",
     title: "SPI pins reserved for Ethernet",
-    description: "Which Arduino pins the W5100 shield uses and which GPIO remain available for LCD and DHT22 lines.",
+    description: "Which Arduino pins a W5100 Ethernet shield reserves for SPI—and which GPIO stay free for LiquidCrystal and DHT22 garage probes.",
     summary: "Avoid pin conflicts between the Ethernet stack and local peripherals.",
   },
   {
@@ -175,7 +175,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "lcd-local-display-format",
     parentSlug: "arduino-dht22-lcd",
     title: "LCD local display format",
-    description: "Format on-site temperature and humidity lines so technicians can validate probes without a laptop.",
+    description: "Format on-site temperature and humidity LCD lines so you can validate garage probes in the workshop without opening a laptop.",
     summary: "Two-line layout conventions for dual-probe garage controllers.",
   },
   {
@@ -189,14 +189,14 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "fastapi-relay-setup",
     parentSlug: "python-feeds",
     title: "FastAPI relay setup",
-    description: "Run the Python relay that polls upstream Arduino JSON and exposes a stable HTTPS endpoint.",
+    description: "Install and run the Python FastAPI relay that polls upstream Arduino JSON and exposes a stable HTTPS feed for ThermalTrace to pull.",
     summary: "Install, configure upstream URL, and verify cached responses with curl.",
   },
   {
     slug: "redis-cache-for-feeds",
     parentSlug: "python-feeds",
     title: "Redis cache for feeds",
-    description: "Cache probe JSON in Redis so the public internet never hammers your home uplink on every page view.",
+    description: "Cache Arduino probe JSON in Redis so every ThermalTrace page view does not hammer your home uplink—TTL, stale-while-revalidate, recovery.",
     summary: "TTL tuning, stale-while-revalidate behavior, and restart recovery.",
   },
   {
@@ -210,7 +210,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "astro-server-side-rendering",
     parentSlug: "astro-applications",
     title: "Astro server-side rendering",
-    description: "How Astro renders HTML on the server for fast first paint on home, about, and dashboard pages.",
+    description: "How Astro server-side rendering delivers fast first paint on ThermalTrace home, about, and dashboard pages versus static prerender.",
     summary: "SSR pages versus static prerender in this Cloudflare deployment.",
   },
   {
@@ -224,28 +224,28 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "cloudflare-workers-deployment",
     parentSlug: "astro-applications",
     title: "Cloudflare Workers deployment",
-    description: "Build and deploy this site to Cloudflare Workers with the Astro adapter and wrangler configuration.",
+    description: "Build and deploy ThermalTrace to Cloudflare Workers with the Astro adapter, wrangler config, and edge hosting for pages plus APIs.",
     summary: "Edge hosting for pages, API routes, and assets in one pipeline.",
   },
   {
     slug: "nextjs-monitoring-dashboards",
     parentSlug: "nextjs-node-applications",
     title: "Next.js for monitoring dashboards",
-    description: "When Next.js App Router and React Server Components fit environmental monitoring UIs.",
+    description: "When Next.js App Router and React Server Components fit environmental monitoring UIs versus ThermalTrace’s Astro edge stack.",
     summary: "Strengths of Next for auth-heavy dashboards versus this Astro stack.",
   },
   {
     slug: "node-express-api-patterns",
     parentSlug: "nextjs-node-applications",
     title: "Node and Express API patterns",
-    description: "Compare long-running Node APIs with FastAPI relays and Astro API routes for probe data.",
+    description: "Compare long-running Node/Express APIs with FastAPI relays and Astro edge routes for garage probe ingest and dashboard data.",
     summary: "Where Express still wins and where Python or edge routes are simpler.",
   },
   {
     slug: "comparing-full-stack-options",
     parentSlug: "nextjs-node-applications",
     title: "Comparing full-stack options",
-    description: "Choose among Astro, Next.js, and standalone Node services for a garage monitoring project.",
+    description: "Choose among Astro, Next.js, and standalone Node for garage monitoring—SSR, auth, billing, and hardware ingest trade-offs explained.",
     summary: "Trade-offs for SSR, auth, billing, and hardware integration.",
   },
   {
@@ -259,14 +259,14 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "supabase-history-inserts",
     parentSlug: "data-flow",
     title: "Supabase history inserts",
-    description: "When authenticated home page loads persist probe rows with timestamps, labels, and humidity.",
+    description: "Understand when signed-in ThermalTrace loads persist probe rows with timestamps, labels, and humidity—and what guests never store.",
     summary: "What triggers a save, what is stored per probe, and guest behavior.",
   },
   {
     slug: "debugging-stale-readings",
     parentSlug: "data-flow",
     title: "Debugging stale readings",
-    description: "Trace stale or missing home page values from probe to relay to dashboard mapping.",
+    description: "Trace stale or missing garage readings from probe firmware through relay cache to ThermalTrace dashboard mapping—with a curl and auth checklist.",
     summary: "Checklist for curl, cache, auth, and key typos in order.",
   },
   {
@@ -280,21 +280,21 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "stripe-csv-subscription",
     parentSlug: "accounts-and-dashboard",
     title: "Stripe CSV subscription",
-    description: "Subscribe for CSV export access via Stripe Checkout, webhooks, and the member group.",
+    description: "Unlock CSV history export with Stripe Checkout, webhooks, and the member group so winter freeze audits leave the dashboard for your spreadsheet.",
     summary: "Billing flow from checkout to unlocked history download.",
   },
   {
     slug: "configuring-temperature-feeds",
     parentSlug: "accounts-and-dashboard",
     title: "Configuring temperature feeds",
-    description: "Add HTTPS JSON feeds, enable probes, and map keys to labels in the dashboard settings form.",
+    description: "Add HTTPS JSON feeds, enable probes, and map keys to labels in ThermalTrace settings so your home page shows your garage sensors, not demos.",
     summary: "Personalize the home page with your own probe endpoints.",
   },
   {
     slug: "admin-dashboard-features",
     parentSlug: "accounts-and-dashboard",
     title: "Admin dashboard features",
-    description: "Admin-only user management, contact submission review, and CSV export without a subscription.",
+    description: "Use admin-only tools for user management, contact triage, and CSV export without a paid subscription when you operate the ThermalTrace site.",
     summary: "Tools gated by the admin group for site operators.",
   },
   {
@@ -343,7 +343,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "charting-with-spreadsheets",
     parentSlug: "historical-data",
     title: "Charting history with spreadsheets",
-    description: "Build pivot charts, rolling minimums, and dual-axis humidity plots from exported garage CSV files.",
+    description: "Build pivot charts, overnight rolling minimums, and dual-axis humidity plots from ThermalTrace CSV exports for freeze audits.",
     summary: "Turn raw timestamp rows into freeze audits and seasonal comparisons outside the website UI.",
   },
   {
@@ -413,7 +413,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "docker-relay-deployment",
     parentSlug: "python-feeds",
     title: "Docker deployment for the Python relay",
-    description: "Run FastAPI relay and Redis in containers for reproducible upgrades on a home server or small VPS.",
+    description: "Run the FastAPI probe relay and Redis in Docker for reproducible upgrades on a home server or small VPS without dependency drift.",
     summary: "Container images pin Python dependencies and simplify restart after power blips.",
   },
   {
@@ -462,7 +462,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "hosting-cost-comparison",
     parentSlug: "nextjs-node-applications",
     title: "Hosting cost comparison for monitoring stacks",
-    description: "Rough monthly costs for Cloudflare edge Astro, Vercel Next.js, VPS Node, and home relay power draw.",
+    description: "Rough monthly costs for Cloudflare Astro, Vercel Next.js, VPS Node, and home relay power for a hobby garage monitoring stack.",
     summary: "Edge static-first hosting plus a tiny home relay often beats always-on VPS for hobby monitoring.",
   },
   {
@@ -490,7 +490,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "group-membership-model",
     parentSlug: "accounts-and-dashboard",
     title: "Group membership model",
-    description: "How default, member, and admin groups gate CSV export, admin tools, and feature flags in Supabase.",
+    description: "See how default, member, and admin groups in Supabase gate CSV export, operator tools, and plan feature flags without hard-coding emails.",
     summary: "Groups encode subscription and operator roles without hard-coding emails in source.",
   },
   {
@@ -512,7 +512,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "ingest-and-webhooks",
     title: "Kit QR onboarding",
     description:
-      "Sticker a QR code on your probe enclosure for one-scan ingest setup and faster device onboarding.",
+      "Sticker a QR code on your probe enclosure encoding the ingest URL for one-scan ThermalTrace device setup without typing long keys.",
     summary:
       "Encode the ingest URL on a label so new hardware setup is a single phone scan.",
   },
@@ -521,7 +521,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "ingest-and-webhooks",
     title: "ESP32 OTA and battery reporting",
     description:
-      "Over-the-air firmware updates and optional battery/RSSI fields for push ingest devices.",
+      "Keep ESP32 probe firmware current with LAN OTA while push ingest posts battery and RSSI fields to the ThermalTrace HTTP API.",
     summary:
       "Keep ESP32 firmware current on your LAN while telemetry posts to the ingest API.",
   },
@@ -530,7 +530,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "ingest-and-webhooks",
     title: "Zapier and Make.com recipes",
     description:
-      "Connect ThermalTrace outbound webhooks and inbound snooze actions to no-code automations.",
+      "Connect ThermalTrace outbound alert webhooks and inbound snooze actions to Zapier or Make.com for no-code freeze and vacation automations.",
     summary:
       "Route alerts to Zapier/Make and pause notifications from other smart-home flows.",
   },
@@ -557,7 +557,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "accounts-and-dashboard",
     title: "Household sharing walkthrough",
     description:
-      "Invite family by email, understand editor vs view-only roles, and share one freeze-risk dashboard.",
+      "Invite family by email, set editor vs view-only roles, and share one freeze-risk dashboard without handing out a ThermalTrace password.",
     summary:
       "Keep probes and alerts in one household without sharing a password.",
   },

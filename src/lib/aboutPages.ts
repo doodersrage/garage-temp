@@ -77,7 +77,7 @@ export const coreAboutPages: AboutPage[] = [
     slug: "astro-applications",
     title: "Astro applications in this project",
     description:
-      "How Astro server rendering, islands, and Cloudflare deployment power the ThermalTrace site.",
+      "How Astro server rendering, islands, and Cloudflare Workers deployment power ThermalTrace pages, dashboards, and edge API routes.",
     summary:
       "This site uses Astro for fast pages, authenticated dashboards, and API routes at the edge.",
   },
@@ -85,7 +85,7 @@ export const coreAboutPages: AboutPage[] = [
     slug: "nextjs-node-applications",
     title: "Next.js and Node applications",
     description:
-      "Compare Node-based dashboards with this stack and when Next.js fits similar monitoring projects.",
+      "Compare Node and Next.js monitoring dashboards with ThermalTrace’s Astro-on-Cloudflare stack and when each fits garage sensor projects.",
     summary:
       "Node runtimes excel at APIs and SSR; this project achieves the same goals with Astro on Cloudflare.",
   },
@@ -117,7 +117,7 @@ export const coreAboutPages: AboutPage[] = [
     slug: "install-pwa",
     title: "Install as an app (PWA)",
     description:
-      "Add ThermalTrace to your home screen for faster access and optional push alerts.",
+      "Install ThermalTrace as a PWA on desktop, Android, or iOS for faster dashboard access and optional Pro browser push freeze alerts.",
     summary:
       "Desktop, Android, and iOS install steps, plus Web Push limits on Apple devices.",
   },
