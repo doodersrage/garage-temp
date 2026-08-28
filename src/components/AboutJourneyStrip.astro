@@ -1,0 +1,42 @@
+---
+import { getJourneysForSlug } from "../lib/aboutJourneys";
+
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+const matches = getJourneysForSlug(slug);
+
+if (matches.length === 0) {
+  return null;
+}
+---
+<aside class="card about-journey-strip" aria-label="Learning path">
+  {matches.map(({ journey, stepIndex, nextStep, previousStep }) => (
+    <div class="about-journey-strip-row">
+      <p class="about-journey-strip-label">
+        Path: <a class="text-link" href={`/about#journey-${journey.id}`}>{journey.title}</a>
+        <span class="about-journey-strip-meta">
+          Step {stepIndex + 1} of {journey.steps.length}
+        </span>
+      </p>
+      <div class="about-journey-strip-actions">
+        {previousStep && (
+          <a class="btn-ghost" href={`/about/${previousStep.slug}`}>
+            ← {previousStep.label}
+          </a>
+        )}
+        {nextStep ? (
+          <a class="btn-secondary" href={`/about/${nextStep.slug}`}>
+            Next: {nextStep.label} →
+          </a>
+        ) : (
+          <a class="btn-secondary" href={journey.ctaHref}>
+            {journey.ctaLabel}
+          </a>
+        )}
+      </div>
+    </div>
+  ))}
+</aside>

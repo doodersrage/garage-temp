@@ -1,0 +1,58 @@
+---
+import { getTopicContext } from "../lib/aboutNavigation";
+import { getAboutPage } from "../lib/aboutPages";
+
+interface Props {
+  slug: string;
+  limit?: number;
+}
+
+const { slug, limit = 4 } = Astro.props;
+const context = getTopicContext(slug);
+const parent = context?.core;
+const siblings = (context?.guides ?? [])
+  .filter((guide) => guide.slug !== slug)
+  .slice(0, limit);
+
+const crossLinks = [
+  getAboutPage("cold-snap-playbook"),
+  getAboutPage("alert-channel-cookbook"),
+  getAboutPage("ingest-and-webhooks"),
+  getAboutPage("probe-demo"),
+]
+  .filter((page): page is NonNullable<typeof page> => Boolean(page))
+  .filter((page) => page.slug !== slug)
+  .filter((page) => !siblings.some((s) => s.slug === page.slug))
+  .slice(0, 2);
+
+if (siblings.length === 0 && crossLinks.length === 0) {
+  return null;
+}
+---
+<aside class="card about-related" aria-labelledby={`about-related-${slug}`}>
+  <h2 class="about-related-title" id={`about-related-${slug}`}>Related guides</h2>
+  {parent && (
+    <p class="about-related-lead">
+      More under{" "}
+      <a class="text-link" href={`/about/${parent.slug}`}>{parent.title}</a>
+    </p>
+  )}
+  <ul class="about-related-list">
+    {siblings.map((guide) => (
+      <li>
+        <a href={`/about/${guide.slug}`}>
+          <strong>{guide.title}</strong>
+          <span>{guide.summary}</span>
+        </a>
+      </li>
+    ))}
+    {crossLinks.map((guide) => (
+      <li>
+        <a href={`/about/${guide.slug}`}>
+          <strong>{guide.title}</strong>
+          <span>{guide.summary}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</aside>

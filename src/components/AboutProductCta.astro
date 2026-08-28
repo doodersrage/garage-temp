@@ -1,0 +1,68 @@
+---
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+
+const productCtas: Record<
+  string,
+  { title: string; body: string; href: string; label: string }
+> = {
+  "cold-snap-playbook": {
+    title: "Put the playbook into practice",
+    body: "Set your freeze threshold and enable email alerts in a few minutes.",
+    href: "/dashboard/alerts",
+    label: "Open alert settings",
+  },
+  "alert-channel-cookbook": {
+    title: "Wire your channels",
+    body: "Enable destinations, save, then send a test from the alerts page.",
+    href: "/dashboard/alerts#alert-section-channels",
+    label: "Configure channels",
+  },
+  "household-sharing-walkthrough": {
+    title: "Invite your household",
+    body: "Share live probes and alerts without handing out a password.",
+    href: "/dashboard/household",
+    label: "Open household",
+  },
+  "freeze-protection-thresholds": {
+    title: "Set your freeze threshold",
+    body: "Start monitoring with a threshold that matches your coldest zone.",
+    href: "/dashboard/alerts#alert-section-triggers",
+    label: "Set threshold",
+  },
+  "ingest-and-webhooks": {
+    title: "Add a device key",
+    body: "Create push ingest credentials on the Devices page and post a test reading.",
+    href: "/dashboard/temperature",
+    label: "Open devices",
+  },
+  "dht22-sensor-overview": {
+    title: "See it on a live dashboard",
+    body: "Create a free account, map your probe keys, and watch freeze risk overnight.",
+    href: "/register",
+    label: "Start free",
+  },
+};
+
+const fallback = {
+  title: "Set this up in ThermalTrace",
+  body: "Track probes, freeze alerts, and history without running your own server.",
+  href: "/register",
+  label: "Create free account",
+};
+
+const cta = productCtas[slug] ?? fallback;
+---
+<aside class="card about-product-cta" role="note">
+  <div class="about-product-cta-body">
+    <p class="about-product-cta-title">{cta.title}</p>
+    <p class="about-product-cta-text">{cta.body}</p>
+  </div>
+  <div class="about-product-cta-actions">
+    <a class="btn-primary" href={cta.href}>{cta.label}</a>
+    <a class="btn-secondary" href="/pricing">See plans</a>
+  </div>
+</aside>

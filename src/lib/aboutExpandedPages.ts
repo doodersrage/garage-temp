@@ -535,6 +535,33 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
       "Route alerts to Zapier/Make and pause notifications from other smart-home flows.",
   },
   {
+    slug: "cold-snap-playbook",
+    parentSlug: "accounts-and-dashboard",
+    title: "Cold-snap alert playbook",
+    description:
+      "What to do before, during, and after a freeze alert—thresholds, quiet hours, acknowledgement, and escalation.",
+    summary:
+      "A practical checklist so freeze alerts turn into action instead of noise.",
+  },
+  {
+    slug: "alert-channel-cookbook",
+    parentSlug: "accounts-and-dashboard",
+    title: "Alert channel cookbook",
+    description:
+      "Enable email, chat, SMS, push, and webhooks—fill destinations, test delivery, and escalate when unacked.",
+    summary:
+      "Pick channels that match how your household actually wakes up for cold snaps.",
+  },
+  {
+    slug: "household-sharing-walkthrough",
+    parentSlug: "accounts-and-dashboard",
+    title: "Household sharing walkthrough",
+    description:
+      "Invite family by email, understand editor vs view-only roles, and share one freeze-risk dashboard.",
+    summary:
+      "Keep probes and alerts in one household without sharing a password.",
+  },
+  {
     slug: "probe-demo",
     parentSlug: "temperature-probes",
     title: "Interactive temperature probe demo",

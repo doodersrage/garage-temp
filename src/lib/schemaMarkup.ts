@@ -111,6 +111,26 @@ export function getBreadcrumbSchema(
   };
 }
 
+export function getFaqPageSchema(
+  pageUrl: string,
+  faqs: Array<{ question: string; answer: string }>,
+) {
+  if (faqs.length === 0) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+    url: pageUrl,
+  };
+}
+
 export function getSiteSchemas(options: {
   siteUrl: string;
   pageUrl: string;

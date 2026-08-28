@@ -2,15 +2,21 @@
 import Layout from "../layouts/Layout.astro";
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
-import { aboutPages, getAboutPage, getAboutParent } from "../lib/aboutPages";
+import { aboutPages, getAboutParent } from "../lib/aboutPages";
 import {
   getArticleSchema,
   getBreadcrumbSchema,
+  getFaqPageSchema,
   resolvePageUrl,
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
+import { getAboutFaqs, aboutFaqsToBlocks } from "../lib/aboutFaqs";
 import "../styles/about.css";
 import AboutTopicSidebar from "./AboutTopicSidebar.astro";
+import AboutRelatedGuides from "./AboutRelatedGuides.astro";
+import AboutProductCta from "./AboutProductCta.astro";
+import AboutJourneyStrip from "./AboutJourneyStrip.astro";
+import AboutPageSections from "./AboutPageSections.astro";
 
 interface Props {
   slug: string;
@@ -43,6 +49,10 @@ const nextPage =
     ? aboutPages[pageIndex + 1]
     : null;
 
+const faqs = getAboutFaqs(slug);
+const faqBlocks = aboutFaqsToBlocks(faqs);
+const faqSchema = getFaqPageSchema(pageUrl, faqs);
+
 const breadcrumbs = [
   { name: "Home", path: "/" },
   { name: "About", path: "/about" },
@@ -61,6 +71,7 @@ const schema = [
     imageUrl: heroImage ? new URL(heroImage.src, siteUrl).href : undefined,
   }),
   getBreadcrumbSchema(siteUrl, breadcrumbs),
+  ...(faqSchema ? [faqSchema] : []),
 ];
 ---
 <Layout title={title} description={description} schema={schema} skipAuth>
@@ -86,6 +97,8 @@ const schema = [
           <p class="card-subtitle">{description}</p>
         </section>
 
+        <AboutJourneyStrip slug={slug} />
+
         {heroImage && (
           <figure class="about-figure card overflow-hidden p-0">
             <Image src={heroImage} alt={heroAlt ?? title} class="h-full w-full object-cover" />
@@ -95,7 +108,11 @@ const schema = [
 
         <section class="card about-prose">
           <slot />
+          {faqBlocks.length > 0 && <AboutPageSections sections={faqBlocks} />}
         </section>
+
+        <AboutProductCta slug={slug} />
+        <AboutRelatedGuides slug={slug} />
 
         <nav class="card about-pagination" aria-label="About section pages">
           {previousPage ? (

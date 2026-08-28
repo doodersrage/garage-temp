@@ -3,6 +3,7 @@
 import Layout from "../../layouts/Layout.astro";
 import PageHeader from "../../components/PageHeader.astro";
 import AboutQuickStart from "../../components/AboutQuickStart.astro";
+import AboutJourneys from "../../components/AboutJourneys.astro";
 import AboutHubNav from "../../components/AboutHubNav.astro";
 import AboutProbeActivity from "../../components/AboutProbeActivity";
 import AboutSearch from "../../components/AboutSearch";
@@ -17,7 +18,7 @@ import "../../styles/about.css";
 
 const title = "About ThermalTrace";
 const description =
-  "Guides on temperature probes, historical data, Arduino firmware, Python feeds, Astro, Node.js, and the full monitoring stack behind this site.";
+  "Guides on temperature probes, freeze alerts, Arduino firmware, ESP ingest, household sharing, and the monitoring stack behind ThermalTrace.";
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const schema = [
@@ -37,25 +38,15 @@ const featuredSearchIndex = buildAboutSearchIndex(featuredPages);
     <PageHeader
       kicker="About"
       title={title}
-      lede="Open-source guides on temperature probes, historical curves, Arduino firmware, Python feeds, and the stack behind ThermalTrace."
-    />
+      lede="Open-source guides on probes, freeze alerts, firmware, and the stack behind ThermalTrace—organized by the job you need done."
+    >
+      <a slot="actions" class="btn-primary" href="/register">Start free</a>
+      <a slot="actions" class="btn-secondary" href="#about-journeys-title">Choose a path</a>
+    </PageHeader>
+
+    <AboutJourneys />
 
     <AboutQuickStart />
-
-    <section class="card about-intent-links" aria-label="Popular guides">
-      <h2 class="card-title">High-intent guides</h2>
-      <p class="card-subtitle mb-4">
-        Jump to the pages people search for when wiring sensors or planning freeze protection.
-      </p>
-      <div class="flex flex-wrap gap-2">
-        <a class="btn-secondary" href="/about/dht22-sensor-overview">DHT22 sensor overview</a>
-        <a class="btn-secondary" href="/about/freeze-protection-thresholds">Freeze thresholds</a>
-        <a class="btn-secondary" href="/about/ingest-and-webhooks">ESP ingest &amp; webhooks</a>
-        <a class="btn-secondary" href="/about/esp32-ota-firmware">ESP32 OTA firmware</a>
-        <a class="btn-secondary" href="/freeze-map">Public freeze map</a>
-        <a class="btn-primary" href="/register">Start free</a>
-      </div>
-    </section>
 
     <section class="card about-browse">
       <h2 class="card-title">Find a guide</h2>

@@ -732,15 +732,48 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
   ],
 
   "display-preferences-deep-dive": [
-      { type: "p", html: "Beyond mapping probe keys to labels, display preferences control which units appear on stat cards, whether humidity shows prominently, and how multiple feeds order on the home page. Preferences live server-side with your account so browsers and devices stay consistent after sign-in." },
-      { type: "figure", illustration: "display-preferences-deep-dive.svg", alt: "Dashboard settings panel toggling units and probe card order", caption: "Per-account toggles control temperature units, humidity visibility, and card ordering." },
-      { type: "h2", text: "Preference categories" },
-      { type: "ul", items: ["**Temperature unit** — °F vs °C default on cards (JSON still carries both).","**Feed ordering** — primary garage first when multiple URLs configured.","**Probe visibility** — hide unused keys from home while keeping history."] },
-      { type: "h2", text: "Interaction with mappings" },
-      { type: "p", html: "Labels come from <a class=\"text-link\" href=\"/about/probe-mapping-labels\">probe mapping</a>; prefs control presentation only. Misconfigured keys still hide data—debug with <a class=\"text-link\" href=\"/about/debugging-stale-readings\">stale reading checklist</a>." },
-      { type: "h2", text: "Implementation notes" },
-      { type: "p", html: "SSR reads prefs when rendering <a class=\"text-link\" href=\"/about/home-page-probe-fetch\">home page fetch</a> for signed-in users. Guests see site defaults. Auth required: <a class=\"text-link\" href=\"/about/configuring-temperature-feeds\">temperature feed settings</a> and <a class=\"text-link\" href=\"/about/accounts-and-dashboard\">accounts overview</a>." }
-  ]
+      { type: "p", html: "Signed-in display preferences control which home panels appear, whether readings use Celsius, and which outdoor city backs weather context. They store on the account so every browser you use sees the same defaults." },
+      { type: "h2", text: "What you can change" },
+      { type: "ul", items: ["**Show probe panels** on the public home when signed in.","**Show weather** next to indoor readings for outdoor context.","**Prefer Celsius** for charts and cards.","**Theme** light, dark, or system."] },
+      { type: "h2", text: "Where to edit" },
+      { type: "p", html: "Open <a class=\"text-link\" href=\"/dashboard/settings\">Dashboard → Settings</a>. Changes apply on the next home load. Probe key labels and feed URLs live under Devices instead—see <a class=\"text-link\" href=\"/about/configuring-temperature-feeds\">configuring temperature feeds</a>." }
+  ],
+
+  "cold-snap-playbook": [
+      { type: "p", html: "A freeze alert only helps if someone knows what to do next. This playbook covers the night before a cold snap, the moment an alert fires, and the morning after—so ThermalTrace becomes a response loop, not just a chart." },
+      { type: "h2", text: "Before the cold snap" },
+      { type: "ol", items: ["Confirm the <a class=\"text-link\" href=\"/about/freeze-protection-thresholds\">freeze threshold</a> matches your coldest zone (often a few degrees above hard freeze).","Enable email (and Pro SMS/push if you have them) in the <a class=\"text-link\" href=\"/about/alert-channel-cookbook\">channel cookbook</a>.","Turn on forecast / NWS freeze inputs so you get warning before indoor air drops.","Send a <strong>test alert</strong> from Dashboard → Alerts while you are awake."] },
+      { type: "h2", text: "When an alert fires" },
+      { type: "ul", items: ["**Acknowledge** it (“I’m on it”) so escalations pause if you use playbooks.","Check the coldest probe and whether a door has been open.","If you cannot respond, escalate to SMS/household members.","Keep quiet-hours bypass on for freeze/forecast so overnight alerts still arrive."] },
+      { type: "h2", text: "After the snap" },
+      { type: "p", html: "Review history for overnight lows, adjust the threshold if you were warned too late or too often, and read the <a class=\"text-link\" href=\"/about/temperature-probe-case-study\">probe case study</a> for placement lessons. Invite family with the <a class=\"text-link\" href=\"/about/household-sharing-walkthrough\">household sharing walkthrough</a> so one person is not the only responder." },
+      { type: "h2", text: "Product checklist" },
+      { type: "ul", items: ["Dashboard → Alerts → Triggers + Channels","Dashboard → Alerts → Send a test now","Optional: playbook steps if unacked after N minutes","Optional: household invites for shared coverage"] }
+  ],
+
+  "alert-channel-cookbook": [
+      { type: "p", html: "ThermalTrace can reach you on email, chat apps, SMS, browser push, and webhooks. The right mix depends on how loud a freeze needs to be at 2 a.m.—not on enabling every checkbox." },
+      { type: "h2", text: "Free vs Pro channels" },
+      { type: "ul", items: ["**Free:** email, Discord, Telegram, Slack, Teams, ntfy, Pushover.","**Pro:** SMS, WhatsApp, browser push, outbound webhooks, timed playbooks."] },
+      { type: "h2", text: "Setup pattern" },
+      { type: "ol", items: ["Check the channel under Dashboard → Alerts → Channels.","Fill its destination (email, phone, webhook URL, chat id).","Save alert settings.","Click <strong>Send test now</strong> and confirm delivery.","Add a second channel for escalation if the first is ignored."] },
+      { type: "h2", text: "Skipped channels" },
+      { type: "p", html: "A checked channel with an empty destination is skipped when alerts fire. The save flow warns when destinations are incomplete—fix them before trusting overnight coverage. For automation into Zapier or Make, see <a class=\"text-link\" href=\"/about/zapier-make-recipes\">Zapier and Make recipes</a>." },
+      { type: "h2", text: "Suggested starter stack" },
+      { type: "ul", items: ["**Email** for an audit trail.","**Discord or Slack** for household visibility.","**SMS (Pro)** for wake-up urgency.","**Push (Pro)** after installing the <a class=\"text-link\" href=\"/about/install-pwa\">PWA</a>."] }
+  ],
+
+  "household-sharing-walkthrough": [
+      { type: "p", html: "Freeze risk is a household problem. ThermalTrace lets you invite people by email so everyone sees the same probes and alerts without sharing a single login password." },
+      { type: "h2", text: "Invite flow" },
+      { type: "ol", items: ["Open Dashboard → Household.","Enter the invitee email and send the invite.","They create or sign into an account with that email and accept.","Confirm they appear under Members with the intended role."] },
+      { type: "h2", text: "Roles" },
+      { type: "ul", items: ["**Owner / editor:** change devices, alerts, and sharing.","**View-only:** watch live data and history without changing settings."] },
+      { type: "h2", text: "Tips" },
+      { type: "p", html: "Keep alert destinations on channels the household actually checks. Pair sharing with the <a class=\"text-link\" href=\"/about/cold-snap-playbook\">cold-snap playbook</a> so the first person awake knows what to do. Groups and plan gating are covered in <a class=\"text-link\" href=\"/about/group-membership-model\">group membership model</a>." },
+      { type: "h2", text: "Multiple properties" },
+      { type: "p", html: "Pro portfolios can watch more than one property. Start with a single household garage, prove alerts, then expand—see <a class=\"text-link\" href=\"/pricing\">pricing</a> for portfolio limits." }
+  ],
 };
 
 export const EXPANDED_ABOUT_SLUGS: readonly string[] = [
@@ -813,7 +846,10 @@ export const EXPANDED_ABOUT_SLUGS: readonly string[] = [
   "caching-feed-responses",
   "group-membership-model",
   "contact-form-admin-review",
-  "display-preferences-deep-dive"
+  "display-preferences-deep-dive",
+  "cold-snap-playbook",
+  "alert-channel-cookbook",
+  "household-sharing-walkthrough"
 ] as const;
 
 export const expandedAboutSlugs: Set<string> = new Set(EXPANDED_ABOUT_SLUGS);

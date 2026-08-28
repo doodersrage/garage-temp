@@ -14,12 +14,12 @@ export type AboutMegaGroup = {
 
 /** Featured entry points on the about hub. */
 export const featuredAboutSlugs = [
+  "cold-snap-playbook",
   "temperature-probe-case-study",
   "probe-demo",
-  "accounts-and-dashboard",
   "ingest-and-webhooks",
-  "data-flow",
-  "install-pwa",
+  "alert-channel-cookbook",
+  "household-sharing-walkthrough",
 ] as const;
 
 /** Five learning paths on the about hub (every core topic appears once). */
