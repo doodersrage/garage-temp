@@ -170,7 +170,9 @@ const weatherHasCoords =
   Number.isFinite(weatherSnapshot.lon);
 const nwsAlerts =
   weatherHasCoords && weatherSnapshot
-    ? await fetchNwsAlerts(weatherSnapshot.lat!, weatherSnapshot.lon!)
+    ? await fetchNwsAlerts(weatherSnapshot.lat!, weatherSnapshot.lon!).catch(
+        () => null,
+      )
     : null;
 
 const canEdit = canEditHousehold(householdRole);

@@ -19,6 +19,8 @@ const checks = [
   { path: "/privacy", heading: /Privacy/i },
   { path: "/about/zapier-make-recipes", heading: /Zapier.*Make/i },
   { path: "/sitemap-0.xml", bodyIncludes: "dht22-sensor-overview" },
+  { path: "/sitemap-index.xml", bodyIncludes: "sitemap-0.xml" },
+  { path: "/robots.txt", bodyIncludes: "Sitemap:" },
   { path: "/manifest.webmanifest", json: "name", expect: "ThermalTrace" },
 ];
 

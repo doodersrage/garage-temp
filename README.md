@@ -406,6 +406,8 @@ pnpm ping:sitemaps          # Google/Bing sitemap ping only
 
 Also submit `https://thermaltrace.dev/sitemap-index.xml` in [Google Search Console](https://search.google.com/search-console) → Sitemaps.
 
+Sitemaps are served by SSR routes (`/sitemap-0.xml`, `/sitemap-index.xml`) so they stay available on Cloudflare Workers even when static Asset uploads omit the build-time XML files.
+
 Admin channel tests (SMS/push) still run from **Dashboard → Ops** after sign-in.
 
 ### Post-deploy smoke checklist

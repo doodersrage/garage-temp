@@ -74,17 +74,19 @@ import PlanComparisonTable from "../components/PlanComparisonTable.astro";
         <li><strong>Pro</strong> — SMS, push, share links, and webhooks when someone needs to wake up at 2 a.m.</li>
       </ul>
       <div class="flex flex-wrap gap-3">
-        <a class="btn-primary" href="/pricing">Compare Free, Member, and Pro</a>
-        <a class="btn-secondary" href="/register">Create free account</a>
+        <a class="btn-primary" href="/register">Start free — no card required</a>
+        <a class="btn-secondary" href="/pricing">See plan prices</a>
+        <a class="btn-ghost" href="/stories/garage-freeze-alert">Read a freeze case study</a>
       </div>
     </section>
 
     <section class="card">
       <h2 class="card-title">Full feature matrix</h2>
-      <p class="card-subtitle mb-4">Every entitlement at a glance — then pick a plan.</p>
+      <p class="card-subtitle mb-4">Every entitlement at a glance — then pick a plan on pricing.</p>
       <PlanComparisonTable />
-      <p class="mt-4 mb-0">
+      <p class="mt-4 mb-0 flex flex-wrap gap-3">
         <a class="btn-primary" href="/pricing">Go to pricing</a>
+        <a class="btn-secondary" href="/register">Create free account</a>
       </p>
     </section>
   </div>
