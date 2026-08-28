@@ -58,7 +58,8 @@ const wiringGuides = [
     For <a class="text-link" href="/about/ingest-and-webhooks">push ingest</a>, the same probe object can be
     posted to <code>/api/ingest/&lt;key&gt;</code>. Optional top-level <code>battery</code> (or
     <code>battery_pct</code>) and <code>rssi</code> fields update device health on the Devices page without
-    requiring extra sensor keys.
+    requiring extra sensor keys. Drop-in ESP sketches:
+    <a class="text-link" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches" target="_blank" rel="noreferrer">sketches/</a>.
   </p>
   <pre><code>{`{
   "temp": {
@@ -107,7 +108,13 @@ const wiringGuides = [
   <p>
     Sketches are edited in the Arduino IDE or PlatformIO, flashed over USB, then verified with serial
     logging before the board is mounted in the garage. Confirm JSON shape with curl before adding the
-    feed URL to the website dashboard. Source firmware:
+    feed URL to the website dashboard.
+  </p>
+  <p>
+    Ready-to-adapt samples for DS18B20, MAX31855, and MAX6675 (Arduino + MicroPython) live in this
+    repo under
+    <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches">sketches/</a>.
+    Full Ethernet + DHT garage firmware:
     <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/arduino-network-json-temperature-sever">arduino-network-json-temperature-sever</a>.
   </p>
 

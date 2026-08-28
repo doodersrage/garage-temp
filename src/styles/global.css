@@ -1828,6 +1828,33 @@
     @apply px-3 py-2 text-sm;
   }
 
+  .dashboard-kiosk-toggle[aria-pressed="true"] {
+    background-color: var(--color-accent-soft);
+    color: var(--color-accent-muted);
+  }
+
+  body.is-kiosk .site-header,
+  body.is-kiosk .dashboard-sidebar,
+  body.is-kiosk .site-footer {
+    display: none !important;
+  }
+
+  body.is-kiosk .dashboard-shell {
+    display: block;
+  }
+
+  body.is-kiosk .dashboard-main {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 1rem 1.25rem 2rem;
+  }
+
+  body.is-kiosk .dashboard-topbar-meta,
+  body.is-kiosk .plan-badge {
+    display: none;
+  }
+
   .dashboard-stack {
     display: flex;
     flex-direction: column;
@@ -2349,6 +2376,35 @@
     font-size: 0.9375rem;
     font-weight: 600;
     color: var(--color-text-secondary);
+  }
+
+  .chart-threshold-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem 1rem;
+    margin-top: 0.85rem;
+  }
+
+  .chart-threshold-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 8.5rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
+
+  .chart-threshold-field .form-input {
+    min-width: 7rem;
+    padding: 0.4rem 0.55rem;
+    font-size: 0.875rem;
+  }
+
+  .chart-threshold-note {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    align-self: center;
   }
 
   .history-filters {

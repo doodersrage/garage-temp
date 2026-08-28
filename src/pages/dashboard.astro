@@ -8,6 +8,7 @@ import { getUserPreferences } from "../lib/userPreferences";
 import { fetchGarageTempHistory } from "../lib/garageTempsHistory";
 import { fetchUserTempConfig } from "../lib/userTempConfig";
 import { getUserEntitlements } from "../lib/entitlements";
+import { canDownloadHistoryCsv } from "../lib/adminAccess";
 import { getUserDevicesAsTempConfig, listHouseholdDevices } from "../lib/devices";
 import { getAlertSettingsForUser } from "../lib/notify";
 import {
@@ -90,6 +91,7 @@ const [
   householdRole,
   weekCompareResult,
   chartWeek,
+  canExportCsv,
 ] = await Promise.all([
   household.householdId
     ? listHouseholdMembers(household.householdId)
@@ -110,6 +112,7 @@ const [
     : Promise.resolve(null),
   fetchWeekCompare(user.id),
   fetchGarageTempChartData(user.id, 7),
+  canDownloadHistoryCsv(user.id),
 ]);
 
 const devices = householdDevicesResult.devices;
@@ -176,6 +179,11 @@ const nwsAlerts =
     : null;
 
 const canEdit = canEditHousehold(householdRole);
+
+const exportToDate = new Date();
+const exportFromDate = new Date(exportToDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+const exportFrom = exportFromDate.toISOString().slice(0, 10);
+const exportTo = exportToDate.toISOString().slice(0, 10);
 
 const useCelsius = preferences.useCelsius;
 const timeToFreeze = buildTimeToFreezeFromPoints(
@@ -325,7 +333,13 @@ if (hasEmailAlerts) analyticsEvents.push({ name: "onboarding_step_complete", pro
       </div>
       <div class="dashboard-insights">
         <div class="dashboard-insights-primary">
-          <DashboardWeekChart points={chartWeek.points} />
+          <DashboardWeekChart
+            points={chartWeek.points}
+            freezeThresholdF={alertSettings.freezeThresholdF}
+            canExport={canExportCsv}
+            exportFrom={exportFrom}
+            exportTo={exportTo}
+          />
           <NightsAtRiskCard
             nightsAtRisk={nightsAtRisk}
             nightsRiskCount={nightsRiskCount}

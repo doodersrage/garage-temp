@@ -331,6 +331,7 @@ Guides:
 
 - [arduino-network-json-temperature-sever](https://github.com/doodersrage/arduino-network-json-temperature-sever) — probe JSON server  
 - [thermaltrace](https://github.com/doodersrage/thermaltrace) — this site  
+- [sketches/](./sketches) — DS18B20 / MAX31855 / MAX6675 Arduino + MicroPython ingest samples  
 - [fast-api-relay](https://github.com/doodersrage/fast-api-relay) — optional Python relay  
 
 ---

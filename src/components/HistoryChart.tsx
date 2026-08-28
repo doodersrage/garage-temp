@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 
 type Point = {
   timestamp: string;
@@ -11,17 +11,90 @@ interface Props {
   points: Point[];
   priorYearPoints?: Point[];
   title?: string;
+  /** Freeze / low alert line from account settings (°F). */
+  freezeThresholdF?: number | null;
+  /** Optional default high-temp warning (°F); user can override in the chart. */
+  defaultHighTempF?: number | null;
+  /** Optional default ambient target (°F). */
+  defaultTargetAmbientF?: number | null;
 }
 
 const PROBE_COLORS = ["#60a5fa", "#34d399", "#f472b6", "#fbbf24", "#a78bfa", "#fb7185"];
+const COLOR_BELOW = "#38bdf8";
+const COLOR_ABOVE = "#fb923c";
+const STORAGE_HIGH = "tt-chart-high-f";
+const STORAGE_TARGET = "tt-chart-target-f";
+
+function readStoredNumber(key: string): number | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw == null || raw === "") return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredNumber(key: string, value: number | null) {
+  try {
+    if (value == null) localStorage.removeItem(key);
+    else localStorage.setItem(key, String(value));
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
+function segmentColor(
+  tempf: number,
+  freeze: number | null,
+  high: number | null,
+  base: string,
+): string {
+  if (freeze != null && tempf <= freeze) return COLOR_BELOW;
+  if (high != null && tempf >= high) return COLOR_ABOVE;
+  return base;
+}
 
 export default function HistoryChart({
   points,
   priorYearPoints = [],
   title = "Temperature trend (last 7 days)",
+  freezeThresholdF = null,
+  defaultHighTempF = null,
+  defaultTargetAmbientF = null,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const probeLabels = [...new Set(points.map((p) => p.probeLabel || "Probe"))];
+  const probeLabels = useMemo(
+    () => [...new Set(points.map((p) => p.probeLabel || "Probe"))],
+    [points],
+  );
+
+  const [highTempF, setHighTempF] = useState<number | null>(defaultHighTempF);
+  const [targetAmbientF, setTargetAmbientF] = useState<number | null>(
+    defaultTargetAmbientF,
+  );
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const storedHigh = readStoredNumber(STORAGE_HIGH);
+    const storedTarget = readStoredNumber(STORAGE_TARGET);
+    if (storedHigh != null) setHighTempF(storedHigh);
+    else if (defaultHighTempF != null) setHighTempF(defaultHighTempF);
+    if (storedTarget != null) setTargetAmbientF(storedTarget);
+    else if (defaultTargetAmbientF != null) setTargetAmbientF(defaultTargetAmbientF);
+    setHydrated(true);
+  }, [defaultHighTempF, defaultTargetAmbientF]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    writeStoredNumber(STORAGE_HIGH, highTempF);
+  }, [highTempF, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    writeStoredNumber(STORAGE_TARGET, targetAmbientF);
+  }, [targetAmbientF, hydrated]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -49,13 +122,25 @@ export default function HistoryChart({
     const maxTs = Date.parse(sortedPoints[sortedPoints.length - 1]!.timestamp);
     const tsRange = maxTs - minTs || 1;
 
+    const guideTemps = [
+      freezeThresholdF,
+      highTempF,
+      targetAmbientF,
+    ].filter((v): v is number => v != null && Number.isFinite(v));
+
     const allTemps = [
       ...points.map((p) => p.tempf),
       ...priorYearPoints.map((p) => p.tempf),
+      ...guideTemps,
     ];
     const min = Math.min(...allTemps) - 2;
     const max = Math.max(...allTemps) + 2;
     const range = max - min || 1;
+
+    const yFor = (tempf: number) =>
+      pad.top + innerH - ((tempf - min) / range) * innerH;
+    const xFor = (ts: number) =>
+      pad.left + ((ts - minTs) / tsRange) * innerW;
 
     g.clearRect(0, 0, width, height);
     g.fillStyle = "#151b24";
@@ -76,7 +161,53 @@ export default function HistoryChart({
       g.fillText(`${val.toFixed(0)}°F`, pad.left - 6, y + 3);
     }
 
-    function drawSeries(series: Point[], color: string) {
+    function drawGuide(
+      tempf: number | null,
+      color: string,
+      label: string,
+      dash: number[],
+    ) {
+      if (tempf == null || !Number.isFinite(tempf)) return;
+      const y = yFor(tempf);
+      g.save();
+      g.strokeStyle = color;
+      g.lineWidth = 1.5;
+      g.setLineDash(dash);
+      g.beginPath();
+      g.moveTo(pad.left, y);
+      g.lineTo(width - pad.right, y);
+      g.stroke();
+      g.setLineDash([]);
+      g.fillStyle = color;
+      g.font = "10px system-ui, sans-serif";
+      g.textAlign = "left";
+      g.fillText(`${label} ${tempf.toFixed(0)}°F`, pad.left + 4, y - 4);
+      g.restore();
+    }
+
+    drawGuide(freezeThresholdF, "rgba(56, 189, 248, 0.9)", "Freeze", [6, 4]);
+    drawGuide(targetAmbientF, "rgba(167, 139, 250, 0.85)", "Target", [2, 4]);
+    drawGuide(highTempF, "rgba(251, 146, 60, 0.9)", "High", [6, 4]);
+
+    function drawSeriesColored(series: Point[], baseColor: string) {
+      if (series.length < 2) return;
+      const ordered = [...series].sort(
+        (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+      );
+      for (let i = 1; i < ordered.length; i++) {
+        const a = ordered[i - 1]!;
+        const b = ordered[i]!;
+        const mid = (a.tempf + b.tempf) / 2;
+        g.strokeStyle = segmentColor(mid, freezeThresholdF, highTempF, baseColor);
+        g.lineWidth = 2;
+        g.beginPath();
+        g.moveTo(xFor(Date.parse(a.timestamp)), yFor(a.tempf));
+        g.lineTo(xFor(Date.parse(b.timestamp)), yFor(b.tempf));
+        g.stroke();
+      }
+    }
+
+    function drawSeriesFlat(series: Point[], color: string) {
       if (series.length < 2) return;
       const ordered = [...series].sort(
         (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
@@ -85,10 +216,8 @@ export default function HistoryChart({
       g.lineWidth = 2;
       g.beginPath();
       ordered.forEach((point, i) => {
-        const x =
-          pad.left +
-          ((Date.parse(point.timestamp) - minTs) / tsRange) * innerW;
-        const y = pad.top + innerH - ((point.tempf - min) / range) * innerH;
+        const x = xFor(Date.parse(point.timestamp));
+        const y = yFor(point.tempf);
         if (i === 0) g.moveTo(x, y);
         else g.lineTo(x, y);
       });
@@ -96,7 +225,7 @@ export default function HistoryChart({
     }
 
     if (priorYearPoints.length >= 2) {
-      drawSeries(priorYearPoints, "rgba(148, 163, 184, 0.55)");
+      drawSeriesFlat(priorYearPoints, "rgba(148, 163, 184, 0.55)");
     }
 
     const byProbe = new Map<string, Point[]>();
@@ -108,24 +237,20 @@ export default function HistoryChart({
     }
 
     [...byProbe.entries()].forEach(([, series], index) => {
-      drawSeries(series, PROBE_COLORS[index % PROBE_COLORS.length]!);
+      drawSeriesColored(series, PROBE_COLORS[index % PROBE_COLORS.length]!);
     });
 
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "10px system-ui, sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText(
-      new Date(minTs).toLocaleDateString(),
-      pad.left,
-      height - 8,
-    );
-    ctx.textAlign = "right";
-    ctx.fillText(
+    g.fillStyle = "#94a3b8";
+    g.font = "10px system-ui, sans-serif";
+    g.textAlign = "left";
+    g.fillText(new Date(minTs).toLocaleDateString(), pad.left, height - 8);
+    g.textAlign = "right";
+    g.fillText(
       new Date(maxTs).toLocaleDateString(),
       width - pad.right,
       height - 8,
     );
-  }, [points, priorYearPoints]);
+  }, [points, priorYearPoints, freezeThresholdF, highTempF, targetAmbientF]);
 
   if (points.length < 2) {
     return (
@@ -158,6 +283,10 @@ export default function HistoryChart({
           Gray = same window last year
         </p>
       )}
+      <p class="m-0 mb-2 text-xs text-[var(--color-text-muted)]">
+        Trace turns <span style={{ color: COLOR_BELOW }}>cool</span> at/below freeze
+        and <span style={{ color: COLOR_ABOVE }}>warm</span> at/above the high line.
+      </p>
       <canvas
         ref={canvasRef}
         class="w-full"
@@ -165,6 +294,44 @@ export default function HistoryChart({
         role="img"
         aria-label={`Line chart of ${title}`}
       />
+      <form
+        class="chart-threshold-controls"
+        onSubmit={(e) => e.preventDefault()}
+      >
+        <label class="chart-threshold-field">
+          <span>Target ambient (°F)</span>
+          <input
+            type="number"
+            step="0.5"
+            class="form-input"
+            value={targetAmbientF ?? ""}
+            placeholder="Optional"
+            onInput={(e) => {
+              const v = (e.target as HTMLInputElement).value;
+              setTargetAmbientF(v === "" ? null : Number(v));
+            }}
+          />
+        </label>
+        <label class="chart-threshold-field">
+          <span>High warning (°F)</span>
+          <input
+            type="number"
+            step="0.5"
+            class="form-input"
+            value={highTempF ?? ""}
+            placeholder="Optional"
+            onInput={(e) => {
+              const v = (e.target as HTMLInputElement).value;
+              setHighTempF(v === "" ? null : Number(v));
+            }}
+          />
+        </label>
+        {freezeThresholdF != null && (
+          <p class="chart-threshold-note mb-0">
+            Freeze line from alerts: {freezeThresholdF}°F
+          </p>
+        )}
+      </form>
     </div>
   );
 }

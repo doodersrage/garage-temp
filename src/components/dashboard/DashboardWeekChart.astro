@@ -7,23 +7,56 @@ import type { ChartPoint } from "../../lib/garageTempsHistory";
 interface Props {
   points: ChartPoint[];
   title?: string;
+  freezeThresholdF?: number | null;
+  canExport?: boolean;
+  exportFrom?: string;
+  exportTo?: string;
 }
 
-const { points, title = "Temperature trend (7 days)" } = Astro.props;
+const {
+  points,
+  title = "Temperature trend (7 days)",
+  freezeThresholdF = null,
+  canExport = false,
+  exportFrom = "",
+  exportTo = "",
+} = Astro.props;
+
+const exportParams = new URLSearchParams();
+if (exportFrom) exportParams.set("from", exportFrom);
+if (exportTo) exportParams.set("to", exportTo);
+const exportCsvHref = exportParams.toString()
+  ? `/api/garage-temps/export.csv?${exportParams}`
+  : "/api/garage-temps/export.csv";
 ---
 <DashboardCard>
-  <h2 class="card-title">Probe curves (7 days)</h2>
-  <p class="card-subtitle mb-4">
-    Temperature traces from your probes. Open History for filters, year-over-year overlay, and CSV export.
-  </p>
+  <div class="card-header-row">
+    <div>
+      <h2 class="card-title">Probe curves (7 days)</h2>
+      <p class="card-subtitle mb-0">
+        Temperature traces with freeze / target / high guide lines. Open History for filters and year-over-year.
+      </p>
+    </div>
+    {canExport && (
+      <div class="flex flex-wrap gap-2">
+        <a class="btn-secondary" href={exportCsvHref} download>Export run (CSV)</a>
+        <a class="btn-ghost" href="/api/user/export">Export JSON</a>
+      </div>
+    )}
+  </div>
   {points.length < 2 ? (
-    <p class="mb-0 text-sm text-muted-foreground">
+    <p class="mt-4 mb-0 text-sm text-muted-foreground">
       Not enough history yet for a chart.
       <a class="text-link" href="/dashboard/history">View history</a>
     </p>
   ) : (
-    <div class="relative min-h-[300px]">
-      <HistoryChart client:visible points={points} title={title}>
+    <div class="relative mt-4 min-h-[300px]">
+      <HistoryChart
+        client:visible
+        points={points}
+        title={title}
+        freezeThresholdF={freezeThresholdF}
+      >
         <ChartSkeleton slot="fallback" />
       </HistoryChart>
     </div>

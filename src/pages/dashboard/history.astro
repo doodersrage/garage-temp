@@ -25,6 +25,7 @@ import { computeFreezeHours } from "../../lib/freezeHours";
 import IndoorOutdoorChart from "../../components/IndoorOutdoorChart.tsx";
 import { RAW_READING_RETENTION_DAYS } from "../../lib/retentionSchedule";
 import { getUserEntitlements } from "../../lib/entitlements";
+import { getAlertSettingsForUser } from "../../lib/notify";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -74,6 +75,7 @@ const [
   subscription,
   insights,
   entitlements,
+  alertSettings,
 ] = await Promise.all([
   fetchGarageTempHistory(user.id, pageParam, undefined, filters),
   fetchGarageTempChartData(user.id, chartWindowDays, filters),
@@ -85,6 +87,7 @@ const [
   getUserSubscription(user.id),
   computeSeasonalInsights(user.id, 30),
   getUserEntitlements(user.id),
+  getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
 ]);
 
 const outdoorDelta = await fetchIndoorOutdoorDelta(
@@ -94,7 +97,7 @@ const outdoorDelta = await fetchIndoorOutdoorDelta(
 const indoorOutdoorSeries = outdoorDelta
   ? buildIndoorOutdoorSeries(chartData.points, outdoorDelta.outdoorF)
   : [];
-const freezeHours = computeFreezeHours(chartData.points, 34);
+const freezeHours = computeFreezeHours(chartData.points, alertSettings.freezeThresholdF);
 
 if (history.totalPages > 0 && pageParam > history.totalPages) {
   return Astro.redirect(`/dashboard/history?page=${history.totalPages}`);
@@ -255,6 +258,7 @@ const showRetentionNote =
       days={chartDays}
       anomalies={anomalies}
       filterOptions={filterOptions}
+      freezeThresholdF={alertSettings.freezeThresholdF}
     />
   </div>
 </DashboardLayout>

@@ -1,6 +1,7 @@
 ---
 import Layout from "./Layout.astro";
 import DashboardSidebar from "../components/DashboardSidebar.astro";
+import KioskModeToggle from "../components/KioskModeToggle";
 import { getAuthFromCookies } from "../lib/auth";
 import { isUserAdmin } from "../lib/adminAccess";
 import { getUserEntitlements } from "../lib/entitlements";
@@ -51,6 +52,7 @@ const planLabel =
           <span class:list={["plan-badge", `plan-badge--${entitlements.tier}`]}>
             {planLabel}
           </span>
+          <KioskModeToggle client:load />
           <a class="btn-ghost dashboard-topbar-home" href="/">Live home</a>
         </div>
       </header>

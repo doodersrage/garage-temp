@@ -25,6 +25,7 @@ interface Props {
     feeds: string[];
     probes: { key: string; label: string }[];
   };
+  freezeThresholdF?: number | null;
 }
 
 const {
@@ -41,6 +42,7 @@ const {
   days = 7,
   anomalies = [],
   filterOptions = { feeds: [], probes: [] },
+  freezeThresholdF = null,
 } = Astro.props;
 const { readings, page, pageSize, totalCount, totalPages, error } = history;
 
@@ -163,6 +165,7 @@ const clearFiltersHref = basePath;
     points={chartPoints}
     priorYearPoints={compareYoy ? priorYearPoints : []}
     title={chartTitle}
+    freezeThresholdF={freezeThresholdF}
   />
 
   {error ? (
