@@ -6,12 +6,18 @@ import { fetchReferralAdminStats } from "../../lib/referrals";
 import { listRecentServerErrors } from "../../lib/serverErrors";
 import { auditStripeDisplayPrices } from "../../lib/stripePriceAudit";
 import { getAuthFromCookies } from "../../lib/auth";
+import { isUserAdmin } from "../../lib/adminAccess";
 import { isTwilioConfigured } from "../../lib/notify";
 import { isVapidConfigured } from "../../lib/webPush";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
   return Astro.redirect("/signin");
+}
+
+// Gate before admin-only fetches — otherwise non-admins can hit a blank 200.
+if (!(await isUserAdmin(user.id))) {
+  return Astro.redirect("/dashboard");
 }
 
 const emailTestOk = Astro.url.searchParams.get("email_test") === "1";

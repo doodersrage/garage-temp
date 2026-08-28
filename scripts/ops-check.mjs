@@ -95,8 +95,9 @@ for (const group of groups) {
 console.log("\nNext steps:");
 console.log("  pnpm secrets:push     — sync .env secrets to Cloudflare Worker");
 console.log("  pnpm ops:smoke        — public pages + sitemap after deploy");
+console.log("  pnpm ops:dogfood      — alert test + Ops email smokes (needs E2E admin)");
 console.log("  pnpm test:e2e:auth    — authenticated alert settings (needs E2E_TEST_*)");
-console.log("  Dashboard → Ops       — email + channel smoke tests while signed in as admin");
+console.log("  GSC                   — confirm https://thermaltrace.dev/sitemap-index.xml in Search Console");
 if (!env.TWILIO_ACCOUNT_SID?.trim()) {
   console.log("  Twilio                — add TWILIO_* to .env for SMS/WhatsApp, then secrets:push");
 }

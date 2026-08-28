@@ -39,6 +39,40 @@ test.describe("alert settings", () => {
     await expect(page).toHaveURL(/alert_saved=1/, { timeout: 20_000 });
     await expect(page.locator("#freeze_threshold_f")).toHaveValue(original);
   });
+
+  test("email channel + freeze alerts enable and test send", async ({ page }) => {
+    test.skip(!getE2ECredentials(), "Set E2E_TEST_EMAIL and E2E_TEST_PASSWORD");
+
+    await signIn(page, "/dashboard/alerts");
+
+    const enabled = page.locator('input[name="alerts_enabled"]');
+    const emailChannel = page.locator('input[name="channel_email"]');
+    if (!(await enabled.isChecked())) await enabled.check();
+    if (!(await emailChannel.isChecked())) await emailChannel.check();
+
+    await page.locator("#alert-settings-submit").click();
+    await expect(page).toHaveURL(/alert_saved=1/, { timeout: 20_000 });
+
+    await page.getByRole("button", { name: /Send test now/i }).click();
+    await expect(page).toHaveURL(/test_sent=1|test_error=1/, { timeout: 25_000 });
+    await expect(page).toHaveURL(/test_sent=1/);
+  });
+});
+
+test.describe("ops admin", () => {
+  test("ops email drip smoke when user is admin", async ({ page }) => {
+    test.skip(!getE2ECredentials(), "Set E2E_TEST_EMAIL and E2E_TEST_PASSWORD");
+
+    await signIn(page, "/dashboard/ops");
+    if (!/\/dashboard\/ops\/?$/.test(new URL(page.url()).pathname)) {
+      test.skip(true, "E2E user is not an admin — skip Ops email smoke");
+    }
+
+    await expect(page.getByRole("heading", { name: /Ops/i }).first()).toBeVisible();
+    await page.getByRole("button", { name: /Test drip day 1/i }).click();
+    await expect(page).toHaveURL(/email_test=1/, { timeout: 25_000 });
+    await expect(page.getByText(/Test email sent/i)).toBeVisible();
+  });
 });
 
 test.describe("dashboard overview", () => {

@@ -137,44 +137,93 @@ export const aboutPhotos: Record<AboutPhotoId, AboutPhoto> = {
 
 /** Hero photo overrides for guides that benefit from atmosphere or topical hardware. */
 export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
-  // Freeze / alerts
+  // Freeze / alerts / weather
   "cold-snap-playbook": "frost-window",
   "freeze-protection-thresholds": "utility-pipes",
   "alert-channel-cookbook": "cold-weather-road",
   "seasonal-garage-patterns": "frost-window",
+  "weather-api-parallel-path": "cold-weather-road",
+  "humidity-condensation-basics": "frost-window",
 
-  // Probes / hardware
+  // Probes / garage context
   "dht22-sensor-overview": "dht22-module",
   "dht22-data-line-wiring": "arduino-dht11",
   "dht22-read-errors-retries": "dht22-module",
   "probe-mounting-enclosures": "garage-workbench",
+  "probe-mapping-labels": "dht22-module",
+  "probe-cable-length-limits": "ethernet-cable",
   "multi-zone-garage-layout": "home-workshop",
   "garage-door-temperature-swings": "garage-workbench",
   "sun-load-garage-walls": "home-workshop",
   "infiltration-wind-drafts": "garage-workbench",
-  "humidity-condensation-basics": "frost-window",
   "thermal-mass-concrete-slab": "home-workshop",
+  "hvac-duct-influence": "home-workshop",
+  "stored-vehicle-heat": "garage-workbench",
+  "enclosure-ventilation": "garage-workbench",
+  "sensor-warm-up-time": "dht22-module",
+  "dual-probe-averaging": "dht22-module",
 
-  // Arduino / firmware
+  // Arduino / firmware / wiring
   "arduino-ide-setup": "arduino-uno-board",
   "sketch-polling-main-loop": "arduino-uno-board",
   "ethernet-shield-stacking": "ethernet-cable",
   "breadboard-power-rails": "arduino-dht11",
   "firmware-watchdog-recovery": "arduino-uno-board",
   "json-probe-output-schema": "ethernet-cable",
+  "circuit-wiring-troubleshooting": "arduino-dht11",
+  "liquid-crystal-gpio-map": "arduino-uno-board",
+  "spi-pins-ethernet-reserved": "ethernet-cable",
+  "lcd-local-display-format": "arduino-uno-board",
+  "lcd-i2c-alternative": "arduino-uno-board",
+  "serial-debugging-tips": "arduino-dht11",
+  "library-dependencies": "arduino-uno-board",
+  "ground-loop-avoidance": "arduino-dht11",
+  "backlight-pwm-options": "arduino-uno-board",
+  "jumper-wire-standards": "arduino-dht11",
+  "kit-qr-onboarding": "ethernet-cable",
+  "esp32-ota-firmware": "arduino-uno-board",
 
-  // Data / accounts
+  // Relay / network / data path
   "debugging-stale-readings": "ethernet-cable",
+  "static-ip-vs-dhcp": "ethernet-cable",
+  "docker-relay-deployment": "ethernet-cable",
+  "fastapi-relay-setup": "ethernet-cable",
+  "redis-cache-for-feeds": "ethernet-cable",
+  "relay-security-and-access": "ethernet-cable",
+  "health-check-endpoints": "ethernet-cable",
+  "environment-variables-relay": "ethernet-cable",
+  "caching-feed-responses": "ethernet-cable",
+  "home-page-probe-fetch": "ethernet-cable",
+  "configuring-temperature-feeds": "ethernet-cable",
+  "websocket-live-updates": "ethernet-cable",
+
+  // Dashboard / accounts / product
   "history-dashboard-browsing": "desk-workspace",
   "csv-export-spreadsheet-analysis": "desk-workspace",
+  "charting-with-spreadsheets": "desk-workspace",
+  "spotting-data-gaps": "desk-workspace",
   "household-sharing-walkthrough": "desk-workspace",
   "group-membership-model": "desk-workspace",
   "cookie-session-lifecycle": "desk-workspace",
   "supabase-auth-flow": "desk-workspace",
-  "static-ip-vs-dhcp": "ethernet-cable",
-  "docker-relay-deployment": "ethernet-cable",
-  "fastapi-relay-setup": "ethernet-cable",
-  "health-check-endpoints": "ethernet-cable",
+  "supabase-history-inserts": "desk-workspace",
+  "stripe-csv-subscription": "desk-workspace",
+  "admin-dashboard-features": "desk-workspace",
+  "contact-form-admin-review": "desk-workspace",
+  "display-preferences-deep-dive": "desk-workspace",
+  "middleware-auth-patterns": "desk-workspace",
+  "zapier-make-recipes": "desk-workspace",
+
+  // Stack / hosting (atmospheric, not literal)
+  "astro-server-side-rendering": "desk-workspace",
+  "astro-islands-and-hydration": "desk-workspace",
+  "cloudflare-workers-deployment": "ethernet-cable",
+  "nextjs-monitoring-dashboards": "desk-workspace",
+  "node-express-api-patterns": "ethernet-cable",
+  "comparing-full-stack-options": "desk-workspace",
+  "env-secrets-cloudflare": "ethernet-cable",
+  "tailwind-v4-setup": "desk-workspace",
+  "hosting-cost-comparison": "desk-workspace",
 };
 
 export function getAboutPhoto(id: AboutPhotoId): AboutPhoto {
