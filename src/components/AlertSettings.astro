@@ -66,6 +66,18 @@ const needsPro =
   !entitlements.canUsePush ||
   !entitlements.canUseOutboundWebhook;
 
+const PLAYBOOK_KINDS = [
+  { id: "threshold", label: "Threshold" },
+  { id: "forecast", label: "Forecast" },
+  { id: "nws", label: "NWS" },
+  { id: "rate", label: "Rate drop" },
+  { id: "outage", label: "Outage" },
+  { id: "rule", label: "Rule" },
+  { id: "battery", label: "Battery" },
+  { id: "rssi", label: "Signal" },
+  { id: "generic", label: "Generic" },
+] as const;
+
 const rulesJson = JSON.stringify(settings.alertRules ?? []);
 ---
 <DashboardCard class="animate-slide-up-fade">
@@ -162,22 +174,33 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
   </label>
 
   <label class="checkbox-row mb-4">
-    <input type="checkbox" name="portfolio_alerts_enabled" value="true" checked={settings.portfolioAlertsEnabled} />
-    <span>Portfolio freeze alerts (email when any property crosses threshold)</span>
+    <input
+      type="checkbox"
+      name="portfolio_alerts_enabled"
+      value="true"
+      checked={settings.portfolioAlertsEnabled}
+      disabled={!entitlements.canUsePortfolio}
+    />
+    <span>
+      Portfolio freeze alerts (email when any property crosses threshold)
+      {!entitlements.canUsePortfolio && (
+        <span class="text-[var(--color-text-muted)]"> — Pro plan</span>
+      )}
+    </span>
   </label>
 
   <h3 class="text-base font-semibold mb-2">Alert playbooks</h3>
   <p class="card-subtitle mb-3">
-    Escalation steps after the initial alert (JSON). Example: SMS 15 minutes later if unacknowledged.
+    Escalation steps after the initial alert — for example, SMS 15 minutes later if still unacknowledged.
   </p>
-  <div class="form-field mb-4">
-    <label class="form-label" for="alert_playbooks_editor">Playbooks JSON</label>
-    <textarea
-      class="form-input font-mono text-xs min-h-[120px]"
-      id="alert_playbooks_editor"
-      data-playbooks-editor
-    >{JSON.stringify(settings.alertPlaybooks ?? [], null, 2)}</textarea>
-  </div>
+  <div id="alert-playbooks-list" class="space-y-3 mb-3"></div>
+  <button type="button" class="btn-secondary mb-4" id="add-playbook-step">Add step</button>
+  <textarea
+    class="form-textarea font-mono text-xs sr-only"
+    id="alert_playbooks_editor"
+    data-playbooks-editor
+    aria-hidden="true"
+  >{JSON.stringify(settings.alertPlaybooks ?? [], null, 2)}</textarea>
 
   <h3 class="text-base font-semibold mb-2">Escalation</h3>
   <p class="card-subtitle mb-3">
@@ -790,11 +813,6 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     form.addEventListener("submit", () => {
       syncRulesHidden();
       const severityHidden = document.getElementById("channel_severity_json");
-      const playbooksHidden = document.getElementById("alert_playbooks_json");
-      const playbooksEditor = document.querySelector("[data-playbooks-editor]");
-      if (playbooksHidden && playbooksEditor) {
-        playbooksHidden.value = playbooksEditor.value?.trim() || "[]";
-      }
       if (severityHidden) {
         const map = {};
         document.querySelectorAll("[data-severity-kind]").forEach((el) => {
@@ -871,6 +889,111 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     });
     syncIncompleteHint();
     renderRules();
+  })();
+</script>
+
+<script is:inline define:vars={{ initialPlaybooks: settings.alertPlaybooks ?? [], alertChannels: ALERT_CHANNELS, playbookKinds: PLAYBOOK_KINDS }}>
+  (() => {
+    const form = document.getElementById("alert-settings-form");
+    if (!(form instanceof HTMLFormElement)) return;
+    const list = document.getElementById("alert-playbooks-list");
+    const hidden = document.getElementById("alert_playbooks_json");
+    const editor = document.getElementById("alert_playbooks_editor");
+    const addBtn = document.getElementById("add-playbook-step");
+    let steps = Array.isArray(initialPlaybooks) ? structuredClone(initialPlaybooks) : [];
+
+    function syncPlaybooksHidden() {
+      const json = JSON.stringify(steps);
+      if (hidden) hidden.value = json;
+      if (editor instanceof HTMLTextAreaElement) editor.value = json;
+    }
+
+    function renderPlaybooks() {
+      if (!list) return;
+      list.innerHTML = "";
+      steps.forEach((step, stepIndex) => {
+        const wrap = document.createElement("div");
+        wrap.className = "rounded border border-[var(--color-border)] p-3";
+        const channelChecks = alertChannels
+          .map((ch) => {
+            const checked = (step.channels || []).includes(ch.id) ? "checked" : "";
+            return `<label class="checkbox-row mb-0 text-sm"><input type="checkbox" data-channel="${ch.id}" ${checked} /> <span>${ch.label}</span></label>`;
+          })
+          .join("");
+        const kindChecks = playbookKinds
+          .map((k) => {
+            const checked = (step.kinds || []).includes(k.id) ? "checked" : "";
+            return `<label class="checkbox-row mb-0 text-sm"><input type="checkbox" data-kind="${k.id}" ${checked} /> <span>${k.label}</span></label>`;
+          })
+          .join("");
+        wrap.innerHTML = `
+          <div class="flex flex-wrap gap-2 mb-2 items-center">
+            <input class="form-input flex-1" data-field="name" value="${(step.name || "").replace(/"/g, "&quot;")}" placeholder="Step name" />
+            <div class="form-field mb-0">
+              <label class="form-label text-xs">After (min)</label>
+              <input class="form-input" type="number" data-field="afterMinutes" min="1" value="${step.afterMinutes ?? 15}" style="max-width:6rem" />
+            </div>
+            <label class="checkbox-row mb-0"><input type="checkbox" data-field="ifUnacked" ${step.ifUnacked !== false ? "checked" : ""} /> <span>Only if unacked</span></label>
+            <button type="button" class="btn-secondary text-sm" data-remove-step>Delete</button>
+          </div>
+          <p class="text-sm text-[var(--color-text-muted)] mb-1">Channels</p>
+          <div class="flex flex-wrap gap-2 mb-2">${channelChecks}</div>
+          <p class="text-sm text-[var(--color-text-muted)] mb-1">Kinds (none = all)</p>
+          <div class="flex flex-wrap gap-2">${kindChecks}</div>
+        `;
+        wrap.querySelector("[data-remove-step]")?.addEventListener("click", () => {
+          steps.splice(stepIndex, 1);
+          renderPlaybooks();
+        });
+        wrap.querySelector('[data-field="name"]')?.addEventListener("input", (e) => {
+          steps[stepIndex].name = e.target.value;
+          syncPlaybooksHidden();
+        });
+        wrap.querySelector('[data-field="afterMinutes"]')?.addEventListener("input", (e) => {
+          steps[stepIndex].afterMinutes = Number(e.target.value) || 15;
+          syncPlaybooksHidden();
+        });
+        wrap.querySelector('[data-field="ifUnacked"]')?.addEventListener("change", (e) => {
+          steps[stepIndex].ifUnacked = e.target.checked;
+          syncPlaybooksHidden();
+        });
+        wrap.querySelectorAll("[data-channel]").forEach((el) => {
+          el.addEventListener("change", () => {
+            const channels = [...wrap.querySelectorAll("[data-channel]:checked")].map(
+              (node) => node.getAttribute("data-channel"),
+            );
+            steps[stepIndex].channels = channels;
+            syncPlaybooksHidden();
+          });
+        });
+        wrap.querySelectorAll("[data-kind]").forEach((el) => {
+          el.addEventListener("change", () => {
+            const kinds = [...wrap.querySelectorAll("[data-kind]:checked")].map(
+              (node) => node.getAttribute("data-kind"),
+            );
+            steps[stepIndex].kinds = kinds;
+            syncPlaybooksHidden();
+          });
+        });
+        list.appendChild(wrap);
+      });
+      syncPlaybooksHidden();
+    }
+
+    addBtn?.addEventListener("click", () => {
+      steps.push({
+        id: crypto.randomUUID(),
+        name: "Escalation step",
+        afterMinutes: 15,
+        ifUnacked: true,
+        channels: ["sms"],
+        kinds: [],
+      });
+      renderPlaybooks();
+    });
+
+    form.addEventListener("submit", syncPlaybooksHidden);
+    renderPlaybooks();
   })();
 </script>
 

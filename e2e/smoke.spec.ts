@@ -51,4 +51,28 @@ test.describe("public smoke", () => {
     await page.goto("/docs/api");
     await expect(page.getByRole("heading", { name: /API documentation/i })).toBeVisible();
   });
+
+  test("privacy page loads", async ({ page }) => {
+    await page.goto("/privacy");
+    await expect(page.getByRole("heading", { name: /Privacy/i })).toBeVisible();
+  });
+
+  test("Zapier integration docs load", async ({ page }) => {
+    await page.goto("/about/zapier-integration");
+    await expect(page.getByRole("heading", { name: /Zapier & Make/i })).toBeVisible();
+  });
+
+  test("portfolio requires sign-in", async ({ page }) => {
+    await page.goto("/dashboard/portfolio");
+    await expect(page).toHaveURL(/signin/);
+  });
+
+  test("manifest includes portfolio shortcut", async ({ request }) => {
+    const res = await request.get("/manifest.webmanifest");
+    expect(res.ok()).toBeTruthy();
+    const manifest = await res.json();
+    const urls = (manifest.shortcuts ?? []).map((s: { url: string }) => s.url);
+    expect(urls).toContain("/dashboard/portfolio");
+    expect(urls).toContain("/dashboard/alerts");
+  });
 });

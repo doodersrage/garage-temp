@@ -1,6 +1,7 @@
 ---
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import DashboardCard from "../../components/dashboard/DashboardCard.astro";
+import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { fetchCrossPropertySnapshots } from "../../lib/crossProperty";
 import { listUserHouseholds } from "../../lib/households";
@@ -13,16 +14,21 @@ if (!session || !user) {
 
 const entitlements = await getUserEntitlements(user.id);
 const { households } = await listUserHouseholds(user.id);
-const { properties, error } = await fetchCrossPropertySnapshots(user.id);
+const { properties, error } = entitlements.canUsePortfolio
+  ? await fetchCrossPropertySnapshots(user.id)
+  : { properties: [], error: null as string | null };
 const atRisk = properties.filter((p) => p.atRisk);
 ---
 <DashboardLayout title="Portfolio">
   <div class="space-y-6">
+    {!entitlements.canUsePortfolio && (
+      <UpgradeNudge feature="multi_property" tier={entitlements.tier} />
+    )}
     <section class="card">
       <h1 class="card-title">All properties</h1>
       <p class="card-subtitle mb-0">
         Cross-property freeze risk at a glance
-        {entitlements.maxOwnedHouseholds > 1 ? "" : " — add more households on Pro"}.
+        {entitlements.canUsePortfolio ? "" : " — upgrade to Pro to unlock portfolio view and alerts"}.
       </p>
       {error && <p class="alert-warning mt-3" role="alert">{error}</p>}
     </section>
@@ -43,6 +49,7 @@ const atRisk = properties.filter((p) => p.atRisk);
     )}
 
     <DashboardCard>
+      {entitlements.canUsePortfolio ? (
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
@@ -82,7 +89,12 @@ const atRisk = properties.filter((p) => p.atRisk);
           </tbody>
         </table>
       </div>
-      {households.length === 0 && (
+      ) : (
+        <p class="text-sm text-[var(--color-text-muted)] mb-0">
+          Portfolio view shows freeze risk across all your properties. Available on Pro.
+        </p>
+      )}
+      {households.length === 0 && entitlements.canUsePortfolio && (
         <p class="text-sm text-[var(--color-text-muted)] mb-0">No households yet.</p>
       )}
     </DashboardCard>

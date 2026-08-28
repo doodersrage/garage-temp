@@ -2,6 +2,7 @@ import { fetchCrossPropertySnapshots } from "./crossProperty";
 import { getAlertSettingsForUser, notifyUser } from "./notify";
 import { createServerClient } from "./supabase";
 import { listUserHouseholds } from "./households";
+import { getUserEntitlements } from "./entitlements";
 
 const PORTFOLIO_COOLDOWN_MS = 4 * 60 * 60 * 1000;
 
@@ -26,6 +27,12 @@ export async function sendPortfolioAlertsForAllUsers(): Promise<{
 
   for (const userId of userIds) {
     try {
+      const entitlements = await getUserEntitlements(userId);
+      if (!entitlements.canUsePortfolio) {
+        skipped += 1;
+        continue;
+      }
+
       const { households } = await listUserHouseholds(userId);
       if (households.length < 2) {
         skipped += 1;

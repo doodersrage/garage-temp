@@ -7,6 +7,8 @@ import {
   rowToAlertSettings,
 } from "./alerts";
 import { recordAlertEvent } from "./alertEvents";
+import { buildUserAckUrl } from "./alertAckTokens";
+import { buildSiteUrl } from "./siteUrl";
 import { applyAlertTemplates } from "./alertTemplates";
 import {
   quietHoursAllowsSmsCritical,
@@ -440,9 +442,15 @@ export async function notifyUser(
       )
     : null;
   const routedSet = routedChannels ? new Set(routedChannels) : null;
-  const bodyWithSnooze = options?.snoozeUrl
-    ? `${payloadResolved.body}\n\nSnooze 24h: ${options.snoozeUrl}`
-    : payloadResolved.body;
+  const baseUrl = buildSiteUrl();
+  const ackUrl = await buildUserAckUrl(baseUrl, userId);
+  const footerLines: string[] = [];
+  if (options?.snoozeUrl) footerLines.push(`Snooze 24h: ${options.snoozeUrl}`);
+  footerLines.push(`Mark as handled: ${ackUrl}`);
+  const bodyWithSnooze =
+    footerLines.length > 0
+      ? `${payloadResolved.body}\n\n${footerLines.join("\n")}`
+      : payloadResolved.body;
   const channelFilterSet = options?.channelFilter?.length
     ? new Set(options.channelFilter)
     : null;

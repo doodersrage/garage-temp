@@ -17,6 +17,7 @@ export type Entitlements = {
   canUsePush: boolean;
   canUseOutboundWebhook: boolean;
   canCreateShareLinks: boolean;
+  canUsePortfolio: boolean;
   maxDevices: number;
   maxOwnedHouseholds: number;
 };
@@ -44,6 +45,7 @@ export async function getUserEntitlements(userId: string): Promise<Entitlements>
       canUsePush: true,
       canUseOutboundWebhook: true,
       canCreateShareLinks: true,
+      canUsePortfolio: true,
       maxDevices: PRO_MAX_DEVICES,
       maxOwnedHouseholds: PRO_MAX_OWNED_HOUSEHOLDS,
     };
@@ -57,6 +59,7 @@ export async function getUserEntitlements(userId: string): Promise<Entitlements>
       canUsePush: true,
       canUseOutboundWebhook: true,
       canCreateShareLinks: true,
+      canUsePortfolio: true,
       maxDevices: PRO_MAX_DEVICES,
       maxOwnedHouseholds: PRO_MAX_OWNED_HOUSEHOLDS,
     };
@@ -70,6 +73,7 @@ export async function getUserEntitlements(userId: string): Promise<Entitlements>
       canUsePush: false,
       canUseOutboundWebhook: false,
       canCreateShareLinks: false,
+      canUsePortfolio: false,
       maxDevices: MEMBER_MAX_DEVICES,
       maxOwnedHouseholds: MEMBER_MAX_OWNED_HOUSEHOLDS,
     };
@@ -82,6 +86,7 @@ export async function getUserEntitlements(userId: string): Promise<Entitlements>
     canUsePush: false,
     canUseOutboundWebhook: false,
     canCreateShareLinks: false,
+    canUsePortfolio: false,
     maxDevices: FREE_MAX_DEVICES,
     maxOwnedHouseholds: FREE_MAX_OWNED_HOUSEHOLDS,
   };

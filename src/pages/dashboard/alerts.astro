@@ -2,6 +2,7 @@
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import AlertSettings from "../../components/AlertSettings.astro";
 import UpgradeNudge from "../../components/UpgradeNudge.astro";
+import ProductAnalyticsTracker from "../../components/ProductAnalyticsTracker.tsx";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getAlertSettingsForUser, isTwilioConfigured } from "../../lib/notify";
 import { getUserEntitlements } from "../../lib/entitlements";
@@ -95,9 +96,9 @@ const alertNotice = Astro.url.searchParams.get("alert_saved")
             ? "No alert channels are enabled. Turn on at least one channel, save, then retry."
             : "Could not send test alert. Check channel settings and try again."
         : Astro.url.searchParams.get("ack_ok")
-          ? "Alert marked as handled."
+          ? Astro.url.searchParams.get("ack_msg") ?? "Alert marked as handled."
           : Astro.url.searchParams.get("ack_error")
-            ? "Could not acknowledge alert."
+            ? Astro.url.searchParams.get("ack_msg") ?? "Could not acknowledge alert."
             : null;
 
 const alertNoticeIsError =
@@ -119,8 +120,13 @@ const lastAlertCandidates = [
 const lastAlertAt =
   lastAlertCandidates.sort((a, b) => Date.parse(b) - Date.parse(a))[0] ?? null;
 const lastAlertAge = formatRelativeAge(lastAlertAt);
+
+const analyticsEvents = Astro.url.searchParams.get("test_sent")
+  ? [{ name: "first_alert_test" as const }]
+  : [];
 ---
 <DashboardLayout title="Alerts">
+  <ProductAnalyticsTracker client:load events={analyticsEvents} />
   <div class="space-y-6">
     <section class="card">
       <h1 class="card-title">Alerts & digests</h1>

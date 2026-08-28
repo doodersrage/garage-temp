@@ -60,9 +60,11 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 - Composite AND rules (door + temp, flood, power, …) with optional value/label filters
 - Quiet hours (optional freeze bypass; Pro SMS-critical override)
 - Per-kind severity routing and per-space channel routing
-- Channels: email, Discord, Telegram, Slack; Pro adds SMS (Twilio), browser push, outbound / reading webhooks
-- Custom alert templates (`{{kind}}`, `{{title}}`, `{{body}}`) and acknowledgment on recent activity
+- Channels: email, Discord, Telegram, Slack, Teams, ntfy, Pushover, WhatsApp; Pro adds SMS (Twilio), browser push, outbound / reading webhooks
+- Custom alert templates (`{{kind}}`, `{{title}}`, `{{body}}`) and one-click acknowledgment (dashboard + email/Telegram links)
+- **Alert playbooks** — timed escalation steps (e.g. SMS 15 min later if unacknowledged); visual step builder on Alerts page
 - Escalation (SMS repeat), test alert with per-channel feedback, activity audit trail
+- **Portfolio view** (Pro) — cross-property freeze risk table + optional portfolio freeze email alerts
 - Weekly digest (Mondays), monthly freeze report (1st + HTML attachment), quarterly seasonal report
 - Onboarding drip emails (days 1 / 3 / 7) and Stripe trial reminders (3d / 1d)
 
@@ -75,7 +77,8 @@ Display preferences, alert settings, snooze/vacation, and household invites save
 - Contextual upgrade nudges where Member/Pro unlocks a feature
 - Households: invite by email (member or viewer), rename, leave, revoke, multi-property switcher
 - Device transfer between properties; household activity log
-- Pro: public share links (live / history / metrics / embed), inbound webhooks (snooze, vacation, status, …), dashboard API keys (`GET /api/v1/metrics`), Grafana dashboard JSON
+- Pro: public share links (live / history / metrics / embed), inbound webhooks (snooze, vacation, status, …), dashboard API keys (`GET /api/v1/metrics`), **v1 devices API** (`POST /api/v1/devices`), Grafana dashboard JSON
+- **MQTT bridge** ingest (`POST /api/ingest/mqtt`) for Home Assistant / Mosquitto payloads
 - Public status pages (`/status/<token>`), iCal freeze outlook, JSON export (`GET /api/user/export`)
 - Referral program: invite link; referred signups get +7 Pro trial days; referrer rewarded on Pro subscribe
 - Pro checkout: 14-day trial + Stripe promotion codes
@@ -102,6 +105,7 @@ Display preferences, alert settings, snooze/vacation, and household invites save
 | Push devices | 2 | 6 | 24 |
 | SMS, browser push, outbound / reading webhooks | | | ✓ |
 | Public share links, status pages, metrics API | | | ✓ |
+| Portfolio view + cross-property freeze alerts | | | ✓ |
 | Dashboard API keys + Grafana JSON | | | ✓ |
 
 Exact limits live in [`src/lib/entitlements.ts`](src/lib/entitlements.ts). Display prices on `/pricing` must match live Stripe unit amounts (see [Deploy & ops](#deploy--ops)).

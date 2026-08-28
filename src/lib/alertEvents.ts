@@ -50,6 +50,29 @@ export async function acknowledgeAlertEvent(
   return { ok: true };
 }
 
+/** Acknowledge the most recent delivered alert that is still unhandled. */
+export async function acknowledgeLatestUnackedAlert(
+  userId: string,
+): Promise<{ ok: boolean; eventId?: number; error?: string }> {
+  const supabase = createServerClient();
+  const { data, error: fetchError } = await supabase
+    .from("alert_events")
+    .select("id")
+    .eq("user_id", userId)
+    .is("acknowledged_at", null)
+    .not("channels_sent", "eq", "{}")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (fetchError) return { ok: false, error: fetchError.message };
+  if (!data) return { ok: false, error: "No unhandled alerts." };
+
+  const result = await acknowledgeAlertEvent(userId, data.id);
+  if (!result.ok) return result;
+  return { ok: true, eventId: data.id };
+}
+
 export async function listRecentAlertEvents(
   userId: string,
   limit = 20,

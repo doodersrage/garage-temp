@@ -15,6 +15,8 @@ const checks = [
   { path: "/compare", heading: /Built for homeowners/i },
   { path: "/system-status", heading: /System status/i },
   { path: "/docs/api", heading: /API documentation/i },
+  { path: "/privacy", heading: /Privacy/i },
+  { path: "/about/zapier-integration", heading: /Zapier & Make/i },
   { path: "/manifest.webmanifest", json: "name", expect: "ThermalTrace" },
 ];
 

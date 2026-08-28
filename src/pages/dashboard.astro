@@ -39,6 +39,8 @@ import { fetchNwsAlerts } from "../lib/nwsAlerts";
 import { buildHeatingInsights } from "../lib/heatingInsights";
 import HeatingInsightsCard from "../components/HeatingInsightsCard.astro";
 import ProductAnalyticsTracker from "../components/ProductAnalyticsTracker.tsx";
+import UnackedAlertsBanner from "../components/UnackedAlertsBanner.astro";
+import { countUnacknowledgedAlerts } from "../lib/alertEvents";
 
 import DashboardMetricGrid from "../components/dashboard/DashboardMetricGrid.astro";
 import MetricCard from "../components/dashboard/MetricCard.astro";
@@ -62,6 +64,7 @@ const [
   feedHealth,
   userHouseholds,
   activeHouseholdId,
+  unackedAlertCount,
 ] = await Promise.all([
   getUserPreferences(user),
   fetchUserTempConfig(user.id),
@@ -73,6 +76,7 @@ const [
   checkFeedHealth(user.id),
   listUserHouseholds(user.id),
   getUserHouseholdId(user.id),
+  countUnacknowledgedAlerts(user.id),
 ]);
 
 const members = household.householdId
@@ -229,6 +233,8 @@ if (hasAlertsConfigured) analyticsEvents.push({ name: "onboarding_step_complete"
       households={userHouseholds.households}
       activeHouseholdId={activeHouseholdId}
     />
+
+    <UnackedAlertsBanner count={unackedAlertCount} />
 
     {!canEdit && (
       <p class="alert-warning mt-0 mb-0" role="status">

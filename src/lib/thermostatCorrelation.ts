@@ -61,9 +61,13 @@ export async function fetchEcobeeSnapshot(
 }
 
 export async function fetchThermostatContext(): Promise<ThermostatSnapshot | null> {
-  const nest = import.meta.env.NEST_ACCESS_TOKEN?.trim();
+  const { resolveNestAccessToken, resolveEcobeeAccessToken } = await import("./thermostatOAuth");
+
+  const nest = await resolveNestAccessToken();
   if (nest) return fetchNestSnapshot(nest);
-  const ecobee = import.meta.env.ECOBEE_ACCESS_TOKEN?.trim();
+
+  const ecobee = await resolveEcobeeAccessToken();
   if (ecobee) return fetchEcobeeSnapshot(ecobee);
+
   return null;
 }

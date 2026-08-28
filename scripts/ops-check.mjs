@@ -56,6 +56,11 @@ const groups = [
     keys: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID", "STRIPE_PRICE_ID_PRO"],
   },
   {
+    label: "Cron & ack links",
+    keys: ["CRON_SECRET"],
+    optional: true,
+  },
+  {
     label: "Email",
     keys: ["SMTP_MAIL_FROM", "SMTP_MAIL_TO"],
   },
@@ -76,8 +81,10 @@ for (const group of groups) {
 }
 
 console.log("\nNext steps:");
-console.log("  pnpm db:push          — apply Supabase migrations (NWS freeze columns)");
+console.log("  pnpm db:push          — apply Supabase migrations");
 console.log("  pnpm secrets:push     — sync .env secrets to Cloudflare Worker");
+console.log("  pnpm smoke:public     — verify production pages after deploy");
+console.log("  Supabase dashboard    — enable TOTP MFA if using MFA enroll UI");
 console.log("  Dashboard → Ops       — run email + channel smoke tests after deploy");
 
 process.exit(failed ? 1 : 0);

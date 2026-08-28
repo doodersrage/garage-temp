@@ -33,6 +33,16 @@
       "url": "/dashboard"
     },
     {
+      "name": "Alerts",
+      "short_name": "Alerts",
+      "url": "/dashboard/alerts"
+    },
+    {
+      "name": "Portfolio",
+      "short_name": "Portfolio",
+      "url": "/dashboard/portfolio"
+    },
+    {
       "name": "History",
       "short_name": "History",
       "url": "/dashboard/history"

@@ -1,0 +1,13 @@
+---
+interface Props {
+  count: number;
+}
+
+const { count } = Astro.props;
+---
+{count > 0 && (
+  <div class="alert-warning mb-4" role="status">
+    <strong>{count}</strong> unhandled alert{count === 1 ? "" : "s"} —
+    <a href="/dashboard/alerts" class="text-link ml-1">Review &amp; acknowledge</a>
+  </div>
+)}
