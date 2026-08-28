@@ -4,7 +4,8 @@ Open-source dashboard to **track, log, and analyze temperature probe curves** �
 
 **Production:** [thermaltrace.dev](https://thermaltrace.dev)  
 **Workers preview:** [garage-temp.doodersrage.workers.dev](https://garage-temp.doodersrage.workers.dev) (redirects to apex)  
-**API docs:** [/docs/api](https://thermaltrace.dev/docs/api) · [OpenAPI](https://thermaltrace.dev/openapi.yaml)
+**API docs:** [/docs/api](https://thermaltrace.dev/docs/api) · [OpenAPI](https://thermaltrace.dev/openapi.yaml)  
+**Developer docs (GitHub Pages):** [doodersrage.github.io/thermaltrace](https://doodersrage.github.io/thermaltrace/)
 
 ---
 

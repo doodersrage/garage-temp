@@ -29,6 +29,8 @@
     "audit:stripe": "node --env-file=.env scripts/audit-stripe-prices.mjs",
     "generate:vapid": "node scripts/generate-vapid-keys.mjs",
     "astro": "astro",
+    "docs:dev": "pnpm --dir docs --ignore-workspace dev",
+    "docs:build": "pnpm --dir docs --ignore-workspace build",
     "generate-types": "supabase gen types typescript --linked > src/types/supabase.ts && wrangler types"
   },
   "dependencies": {
