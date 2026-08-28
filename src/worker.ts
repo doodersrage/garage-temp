@@ -43,7 +43,7 @@ export default {
               errors: result.errors.slice(0, 20),
             });
             await notifyOps(
-              "Garage Temp job failed: collect-history",
+              "ThermalTrace job failed: collect-history",
               formatJobFailureBody("collect-history", {
                 householdsProcessed: result.householdsProcessed,
                 usersProcessed: result.usersProcessed,
@@ -66,7 +66,7 @@ export default {
           };
           await finishJobRun(historyJobId, "error", details);
           await notifyOps(
-            "Garage Temp job failed: collect-history",
+            "ThermalTrace job failed: collect-history",
             formatJobFailureBody("collect-history", details),
           );
           throw error;
@@ -84,7 +84,7 @@ export default {
                 errors: digest.errors.slice(0, 20),
               });
               await notifyOps(
-                "Garage Temp job failed: weekly-digest",
+                "ThermalTrace job failed: weekly-digest",
                 formatJobFailureBody("weekly-digest", {
                   sent: digest.sent,
                   skipped: digest.skipped,
@@ -107,7 +107,7 @@ export default {
             };
             await finishJobRun(digestJobId, "error", details);
             await notifyOps(
-              "Garage Temp job failed: weekly-digest",
+              "ThermalTrace job failed: weekly-digest",
               formatJobFailureBody("weekly-digest", details),
             );
           }
@@ -202,7 +202,7 @@ export default {
           });
           if (failed) {
             await notifyOps(
-              "Garage Temp job failed: drip-emails",
+              "ThermalTrace job failed: drip-emails",
               formatJobFailureBody("drip-emails", {
                 message: "Hard drip email failures",
                 errors: drip.errors.slice(0, 10),
@@ -226,7 +226,7 @@ export default {
                 error: retention.error,
               });
               await notifyOps(
-                "Garage Temp job failed: sensor-retention",
+                "ThermalTrace job failed: sensor-retention",
                 formatJobFailureBody("sensor-retention", {
                   message: retention.error,
                   rolledUp: retention.rolledUp,
@@ -249,7 +249,7 @@ export default {
             };
             await finishJobRun(retentionJobId, "error", details);
             await notifyOps(
-              "Garage Temp job failed: sensor-retention",
+              "ThermalTrace job failed: sensor-retention",
               formatJobFailureBody("sensor-retention", details),
             );
           }
@@ -264,7 +264,7 @@ export default {
               error: freezeMap.error,
             });
             await notifyOps(
-              "Garage Temp job failed: freeze-map",
+              "ThermalTrace job failed: freeze-map",
               formatJobFailureBody("freeze-map", {
                 message: freezeMap.error,
                 cities: freezeMap.cities,
@@ -283,7 +283,7 @@ export default {
           };
           await finishJobRun(freezeMapJobId, "error", details);
           await notifyOps(
-            "Garage Temp job failed: freeze-map",
+            "ThermalTrace job failed: freeze-map",
             formatJobFailureBody("freeze-map", details),
           );
         }

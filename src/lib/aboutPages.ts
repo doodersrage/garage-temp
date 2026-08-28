@@ -77,7 +77,7 @@ export const coreAboutPages: AboutPage[] = [
     slug: "astro-applications",
     title: "Astro applications in this project",
     description:
-      "How Astro server rendering, islands, and Cloudflare deployment power the Garage Temperature Monitor site.",
+      "How Astro server rendering, islands, and Cloudflare deployment power the ThermalTrace site.",
     summary:
       "This site uses Astro for fast pages, authenticated dashboards, and API routes at the edge.",
   },
@@ -109,7 +109,7 @@ export const coreAboutPages: AboutPage[] = [
     slug: "ingest-and-webhooks",
     title: "Ingest API and alert webhooks",
     description:
-      "Push sensor readings into Garage Temp with the ingest API, and send alerts to Discord, IFTTT, or Home Assistant.",
+      "Push sensor readings into ThermalTrace with the ingest API, and send alerts to Discord, IFTTT, or Home Assistant.",
     summary:
       "Device API keys, typed sensor payloads, outbound HMAC webhooks, and Pro alert channels.",
   },
@@ -117,7 +117,7 @@ export const coreAboutPages: AboutPage[] = [
     slug: "install-pwa",
     title: "Install as an app (PWA)",
     description:
-      "Add Garage Temperature Monitor to your home screen for faster access and optional push alerts.",
+      "Add ThermalTrace to your home screen for faster access and optional push alerts.",
     summary:
       "Desktop, Android, and iOS install steps, plus Web Push limits on Apple devices.",
   },

@@ -13,7 +13,7 @@ import {
 import { aboutPages } from "../../lib/aboutPages";
 import "../../styles/about.css";
 
-const title = "About Garage Temperature Monitor";
+const title = "About ThermalTrace";
 const description =
   "Guides on temperature probes, historical data, Arduino firmware, Python feeds, Astro, Node.js, and the full monitoring stack behind this site.";
 
@@ -32,7 +32,7 @@ const guideCount = aboutPages.filter((page) => page.parentSlug).length;
     <PageHeader
       kicker="About"
       title={title}
-      lede="Live sensor readings, local weather, saved history, and the technology behind the project — from Arduino probes to the Astro dashboard."
+      lede="Open-source guides on temperature probes, historical curves, Arduino firmware, Python feeds, and the stack behind ThermalTrace."
     >
       <a slot="actions" class="btn-primary" href="/about/temperature-probe-case-study">Read the case study</a>
       <a slot="actions" class="btn-secondary" href="/about/probe-demo">Open probe demo</a>
@@ -41,7 +41,7 @@ const guideCount = aboutPages.filter((page) => page.parentSlug).length;
     <section class="card">
       <div class="about-prose">
         <p>
-          Garage Temperature Monitor combines Arduino probes, JSON feeds, and a modern web dashboard
+          ThermalTrace combines Arduino probes, JSON feeds, and a modern web dashboard
           so you can see current conditions, compare them with outdoor weather, and review trends over time.
         </p>
         <p>

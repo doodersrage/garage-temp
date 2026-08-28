@@ -15,10 +15,10 @@ type DripStage = {
 const DRIP_STAGES: DripStage[] = [
   {
     day: 1,
-    subject: "Add your first probe to Garage Temp",
+    subject: "Add your first probe to ThermalTrace",
     body: (site) =>
       [
-        "Welcome to Garage Temp!",
+        "Welcome to ThermalTrace!",
         "",
         "Next step: add a push device or JSON feed so live readings appear on your dashboard.",
         `${site}/dashboard/temperature`,
@@ -31,7 +31,7 @@ const DRIP_STAGES: DripStage[] = [
     subject: "Turn on freeze alerts before the next cold snap",
     body: (site) =>
       [
-        "Garage Temp can email or message you when temperatures drop toward freezing.",
+        "ThermalTrace can email or message you when temperatures drop toward freezing.",
         "",
         "Set a threshold under Alerts — most users start around 34°F.",
         `${site}/dashboard/alerts`,
@@ -42,7 +42,7 @@ const DRIP_STAGES: DripStage[] = [
     subject: "Try Pro free — SMS, push, and share links",
     body: (site) =>
       [
-        "You've had a week to explore Garage Temp.",
+        "You've had a week to explore ThermalTrace.",
         "",
         "Pro adds SMS and browser push alerts, public share links, webhooks, and up to 24 devices — with a 14-day trial.",
         `${site}/pricing`,

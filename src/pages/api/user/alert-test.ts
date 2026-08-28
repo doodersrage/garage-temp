@@ -28,8 +28,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     );
 
     const { sent, skipped } = await notifyUser(user.id, user.email, settings, {
-      title: "Garage Temp test alert",
-      body: "This is a test notification from your Garage Temperature Monitor dashboard. If you received this, your alert channels are working.",
+      title: "ThermalTrace test alert",
+      body: "This is a test notification from your ThermalTrace dashboard. If you received this, your alert channels are working.",
       kind: "generic",
     });
 

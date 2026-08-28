@@ -33,7 +33,7 @@ async function sendMonthlyReportEmail(
 
   const msg = createMimeMessage();
   msg.setSender({
-    name: "Garage Temp Monitor",
+    name: "ThermalTrace",
     addr: from,
   });
   msg.setRecipient(to);

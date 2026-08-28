@@ -3,13 +3,13 @@
     {
       "name": "DS_PROMETHEUS",
       "label": "Prometheus",
-      "description": "Garage Temp metrics scrape target",
+      "description": "ThermalTrace metrics scrape target",
       "type": "datasource",
       "pluginId": "prometheus",
       "pluginName": "Prometheus"
     }
   ],
-  "title": "Garage Temp",
+  "title": "ThermalTrace",
   "uid": "garage-temp",
   "timezone": "browser",
   "schemaVersion": 39,

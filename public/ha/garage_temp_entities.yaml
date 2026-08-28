@@ -1,11 +1,11 @@
-# Home Assistant entity naming for Garage Temp push devices
+# Home Assistant entity naming for ThermalTrace push devices
 # Copy sensor keys from Dashboard → Temperature → device sensors.
 
 sensor:
   - platform: rest
     name: garage_temp_living
     resource: http://YOUR_DEVICE_IP/status
-    # Or use MQTT / webhook ingest to Garage Temp instead
+    # Or use MQTT / webhook ingest to ThermalTrace instead
 
 # Recommended entity_id pattern when mirroring ingest keys:
 #   sensor.garage_<space>_<key>_temperature
@@ -14,7 +14,7 @@ sensor:
 
 template:
   - sensor:
-      - name: "Garage Temp Delta Outdoor"
+      - name: "ThermalTrace Delta Outdoor"
         unit_of_measurement: "°F"
         device_class: temperature
         state: >
@@ -28,7 +28,7 @@ binary_sensor:
       {{ is_state('binary_sensor.garage_door_door', 'on') }}
 
 automation:
-  - alias: "Garage Temp freeze snooze via inbound webhook"
+  - alias: "ThermalTrace freeze snooze via inbound webhook"
     trigger:
       - platform: numeric_state
         entity_id: sensor.garage_garage_avg_temperature

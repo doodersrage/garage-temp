@@ -1,40 +1,41 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 492 76" fill="none" role="img" aria-labelledby="gtp-logo-title">
-  <title id="gtp-logo-title">Garage Temperature Probe</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 76" fill="none" role="img" aria-labelledby="tt-logo-title">
+  <title id="tt-logo-title">ThermalTrace</title>
   <defs>
-    <linearGradient id="gtp-steel" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="tt-steel" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#ECEEF2"/>
       <stop offset="42%" stop-color="#B9BFC8"/>
       <stop offset="100%" stop-color="#6B737D"/>
     </linearGradient>
-    <linearGradient id="gtp-orange" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="tt-accent" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#FFD9B0"/>
       <stop offset="38%" stop-color="#FF9E4A"/>
       <stop offset="100%" stop-color="#E85500"/>
     </linearGradient>
-    <linearGradient id="gtp-garage" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="tt-eyebrow" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#D2D7DE"/>
       <stop offset="100%" stop-color="#9098A3"/>
     </linearGradient>
   </defs>
 
+  <!-- Same motif as the old mark: eyebrow + orange arc dropping into the accent word -->
   <path
-    d="M 168 21.5 H 302 Q 318 21.5 322 30 L 327 46"
-    stroke="url(#gtp-orange)"
+    d="M 158 21.5 H 278 Q 296 21.5 301 30 L 308 48"
+    stroke="url(#tt-accent)"
     stroke-width="2.4"
     stroke-linecap="round"
     fill="none"
   />
 
   <text
-    x="152"
+    x="142"
     y="21"
     text-anchor="middle"
-    fill="url(#gtp-garage)"
+    fill="url(#tt-eyebrow)"
     font-family="ui-rounded, 'Segoe UI', system-ui, sans-serif"
     font-size="16.5"
     font-weight="600"
     letter-spacing="0.04em"
-  >Garage</text>
+  >Sensors</text>
 
   <text
     y="62"
@@ -43,6 +44,6 @@
     font-weight="800"
     letter-spacing="-0.025em"
   >
-    <tspan x="0" fill="url(#gtp-steel)">Temperature</tspan><tspan dx="6" fill="url(#gtp-orange)">Probe</tspan>
+    <tspan x="0" fill="url(#tt-steel)">Thermal</tspan><tspan dx="6" fill="url(#tt-accent)">Trace</tspan>
   </text>
 </svg>

@@ -1,6 +1,7 @@
-const SITE_NAME = "Garage Temperature Monitor";
-const DEFAULT_DESCRIPTION =
-  "Monitor garage temperature and humidity with Arduino probes, JSON feeds, live dashboards, and historic CSV export.";
+import { BRAND_DESCRIPTION, BRAND_NAME } from "./brand";
+
+const SITE_NAME = BRAND_NAME;
+const DEFAULT_DESCRIPTION = BRAND_DESCRIPTION;
 
 export function getDefaultDescription(): string {
   return DEFAULT_DESCRIPTION;

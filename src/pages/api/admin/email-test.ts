@@ -22,9 +22,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const siteUrl = resolveSiteUrl(null);
   const subjects: Record<string, { subject: string; body: string }> = {
     drip_day1: {
-      subject: "[Test] Add your first probe to Garage Temp",
+      subject: "[Test] Add your first probe to ThermalTrace",
       body: [
-        "Welcome to Garage Temp!",
+        "Welcome to ThermalTrace!",
         "",
         "Next step: add a push device or JSON feed.",
         `${siteUrl}/dashboard/temperature`,
@@ -38,7 +38,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       ].join("\n"),
     },
     trial_3d: {
-      subject: "[Test] Your Garage Temp Pro trial ends in 3 days",
+      subject: "[Test] Your ThermalTrace Pro trial ends in 3 days",
       body: [`Keep SMS, push, and share links: ${siteUrl}/dashboard/plans`].join("\n"),
     },
   };

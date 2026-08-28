@@ -50,7 +50,7 @@ describe("serverErrors", () => {
       }),
     );
     expect(notifyOps).toHaveBeenCalledWith(
-      "Garage Temp page error: /dashboard/history",
+      "ThermalTrace page error: /dashboard/history",
       expect.stringContaining("boom"),
     );
   });

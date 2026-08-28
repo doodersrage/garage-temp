@@ -530,7 +530,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "ingest-and-webhooks",
     title: "Zapier and Make.com recipes",
     description:
-      "Connect Garage Temp outbound webhooks and inbound snooze actions to no-code automations.",
+      "Connect ThermalTrace outbound webhooks and inbound snooze actions to no-code automations.",
     summary:
       "Route alerts to Zapier/Make and pause notifications from other smart-home flows.",
   },

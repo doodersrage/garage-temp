@@ -1,6 +1,6 @@
-# Garage Temperature Monitor
+# ThermalTrace
 
-Live garage (and multi-space) temperature, humidity, and sensor monitoring — built with **Astro 6**, **Cloudflare Workers**, **Supabase**, and **Stripe**.
+Open-source dashboard to **track, log, and analyze temperature probe curves** — built with **Astro 6**, **Cloudflare Workers**, **Supabase**, and **Stripe**.
 
 **Production:** [garage-temp.robmcd.name](https://garage-temp.robmcd.name)  
 **Workers preview:** [garage-temp.doodersrage.workers.dev](https://garage-temp.doodersrage.workers.dev)  
@@ -31,7 +31,7 @@ Live garage (and multi-space) temperature, humidity, and sensor monitoring — b
 
 ## What it does
 
-Track probes in a garage (or attic, shed, basement, …), compare them with outdoor weather, keep history, and get alerted when something goes wrong — freeze risk, humidity spikes, silent feeds, door left open, or rapid temperature drops.
+ThermalTrace connects temperature (and humidity) probes in a garage, attic, shed, basement, or other space, compares them with outdoor weather, keeps history you can chart and export, and alerts you when something goes wrong — freeze risk, humidity spikes, silent feeds, door left open, or rapid temperature drops.
 
 You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devices **push** readings to a per-device ingest URL. Households share devices, invite family (including read-only viewers), and (on Pro) publish share links, metrics, and inbound automation webhooks.
 

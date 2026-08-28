@@ -33,7 +33,7 @@ export async function sendPlainEmail(
 
   const msg = createMimeMessage();
   msg.setSender({
-    name: options?.fromName ?? "Garage Temp Monitor",
+    name: options?.fromName ?? "ThermalTrace",
     addr: from,
   });
   msg.setRecipient(to);

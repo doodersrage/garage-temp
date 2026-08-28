@@ -69,8 +69,8 @@ export async function sendTrialRemindersForAllUsers(): Promise<{
       const plan = sub.plan_tier === "pro" ? "Pro" : "Member";
       const subject =
         remaining === 1
-          ? `Your Garage Temp ${plan} trial ends tomorrow`
-          : `Your Garage Temp ${plan} trial ends in ${remaining} days`;
+          ? `Your ThermalTrace ${plan} trial ends tomorrow`
+          : `Your ThermalTrace ${plan} trial ends in ${remaining} days`;
       const body = [
         `Hi,`,
         ``,

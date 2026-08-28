@@ -14,15 +14,15 @@ const showGarageTemps = !isAuthenticated || preferences!.showGarageTemps;
 const showWeather = !isAuthenticated || preferences!.showWeather;
 ---
 
-<Layout description="Live garage temperature and humidity readings with local weather, saved history, and a configurable dashboard.">
+<Layout description="ThermalTrace tracks, logs, and analyzes temperature probe curves with live dashboards, freeze alerts, and history.">
 	{!isAuthenticated ? (
 		<div class="home-marketing">
 			<section class="home-hero home-hero--bleed">
 				<div class="home-hero-inner">
-					<h1 class="home-hero-brand">Garage Temperature Monitor</h1>
+					<h1 class="home-hero-brand">ThermalTrace</h1>
 					<p class="home-hero-lead">
-						Watch freeze risk in real time, compare indoor conditions with outdoor weather,
-						and get alerts before pipes and storage take damage.
+						An open-source dashboard to track, log, and analyze temperature probe curves —
+						with freeze-aware alerts before pipes and storage take damage.
 					</p>
 					<div class="home-hero-actions">
 						<a class="btn-primary" href="/register">Create free account</a>
@@ -60,9 +60,9 @@ const showWeather = !isAuthenticated || preferences!.showWeather;
 
 				<section class="card home-guides">
 					<div class="home-guides-copy">
-						<h2 class="card-title">Built for cold-weather garages</h2>
+						<h2 class="card-title">Built for probe curves</h2>
 						<p class="card-subtitle mb-0">
-							Probe placement, wiring, firmware, and the data path from sensor wire to screen.
+							Probe placement, wiring, firmware, and the data path from sensor wire to chart.
 						</p>
 					</div>
 					<div class="home-guides-actions">

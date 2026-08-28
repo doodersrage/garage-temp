@@ -24,7 +24,7 @@ export async function sendReadingWebhook(
   const body = JSON.stringify(payload);
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "User-Agent": "GarageTemp/1.0",
+    "User-Agent": "ThermalTrace/1.0",
   };
 
   const secret = settings.readingWebhookSecret?.trim();

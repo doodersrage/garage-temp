@@ -1,15 +1,15 @@
-# Garage Temp → Home Assistant webhook blueprint
+# ThermalTrace → Home Assistant webhook blueprint
 # Import via Settings → Automations & Scenes → Blueprints → Import
 # Or copy into config/blueprints/automation/garage_temp_webhook.yaml
 #
-# Point Garage Temp Pro outbound webhook at:
+# Point ThermalTrace Pro outbound webhook at:
 #   https://<your-ha-host>/api/webhook/<webhook_id>
-# Optional: set the same secret in Garage Temp and verify X-Signature (HMAC-SHA256 hex of body).
+# Optional: set the same secret in ThermalTrace and verify X-Signature (HMAC-SHA256 hex of body).
 
 blueprint:
-  name: Garage Temp alert webhook
+  name: ThermalTrace alert webhook
   description: >
-    Receive Garage Temp outbound HTTPS alerts and create a persistent notification.
+    Receive ThermalTrace outbound HTTPS alerts and create a persistent notification.
     Optionally republish to MQTT for local automations.
   domain: automation
   input:
@@ -27,7 +27,7 @@ blueprint:
         text:
     notify_title_prefix:
       name: Notification title prefix
-      default: "Garage Temp"
+      default: "ThermalTrace"
       selector:
         text:
 

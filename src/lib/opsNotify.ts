@@ -11,7 +11,7 @@ async function sendOpsEmail(subject: string, body: string): Promise<boolean> {
 
   try {
     const { sendPlainEmail } = await import("./mailer");
-    await sendPlainEmail(to, subject, body, { fromName: "Garage Temp Ops" });
+    await sendPlainEmail(to, subject, body, { fromName: "ThermalTrace Ops" });
     return true;
   } catch (error) {
     console.error("Failed to send ops email:", error);

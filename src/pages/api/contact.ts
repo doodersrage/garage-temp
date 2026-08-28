@@ -42,7 +42,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   }
 
   const msg = createMimeMessage();
-  msg.setSender({ name: "Garage Temp Monitor", addr: from });
+  msg.setSender({ name: "ThermalTrace", addr: from });
   msg.setRecipient(to);
   msg.setSubject("Contact Form Submission");
   msg.addMessage({

@@ -61,7 +61,7 @@ export function summarizeProbesForReport(points: ChartPoint[]): MonthlyProbeSumm
 
 export function buildMonthlyReportPlainText(data: MonthlyReportData): string {
   const lines = [
-    `Garage Temp monthly report — ${data.monthLabel}`,
+    `ThermalTrace monthly report — ${data.monthLabel}`,
     "",
     `Readings (30d): ${data.readingCount}`,
     `Coldest: ${formatTemp(data.minTempF)}`,
@@ -143,12 +143,12 @@ export function buildMonthlyReportHtmlDocument(data: MonthlyReportData): string 
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Garage Temp report — ${escapeHtml(data.monthLabel)}</title>
+  <title>ThermalTrace report — ${escapeHtml(data.monthLabel)}</title>
 </head>
 <body style="margin:0;padding:24px;background:#090b0f;color:#e2e8f0;font-family:system-ui,-apple-system,sans-serif;line-height:1.5">
   <div style="max-width:720px;margin:0 auto">
     <header style="margin-bottom:24px">
-      <p style="margin:0 0 8px;color:#60a5fa;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em">Garage Temp Monitor</p>
+      <p style="margin:0 0 8px;color:#60a5fa;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em">ThermalTrace</p>
       <h1 style="margin:0 0 8px;font-size:28px;color:#f8fafc">Monthly report — ${escapeHtml(data.monthLabel)}</h1>
       <p style="margin:0;color:#94a3b8">30-day snapshot from your saved readings and forecast outlook.</p>
     </header>
@@ -208,7 +208,7 @@ export function buildMonthlyReportHtmlDocument(data: MonthlyReportData): string 
 export function buildMonthlyReportHtmlEmail(data: MonthlyReportData): string {
   return `<div style="font-family:system-ui,sans-serif;color:#111;line-height:1.5">
     <h2 style="margin:0 0 12px">Monthly garage report — ${escapeHtml(data.monthLabel)}</h2>
-    <p style="margin:0 0 16px">30-day summary from Garage Temp Monitor. See the attached HTML report for full probe and forecast tables.</p>
+    <p style="margin:0 0 16px">30-day summary from ThermalTrace. See the attached HTML report for full probe and forecast tables.</p>
     <ul style="margin:0 0 16px;padding-left:20px">
       <li>Readings: <strong>${data.readingCount}</strong></li>
       <li>Coldest: <strong>${formatTemp(data.minTempF)}</strong></li>

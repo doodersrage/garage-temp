@@ -14,13 +14,13 @@ function formatIcalDate(date: Date): string {
 
 export function buildFreezeOutlookIcal(
   nights: NightRisk[],
-  calendarName = "Garage Temp freeze outlook",
+  calendarName = "ThermalTrace freeze outlook",
 ): string {
   const now = formatIcalDate(new Date());
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Garage Temp//Freeze Outlook//EN",
+    "PRODID:-//ThermalTrace//Freeze Outlook//EN",
     `X-WR-CALNAME:${escapeIcal(calendarName)}`,
     "CALSCALE:GREGORIAN",
   ];

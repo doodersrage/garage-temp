@@ -23,7 +23,7 @@ export async function fetchNwsAlerts(
     const response = await fetch(url, {
       headers: {
         Accept: "application/geo+json",
-        "User-Agent": "GarageTempMonitor/1.0 (garage-temp.robmcd.name)",
+        "User-Agent": "ThermalTrace/1.0 (garage-temp.robmcd.name)",
       },
     });
     if (!response.ok) return null;

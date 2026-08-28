@@ -1,7 +1,7 @@
 {
-  "name": "Garage Temperature Monitor",
-  "short_name": "Garage Temp",
-  "description": "Live garage temperature and humidity monitoring with history, alerts, and probe dashboards.",
+  "name": "ThermalTrace",
+  "short_name": "ThermalTrace",
+  "description": "Open-source dashboard to track, log, and analyze temperature probe curves — with live readings, freeze alerts, and history.",
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",

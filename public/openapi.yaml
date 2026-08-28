@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: Garage Temp API
+  title: ThermalTrace API
   version: 1.0.0
   description: |
     HTTP endpoints for device ingest, share links, metrics, and inbound automations.

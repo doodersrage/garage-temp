@@ -162,7 +162,7 @@ export async function sendInviteEmail(
       to,
       `You're invited to ${householdName}`,
       [
-        `${invitedByEmail ?? "Someone"} invited you to share garage sensors on Garage Temperature Monitor.`,
+        `${invitedByEmail ?? "Someone"} invited you to share garage sensors on ThermalTrace.`,
         "",
         `Household: ${householdName}`,
         `Accept invite: ${acceptUrl}`,

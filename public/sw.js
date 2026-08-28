@@ -1,4 +1,4 @@
-/* Garage Temp PWA service worker */
+/* ThermalTrace PWA service worker */
 const CACHE = "garage-temp-v3";
 const PRECACHE = ["/manifest.webmanifest", "/favicon.svg", "/logo.svg"];
 
@@ -108,7 +108,7 @@ self.addEventListener("fetch", (event) => {
 });
 
 self.addEventListener("push", (event) => {
-  let title = "Garage Temp";
+  let title = "ThermalTrace";
   let body = "New alert";
   try {
     const data = event.data ? event.data.json() : null;

@@ -12,6 +12,7 @@ import {
   resolvePageUrl,
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
+import { BRAND_NAME } from "../lib/brand";
 
 interface Props {
   title?: string;
@@ -22,7 +23,7 @@ interface Props {
 }
 
 const { title, description, schema, ogImage, skipAuth = false } = Astro.props;
-const pageTitle = title ? `${title} · Garage Temperature Monitor` : 'Garage Temperature Monitor';
+const pageTitle = title ? `${title} · ${BRAND_NAME}` : BRAND_NAME;
 const metaDescription = description ?? getDefaultDescription();
 const siteUrl = resolveSiteUrl(Astro.site);
 const ogImageUrl = ogImage ?? `${siteUrl}/logo.svg`;
@@ -107,7 +108,7 @@ const isDashboard = currentPath.startsWith("/dashboard");
 			<header class="site-header">
 				<div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
 					<a href="/" class="site-logo-link flex items-center gap-3">
-						<Image src={logo} height={48} width={311} alt="Garage Temperature Monitor" class="site-logo" />
+						<Image src={logo} height={44} width={260} alt="ThermalTrace" class="site-logo" />
 					</a>
 					<button
 						type="button"
@@ -160,9 +161,9 @@ const isDashboard = currentPath.startsWith("/dashboard");
 					<div class="site-footer-inner">
 						<div class="site-footer-grid">
 							<div>
-								<p class="site-footer-brand">Garage Temperature Monitor</p>
+								<p class="site-footer-brand">ThermalTrace</p>
 								<p class="site-footer-copy">
-									Live garage monitoring, freeze alerts, and history for homes that need to stay ahead of cold snaps.
+									Open-source temperature probe curves, freeze alerts, and history — track, log, and analyze conditions before cold snaps do damage.
 								</p>
 							</div>
 							<div>
@@ -202,7 +203,7 @@ const isDashboard = currentPath.startsWith("/dashboard");
 								</ul>
 							</div>
 						</div>
-						<p class="site-footer-legal">Copyright © {currentYear} Garage Temperature Monitor. All rights reserved.</p>
+						<p class="site-footer-legal">Copyright © {currentYear} ThermalTrace. All rights reserved.</p>
 					</div>
 				</footer>
 			)}

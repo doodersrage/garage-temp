@@ -42,7 +42,7 @@ export async function recordServerError(input: {
   if (Date.now() - last >= NOTIFY_COOLDOWN_MS) {
     lastNotifiedByPath.set(key, Date.now());
     await notifyOps(
-      `Garage Temp page error: ${input.path}`,
+      `ThermalTrace page error: ${input.path}`,
       [`Method: ${input.method ?? "GET"}`, `Message: ${message}`, stack ? `Stack: ${stack.slice(0, 500)}` : ""]
         .filter(Boolean)
         .join("\n"),

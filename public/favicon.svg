@@ -1,27 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-labelledby="gtp-icon-title">
-  <title id="gtp-icon-title">Garage Temperature Probe</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-labelledby="tt-icon-title">
+  <title id="tt-icon-title">ThermalTrace</title>
   <defs>
     <linearGradient id="icon-steel" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#ECEEF2"/>
       <stop offset="100%" stop-color="#7A828C"/>
     </linearGradient>
-    <linearGradient id="icon-orange" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="icon-accent" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#FFC48A"/>
       <stop offset="100%" stop-color="#E85500"/>
     </linearGradient>
   </defs>
   <rect width="32" height="32" rx="7" fill="#090B0F"/>
+  <!-- Mini probe-curve / trace mark -->
   <path
-    d="M 16 5.5 V 19.5"
+    d="M 7 22 C 11 22 12 10 16 10 C 20 10 21 22 25 22"
     stroke="url(#icon-steel)"
-    stroke-width="3.2"
+    stroke-width="2.4"
     stroke-linecap="round"
+    fill="none"
   />
-  <circle cx="16" cy="23.5" r="4.2" fill="url(#icon-orange)"/>
-  <path
-    d="M 11.5 8.5 H 20.5"
-    stroke="url(#icon-orange)"
-    stroke-width="2"
-    stroke-linecap="round"
-  />
+  <circle cx="25" cy="22" r="3.1" fill="url(#icon-accent)"/>
 </svg>

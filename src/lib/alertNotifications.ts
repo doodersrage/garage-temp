@@ -77,7 +77,7 @@ export async function sendThresholdAlertsIfNeeded(
         email,
         settings,
         {
-          title: "Escalated: Garage temperature alert",
+          title: "Escalated: Temperature alert",
           body: messages.join("\n"),
           kind: "threshold",
         },
@@ -92,7 +92,7 @@ export async function sendThresholdAlertsIfNeeded(
 
   const alertSpace = readings.find((r) => r.space)?.space ?? null;
   await notifyUser(userId, email, settings, {
-    title: "Garage temperature alert",
+    title: "Temperature alert",
     body: messages.join("\n"),
     kind: "threshold",
   }, { space: alertSpace });
@@ -359,7 +359,7 @@ export async function maybeSendRuleAlerts(
   if (messages.length === 0) return;
 
   await notifyUser(userId, email, settings, {
-    title: "Garage alert rule matched",
+    title: "Alert rule matched",
     body: messages.join("\n"),
     kind: "rule",
   });
