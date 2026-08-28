@@ -1,0 +1,55 @@
+---
+interface Props {
+  hasAlertsEnabled: boolean;
+  hasEmailAlerts: boolean;
+  canEdit?: boolean;
+}
+
+const { hasAlertsEnabled, hasEmailAlerts, canEdit = true } = Astro.props;
+
+if (!canEdit || (hasAlertsEnabled && hasEmailAlerts)) {
+  return null;
+}
+
+const step = !hasAlertsEnabled ? "threshold" : "email";
+---
+<aside class="card alert-setup-nudge" data-nudge-key="alert_setup_nudge" role="note">
+  <div class="alert-setup-nudge-body">
+    <p class="alert-setup-nudge-title">Finish alert setup</p>
+    {step === "threshold" ? (
+      <p class="alert-setup-nudge-text">
+        Alerts are off or missing a freeze threshold. Set one before cold weather hits so you get warned in time.
+      </p>
+    ) : (
+      <p class="alert-setup-nudge-text">
+        Alerts are on but email is not configured. Enable the email channel and save so freeze warnings reach your inbox.
+      </p>
+    )}
+  </div>
+  <div class="alert-setup-nudge-actions">
+    {step === "threshold" ? (
+      <a class="btn-primary" href="/dashboard/alerts#alert-section-triggers">Set freeze threshold</a>
+    ) : (
+      <a class="btn-primary" href="/dashboard/alerts#alert-section-channels">Enable email alerts</a>
+    )}
+    <a class="btn-secondary" href="/dashboard/alerts">Open alerts</a>
+    <button type="button" class="btn-ghost alert-setup-nudge-dismiss" data-dismiss="alert_setup_nudge">
+      Dismiss
+    </button>
+  </div>
+</aside>
+
+<script is:inline>
+  (() => {
+    const el = document.querySelector(".alert-setup-nudge[data-nudge-key]");
+    const key = el?.getAttribute("data-nudge-key");
+    if (key && localStorage.getItem(key) === "1") {
+      el?.remove();
+    }
+    document.querySelector(".alert-setup-nudge-dismiss")?.addEventListener("click", () => {
+      const card = document.querySelector(".alert-setup-nudge");
+      if (key) localStorage.setItem(key, "1");
+      card?.remove();
+    });
+  })();
+</script>

@@ -13,6 +13,7 @@ import { buildPublicSitemapUrls } from './src/lib/sitemapPages.ts';
 
 const site = process.env.SITE_URL?.replace(/\/+$/, "") || "https://thermaltrace.dev";
 
+/** @param {string} pageUrl */
 function isIndexablePublicPage(pageUrl) {
   return (
     !pageUrl.includes("/dashboard") &&

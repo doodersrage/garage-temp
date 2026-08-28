@@ -1,6 +1,8 @@
 ---
 import DashboardLayout from "../layouts/DashboardLayout.astro";
 import DashboardOnboarding from "../components/DashboardOnboarding.astro";
+import AlertSetupNudge from "../components/dashboard/AlertSetupNudge.astro";
+import DashboardStoryCard from "../components/dashboard/DashboardStoryCard.astro";
 import { getAuthFromCookies } from "../lib/auth";
 import { getUserPreferences } from "../lib/userPreferences";
 import { fetchGarageTempHistory } from "../lib/garageTempsHistory";
@@ -234,6 +236,14 @@ if (hasEmailAlerts) analyticsEvents.push({ name: "onboarding_step_complete", pro
       hasHousehold={Boolean(household.householdId)}
       dismissed={onboardingDismissed}
     />
+
+    <AlertSetupNudge
+      hasAlertsEnabled={hasAlertsEnabled}
+      hasEmailAlerts={hasEmailAlerts}
+      canEdit={canEdit}
+    />
+
+    <DashboardStoryCard />
 
     <HouseholdSwitcher
       households={userHouseholds.households}

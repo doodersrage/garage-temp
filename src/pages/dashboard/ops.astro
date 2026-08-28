@@ -71,8 +71,26 @@ const opsDiscordConfigured = Boolean(
         <li>Send one drip/trial email smoke test after template changes.</li>
         <li>
           Verify Twilio + VAPID secrets
-          {twilioConfigured ? " · Twilio configured" : " · set `TWILIO_*`"}
+          {twilioConfigured ? (
+            <> · Twilio configured</>
+          ) : (
+            <>
+              {" · "}
+              <a class="text-link" href="https://console.twilio.com/" target="_blank" rel="noreferrer">
+                Add `TWILIO_*` in `.env`
+              </a>
+              {" then "}
+              <code>pnpm secrets:push</code>
+            </>
+          )}
           {vapidConfigured ? " · VAPID configured" : " · set `VAPID_*` (run `pnpm generate:vapid`)"}.
+        </li>
+        <li>
+          After deploy: <code>pnpm ops:smoke</code> and submit{" "}
+          <a class="text-link" href="https://search.google.com/search-console" target="_blank" rel="noreferrer">
+            sitemap in Search Console
+          </a>
+          .
         </li>
         <li>
           Ops notify: email uses `SMTP_MAIL_TO`

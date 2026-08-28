@@ -175,7 +175,12 @@ pnpm test:e2e          # Playwright (needs build / local server per config)
 pnpm audit:stripe      # compare STRIPE_DISPLAY_* to live Stripe prices
 ```
 
-Authenticated alert-settings E2E: set `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD`, then `pnpm test:e2e e2e/alert-settings.spec.ts`.
+Authenticated alert-settings E2E: set `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD` in `.env`, then:
+
+```bash
+pnpm test:e2e:auth
+# against production: PLAYWRIGHT_BASE_URL=https://thermaltrace.dev pnpm test:e2e:auth
+```
 
 ---
 
@@ -395,7 +400,11 @@ Set Worker secrets `SITE_URL` and `ORIGIN` to `https://thermaltrace.dev`, then `
 ```bash
 pnpm smoke:public
 # or: pnpm smoke:public https://garage-temp.doodersrage.workers.dev
+pnpm ops:smoke              # smoke + sitemap coverage + search-engine ping
+pnpm ping:sitemaps          # Google/Bing sitemap ping only
 ```
+
+Also submit `https://thermaltrace.dev/sitemap-index.xml` in [Google Search Console](https://search.google.com/search-console) → Sitemaps.
 
 Admin channel tests (SMS/push) still run from **Dashboard → Ops** after sign-in.
 
