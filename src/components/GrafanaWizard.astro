@@ -10,11 +10,11 @@ interface Props {
 
 const { siteUrl, apiKeyPrefix = null, apiKey = null } = Astro.props;
 const metricsUrl = `${siteUrl}/api/v1/metrics`;
-const dashboardJsonUrl = `${siteUrl}/grafana/garage-temp-dashboard.json`;
+const dashboardJsonUrl = `${siteUrl}/grafana/thermaltrace-dashboard.json`;
 const host = siteUrl.replace(/^https?:\/\//, "");
 const scrapeSnippet = `# prometheus.yml
 scrape_configs:
-  - job_name: garage_temp
+  - job_name: thermaltrace
     metrics_path: /api/v1/metrics
     scheme: ${siteUrl.startsWith("https") ? "https" : "http"}
     static_configs:
@@ -39,8 +39,8 @@ scrape_configs:
     </li>
     <li>
       Download
-      <a class="text-link" href="/grafana/garage-temp-dashboard.json" download>
-        garage-temp-dashboard.json
+      <a class="text-link" href="/grafana/thermaltrace-dashboard.json" download>
+        thermaltrace-dashboard.json
       </a>
       and import via Dashboards → New → Import.
     </li>

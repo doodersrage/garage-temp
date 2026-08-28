@@ -71,6 +71,12 @@ const signInHref = signInParams.toString()
           <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
         </div>
         <button class="btn-primary" type="submit">Create account</button>
+        <p class="form-hint mt-3 mb-0">
+          By creating an account you agree to our
+          <a class="text-link" href="/terms">Terms</a>
+          and
+          <a class="text-link" href="/privacy">Privacy policy</a>.
+        </p>
       </form>
 
       <OAuthButtons action="/api/auth/signin" next={safeNext} ref={refCode} />

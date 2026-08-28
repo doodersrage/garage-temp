@@ -1,6 +1,12 @@
 /* ThermalTrace PWA service worker */
-const CACHE = "garage-temp-v3";
-const PRECACHE = ["/manifest.webmanifest", "/favicon.svg", "/logo.svg"];
+const CACHE = "thermaltrace-v4";
+const PRECACHE = [
+  "/manifest.webmanifest",
+  "/favicon.svg",
+  "/logo.svg",
+  "/icon-192.png",
+  "/icon-512.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -123,7 +129,7 @@ self.addEventListener("push", (event) => {
       body,
       icon: "/favicon.svg",
       badge: "/favicon.svg",
-      tag: "garage-temp-alert",
+      tag: "thermaltrace-alert",
       renotify: true,
     }),
   );

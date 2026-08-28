@@ -93,5 +93,10 @@ const safeNext =
       New here?
       <a class="text-link" href={safeNext ? `/register?next=${encodeURIComponent(safeNext)}` : "/register"}>Create a free account</a>
     </p>
+    <p class="form-hint text-center mt-3 mb-0">
+      <a class="text-link" href="/privacy">Privacy</a>
+      {" · "}
+      <a class="text-link" href="/terms">Terms</a>
+    </p>
   </div>
 </Layout>

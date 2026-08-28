@@ -47,7 +47,7 @@ export const GET: APIRoute = async ({ cookies }) => {
   return new Response(JSON.stringify(payload, null, 2), {
     headers: {
       "Content-Type": "application/json",
-      "Content-Disposition": 'attachment; filename="garage-temp-export.json"',
+      "Content-Disposition": 'attachment; filename="thermaltrace-export.json"',
     },
   });
 };

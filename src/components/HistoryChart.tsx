@@ -257,7 +257,15 @@ export default function HistoryChart({
       <div class="history-chart-wrap">
         <p class="history-chart-title m-0">{title}</p>
         <p class="m-0 text-sm text-[var(--color-text-muted)]">
-          Not enough readings yet for a chart. Snapshots collect automatically while devices are online.
+          Not enough readings yet for a chart.
+        </p>
+        <p class="mt-3 mb-0 text-sm">
+          <a class="text-link" href="/dashboard/temperature">Add a device</a>
+          {" → "}
+          verify ingest
+          {" → "}
+          <a class="text-link" href="/">open Home</a>
+          {" "}so snapshots can collect.
         </p>
       </div>
     );

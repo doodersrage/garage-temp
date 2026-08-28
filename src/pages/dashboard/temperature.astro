@@ -321,7 +321,7 @@ const ingestKeyDeviceName =
             class="btn-secondary"
             id="ingest-qr-download"
             href="#"
-            download="garage-temp-ingest-qr.svg"
+            download="thermaltrace-ingest-qr.svg"
           >
             Download SVG
           </a>
@@ -670,7 +670,7 @@ const ingestKeyDeviceName =
         const href = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = href;
-        a.download = "garage-temp-ingest-qr.svg";
+        a.download = "thermaltrace-ingest-qr.svg";
         a.click();
         URL.revokeObjectURL(href);
       });

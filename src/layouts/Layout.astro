@@ -94,6 +94,7 @@ const registerServiceWorker =
 		<meta name="description" content={metaDescription} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
+		<link rel="apple-touch-icon" href="/icon-192.png" />
 		<link rel="manifest" href="/manifest.webmanifest" />
 		<meta name="theme-color" content={resolvedTheme === "light" ? "#f1f5f9" : "#090b0f"} />
 		<link rel="canonical" href={pageUrl} />
@@ -242,13 +243,16 @@ const registerServiceWorker =
 									)}
 									<li><a href="/contact">Contact</a></li>
 									<li><a href="/privacy">Privacy</a></li>
+									<li><a href="/terms">Terms</a></li>
 								</ul>
 							</div>
 						</div>
 						<p class="site-footer-legal">
 							Copyright © {currentYear} ThermalTrace. All rights reserved.
 							{" · "}
-							<a href="/privacy">Privacy policy</a>
+							<a href="/privacy">Privacy</a>
+							{" · "}
+							<a href="/terms">Terms</a>
 						</p>
 					</div>
 				</footer>

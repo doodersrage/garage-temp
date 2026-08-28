@@ -225,6 +225,14 @@
     body::after {
       animation: none;
       opacity: 0.5;
+      background-size: 100% 100%;
+      filter: blur(40px);
+    }
+
+    .nav-cta:hover,
+    .btn-primary:hover,
+    .btn-secondary:hover {
+      transform: none;
     }
   }
 
@@ -2700,7 +2708,71 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-slide-in-left,
-  .animate-slide-in-right {
+  .animate-slide-in-right,
+  .home-feature,
+  .site-logo-link,
+  .nav-link,
+  .nav-cta {
     animation: none !important;
+    transition: none !important;
   }
 }
+
+@media print {
+  body::before,
+  body::after,
+  .site-header,
+  .site-footer,
+  .site-nav-toggle,
+  .skip-link,
+  .dashboard-sidebar,
+  .dashboard-kiosk-toggle,
+  .dashboard-topbar-actions,
+  .dashboard-topbar-home,
+  .plan-badge,
+  .cf-turnstile,
+  .btn-ghost,
+  .btn-secondary:not(.print-keep),
+  form.history-filters,
+  .alert-setup-nudge,
+  .dashboard-onboarding {
+    display: none !important;
+  }
+
+  body,
+  body.is-dashboard {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .dashboard-shell {
+    display: block !important;
+  }
+
+  .dashboard-main {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .card,
+  .dashboard-card,
+  .history-chart-wrap,
+  .stat-item,
+  .metric-card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border-color: #ccc !important;
+    background: #fff !important;
+  }
+
+  a[href]::after {
+    content: none !important;
+  }
+
+  .history-chart-wrap canvas {
+    max-width: 100%;
+  }
+}
+

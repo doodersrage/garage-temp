@@ -48,7 +48,7 @@ export const GET: APIRoute = async ({ cookies, url }) => {
   }
 
   const csv = buildGarageTempsCsv(readings);
-  const filename = `garage-temp-readings-${new Date().toISOString().slice(0, 10)}.csv`;
+  const filename = `thermaltrace-readings-${new Date().toISOString().slice(0, 10)}.csv`;
 
   return new Response(csv, {
     status: 200,

@@ -17,6 +17,7 @@ const checks = [
   { path: "/system-status", heading: /System status/i },
   { path: "/docs/api", heading: /API documentation/i },
   { path: "/privacy", heading: /Privacy/i },
+  { path: "/terms", heading: /Terms of service/i },
   { path: "/about/zapier-make-recipes", heading: /Zapier.*Make/i },
   { path: "/about/cold-snap-playbook", heading: /Cold-snap/i },
   { path: "/sitemap-0.xml", bodyIncludes: "cold-snap-playbook" },

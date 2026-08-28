@@ -41,7 +41,7 @@ async function sendMonthlyReportEmail(
   msg.addMessage({ contentType: "text/plain", data: plainBody });
   msg.addMessage({ contentType: "text/html", data: htmlBody });
   msg.addAttachment({
-    filename: "garage-temp-monthly-report.html",
+    filename: "thermaltrace-monthly-report.html",
     contentType: "text/html; charset=UTF-8",
     data: encodeBase64Utf8(attachmentHtml),
   });

@@ -11,6 +11,7 @@ const STATIC_PUBLIC_PATHS = [
   "/compare",
   "/contact",
   "/privacy",
+  "/terms",
   "/freeze-map",
   "/embed/freeze-map",
   "/system-status",

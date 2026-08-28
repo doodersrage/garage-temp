@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import DemoTempsPanel from '../components/DemoTempsPanel';
 import WeatherPanel from '../components/WeatherPanel';
 import LiveTempsPanel from '../components/LiveTempsPanel';
+import { BRAND_NAME_TM } from '../lib/brand';
 import { getAuthFromCookies } from '../lib/auth';
 import { getUserPreferences } from '../lib/userPreferences';
 
@@ -19,7 +20,7 @@ const showWeather = !isAuthenticated || preferences!.showWeather;
 		<div class="home-marketing">
 			<section class="home-hero home-hero--bleed">
 				<div class="home-hero-inner">
-					<h1 class="home-hero-brand">ThermalTrace</h1>
+					<h1 class="home-hero-brand">{BRAND_NAME_TM}</h1>
 					<p class="home-hero-lead">
 						An open-source dashboard to track, log, and analyze temperature probe curves —
 						with freeze-aware alerts before pipes and storage take damage.

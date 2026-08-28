@@ -182,14 +182,18 @@ const clearFiltersHref = basePath;
       ) : (
         <>
           <p class="mb-4">
-            No temperature/humidity history yet. This chart tracks climate snapshots from feeds and
-            temperature sensors—door, flood, and other non-climate sensors appear on Home instead.
-            Snapshots also collect on the hourly background job.
+            No climate history yet. Snapshots collect when devices are online and when you open Home while signed in.
           </p>
-          <div class="flex flex-wrap justify-center gap-3">
-            <a class="btn-primary" href="/">Open Home</a>
-            <a class="btn-secondary" href="/dashboard/temperature">Devices & feed health</a>
-          </div>
+          <ol class="mb-4 pl-5 text-sm text-left max-w-md mx-auto space-y-1 text-[var(--color-text-muted)]">
+            <li>
+              <a class="text-link" href="/dashboard/temperature">Add a device or feed</a>
+            </li>
+            <li>Verify ingest on the Devices page</li>
+            <li>
+              <a class="text-link" href="/">Open Home</a> to confirm live readings
+            </li>
+          </ol>
+          <a class="btn-primary" href="/dashboard/temperature">Go to Devices</a>
         </>
       )}
     </div>

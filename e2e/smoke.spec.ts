@@ -68,6 +68,17 @@ test.describe("public smoke", () => {
     await expect(page.getByRole("heading", { name: /Privacy/i })).toBeVisible();
   });
 
+  test("terms page loads", async ({ page }) => {
+    await page.goto("/terms");
+    await expect(page.getByRole("heading", { name: /Terms of service/i })).toBeVisible();
+  });
+
+  test("404 page loads", async ({ page }) => {
+    const res = await page.goto("/this-page-does-not-exist-thermaltrace");
+    expect(res?.status()).toBe(404);
+    await expect(page.getByRole("heading", { name: /Page not found/i })).toBeVisible();
+  });
+
   test("Zapier integration docs load", async ({ page }) => {
     await page.goto("/about/zapier-make-recipes");
     await expect(page.getByRole("heading", { name: /Zapier.*Make/i })).toBeVisible();

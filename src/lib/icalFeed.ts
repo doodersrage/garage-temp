@@ -26,7 +26,7 @@ export function buildFreezeOutlookIcal(
   ];
 
   for (const night of nights.filter((n) => n.atRisk)) {
-    const uid = `garage-temp-freeze-${night.dateLabel.replace(/\s+/g, "-")}@garage-temp`;
+    const uid = `thermaltrace-freeze-${night.dateLabel.replace(/\s+/g, "-")}@thermaltrace.dev`;
     lines.push(
       "BEGIN:VEVENT",
       `UID:${uid}`,

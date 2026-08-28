@@ -26,7 +26,7 @@ export const GET: APIRoute = async ({ cookies }) => {
     status: 200,
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
-      "Content-Disposition": 'attachment; filename="garage-temp-freeze-outlook.ics"',
+      "Content-Disposition": 'attachment; filename="thermaltrace-freeze-outlook.ics"',
       "Cache-Control": "no-store",
     },
   });
