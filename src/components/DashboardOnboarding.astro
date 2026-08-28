@@ -5,9 +5,9 @@ interface Props {
   hasDevices: boolean;
   hasSensors: boolean;
   hasHistory: boolean;
-  hasAlertsConfigured?: boolean;
+  hasAlertsEnabled?: boolean;
+  hasEmailAlerts?: boolean;
   hasHouseholdMembers?: boolean;
-  /** Live sensors present — show optional freeze-map CTA. */
   hasLiveSensors?: boolean;
   hasHousehold?: boolean;
   dismissed?: boolean;
@@ -17,7 +17,8 @@ const {
   hasDevices,
   hasSensors,
   hasHistory,
-  hasAlertsConfigured = false,
+  hasAlertsEnabled = false,
+  hasEmailAlerts = false,
   hasHouseholdMembers = false,
   hasLiveSensors = false,
   hasHousehold = false,
@@ -26,95 +27,94 @@ const {
 
 const showFreezeMapCta = hasLiveSensors && hasHousehold;
 
-const kitSteps = [
+/** Three-step path most users need before winter. */
+const essentialSteps = [
   {
     done: hasDevices,
     href: "/dashboard/temperature",
-    title: "Create a push device",
-    detail: "Dashboard → Devices → add a push ingest device and copy the one-time key.",
+    title: "Connect a device or feed",
+    detail: "Dashboard → Devices: add push ingest (ESP/Arduino) or an HTTPS JSON pull feed.",
   },
+  {
+    done: hasAlertsEnabled,
+    href: "/dashboard/alerts#alert-section-triggers",
+    title: "Set a freeze threshold",
+    detail: "Open Triggers, pick the temperature that should fire before pipes or goods are at risk.",
+  },
+  {
+    done: hasEmailAlerts,
+    href: "/dashboard/alerts#alert-section-channels",
+    title: "Enable email alerts",
+    detail: "Check Email under Channels, confirm your address, save, then send a test alert.",
+  },
+];
+
+const kitSteps = [
   {
     done: hasSensors,
     href: "/dashboard/temperature#add-sensor",
-    title: "Add sensor keys",
-    detail: "Match firmware keys (temp1, door1, …) so ingest maps correctly.",
+    title: "Map sensor keys",
+    detail: "Match firmware keys (temp1, door1, …) so ingest maps to readable labels.",
   },
   {
     done: hasHistory || hasSensors,
     href: "/about/ingest-and-webhooks",
     title: "Verify with a test POST",
-    detail: "curl the ingest URL, or follow the Arduino wiring / sketches guides.",
+    detail: "curl the ingest URL or follow the Arduino wiring guides.",
   },
   {
     done: hasHistory || hasSensors,
-    href: "/dashboard/temperature",
+    href: "/about/kit-qr-onboarding",
     title: "Optional: QR sticker",
-    detail: "After create/rotate on Devices, download or print the in-app ingest QR (no external generator).",
-  },
-  {
-    done: hasAlertsConfigured,
-    href: "/dashboard/alerts",
-    title: "Enable freeze alerts",
-    detail: "Turn on alerts and set a freeze threshold before winter.",
-  },
-];
-
-const coreSteps = [
-  {
-    done: hasDevices,
-    href: "/dashboard/temperature",
-    title: "Connect a device or feed",
-    detail: "Add a push ingest device (ESP/Arduino) or an HTTPS JSON pull feed.",
-  },
-  {
-    done: hasSensors,
-    href: "/dashboard/temperature",
-    title: "Label your sensors",
-    detail: "Map keys to friendly names so home and history cards are readable.",
-  },
-  {
-    done: hasHistory,
-    href: "/dashboard/history",
-    title: "Review saved history",
-    detail: "Snapshots collect automatically while feeds or devices are online (including hourly jobs).",
+    detail: "Print the in-app ingest QR from Devices for one-scan phone setup.",
   },
 ];
 
 const nextSteps = [
   {
-    done: hasAlertsConfigured,
-    href: "/dashboard/alerts",
-    title: "Set up alerts",
-    detail: "Get freeze, humidity, forecast, and outage notifications.",
+    done: hasHistory,
+    required: true,
+    href: "/dashboard/history",
+    title: "Review saved history",
+    detail: "Snapshots collect while feeds or devices are online.",
   },
   {
     done: hasHouseholdMembers,
+    required: true,
     href: "/dashboard/household",
     title: "Invite your household",
-    detail: "Share devices and history with family by email.",
+    detail: "Share devices and alerts with family by email.",
+  },
+  {
+    done: false,
+    required: false,
+    href: "/about/install-pwa",
+    title: "Install on your phone",
+    detail: "Add ThermalTrace to your home screen for faster access and optional push alerts.",
   },
 ];
 
-const coreDone = coreSteps.every((step) => step.done);
+const essentialDone = essentialSteps.every((step) => step.done);
 const kitDone = kitSteps.every((step) => step.done);
-const optionalDone = nextSteps.every((step) => step.done);
-const fullyDone = coreDone && optionalDone && kitDone;
-const activeSteps = !coreDone ? coreSteps : !kitDone ? kitSteps : nextSteps;
+const optionalDone = nextSteps.filter((step) => step.required).every((step) => step.done);
+const fullyDone = essentialDone && kitDone && optionalDone;
+
+const activeSteps = !essentialDone ? essentialSteps : !kitDone ? kitSteps : nextSteps;
 const completedCount = activeSteps.filter((step) => step.done).length;
 const progressPct = activeSteps.length
   ? Math.round((completedCount / activeSteps.length) * 100)
   : 100;
-const steps = activeSteps;
-const sectionTitle = !coreDone
+
+const sectionTitle = !essentialDone
   ? "Getting started"
   : !kitDone
-    ? "Hardware kit setup"
+    ? "Hardware setup"
     : "Next steps";
-const sectionSubtitle = !coreDone
-  ? `${completedCount} of ${coreSteps.length} setup steps complete`
+const sectionSubtitle = !essentialDone
+  ? `${completedCount} of ${essentialSteps.length} essentials — device, threshold, email`
   : !kitDone
-    ? `${completedCount} of ${kitSteps.length} kit steps complete`
-    : `${completedCount} of ${nextSteps.length} optional steps complete`;
+    ? `${completedCount} of ${kitSteps.length} hardware steps`
+    : `${completedCount} of ${nextSteps.length} optional steps`;
 
 if (dismissed || fullyDone) {
   return null;
@@ -135,7 +135,7 @@ if (dismissed || fullyDone) {
         <div class="onboarding-progress-bar" style={`width: ${progressPct}%`}></div>
       </div>
     </div>
-    {(coreDone || kitDone) && (
+    {essentialDone && (
       <form action="/api/user/onboarding" method="post">
         <input type="hidden" name="action" value="dismiss" />
         <input type="hidden" name="redirect" value="/dashboard" />
@@ -144,7 +144,7 @@ if (dismissed || fullyDone) {
     )}
   </div>
   <div class="dashboard-onboarding mt-4">
-    {steps.map((step, index) => (
+    {activeSteps.map((step, index) => (
       <a class="dashboard-onboarding-item" href={step.href}>
         <span class="dashboard-onboarding-step">
           {step.done ? "✓" : index + 1}
@@ -156,17 +156,17 @@ if (dismissed || fullyDone) {
       </a>
     ))}
   </div>
-  {coreDone && (
+  {essentialDone && (
     <p class="mt-4 mb-0 text-sm text-[var(--color-text-muted)]">
       Guides:
-      <a class="text-link" href="/about/ingest-and-webhooks">Ingest</a> ·
-      <a class="text-link" href="/about/arduino-sketches">Arduino sketches</a> ·
-      <a class="text-link" href="/about/arduino-circuit-wiring">Wiring</a> ·
+      <a class="text-link" href="/about/esp32-ota-firmware">ESP32 OTA</a> ·
+      <a class="text-link" href="/about/kit-qr-onboarding">Kit QR</a> ·
+      <a class="text-link" href="/about/ingest-and-webhooks">Ingest API</a> ·
       <a class="text-link" href="/freeze-map">Freeze map</a>
       {showFreezeMapCta && (
         <>
           {" · "}
-          <a class="text-link" href="/dashboard/household">Freeze-map opt-in</a>
+          <a class="text-link" href="/dashboard/household">Opt in on map</a>
         </>
       )}
     </p>

@@ -175,6 +175,8 @@ pnpm test:e2e          # Playwright (needs build / local server per config)
 pnpm audit:stripe      # compare STRIPE_DISPLAY_* to live Stripe prices
 ```
 
+Authenticated alert-settings E2E: set `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD`, then `pnpm test:e2e e2e/alert-settings.spec.ts`.
+
 ---
 
 ## Project layout

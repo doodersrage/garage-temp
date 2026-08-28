@@ -99,7 +99,11 @@ const hasSensors =
   deviceConfig.devices.some(
     (d) => d.source === "push" && d.sensors.length > 0,
   );
-const hasAlertsConfigured = alertSettings.enabled;
+const hasAlertsEnabled = alertSettings.enabled;
+const hasEmailAlerts =
+  alertSettings.enabled &&
+  alertSettings.channelEmail &&
+  Boolean(alertSettings.email?.trim());
 const hasHouseholdMembers = members.members.length > 1;
 const hasHistory = history.totalCount > 0;
 const onboardingDismissed =
@@ -192,7 +196,7 @@ const analyticsEvents: Array<{
 if (hasDevices) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "devices" } });
 if (hasSensors) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "sensors" } });
 if (hasHistory) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "history" } });
-if (hasAlertsConfigured) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "alerts" } });
+if (hasEmailAlerts) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "alerts" } });
 ---
 <DashboardLayout title="Overview">
   <ProductAnalyticsTracker client:load events={analyticsEvents} />
@@ -223,7 +227,8 @@ if (hasAlertsConfigured) analyticsEvents.push({ name: "onboarding_step_complete"
       hasDevices={hasDevices}
       hasSensors={hasSensors}
       hasHistory={hasHistory}
-      hasAlertsConfigured={hasAlertsConfigured}
+      hasAlertsEnabled={hasAlertsEnabled}
+      hasEmailAlerts={hasEmailAlerts}
       hasHouseholdMembers={hasHouseholdMembers}
       hasLiveSensors={latest.length > 0}
       hasHousehold={Boolean(household.householdId)}

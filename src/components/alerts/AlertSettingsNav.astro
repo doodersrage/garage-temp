@@ -1,0 +1,22 @@
+---
+const links = [
+  { id: "alert-section-basics", label: "Basics" },
+  { id: "alert-section-triggers", label: "Triggers" },
+  { id: "alert-section-channels", label: "Channels" },
+  { id: "alert-section-quiet", label: "Quiet hours" },
+  { id: "alert-section-automation", label: "Automation" },
+  { id: "alert-section-advanced", label: "Advanced" },
+];
+---
+<nav class="alert-settings-nav card" aria-label="Alert settings sections">
+  <p class="alert-settings-nav-label">Jump to</p>
+  <ul class="alert-settings-nav-list">
+    {links.map((link) => (
+      <li>
+        <a class="alert-settings-nav-link" href={`#${link.id}`}>
+          {link.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

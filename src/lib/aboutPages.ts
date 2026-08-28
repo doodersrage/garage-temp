@@ -149,6 +149,19 @@ function buildAboutPages(): AboutPage[] {
 
 export const aboutPages: AboutPage[] = buildAboutPages();
 
+export function getAboutStats(): {
+  coreCount: number;
+  guideCount: number;
+  totalCount: number;
+} {
+  const guideCount = aboutPages.filter((page) => page.parentSlug).length;
+  return {
+    coreCount: coreAboutPages.length,
+    guideCount,
+    totalCount: aboutPages.length,
+  };
+}
+
 export function getAboutPage(slug: string): AboutPage | undefined {
   return aboutPages.find((page) => page.slug === slug);
 }

@@ -12,7 +12,17 @@ export type AboutMegaGroup = {
   coreSlugs: string[];
 };
 
-/** Four high-level learning paths on the about hub. */
+/** Featured entry points on the about hub. */
+export const featuredAboutSlugs = [
+  "temperature-probe-case-study",
+  "probe-demo",
+  "accounts-and-dashboard",
+  "ingest-and-webhooks",
+  "data-flow",
+  "install-pwa",
+] as const;
+
+/** Five learning paths on the about hub (every core topic appears once). */
 export const aboutMegaGroups: AboutMegaGroup[] = [
   {
     id: "environment",
@@ -40,13 +50,14 @@ export const aboutMegaGroups: AboutMegaGroup[] = [
   {
     id: "software",
     title: "Backend & website",
-    description: "Python relays, Astro on Cloudflare, accounts, and dashboards.",
-    coreSlugs: [
-      "python-feeds",
-      "astro-applications",
-      "nextjs-node-applications",
-      "accounts-and-dashboard",
-    ],
+    description: "Python relays, Astro on Cloudflare, and stack comparisons.",
+    coreSlugs: ["python-feeds", "astro-applications", "nextjs-node-applications"],
+  },
+  {
+    id: "product",
+    title: "Dashboard & integrations",
+    description: "Accounts, ingest API, alerts, PWA install, and automation.",
+    coreSlugs: ["accounts-and-dashboard", "ingest-and-webhooks", "install-pwa"],
   },
 ];
 
@@ -69,17 +80,31 @@ export function getAboutTopicSections(): AboutTopicSection[] {
 export function getAboutMegaGroupSections(): {
   group: AboutMegaGroup;
   sections: AboutTopicSection[];
+  coreCount: number;
+  guideCount: number;
 }[] {
   const sectionBySlug = new Map(
     getAboutTopicSections().map((section) => [section.core.slug, section]),
   );
 
-  return aboutMegaGroups.map((group) => ({
-    group,
-    sections: group.coreSlugs
+  return aboutMegaGroups.map((group) => {
+    const sections = group.coreSlugs
       .map((slug) => sectionBySlug.get(slug))
-      .filter((section): section is AboutTopicSection => !!section),
-  }));
+      .filter((section): section is AboutTopicSection => !!section);
+
+    return {
+      group,
+      sections,
+      coreCount: sections.length,
+      guideCount: sections.reduce((total, section) => total + section.guides.length, 0),
+    };
+  });
+}
+
+export function getFeaturedAboutPages(): AboutPage[] {
+  return featuredAboutSlugs
+    .map((slug) => getAboutPage(slug))
+    .filter((page): page is AboutPage => !!page);
 }
 
 export function getTopicContext(slug: string): {

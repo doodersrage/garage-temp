@@ -68,6 +68,13 @@ const groups = [
 
 let failed = false;
 
+const siteUrl = env.SITE_URL?.trim();
+if (siteUrl && !siteUrl.includes("thermaltrace.dev")) {
+  console.log(
+    `⚠ SITE_URL is "${siteUrl}" — production should use https://thermaltrace.dev (run pnpm secrets:push after updating .env)`,
+  );
+}
+
 for (const group of groups) {
   const missing = group.keys.filter((k) => !env[k]?.trim());
   if (missing.length === 0) {

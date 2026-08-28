@@ -1,0 +1,35 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  subtitle?: string;
+  collapsible?: boolean;
+  open?: boolean;
+}
+
+const { id, title, subtitle, collapsible = false, open = false } = Astro.props;
+---
+{collapsible ? (
+  <details class="card alert-settings-panel" id={id} open={open}>
+    <summary class="alert-settings-panel-summary">
+      <span class="alert-settings-panel-heading">
+        <span class="alert-settings-panel-title">{title}</span>
+        {subtitle && <span class="alert-settings-panel-subtitle">{subtitle}</span>}
+      </span>
+      <span class="alert-settings-panel-chevron" aria-hidden="true">▸</span>
+    </summary>
+    <div class="alert-settings-panel-body">
+      <slot />
+    </div>
+  </details>
+) : (
+  <section class="card alert-settings-panel" id={id}>
+    <div class="alert-settings-panel-heading">
+      <h2 class="card-title">{title}</h2>
+      {subtitle && <p class="card-subtitle">{subtitle}</p>}
+    </div>
+    <div class="alert-settings-panel-body">
+      <slot />
+    </div>
+  </section>
+)}

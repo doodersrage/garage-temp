@@ -1,0 +1,25 @@
+---
+import { getFeaturedAboutPages } from "../lib/aboutNavigation";
+
+const featured = getFeaturedAboutPages();
+---
+<section class="card about-quick-start" aria-labelledby="about-quick-start-title">
+  <div class="about-quick-start-header">
+    <div>
+      <h2 class="about-quick-start-title" id="about-quick-start-title">Start here</h2>
+      <p class="about-quick-start-lead">
+        Six entry points—case study, live demo, dashboard setup, ingest API, data flow, and PWA install.
+      </p>
+    </div>
+  </div>
+  <ul class="about-quick-start-grid">
+    {featured.map((page) => (
+      <li>
+        <a class="about-quick-start-card" href={`/about/${page.slug}`}>
+          <span class="about-quick-start-card-title">{page.title}</span>
+          <span class="about-quick-start-card-summary">{page.summary}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>

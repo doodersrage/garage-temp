@@ -8,11 +8,19 @@ import { parseSpaceChannelRouting } from "./spaceChannelRouting";
 import { parseAlertTemplates } from "./alertTemplates";
 import type { Entitlements } from "./entitlements";
 
-function formHas(formData: FormData, key: string): boolean {
-  return formData.has(key);
+/** Checkbox fields use value="true" when checked; omitted when unchecked. */
+function formCheckbox(formData: FormData, key: string): boolean {
+  return formData.get(key)?.toString() === "true";
 }
 
-function formString(formData: FormData, key: string): string | null {
+function formString(
+  formData: FormData,
+  key: string,
+  fallback?: string | null,
+): string | null {
+  if (!formData.has(key)) {
+    return fallback ?? null;
+  }
   const value = formData.get(key)?.toString().trim();
   return value || null;
 }
@@ -22,10 +30,56 @@ function formNumber(
   key: string,
   fallback: number,
 ): number {
+  if (!formData.has(key)) return fallback;
   const raw = formData.get(key);
   if (raw == null || raw === "") return fallback;
   const num = Number(raw);
   return Number.isFinite(num) ? num : fallback;
+}
+
+/** Checkbox names on the alert settings form (value="true" when checked). */
+const ALERT_SETTINGS_CHECKBOXES = [
+  "alerts_enabled",
+  "digest_enabled",
+  "monthly_report_enabled",
+  "quarterly_report_enabled",
+  "drip_emails_enabled",
+  "battery_alerts_enabled",
+  "battery_trend_alerts_enabled",
+  "rssi_alerts_enabled",
+  "feed_uptime_alerts_enabled",
+  "portfolio_alerts_enabled",
+  "escalation_enabled",
+  "forecast_freeze_enabled",
+  "nws_freeze_alerts_enabled",
+  "quiet_hours_enabled",
+  "quiet_hours_bypass_freeze",
+  "quiet_hours_sms_critical",
+  "channel_email",
+  "channel_discord",
+  "channel_telegram",
+  "channel_slack",
+  "channel_teams",
+  "channel_ntfy",
+  "channel_pushover",
+  "channel_whatsapp",
+  "channel_sms",
+  "channel_push",
+  "channel_webhook",
+] as const;
+
+/** Normalize FormData from the alert settings form before save. */
+export function prepareAlertSettingsFormData(source: FormData): FormData {
+  const formData = new FormData();
+  for (const [key, value] of source.entries()) {
+    formData.append(key, value);
+  }
+  for (const name of ALERT_SETTINGS_CHECKBOXES) {
+    if (!formData.has(name)) {
+      formData.set(name, "");
+    }
+  }
+  return formData;
 }
 
 /** Build alert settings from a dashboard form POST / Action FormData. */
@@ -37,8 +91,8 @@ export function buildAlertSettingsFromFormData(
   return {
     ...DEFAULT_ALERT_SETTINGS,
     ...existing,
-    enabled: formHas(formData, "alerts_enabled"),
-    digestEnabled: formHas(formData, "digest_enabled"),
+    enabled: formCheckbox(formData, "alerts_enabled"),
+    digestEnabled: formCheckbox(formData, "digest_enabled"),
     freezeThresholdF: formNumber(
       formData,
       "freeze_threshold_f",
@@ -51,74 +105,78 @@ export function buildAlertSettingsFromFormData(
     ),
     rateChangeF: formNumber(formData, "rate_change_f", existing.rateChangeF),
     outageHours: formNumber(formData, "outage_hours", existing.outageHours),
-    email: formString(formData, "alert_email"),
-    channelEmail: formHas(formData, "channel_email"),
-    channelSms: formHas(formData, "channel_sms") && entitlements.canUseSms,
-    channelDiscord: formHas(formData, "channel_discord"),
-    channelTelegram: formHas(formData, "channel_telegram"),
-    channelSlack: formHas(formData, "channel_slack"),
-    channelTeams: formHas(formData, "channel_teams"),
-    channelNtfy: formHas(formData, "channel_ntfy"),
-    channelPushover: formHas(formData, "channel_pushover"),
+    email: formString(formData, "alert_email", existing.email),
+    channelEmail: formCheckbox(formData, "channel_email"),
+    channelSms: formCheckbox(formData, "channel_sms") && entitlements.canUseSms,
+    channelDiscord: formCheckbox(formData, "channel_discord"),
+    channelTelegram: formCheckbox(formData, "channel_telegram"),
+    channelSlack: formCheckbox(formData, "channel_slack"),
+    channelTeams: formCheckbox(formData, "channel_teams"),
+    channelNtfy: formCheckbox(formData, "channel_ntfy"),
+    channelPushover: formCheckbox(formData, "channel_pushover"),
     channelWhatsapp:
-      formHas(formData, "channel_whatsapp") && entitlements.canUseSms,
-    channelPush: formHas(formData, "channel_push") && entitlements.canUsePush,
+      formCheckbox(formData, "channel_whatsapp") && entitlements.canUseSms,
+    channelPush: formCheckbox(formData, "channel_push") && entitlements.canUsePush,
     channelWebhook:
-      formHas(formData, "channel_webhook") && entitlements.canUseOutboundWebhook,
-    discordWebhookUrl: formString(formData, "discord_webhook_url"),
-    teamsWebhookUrl: formString(formData, "teams_webhook_url"),
-    ntfyTopic: formString(formData, "ntfy_topic"),
-    ntfyServer: formString(formData, "ntfy_server") || existing.ntfyServer,
-    pushoverUserKey: formString(formData, "pushover_user_key"),
+      formCheckbox(formData, "channel_webhook") && entitlements.canUseOutboundWebhook,
+    discordWebhookUrl: formString(formData, "discord_webhook_url", existing.discordWebhookUrl),
+    teamsWebhookUrl: formString(formData, "teams_webhook_url", existing.teamsWebhookUrl),
+    ntfyTopic: formString(formData, "ntfy_topic", existing.ntfyTopic),
+    ntfyServer: formString(formData, "ntfy_server", existing.ntfyServer) || existing.ntfyServer,
+    pushoverUserKey: formString(formData, "pushover_user_key", existing.pushoverUserKey),
     pushoverAppToken:
-      formString(formData, "pushover_app_token") || existing.pushoverAppToken,
-    whatsappPhone: formString(formData, "whatsapp_phone"),
-    smsPhone: formString(formData, "sms_phone"),
-    outboundWebhookUrl: formString(formData, "outbound_webhook_url"),
+      formString(formData, "pushover_app_token", existing.pushoverAppToken) ||
+      existing.pushoverAppToken,
+    whatsappPhone: formString(formData, "whatsapp_phone", existing.whatsappPhone),
+    smsPhone: formString(formData, "sms_phone", existing.smsPhone),
+    outboundWebhookUrl: formString(formData, "outbound_webhook_url", existing.outboundWebhookUrl),
     outboundWebhookSecret:
-      formString(formData, "outbound_webhook_secret") ||
+      formString(formData, "outbound_webhook_secret", existing.outboundWebhookSecret) ||
       existing.outboundWebhookSecret,
     telegramBotToken:
-      formString(formData, "telegram_bot_token") || existing.telegramBotToken,
-    telegramChatId: formString(formData, "telegram_chat_id"),
-    slackWebhookUrl: formString(formData, "slack_webhook_url"),
+      formString(formData, "telegram_bot_token", existing.telegramBotToken) ||
+      existing.telegramBotToken,
+    telegramChatId: formString(formData, "telegram_chat_id", existing.telegramChatId),
+    slackWebhookUrl: formString(formData, "slack_webhook_url", existing.slackWebhookUrl),
     lastAlertSentAt: existing.lastAlertSentAt,
     lastOutageAlertAt: existing.lastOutageAlertAt,
     lastRateAlertAt: existing.lastRateAlertAt,
     lastForecastAlertAt: existing.lastForecastAlertAt,
-    forecastFreezeEnabled: formHas(formData, "forecast_freeze_enabled"),
-    nwsFreezeAlertsEnabled: formHas(formData, "nws_freeze_alerts_enabled"),
+    forecastFreezeEnabled: formCheckbox(formData, "forecast_freeze_enabled"),
+    nwsFreezeAlertsEnabled: formCheckbox(formData, "nws_freeze_alerts_enabled"),
     lastNwsAlertAt: existing.lastNwsAlertAt,
     forecastHoursAhead: formNumber(
       formData,
       "forecast_hours_ahead",
       existing.forecastHoursAhead,
     ),
-    quietHoursEnabled: formHas(formData, "quiet_hours_enabled"),
+    quietHoursEnabled: formCheckbox(formData, "quiet_hours_enabled"),
     quietHoursStart:
-      formString(formData, "quiet_hours_start") || existing.quietHoursStart,
+      formString(formData, "quiet_hours_start", existing.quietHoursStart) ||
+      existing.quietHoursStart,
     quietHoursEnd:
-      formString(formData, "quiet_hours_end") || existing.quietHoursEnd,
+      formString(formData, "quiet_hours_end", existing.quietHoursEnd) ||
+      existing.quietHoursEnd,
     quietHoursTimezone:
-      formString(formData, "quiet_hours_timezone") ||
+      formString(formData, "quiet_hours_timezone", existing.quietHoursTimezone) ||
       existing.quietHoursTimezone,
-    quietHoursBypassFreeze: formHas(formData, "quiet_hours_bypass_freeze"),
+    quietHoursBypassFreeze: formCheckbox(formData, "quiet_hours_bypass_freeze"),
     quietHoursSmsCritical:
-      formHas(formData, "quiet_hours_sms_critical") && entitlements.canUseSms,
-    alertRules: parseAlertRulesFromForm(
-      formData.get("alert_rules_json")?.toString(),
-    ),
-    monthlyReportEnabled: formHas(formData, "monthly_report_enabled"),
-    quarterlyReportEnabled: formHas(formData, "quarterly_report_enabled"),
-    dripEmailsEnabled: formHas(formData, "drip_emails_enabled"),
-    batteryAlertsEnabled: formHas(formData, "battery_alerts_enabled"),
-    batteryTrendAlertsEnabled: formHas(formData, "battery_trend_alerts_enabled"),
+      formCheckbox(formData, "quiet_hours_sms_critical") && entitlements.canUseSms,
+    alertRules: formData.has("alert_rules_json")
+      ? parseAlertRulesFromForm(formData.get("alert_rules_json")?.toString())
+      : existing.alertRules,
+    monthlyReportEnabled: formCheckbox(formData, "monthly_report_enabled"),
+    quarterlyReportEnabled: formCheckbox(formData, "quarterly_report_enabled"),
+    dripEmailsEnabled: formCheckbox(formData, "drip_emails_enabled"),
+    batteryAlertsEnabled: formCheckbox(formData, "battery_alerts_enabled"),
+    batteryTrendAlertsEnabled: formCheckbox(formData, "battery_trend_alerts_enabled"),
     batteryThresholdPct: formNumber(
       formData,
       "battery_threshold_pct",
       existing.batteryThresholdPct,
     ),
-    rssiAlertsEnabled: formHas(formData, "rssi_alerts_enabled"),
+    rssiAlertsEnabled: formCheckbox(formData, "rssi_alerts_enabled"),
     rssiThreshold: formNumber(
       formData,
       "rssi_threshold",
@@ -130,13 +188,14 @@ export function buildAlertSettingsFromFormData(
     lastBatteryTrendAlertAt: existing.lastBatteryTrendAlertAt,
     lastRssiAlertAt: existing.lastRssiAlertAt,
     lastMonthlyReportAt: existing.lastMonthlyReportAt,
-    escalationEnabled: formHas(formData, "escalation_enabled"),
+    escalationEnabled: formCheckbox(formData, "escalation_enabled"),
     escalationMinutes: formNumber(
       formData,
       "escalation_minutes",
       existing.escalationMinutes,
     ),
     alertTemplates: (() => {
+      if (!formData.has("alert_templates_json")) return existing.alertTemplates;
       try {
         const raw = formData.get("alert_templates_json")?.toString();
         const parsed = raw
@@ -153,10 +212,11 @@ export function buildAlertSettingsFromFormData(
       }
     })(),
     telegramCommandSecret:
-      formString(formData, "telegram_command_secret") ||
+      formString(formData, "telegram_command_secret", existing.telegramCommandSecret) ||
       existing.telegramCommandSecret,
     lastEscalationAt: existing.lastEscalationAt,
     channelSeverity: (() => {
+      if (!formData.has("channel_severity_json")) return existing.channelSeverity;
       try {
         const raw = formData.get("channel_severity_json")?.toString();
         if (!raw) return existing.channelSeverity;
@@ -168,11 +228,14 @@ export function buildAlertSettingsFromFormData(
         return existing.channelSeverity;
       }
     })(),
-    readingWebhookUrl: formString(formData, "reading_webhook_url"),
+    readingWebhookUrl: formString(formData, "reading_webhook_url", existing.readingWebhookUrl),
     readingWebhookSecret:
-      formString(formData, "reading_webhook_secret") ||
+      formString(formData, "reading_webhook_secret", existing.readingWebhookSecret) ||
       existing.readingWebhookSecret,
     spaceChannelRouting: (() => {
+      if (!formData.has("space_channel_routing_json")) {
+        return existing.spaceChannelRouting;
+      }
       try {
         const raw = formData.get("space_channel_routing_json")?.toString();
         return raw
@@ -182,17 +245,17 @@ export function buildAlertSettingsFromFormData(
         return existing.spaceChannelRouting;
       }
     })(),
-    alertPlaybooks: parseAlertPlaybooksFromForm(
-      formData.get("alert_playbooks_json")?.toString(),
-    ),
+    alertPlaybooks: formData.has("alert_playbooks_json")
+      ? parseAlertPlaybooksFromForm(formData.get("alert_playbooks_json")?.toString())
+      : existing.alertPlaybooks,
     dataRetentionDays: (() => {
       const raw = formData.get("data_retention_days");
       if (raw == null || raw === "") return existing.dataRetentionDays;
       const n = Number(raw);
       return Number.isFinite(n) && n >= 30 ? Math.floor(n) : existing.dataRetentionDays;
     })(),
-    feedUptimeAlertsEnabled: formHas(formData, "feed_uptime_alerts_enabled"),
-    portfolioAlertsEnabled: formHas(formData, "portfolio_alerts_enabled"),
+    feedUptimeAlertsEnabled: formCheckbox(formData, "feed_uptime_alerts_enabled"),
+    portfolioAlertsEnabled: formCheckbox(formData, "portfolio_alerts_enabled"),
     lastFeedUptimeAlertAt: existing.lastFeedUptimeAlertAt,
     lastPortfolioAlertAt: existing.lastPortfolioAlertAt,
     playbookFired: existing.playbookFired,

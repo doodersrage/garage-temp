@@ -2,12 +2,14 @@
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import AlertSettings from "../../components/AlertSettings.astro";
 import UpgradeNudge from "../../components/UpgradeNudge.astro";
+import PwaInstallCard from "../../components/dashboard/PwaInstallCard.astro";
 import ProductAnalyticsTracker from "../../components/ProductAnalyticsTracker.tsx";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getAlertSettingsForUser, isTwilioConfigured } from "../../lib/notify";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { formatRelativeAge } from "../../lib/relativeTime";
 import { listRecentAlertEvents } from "../../lib/alertEvents";
+import { formatAlertChannelList, formatAlertChannelsCsv } from "../../lib/alertChannelLabels";
 import {
   getOrCreateHouseholdForUser,
   getUserHouseholdRole,
@@ -45,38 +47,8 @@ const deviceSpaces = [
   ),
 ].sort((a, b) => a.localeCompare(b));
 
-const channelLabels: Record<string, string> = {
-  email: "email",
-  discord: "Discord",
-  telegram: "Telegram",
-  slack: "Slack",
-  sms: "SMS",
-  push: "browser push",
-  webhook: "webhook",
-  quiet_hours: "quiet hours",
-  push_not_configured: "push (server VAPID keys missing)",
-  push_no_subscription: "push (subscribe this browser first)",
-  push_delivery_failed: "push (delivery failed — re-subscribe)",
-  push_load_failed: "push (could not load subscriptions)",
-  push_send_failed: "push (send error)",
-  sms_not_configured: "SMS (Twilio not configured)",
-};
-
-function formatChannels(raw: string | null): string {
-  if (!raw) return "";
-  return raw
-    .split(",")
-    .filter(Boolean)
-    .map((key) => channelLabels[key] ?? key)
-    .join(", ");
-}
-
-function formatChannelList(channels: string[]): string {
-  return channels.map((key) => channelLabels[key] ?? key).join(", ");
-}
-
-const sentChannels = formatChannels(Astro.url.searchParams.get("sent"));
-const skippedChannels = formatChannels(Astro.url.searchParams.get("skipped"));
+const sentChannels = formatAlertChannelsCsv(Astro.url.searchParams.get("sent"));
+const skippedChannels = formatAlertChannelsCsv(Astro.url.searchParams.get("skipped"));
 const testReason = Astro.url.searchParams.get("test_reason");
 
 const alertNotice = Astro.url.searchParams.get("alert_saved")
@@ -166,6 +138,8 @@ const analyticsEvents = Astro.url.searchParams.get("test_sent")
       deviceSpaces={deviceSpaces}
     />
 
+    <PwaInstallCard />
+
     {canEdit && (
       <section class="card">
         <h2 class="card-title">Send a test alert</h2>
@@ -206,8 +180,8 @@ const analyticsEvents = Astro.url.searchParams.get("test_sent")
                     <td class="py-2 pr-3 whitespace-nowrap">{age.label}</td>
                     <td class="py-2 pr-3">{event.kind}</td>
                     <td class="py-2 pr-3">{event.title}</td>
-                    <td class="py-2 pr-3">{formatChannelList(event.channels_sent) || "—"}</td>
-                    <td class="py-2 pr-3">{formatChannelList(event.channels_skipped) || "—"}</td>
+                    <td class="py-2 pr-3">{formatAlertChannelList(event.channels_sent) || "—"}</td>
+                    <td class="py-2 pr-3">{formatAlertChannelList(event.channels_skipped) || "—"}</td>
                     <td class="py-2">
                       {event.acknowledged_at ? (
                         <span class="text-[var(--color-text-muted)]">Handled</span>

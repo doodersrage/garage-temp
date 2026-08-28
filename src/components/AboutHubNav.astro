@@ -1,30 +1,41 @@
 ---
 import { getAboutMegaGroupSections } from "../lib/aboutNavigation";
+import { getAboutStats } from "../lib/aboutPages";
 
 const megaGroups = getAboutMegaGroupSections();
+const stats = getAboutStats();
 ---
 <nav class="about-hub-toc card" aria-label="About section topics">
   <h2 class="about-hub-toc-title">Browse by topic</h2>
   <p class="about-hub-toc-lead">
-    Four learning paths—from garage physics to firmware, relays, and the dashboard. Jump to a section below.
+    {stats.coreCount} topic overviews and {stats.guideCount} deep-dive guides across five learning paths.
+    Search above or jump to a section below.
   </p>
   <ol class="about-hub-toc-list">
-    {megaGroups.map(({ group }) => (
+    {megaGroups.map(({ group, coreCount, guideCount }) => (
       <li>
         <a class="about-hub-toc-link" href={`#${group.id}`}>
           <span class="about-hub-toc-link-title">{group.title}</span>
           <span class="about-hub-toc-link-desc">{group.description}</span>
+          <span class="about-hub-toc-link-meta">
+            {coreCount} {coreCount === 1 ? "topic" : "topics"} · {guideCount} guides
+          </span>
         </a>
       </li>
     ))}
   </ol>
 </nav>
 
-{megaGroups.map(({ group, sections }) => (
+{megaGroups.map(({ group, sections, guideCount }) => (
   <section id={group.id} class="about-mega-group">
     <header class="about-mega-group-header">
       <h2 class="about-mega-group-title">{group.title}</h2>
-      <p class="about-mega-group-desc">{group.description}</p>
+      <p class="about-mega-group-desc">
+        {group.description}
+        <span class="about-mega-group-meta">
+          {sections.length} topics · {guideCount} guides
+        </span>
+      </p>
     </header>
 
     <div class="about-mega-group-sections">
@@ -36,13 +47,13 @@ const megaGroups = getAboutMegaGroupSections();
               <p>{core.summary}</p>
             </a>
             <a class="btn-secondary about-topic-start" href={`/about/${core.slug}`}>
-              Start here
+              Read overview
               <span class="btn-icon btn-icon--end" aria-hidden="true">→</span>
             </a>
           </div>
 
           {guides.length > 0 && (
-            <details class="about-topic-guides" open={guides.length <= 5}>
+            <details class="about-topic-guides">
               <summary>
                 Deep-dive guides
                 <span class="about-topic-count">{guides.length}</span>

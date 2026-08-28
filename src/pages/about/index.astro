@@ -2,6 +2,7 @@
 
 import Layout from "../../layouts/Layout.astro";
 import PageHeader from "../../components/PageHeader.astro";
+import AboutQuickStart from "../../components/AboutQuickStart.astro";
 import AboutHubNav from "../../components/AboutHubNav.astro";
 import AboutProbeActivity from "../../components/AboutProbeActivity";
 import AboutSearch from "../../components/AboutSearch";
@@ -9,7 +10,8 @@ import {
   getBreadcrumbSchema,
   resolveSiteUrl,
 } from "../../lib/schemaMarkup";
-import { aboutPages } from "../../lib/aboutPages";
+import { aboutPages, getAboutStats } from "../../lib/aboutPages";
+import { getFeaturedAboutPages } from "../../lib/aboutNavigation";
 import "../../styles/about.css";
 
 const title = "About ThermalTrace";
@@ -24,7 +26,8 @@ const schema = [
   ]),
 ];
 
-const guideCount = aboutPages.filter((page) => page.parentSlug).length;
+const stats = getAboutStats();
+const featuredPages = getFeaturedAboutPages();
 ---
 <Layout title="About" description={description} schema={schema} skipAuth>
   <div class="page-shell page-stack">
@@ -32,23 +35,19 @@ const guideCount = aboutPages.filter((page) => page.parentSlug).length;
       kicker="About"
       title={title}
       lede="Open-source guides on temperature probes, historical curves, Arduino firmware, Python feeds, and the stack behind ThermalTrace."
-    >
-      <a slot="actions" class="btn-primary" href="/about/temperature-probe-case-study">Read the case study</a>
-      <a slot="actions" class="btn-secondary" href="/about/probe-demo">Open probe demo</a>
-    </PageHeader>
+    />
 
-    <section class="card">
-      <div class="about-prose">
-        <p>
-          ThermalTrace combines Arduino probes, JSON feeds, and a modern web dashboard
-          so you can see current conditions, compare them with outdoor weather, and review trends over time.
-        </p>
-        <p>
-          The guides below follow four learning paths—{guideCount} focused articles plus twelve topic
-          overviews—covering probes, physics, historical data, firmware, backend scripts, and this website.
-        </p>
-      </div>
+    <AboutQuickStart />
+
+    <section class="card about-browse">
+      <h2 class="card-title">Find a guide</h2>
+      <p class="card-subtitle">
+        Search {stats.totalCount} articles or browse by learning path below.
+      </p>
+      <AboutSearch client:visible pages={aboutPages} featured={featuredPages} />
     </section>
+
+    <AboutHubNav />
 
     <section class="about-probe-hero">
       <div class="about-probe-hero-shell card overflow-hidden p-0">
@@ -64,39 +63,29 @@ const guideCount = aboutPages.filter((page) => page.parentSlug).length;
       </div>
     </section>
 
-    <section class="card">
-      <h2 class="card-title">Search the guides</h2>
-      <p class="card-subtitle">Find a topic across {guideCount + 12} articles.</p>
-      <AboutSearch client:visible pages={aboutPages} />
-    </section>
-
-    <AboutHubNav />
-
-    <section class="card">
+    <section class="card about-repos">
       <h2 class="card-title">Open-source repositories</h2>
       <p class="card-subtitle">Projects you can inspect, fork, or adapt for your own build.</p>
-      <div class="about-prose">
-        <ul>
-          <li>
-            Arduino sketch and sensor firmware:
-            <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/arduino-network-json-temperature-sever">
-              arduino-network-json-temperature-sever
-            </a>
-          </li>
-          <li>
-            This website (Astro on Cloudflare):
-            <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/garage-temp">
-              garage-temp
-            </a>
-          </li>
-          <li>
-            JSON feed relay (FastAPI with Redis caching):
-            <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/fast-api-relay">
-              fast-api-relay
-            </a>
-          </li>
-        </ul>
-      </div>
+      <ul class="about-repos-list">
+        <li>
+          <a class="about-repos-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/arduino-network-json-temperature-sever">
+            <strong>arduino-network-json-temperature-sever</strong>
+            <span>Arduino sketch and sensor firmware</span>
+          </a>
+        </li>
+        <li>
+          <a class="about-repos-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/garage-temp">
+            <strong>garage-temp</strong>
+            <span>This website (Astro on Cloudflare)</span>
+          </a>
+        </li>
+        <li>
+          <a class="about-repos-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/fast-api-relay">
+            <strong>fast-api-relay</strong>
+            <span>JSON feed relay (FastAPI with Redis caching)</span>
+          </a>
+        </li>
+      </ul>
     </section>
   </div>
 </Layout>

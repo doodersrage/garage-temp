@@ -55,6 +55,7 @@ test.describe("public smoke", () => {
   test("about hub loads", async ({ page }) => {
     await page.goto("/about/");
     await expect(page.getByRole("heading", { name: /About ThermalTrace/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Start here/i })).toBeVisible();
   });
 
   test("about guide loads", async ({ page }) => {
@@ -68,8 +69,8 @@ test.describe("public smoke", () => {
   });
 
   test("Zapier integration docs load", async ({ page }) => {
-    await page.goto("/about/zapier-integration");
-    await expect(page.getByRole("heading", { name: /Zapier & Make/i })).toBeVisible();
+    await page.goto("/about/zapier-make-recipes");
+    await expect(page.getByRole("heading", { name: /Zapier.*Make/i })).toBeVisible();
   });
 
   test("portfolio requires sign-in", async ({ page }) => {

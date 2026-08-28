@@ -330,10 +330,13 @@ export async function saveAlertSettingsForUser(
   settings: AlertSettings,
 ): Promise<{ error: string | null }> {
   const supabase = createServerClient();
-  const { error } = await supabase.from("alert_settings").upsert({
-    user_id: userId,
-    ...alertSettingsToRow(settings),
-  });
+  const { error } = await supabase.from("alert_settings").upsert(
+    {
+      user_id: userId,
+      ...alertSettingsToRow(settings),
+    },
+    { onConflict: "user_id" },
+  );
 
   return { error: error?.message ?? null };
 }
