@@ -1,0 +1,116 @@
+---
+interface Props {
+  vapidPublicKey: string;
+}
+
+const { vapidPublicKey } = Astro.props;
+---
+<script is:inline define:vars={{ vapidPublicKey }}>
+    function urlBase64ToUint8Array(base64String) {
+      if (!base64String) throw new Error("VAPID public key is not configured");
+      const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+      const rawData = atob(base64);
+      return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+    }
+
+    const btn = document.getElementById("enable-push-btn");
+    const status = document.getElementById("push-status");
+    const hint = document.getElementById("push-hint");
+    const pushChannel = document.querySelector('[name="channel_push"]');
+
+    async function ensureServiceWorker() {
+      await navigator.serviceWorker.register("/sw.js?v=3");
+      return navigator.serviceWorker.ready;
+    }
+
+    async function refreshPushStatus() {
+      if (!status) return;
+      if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+        status.textContent = "Push is not supported in this browser.";
+        if (btn) btn.hidden = true;
+        return;
+      }
+
+      const permission = Notification.permission;
+      if (permission === "denied") {
+        status.textContent = "Notifications are blocked for this site. Allow them in browser settings, then retry.";
+        if (btn) btn.textContent = "Retry enable push";
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/push/status");
+        const server = res.ok ? await res.json() : null;
+        const reg = await ensureServiceWorker();
+        const existing = await reg.pushManager.getSubscription();
+
+        if (existing && server?.subscriptionCount > 0) {
+          status.textContent = "Push enabled on this browser.";
+          if (btn) btn.textContent = "Re-enable / refresh push";
+          if (hint) {
+            hint.textContent = server.channelEnabled
+              ? "Browser push channel is on — test from below."
+              : 'Check "Browser push" under channels above, save settings, then send a test.';
+          }
+        } else if (permission === "granted") {
+          status.textContent = "Permission granted, but this browser is not subscribed yet.";
+          if (btn) btn.textContent = "Subscribe this browser";
+        } else {
+          status.textContent = "Not enabled on this browser yet.";
+          if (btn) btn.textContent = "Enable browser push";
+        }
+
+        if (server && !server.vapidConfigured && hint) {
+          hint.textContent = "Server VAPID keys are missing — push cannot send until configured.";
+        }
+      } catch {
+        status.textContent = "Could not read push status.";
+      }
+    }
+
+    btn?.addEventListener("click", async () => {
+      try {
+        if (!vapidPublicKey) {
+          throw new Error("VAPID public key is not configured on the server");
+        }
+        const reg = await ensureServiceWorker();
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+          throw new Error("Notification permission was not granted");
+        }
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+          });
+        }
+        const json = sub.toJSON();
+        const res = await fetch("/api/push/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => null);
+          throw new Error(err?.error || "Server rejected subscription");
+        }
+        if (pushChannel instanceof HTMLInputElement) {
+          pushChannel.checked = true;
+        }
+        if (status) {
+          status.textContent = "Subscribed on this browser. Save alert settings, then send a test.";
+        }
+        if (hint) {
+          hint.textContent = 'The "Browser push" channel was checked — click Save alert settings before testing.';
+        }
+        if (btn) btn.textContent = "Re-enable / refresh push";
+      } catch (e) {
+        if (status) status.textContent = "Could not enable push: " + (e?.message || e);
+        await refreshPushStatus();
+      }
+    });
+
+    refreshPushStatus();
+  </script>

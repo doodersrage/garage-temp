@@ -3,7 +3,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import AlertSettings from "../../components/AlertSettings.astro";
 import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import PwaInstallCard from "../../components/dashboard/PwaInstallCard.astro";
-import ProductAnalyticsTracker from "../../components/ProductAnalyticsTracker.tsx";
+import ProductAnalyticsTracker from "../../components/ProductAnalyticsTracker.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getAlertSettingsForUser, isTwilioConfigured } from "../../lib/notify";
 import { getUserEntitlements } from "../../lib/entitlements";
@@ -98,10 +98,10 @@ const analyticsEvents = Astro.url.searchParams.get("test_sent")
   : [];
 ---
 <DashboardLayout title="Alerts">
-  <ProductAnalyticsTracker client:load events={analyticsEvents} />
+  <ProductAnalyticsTracker events={analyticsEvents} />
   <div class="space-y-6">
     <section class="card">
-      <h1 class="card-title">Alerts & digests</h1>
+      <h2 class="card-title">Alerts & digests</h2>
       <p class="card-subtitle">
         Get notified when temperatures drop, humidity spikes, feeds go quiet, forecast freeze risk rises, or composite rules match.
       </p>
@@ -162,14 +162,15 @@ const analyticsEvents = Astro.url.searchParams.get("test_sent")
       ) : (
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
+            <caption class="sr-only">Recent alert delivery and acknowledgement events</caption>
             <thead>
               <tr class="text-left text-[var(--color-text-muted)]">
-                <th class="py-2 pr-3">When</th>
-                <th class="py-2 pr-3">Kind</th>
-                <th class="py-2 pr-3">Title</th>
-                <th class="py-2 pr-3">Sent</th>
-                <th class="py-2 pr-3">Skipped</th>
-                <th class="py-2">Ack</th>
+                <th scope="col" class="py-2 pr-3">When</th>
+                <th scope="col" class="py-2 pr-3">Kind</th>
+                <th scope="col" class="py-2 pr-3">Title</th>
+                <th scope="col" class="py-2 pr-3">Sent</th>
+                <th scope="col" class="py-2 pr-3">Skipped</th>
+                <th scope="col" class="py-2">Ack</th>
               </tr>
             </thead>
             <tbody>

@@ -11,6 +11,7 @@ import {
   resolveSiteUrl,
 } from "../../lib/schemaMarkup";
 import { aboutPages, getAboutStats } from "../../lib/aboutPages";
+import { buildAboutSearchIndex } from "../../lib/aboutSearchIndex";
 import { getFeaturedAboutPages } from "../../lib/aboutNavigation";
 import "../../styles/about.css";
 
@@ -28,6 +29,8 @@ const schema = [
 
 const stats = getAboutStats();
 const featuredPages = getFeaturedAboutPages();
+const searchIndex = buildAboutSearchIndex(aboutPages);
+const featuredSearchIndex = buildAboutSearchIndex(featuredPages);
 ---
 <Layout title="About" description={description} schema={schema} skipAuth>
   <div class="page-shell page-stack">
@@ -44,7 +47,7 @@ const featuredPages = getFeaturedAboutPages();
       <p class="card-subtitle">
         Search {stats.totalCount} articles or browse by learning path below.
       </p>
-      <AboutSearch client:visible pages={aboutPages} featured={featuredPages} />
+      <AboutSearch client:visible pages={searchIndex} featured={featuredSearchIndex} />
     </section>
 
     <AboutHubNav />

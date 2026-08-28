@@ -128,6 +128,7 @@ if (dismissed || fullyDone) {
       <div
         class="onboarding-progress mt-3"
         role="progressbar"
+        aria-label={`Setup progress: ${completedCount} of ${activeSteps.length} steps complete`}
         aria-valuenow={progressPct}
         aria-valuemin={0}
         aria-valuemax={100}

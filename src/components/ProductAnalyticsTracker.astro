@@ -1,0 +1,23 @@
+---
+interface Props {
+  events?: Array<{
+    name: string;
+    props?: Record<string, string | number | boolean>;
+  }>;
+}
+
+const { events = [] } = Astro.props;
+
+if (events.length === 0) return;
+---
+<script is:inline define:vars={{ events }}>
+  (() => {
+    for (const event of events) {
+      const payload = { event: event.name, ...(event.props ?? {}) };
+      const gtag = window.gtag;
+      if (typeof gtag === "function") {
+        gtag("event", event.name, event.props ?? {});
+      }
+    }
+  })();
+</script>

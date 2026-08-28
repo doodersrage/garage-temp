@@ -1,12 +1,12 @@
 import { useMemo, useState } from "preact/hooks";
-import type { AboutPage } from "../lib/aboutPages";
+import type { AboutSearchEntry } from "../lib/aboutSearchIndex";
 
 interface Props {
-  pages: AboutPage[];
-  featured?: AboutPage[];
+  pages: AboutSearchEntry[];
+  featured?: AboutSearchEntry[];
 }
 
-function matchPage(page: AboutPage, query: string): boolean {
+function matchPage(page: AboutSearchEntry, query: string): boolean {
   const q = query.toLowerCase();
   return (
     page.title.toLowerCase().includes(q) ||

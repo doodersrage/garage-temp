@@ -71,6 +71,9 @@ const navItems = [
 ];
 const isDashboard = currentPath.startsWith("/dashboard");
 const loadAnalytics = shouldLoadGoogleAnalytics(currentPath);
+const loadTurnstile = currentPath.startsWith("/contact");
+const registerServiceWorker =
+  currentPath.startsWith("/dashboard") || currentPath.startsWith("/signin");
 ---
 <!doctype html>
 <html lang="en" data-theme={resolvedTheme}>
@@ -213,8 +216,11 @@ const loadAnalytics = shouldLoadGoogleAnalytics(currentPath);
 				</footer>
 			)}
 		</div>
-		<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline />
-		<script is:inline>
+		{loadTurnstile && (
+			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline />
+		)}
+		<script src="/nudge-dismiss.js" defer is:inline />
+		<script is:inline define:vars={{ registerServiceWorker }}>
 			(() => {
 				const toggle = document.getElementById("site-nav-toggle");
 				const nav = document.getElementById("site-nav");
@@ -270,7 +276,7 @@ const loadAnalytics = shouldLoadGoogleAnalytics(currentPath);
 				}
 			});
 
-			if ("serviceWorker" in navigator) {
+			if (registerServiceWorker && "serviceWorker" in navigator) {
 				window.addEventListener("load", () => {
 					navigator.serviceWorker.register("/sw.js?v=3").catch(() => {});
 				});

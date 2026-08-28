@@ -1,9 +1,12 @@
 ---
 interface Props {
   dismissedKey?: string;
+  show?: boolean;
 }
 
-const { dismissedKey = "dashboard_story_dismiss" } = Astro.props;
+const { dismissedKey = "dashboard_story_dismiss", show = true } = Astro.props;
+
+if (!show) return;
 ---
 <aside class="card card-muted dashboard-story-card" data-nudge-key={dismissedKey} role="note">
   <div class="dashboard-story-body">
@@ -16,27 +19,8 @@ const { dismissedKey = "dashboard_story_dismiss" } = Astro.props;
   <div class="dashboard-story-actions">
     <a class="btn-secondary" href="/stories/garage-freeze-alert">Read case study</a>
     <a class="btn-ghost" href="/about/temperature-probe-case-study">Technical deep dive</a>
-    <button type="button" class="btn-ghost dashboard-story-dismiss" data-dismiss={dismissedKey}>
+    <button type="button" class="btn-ghost" data-dismiss={dismissedKey}>
       Dismiss
     </button>
   </div>
 </aside>
-
-<script is:inline>
-  (() => {
-    document.querySelectorAll(".dashboard-story-card[data-nudge-key]").forEach((el) => {
-      const key = el.getAttribute("data-nudge-key");
-      if (key && localStorage.getItem(key) === "1") {
-        el.remove();
-      }
-    });
-    document.querySelectorAll(".dashboard-story-dismiss").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const key = btn.getAttribute("data-dismiss");
-        const card = btn.closest(".dashboard-story-card");
-        if (key) localStorage.setItem(key, "1");
-        card?.remove();
-      });
-    });
-  })();
-</script>

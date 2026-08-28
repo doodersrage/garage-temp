@@ -91,7 +91,7 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
 <DashboardLayout title="Share links">
   <div class="space-y-6">
     <section class="card">
-      <h1 class="card-title">Public share links</h1>
+      <h2 class="card-title">Public share links</h2>
       <p class="card-subtitle">Read-only live views for family without accounts. Pro feature.</p>
       {notice && (
         <p class:list={[noticeIsError ? "alert-warning" : "alert-success", "mt-4"]}>{notice}</p>

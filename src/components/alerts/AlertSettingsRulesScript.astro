@@ -1,0 +1,235 @@
+---
+import { CONDITION_OPTIONS } from "../../lib/alertRules";
+import type { AlertRule } from "../../lib/alertRules";
+
+interface Props {
+  initialRules?: AlertRule[];
+}
+
+const { initialRules = [] } = Astro.props;
+---
+<script is:inline define:vars={{ conditionOptions: CONDITION_OPTIONS, initialRules }}>
+  (() => {
+    const form = document.getElementById("alert-settings-form");
+    if (!(form instanceof HTMLFormElement)) return;
+    const hint = document.getElementById("channel-incomplete-hint");
+    const list = document.getElementById("alert-rules-list");
+    const hidden = document.getElementById("alert_rules_json");
+    const addBtn = document.getElementById("add-alert-rule");
+    let rules = Array.isArray(initialRules) ? structuredClone(initialRules) : [];
+
+    function syncRulesHidden() {
+      if (hidden) hidden.value = JSON.stringify(rules);
+    }
+
+    function renderRules() {
+      if (!list) return;
+      list.innerHTML = "";
+      rules.forEach((rule, ruleIndex) => {
+        const wrap = document.createElement("div");
+        wrap.className = "rounded border border-[var(--color-border)] p-3";
+        const condOptions = conditionOptions
+          .map((o) => `<option value="${o.value}">${o.label}</option>`)
+          .join("");
+        const conditionsHtml = (rule.all || [])
+          .map((c, ci) => {
+            const opts = conditionOptions
+              .map(
+                (o) =>
+                  `<option value="${o.value}" ${o.value === c.type ? "selected" : ""}>${o.label}</option>`,
+              )
+              .join("");
+            return `<div class="flex flex-wrap gap-2 mb-2 items-center" data-ci="${ci}">
+              <select data-field="type" class="form-input">${opts}</select>
+              <input data-field="value" class="form-input" type="number" step="0.5" style="max-width:7rem" placeholder="value" value="${c.value != null ? c.value : ""}" />
+              <input data-field="labelIncludes" class="form-input" type="text" style="max-width:10rem" placeholder="label contains" value="${(c.labelIncludes || "").replace(/"/g, "&quot;")}" />
+              <button type="button" class="btn-secondary text-sm" data-remove-cond>Remove</button>
+            </div>`;
+          })
+          .join("");
+        wrap.innerHTML = `
+          <div class="flex flex-wrap gap-2 mb-2 items-center">
+            <label class="checkbox-row mb-0"><input type="checkbox" data-field="enabled" ${rule.enabled !== false ? "checked" : ""} /> <span>On</span></label>
+            <input class="form-input flex-1" data-field="name" value="${(rule.name || "").replace(/"/g, "&quot;")}" placeholder="Rule name" />
+            <button type="button" class="btn-secondary text-sm" data-remove-rule>Delete rule</button>
+          </div>
+          <p class="text-sm text-[var(--color-text-muted)] mb-2">All of:</p>
+          <div data-conditions>${conditionsHtml}</div>
+          <button type="button" class="btn-secondary text-sm" data-add-cond>Add condition</button>
+        `;
+        wrap.querySelector("[data-remove-rule]")?.addEventListener("click", () => {
+          rules.splice(ruleIndex, 1);
+          renderRules();
+        });
+        wrap.querySelector('[data-field="enabled"]')?.addEventListener("change", (e) => {
+          rules[ruleIndex].enabled = e.target.checked;
+          syncRulesHidden();
+        });
+        wrap.querySelector('[data-field="name"]')?.addEventListener("input", (e) => {
+          rules[ruleIndex].name = e.target.value;
+          syncRulesHidden();
+        });
+        wrap.querySelector("[data-add-cond]")?.addEventListener("click", () => {
+          if (!rules[ruleIndex].all) rules[ruleIndex].all = [];
+          rules[ruleIndex].all.push({ type: "door_open" });
+          renderRules();
+        });
+        wrap.querySelectorAll("[data-conditions] > div").forEach((row) => {
+          const ci = Number(row.getAttribute("data-ci"));
+          row.querySelector('[data-field="type"]')?.addEventListener("change", (e) => {
+            rules[ruleIndex].all[ci].type = e.target.value;
+            syncRulesHidden();
+          });
+          row.querySelector('[data-field="value"]')?.addEventListener("input", (e) => {
+            const v = e.target.value;
+            rules[ruleIndex].all[ci].value = v === "" ? undefined : Number(v);
+            syncRulesHidden();
+          });
+          row.querySelector('[data-field="labelIncludes"]')?.addEventListener("input", (e) => {
+            const v = e.target.value.trim();
+            rules[ruleIndex].all[ci].labelIncludes = v || undefined;
+            syncRulesHidden();
+          });
+          row.querySelector("[data-remove-cond]")?.addEventListener("click", () => {
+            rules[ruleIndex].all.splice(ci, 1);
+            renderRules();
+          });
+        });
+        void condOptions;
+        list.appendChild(wrap);
+      });
+      syncRulesHidden();
+    }
+
+    addBtn?.addEventListener("click", () => {
+      rules.push({
+        id: crypto.randomUUID(),
+        enabled: true,
+        name: "New rule",
+        all: [{ type: "door_open" }, { type: "temp_below" }],
+      });
+      renderRules();
+    });
+
+    function syncIncompleteHint() {
+      if (!hint) return;
+      const discordOn = form.querySelector('[name="channel_discord"]')?.checked;
+      const telegramOn = form.querySelector('[name="channel_telegram"]')?.checked;
+      const slackOn = form.querySelector('[name="channel_slack"]')?.checked;
+      const smsOn = form.querySelector('[name="channel_sms"]')?.checked;
+      const webhookOn = form.querySelector('[name="channel_webhook"]')?.checked;
+      const emailOn = form.querySelector('[name="channel_email"]')?.checked;
+      const discordUrl = form.querySelector("#discord_webhook_url")?.value?.trim();
+      const tgToken = form.querySelector("#telegram_bot_token")?.value?.trim();
+      const tgChat = form.querySelector("#telegram_chat_id")?.value?.trim();
+      const slackUrl = form.querySelector("#slack_webhook_url")?.value?.trim();
+      const smsPhone = form.querySelector("#sms_phone")?.value?.trim();
+      const webhookUrl = form.querySelector("#outbound_webhook_url")?.value?.trim();
+      const alertEmail = form.querySelector("#alert_email")?.value?.trim();
+      const incomplete =
+        (emailOn && !alertEmail) ||
+        (discordOn && !discordUrl) ||
+        (telegramOn && (!tgToken || !tgChat)) ||
+        (slackOn && !slackUrl) ||
+        (smsOn && !smsPhone) ||
+        (webhookOn && !webhookUrl);
+      hint.hidden = !incomplete;
+    }
+
+    form.addEventListener("change", syncIncompleteHint);
+    form.addEventListener("input", syncIncompleteHint);
+
+    function syncChannelPanels() {
+      form.querySelectorAll("[data-channel-toggle]").forEach((input) => {
+        if (!(input instanceof HTMLInputElement)) return;
+        const panelId = input.getAttribute("data-channel-toggle");
+        if (!panelId) return;
+        const panel = form.querySelector(`[data-channel-panel="${panelId}"]`);
+        if (panel instanceof HTMLElement) panel.hidden = !input.checked;
+      });
+    }
+    form.addEventListener("change", syncChannelPanels);
+    syncChannelPanels();
+
+    function syncAlertSettingsFormFields() {
+      syncRulesHidden();
+      const severityHidden = document.getElementById("channel_severity_json");
+      if (severityHidden) {
+        const map = {};
+        document.querySelectorAll("[data-severity-kind]").forEach((el) => {
+          if (!el.checked) return;
+          const kind = el.getAttribute("data-severity-kind");
+          const ch = el.getAttribute("data-severity-channel");
+          if (!kind || !ch) return;
+          if (!map[kind]) map[kind] = [];
+          map[kind].push(ch);
+        });
+        severityHidden.value = JSON.stringify(map);
+      }
+      const templatesHidden = document.getElementById("alert_templates_json");
+      if (templatesHidden) {
+        const map = {};
+        document.querySelectorAll("[data-template-kind]").forEach((el) => {
+          const kind = el.getAttribute("data-template-kind");
+          const field = el.getAttribute("data-template-field");
+          if (!kind || !field) return;
+          const value = el.value?.trim();
+          if (!value) return;
+          if (!map[kind]) map[kind] = {};
+          map[kind][field] = value;
+        });
+        templatesHidden.value = JSON.stringify(map);
+      }
+      const routingHidden = document.getElementById("space_channel_routing_json");
+      if (routingHidden) {
+        let routing = {};
+        try {
+          const parsed = JSON.parse(routingHidden.value || "{}");
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            routing = structuredClone(parsed);
+          }
+        } catch {
+          routing = {};
+        }
+        const uiKinds = new Set(["threshold", "forecast", "nws", "rule", "outage", "rate"]);
+        const spacesTouched = new Set();
+        document.querySelectorAll(".space-routing-checkbox").forEach((el) => {
+          const space = el.getAttribute("data-space");
+          if (space) spacesTouched.add(space);
+        });
+        for (const space of spacesTouched) {
+          if (!routing[space] || typeof routing[space] !== "object") routing[space] = {};
+          for (const kind of uiKinds) {
+            routing[space][kind] = [];
+          }
+        }
+        document.querySelectorAll(".space-routing-checkbox").forEach((el) => {
+          if (!el.checked) return;
+          const space = el.getAttribute("data-space");
+          const kind = el.getAttribute("data-kind") || "threshold";
+          const channel = el.getAttribute("data-channel");
+          if (!space || !channel) return;
+          if (!routing[space]) routing[space] = {};
+          if (!Array.isArray(routing[space][kind])) routing[space][kind] = [];
+          routing[space][kind].push(channel);
+        });
+        for (const space of spacesTouched) {
+          for (const kind of uiKinds) {
+            if (Array.isArray(routing[space]?.[kind]) && routing[space][kind].length === 0) {
+              delete routing[space][kind];
+            }
+          }
+          if (routing[space] && Object.keys(routing[space]).length === 0) {
+            delete routing[space];
+          }
+        }
+        routingHidden.value = JSON.stringify(routing);
+      }
+    }
+
+    window.syncAlertSettingsFormFields = syncAlertSettingsFormFields;
+    form.addEventListener("submit", syncAlertSettingsFormFields, { capture: true });
+    syncIncompleteHint();
+    renderRules();
+  })();
+</script>

@@ -1,6 +1,4 @@
 ---
-export const prerender = false;
-
 import Layout from "../layouts/Layout.astro";
 import PageHeader from "../components/PageHeader.astro";
 import PlanComparisonTable from "../components/PlanComparisonTable.astro";
@@ -23,41 +21,42 @@ import PlanComparisonTable from "../components/PlanComparisonTable.astro";
       <h2 class="card-title">ThermalTrace vs alternatives</h2>
       <div class="overflow-x-auto">
         <table class="plan-comparison-table">
+          <caption class="sr-only">ThermalTrace compared to DIY scripts and generic IoT apps</caption>
           <thead>
             <tr>
-              <th>Capability</th>
-              <th>ThermalTrace</th>
-              <th>DIY script + cron</th>
-              <th>Generic IoT app</th>
+              <th scope="col">Capability</th>
+              <th scope="col">ThermalTrace</th>
+              <th scope="col">DIY script + cron</th>
+              <th scope="col">Generic IoT app</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Freeze alerts (email/SMS/push)</td>
+              <th scope="row">Freeze alerts (email/SMS/push)</th>
               <td>Built-in, per-household</td>
               <td>You wire Twilio + cron</td>
               <td>Varies; often push-only</td>
             </tr>
             <tr>
-              <td>ESP/Arduino push ingest</td>
+              <th scope="row">ESP/Arduino push ingest</th>
               <td>One-time device key</td>
               <td>Custom endpoint</td>
               <td>Often cloud-vendor lock-in</td>
             </tr>
             <tr>
-              <td>History & CSV export</td>
+              <th scope="row">History & CSV export</th>
               <td>Member+</td>
               <td>Self-hosted DB</td>
               <td>Subscription tiers</td>
             </tr>
             <tr>
-              <td>Share links & Grafana</td>
+              <th scope="row">Share links & Grafana</th>
               <td>Pro</td>
               <td>Manual setup</td>
               <td>Rare on consumer apps</td>
             </tr>
             <tr>
-              <td>Household multi-user</td>
+              <th scope="row">Household multi-user</th>
               <td>Free</td>
               <td>N/A</td>
               <td>Family plans extra</td>

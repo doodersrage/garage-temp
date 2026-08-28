@@ -40,7 +40,7 @@ import {
 import { fetchNwsAlerts } from "../lib/nwsAlerts";
 import { buildHeatingInsights } from "../lib/heatingInsights";
 import HeatingInsightsCard from "../components/HeatingInsightsCard.astro";
-import ProductAnalyticsTracker from "../components/ProductAnalyticsTracker.tsx";
+import ProductAnalyticsTracker from "../components/ProductAnalyticsTracker.astro";
 import UnackedAlertsBanner from "../components/UnackedAlertsBanner.astro";
 import { countUnacknowledgedAlerts } from "../lib/alertEvents";
 
@@ -81,17 +81,38 @@ const [
   countUnacknowledgedAlerts(user.id),
 ]);
 
-const members = household.householdId
-  ? await listHouseholdMembers(household.householdId)
-  : { members: [] };
+const [
+  members,
+  householdDevicesResult,
+  latest,
+  nightsAtRisk,
+  weatherSnapshot,
+  householdRole,
+  weekCompareResult,
+  chartWeek,
+] = await Promise.all([
+  household.householdId
+    ? listHouseholdMembers(household.householdId)
+    : Promise.resolve({ members: [] as Awaited<ReturnType<typeof listHouseholdMembers>>["members"] }),
+  household.householdId
+    ? listHouseholdDevices(household.householdId)
+    : Promise.resolve({ devices: deviceConfig.devices }),
+  household.householdId
+    ? fetchLatestSensorValues(household.householdId)
+    : Promise.resolve([]),
+  fetchNightsAtRisk({
+    cityId: preferences.weatherCityId,
+    freezeThresholdF: alertSettings.freezeThresholdF,
+  }),
+  fetchWeatherSnapshot(preferences.weatherCityId),
+  activeHouseholdId
+    ? getUserHouseholdRole(user.id, activeHouseholdId)
+    : Promise.resolve(null),
+  fetchWeekCompare(user.id),
+  fetchGarageTempChartData(user.id, 7),
+]);
 
-const devices = household.householdId
-  ? (await listHouseholdDevices(household.householdId)).devices
-  : deviceConfig.devices;
-
-const latest = household.householdId
-  ? await fetchLatestSensorValues(household.householdId)
-  : [];
+const devices = householdDevicesResult.devices;
 
 const hasDevices =
   tempConfig.hasCustomConfig ||
@@ -140,32 +161,21 @@ const lastAlertAt =
   lastAlertCandidates.sort((a, b) => Date.parse(b) - Date.parse(a))[0] ?? null;
 const lastAlertAge = formatRelativeAge(lastAlertAt);
 
-const nightsAtRisk = await fetchNightsAtRisk({
-  cityId: preferences.weatherCityId,
-  freezeThresholdF: alertSettings.freezeThresholdF,
-});
 const nightsRiskCount = nightsAtRisk.filter((n) => n.atRisk).length;
 
-const weatherSnapshot = await fetchWeatherSnapshot(preferences.weatherCityId);
 const weatherHasCoords =
   weatherSnapshot?.lat != null &&
   weatherSnapshot?.lon != null &&
   Number.isFinite(weatherSnapshot.lat) &&
   Number.isFinite(weatherSnapshot.lon);
-const nwsAlerts = weatherHasCoords
-  ? await fetchNwsAlerts(weatherSnapshot!.lat!, weatherSnapshot!.lon!)
-  : null;
+const nwsAlerts =
+  weatherHasCoords && weatherSnapshot
+    ? await fetchNwsAlerts(weatherSnapshot.lat!, weatherSnapshot.lon!)
+    : null;
 
-const householdRole = activeHouseholdId
-  ? await getUserHouseholdRole(user.id, activeHouseholdId)
-  : null;
 const canEdit = canEditHousehold(householdRole);
 
 const useCelsius = preferences.useCelsius;
-const [weekCompareResult, chartWeek] = await Promise.all([
-  fetchWeekCompare(user.id),
-  fetchGarageTempChartData(user.id, 7),
-]);
 const timeToFreeze = buildTimeToFreezeFromPoints(
   chartWeek.points,
   alertSettings.freezeThresholdF,
@@ -191,6 +201,12 @@ const feedsValue =
 
 const upgradeTarget = nextUpgradeTier(entitlements.tier);
 
+const essentialDone = hasDevices && hasAlertsEnabled && hasEmailAlerts;
+const showSecondaryNudges = onboardingDismissed || essentialDone;
+const showAlertSetupNudge =
+  showSecondaryNudges && canEdit && (!hasAlertsEnabled || !hasEmailAlerts);
+const showStoryCard = showSecondaryNudges && canEdit && !showAlertSetupNudge;
+
 const analyticsEvents: Array<{
   name: import("../lib/productAnalytics").ProductEvent;
   props?: Record<string, string | number | boolean>;
@@ -201,7 +217,7 @@ if (hasHistory) analyticsEvents.push({ name: "onboarding_step_complete", props: 
 if (hasEmailAlerts) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "alerts" } });
 ---
 <DashboardLayout title="Overview">
-  <ProductAnalyticsTracker client:load events={analyticsEvents} />
+  <ProductAnalyticsTracker events={analyticsEvents} />
   <div class="dashboard-stack">
     {(passwordUpdated || prefsSaved || prefsError) && (
       <div class="dashboard-flash">
@@ -241,9 +257,10 @@ if (hasEmailAlerts) analyticsEvents.push({ name: "onboarding_step_complete", pro
       hasAlertsEnabled={hasAlertsEnabled}
       hasEmailAlerts={hasEmailAlerts}
       canEdit={canEdit}
+      show={showAlertSetupNudge}
     />
 
-    <DashboardStoryCard />
+    <DashboardStoryCard show={showStoryCard} />
 
     <HouseholdSwitcher
       households={userHouseholds.households}

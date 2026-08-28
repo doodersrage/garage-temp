@@ -1,6 +1,7 @@
 ---
 
 import AboutArticle from "../../components/AboutArticle.astro";
+import { Image } from "astro:assets";
 import tempProbeV1 from "../../assets/temp-probe-v1.jpg";
 import JSONProbe from "../../assets/json-temp.jpg";
 import { getAboutPage } from "../../lib/aboutPages";
@@ -28,7 +29,13 @@ const page = getAboutPage("data-flow")!;
   </p>
 
   <figure class="about-figure">
-    <img src={tempProbeV1.src} width={tempProbeV1.width} height={tempProbeV1.height} alt="Probe hardware that starts the monitoring pipeline" />
+    <Image
+      src={tempProbeV1}
+      alt="Probe hardware that starts the monitoring pipeline"
+      widths={[480, 768, 1024]}
+      sizes="(max-width: 768px) 100vw, 640px"
+      class="w-full h-auto rounded-lg"
+    />
     <figcaption>Hardware sensing is the source of truth for every downstream system.</figcaption>
   </figure>
 

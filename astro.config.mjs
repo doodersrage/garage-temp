@@ -93,14 +93,14 @@ export default defineConfig({
       name: 'Plus Jakarta Sans',
       cssVariable: "--font-sans",
       subsets: ['latin'],
-      weights: ['400', '500', '600', '700'],
+      weights: ['400', '600', '700'],
     },
     {
       provider: fontProviders.google(),
       name: 'Sora',
       cssVariable: "--font-display",
       subsets: ['latin'],
-      weights: ['500', '600', '700'],
+      weights: ['600', '700'],
     },
   ],
   

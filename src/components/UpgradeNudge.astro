@@ -34,28 +34,8 @@ const checkoutSource = `nudge_${feature}`;
         {nudge.targetTier === "member" ? "Upgrade to Member" : "Upgrade to Pro"}
       </button>
     </form>
-    <button type="button" class="btn-ghost upgrade-nudge-dismiss" data-dismiss={nudge.dismissKey}>
+    <button type="button" class="btn-ghost" data-dismiss={nudge.dismissKey}>
       Dismiss
     </button>
   </div>
 </aside>
-
-<script is:inline>
-  (() => {
-    document.querySelectorAll(".upgrade-nudge[data-nudge-key]").forEach((el) => {
-      const key = el.getAttribute("data-nudge-key");
-      if (key && localStorage.getItem(key) === "1") {
-        el.remove();
-      }
-    });
-
-    document.querySelectorAll(".upgrade-nudge-dismiss").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const key = btn.getAttribute("data-dismiss");
-        const card = btn.closest(".upgrade-nudge");
-        if (key) localStorage.setItem(key, "1");
-        card?.remove();
-      });
-    });
-  })();
-</script>
