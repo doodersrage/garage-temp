@@ -719,6 +719,17 @@
     padding-top: 1.25rem;
     border-top: 1px solid var(--color-border);
     font-size: 0.8125rem;
+    color: var(--color-text-muted);
+  }
+
+  .site-footer-legal a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .site-footer-legal a:hover {
+    color: var(--color-text);
   }
 
   .auth-page {
