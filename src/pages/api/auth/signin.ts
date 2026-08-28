@@ -1,11 +1,11 @@
 import type { APIRoute } from "astro";
 import { supabase } from "../../../lib/supabase";
 import type { Provider } from "@supabase/supabase-js";
-import { setAuthCookies } from "../../../lib/auth";
 import {
   buildSignInRedirectUrl,
   mapSignInError,
 } from "../../../lib/signInErrors";
+import { applySessionCookiesAfterAuth, createAuthClient } from "../../../lib/mfa";
 import {
   buildOAuthCallbackUrl,
   OAUTH_NEXT_COOKIE,
@@ -80,16 +80,20 @@ export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress
     return redirect(buildSignInRedirectUrl("missing_fields", email));
   }
 
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const authClient = createAuthClient();
+  const { data, error } = await authClient.auth.signInWithPassword({
     email,
     password,
   });
 
-  if (error) {
-    return redirect(buildSignInRedirectUrl(mapSignInError(error), email));
+  if (error || !data.session) {
+    return redirect(buildSignInRedirectUrl(mapSignInError(error ?? { message: "generic" }), email));
   }
 
-  const { access_token, refresh_token } = data.session;
-  setAuthCookies(cookies, access_token, refresh_token);
-  return redirect(safeNext ?? "/dashboard");
+  const { redirectTo } = await applySessionCookiesAfterAuth(
+    cookies,
+    data.session,
+    safeNext,
+  );
+  return redirect(redirectTo);
 };

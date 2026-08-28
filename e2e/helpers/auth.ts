@@ -81,6 +81,13 @@ export async function signIn(page: Page, next = "/dashboard/alerts"): Promise<vo
     },
   ]);
 
-  await page.goto(next);
-  await page.waitForURL(new RegExp(next.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  await page.goto(next, { waitUntil: "domcontentloaded" });
+  // Allow auth middleware redirects (e.g. MFA step-up) before asserting destination.
+  await page.waitForURL(
+    (url) => {
+      const path = url.pathname;
+      return path === next || path.startsWith(`${next}/`) || path.startsWith("/signin");
+    },
+    { timeout: 20_000 },
+  );
 }

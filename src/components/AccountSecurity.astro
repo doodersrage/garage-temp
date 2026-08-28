@@ -11,7 +11,7 @@ const { accessToken, refreshToken } = Astro.props;
 <DashboardCard>
   <h2 class="card-title">Security (MFA)</h2>
   <p class="card-subtitle mb-3">
-    Add an authenticator app (TOTP). Requires MFA enabled in your Supabase project.
+    Add an authenticator app (TOTP). After enrollment, sign-in will ask for a 6-digit code.
   </p>
   <MfaEnroll client:visible accessToken={accessToken} refreshToken={refreshToken} />
 </DashboardCard>

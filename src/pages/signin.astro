@@ -3,10 +3,25 @@ import Layout from "../layouts/Layout.astro";
 import OAuthButtons from "../components/OAuthButtons.astro";
 import { getAuthFromCookies } from "../lib/auth";
 import { getSignInErrorMessage } from "../lib/signInErrors";
+import {
+  buildMfaChallengeUrl,
+  sessionNeedsMfaStepUp,
+  setMfaRequiredCookie,
+} from "../lib/mfa";
 
-const { user } = await getAuthFromCookies(Astro.cookies);
+const { session, user } = await getAuthFromCookies(Astro.cookies);
 
-if (user) {
+if (session && user) {
+  const needsStepUp = await sessionNeedsMfaStepUp(
+    session.access_token,
+    session.refresh_token,
+  );
+  if (needsStepUp) {
+    setMfaRequiredCookie(Astro.cookies, true);
+    const nextPath = Astro.url.searchParams.get("next") ?? "";
+    return Astro.redirect(buildMfaChallengeUrl(nextPath));
+  }
+  setMfaRequiredCookie(Astro.cookies, false);
   return Astro.redirect("/dashboard");
 }
 

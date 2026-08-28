@@ -1,8 +1,25 @@
 import { defineMiddleware } from "astro:middleware";
 import { getAuthFromCookies } from "./lib/auth";
 import { pathRequiresAuth } from "./lib/routeAuth";
+import {
+  buildMfaChallengeUrl,
+  getAalClaim,
+  isMfaCheckedNotRequired,
+  isMfaRequiredCookieSet,
+  sessionNeedsMfaStepUp,
+  setMfaRequiredCookie,
+} from "./lib/mfa";
 import { recordServerError } from "./lib/serverErrors";
 import { CANONICAL_HOST, LEGACY_HOSTS } from "./lib/siteConfig";
+
+function isMfaExemptPath(pathname: string): boolean {
+  return (
+    pathname === "/signin/mfa" ||
+    pathname === "/api/auth/mfa-verify" ||
+    pathname === "/api/auth/signout" ||
+    pathname === "/api/auth/set-session"
+  );
+}
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname, hostname, protocol } = context.url;
@@ -37,6 +54,35 @@ export const onRequest = defineMiddleware(async (context, next) => {
       }
 
       userId = user?.id ?? null;
+
+      if (!isMfaExemptPath(pathname)) {
+        const aal = getAalClaim(session.access_token);
+        let needsMfa = false;
+
+        if (aal === "aal2") {
+          setMfaRequiredCookie(context.cookies, false);
+        } else if (isMfaRequiredCookieSet(context.cookies)) {
+          needsMfa = true;
+        } else if (isMfaCheckedNotRequired(context.cookies)) {
+          needsMfa = false;
+        } else if (aal === "aal1") {
+          needsMfa = await sessionNeedsMfaStepUp(
+            session.access_token,
+            session.refresh_token,
+          );
+          setMfaRequiredCookie(context.cookies, needsMfa);
+        }
+
+        if (needsMfa) {
+          if (pathname.startsWith("/api/")) {
+            return new Response(JSON.stringify({ error: "MFA required" }), {
+              status: 401,
+              headers: { "Content-Type": "application/json" },
+            });
+          }
+          return context.redirect(buildMfaChallengeUrl(pathname));
+        }
+      }
     }
 
     return await next();

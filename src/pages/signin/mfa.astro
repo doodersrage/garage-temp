@@ -1,0 +1,84 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getAuthFromCookies } from "../../lib/auth";
+import {
+  sessionNeedsMfaStepUp,
+  setMfaRequiredCookie,
+} from "../../lib/mfa";
+import { sanitizeNextPath } from "../../lib/siteUrl";
+
+const { session, user } = await getAuthFromCookies(Astro.cookies);
+
+if (!session || !user) {
+  return Astro.redirect("/signin");
+}
+
+const needsStepUp = await sessionNeedsMfaStepUp(
+  session.access_token,
+  session.refresh_token,
+);
+
+if (!needsStepUp) {
+  setMfaRequiredCookie(Astro.cookies, false);
+  const next = sanitizeNextPath(Astro.url.searchParams.get("next")) ?? "/dashboard";
+  return Astro.redirect(next);
+}
+
+setMfaRequiredCookie(Astro.cookies, true);
+
+const errorCode = Astro.url.searchParams.get("error");
+const errorMessage =
+  errorCode === "invalid_code"
+    ? "That code was incorrect or expired. Enter a fresh code from your authenticator app."
+    : errorCode === "no_factor"
+      ? "No authenticator is enrolled on this account. Sign in again and add one under Settings."
+      : errorCode === "generic"
+        ? "Something went wrong verifying your code. Try again."
+        : null;
+
+const safeNext =
+  sanitizeNextPath(Astro.url.searchParams.get("next")) ?? "/dashboard";
+---
+<Layout
+  title="Authenticator code"
+  description="Enter the 6-digit code from your authenticator app to finish signing in."
+>
+  <div class="auth-page">
+    <header class="auth-intro page-header">
+      <h1 class="page-header-title">Authenticator code</h1>
+      <p class="page-header-lede">
+        Enter the 6-digit code from your authenticator app for {user.email}.
+      </p>
+    </header>
+
+    <div class="form-panel">
+      {errorMessage && (
+        <div class="alert-warning mb-4" role="alert">
+          <p class="m-0">{errorMessage}</p>
+        </div>
+      )}
+      <form action="/api/auth/mfa-verify" method="post">
+        <input type="hidden" name="next" value={safeNext} />
+        <div class="form-field">
+          <label class="form-label" for="code">Authentication code</label>
+          <input
+            class="form-input"
+            type="text"
+            name="code"
+            id="code"
+            inputmode="numeric"
+            pattern="[0-9]{6}"
+            autocomplete="one-time-code"
+            maxlength="6"
+            required
+            autofocus
+          />
+        </div>
+        <button class="btn-primary" type="submit">Verify and continue</button>
+      </form>
+      <p class="m-0 mt-4 text-sm text-center">
+        <a class="text-link" href="/api/auth/signout">Use a different account</a>
+      </p>
+    </div>
+  </div>
+</Layout>
