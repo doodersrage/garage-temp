@@ -1,0 +1,27 @@
+---
+import { Image } from "astro:assets";
+import { getAboutPhoto, type AboutPhotoId } from "../lib/aboutPhotos";
+
+interface Props {
+  photoId: AboutPhotoId;
+  class?: string;
+}
+
+const { photoId, class: className } = Astro.props;
+const photo = getAboutPhoto(photoId);
+---
+<figure class:list={["about-figure", className]}>
+  <Image
+    src={photo.image}
+    alt={photo.alt}
+    widths={[480, 768, 1024]}
+    sizes="(max-width: 768px) 100vw, 640px"
+    class="w-full h-auto"
+  />
+  <figcaption>
+    <span class="about-figure-caption">{photo.caption}</span>
+    <a class="about-figure-credit" href={photo.sourceUrl} rel="noopener noreferrer" target="_blank">
+      {photo.credit}
+    </a>
+  </figcaption>
+</figure>

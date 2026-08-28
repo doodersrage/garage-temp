@@ -1,19 +1,24 @@
 ---
 
 import AboutArticle from "../../components/AboutArticle.astro";
+import AboutCcFigure from "../../components/AboutCcFigure.astro";
 import { Image } from "astro:assets";
-import tempProbeV1 from "../../assets/temp-probe-v1.jpg";
 import tempProbeV2 from "../../assets/temp-probe-v2.jpg";
 import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutPhoto } from "../../lib/aboutPhotos";
 
 const page = getAboutPage("temperature-probes")!;
+const hero = getAboutPhoto("dht22-module");
 ---
 <AboutArticle
   slug={page.slug}
   title={page.title}
   description={page.description}
-  heroImage={tempProbeV1}
-  heroAlt="Arduino board with wired temperature probe inputs in a garage monitoring setup"
+  heroImage={hero.image}
+  heroAlt={hero.alt}
+  heroCaption={hero.caption}
+  heroCredit={hero.credit}
+  heroCreditHref={hero.sourceUrl}
 >
   <p>
     Temperature probes are the sensing layer of any environmental monitor. In a garage or workshop,
@@ -54,16 +59,7 @@ const page = getAboutPage("temperature-probes")!;
     Shoulder height (4–5 feet) usually represents the air volume people and stored items experience.
   </p>
 
-  <figure class="about-figure">
-    <Image
-      src={tempProbeV2}
-      alt="Second revision of the probe controller board with network connectivity"
-      widths={[480, 768, 1024]}
-      sizes="(max-width: 768px) 100vw, 640px"
-      class="w-full h-auto rounded-lg"
-    />
-    <figcaption>Revision two of the probe board adds refinements learned from the first deployment.</figcaption>
-  </figure>
+  <AboutCcFigure photoId="garage-workbench" />
 
   <h2>Why multiple probes beat one</h2>
   <p>
@@ -72,6 +68,17 @@ const page = getAboutPage("temperature-probes")!;
     and which area represents the risk you care about. The firmware averages active probes so the
     history page still has one summary snapshot per load while preserving per-probe detail on the home page.
   </p>
+
+  <figure class="about-figure">
+    <Image
+      src={tempProbeV2}
+      alt="ThermalTrace probe controller board with Ethernet connectivity and DHT22 sensors"
+      widths={[480, 768, 1024]}
+      sizes="(max-width: 768px) 100vw, 640px"
+      class="w-full h-auto rounded-lg"
+    />
+    <figcaption>Revision two of the ThermalTrace probe board—Ethernet, LCD, and dual DHT22 inputs.</figcaption>
+  </figure>
 
   <h2>From probe wire to web page</h2>
   <p>

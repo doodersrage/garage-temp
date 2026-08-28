@@ -24,14 +24,26 @@ interface Props {
   description: string;
   heroImage?: ImageMetadata;
   heroAlt?: string;
+  heroCaption?: string;
+  heroCredit?: string;
+  heroCreditHref?: string;
   sectionParent?: {
     slug: string;
     title: string;
   };
 }
 
-const { slug, title, description, heroImage, heroAlt, sectionParent: sectionParentProp } =
-  Astro.props;
+const {
+  slug,
+  title,
+  description,
+  heroImage,
+  heroAlt,
+  heroCaption,
+  heroCredit,
+  heroCreditHref,
+  sectionParent: sectionParentProp,
+} = Astro.props;
 
 const sectionParent =
   sectionParentProp ??
@@ -102,7 +114,18 @@ const schema = [
         {heroImage && (
           <figure class="about-figure card overflow-hidden p-0">
             <Image src={heroImage} alt={heroAlt ?? title} class="h-full w-full object-cover" />
-            {heroAlt && <figcaption>{heroAlt}</figcaption>}
+            {(heroCaption || heroCredit) && (
+              <figcaption>
+                {heroCaption && <span class="about-figure-caption">{heroCaption}</span>}
+                {heroCredit && heroCreditHref ? (
+                  <a class="about-figure-credit" href={heroCreditHref} rel="noopener noreferrer" target="_blank">
+                    {heroCredit}
+                  </a>
+                ) : heroCredit ? (
+                  <span class="about-figure-credit">{heroCredit}</span>
+                ) : null}
+              </figcaption>
+            )}
           </figure>
         )}
 

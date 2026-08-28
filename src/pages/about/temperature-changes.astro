@@ -1,16 +1,30 @@
 ---
 
 import AboutArticle from "../../components/AboutArticle.astro";
+import AboutCcFigure from "../../components/AboutCcFigure.astro";
 import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutPhoto } from "../../lib/aboutPhotos";
 
 const page = getAboutPage("temperature-changes")!;
+const hero = getAboutPhoto("home-workshop");
 ---
-<AboutArticle slug={page.slug} title={page.title} description={page.description}>
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={hero.image}
+  heroAlt={hero.alt}
+  heroCaption={hero.caption}
+  heroCredit={hero.credit}
+  heroCreditHref={hero.sourceUrl}
+>
   <p>
     Garage temperature rarely sits still. It climbs when the sun hits the roof, drops after a cold
     front passes, and spikes the moment a bay door opens. Understanding what drives those changes
     helps you interpret probe readings instead of treating every swing as an equipment fault.
   </p>
+
+  <AboutCcFigure photoId="garage-workbench" />
 
   <h2>Daily patterns</h2>
   <p>

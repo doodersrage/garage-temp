@@ -1,19 +1,24 @@
 ---
 
 import AboutArticle from "../../components/AboutArticle.astro";
+import AboutCcFigure from "../../components/AboutCcFigure.astro";
 import { Image } from "astro:assets";
-import tempProbeV1 from "../../assets/temp-probe-v1.jpg";
 import JSONProbe from "../../assets/json-temp.jpg";
 import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutPhoto } from "../../lib/aboutPhotos";
 
 const page = getAboutPage("data-flow")!;
+const hero = getAboutPhoto("ethernet-cable");
 ---
 <AboutArticle
   slug={page.slug}
   title={page.title}
   description={page.description}
-  heroImage={JSONProbe}
-  heroAlt="JSON feed consumed by the website after leaving the Arduino probe network"
+  heroImage={hero.image}
+  heroAlt={hero.alt}
+  heroCaption={hero.caption}
+  heroCredit={hero.credit}
+  heroCreditHref={hero.sourceUrl}
 >
   <p>
     Every number on the home page travels through several layers. Understanding that pipeline helps
@@ -28,16 +33,7 @@ const page = getAboutPage("data-flow")!;
     <a class="text-link" href="/about/temperature-probes">temperature probes</a>.
   </p>
 
-  <figure class="about-figure">
-    <Image
-      src={tempProbeV1}
-      alt="Probe hardware that starts the monitoring pipeline"
-      widths={[480, 768, 1024]}
-      sizes="(max-width: 768px) 100vw, 640px"
-      class="w-full h-auto rounded-lg"
-    />
-    <figcaption>Hardware sensing is the source of truth for every downstream system.</figcaption>
-  </figure>
+  <AboutCcFigure photoId="arduino-dht11" />
 
   <h2>Step 2 — Publishing JSON</h2>
   <p>
@@ -45,6 +41,17 @@ const page = getAboutPage("data-flow")!;
     so the wider internet never hits the residential uplink directly—see
     <a class="text-link" href="/about/python-feeds">Python scripts and feeds</a>.
   </p>
+
+  <figure class="about-figure">
+    <Image
+      src={JSONProbe}
+      alt="Browser JSON viewer showing temp probe keys 0, 1, and avg with Fahrenheit Celsius and humidity"
+      widths={[480, 768, 1024]}
+      sizes="(max-width: 768px) 100vw, 640px"
+      class="w-full h-auto rounded-lg"
+    />
+    <figcaption>Live feed payload shape consumed by the website after leaving the garage network.</figcaption>
+  </figure>
 
   <h2>Step 3 — Website fetch and display</h2>
   <p>

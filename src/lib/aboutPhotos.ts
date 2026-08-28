@@ -1,0 +1,187 @@
+import type { ImageMetadata } from "astro";
+import arduinoDht11 from "../assets/about-photos/arduino-dht11.jpg";
+import arduinoUnoBoard from "../assets/about-photos/arduino-uno-board.jpg";
+import coldWeatherRoad from "../assets/about-photos/cold-weather-road.jpg";
+import deskWorkspace from "../assets/about-photos/desk-workspace.jpg";
+import dht22Module from "../assets/about-photos/dht22-module.jpg";
+import ethernetCable from "../assets/about-photos/ethernet-cable.jpg";
+import frostWindow from "../assets/about-photos/frost-window.jpg";
+import garageWorkbench from "../assets/about-photos/garage-workbench.jpg";
+import homeWorkshop from "../assets/about-photos/home-workshop.jpg";
+import utilityPipes from "../assets/about-photos/utility-pipes.jpg";
+
+export type AboutPhotoId =
+  | "arduino-dht11"
+  | "arduino-uno-board"
+  | "cold-weather-road"
+  | "desk-workspace"
+  | "dht22-module"
+  | "ethernet-cable"
+  | "frost-window"
+  | "garage-workbench"
+  | "home-workshop"
+  | "utility-pipes";
+
+export type AboutPhoto = {
+  id: AboutPhotoId;
+  image: ImageMetadata;
+  alt: string;
+  /** Short on-page caption (not a duplicate of alt). */
+  caption: string;
+  /** Attribution line required by the license. */
+  credit: string;
+  license: string;
+  sourceUrl: string;
+};
+
+/**
+ * Curated Creative Commons / public-domain photos for About guides.
+ * Prefer topical photos over reusing project bench shots on unrelated pages.
+ */
+export const aboutPhotos: Record<AboutPhotoId, AboutPhoto> = {
+  "frost-window": {
+    id: "frost-window",
+    image: frostWindow,
+    alt: "Fern-like frost crystals covering a dark window pane",
+    caption: "Frost patterns form when moist air meets a surface below freezing.",
+    credit: "Photo: Muffet / Flickr — CC BY 2.0",
+    license: "CC BY 2.0",
+    sourceUrl: "https://www.flickr.com/photos/53133240@N00/74115299",
+  },
+  "utility-pipes": {
+    id: "utility-pipes",
+    image: utilityPipes,
+    alt: "Copper water pipes, shut-off valve, and meter on a concrete utility wall",
+    caption: "Freeze alerts matter most near exposed plumbing and uninsulated walls.",
+    credit: "Photo: mathplourde / Flickr — CC BY 2.0",
+    license: "CC BY 2.0",
+    sourceUrl: "https://www.flickr.com/photos/23311795@N04/3793183731",
+  },
+  "cold-weather-road": {
+    id: "cold-weather-road",
+    image: coldWeatherRoad,
+    alt: "Person in extreme cold holding an outdoor thermometer reading far below zero",
+    caption: "Regional cold snaps can outpace what outdoor weather apps imply for an attached garage.",
+    credit: "Photo: Bureau of Land Management — public domain",
+    license: "Public domain",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:Cold_weather_on_the_Dalton_Highway_(49494853936).jpg",
+  },
+  "dht22-module": {
+    id: "dht22-module",
+    image: dht22Module,
+    alt: "Aosong AM2302 DHT22 temperature and humidity sensor module on a black breakout board",
+    caption: "The DHT22 (AM2302) is the digital humidity–temperature sensor used in many garage builds.",
+    credit: "Photo: Suyash Dwivedi — CC BY-SA 4.0",
+    license: "CC BY-SA 4.0",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:AM2302_(DHT22)_digital_temperature_and_humidity_sensor_module.jpg",
+  },
+  "arduino-uno-board": {
+    id: "arduino-uno-board",
+    image: arduinoUnoBoard,
+    alt: "Top view of a blue Arduino Uno microcontroller board on a white background",
+    caption: "Arduino-compatible boards run the sketch that polls probes and publishes JSON.",
+    credit: "Photo: Wikimedia Commons contributor — CC0",
+    license: "CC0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Arduino_Uno_board.jpg",
+  },
+  "arduino-dht11": {
+    id: "arduino-dht11",
+    image: arduinoDht11,
+    alt: "Arduino Uno wired to a DHT temperature-humidity sensor with three jumper wires",
+    caption: "A minimal MCU-plus-sensor bring-up before Ethernet, LCD, and dual-probe wiring.",
+    credit: "Photo: Wikimedia Commons contributor — CC BY-SA 4.0",
+    license: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Arduino_uno_dht11.jpg",
+  },
+  "garage-workbench": {
+    id: "garage-workbench",
+    image: garageWorkbench,
+    alt: "Bench grinder on a wooden workbench against a brick garage wall with tools",
+    caption: "Workshops and garages swing harder than living space—placement beats sensor brand.",
+    credit: "Photo: Shixart1985 — CC BY 2.0",
+    license: "CC BY 2.0",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:Workshop_scene_shows_workbench_with_a_tool_and_materials_in_a_garage_setting.jpg",
+  },
+  "home-workshop": {
+    id: "home-workshop",
+    image: homeWorkshop,
+    alt: "Cluttered home workshop with workbench, tools, lumber, and packed shelves",
+    caption: "Humidity and temperature swings matter when tools, wood, and paint share the same bay.",
+    credit: "Photo: danielmee33 / Flickr — CC BY 2.0",
+    license: "CC BY 2.0",
+    sourceUrl: "https://www.flickr.com/photos/8432632@N04/28260557796",
+  },
+  "ethernet-cable": {
+    id: "ethernet-cable",
+    image: ethernetCable,
+    alt: "Close-up of white Cat-5e Ethernet cables with RJ45 connectors",
+    caption: "Probe JSON usually leaves the garage over Ethernet or a nearby relay—not the public internet directly.",
+    credit: "Photo: DiscDepotDundee.co.uk — CC BY-SA 4.0",
+    license: "CC BY-SA 4.0",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:Cat-5e_Ethernet_network_cable_RJ45_end_connectors.jpg",
+  },
+  "desk-workspace": {
+    id: "desk-workspace",
+    image: deskWorkspace,
+    alt: "Home desk with laptop, external monitor, and keyboard in a living space",
+    caption: "Household members check the same dashboard from wherever they already work.",
+    credit: "Photo: David Wellbeloved / Flickr — CC BY 2.0",
+    license: "CC BY 2.0",
+    sourceUrl: "https://www.flickr.com/photos/35339157@N00/5378333486",
+  },
+};
+
+/** Hero photo overrides for guides that benefit from atmosphere or topical hardware. */
+export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
+  // Freeze / alerts
+  "cold-snap-playbook": "frost-window",
+  "freeze-protection-thresholds": "utility-pipes",
+  "alert-channel-cookbook": "cold-weather-road",
+  "seasonal-garage-patterns": "frost-window",
+
+  // Probes / hardware
+  "dht22-sensor-overview": "dht22-module",
+  "dht22-data-line-wiring": "arduino-dht11",
+  "dht22-read-errors-retries": "dht22-module",
+  "probe-mounting-enclosures": "garage-workbench",
+  "multi-zone-garage-layout": "home-workshop",
+  "garage-door-temperature-swings": "garage-workbench",
+  "sun-load-garage-walls": "home-workshop",
+  "infiltration-wind-drafts": "garage-workbench",
+  "humidity-condensation-basics": "frost-window",
+  "thermal-mass-concrete-slab": "home-workshop",
+
+  // Arduino / firmware
+  "arduino-ide-setup": "arduino-uno-board",
+  "sketch-polling-main-loop": "arduino-uno-board",
+  "ethernet-shield-stacking": "ethernet-cable",
+  "breadboard-power-rails": "arduino-dht11",
+  "firmware-watchdog-recovery": "arduino-uno-board",
+  "json-probe-output-schema": "ethernet-cable",
+
+  // Data / accounts
+  "debugging-stale-readings": "ethernet-cable",
+  "history-dashboard-browsing": "desk-workspace",
+  "csv-export-spreadsheet-analysis": "desk-workspace",
+  "household-sharing-walkthrough": "desk-workspace",
+  "group-membership-model": "desk-workspace",
+  "cookie-session-lifecycle": "desk-workspace",
+  "supabase-auth-flow": "desk-workspace",
+  "static-ip-vs-dhcp": "ethernet-cable",
+  "docker-relay-deployment": "ethernet-cable",
+  "fastapi-relay-setup": "ethernet-cable",
+  "health-check-endpoints": "ethernet-cable",
+};
+
+export function getAboutPhoto(id: AboutPhotoId): AboutPhoto {
+  return aboutPhotos[id];
+}
+
+export function getAboutHeroPhoto(slug: string): AboutPhoto | undefined {
+  const id = aboutHeroPhotoBySlug[slug];
+  return id ? aboutPhotos[id] : undefined;
+}

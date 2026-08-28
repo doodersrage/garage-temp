@@ -3,6 +3,7 @@ import AboutArticle from "../../components/AboutArticle.astro";
 import AboutPageSections from "../../components/AboutPageSections.astro";
 import { getAboutPage } from "../../lib/aboutPages";
 import { getExpandedAboutContent } from "../../lib/aboutExpandedContent";
+import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
 
 const { slug } = Astro.params;
 
@@ -16,7 +17,18 @@ const sections = getExpandedAboutContent(slug);
 if (!page || !sections) {
   return Astro.redirect("/about");
 }
+
+const hero = getAboutHeroPhoto(slug);
 ---
-<AboutArticle slug={page.slug} title={page.title} description={page.description}>
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={hero?.image}
+  heroAlt={hero?.alt}
+  heroCaption={hero?.caption}
+  heroCredit={hero?.credit}
+  heroCreditHref={hero?.sourceUrl}
+>
   <AboutPageSections sections={sections} />
 </AboutArticle>
