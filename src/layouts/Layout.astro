@@ -62,12 +62,19 @@ const schemas = getSiteSchemas({
 });
 
 const navItems = [
-  { href: '/', label: 'Home', match: (path: string) => path === '/' },
-  { href: '/pricing', label: 'Pricing', match: (path: string) => path.startsWith('/pricing') },
-  { href: '/compare', label: 'Compare', match: (path: string) => path.startsWith('/compare') },
-  { href: '/freeze-map', label: 'Freeze map', match: (path: string) => path.startsWith('/freeze-map') },
-  { href: '/about', label: 'About', match: (path: string) => path === '/about' || path.startsWith('/about/') },
-  { href: '/contact', label: 'Contact', match: (path: string) => path.startsWith('/contact') },
+  { href: "/pricing", label: "Pricing", match: (path: string) => path.startsWith("/pricing") },
+  { href: "/compare", label: "Compare", match: (path: string) => path.startsWith("/compare") },
+  {
+    href: "/freeze-map",
+    label: "Freeze map",
+    match: (path: string) => path.startsWith("/freeze-map"),
+  },
+  {
+    href: "/about",
+    label: "About",
+    match: (path: string) => path === "/about" || path.startsWith("/about/"),
+  },
+  { href: "/contact", label: "Contact", match: (path: string) => path.startsWith("/contact") },
 ];
 const isDashboard = currentPath.startsWith("/dashboard");
 const loadAnalytics = shouldLoadGoogleAnalytics(currentPath);
@@ -118,8 +125,8 @@ const registerServiceWorker =
 		<a class="skip-link" href="#main-content">Skip to content</a>
 		<div class="flex min-h-screen flex-col">
 			<header class="site-header">
-				<div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-					<a href="/" class="site-logo-link flex items-center gap-3">
+				<div class="site-header-inner">
+					<a href="/" class="site-logo-link">
 						<Image src={logo} height={44} width={260} alt="ThermalTrace" class="site-logo" />
 					</a>
 					<button
@@ -132,36 +139,51 @@ const registerServiceWorker =
 						Menu
 					</button>
 					<nav id="site-nav" class="site-nav" aria-label="Main">
-						{!isDashboard && navItems.map(({ href, label, match }) => (
-							<a
-								href={href}
-								class:list={["nav-link", match(currentPath) && "nav-link-active"]}
-							>
-								{label}
-							</a>
-						))}
-						{user ? (
-							<>
-								<a
-									href="/dashboard"
-									class:list={[
-										"nav-link",
-										(currentPath === "/dashboard" || currentPath.startsWith("/dashboard/")) &&
-											"nav-link-active",
-									]}
-								>
-									Dashboard
-								</a>
-								<a href="/api/auth/signout" class="nav-link">Sign out</a>
-							</>
-						) : (
-							<>
-								<a href="/signin" class:list={["nav-link", currentPath === "/signin" && "nav-link-active"]}>Sign in</a>
-								{!isDashboard && (
-									<a href="/register" class="nav-cta">Register</a>
-								)}
-							</>
+						{!isDashboard && (
+							<div class="site-nav-primary">
+								{navItems.map(({ href, label, match }) => (
+									<a
+										href={href}
+										class:list={["nav-link", match(currentPath) && "nav-link-active"]}
+									>
+										{label}
+									</a>
+								))}
+							</div>
 						)}
+						<div class="site-nav-actions">
+							{user ? (
+								<>
+									<a
+										href="/dashboard"
+										class:list={[
+											"nav-link",
+											(currentPath === "/dashboard" ||
+												currentPath.startsWith("/dashboard/")) &&
+												"nav-link-active",
+										]}
+									>
+										Dashboard
+									</a>
+									<a href="/api/auth/signout" class="nav-link">Sign out</a>
+								</>
+							) : (
+								<>
+									<a
+										href="/signin"
+										class:list={[
+											"nav-link",
+											currentPath === "/signin" && "nav-link-active",
+										]}
+									>
+										Sign in
+									</a>
+									{!isDashboard && (
+										<a href="/register" class="nav-cta">Get started</a>
+									)}
+								</>
+							)}
+						</div>
 					</nav>
 				</div>
 			</header>
