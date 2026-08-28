@@ -1948,12 +1948,42 @@
   }
 
   .dashboard-sidebar-top {
-    @apply flex items-start justify-between gap-3;
+    @apply flex flex-col gap-3;
+  }
+
+  .dashboard-sidebar-brand {
+    display: block;
+    flex-shrink: 0;
+    transition: opacity var(--motion-duration) var(--motion-ease);
+  }
+
+  .dashboard-sidebar-brand:hover {
+    opacity: 0.92;
+  }
+
+  .dashboard-sidebar-logo {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: 2rem;
+  }
+
+  html[data-theme="light"] .dashboard-sidebar-logo {
+    filter: brightness(0.32) contrast(1.15);
   }
 
   .dashboard-sidebar-identity {
     min-width: 0;
-    flex: 1;
+  }
+
+  @media (min-width: 1024px) {
+    .dashboard-nav-toggle {
+      @apply hidden;
+    }
+
+    .dashboard-nav-panel {
+      @apply mt-0 block;
+    }
   }
 
   .dashboard-nav-toggle {
@@ -1968,23 +1998,14 @@
     @apply block;
   }
 
-  @media (min-width: 1024px) {
+  @media (max-width: 1023px) {
     .dashboard-sidebar-top {
-      @apply block;
+      @apply flex-row items-start justify-between;
     }
 
-    .dashboard-nav-toggle {
-      @apply hidden;
+    .dashboard-sidebar-brand {
+      max-width: 11rem;
     }
-
-    .dashboard-nav-panel {
-      @apply mt-0 block;
-    }
-  }
-
-  .dashboard-sidebar-label {
-    @apply mb-1 px-2 text-xs font-semibold uppercase tracking-wide;
-    color: var(--color-text-muted);
   }
 
   .dashboard-sidebar-email {

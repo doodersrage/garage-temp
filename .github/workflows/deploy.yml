@@ -1,0 +1,63 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Reuses CI placeholder env for astro build (real secrets live on the Worker).
+env:
+  SUPABASE_URL: https://example.supabase.co
+  SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ci-build-placeholder
+  SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ci-build-placeholder
+  SITE_URL: https://garage-temp.robmcd.name
+  ORIGIN: https://garage-temp.robmcd.name
+  GARAGE_TEMP_FEED_URL: https://example.com/feed.json
+  NEXT_PUBLIC_OPENWEATHER_API_KEY: ci-placeholder
+  NEXT_PUBLIC_OPENWEATHER_CITY_ID: "5128581"
+  TURNSTILE_SITE_KEY: ci-placeholder
+  TURNSTILE_SECRET_TOKEN: ci-placeholder
+  SMTP_MAIL_FROM: ci@example.com
+  SMTP_MAIL_TO: ci@example.com
+  STRIPE_SECRET_KEY: sk_test_ci_placeholder
+  STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+  STRIPE_PRICE_ID: price_ci_placeholder
+  STRIPE_PRICE_ID_PRO: price_ci_placeholder_pro
+  STRIPE_DISPLAY_MEMBER_MONTHLY: "1"
+  STRIPE_DISPLAY_MEMBER_ANNUAL: "10"
+  STRIPE_DISPLAY_PRO_MONTHLY: "5"
+  STRIPE_DISPLAY_PRO_ANNUAL: "50"
+  STRIPE_PRICE_ID_ANNUAL: price_ci_placeholder_annual
+  STRIPE_PRICE_ID_PRO_ANNUAL: price_ci_placeholder_pro_annual
+  PRICING_DEFAULT_INTERVAL: annual
+  CRON_SECRET: ci-cron-secret
+  VAPID_PUBLIC_KEY: ci-placeholder
+  VAPID_PRIVATE_KEY: ci-placeholder
+  VAPID_SUBJECT: mailto:ci@example.com
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    needs: []
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm build || (rm -rf node_modules/.vite && pnpm build)
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --config dist/server/wrangler.json

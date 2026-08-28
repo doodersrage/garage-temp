@@ -11,7 +11,7 @@ import preact from '@astrojs/preact';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://garage-temp.robmcd.name',
+  site: process.env.SITE_URL?.replace(/\/+$/, "") || "https://garage-temp.robmcd.name",
 
   server: {
     host: true

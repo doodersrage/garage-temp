@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { resolveConfiguredSiteUrl } from "./siteConfig";
 
 let stripeClient: Stripe | null = null;
 
@@ -17,16 +18,19 @@ export function createStripeClient(): Stripe {
 }
 
 export function getSiteUrl(request: Request): string {
-  const configured =
+  const fromEnv =
     import.meta.env.SITE_URL?.trim() ||
-    import.meta.env.ORIGIN?.trim() ||
-    "";
+    import.meta.env.ORIGIN?.trim();
 
-  if (configured) {
-    return configured.replace(/\/+$/, "");
+  if (fromEnv) {
+    return fromEnv.replace(/\/+$/, "");
   }
 
-  return new URL(request.url).origin;
+  try {
+    return new URL(request.url).origin;
+  } catch {
+    return resolveConfiguredSiteUrl();
+  }
 }
 
 export function buildSiteUrl(request: Request, path: string): string {

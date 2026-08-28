@@ -1,16 +1,23 @@
-import { resolveSiteUrl } from "./schemaMarkup";
+import { resolveConfiguredSiteUrl } from "./siteConfig";
 
 export function buildSiteUrl(request?: Request, site?: URL | string | null): string {
   if (site) {
-    return resolveSiteUrl(site);
+    return resolveConfiguredSiteUrl(site);
   }
 
   if (request) {
+    const fromEnv =
+      import.meta.env.SITE_URL?.trim() ||
+      import.meta.env.ORIGIN?.trim();
+    if (fromEnv) {
+      return fromEnv.replace(/\/+$/, "");
+    }
+
     const url = new URL(request.url);
     return `${url.protocol}//${url.host}`;
   }
 
-  return resolveSiteUrl(null);
+  return resolveConfiguredSiteUrl();
 }
 
 export function buildOAuthCallbackUrl(request: Request, site?: URL | string | null): string {

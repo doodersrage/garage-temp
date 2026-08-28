@@ -1,3 +1,5 @@
+import { resolveConfiguredSiteUrl } from "./siteConfig";
+
 export type NwsAlert = {
   event: string;
   headline: string;
@@ -23,7 +25,7 @@ export async function fetchNwsAlerts(
     const response = await fetch(url, {
       headers: {
         Accept: "application/geo+json",
-        "User-Agent": "ThermalTrace/1.0 (garage-temp.robmcd.name)",
+        "User-Agent": `ThermalTrace/1.0 (${resolveConfiguredSiteUrl()})`,
       },
     });
     if (!response.ok) return null;

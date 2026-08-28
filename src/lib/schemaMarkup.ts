@@ -1,4 +1,10 @@
 import { BRAND_DESCRIPTION, BRAND_NAME } from "./brand";
+import {
+  resolveConfiguredSiteUrl as resolveSiteUrl,
+  resolvePageUrl,
+} from "./siteConfig";
+
+export { resolveSiteUrl, resolvePageUrl };
 
 const SITE_NAME = BRAND_NAME;
 const DEFAULT_DESCRIPTION = BRAND_DESCRIPTION;
@@ -9,19 +15,6 @@ export function getDefaultDescription(): string {
 
 export function getSiteName(): string {
   return SITE_NAME;
-}
-
-export function resolveSiteUrl(siteUrl?: string | URL | null): string {
-  if (siteUrl) {
-    return siteUrl.toString().replace(/\/+$/, "");
-  }
-
-  return "https://garage-temp.robmcd.name";
-}
-
-export function resolvePageUrl(siteUrl: string, pathname: string): string {
-  const normalizedPath = pathname.startsWith("/") ? pathname : `/${pathname}`;
-  return `${siteUrl}${normalizedPath}`;
 }
 
 export function getOrganizationSchema(siteUrl: string) {

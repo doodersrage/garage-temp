@@ -1,4 +1,5 @@
 ---
+import { Image } from "astro:assets";
 import LayoutDashboard from "@lucide/astro/icons/layout-dashboard";
 import Cpu from "@lucide/astro/icons/cpu";
 import Bell from "@lucide/astro/icons/bell";
@@ -12,6 +13,7 @@ import Radio from "@lucide/astro/icons/radio";
 import Timer from "@lucide/astro/icons/timer";
 import UserCog from "@lucide/astro/icons/user-cog";
 import Mail from "@lucide/astro/icons/mail";
+import logo from "../assets/gtm.svg";
 
 interface Props {
   currentPath: string;
@@ -132,8 +134,10 @@ const groups = [
 <aside class="dashboard-sidebar">
   <nav class="dashboard-sidebar-inner" aria-label="Dashboard" id="dashboard-nav">
     <div class="dashboard-sidebar-top">
+      <a href="/dashboard" class="dashboard-sidebar-brand">
+        <Image src={logo} height={32} width={190} alt="ThermalTrace" class="dashboard-sidebar-logo" />
+      </a>
       <div class="dashboard-sidebar-identity">
-        <p class="dashboard-sidebar-label">Workspace</p>
         {email && <p class="dashboard-sidebar-email" title={email}>{email}</p>}
         {planLabel && <span class="plan-badge plan-badge--sidebar">{planLabel}</span>}
       </div>

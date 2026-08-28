@@ -316,7 +316,7 @@ Guides:
 ### Open-source firmware & relays
 
 - [arduino-network-json-temperature-sever](https://github.com/doodersrage/arduino-network-json-temperature-sever) — probe JSON server  
-- [garage-temp](https://github.com/doodersrage/garage-temp) — this site  
+- [thermaltrace](https://github.com/doodersrage/thermaltrace) — this site  
 - [fast-api-relay](https://github.com/doodersrage/fast-api-relay) — optional Python relay  
 
 ---
@@ -341,15 +341,21 @@ Guides:
 ## Deploy & ops
 
 ```bash
-pnpm test && pnpm typecheck && pnpm build && pnpm deploy
+pnpm ops:check              # verify .env has core keys
+pnpm test && pnpm typecheck && pnpm build
+pnpm db:push                # apply Supabase migrations (NWS freeze columns)
+pnpm secrets:push           # sync .env → Worker secrets (Twilio, VAPID, Stripe, …)
+pnpm deploy
 ```
 
 After deploy:
 
-1. Set Worker secrets / vars (Dashboard → Workers → **garage-temp** → Settings → Variables), including `STRIPE_DISPLAY_*`
-2. Confirm hourly cron (`0 * * * *`) is active
-3. Confirm Email Sending for `SMTP_MAIL_FROM` (see [Outbound email](#outbound-email-cloudflare-email))
-4. Point Stripe webhooks at `/api/stripe/webhook` with `STRIPE_WEBHOOK_SECRET`
+1. Worker name stays **`garage-temp`** on Cloudflare (routes/secrets unchanged); product brand is **ThermalTrace**
+2. Set `SITE_URL` / `ORIGIN` Worker secrets to your public hostname
+3. Confirm hourly cron (`0 * * * *`) is active
+4. Confirm Email Sending for `SMTP_MAIL_FROM` (see [Outbound email](#outbound-email-cloudflare-email))
+5. Point Stripe webhooks at `/api/stripe/webhook` with `STRIPE_WEBHOOK_SECRET`
+6. Optional: `node --env-file=.env scripts/rename-stripe-products.mjs` to rename Stripe product labels
 
 Keep display amounts aligned with live Stripe:
 
@@ -358,12 +364,17 @@ pnpm audit:stripe
 # or open /dashboard/ops → Stripe display price audit
 ```
 
+### GitHub Actions deploy
+
+Add repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Pushes to `main` run [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) after tests + build. Runtime secrets remain on the Worker (`pnpm secrets:push`), not in GitHub.
+
 ### Post-deploy smoke checklist
 
 - [ ] `/system-status` — healthy + recent cron runs  
 - [ ] `/pricing` — amounts match Stripe (monthly/annual toggle)  
 - [ ] `/compare`, `/docs/api`, case study CTAs → `/pricing`  
-- [ ] Dashboard → **Ops** (admin) — health, price audit Match, funnel, email smoke test  
+- [ ] Dashboard → **Ops** (admin) — email + **channel smoke tests** (SMS/push when configured)  
+- [ ] Enable **NWS freeze alerts** under Alerts after migration  
 - [ ] Save display prefs / alert settings (Actions) without full reload  
 - [ ] Optional: `OPS_DISCORD_WEBHOOK_URL` for failure Discord  
 - [ ] Test alert → Share page webhook delivery log (Pro)  

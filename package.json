@@ -8,6 +8,11 @@
   },
   "scripts": {
     "deploy": "astro build && wrangler deploy --config dist/server/wrangler.json",
+    "db:push": "supabase db push --linked",
+    "secrets:push": "node scripts/push-worker-secrets.mjs",
+    "secrets:push:dry": "node scripts/push-worker-secrets.mjs --dry-run",
+    "ops:check": "node scripts/ops-check.mjs",
+    "stripe:rename": "node --env-file=.env scripts/rename-stripe-products.mjs",
     "dev": "astro dev",
     "build": "astro sync && astro build",
     "preview": "astro preview",
