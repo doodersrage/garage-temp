@@ -24,6 +24,8 @@ import { formatJobFailureBody, notifyOps } from "./lib/opsNotify";
 import { collectFreezeMapSnapshots } from "./lib/freezeMap";
 import { runFeedUptimeForAllUsers } from "./lib/feedUptimeMonitor";
 import { archiveOldReadings } from "./lib/archiveHistory";
+import { runPlaybooksForAllUsers } from "./lib/alertPlaybookRunner";
+import { sendPortfolioAlertsForAllUsers } from "./lib/portfolioAlerts";
 
 export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext) {
@@ -320,6 +322,34 @@ export default {
               message: error instanceof Error ? error.message : "Unknown error",
             });
           }
+        }
+
+        const playbookJobId = await startJobRun("alert-playbooks");
+        try {
+          const playbooks = await runPlaybooksForAllUsers();
+          await finishJobRun(
+            playbookJobId,
+            playbooks.errors.length ? "error" : "success",
+            playbooks,
+          );
+        } catch (error) {
+          await finishJobRun(playbookJobId, "error", {
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+
+        const portfolioJobId = await startJobRun("portfolio-alerts");
+        try {
+          const portfolio = await sendPortfolioAlertsForAllUsers();
+          await finishJobRun(
+            portfolioJobId,
+            portfolio.errors.length ? "error" : "success",
+            portfolio,
+          );
+        } catch (error) {
+          await finishJobRun(portfolioJobId, "error", {
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
         }
       })(),
     );

@@ -4,8 +4,8 @@ import { getOrCreateHouseholdForUser } from "../../../lib/households";
 import { getUserEntitlements } from "../../../lib/entitlements";
 import { createServerClient } from "../../../lib/supabase";
 import {
-  redirectUnlessEditor,
-  requireHouseholdEditor,
+  redirectUnlessManager,
+  requireHouseholdManager,
 } from "../../../lib/householdAuth";
 import { recordHouseholdActivity } from "../../../lib/householdActivity";
 
@@ -62,8 +62,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const redirectTo = formData.get("redirect")?.toString() || "/dashboard/share";
   const action = formData.get("action")?.toString() ?? "create";
 
-  const editor = await requireHouseholdEditor(user.id);
-  const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
+  const manager = await requireHouseholdManager(user.id);
+  const blocked = redirectUnlessManager(manager, redirectTo, redirect);
   if (blocked) return blocked;
 
   if (!entitlements.canCreateShareLinks) {

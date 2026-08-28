@@ -48,5 +48,11 @@
 	],
 	"triggers": {
 		"crons": ["0 * * * *"]
-	}
+	},
+	"r2_buckets": [
+		{
+			"binding": "HISTORY_ARCHIVE",
+			"bucket_name": "thermaltrace-history"
+		}
+	]
 }

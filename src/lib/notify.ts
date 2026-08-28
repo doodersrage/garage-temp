@@ -382,7 +382,13 @@ export async function notifyUser(
   fallbackEmail: string | null | undefined,
   settings: AlertSettings,
   payload: NotifyPayload,
-  options?: { snoozeUrl?: string; smsOnly?: boolean; space?: string | null },
+  options?: {
+    snoozeUrl?: string;
+    smsOnly?: boolean;
+    space?: string | null;
+    /** When set, only these channels may fire (must also be enabled in settings). */
+    channelFilter?: AlertChannelName[];
+  },
 ): Promise<{ sent: string[]; skipped: string[] }> {
   if (
     !options?.smsOnly &&
@@ -437,7 +443,11 @@ export async function notifyUser(
   const bodyWithSnooze = options?.snoozeUrl
     ? `${payloadResolved.body}\n\nSnooze 24h: ${options.snoozeUrl}`
     : payloadResolved.body;
+  const channelFilterSet = options?.channelFilter?.length
+    ? new Set(options.channelFilter)
+    : null;
   const allowChannel = (channel: AlertChannelName) => {
+    if (channelFilterSet && !channelFilterSet.has(channel)) return false;
     if (routedSet && !routedSet.has(channel)) return false;
     if (options?.smsOnly) return channel === "sms";
     if (smsCriticalOnly) return channel === "sms";

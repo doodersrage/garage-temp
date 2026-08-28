@@ -23,8 +23,8 @@ import {
 import { buildSiteUrl } from "../../../lib/stripe";
 import { updateHouseholdFreezeMapSettings } from "../../../lib/freezeMap";
 import {
-  redirectUnlessEditor,
-  requireHouseholdEditor,
+  redirectUnlessManager,
+  requireHouseholdManager,
 } from "../../../lib/householdAuth";
 import { recordHouseholdActivity } from "../../../lib/householdActivity";
 
@@ -118,8 +118,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?property_created=1`);
   }
 
-  const editor = await requireHouseholdEditor(user.id);
-  const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
+  const manager = await requireHouseholdManager(user.id);
+  const blocked = redirectUnlessManager(manager, redirectTo, redirect);
   if (blocked) return blocked;
 
   const ownedId = await getOwnedHouseholdId(user.id);

@@ -3,7 +3,7 @@ import { getAuthFromCookies } from "../../../lib/auth";
 import {
   getUserHouseholdId,
   getUserHouseholdRole,
-  canEditHousehold,
+  canManageHousehold,
 } from "../../../lib/households";
 import {
   createInboundWebhook,
@@ -48,8 +48,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const role = await getUserHouseholdRole(user.id, householdId);
-  if (!canEditHousehold(role)) {
-    return redirect("/dashboard/share?inbound_error=viewer");
+  if (!canManageHousehold(role)) {
+    return redirect("/dashboard/share?inbound_error=manager_required");
   }
 
   const formData = await request.formData();

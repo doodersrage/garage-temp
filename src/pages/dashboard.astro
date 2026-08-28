@@ -38,6 +38,7 @@ import {
 import { fetchNwsAlerts } from "../lib/nwsAlerts";
 import { buildHeatingInsights } from "../lib/heatingInsights";
 import HeatingInsightsCard from "../components/HeatingInsightsCard.astro";
+import ProductAnalyticsTracker from "../components/ProductAnalyticsTracker.tsx";
 
 import DashboardMetricGrid from "../components/dashboard/DashboardMetricGrid.astro";
 import MetricCard from "../components/dashboard/MetricCard.astro";
@@ -178,8 +179,18 @@ const feedsValue =
       : `${feedHealth.statuses.length} online`;
 
 const upgradeTarget = nextUpgradeTier(entitlements.tier);
+
+const analyticsEvents: Array<{
+  name: import("../lib/productAnalytics").ProductEvent;
+  props?: Record<string, string | number | boolean>;
+}> = [];
+if (hasDevices) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "devices" } });
+if (hasSensors) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "sensors" } });
+if (hasHistory) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "history" } });
+if (hasAlertsConfigured) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "alerts" } });
 ---
 <DashboardLayout title="Overview">
+  <ProductAnalyticsTracker client:load events={analyticsEvents} />
   <div class="dashboard-stack">
     {(passwordUpdated || prefsSaved || prefsError) && (
       <div class="dashboard-flash">

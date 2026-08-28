@@ -18,7 +18,7 @@ import { listIngestStatsForHousehold } from "../../lib/ingestStats";
 import { listHouseholdActivity } from "../../lib/householdActivity";
 import {
   getUserHouseholdRole,
-  canEditHousehold,
+  canManageHousehold,
 } from "../../lib/households";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
@@ -63,7 +63,7 @@ const activity = household.householdId
 const householdRole = household.householdId
   ? await getUserHouseholdRole(user.id, household.householdId)
   : null;
-const canEdit = canEditHousehold(householdRole);
+const canManage = canManageHousehold(householdRole);
 
 const siteUrl = getSiteUrl(Astro.request);
 const webhookDeliveries = await listRecentWebhookDeliveries(user.id, 15);
@@ -96,7 +96,7 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
       {notice && (
         <p class:list={[noticeIsError ? "alert-warning" : "alert-success", "mt-4"]}>{notice}</p>
       )}
-      {!canEdit && (
+      {!canManage && (
         <p class="alert-warning mt-4 mb-0" role="status">
           View-only — you cannot create or revoke share links.
         </p>
@@ -124,7 +124,7 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
 
     {!entitlements.canCreateShareLinks ? (
       <UpgradeNudge feature="share_links" tier={entitlements.tier} />
-    ) : canEdit ? (
+    ) : canManage ? (
       <form action="/api/share/manage" method="post" class="card">
         <input type="hidden" name="action" value="create" />
         <input type="hidden" name="redirect" value="/dashboard/share" />
@@ -239,7 +239,7 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
       )}
     </section>
 
-    {entitlements.canCreateShareLinks && canEdit && (
+    {entitlements.canCreateShareLinks && canManage && (
       <section class="card">
         <h2 class="card-title">Public status pages</h2>
         <p class="card-subtitle mb-4">
@@ -287,7 +287,7 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
       </section>
     )}
 
-    {entitlements.canCreateShareLinks && canEdit && (
+    {entitlements.canCreateShareLinks && canManage && (
       <section class="card">
         <h2 class="card-title">Dashboard API keys</h2>
         <p class="card-subtitle mb-4">
@@ -351,7 +351,7 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
           <code>snooze</code>, <code>vacation</code>, <code>clear_snooze</code>, <code>clear_vacation</code>, <code>status</code>.
           Example: <code>{`{"action":"snooze","hours":24}`}</code> to <code>POST /api/inbound/&lt;token&gt;</code>.
         </p>
-        {!canEdit && (
+        {!canManage && (
           <p class="alert-warning mb-4" role="status">View-only — cannot create or revoke inbound webhooks.</p>
         )}
         {inboundToken && (
@@ -369,7 +369,7 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
             </button>
           </div>
         )}
-        {canEdit && (
+        {canManage && (
         <form action="/api/inbound-webhooks" method="post" class="mb-4 flex flex-wrap gap-2 items-end">
           <input type="hidden" name="action" value="create" />
           <input type="hidden" name="redirect" value="/dashboard/share" />

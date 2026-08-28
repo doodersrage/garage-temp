@@ -119,6 +119,7 @@ export type Database = {
           last_monthly_report_at: string | null
           last_nws_alert_at: string | null
           last_outage_alert_at: string | null
+          last_portfolio_alert_at: string | null
           last_quarterly_report_at: string | null
           last_rate_alert_at: string | null
           last_rssi_alert_at: string | null
@@ -130,6 +131,8 @@ export type Database = {
           outage_hours: number
           outbound_webhook_secret: string | null
           outbound_webhook_url: string | null
+          playbook_fired: Json
+          portfolio_alerts_enabled: boolean
           pushover_app_token: string | null
           pushover_user_key: string | null
           quarterly_report_enabled: boolean
@@ -200,6 +203,7 @@ export type Database = {
           last_monthly_report_at?: string | null
           last_nws_alert_at?: string | null
           last_outage_alert_at?: string | null
+          last_portfolio_alert_at?: string | null
           last_quarterly_report_at?: string | null
           last_rate_alert_at?: string | null
           last_rssi_alert_at?: string | null
@@ -211,6 +215,8 @@ export type Database = {
           outage_hours?: number
           outbound_webhook_secret?: string | null
           outbound_webhook_url?: string | null
+          playbook_fired?: Json
+          portfolio_alerts_enabled?: boolean
           pushover_app_token?: string | null
           pushover_user_key?: string | null
           quarterly_report_enabled?: boolean
@@ -281,6 +287,7 @@ export type Database = {
           last_monthly_report_at?: string | null
           last_nws_alert_at?: string | null
           last_outage_alert_at?: string | null
+          last_portfolio_alert_at?: string | null
           last_quarterly_report_at?: string | null
           last_rate_alert_at?: string | null
           last_rssi_alert_at?: string | null
@@ -292,6 +299,8 @@ export type Database = {
           outage_hours?: number
           outbound_webhook_secret?: string | null
           outbound_webhook_url?: string | null
+          playbook_fired?: Json
+          portfolio_alerts_enabled?: boolean
           pushover_app_token?: string | null
           pushover_user_key?: string | null
           quarterly_report_enabled?: boolean

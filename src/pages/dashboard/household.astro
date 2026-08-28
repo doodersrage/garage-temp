@@ -7,6 +7,8 @@ import {
   getOwnedHouseholdId,
   listHouseholdMembers,
   listUserHouseholds,
+  getUserHouseholdRole,
+  canManageHousehold,
 } from "../../lib/households";
 import { listPendingInvites } from "../../lib/householdInvites";
 import { getHouseholdErrorMessage } from "../../lib/householdErrors";
@@ -76,6 +78,10 @@ const notice = Astro.url.searchParams.get("invited")
       : null;
 
 const isOwner = Boolean(ownedId && ownedId === manageId);
+const manageRole = manageId
+  ? await getUserHouseholdRole(user.id, manageId)
+  : null;
+const canManage = canManageHousehold(manageRole);
 const activeMembership = householdsResult.households.find(
   (h) => h.household_id === active.householdId,
 );
@@ -309,7 +315,7 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
       </DashboardCard>
     )}
 
-    {isOwner ? (
+    {canManage ? (
       <DashboardCard>
         <form method="POST" id="household-invite-form" data-invite-form>
           <input type="hidden" name="action" value="invite" />
@@ -345,7 +351,7 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
       </DashboardCard>
     )}
 
-    {isOwner && (invitesResult.invites ?? []).length > 0 && (
+    {canManage && (invitesResult.invites ?? []).length > 0 && (
       <DashboardCard>
         <h2 class="card-title">Pending invites</h2>
         <ul class="space-y-3">

@@ -19,7 +19,7 @@ export async function storeFeedUptimeChecks(
     latency_ms: null,
     checked_at: s.checkedAt,
   }));
-  await supabase.from("feed_uptime_checks" as "alert_events").insert(rows as never);
+  await supabase.from("feed_uptime_checks").insert(rows);
 }
 
 export async function runFeedUptimeForAllUsers(): Promise<{
@@ -73,7 +73,7 @@ export async function runFeedUptimeForAllUsers(): Promise<{
         .update({
           last_feed_uptime_alert_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        } as never)
+        })
         .eq("user_id", userId);
 
       alertsSent += 1;

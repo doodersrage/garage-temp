@@ -161,6 +161,11 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     <span>Alert when pull JSON feeds become unreachable (hourly check)</span>
   </label>
 
+  <label class="checkbox-row mb-4">
+    <input type="checkbox" name="portfolio_alerts_enabled" value="true" checked={settings.portfolioAlertsEnabled} />
+    <span>Portfolio freeze alerts (email when any property crosses threshold)</span>
+  </label>
+
   <h3 class="text-base font-semibold mb-2">Alert playbooks</h3>
   <p class="card-subtitle mb-3">
     Escalation steps after the initial alert (JSON). Example: SMS 15 minutes later if unacknowledged.

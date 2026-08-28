@@ -2,9 +2,9 @@ import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import { getUserEntitlements } from "../../../lib/entitlements";
 import {
-  householdEditorCtx,
-  redirectUnlessEditor,
-  requireHouseholdEditor,
+  householdManagerCtx,
+  redirectUnlessManager,
+  requireHouseholdManager,
 } from "../../../lib/householdAuth";
 import { recordHouseholdActivity } from "../../../lib/householdActivity";
 import {
@@ -20,8 +20,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const redirectTo = formData.get("redirect")?.toString() || "/dashboard/share";
   const action = formData.get("action")?.toString() ?? "create";
 
-  const editor = await requireHouseholdEditor(user.id);
-  const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
+  const manager = await requireHouseholdManager(user.id);
+  const blocked = redirectUnlessManager(manager, redirectTo, redirect);
   if (blocked) return blocked;
 
   const entitlements = await getUserEntitlements(user.id);
@@ -29,7 +29,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?status_error=pro`);
   }
 
-  const householdId = householdEditorCtx(editor).householdId;
+  const householdId = householdManagerCtx(manager).householdId;
 
   if (action === "revoke") {
     const id = formData.get("id")?.toString();

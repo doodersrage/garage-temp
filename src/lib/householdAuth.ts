@@ -47,6 +47,28 @@ export async function requireHouseholdManager(
   return { ok: true, ctx };
 }
 
+/** Redirect when user lacks household manager (owner/member) role. */
+export function redirectUnlessManager(
+  manager: Awaited<ReturnType<typeof requireHouseholdManager>>,
+  redirectTo: string,
+  redirect: (url: string) => Response,
+): Response | null {
+  if (manager.ok) return null;
+  if (manager.error === "manager_required") {
+    return redirect(`${redirectTo}?error=manager_required`);
+  }
+  return redirect(`${redirectTo}?error=1`);
+}
+
+export function householdManagerCtx(
+  manager: Awaited<ReturnType<typeof requireHouseholdManager>>,
+): HouseholdEditorContext {
+  if (!manager.ok) {
+    throw new Error(manager.error || "Not a household manager");
+  }
+  return manager.ctx;
+}
+
 /** Redirect helper for form POST routes when the user is a viewer. */
 export function redirectUnlessEditor(
   editor: Awaited<ReturnType<typeof requireHouseholdEditor>>,

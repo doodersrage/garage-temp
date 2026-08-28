@@ -27,11 +27,11 @@ export const POST: APIRoute = async ({ request }) => {
 
   const supabase = createServerClient();
   const token = randomToken();
-  const { error } = await supabase.from("status_subscriptions" as "alert_events").insert({
+  const { error } = await supabase.from("status_subscriptions").insert({
     email,
     token,
     confirmed_at: new Date().toISOString(),
-  } as never);
+  });
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {

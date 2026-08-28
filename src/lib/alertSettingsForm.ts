@@ -192,7 +192,10 @@ export function buildAlertSettingsFromFormData(
       return Number.isFinite(n) && n >= 30 ? Math.floor(n) : existing.dataRetentionDays;
     })(),
     feedUptimeAlertsEnabled: formHas(formData, "feed_uptime_alerts_enabled"),
+    portfolioAlertsEnabled: formHas(formData, "portfolio_alerts_enabled"),
     lastFeedUptimeAlertAt: existing.lastFeedUptimeAlertAt,
+    lastPortfolioAlertAt: existing.lastPortfolioAlertAt,
+    playbookFired: existing.playbookFired,
   };
 }
 

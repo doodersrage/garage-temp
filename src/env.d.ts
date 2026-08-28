@@ -34,6 +34,8 @@ interface ImportMetaEnv {
   readonly GA_MEASUREMENT_ID?: string;
   readonly SENTRY_DSN?: string;
   readonly TWILIO_WHATSAPP_FROM?: string;
+  readonly NEST_ACCESS_TOKEN?: string;
+  readonly ECOBEE_ACCESS_TOKEN?: string;
   readonly PROD: boolean;
 }
 

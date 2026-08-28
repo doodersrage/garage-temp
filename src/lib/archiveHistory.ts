@@ -45,13 +45,13 @@ export async function archiveOldReadings(options?: {
       httpMetadata: { contentType: "application/json" },
     });
 
-    await supabase.from("history_archives" as "alert_events").insert({
+    await supabase.from("history_archives").insert({
       household_id: household.id,
       period_start: cutoff.toISOString().slice(0, 10),
       period_end: new Date().toISOString().slice(0, 10),
       object_key: key,
       row_count: readings.length,
-    } as never);
+    });
 
     archived += readings.length;
   }

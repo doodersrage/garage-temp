@@ -1,18 +1,17 @@
 ---
 import DashboardCard from "./dashboard/DashboardCard.astro";
+import MfaEnroll from "./MfaEnroll.tsx";
 
 interface Props {
-  mfaEnabled?: boolean;
+  accessToken: string;
+  refreshToken: string;
 }
-const { mfaEnabled = false } = Astro.props;
+const { accessToken, refreshToken } = Astro.props;
 ---
 <DashboardCard>
   <h2 class="card-title">Security (MFA)</h2>
   <p class="card-subtitle mb-3">
-    Enable TOTP in your Supabase project (Auth → MFA), then enroll from the Supabase dashboard or a compatible client.
-    {mfaEnabled ? " At least one factor is enrolled on this account." : ""}
+    Add an authenticator app (TOTP). Requires MFA enabled in your Supabase project.
   </p>
-  <p class="text-sm text-[var(--color-text-muted)] mb-0">
-    Passkeys/WebAuthn can be enabled under <code>supabase/config.toml</code> → <code>[auth.mfa.web_authn]</code>.
-  </p>
+  <MfaEnroll client:visible accessToken={accessToken} refreshToken={refreshToken} />
 </DashboardCard>
