@@ -101,6 +101,7 @@ const hasSensors =
   );
 const hasAlertsConfigured = alertSettings.enabled;
 const hasHouseholdMembers = members.members.length > 1;
+const hasHistory = history.totalCount > 0;
 const onboardingDismissed =
   (user.user_metadata as Record<string, unknown> | undefined)?.onboarding_dismissed ===
   true;
@@ -221,7 +222,7 @@ if (hasAlertsConfigured) analyticsEvents.push({ name: "onboarding_step_complete"
     <DashboardOnboarding
       hasDevices={hasDevices}
       hasSensors={hasSensors}
-      hasHistory={history.totalCount > 0}
+      hasHistory={hasHistory}
       hasAlertsConfigured={hasAlertsConfigured}
       hasHouseholdMembers={hasHouseholdMembers}
       hasLiveSensors={latest.length > 0}
