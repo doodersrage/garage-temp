@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 76" fill="none" role="img" aria-labelledby="tt-logo-title">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 58" fill="none" role="img" aria-labelledby="tt-logo-title">
   <title id="tt-logo-title">ThermalTrace</title>
   <defs>
     <linearGradient id="tt-steel" x1="0" y1="0" x2="0" y2="1">
@@ -11,34 +11,10 @@
       <stop offset="38%" stop-color="#FF9E4A"/>
       <stop offset="100%" stop-color="#E85500"/>
     </linearGradient>
-    <linearGradient id="tt-eyebrow" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#D2D7DE"/>
-      <stop offset="100%" stop-color="#9098A3"/>
-    </linearGradient>
   </defs>
 
-  <!-- Same motif as the old mark: eyebrow + orange arc dropping into the accent word -->
-  <path
-    d="M 158 21.5 H 278 Q 296 21.5 301 30 L 308 48"
-    stroke="url(#tt-accent)"
-    stroke-width="2.4"
-    stroke-linecap="round"
-    fill="none"
-  />
-
   <text
-    x="142"
-    y="21"
-    text-anchor="middle"
-    fill="url(#tt-eyebrow)"
-    font-family="ui-rounded, 'Segoe UI', system-ui, sans-serif"
-    font-size="16.5"
-    font-weight="600"
-    letter-spacing="0.04em"
-  >Sensors</text>
-
-  <text
-    y="62"
+    y="46"
     font-family="ui-rounded, 'Segoe UI', system-ui, sans-serif"
     font-size="49"
     font-weight="800"
