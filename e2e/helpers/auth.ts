@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { createClient } from "@supabase/supabase-js";
 
 export function getE2ECredentials(): { email: string; password: string } | null {
   const email = process.env.E2E_TEST_EMAIL?.trim();
@@ -7,31 +8,79 @@ export function getE2ECredentials(): { email: string; password: string } | null 
   return { email, password };
 }
 
+function getSupabaseConfig(): { url: string; anonKey: string } | null {
+  const url = process.env.SUPABASE_URL?.trim();
+  const anonKey = process.env.SUPABASE_ANON_KEY?.trim();
+  if (!url || !anonKey) return null;
+  return { url, anonKey };
+}
+
+/** Cookie domain for PLAYWRIGHT_BASE_URL (defaults to localhost). */
+function cookieDomainFromBaseUrl(baseURL: string | undefined): string {
+  if (!baseURL) return "127.0.0.1";
+  try {
+    return new URL(baseURL).hostname;
+  } catch {
+    return "127.0.0.1";
+  }
+}
+
+/**
+ * Sign in via Supabase Auth API and set session cookies.
+ * Avoids Turnstile on the HTML form (required in production).
+ */
 export async function signIn(page: Page, next = "/dashboard/alerts"): Promise<void> {
   const creds = getE2ECredentials();
   if (!creds) {
     throw new Error("E2E_TEST_EMAIL and E2E_TEST_PASSWORD are required");
   }
 
-  await page.goto(`/signin?next=${encodeURIComponent(next)}`);
-  await page.locator('input[name="email"]').fill(creds.email);
-  await page.locator('input[name="password"]').fill(creds.password);
-  await page.getByRole("button", { name: /sign in/i }).click();
+  const supabaseConfig = getSupabaseConfig();
+  if (!supabaseConfig) {
+    throw new Error("SUPABASE_URL and SUPABASE_ANON_KEY are required for E2E sign-in");
+  }
 
-  const escapedNext = next.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const result = await Promise.race([
-    page.waitForURL(new RegExp(escapedNext), { timeout: 25_000 }).then(() => "ok" as const),
-    page
-      .locator('[role="alert"]')
-      .filter({ hasText: /sign/i })
-      .waitFor({ timeout: 25_000 })
-      .then(async () => {
-        const message = (await page.locator('[role="alert"]').first().textContent())?.trim();
-        throw new Error(message || "Sign-in failed — check E2E_TEST_EMAIL / E2E_TEST_PASSWORD");
-      }),
+  const supabase = createClient(supabaseConfig.url, supabaseConfig.anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: creds.email,
+    password: creds.password,
+  });
+
+  if (error || !data.session) {
+    throw new Error(
+      error?.message ||
+        "Supabase sign-in failed — check E2E_TEST_EMAIL / E2E_TEST_PASSWORD",
+    );
+  }
+
+  const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:4321";
+  const domain = cookieDomainFromBaseUrl(baseURL);
+  const secure = baseURL.startsWith("https://");
+
+  await page.context().addCookies([
+    {
+      name: "sb-access-token",
+      value: data.session.access_token,
+      domain,
+      path: "/",
+      httpOnly: true,
+      secure,
+      sameSite: "Lax",
+    },
+    {
+      name: "sb-refresh-token",
+      value: data.session.refresh_token,
+      domain,
+      path: "/",
+      httpOnly: true,
+      secure,
+      sameSite: "Lax",
+    },
   ]);
 
-  if (result !== "ok") {
-    throw new Error("Sign-in did not reach the dashboard");
-  }
+  await page.goto(next);
+  await page.waitForURL(new RegExp(next.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 }

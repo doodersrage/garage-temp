@@ -52,6 +52,11 @@ const groups = [
     optional: true,
   },
   {
+    label: "E2E auth tests",
+    keys: ["E2E_TEST_EMAIL", "E2E_TEST_PASSWORD"],
+    optional: true,
+  },
+  {
     label: "Stripe",
     keys: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID", "STRIPE_PRICE_ID_PRO"],
   },
@@ -88,10 +93,15 @@ for (const group of groups) {
 }
 
 console.log("\nNext steps:");
-console.log("  pnpm db:push          — apply Supabase migrations");
 console.log("  pnpm secrets:push     — sync .env secrets to Cloudflare Worker");
-console.log("  pnpm smoke:public     — verify production pages after deploy");
-console.log("  Supabase dashboard    — enable TOTP MFA if using MFA enroll UI");
-console.log("  Dashboard → Ops       — run email + channel smoke tests after deploy");
+console.log("  pnpm ops:smoke        — public pages + sitemap after deploy");
+console.log("  pnpm test:e2e:auth    — authenticated alert settings (needs E2E_TEST_*)");
+console.log("  Dashboard → Ops       — email + channel smoke tests while signed in as admin");
+if (!env.TWILIO_ACCOUNT_SID?.trim()) {
+  console.log("  Twilio                — add TWILIO_* to .env for SMS/WhatsApp, then secrets:push");
+}
+if (!env.E2E_TEST_EMAIL?.trim() || !env.E2E_TEST_PASSWORD?.trim()) {
+  console.log("  E2E                   — set E2E_TEST_EMAIL / E2E_TEST_PASSWORD for Playwright auth");
+}
 
 process.exit(failed ? 1 : 0);

@@ -10,7 +10,6 @@ import { updateUserAlertSettings } from "../lib/alertNotifications";
 import {
   alertChannelsIncomplete,
   buildAlertSettingsFromFormData,
-  objectToFormData,
 } from "../lib/alertSettingsForm";
 import {
   getAlertSettingsForUser,
@@ -137,12 +136,19 @@ export const server = {
 
   updateAlertSettings: defineAction({
     accept: "form",
-    input: z.record(z.string(), z.union([z.string(), z.array(z.string())])),
-    handler: async (input, context) => {
+    // No Zod input schema: alert forms are dynamic. z.record fails Astro form
+    // parsing (FormData is passed through and fails "expected record").
+    handler: async (formData, context) => {
       const { session, user } = await requireAuthed(context.cookies);
       await requireEditor(user.id);
 
-      const formData = objectToFormData(input as Record<string, unknown>);
+      if (!(formData instanceof FormData)) {
+        throw new ActionError({
+          code: "BAD_REQUEST",
+          message: "Expected form data.",
+        });
+      }
+
       const existing = await getAlertSettingsForUser(
         user.id,
         user.user_metadata as Record<string, unknown> | undefined,

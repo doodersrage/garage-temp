@@ -178,9 +178,12 @@ pnpm audit:stripe      # compare STRIPE_DISPLAY_* to live Stripe prices
 Authenticated alert-settings E2E: set `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD` in `.env`, then:
 
 ```bash
+pnpm e2e:reset-password   # optional: recreate/reset the E2E user via Supabase admin
 pnpm test:e2e:auth
 # against production: PLAYWRIGHT_BASE_URL=https://thermaltrace.dev pnpm test:e2e:auth
 ```
+
+Auth E2E signs in through the Supabase API (sets session cookies) so it does not depend on Turnstile.
 
 ---
 

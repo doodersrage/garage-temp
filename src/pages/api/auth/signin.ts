@@ -73,7 +73,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress
   );
 
   if (!turnstile.success) {
-    return redirect(buildSignInRedirectUrl("generic", email));
+    return redirect(buildSignInRedirectUrl("turnstile_failed", email));
   }
 
   if (!email || !password) {

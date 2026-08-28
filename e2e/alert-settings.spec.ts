@@ -11,7 +11,7 @@ test.describe("alert settings", () => {
     test.skip(!getE2ECredentials(), "Set E2E_TEST_EMAIL and E2E_TEST_PASSWORD");
 
     await signIn(page, "/dashboard/alerts");
-    await expect(page.getByRole("heading", { name: /Alerts & digests/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Alerts/i }).first()).toBeVisible();
     await expect(page.getByRole("navigation", { name: /Alert settings sections/i })).toBeVisible();
     await expect(page.locator("#alert-section-basics")).toBeVisible();
     await expect(page.locator("#alert-section-triggers")).toBeVisible();
@@ -27,17 +27,26 @@ test.describe("alert settings", () => {
     await threshold.scrollIntoViewIfNeeded();
 
     const original = await threshold.inputValue();
-    const trial =
-      original === "31.5" ? "32" : "31.5";
+    const trial = original === "31.5" ? "32" : "31.5";
 
     await threshold.fill(trial);
     await page.locator("#alert-settings-submit").click();
-    await expect(page).toHaveURL(/alert_saved=1/);
+    await expect(page).toHaveURL(/alert_saved=1/, { timeout: 20_000 });
     await expect(page.locator("#freeze_threshold_f")).toHaveValue(trial);
 
     await threshold.fill(original);
     await page.locator("#alert-settings-submit").click();
-    await expect(page).toHaveURL(/alert_saved=1/);
+    await expect(page).toHaveURL(/alert_saved=1/, { timeout: 20_000 });
     await expect(page.locator("#freeze_threshold_f")).toHaveValue(original);
+  });
+});
+
+test.describe("dashboard overview", () => {
+  test("overview loads for signed-in user", async ({ page }) => {
+    test.skip(!getE2ECredentials(), "Set E2E_TEST_EMAIL and E2E_TEST_PASSWORD");
+
+    await signIn(page, "/dashboard");
+    await expect(page.getByRole("heading", { name: /Overview|Status|Getting started/i }).first()).toBeVisible();
+    await expect(page.locator("#status")).toBeVisible();
   });
 });

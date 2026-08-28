@@ -71,7 +71,11 @@ const navItems = [
 ];
 const isDashboard = currentPath.startsWith("/dashboard");
 const loadAnalytics = shouldLoadGoogleAnalytics(currentPath);
-const loadTurnstile = currentPath.startsWith("/contact");
+const loadTurnstile =
+  currentPath.startsWith("/contact") ||
+  currentPath.startsWith("/signin") ||
+  currentPath.startsWith("/register") ||
+  currentPath.startsWith("/forgot-password");
 const registerServiceWorker =
   currentPath.startsWith("/dashboard") || currentPath.startsWith("/signin");
 ---
