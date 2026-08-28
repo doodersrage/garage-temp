@@ -1,13 +1,15 @@
 # Docs site (VitePress → GitHub Pages)
 
-Developer docs only. Product guides stay on https://thermaltrace.dev/about.
+**Live:** https://doodersrage.github.io/thermaltrace/
+
+Product guides stay on https://thermaltrace.dev/about — this site is the developer reference (ingest, API, sketches, HA, Grafana).
 
 ```bash
-pnpm --dir docs install
-pnpm --dir docs dev      # http://localhost:5173/thermaltrace/
-pnpm --dir docs build    # → docs/.vitepress/dist
+pnpm --dir docs --ignore-workspace install
+pnpm docs:dev      # http://localhost:5173/thermaltrace/
+pnpm docs:build
 ```
 
-Published at: https://doodersrage.github.io/thermaltrace/
+Deploy: `.github/workflows/docs.yml` on push to `main` when `docs/`, `sketches/`, or `public/openapi.yaml` change.
 
-Deploy: `.github/workflows/docs.yml` on push to `main` (paths under `docs/`, `sketches/`, `public/openapi.yaml`).
+On the GitHub repo page: open **Environments → github-pages**, or use the Docs badge in the root README. About → Website remains the production app URL.

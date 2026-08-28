@@ -1,50 +1,91 @@
 import { defineConfig } from "vitepress";
 
 const site = "https://thermaltrace.dev";
+const docs = "https://doodersrage.github.io/thermaltrace/";
 
 export default defineConfig({
   title: "ThermalTrace Docs",
   description:
-    "Developer docs for ThermalTrace — ingest API, sensor sketches, and OpenAPI.",
+    "Developer documentation for ThermalTrace — ingest, API, sketches, Home Assistant, and local development.",
   base: "/thermaltrace/",
   cleanUrls: true,
   lastUpdated: true,
   head: [
     ["link", { rel: "icon", href: `${site}/favicon.svg` }],
     ["meta", { name: "theme-color", content: "#090b0f" }],
+    ["meta", { property: "og:title", content: "ThermalTrace Docs" }],
+    [
+      "meta",
+      {
+        property: "og:description",
+        content: "Ingest API, sensor sketches, webhooks, and local development for ThermalTrace.",
+      },
+    ],
+    ["meta", { property: "og:url", content: docs }],
+    ["meta", { property: "og:image", content: `${site}/og-dashboard.png` }],
   ],
   themeConfig: {
     logo: { src: `${site}/favicon.svg`, alt: "ThermalTrace" },
     siteTitle: "ThermalTrace",
     nav: [
-      { text: "App", link: site },
-      { text: "About hub", link: `${site}/about` },
-      { text: "GitHub", link: "https://github.com/doodersrage/thermaltrace" },
-    ],
-    sidebar: [
+      { text: "Guide", link: "/guide/architecture" },
+      { text: "Ingest", link: "/ingest/" },
+      { text: "API", link: "/api/" },
       {
-        text: "Start",
+        text: "Links",
         items: [
-          { text: "Overview", link: "/" },
-          { text: "Push ingest", link: "/ingest" },
-          { text: "HTTP API", link: "/api" },
-          { text: "Sensor sketches", link: "/sketches" },
-        ],
-      },
-      {
-        text: "On the product site",
-        items: [
-          { text: "Guides & journeys", link: `${site}/about` },
-          { text: "In-app API page", link: `${site}/docs/api` },
-          { text: "Pricing", link: `${site}/pricing` },
+          { text: "Live app", link: site },
+          { text: "About & guides", link: `${site}/about` },
+          { text: "GitHub repo", link: "https://github.com/doodersrage/thermaltrace" },
+          { text: "OpenAPI YAML", link: "/openapi.yaml" },
         ],
       },
     ],
+    sidebar: {
+      "/": [
+        {
+          text: "Introduction",
+          items: [
+            { text: "Overview", link: "/" },
+            { text: "Architecture", link: "/guide/architecture" },
+            { text: "Local development", link: "/guide/local-dev" },
+            { text: "Troubleshooting", link: "/guide/troubleshooting" },
+          ],
+        },
+        {
+          text: "Hardware & ingest",
+          items: [
+            { text: "Push ingest", link: "/ingest/" },
+            { text: "Pull feeds", link: "/ingest/pull-feeds" },
+            { text: "Sensor sketches", link: "/sketches/" },
+          ],
+        },
+        {
+          text: "Integrations",
+          items: [
+            { text: "HTTP API", link: "/api/" },
+            { text: "Alert webhooks", link: "/integrations/webhooks" },
+            { text: "Home Assistant", link: "/integrations/home-assistant" },
+            { text: "Grafana / Prometheus", link: "/integrations/grafana" },
+          ],
+        },
+        {
+          text: "On thermaltrace.dev",
+          items: [
+            { text: "Product About hub", link: `${site}/about` },
+            { text: "In-app API page", link: `${site}/docs/api` },
+            { text: "Pricing", link: `${site}/pricing` },
+            { text: "System status", link: `${site}/system-status` },
+          ],
+        },
+      ],
+    },
     socialLinks: [
       { icon: "github", link: "https://github.com/doodersrage/thermaltrace" },
     ],
     footer: {
-      message: "Full product guides live on thermaltrace.dev — this site is for developers.",
+      message:
+        'App & product guides: <a href="https://thermaltrace.dev">thermaltrace.dev</a> · This site: developer reference',
       copyright: "Copyright © ThermalTrace",
     },
     search: { provider: "local" },
@@ -53,5 +94,6 @@ export default defineConfig({
         "https://github.com/doodersrage/thermaltrace/edit/main/docs/:path",
       text: "Edit on GitHub",
     },
+    outline: { level: [2, 3] },
   },
 });

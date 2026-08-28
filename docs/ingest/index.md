@@ -1,0 +1,102 @@
+# Push ingest
+
+Create a **push** device under **[Dashboard → Devices](https://thermaltrace.dev/dashboard/temperature)** on the live app. You receive a **one-time** device key — store it in firmware; you will not see the full key again.
+
+```http
+POST https://thermaltrace.dev/api/ingest/<device-key>
+Content-Type: application/json
+```
+
+Optional top-level health fields (any payload style):
+
+| Field | Meaning |
+|-------|---------|
+| `battery` / `battery_pct` | Battery percent (0–100) |
+| `rssi` | Wi-Fi / radio RSSI (dBm) |
+
+After the first successful POST, open **[Home](https://thermaltrace.dev/)** while signed in to confirm live values. History snapshots collect from Home refreshes and the hourly cron.
+
+## curl smoke test
+
+```bash
+curl -X POST "https://thermaltrace.dev/api/ingest/YOUR_DEVICE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"temp1": 42.5, "door1": false, "battery": 87, "rssi": -62}'
+```
+
+Expect HTTP `200` when the key is valid. Map `temp1` / `door1` as sensor keys on the Devices page so labels show correctly.
+
+## Payload styles
+
+### Flat keys
+
+Simplest for ESP sketches. Keys must match what you configure under the device’s sensors.
+
+```json
+{
+  "temp1": 42.5,
+  "humidity1": 41,
+  "door1": true,
+  "rssi": -62
+}
+```
+
+### Classic Arduino `temp` object
+
+Matches the Ethernet garage firmware JSON shape:
+
+```json
+{
+  "temp": {
+    "0": { "c": 18.5, "f": 65.3, "h": 42 },
+    "1": { "c": 19.0, "f": 66.2, "h": 40 },
+    "avg": { "f": 37.5, "c": 3.1, "h": 42.2 }
+  },
+  "battery": 87,
+  "rssi": -62
+}
+```
+
+### Typed `sensors[]`
+
+```json
+{
+  "sensors": [
+    { "key": "garage_temp", "kind": "temperature", "value": 65.3, "unit": "F" },
+    { "key": "garage_rh", "kind": "humidity", "value": 42, "unit": "%" },
+    { "key": "door1", "kind": "door", "bool": true },
+    { "key": "co2", "kind": "co2", "value": 820, "unit": "ppm" }
+  ],
+  "battery": 87,
+  "rssi": -62
+}
+```
+
+Supported `kind` values: `temperature`, `humidity`, `co2`, `door`, `power`, `flood`, `generic`.
+
+## MQTT-over-HTTP bridge
+
+Cloudflare Workers are not an MQTT broker. If your bridge can POST HTTP:
+
+```http
+POST https://thermaltrace.dev/api/ingest/mqtt
+X-Ingest-Key: <device-key>
+Content-Type: application/json
+```
+
+Body may include `topic`, `payload` (string), or `message` (object). The Worker forwards into the same ingest path. Details: [OpenAPI](/api/).
+
+## Common mistakes
+
+| Symptom | Check |
+|---------|--------|
+| `401` | Wrong or rotated device key |
+| Readings missing on Home | Sensor **keys** on Devices don’t match JSON keys |
+| No history | Need successful ingest **and** signed-in Home / hourly job |
+| TLS failures on MCU | Use a local HTTPS relay ([python feeds](https://thermaltrace.dev/about/python-feeds)) |
+
+## Related
+
+- [Sensor sketches](/sketches/)
+- [Pull feeds](/ingest/pull-feeds) (alternative to push)
+- Product guide: [ingest & webhooks](https://thermaltrace.dev/about/ingest-and-webhooks)

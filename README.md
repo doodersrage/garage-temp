@@ -2,15 +2,25 @@
 
 Open-source dashboard to **track, log, and analyze temperature probe curves** — built with **Astro 6**, **Cloudflare Workers**, **Supabase**, and **Stripe**.
 
-**Production:** [thermaltrace.dev](https://thermaltrace.dev)  
-**Workers preview:** [garage-temp.doodersrage.workers.dev](https://garage-temp.doodersrage.workers.dev) (redirects to apex)  
-**API docs:** [/docs/api](https://thermaltrace.dev/docs/api) · [OpenAPI](https://thermaltrace.dev/openapi.yaml)  
-**Developer docs (GitHub Pages):** [doodersrage.github.io/thermaltrace](https://doodersrage.github.io/thermaltrace/)
+[![App](https://img.shields.io/badge/app-thermaltrace.dev-f97316)](https://thermaltrace.dev)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-0ea5e9)](https://doodersrage.github.io/thermaltrace/)
+[![CI](https://github.com/doodersrage/thermaltrace/actions/workflows/ci.yml/badge.svg)](https://github.com/doodersrage/thermaltrace/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-slategray)](./LICENSE)
+
+| | |
+|---|---|
+| **App** | [thermaltrace.dev](https://thermaltrace.dev) |
+| **Developer docs** | [doodersrage.github.io/thermaltrace](https://doodersrage.github.io/thermaltrace/) |
+| **OpenAPI** | [thermaltrace.dev/openapi.yaml](https://thermaltrace.dev/openapi.yaml) |
+| **Workers preview** | [garage-temp.doodersrage.workers.dev](https://garage-temp.doodersrage.workers.dev) (redirects to apex) |
+
+> GitHub **About → Website** points at the live app. Developer docs are on **GitHub Pages** (see badge above, or repo **Environments → github-pages**).
 
 ---
 
 ## Contents
 
+- [Documentation](#documentation)
 - [What it does](#what-it-does)
 - [Features](#features)
 - [Plans](#plans-entitlements)
@@ -27,6 +37,19 @@ Open-source dashboard to **track, log, and analyze temperature probe curves** �
 - [Deploy & ops](#deploy--ops)
 - [Development tips](#development-tips)
 - [License](#license)
+
+---
+
+## Documentation
+
+| Surface | URL |
+|---------|-----|
+| **Developer docs (GitHub Pages)** | https://doodersrage.github.io/thermaltrace/ |
+| Product About hub | https://thermaltrace.dev/about |
+| In-app API page | https://thermaltrace.dev/docs/api |
+| OpenAPI | https://thermaltrace.dev/openapi.yaml · also on Pages as `/openapi.yaml` |
+
+Pages content lives in [`docs/`](./docs/) (VitePress). Local: `pnpm docs:dev`. Deploy: `.github/workflows/docs.yml`.
 
 ---
 
