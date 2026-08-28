@@ -1976,16 +1976,6 @@
     min-width: 0;
   }
 
-  @media (min-width: 1024px) {
-    .dashboard-nav-toggle {
-      @apply hidden;
-    }
-
-    .dashboard-nav-panel {
-      @apply mt-0 block;
-    }
-  }
-
   .dashboard-nav-toggle {
     @apply shrink-0 text-sm;
   }
@@ -1996,6 +1986,16 @@
 
   .dashboard-nav-panel.dashboard-nav-open {
     @apply block;
+  }
+
+  @media (min-width: 1024px) {
+    .dashboard-nav-toggle {
+      @apply hidden;
+    }
+
+    .dashboard-nav-panel {
+      @apply mt-0 block;
+    }
   }
 
   @media (max-width: 1023px) {
