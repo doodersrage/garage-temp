@@ -52,6 +52,16 @@ test.describe("public smoke", () => {
     await expect(page.getByRole("heading", { name: /API documentation/i })).toBeVisible();
   });
 
+  test("about hub loads", async ({ page }) => {
+    await page.goto("/about/");
+    await expect(page.getByRole("heading", { name: /About ThermalTrace/i })).toBeVisible();
+  });
+
+  test("about guide loads", async ({ page }) => {
+    await page.goto("/about/temperature-probes/");
+    await expect(page.getByRole("heading", { name: /Temperature probes/i })).toBeVisible();
+  });
+
   test("privacy page loads", async ({ page }) => {
     await page.goto("/privacy");
     await expect(page.getByRole("heading", { name: /Privacy/i })).toBeVisible();

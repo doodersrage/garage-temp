@@ -13,6 +13,7 @@ const checks = [
   { path: "/", title: /ThermalTrace/i },
   { path: "/pricing", heading: /Plans that grow/i },
   { path: "/compare", heading: /Built for homeowners/i },
+  { path: "/about/", heading: /About ThermalTrace/i },
   { path: "/system-status", heading: /System status/i },
   { path: "/docs/api", heading: /API documentation/i },
   { path: "/privacy", heading: /Privacy/i },
