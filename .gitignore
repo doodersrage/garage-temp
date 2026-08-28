@@ -7,6 +7,10 @@ dist/
 # dependencies
 node_modules/
 .pnpm-store/
+docs/node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+docs/public/openapi.yaml
 
 # logs
 npm-debug.log*

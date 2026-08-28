@@ -22,7 +22,7 @@ export default defineConfig({
       },
     ],
     ["meta", { property: "og:url", content: docs }],
-    ["meta", { property: "og:image", content: `${site}/og-dashboard.png` }],
+    ["meta", { property: "og:image", content: `${site}/og-dashboard.jpg` }],
   ],
   themeConfig: {
     logo: { src: `${site}/favicon.svg`, alt: "ThermalTrace" },

@@ -6,7 +6,7 @@ hero:
   text: Developer documentation
   tagline: Push ingest, HTTP API, sensor sketches, and integrations for the open-source temperature dashboard.
   image:
-    src: https://thermaltrace.dev/og-dashboard.png
+    src: https://thermaltrace.dev/og-dashboard.jpg
     alt: ThermalTrace dashboard
   actions:
     - theme: brand

@@ -389,7 +389,7 @@ pnpm deploy
 
 After deploy:
 
-1. Worker name stays **`garage-temp`** on Cloudflare (routes/secrets unchanged); product brand is **ThermalTrace**
+1. **Infra IDs vs brand** — Cloudflare Worker name may stay `garage-temp`; API paths like `/api/garage-temps/*` are stable URLs. User-facing brand and downloads use **ThermalTrace** / `thermaltrace-*`.
 2. Set `SITE_URL` / `ORIGIN` Worker secrets to your public hostname
 3. Confirm hourly cron (`0 * * * *`) is active
 4. Confirm Email Sending for `SMTP_MAIL_FROM` (see [Outbound email](#outbound-email-cloudflare-email))
@@ -411,7 +411,7 @@ Add repository secrets (one-time):
 CLOUDFLARE_API_TOKEN=... pnpm setup:github-secrets
 ```
 
-Or set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` manually under **Settings → Secrets → Actions**. Pushes to `main` run [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) when secrets exist; otherwise deploy is skipped (use `pnpm deploy` locally).
+Or set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` manually under **Settings → Secrets → Actions**. Pushes to `main` run [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml); without secrets the workflow still succeeds and prints a skip notice (use `pnpm deploy` locally).
 
 ### Custom domain (`thermaltrace.dev`)
 

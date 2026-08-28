@@ -29,7 +29,7 @@ const { title, description, schema, ogImage, skipAuth = false } = Astro.props;
 const pageTitle = title ? `${title} · ${BRAND_NAME}` : BRAND_NAME;
 const metaDescription = description ?? getDefaultDescription();
 const siteUrl = resolveSiteUrl(Astro.site);
-const ogImageUrl = ogImage ?? `${siteUrl}/og-dashboard.png`;
+const ogImageUrl = ogImage ?? `${siteUrl}/og-dashboard.jpg`;
 
 const { user } = skipAuth
   ? { user: null }
