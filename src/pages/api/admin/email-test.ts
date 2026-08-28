@@ -3,6 +3,8 @@ import { getAuthFromCookies } from "../../../lib/auth";
 import { isUserAdmin } from "../../../lib/adminAccess";
 import { createAdminClient } from "../../../lib/supabase";
 import { resolveSiteUrl } from "../../../lib/schemaMarkup";
+import { buildDripEmail } from "../../../lib/dripEmails";
+import { buildTrialReminderEmail } from "../../../lib/trialEmails";
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -20,30 +22,23 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   const siteUrl = resolveSiteUrl(null);
-  const subjects: Record<string, { subject: string; body: string }> = {
-    drip_day1: {
-      subject: "[Test] Add your first probe to ThermalTrace",
-      body: [
-        "Welcome to ThermalTrace!",
-        "",
-        "Next step: add a push device or JSON feed.",
-        `${siteUrl}/dashboard/temperature`,
-      ].join("\n"),
+  const templates = {
+    drip_day1: () => {
+      const mail = buildDripEmail("day1", siteUrl);
+      return { subject: `[Test] ${mail.subject}`, text: mail.text, html: mail.html };
     },
-    drip_day3: {
-      subject: "[Test] Turn on freeze alerts",
-      body: [
-        "Set a threshold under Alerts — most users start around 34°F.",
-        `${siteUrl}/dashboard/alerts`,
-      ].join("\n"),
+    drip_day3: () => {
+      const mail = buildDripEmail("day3", siteUrl);
+      return { subject: `[Test] ${mail.subject}`, text: mail.text, html: mail.html };
     },
-    trial_3d: {
-      subject: "[Test] Your ThermalTrace Pro trial ends in 3 days",
-      body: [`Keep SMS, push, and share links: ${siteUrl}/dashboard/plans`].join("\n"),
+    trial_3d: () => {
+      const mail = buildTrialReminderEmail({ plan: "Pro", remaining: 3, siteUrl });
+      return { subject: `[Test] ${mail.subject}`, text: mail.text, html: mail.html };
     },
-  };
+  } as const;
 
-  const template = subjects[kind] ?? subjects.drip_day1;
+  const build = templates[kind as keyof typeof templates] ?? templates.drip_day1;
+  const template = build();
 
   const from = import.meta.env.SMTP_MAIL_FROM;
   if (!from) {
@@ -51,8 +46,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   try {
-    const { sendPlainEmail } = await import("../../../lib/mailer");
-    await sendPlainEmail(email, template.subject, template.body);
+    const { sendEmail } = await import("../../../lib/mailer");
+    await sendEmail(email, template.subject, template.text, { html: template.html });
 
     return new Response(null, {
       status: 302,

@@ -1,6 +1,7 @@
 import type { ChartPoint } from "./garageTempsHistory";
 import type { NightRisk } from "./FetchWeather";
 import type { FreezeHoursSummary } from "./freezeHours";
+import { buildBrandedEmailHtml } from "./emailLayout";
 
 export type MonthlyProbeSummary = {
   label: string;
@@ -148,7 +149,7 @@ export function buildMonthlyReportHtmlDocument(data: MonthlyReportData): string 
 <body style="margin:0;padding:24px;background:#090b0f;color:#e2e8f0;font-family:system-ui,-apple-system,sans-serif;line-height:1.5">
   <div style="max-width:720px;margin:0 auto">
     <header style="margin-bottom:24px">
-      <p style="margin:0 0 8px;color:#60a5fa;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em">ThermalTrace</p>
+      <p style="margin:0 0 8px;font-size:13px;font-weight:800;letter-spacing:-0.02em"><span style="color:#c5cbd3">Thermal</span><span style="color:#e85500">Trace</span></p>
       <h1 style="margin:0 0 8px;font-size:28px;color:#f8fafc">Monthly report — ${escapeHtml(data.monthLabel)}</h1>
       <p style="margin:0;color:#94a3b8">30-day snapshot from your saved readings and forecast outlook.</p>
     </header>
@@ -193,9 +194,9 @@ export function buildMonthlyReportHtmlDocument(data: MonthlyReportData): string 
 
     <footer style="border-top:1px solid #2a3441;padding-top:16px;color:#94a3b8;font-size:13px">
       <p style="margin:0 0 8px">
-        <a href="${escapeHtml(data.historyUrl)}" style="color:#60a5fa">View history</a>
+        <a href="${escapeHtml(data.historyUrl)}" style="color:#ff9e4a">View history</a>
         ·
-        <a href="${escapeHtml(data.alertsUrl)}" style="color:#60a5fa">Manage alerts</a>
+        <a href="${escapeHtml(data.alertsUrl)}" style="color:#ff9e4a">Manage alerts</a>
       </p>
       <p style="margin:0">Print this page (Ctrl/Cmd+P) to save as PDF.</p>
     </footer>
@@ -206,19 +207,23 @@ export function buildMonthlyReportHtmlDocument(data: MonthlyReportData): string 
 
 /** Shorter HTML for the email body (stats only). */
 export function buildMonthlyReportHtmlEmail(data: MonthlyReportData): string {
-  return `<div style="font-family:system-ui,sans-serif;color:#111;line-height:1.5">
-    <h2 style="margin:0 0 12px">Monthly garage report — ${escapeHtml(data.monthLabel)}</h2>
-    <p style="margin:0 0 16px">30-day summary from ThermalTrace. See the attached HTML report for full probe and forecast tables.</p>
-    <ul style="margin:0 0 16px;padding-left:20px">
-      <li>Readings: <strong>${data.readingCount}</strong></li>
-      <li>Coldest: <strong>${formatTemp(data.minTempF)}</strong></li>
-      <li>Warmest: <strong>${formatTemp(data.maxTempF)}</strong></li>
-      <li>Average: <strong>${formatTemp(data.avgTempF)}</strong></li>
-      <li>Freeze hours (≤ ${data.freezeThresholdF}°F): <strong>${data.freezeHours.hoursBelow34.toFixed(1)}</strong></li>
-      <li>Forecast nights at risk: <strong>${data.nightsAtRisk}</strong></li>
-    </ul>
-    <p style="margin:0"><a href="${escapeHtml(data.alertsUrl)}">Manage alerts</a> · <a href="${escapeHtml(data.historyUrl)}">View history</a></p>
-  </div>`;
+  return buildBrandedEmailHtml({
+    eyebrow: "Monthly report",
+    title: `Garage report — ${data.monthLabel}`,
+    intro:
+      "30-day summary from your saved readings. A full HTML report is attached — open it in a browser or print to PDF.",
+    bullets: [
+      `Readings: ${data.readingCount}`,
+      `Coldest: ${formatTemp(data.minTempF)}`,
+      `Warmest: ${formatTemp(data.maxTempF)}`,
+      `Average: ${formatTemp(data.avgTempF)}`,
+      `Freeze hours (≤ ${data.freezeThresholdF}°F): ${data.freezeHours.hoursBelow34.toFixed(1)}`,
+      `Forecast nights at risk: ${data.nightsAtRisk}`,
+    ],
+    cta: { label: "View history", url: data.historyUrl },
+    secondaryCta: { label: "Manage alerts", url: data.alertsUrl },
+    tone: "brand",
+  });
 }
 
 export function encodeBase64Utf8(text: string): string {

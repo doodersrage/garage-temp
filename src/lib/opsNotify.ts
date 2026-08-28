@@ -10,8 +10,19 @@ async function sendOpsEmail(subject: string, body: string): Promise<boolean> {
   if (!to || !from) return false;
 
   try {
-    const { sendPlainEmail } = await import("./mailer");
-    await sendPlainEmail(to, subject, body, { fromName: "ThermalTrace Ops" });
+    const { sendEmail } = await import("./mailer");
+    const { brandedEmailParts } = await import("./emailLayout");
+    const parts = brandedEmailParts({
+      eyebrow: "Ops",
+      title: subject,
+      intro: body,
+      tone: "alert",
+      footerNote: "ThermalTrace operator notification.",
+    });
+    await sendEmail(to, subject, parts.text, {
+      html: parts.html,
+      fromName: "ThermalTrace Ops",
+    });
     return true;
   } catch (error) {
     console.error("Failed to send ops email:", error);

@@ -3,11 +3,18 @@ import type { ChartPoint } from "./garageTempsHistory";
 import { getAlertSettingsForUser, notifyUser } from "./notify";
 import { listAllHouseholdOwnerUserIds } from "./households";
 import { summarizeSeasonal } from "./seasonalInsights";
+import { brandedEmailParts } from "./emailLayout";
+import { resolveSiteUrl } from "./schemaMarkup";
+import { sendEmail } from "./mailer";
 
-async function sendDigestEmail(to: string, subject: string, body: string): Promise<void> {
+async function sendDigestEmail(
+  to: string,
+  subject: string,
+  text: string,
+  html: string,
+): Promise<void> {
   try {
-    const { sendPlainEmail } = await import("./mailer");
-    await sendPlainEmail(to, subject, body);
+    await sendEmail(to, subject, text, { html });
   } catch (error) {
     console.error("Failed to send digest email:", error);
   }
@@ -49,6 +56,7 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
   const errors: string[] = [];
   let sent = 0;
   let skipped = 0;
+  const siteUrl = resolveSiteUrl(null);
 
   const userIds = await listAllHouseholdOwnerUserIds();
 
@@ -88,20 +96,32 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
 
       const summary = summarizePoints(points);
       const seasonal = summarizeSeasonal(points, 7);
-      const body = [
-        "Weekly garage temperature summary (last 7 days)",
-        "",
-        ...summary,
-        "",
-        "Seasonal highlights:",
-        ...seasonal.map((item) => `- ${item.title}: ${item.detail}`),
-        "",
-        "Manage digest settings in your dashboard.",
-      ].join("\n");
+      const parts = brandedEmailParts({
+        eyebrow: "Weekly digest",
+        preheader: summary[0] ?? "Your last 7 days of garage temperatures.",
+        title: "This week in your garage",
+        intro: "Here’s a quick look at the last 7 days of probe readings.",
+        bullets: [
+          ...summary,
+          ...seasonal.map((item) => `${item.title}: ${item.detail}`),
+        ],
+        cta: { label: "Open history", url: `${siteUrl}/dashboard/history` },
+        secondaryCta: {
+          label: "Manage digest settings",
+          url: `${siteUrl}/dashboard/alerts`,
+        },
+        tone: "brand",
+        footerNote:
+          "Weekly digests can be turned off under Dashboard → Alerts → Email options.",
+      });
 
-      await sendDigestEmail(digestEmail, "Weekly garage temperature digest", body);
+      await sendDigestEmail(
+        digestEmail,
+        "Weekly garage temperature digest",
+        parts.text,
+        parts.html,
+      );
 
-      // Also fan out to other digest-capable channels if enabled
       await notifyUser(userId, digestEmail, { ...settings, channelEmail: false }, {
         title: "Weekly garage digest",
         body: summary.join("\n"),
@@ -110,9 +130,7 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
 
       sent += 1;
     } catch (e) {
-      errors.push(
-        `${userId}: ${e instanceof Error ? e.message : "Unknown error"}`,
-      );
+      errors.push(`${userId}: ${e instanceof Error ? e.message : "Unknown error"}`);
     }
   }
 

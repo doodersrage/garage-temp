@@ -163,19 +163,25 @@ export async function sendInviteEmail(
   invitedByEmail: string | null,
 ): Promise<void> {
   try {
-    const { sendPlainEmail } = await import("./mailer");
-    await sendPlainEmail(
-      to,
-      `You're invited to ${householdName}`,
-      [
-        `${invitedByEmail ?? "Someone"} invited you to share garage sensors on ThermalTrace.`,
-        "",
-        `Household: ${householdName}`,
-        `Accept invite: ${acceptUrl}`,
-        "",
-        "This link expires in 7 days. Sign in (or register) with this email address to join.",
-      ].join("\n"),
-    );
+    const { sendEmail } = await import("./mailer");
+    const { brandedEmailParts } = await import("./emailLayout");
+    const who = invitedByEmail ?? "Someone";
+    const parts = brandedEmailParts({
+      eyebrow: "Household invite",
+      preheader: `${who} invited you to share garage sensors on ThermalTrace.`,
+      title: `You're invited to ${householdName}`,
+      intro: `${who} wants to share live probes and freeze alerts with you on ThermalTrace.`,
+      paragraphs: [
+        "Accept the invite with this email address (sign in or register). The link expires in 7 days.",
+      ],
+      bullets: [`Household: ${householdName}`],
+      cta: { label: "Accept invite", url: acceptUrl },
+      tone: "brand",
+      footerNote: "If you weren’t expecting this, you can ignore the message.",
+    });
+    await sendEmail(to, `You're invited to ${householdName}`, parts.text, {
+      html: parts.html,
+    });
   } catch (error) {
     console.error("Failed to send household invite email:", error);
   }

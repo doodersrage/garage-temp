@@ -1,9 +1,10 @@
 import { createAdminClient } from "./supabase";
 import { resolveSiteUrl } from "./schemaMarkup";
+import { brandedEmailParts } from "./emailLayout";
 import {
   isMailerRecipientNotAllowed,
   partitionMailErrors,
-  sendPlainEmail,
+  sendEmail,
 } from "./mailer";
 
 const REMINDER_DAYS = [3, 1] as const;
@@ -17,6 +18,38 @@ export function daysUntil(iso: string | null | undefined): number | null {
 
 export function trialJobShouldFail(errors: string[]): boolean {
   return partitionMailErrors(errors).hardErrors.length > 0;
+}
+
+export function buildTrialReminderEmail(options: {
+  plan: string;
+  remaining: number;
+  siteUrl?: string;
+}): { subject: string; text: string; html: string } {
+  const siteUrl = options.siteUrl ?? resolveSiteUrl(null);
+  const { plan, remaining } = options;
+  const subject =
+    remaining === 1
+      ? `Your ThermalTrace ${plan} trial ends tomorrow`
+      : `Your ThermalTrace ${plan} trial ends in ${remaining} days`;
+  const when = remaining === 1 ? "tomorrow" : `in ${remaining} days`;
+  const parts = brandedEmailParts({
+    eyebrow: "Trial reminder",
+    preheader: `Your ${plan} trial ends ${when}. Keep SMS, push, and share links without interruption.`,
+    title: remaining === 1 ? "Trial ends tomorrow" : `Trial ends in ${remaining} days`,
+    intro: `Your ${plan} trial wraps up ${when}. Stay on Pro to keep SMS, browser push, share links, and webhooks active.`,
+    paragraphs: [
+      "Billing is managed in the Stripe customer portal from your dashboard — no surprise lockout if you renew before the trial ends.",
+    ],
+    bullets: [
+      "SMS and push freeze alerts",
+      "Public share links and embeds",
+      "Outbound webhooks and higher device limits",
+    ],
+    cta: { label: "Review plans & billing", url: `${siteUrl}/dashboard/plans` },
+    secondaryCta: { label: "Compare features", url: `${siteUrl}/pricing` },
+    tone: "brand",
+  });
+  return { subject, ...parts };
 }
 
 export async function sendTrialRemindersForAllUsers(): Promise<{
@@ -67,21 +100,8 @@ export async function sendTrialRemindersForAllUsers(): Promise<{
       }
 
       const plan = sub.plan_tier === "pro" ? "Pro" : "Member";
-      const subject =
-        remaining === 1
-          ? `Your ThermalTrace ${plan} trial ends tomorrow`
-          : `Your ThermalTrace ${plan} trial ends in ${remaining} days`;
-      const body = [
-        `Hi,`,
-        ``,
-        `Your ${plan} trial ends ${remaining === 1 ? "tomorrow" : `in ${remaining} days`}.`,
-        `Keep SMS, push, share links, and integrations without interruption:`,
-        `${siteUrl}/dashboard/plans`,
-        ``,
-        `Manage billing anytime from the dashboard.`,
-      ].join("\n");
-
-      await sendPlainEmail(email, subject, body);
+      const mail = buildTrialReminderEmail({ plan, remaining, siteUrl });
+      await sendEmail(email, mail.subject, mail.text, { html: mail.html });
       await supabase
         .from("alert_settings")
         .update({

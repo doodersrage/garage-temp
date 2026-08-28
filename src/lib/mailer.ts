@@ -21,11 +21,20 @@ export async function sendMailerRaw(message: unknown): Promise<void> {
   await (env.MAILER as unknown as MailerBinding).send(message);
 }
 
-export async function sendPlainEmail(
+export type SendEmailOptions = {
+  fromName?: string;
+  /** Optional HTML part. When omitted, only plain text is sent. */
+  html?: string;
+};
+
+/**
+ * Send multipart email (plain + optional HTML). Prefer branded helpers for product mail.
+ */
+export async function sendEmail(
   to: string,
   subject: string,
-  body: string,
-  options?: { fromName?: string },
+  text: string,
+  options?: SendEmailOptions,
 ): Promise<void> {
   const from = requireSmtpMailFrom();
   const { EmailMessage } = await import("cloudflare:email");
@@ -38,9 +47,22 @@ export async function sendPlainEmail(
   });
   msg.setRecipient(to);
   msg.setSubject(subject);
-  msg.addMessage({ contentType: "text/plain", data: body });
+  msg.addMessage({ contentType: "text/plain", data: text });
+  if (options?.html?.trim()) {
+    msg.addMessage({ contentType: "text/html", data: options.html });
+  }
 
   await sendMailerRaw(new EmailMessage(from, to, msg.asRaw()));
+}
+
+/** Plain or multipart send — pass html when available. */
+export async function sendPlainEmail(
+  to: string,
+  subject: string,
+  body: string,
+  options?: { fromName?: string; html?: string },
+): Promise<void> {
+  await sendEmail(to, subject, body, options);
 }
 
 /** Hard errors fail the job; recipient-not-allowed is a binding/config limit. */

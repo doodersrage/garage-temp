@@ -29,8 +29,22 @@ export type NotifyPayload = {
 
 async function sendEmail(to: string, subject: string, body: string): Promise<void> {
   try {
-    const { sendPlainEmail } = await import("./mailer");
-    await sendPlainEmail(to, subject, body);
+    const { sendEmail: send } = await import("./mailer");
+    const { brandedEmailParts } = await import("./emailLayout");
+    const { resolveSiteUrl } = await import("./schemaMarkup");
+    const siteUrl = resolveSiteUrl(null);
+    const parts = brandedEmailParts({
+      eyebrow: "Alert",
+      preheader: body.slice(0, 120),
+      title: subject,
+      intro: body,
+      cta: { label: "Open dashboard", url: `${siteUrl}/dashboard` },
+      secondaryCta: { label: "Alert settings", url: `${siteUrl}/dashboard/alerts` },
+      tone: "alert",
+      footerNote:
+        "You’re receiving this because freeze or threshold alerts are enabled for your account.",
+    });
+    await send(to, subject, parts.text, { html: parts.html });
   } catch (error) {
     console.error("Failed to send alert email:", error);
   }
