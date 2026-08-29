@@ -26,6 +26,11 @@ export const marketingFaqs = {
       answer:
         "Yes—there is a free plan with live curves and basic alerts. Member adds CSV history export and more devices; Pro adds SMS, push, share links, webhooks, and a trial.",
     },
+    {
+      question: "Is there a ThermalTrace Android app?",
+      answer:
+        "A native Android app is coming soon on Google Play. Until then you can use the full web dashboard or install the Progressive Web App. The phone does not sense temperature — it connects to your ThermalTrace account.",
+    },
   ],
   pricing: [
     {

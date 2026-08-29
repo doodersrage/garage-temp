@@ -15,6 +15,7 @@ const STATIC_PUBLIC_PATHS = [
   "/freeze-map",
   "/system-status",
   "/docs/api",
+  "/android",
   "/stories/garage-freeze-alert",
 ] as const;
 

@@ -7,6 +7,7 @@ describe("sitemapPages", () => {
     expect(paths).toContain("/about/dht22-sensor-overview");
     expect(paths).toContain("/about/temperature-probes");
     expect(paths).toContain("/docs/api");
+    expect(paths).toContain("/android");
     expect(paths).toContain("/privacy");
     expect(paths).toContain("/terms");
   });

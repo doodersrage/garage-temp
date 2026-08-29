@@ -1,0 +1,56 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { BRAND_NAME } from "../lib/brand";
+import {
+  getBreadcrumbSchema,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "Android app", path: "/android" },
+  ]),
+];
+---
+<Layout
+  title="Android app"
+  description={`${BRAND_NAME} Android app is coming soon on Google Play — live readings, alerts, and household settings without on-phone sensors.`}
+  schema={schema}
+>
+  <article class="card max-w-3xl mx-auto my-8">
+    <p class="text-sm text-[var(--color-text-muted)] mb-2">Coming soon</p>
+    <h1 class="card-title">ThermalTrace for Android</h1>
+    <p class="card-subtitle">
+      A native companion for your ThermalTrace account — same live readings, history, alerts,
+      devices, and household tools as the web dashboard.
+    </p>
+
+    <p class="text-sm mt-4">
+      The phone does <strong>not</strong> collect temperature itself. Your ESP/home sensors keep
+      ingesting to thermaltrace.dev; the Android app signs in and loads that data over HTTPS.
+      Optional Pro push alerts use Firebase Cloud Messaging alongside browser Web Push.
+    </p>
+
+    <p class="text-sm mt-4">
+      We are preparing a Google Play listing. Until then, use the
+      <a class="text-link" href="/about/install-pwa">web app (PWA)</a>
+      or the full
+      <a class="text-link" href="/dashboard">dashboard</a>
+      in your browser.
+    </p>
+
+    <p class="text-sm mt-4 mb-0">
+      Source:
+      <a
+        class="text-link"
+        href="https://github.com/doodersrage/thermaltrace-android"
+        target="_blank"
+        rel="noreferrer"
+      >thermaltrace-android on GitHub</a>
+      ·
+      <a class="text-link" href="/privacy">Privacy</a>
+    </p>
+  </article>
+</Layout>

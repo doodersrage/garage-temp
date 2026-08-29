@@ -22,7 +22,8 @@ const schema = [
   <article class="card max-w-3xl mx-auto my-8">
     <h1 class="card-title">Privacy</h1>
     <p class="card-subtitle">
-      How ThermalTrace handles your data, retention, and account deletion.
+      How ThermalTrace handles your data (web and Android), retention, and account deletion.
+      Last updated August 29, 2026.
     </p>
 
     <h2 class="text-lg font-semibold mt-6 mb-2">What we store</h2>
@@ -31,7 +32,19 @@ const schema = [
       <li>Device and sensor configuration, temperature/humidity readings</li>
       <li>Alert settings and delivery audit logs</li>
       <li>Optional billing data via Stripe (we do not store card numbers)</li>
+      <li>
+        On the <strong>Android app</strong>: session tokens on-device; optional Firebase Cloud Messaging
+        device tokens when you enable push (used only to deliver your alerts)
+      </li>
     </ul>
+
+    <h2 class="text-lg font-semibold mt-6 mb-2">Android app</h2>
+    <p class="text-sm">
+      The ThermalTrace Android app (`dev.thermaltrace.android`) is a client for this website. It does
+      <strong>not</strong> read temperature from the phone. It signs in with your ThermalTrace account and
+      loads the same household readings and settings over HTTPS. Push notifications are optional and can be
+      turned off in the app (Account) and under Alert settings on the web.
+    </p>
 
     <h2 class="text-lg font-semibold mt-6 mb-2">Retention</h2>
     <p class="text-sm">
@@ -43,7 +56,8 @@ const schema = [
     <h2 class="text-lg font-semibold mt-6 mb-2">Export & deletion</h2>
     <p class="text-sm">
       Export JSON anytime from <a class="text-link" href="/api/user/export">/api/user/export</a> while signed in.
-      Delete your account under Dashboard → Settings — this removes alert settings and sole-owned households.
+      Delete your account under Dashboard → Settings — this removes alert settings, push device tokens, and
+      sole-owned households. Account deletion on the website also applies to Android app access.
     </p>
 
     <h2 class="text-lg font-semibold mt-6 mb-2">Analytics</h2>
