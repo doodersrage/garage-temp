@@ -28,6 +28,11 @@ interface ImportMetaEnv {
   readonly VAPID_PUBLIC_KEY?: string;
   readonly VAPID_PRIVATE_KEY?: string;
   readonly VAPID_SUBJECT?: string;
+  /** Full Firebase service account JSON (preferred) for FCM HTTP v1 */
+  readonly FCM_SERVICE_ACCOUNT_JSON?: string;
+  readonly FCM_PROJECT_ID?: string;
+  readonly FCM_CLIENT_EMAIL?: string;
+  readonly FCM_PRIVATE_KEY?: string;
   readonly OPS_DISCORD_WEBHOOK_URL?: string;
   readonly DISCORD_OPS_WEBHOOK_URL?: string;
   readonly PRICING_DEFAULT_INTERVAL?: string;

@@ -46,23 +46,31 @@ const { vapidPublicKey } = Astro.props;
         const existing = await reg.pushManager.getSubscription();
 
         if (existing && server?.subscriptionCount > 0) {
-          status.textContent = "Push enabled on this browser.";
+          const androidNote =
+            typeof server.fcmTokenCount === "number" && server.fcmTokenCount > 0
+              ? ` Also ${server.fcmTokenCount} Android device(s) registered.`
+              : "";
+          status.textContent = "Push enabled on this browser." + androidNote;
           if (btn) btn.textContent = "Re-enable / refresh push";
           if (hint) {
             hint.textContent = server.channelEnabled
-              ? "Browser push channel is on — test from below."
-              : 'Check "Browser push" under channels above, save settings, then send a test.';
+              ? "Push channel is on — test from below (browser + Android)."
+              : 'Check "Push (browser + Android)" under channels above, save settings, then send a test.';
           }
         } else if (permission === "granted") {
           status.textContent = "Permission granted, but this browser is not subscribed yet.";
           if (btn) btn.textContent = "Subscribe this browser";
         } else {
           status.textContent = "Not enabled on this browser yet.";
-          if (btn) btn.textContent = "Enable browser push";
+          if (btn) btn.textContent = "Enable browser push on this device";
         }
 
         if (server && !server.vapidConfigured && hint) {
-          hint.textContent = "Server VAPID keys are missing — push cannot send until configured.";
+          hint.textContent = "Server VAPID keys are missing — browser push cannot send until configured.";
+        }
+        if (server && server.fcmTokenCount > 0 && !server.channelEnabled && hint) {
+          hint.textContent =
+            'Android app is registered — check "Push (browser + Android)", save, then test.';
         }
       } catch {
         status.textContent = "Could not read push status.";
@@ -103,7 +111,8 @@ const { vapidPublicKey } = Astro.props;
           status.textContent = "Subscribed on this browser. Save alert settings, then send a test.";
         }
         if (hint) {
-          hint.textContent = 'The "Browser push" channel was checked — click Save alert settings before testing.';
+          hint.textContent =
+            'The "Push (browser + Android)" channel was checked — click Save alert settings before testing.';
         }
         if (btn) btn.textContent = "Re-enable / refresh push";
       } catch (e) {

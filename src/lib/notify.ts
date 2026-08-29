@@ -19,7 +19,7 @@ import { filterChannelsForSpace } from "./spaceChannelRouting";
 import { deliverWebhookPost } from "./webhookDeliveries";
 import { createServerClient } from "./supabase";
 import { getUserEntitlements } from "./entitlements";
-import { sendWebPushToUser } from "./webPush";
+import { sendPushChannelToUser } from "./pushChannel";
 
 export type NotifyPayload = {
   title: string;
@@ -588,7 +588,7 @@ export async function notifyUser(
 
   if (settings.channelPush && allowChannel("push")) {
     if (entitlements.canUsePush) {
-      const pushResult = await sendWebPushToUser(userId, {
+      const pushResult = await sendPushChannelToUser(userId, {
         title: payloadResolved.title,
         body: bodyWithSnooze,
       });

@@ -135,6 +135,42 @@ paths:
       responses:
         "200":
           description: Subscribed
+  /api/push/fcm:
+    post:
+      summary: Register an FCM device token (Pro, session cookies)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+                platform:
+                  type: string
+                  enum: [android, ios, web]
+                appId:
+                  type: string
+      responses:
+        "200":
+          description: Token registered
+        "403":
+          description: Pro plan required
+    delete:
+      summary: Unregister an FCM device token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+      responses:
+        "200":
+          description: Token removed
 components:
   securitySchemes:
     bearerAuth:

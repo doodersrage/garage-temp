@@ -84,7 +84,7 @@ You can **pull** HTTPS JSON from a local probe server, or have ESP/Arduino devic
 - Composite AND rules (door + temp, flood, power, …) with optional value/label filters
 - Quiet hours (optional freeze bypass; Pro SMS-critical override)
 - Per-kind severity routing and per-space channel routing
-- Channels: email, Discord, Telegram, Slack, Teams, ntfy, Pushover, WhatsApp; Pro adds SMS (Twilio), browser push, outbound / reading webhooks
+- Channels: email, Discord, Telegram, Slack, Teams, ntfy, Pushover, WhatsApp; Pro adds SMS (Twilio), push (browser Web Push + Android FCM), outbound / reading webhooks
 - Custom alert templates (`{{kind}}`, `{{title}}`, `{{body}}`) and one-click acknowledgment (dashboard + email/Telegram links)
 - **Alert playbooks** — timed escalation steps (e.g. SMS 15 min later if unacknowledged); visual step builder on Alerts page
 - Escalation (SMS repeat), test alert with per-channel feedback, activity audit trail
@@ -127,7 +127,7 @@ Display preferences, alert settings, snooze/vacation, and household invites save
 | Email + Discord + Telegram + Slack alerts | ✓ | ✓ | ✓ |
 | CSV history export | | ✓ | ✓ |
 | Push devices | 2 | 6 | 24 |
-| SMS, browser push, outbound / reading webhooks | | | ✓ |
+| SMS, push (browser + Android), outbound / reading webhooks | | | ✓ |
 | Public share links, status pages, metrics API | | | ✓ |
 | Portfolio view + cross-property freeze alerts | | | ✓ |
 | Dashboard API keys + Grafana JSON | | | ✓ |
@@ -260,7 +260,8 @@ Configure in `.env` (local) and Cloudflare Worker secrets / vars (production). F
 | `STRIPE_DISPLAY_MEMBER_*` / `STRIPE_DISPLAY_PRO_*` | Display-only USD amounts on `/pricing` (must match Stripe) |
 | `PRICING_DEFAULT_INTERVAL` | `annual` or `monthly` default on `/pricing` |
 | `TWILIO_*` | Pro SMS (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`) |
-| `VAPID_*` | Pro browser push — generate with `pnpm generate:vapid` |
+| `VAPID_*` | Pro browser Web Push — generate with `pnpm generate:vapid` |
+| `FCM_SERVICE_ACCOUNT_JSON` or `FCM_PROJECT_ID` + `FCM_CLIENT_EMAIL` + `FCM_PRIVATE_KEY` | Pro Android/iOS FCM (HTTP v1 service account) |
 | `SITE_URL` / `ORIGIN` | OAuth, password reset, Stripe redirects |
 | `CRON_SECRET` | Bearer for manual history cron |
 | `OPS_DISCORD_WEBHOOK_URL` | Optional Discord when jobs / pages fail |

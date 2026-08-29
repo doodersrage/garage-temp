@@ -175,7 +175,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Does the PWA support freeze push alerts?",
       answer:
-        "Browser push is a Pro channel. Install the PWA for faster dashboard access; enable push where the browser and OS allow it (iOS has extra limits).",
+        "Push is a Pro channel for the browser (PWA) and the ThermalTrace Android app. Install the PWA or Android app, enable Push under Alerts, and allow notifications where the OS requires it (iOS Safari has extra limits for web push).",
     },
   ],
   "data-flow": [

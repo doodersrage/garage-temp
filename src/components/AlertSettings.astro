@@ -270,7 +270,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
       </label>
       <label class="checkbox-row mb-0">
         <input type="checkbox" name="channel_push" value="true" checked={settings.channelPush} disabled={!entitlements.canUsePush} data-channel-toggle="push" />
-        <span>Browser push {!entitlements.canUsePush && <span class="text-[var(--color-text-muted)]">(Pro)</span>}</span>
+        <span>Push (browser + Android) {!entitlements.canUsePush && <span class="text-[var(--color-text-muted)]">(Pro)</span>}</span>
       </label>
       <label class="checkbox-row mb-0">
         <input type="checkbox" name="channel_webhook" value="true" checked={settings.channelWebhook} disabled={!entitlements.canUseOutboundWebhook} data-channel-toggle="webhook" />
@@ -394,14 +394,18 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
       </div>
 
       <div class="alert-channel-panel" data-channel-panel="push" hidden={!settings.channelPush}>
-        <p class="alert-channel-panel-label">Browser push (this device)</p>
+        <p class="alert-channel-panel-label">Push (browser + Android)</p>
+        <p class="form-hint mb-3">
+          One channel covers <strong>this browser</strong> (Web Push) and the
+          <strong>ThermalTrace Android app</strong> (FCM). Enable below for this browser; the Android app registers automatically when you sign in on Pro.
+        </p>
         {!vapidPublicKey ? (
-          <p class="form-hint mb-0">Push is not configured on the server yet (missing VAPID keys).</p>
+          <p class="form-hint mb-2">Browser push is not configured on the server yet (missing VAPID keys).</p>
         ) : (
           <>
             <p class="form-hint mb-3" id="push-status">Checking push status…</p>
             <button type="button" class="btn-secondary" id="enable-push-btn" data-vapid={vapidPublicKey}>
-              Enable browser push
+              Enable browser push on this device
             </button>
             <p class="form-hint mt-2 mb-0" id="push-hint"></p>
           </>
