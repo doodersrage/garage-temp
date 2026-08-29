@@ -202,13 +202,14 @@ export async function sendFcmToUser(
             data: {
               title: payload.title,
               body: payload.body,
-              click_action: "OPEN_DASHBOARD",
+              deep_link: "alerts",
+              click_action: "OPEN_ALERTS",
             },
             android: {
               priority: "HIGH",
               notification: {
                 channel_id: "thermaltrace_alerts",
-                click_action: "OPEN_DASHBOARD",
+                click_action: "OPEN_ALERTS",
               },
             },
           },
