@@ -6,6 +6,7 @@ import PwaInstallCard from "../../components/dashboard/PwaInstallCard.astro";
 import ProductAnalyticsTracker from "../../components/ProductAnalyticsTracker.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getAlertSettingsForUser, isTwilioConfigured } from "../../lib/notify";
+import { getRuntimeEnv } from "../../lib/runtimeEnv";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { formatRelativeAge } from "../../lib/relativeTime";
 import { listRecentAlertEvents } from "../../lib/alertEvents";
@@ -131,7 +132,7 @@ const analyticsEvents = Astro.url.searchParams.get("test_sent")
       userEmail={user.email ?? ""}
       settings={alertSettings}
       entitlements={entitlements}
-      vapidPublicKey={import.meta.env.VAPID_PUBLIC_KEY ?? ""}
+      vapidPublicKey={getRuntimeEnv("VAPID_PUBLIC_KEY") ?? ""}
       twilioConfigured={isTwilioConfigured()}
       redirectTo="/dashboard/alerts"
       canEdit={canEdit}

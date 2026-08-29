@@ -5,7 +5,7 @@ declare module "cloudflare:email" {
 }
 
 declare module "cloudflare:workers" {
-  export const env: {
-    MAILER: { send: (message: unknown) => Promise<void> };
+  export const env: Record<string, unknown> & {
+    MAILER?: { send: (message: unknown) => Promise<void> };
   };
 }

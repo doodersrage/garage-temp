@@ -1,4 +1,5 @@
 import { createAdminClient } from "./supabase";
+import { getRuntimeEnv } from "./runtimeEnv";
 
 export type FcmPayload = {
   title: string;
@@ -24,7 +25,7 @@ export function isFcmConfigured(): boolean {
 }
 
 function resolveServiceAccount(): ServiceAccount | null {
-  const jsonRaw = import.meta.env.FCM_SERVICE_ACCOUNT_JSON?.trim();
+  const jsonRaw = getRuntimeEnv("FCM_SERVICE_ACCOUNT_JSON");
   if (jsonRaw) {
     try {
       const parsed = JSON.parse(jsonRaw) as Partial<ServiceAccount>;
@@ -40,9 +41,9 @@ function resolveServiceAccount(): ServiceAccount | null {
     }
   }
 
-  const projectId = import.meta.env.FCM_PROJECT_ID?.trim();
-  const clientEmail = import.meta.env.FCM_CLIENT_EMAIL?.trim();
-  const privateKey = import.meta.env.FCM_PRIVATE_KEY?.trim();
+  const projectId = getRuntimeEnv("FCM_PROJECT_ID");
+  const clientEmail = getRuntimeEnv("FCM_CLIENT_EMAIL");
+  const privateKey = getRuntimeEnv("FCM_PRIVATE_KEY");
   if (projectId && clientEmail && privateKey) {
     return {
       project_id: projectId,

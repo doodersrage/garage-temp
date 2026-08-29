@@ -20,6 +20,7 @@ import { deliverWebhookPost } from "./webhookDeliveries";
 import { createServerClient } from "./supabase";
 import { getUserEntitlements } from "./entitlements";
 import { sendPushChannelToUser } from "./pushChannel";
+import { getRuntimeEnv, hasRuntimeEnv } from "./runtimeEnv";
 
 export type NotifyPayload = {
   title: string;
@@ -143,11 +144,10 @@ async function sendPushover(
 }
 
 export async function sendTwilioWhatsApp(to: string, body: string): Promise<boolean> {
-  const sid = import.meta.env.TWILIO_ACCOUNT_SID?.trim();
-  const token = import.meta.env.TWILIO_AUTH_TOKEN?.trim();
+  const sid = getRuntimeEnv("TWILIO_ACCOUNT_SID");
+  const token = getRuntimeEnv("TWILIO_AUTH_TOKEN");
   const from =
-    import.meta.env.TWILIO_WHATSAPP_FROM?.trim() ||
-    import.meta.env.TWILIO_FROM_NUMBER?.trim();
+    getRuntimeEnv("TWILIO_WHATSAPP_FROM") || getRuntimeEnv("TWILIO_FROM_NUMBER");
 
   if (!sid || !token || !from) {
     console.warn("Twilio WhatsApp env vars not configured; skipping");
@@ -211,17 +211,17 @@ async function sendTelegram(
 }
 
 export function isTwilioConfigured(): boolean {
-  return Boolean(
-    import.meta.env.TWILIO_ACCOUNT_SID?.trim() &&
-      import.meta.env.TWILIO_AUTH_TOKEN?.trim() &&
-      import.meta.env.TWILIO_FROM_NUMBER?.trim(),
+  return hasRuntimeEnv(
+    "TWILIO_ACCOUNT_SID",
+    "TWILIO_AUTH_TOKEN",
+    "TWILIO_FROM_NUMBER",
   );
 }
 
 export async function sendTwilioSms(to: string, body: string): Promise<boolean> {
-  const sid = import.meta.env.TWILIO_ACCOUNT_SID?.trim();
-  const token = import.meta.env.TWILIO_AUTH_TOKEN?.trim();
-  const from = import.meta.env.TWILIO_FROM_NUMBER?.trim();
+  const sid = getRuntimeEnv("TWILIO_ACCOUNT_SID");
+  const token = getRuntimeEnv("TWILIO_AUTH_TOKEN");
+  const from = getRuntimeEnv("TWILIO_FROM_NUMBER");
 
   if (!sid || !token || !from) {
     console.warn("Twilio env vars not configured; skipping SMS");

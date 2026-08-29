@@ -1,4 +1,5 @@
 import { createAdminClient } from "./supabase";
+import { getRuntimeEnv, hasRuntimeEnv } from "./runtimeEnv";
 
 export type WebPushPayload = {
   title: string;
@@ -16,19 +17,16 @@ export function isStalePushStatus(status: number): boolean {
 }
 
 export function isVapidConfigured(): boolean {
-  return Boolean(
-    import.meta.env.VAPID_PUBLIC_KEY?.trim() &&
-      import.meta.env.VAPID_PRIVATE_KEY?.trim(),
-  );
+  return hasRuntimeEnv("VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY");
 }
 
 export async function sendWebPushToUser(
   userId: string,
   payload: WebPushPayload,
 ): Promise<WebPushDeliveryResult> {
-  const publicKey = import.meta.env.VAPID_PUBLIC_KEY?.trim();
-  const privateKey = import.meta.env.VAPID_PRIVATE_KEY?.trim();
-  const subject = import.meta.env.VAPID_SUBJECT ?? "mailto:admin@example.com";
+  const publicKey = getRuntimeEnv("VAPID_PUBLIC_KEY");
+  const privateKey = getRuntimeEnv("VAPID_PRIVATE_KEY");
+  const subject = getRuntimeEnv("VAPID_SUBJECT") ?? "mailto:admin@example.com";
 
   if (!isVapidConfigured() || !publicKey || !privateKey) {
     return { delivered: 0, failed: 0, skippedReason: "push_not_configured" };
