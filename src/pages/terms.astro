@@ -16,20 +16,29 @@ const schema = [
 ---
 <Layout
   title="Terms of service"
-  description={`${BRAND_NAME} terms: accounts, sensor data license, billing via Stripe, monitoring disclaimer, and liability limits for garage freeze alerts.`}
+  description={`${BRAND_NAME} terms: web and Android clients, accounts, sensor data license, billing via Stripe, monitoring disclaimer, and liability limits.`}
   schema={schema}
 >
   <article class="card max-w-3xl mx-auto my-8">
     <h1 class="card-title">Terms of service</h1>
     <p class="card-subtitle">
-      Simple terms for using ThermalTrace. Last updated August 28, 2026.
+      Simple terms for using ThermalTrace (website, PWA, and Android app). Last updated August 29, 2026.
     </p>
 
     <h2 class="text-lg font-semibold mt-6 mb-2">The service</h2>
     <p class="text-sm">
       ThermalTrace provides dashboards, history, alerts, and integrations for temperature and related
-      sensor data you connect. Features depend on your plan (Free, Member, Pro). We may change,
-      suspend, or discontinue features with reasonable notice when practical.
+      sensor data you connect—via the website, Progressive Web App, and the Android companion app.
+      Features depend on your plan (Free, Member, Pro). We may change, suspend, or discontinue features
+      with reasonable notice when practical.
+    </p>
+
+    <h2 class="text-lg font-semibold mt-6 mb-2">Clients &amp; devices</h2>
+    <p class="text-sm">
+      The Android app and PWA are clients for your ThermalTrace account. They do not replace probe
+      hardware: temperature and humidity come from sensors or feeds you configure. Optional push alerts
+      (browser Web Push and Firebase Cloud Messaging on Android) require a Pro plan where noted and
+      depend on OS/network delivery outside our control.
     </p>
 
     <h2 class="text-lg font-semibold mt-6 mb-2">Your account</h2>
@@ -42,7 +51,7 @@ const schema = [
     <h2 class="text-lg font-semibold mt-6 mb-2">Your data &amp; sensors</h2>
     <p class="text-sm">
       You own the readings and configuration you submit. You grant us a limited license to store and
-      process that data to run the product (charts, alerts, exports, backups). See the
+      process that data to run the product (charts, alerts, exports, backups, push delivery). See the
       <a class="text-link" href="/privacy">privacy policy</a> for retention and deletion.
       You are responsible for how you place sensors and for acting on alerts — ThermalTrace is a
       monitoring aid, not a life-safety or building-code compliance system.

@@ -1,9 +1,24 @@
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
+
+const ANDROID_TOPIC_MESSAGE =
+  "Please send me a note when the ThermalTrace Android app is live on Google Play.";
+
+function topicDefaultMessage(topic: string | null): string {
+  if (topic === "android") return ANDROID_TOPIC_MESSAGE;
+  return "";
+}
 
 export default function Form() {
   const [responseMessage, setResponseMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const seeded = topicDefaultMessage(params.get("topic"));
+    if (seeded) setMessage(seeded);
+  }, []);
 
   async function submit(e: SubmitEvent) {
     e.preventDefault();
@@ -26,6 +41,7 @@ export default function Form() {
       setIsError(false);
       setResponseMessage(data.message ?? "Message sent.");
       (e.target as HTMLFormElement).reset();
+      setMessage("");
     } catch {
       setIsError(true);
       setResponseMessage("Something went wrong. Please try again.");
@@ -52,7 +68,15 @@ export default function Form() {
         <label class="form-label" for="message">
           Message<sup>*</sup>
         </label>
-        <textarea class="form-textarea" name="message" id="message" placeholder="How can we help?" required />
+        <textarea
+          class="form-textarea"
+          name="message"
+          id="message"
+          placeholder="How can we help?"
+          required
+          value={message}
+          onInput={(e) => setMessage((e.target as HTMLTextAreaElement).value)}
+        />
       </div>
       <div class="form-field">
         <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>

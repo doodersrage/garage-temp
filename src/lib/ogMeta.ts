@@ -26,6 +26,9 @@ export function resolveOgImagePath(pathname: string): string {
   if (path.startsWith("/docs")) {
     return "/og-api.jpg";
   }
+  if (path.startsWith("/android")) {
+    return "/og-android.jpg";
+  }
   if (path === "/contact" || path === "/privacy" || path === "/terms") {
     return DEFAULT_OG_IMAGE_PATH;
   }
@@ -53,6 +56,9 @@ export function resolveOgImageAlt(pathname: string): string {
   }
   if (path.startsWith("/docs")) {
     return `${BRAND_NAME} HTTP API — ingest, metrics, webhooks, and OpenAPI`;
+  }
+  if (path.startsWith("/android")) {
+    return `${BRAND_NAME} Android companion app — coming soon on Google Play`;
   }
 
   return `${BRAND_NAME} temperature monitoring dashboard with live probe curves and freeze alerts`;

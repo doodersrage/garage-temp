@@ -17,6 +17,7 @@ describe("ogMeta", () => {
       "/og-story-freeze.jpg",
     );
     expect(resolveOgImagePath("/docs/api")).toBe("/og-api.jpg");
+    expect(resolveOgImagePath("/android")).toBe("/og-android.jpg");
   });
 
   it("builds absolute image URLs", () => {

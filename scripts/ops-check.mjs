@@ -52,6 +52,11 @@ const groups = [
     optional: true,
   },
   {
+    label: "Android FCM (optional)",
+    keys: ["FCM_SERVICE_ACCOUNT_JSON"],
+    optional: true,
+  },
+  {
     label: "E2E auth tests",
     keys: ["E2E_TEST_EMAIL", "E2E_TEST_PASSWORD"],
     optional: true,
@@ -81,7 +86,15 @@ if (siteUrl && !siteUrl.includes("thermaltrace.dev")) {
 }
 
 for (const group of groups) {
-  const missing = group.keys.filter((k) => !env[k]?.trim());
+  let missing = group.keys.filter((k) => !env[k]?.trim());
+  // FCM can be JSON blob OR split project/email/key.
+  if (group.label.startsWith("Android FCM")) {
+    const splitOk =
+      env.FCM_PROJECT_ID?.trim() &&
+      env.FCM_CLIENT_EMAIL?.trim() &&
+      env.FCM_PRIVATE_KEY?.trim();
+    if (splitOk) missing = [];
+  }
   if (missing.length === 0) {
     console.log(`✓ ${group.label}`);
   } else if (group.optional) {
@@ -100,6 +113,14 @@ console.log("  pnpm test:e2e:auth    — authenticated alert settings (needs E2E
 console.log("  GSC                   — confirm https://thermaltrace.dev/sitemap-index.xml in Search Console");
 if (!env.TWILIO_ACCOUNT_SID?.trim()) {
   console.log("  Twilio                — add TWILIO_* to .env for SMS/WhatsApp, then secrets:push");
+}
+if (
+  !env.FCM_SERVICE_ACCOUNT_JSON?.trim() &&
+  !(env.FCM_PROJECT_ID?.trim() && env.FCM_CLIENT_EMAIL?.trim() && env.FCM_PRIVATE_KEY?.trim())
+) {
+  console.log(
+    "  FCM                   — add FCM_SERVICE_ACCOUNT_JSON (or FCM_PROJECT_ID/CLIENT_EMAIL/PRIVATE_KEY) for Android push",
+  );
 }
 if (!env.E2E_TEST_EMAIL?.trim() || !env.E2E_TEST_PASSWORD?.trim()) {
   console.log("  E2E                   — set E2E_TEST_EMAIL / E2E_TEST_PASSWORD for Playwright auth");

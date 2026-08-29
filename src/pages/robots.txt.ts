@@ -33,6 +33,7 @@ Allow: /contact
 Allow: /privacy
 Allow: /terms
 Allow: /system-status
+Allow: /android
 Allow: /openapi.yaml
 
 Sitemap: ${sitemapURL.href}

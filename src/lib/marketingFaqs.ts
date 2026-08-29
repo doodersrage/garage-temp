@@ -82,7 +82,7 @@ export const marketingFaqs = {
     {
       question: "What should I ask about before contacting support?",
       answer:
-        "Probe wiring, ingest payloads, freeze alerts, and dashboard setup are covered in the About guides. Use Contact for account, billing, or bugs the docs do not answer.",
+        "Probe wiring, ingest payloads, freeze alerts, and dashboard setup are covered in the About guides. Use Contact for account, billing, Android launch notes, or bugs the docs do not answer.",
     },
   ],
   docsApi: [
@@ -95,6 +95,28 @@ export const marketingFaqs = {
       question: "How do I authenticate to the HTTP API?",
       answer:
         "Device firmware uses a per-device ingest key in the URL. Pro integrations use a Bearer API key from Dashboard → Share. The browser dashboard uses session cookies.",
+    },
+  ],
+  android: [
+    {
+      question: "Does the Android app measure garage temperature?",
+      answer:
+        "No. The phone is a companion client. ESP/Arduino sensors (or HTTPS JSON feeds) push readings to ThermalTrace; the app signs in and displays that account data.",
+    },
+    {
+      question: "When will ThermalTrace be on Google Play?",
+      answer:
+        "The Play listing is in review. Until it is live, use the web dashboard or install the Progressive Web App from Chrome on Android.",
+    },
+    {
+      question: "Will my web account work in the Android app?",
+      answer:
+        "Yes. The same ThermalTrace login, households, devices, and alert settings apply. Pro push on Android uses Firebase Cloud Messaging in addition to browser Web Push.",
+    },
+    {
+      question: "How do I get notified when the app launches?",
+      answer:
+        "Use the Contact form with topic=android (linked from /android) and ask for a launch note. We also announce updates on the site and GitHub repos.",
     },
   ],
 } as const satisfies Record<string, MarketingFaqItem[]>;

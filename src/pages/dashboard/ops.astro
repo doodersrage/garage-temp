@@ -9,6 +9,7 @@ import { getAuthFromCookies } from "../../lib/auth";
 import { isUserAdmin } from "../../lib/adminAccess";
 import { isTwilioConfigured } from "../../lib/notify";
 import { isVapidConfigured } from "../../lib/webPush";
+import { isFcmConfigured } from "../../lib/fcm";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
@@ -24,6 +25,7 @@ const emailTestOk = Astro.url.searchParams.get("email_test") === "1";
 const channelTestOk = Astro.url.searchParams.get("channel_test") === "1";
 const twilioConfigured = isTwilioConfigured();
 const vapidConfigured = isVapidConfigured();
+const fcmConfigured = isFcmConfigured();
 
 const [checkout, status, referrals, serverErrors, priceAudit] = await Promise.all([
   fetchCheckoutAnalyticsAdmin(30, 30),
@@ -231,7 +233,10 @@ const opsDiscordConfigured = Boolean(
         <strong>{twilioConfigured ? "configured" : "not configured"}</strong>
         {" · "}
         VAPID:
-        <strong>{vapidConfigured ? "configured" : "not configured"}</strong>.
+        <strong>{vapidConfigured ? "configured" : "not configured"}</strong>
+        {" · "}
+        FCM:
+        <strong>{fcmConfigured ? "configured" : "not configured"}</strong>.
       </p>
       <div class="flex flex-wrap gap-4 items-end">
         <form action="/api/admin/channel-test" method="post" class="flex flex-wrap gap-2 items-end">
@@ -259,7 +264,8 @@ const opsDiscordConfigured = Boolean(
         </form>
       </div>
       <p class="form-hint mt-3 mb-0">
-        SMS uses your alert phone if the override is blank. Push requires this browser to be subscribed under Alerts.
+        SMS uses your alert phone if the override is blank. Browser push requires this browser to be
+        subscribed under Alerts. Android FCM tokens register from the native app when FCM secrets are set.
       </p>
     </section>
 

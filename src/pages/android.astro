@@ -1,56 +1,129 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import FaqSection from "../components/FaqSection.astro";
 import { BRAND_NAME } from "../lib/brand";
 import {
   getBreadcrumbSchema,
+  getSoftwareApplicationSchema,
+  resolvePageUrl,
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
+import { getMarketingFaqs, getMarketingFaqSchema } from "../lib/marketingFaqs";
 
 const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/android");
+const androidFaqs = getMarketingFaqs("android");
+const software = getSoftwareApplicationSchema(siteUrl);
 const schema = [
   getBreadcrumbSchema(siteUrl, [
     { name: "Home", path: "/" },
     { name: "Android app", path: "/android" },
   ]),
-];
+  {
+    ...software,
+    "@type": ["SoftwareApplication", "MobileApplication"],
+    name: `${BRAND_NAME} for Android`,
+    operatingSystem: "Android",
+    applicationCategory: "UtilitiesApplication",
+    url: pageUrl,
+    downloadUrl: "https://github.com/doodersrage/thermaltrace-android",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/PreOrder",
+      url: pageUrl,
+    },
+  },
+  getMarketingFaqSchema(pageUrl, "android"),
+].filter(Boolean) as Record<string, unknown>[];
+
+const description = `${BRAND_NAME} Android companion app is coming soon on Google Play—live probe readings, freeze alerts, and household tools for your existing account. Phone is not a sensor.`;
 ---
 <Layout
   title="Android app"
-  description={`${BRAND_NAME} Android app is coming soon on Google Play — live readings, alerts, and household settings without on-phone sensors.`}
+  description={description}
   schema={schema}
+  ogImage="/og-android.jpg"
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
-  <article class="card max-w-3xl mx-auto my-8">
-    <p class="text-sm text-[var(--color-text-muted)] mb-2">Coming soon</p>
-    <h1 class="card-title">ThermalTrace for Android</h1>
-    <p class="card-subtitle">
-      A native companion for your ThermalTrace account — same live readings, history, alerts,
-      devices, and household tools as the web dashboard.
-    </p>
+  <div class="page-shell page-stack">
+    <PageHeader
+      kicker="Coming soon on Google Play"
+      title="ThermalTrace for Android"
+      lede="A native companion for your ThermalTrace account—same live readings, history, alerts, devices, and household tools as the web dashboard."
+    >
+      <a slot="actions" class="btn-primary" href="/contact?topic=android">Request a launch note</a>
+      <a slot="actions" class="btn-secondary" href="/about/install-pwa">Install the PWA today</a>
+      <a slot="actions" class="btn-ghost" href="/register">Create free account</a>
+    </PageHeader>
 
-    <p class="text-sm mt-4">
-      The phone does <strong>not</strong> collect temperature itself. Your ESP/home sensors keep
-      ingesting to thermaltrace.dev; the Android app signs in and loads that data over HTTPS.
-      Optional Pro push alerts use Firebase Cloud Messaging alongside browser Web Push.
-    </p>
+    <section class="card">
+      <h2 class="card-title">What the phone does (and does not)</h2>
+      <ul class="text-sm space-y-2 mb-0">
+        <li>
+          <strong>Does:</strong> sign in to your ThermalTrace account, show live curves and history,
+          manage alerts/devices/household settings, and (on Pro) receive freeze push via Firebase Cloud Messaging.
+        </li>
+        <li>
+          <strong>Does not:</strong> read temperature from the handset. Your ESP/Arduino (or JSON feeds)
+          keep posting to thermaltrace.dev; the app is a client over HTTPS.
+        </li>
+      </ul>
+    </section>
 
-    <p class="text-sm mt-4">
-      We are preparing a Google Play listing. Until then, use the
-      <a class="text-link" href="/about/install-pwa">web app (PWA)</a>
-      or the full
-      <a class="text-link" href="/dashboard">dashboard</a>
-      in your browser.
-    </p>
+    <section class="card">
+      <h2 class="card-title">While Play review is pending</h2>
+      <p class="card-subtitle mb-4">
+        Use the full web product now—the Android app will attach to the same account when the listing goes live.
+      </p>
+      <ol class="text-sm space-y-2 pl-5 list-decimal mb-4">
+        <li>
+          <a class="text-link" href="/register">Create a free account</a>
+          and connect a push device or HTTPS feed.
+        </li>
+        <li>
+          Set freeze thresholds under
+          <a class="text-link" href="/dashboard/alerts">Alert settings</a>
+          (email/chat today; SMS and push on Pro).
+        </li>
+        <li>
+          On Android Chrome,
+          <a class="text-link" href="/about/install-pwa">install the PWA</a>
+          for a home-screen shortcut and optional browser Web Push.
+        </li>
+        <li>
+          Prefer a launch email?
+          <a class="text-link" href="/contact?topic=android">Tell us you’re waiting on Play</a>
+          — we read every message.
+        </li>
+      </ol>
+      <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+        Deep links stay aligned with the web app (<code>/dashboard</code>, alerts, household) so the native client and PWA feel familiar.
+      </p>
+    </section>
 
-    <p class="text-sm mt-4 mb-0">
-      Source:
-      <a
-        class="text-link"
-        href="https://github.com/doodersrage/thermaltrace-android"
-        target="_blank"
-        rel="noreferrer"
-      >thermaltrace-android on GitHub</a>
-      ·
-      <a class="text-link" href="/privacy">Privacy</a>
-    </p>
-  </article>
+    <section class="card">
+      <h2 class="card-title">Open source</h2>
+      <p class="card-subtitle mb-0">
+        App repository:
+        <a
+          class="text-link"
+          href="https://github.com/doodersrage/thermaltrace-android"
+          target="_blank"
+          rel="noreferrer"
+        >thermaltrace-android</a>
+        · Privacy:
+        <a class="text-link" href="/privacy">how Android push tokens are handled</a>
+        · API:
+        <a class="text-link" href="/docs/api">HTTP reference</a>
+      </p>
+    </section>
+
+    <FaqSection
+      faqs={androidFaqs}
+      lede="Straight answers for Play reviewers and homeowners waiting on the listing."
+    />
+  </div>
 </Layout>
