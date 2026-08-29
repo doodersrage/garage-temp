@@ -1,3 +1,4 @@
+import { getRuntimeEnv } from "./runtimeEnv";
 import { createStripeClient } from "./stripe";
 import {
   getMemberPriceDisplay,
@@ -24,12 +25,12 @@ function parseEnvAmount(raw: string | undefined): number | null {
 function displayEnvAmount(plan: "member" | "pro", interval: "monthly" | "annual"): number | null {
   if (plan === "member") {
     return interval === "annual"
-      ? parseEnvAmount(import.meta.env.STRIPE_DISPLAY_MEMBER_ANNUAL)
-      : parseEnvAmount(import.meta.env.STRIPE_DISPLAY_MEMBER_MONTHLY);
+      ? parseEnvAmount(getRuntimeEnv("STRIPE_DISPLAY_MEMBER_ANNUAL"))
+      : parseEnvAmount(getRuntimeEnv("STRIPE_DISPLAY_MEMBER_MONTHLY"));
   }
   return interval === "annual"
-    ? parseEnvAmount(import.meta.env.STRIPE_DISPLAY_PRO_ANNUAL)
-    : parseEnvAmount(import.meta.env.STRIPE_DISPLAY_PRO_MONTHLY);
+    ? parseEnvAmount(getRuntimeEnv("STRIPE_DISPLAY_PRO_ANNUAL"))
+    : parseEnvAmount(getRuntimeEnv("STRIPE_DISPLAY_PRO_MONTHLY"));
 }
 
 export async function auditStripeDisplayPrices(): Promise<{
@@ -50,7 +51,7 @@ export async function auditStripeDisplayPrices(): Promise<{
 
   let stripe: ReturnType<typeof createStripeClient> | null = null;
   try {
-    if (import.meta.env.STRIPE_SECRET_KEY?.startsWith("sk_")) {
+    if (getRuntimeEnv("STRIPE_SECRET_KEY")?.startsWith("sk_")) {
       stripe = createStripeClient();
     }
   } catch {

@@ -1,5 +1,34 @@
 import { describe, expect, it } from "vitest";
+import { env as cloudflareEnv } from "cloudflare:workers";
 import { getRuntimeEnv, hasRuntimeEnv } from "./runtimeEnv";
+
+describe("runtimeEnv", () => {
+  it("reads baked import.meta.env values when present", () => {
+    const env = import.meta.env as unknown as Record<string, string | undefined>;
+    const previous = env.RUNTIME_ENV_TEST_KEY;
+    env.RUNTIME_ENV_TEST_KEY = "  hello  ";
+    expect(getRuntimeEnv("RUNTIME_ENV_TEST_KEY")).toBe("hello");
+    expect(hasRuntimeEnv("RUNTIME_ENV_TEST_KEY")).toBe(true);
+    env.RUNTIME_ENV_TEST_KEY = previous;
+  });
+
+  it("prefers Worker runtime secrets over baked import.meta.env", () => {
+    const baked = import.meta.env as unknown as Record<string, string | undefined>;
+    const runtime = cloudflareEnv as Record<string, unknown>;
+    const prevBaked = baked.STRIPE_DISPLAY_MEMBER_MONTHLY;
+    const prevRuntime = runtime.STRIPE_DISPLAY_MEMBER_MONTHLY;
+    baked.STRIPE_DISPLAY_MEMBER_MONTHLY = "1";
+    runtime.STRIPE_DISPLAY_MEMBER_MONTHLY = "4";
+    expect(getRuntimeEnv("STRIPE_DISPLAY_MEMBER_MONTHLY")).toBe("4");
+    baked.STRIPE_DISPLAY_MEMBER_MONTHLY = prevBaked;
+    runtime.STRIPE_DISPLAY_MEMBER_MONTHLY = prevRuntime;
+  });
+
+  it("returns undefined for missing keys outside Workers", () => {
+    expect(getRuntimeEnv("DEFINITELY_MISSING_RUNTIME_ENV_KEY_XYZ")).toBeUndefined();
+    expect(hasRuntimeEnv("DEFINITELY_MISSING_RUNTIME_ENV_KEY_XYZ")).toBe(false);
+  });
+});
 
 describe("runtimeEnv", () => {
   it("reads baked import.meta.env values when present", () => {

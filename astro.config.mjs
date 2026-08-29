@@ -19,6 +19,11 @@ const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN?.trim() || "";
 const sentryOrg = process.env.SENTRY_ORG?.trim() || "thermaltracedev";
 const sentryProject = process.env.SENTRY_PROJECT?.trim() || "";
 
+/** @param {string} key */
+function defineProcessEnv(key) {
+  return JSON.stringify(process.env[key]?.trim() || "");
+}
+
 /** @param {string} pageUrl */
 function isIndexablePublicPage(pageUrl) {
   return (
@@ -68,6 +73,15 @@ export default defineConfig({
         process.env.PUBLIC_SENTRY_DSN?.trim() || sentryDsn,
       ),
       'import.meta.env.SENTRY_DSN': JSON.stringify(sentryDsn),
+      // Stripe display/price IDs are not PUBLIC_-prefixed, so Vite skips them unless defined.
+      'import.meta.env.STRIPE_DISPLAY_MEMBER_MONTHLY': defineProcessEnv('STRIPE_DISPLAY_MEMBER_MONTHLY'),
+      'import.meta.env.STRIPE_DISPLAY_MEMBER_ANNUAL': defineProcessEnv('STRIPE_DISPLAY_MEMBER_ANNUAL'),
+      'import.meta.env.STRIPE_DISPLAY_PRO_MONTHLY': defineProcessEnv('STRIPE_DISPLAY_PRO_MONTHLY'),
+      'import.meta.env.STRIPE_DISPLAY_PRO_ANNUAL': defineProcessEnv('STRIPE_DISPLAY_PRO_ANNUAL'),
+      'import.meta.env.STRIPE_PRICE_ID': defineProcessEnv('STRIPE_PRICE_ID'),
+      'import.meta.env.STRIPE_PRICE_ID_ANNUAL': defineProcessEnv('STRIPE_PRICE_ID_ANNUAL'),
+      'import.meta.env.STRIPE_PRICE_ID_PRO': defineProcessEnv('STRIPE_PRICE_ID_PRO'),
+      'import.meta.env.STRIPE_PRICE_ID_PRO_ANNUAL': defineProcessEnv('STRIPE_PRICE_ID_PRO_ANNUAL'),
     },
     // Pre-warm Astro Actions runtime so Cloudflare prerender doesn't race
     // a mid-build optimizeDeps reload (missing chunk-*.js in CI).

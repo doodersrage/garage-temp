@@ -1,3 +1,5 @@
+import { getRuntimeEnv } from "./runtimeEnv";
+
 export type PlanPriceDisplay = {
   monthly: string | null;
   annual: string | null;
@@ -49,14 +51,14 @@ function buildPriceDisplay(monthlyRaw?: string, annualRaw?: string): PlanPriceDi
 
 export function getMemberPriceDisplay(): PlanPriceDisplay {
   return buildPriceDisplay(
-    import.meta.env.STRIPE_DISPLAY_MEMBER_MONTHLY,
-    import.meta.env.STRIPE_DISPLAY_MEMBER_ANNUAL,
+    getRuntimeEnv("STRIPE_DISPLAY_MEMBER_MONTHLY"),
+    getRuntimeEnv("STRIPE_DISPLAY_MEMBER_ANNUAL"),
   );
 }
 
 export function getProPriceDisplay(): PlanPriceDisplay {
   return buildPriceDisplay(
-    import.meta.env.STRIPE_DISPLAY_PRO_MONTHLY,
-    import.meta.env.STRIPE_DISPLAY_PRO_ANNUAL,
+    getRuntimeEnv("STRIPE_DISPLAY_PRO_MONTHLY"),
+    getRuntimeEnv("STRIPE_DISPLAY_PRO_ANNUAL"),
   );
 }

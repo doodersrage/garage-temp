@@ -1,31 +1,36 @@
 /**
  * Resolve config values that may be:
- * - baked into the Worker at `astro build` via import.meta.env, or
- * - set later as Cloudflare Worker secrets (runtime only).
+ * - set as Cloudflare Worker secrets (runtime), or
+ * - baked into the Worker at `astro build` via import.meta.env.
  *
- * Prefer import.meta.env when present so local/dev and GitHub Deploy builds keep working;
- * fall back to `cloudflare:workers` env so `pnpm secrets:push` takes effect without a rebuild.
+ * Prefer the Worker runtime value so `pnpm secrets:push` takes effect without
+ * waiting for a rebuild. Fall back to import.meta.env for local/dev and tests.
  */
 import { env as cloudflareEnv } from "cloudflare:workers";
 
-export function getRuntimeEnv(key: string): string | undefined {
-  const baked = (import.meta.env as Record<string, unknown>)[key];
-  if (typeof baked === "string") {
-    const trimmed = baked.trim();
-    if (trimmed) return trimmed;
-  }
+function readEnvRecord(
+  record: Record<string, unknown> | undefined,
+  key: string,
+): string | undefined {
+  if (!record) return undefined;
+  const value = record[key];
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed || undefined;
+}
 
+export function getRuntimeEnv(key: string): string | undefined {
   try {
-    const value = (cloudflareEnv as unknown as Record<string, unknown>)[key];
-    if (typeof value === "string") {
-      const trimmed = value.trim();
-      if (trimmed) return trimmed;
-    }
+    const fromWorker = readEnvRecord(
+      cloudflareEnv as unknown as Record<string, unknown>,
+      key,
+    );
+    if (fromWorker) return fromWorker;
   } catch {
     // Outside Workers (vitest / Node scripts).
   }
 
-  return undefined;
+  return readEnvRecord(import.meta.env as unknown as Record<string, unknown>, key);
 }
 
 export function hasRuntimeEnv(...keys: string[]): boolean {
