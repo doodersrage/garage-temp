@@ -80,7 +80,7 @@ const schema = [
     pageUrl,
     headline: title,
     description,
-    imageUrl: heroImage ? new URL(heroImage.src, siteUrl).href : undefined,
+    imageUrl: `${siteUrl}/og-about.jpg`,
   }),
   getBreadcrumbSchema(siteUrl, breadcrumbs),
   ...(faqSchema ? [faqSchema] : []),
@@ -92,6 +92,8 @@ const schema = [
   schema={schema}
   skipAuth
   ogType="article"
+  ogImage="/og-about.jpg"
+  ogSection={sectionParent?.title ?? "Guides"}
   speakableSelectors={[".card-title", ".card-subtitle", ".about-prose p"]}
 >
   <div class="page-shell page-stack">

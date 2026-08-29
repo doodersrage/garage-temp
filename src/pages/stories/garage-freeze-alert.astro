@@ -38,6 +38,7 @@ const schema = [
     description,
     articleSection: "Customer stories",
     datePublished: "2025-11-01",
+    imageUrl: `${siteUrl}/og-story-freeze.jpg`,
   }),
   getBreadcrumbSchema(siteUrl, [
     { name: "Home", path: "/" },
@@ -51,6 +52,9 @@ const schema = [
   description={description}
   schema={schema}
   ogType="article"
+  ogImage="/og-story-freeze.jpg"
+  ogPublishedTime="2025-11-01"
+  ogSection="Customer stories"
   speakableSelectors={[".card-title", ".card-subtitle", ".faq-answer"]}
 >
   <div class="page-shell page-stack">
