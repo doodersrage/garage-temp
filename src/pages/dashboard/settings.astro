@@ -58,7 +58,9 @@ const planLabel =
     <AccountLifecycle
       userEmail={user.email ?? "your account"}
       dataRetentionDays={alertSettings.dataRetentionDays}
+      historyDays={entitlements.historyDays}
       tierLabel={planLabel}
+      canCustomizeRetention={entitlements.historyDays >= 90}
       deleteError={deleteError}
     />
 

@@ -1185,6 +1185,12 @@
     color: inherit;
   }
 
+  .billing-interval-hint {
+    margin: -0.65rem 0 1.15rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+  }
+
   .plan-tier-sub:empty,
   .plan-tier-savings:empty {
     display: none;
@@ -1220,6 +1226,32 @@
 
   .plan-col-highlight {
     background: var(--color-accent-soft);
+  }
+
+  .plan-comparison-emphasis th,
+  .plan-comparison-emphasis td {
+    font-weight: 600;
+  }
+
+  .plan-cell-badge,
+  .plan-feature-badge {
+    display: inline-block;
+    margin-left: 0.35rem;
+    padding: 0.12rem 0.4rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-accent-soft);
+    color: var(--color-accent-muted);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  .plan-tier-list .plan-feature-badge {
+    margin-left: 0;
+    margin-right: 0.35rem;
   }
 
   .card-title {

@@ -150,9 +150,11 @@ const referralRewardDays = Number(
       <ReferralCard siteUrl={siteUrl} rewardDays={referralRewardDays} />
     )}
 
-    {needsPro && (
+    {!entitlements.canUseForecastAlerts ? (
+      <UpgradeNudge feature="cold_risk" tier={entitlements.tier} />
+    ) : needsPro ? (
       <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} />
-    )}
+    ) : null}
 
     <AlertSettings
       userEmail={user.email ?? ""}

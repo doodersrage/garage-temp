@@ -1,4 +1,13 @@
 import type { PlanTier } from "./entitlements";
+import {
+  FREE_HISTORY_DAYS,
+  FREE_MAX_DEVICES,
+  MEMBER_HISTORY_DAYS,
+  MEMBER_MAX_DEVICES,
+  PRO_HISTORY_DAYS,
+  PRO_MAX_DEVICES,
+  formatHistoryRetention,
+} from "./entitlements";
 
 export type ComparisonTier = "free" | "member" | "pro";
 
@@ -13,6 +22,8 @@ export type NudgeFeatureId =
   | "embed_widget"
   | "status_pages"
   | "device_limit"
+  | "data_retention"
+  | "cold_risk"
   | "prometheus"
   | "multi_property";
 
@@ -24,16 +35,30 @@ export type PlanFeatureRow = {
   member: string;
   pro: string;
   anchor?: string;
+  emphasis?: boolean;
+  cellBadge?: Partial<Record<ComparisonTier, string>>;
 };
 
 export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
   {
     id: "push_devices",
-    category: "Devices",
+    category: "Limits",
     label: "Push ingest devices",
-    free: "2",
-    member: "6",
-    pro: "24",
+    free: `${FREE_MAX_DEVICES} devices`,
+    member: `${MEMBER_MAX_DEVICES} devices`,
+    pro: `${PRO_MAX_DEVICES} devices`,
+    anchor: "push_devices",
+    emphasis: true,
+  },
+  {
+    id: "data_retention",
+    category: "Limits",
+    label: "Data retention",
+    free: formatHistoryRetention(FREE_HISTORY_DAYS),
+    member: formatHistoryRetention(MEMBER_HISTORY_DAYS),
+    pro: `${formatHistoryRetention(PRO_HISTORY_DAYS)}+`,
+    anchor: "data-retention",
+    emphasis: true,
   },
   {
     id: "pull_feeds",
@@ -50,6 +75,20 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     free: "Yes",
     member: "Yes",
     pro: "Yes",
+  },
+  {
+    id: "cold_risk",
+    category: "Alerts",
+    label: "Cold-risk / NWS forecasts",
+    free: "Threshold only",
+    member: "Forecast freeze",
+    pro: "Forecast + NWS",
+    anchor: "cold-risk",
+    emphasis: true,
+    cellBadge: {
+      member: "Cold-risk",
+      pro: "Cold-risk",
+    },
   },
   {
     id: "sms_alerts",
@@ -159,6 +198,15 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     anchor: "multi-property",
   },
   {
+    id: "annual_billing",
+    category: "Billing",
+    label: "Annual billing discount",
+    free: "—",
+    member: "Save ~20%",
+    pro: "Save ~20%",
+    anchor: "annual-billing",
+  },
+  {
     id: "pro_trial",
     category: "Billing",
     label: "Pro free trial",
@@ -236,8 +284,20 @@ const NUDGE_CONFIG: Record<
   device_limit: {
     targetTier: "pro",
     title: "Need more push devices?",
-    body: "Free allows 2 push devices, Member 6, Pro 24 — upgrade when you outgrow the limit.",
+    body: `Free allows ${FREE_MAX_DEVICES} push devices, Member ${MEMBER_MAX_DEVICES}, Pro ${PRO_MAX_DEVICES} — upgrade when you outgrow the limit.`,
     anchor: "push_devices",
+  },
+  data_retention: {
+    targetTier: "member",
+    title: "Keep a longer history window",
+    body: `Free keeps ${formatHistoryRetention(FREE_HISTORY_DAYS)} of readings. Member extends that to ${formatHistoryRetention(MEMBER_HISTORY_DAYS)}; Pro keeps ${formatHistoryRetention(PRO_HISTORY_DAYS)}+ for seasonal and year-over-year compare.`,
+    anchor: "data-retention",
+  },
+  cold_risk: {
+    targetTier: "member",
+    title: "Get ahead of freeze nights",
+    body: "Member adds predictive forecast freeze warnings. Pro adds official NWS freeze and cold alerts for the spaces you are protecting.",
+    anchor: "cold-risk",
   },
   prometheus: {
     targetTier: "pro",

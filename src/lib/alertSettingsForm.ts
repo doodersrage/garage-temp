@@ -142,8 +142,12 @@ export function buildAlertSettingsFromFormData(
     lastOutageAlertAt: existing.lastOutageAlertAt,
     lastRateAlertAt: existing.lastRateAlertAt,
     lastForecastAlertAt: existing.lastForecastAlertAt,
-    forecastFreezeEnabled: formCheckbox(formData, "forecast_freeze_enabled"),
-    nwsFreezeAlertsEnabled: formCheckbox(formData, "nws_freeze_alerts_enabled"),
+    forecastFreezeEnabled:
+      formCheckbox(formData, "forecast_freeze_enabled") &&
+      entitlements.canUseForecastAlerts,
+    nwsFreezeAlertsEnabled:
+      formCheckbox(formData, "nws_freeze_alerts_enabled") &&
+      entitlements.canUseNwsAlerts,
     lastNwsAlertAt: existing.lastNwsAlertAt,
     forecastHoursAhead: formNumber(
       formData,

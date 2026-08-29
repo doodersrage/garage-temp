@@ -6,7 +6,16 @@ import PageHeader from "../components/PageHeader.astro";
 import PlanComparisonTable from "../components/PlanComparisonTable.astro";
 import FaqSection from "../components/FaqSection.astro";
 import { getAuthFromCookies } from "../lib/auth";
-import { getUserEntitlements } from "../lib/entitlements";
+import {
+  getUserEntitlements,
+  FREE_HISTORY_DAYS,
+  FREE_MAX_DEVICES,
+  MEMBER_HISTORY_DAYS,
+  MEMBER_MAX_DEVICES,
+  PRO_HISTORY_DAYS,
+  PRO_MAX_DEVICES,
+  formatHistoryRetention,
+} from "../lib/entitlements";
 import { normalizeComparisonTier } from "../lib/planComparison";
 import { getMemberPriceDisplay, getProPriceDisplay } from "../lib/stripePricing";
 import { getUserSubscription } from "../lib/stripeSubscriptions";
@@ -54,6 +63,12 @@ const memberMonthly = priceForInterval(memberPrices, "monthly");
 const memberAnnual = priceForInterval(memberPrices, "annual");
 const proMonthly = priceForInterval(proPrices, "monthly");
 const proAnnual = priceForInterval(proPrices, "annual");
+const maxAnnualSavings = Math.max(
+  memberPrices.annualSavingsPct ?? 0,
+  proPrices.annualSavingsPct ?? 0,
+);
+const annualSavingsLabel =
+  maxAnnualSavings > 0 ? `Save up to ${maxAnnualSavings}%` : "Save ~20%";
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/pricing");
@@ -68,7 +83,7 @@ const schema = [
 ---
 <Layout
   title="Plans & pricing"
-  description="Compare ThermalTrace Free, Member, and Pro plans—devices, freeze alerts, CSV history export, SMS/push, share links, and webhooks. Start free; upgrade when winter hits."
+  description="Compare ThermalTrace Free, Member, and Pro—device counts, 7-day vs 90-day vs 1-year history, cold-risk/NWS forecasts, and annual billing savings. Start free; upgrade when winter hits."
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
@@ -76,7 +91,7 @@ const schema = [
     <PageHeader
       kicker="Pricing"
       title="Plans that grow with your probes"
-      lede="Start free with live curves and basic alerts. Member adds CSV export and more devices. Pro unlocks SMS, push, share links, webhooks, and a 14-day trial."
+      lede="Start free with live curves and threshold freeze alerts. Member adds 90-day history, more devices, and predictive forecast warnings. Pro unlocks official NWS cold-risk alerts, SMS, push, share links, webhooks, and a 14-day trial."
     >
       {user ? (
         <p class="page-header-meta">
@@ -115,11 +130,12 @@ const schema = [
           aria-pressed={defaultInterval === "annual" ? "true" : "false"}
         >
           Annual
-          {(memberPrices.annualSavingsPct ?? proPrices.annualSavingsPct) != null && (
-            <span class="billing-interval-badge">Save up to {Math.max(memberPrices.annualSavingsPct ?? 0, proPrices.annualSavingsPct ?? 0)}%</span>
-          )}
+          <span class="billing-interval-badge">{annualSavingsLabel}</span>
         </button>
       </div>
+      <p class="billing-interval-hint">
+        Annual plans lock in {maxAnnualSavings > 0 ? `${maxAnnualSavings}%` : "about 20%"} off versus paying monthly.
+      </p>
 
       <div class="plan-tier-grid">
         <article class="plan-tier-card">
@@ -132,9 +148,9 @@ const schema = [
           </div>
           <p class="plan-tier-tagline">Live monitoring for one garage</p>
           <ul class="plan-tier-list">
-            <li>2 push devices</li>
-            <li>Email & chat alerts</li>
-            <li>Charts & dashboard</li>
+            <li>{FREE_MAX_DEVICES} push devices</li>
+            <li>{formatHistoryRetention(FREE_HISTORY_DAYS)} of history</li>
+            <li>Threshold freeze alerts</li>
           </ul>
           <div class="plan-tier-footer">
             {!user ? (
@@ -165,10 +181,12 @@ const schema = [
               data-savings-monthly=""
               data-savings-annual={memberPrices.annualSavingsPct != null && memberPrices.annualSavingsPct > 0
                 ? `Save ${memberPrices.annualSavingsPct}% with annual billing`
-                : ""}
+                : "Save ~20% with annual billing"}
             >
-              {defaultInterval === "annual" && memberPrices.annualSavingsPct != null && memberPrices.annualSavingsPct > 0
-                ? `Save ${memberPrices.annualSavingsPct}% with annual billing`
+              {defaultInterval === "annual"
+                ? (memberPrices.annualSavingsPct != null && memberPrices.annualSavingsPct > 0
+                  ? `Save ${memberPrices.annualSavingsPct}% with annual billing`
+                  : "Save ~20% with annual billing")
                 : "\u00a0"}
             </p>
             <p
@@ -179,11 +197,15 @@ const schema = [
               {defaultInterval === "annual" ? (memberAnnual.sub ?? "\u00a0") : "\u00a0"}
             </p>
           </div>
-          <p class="plan-tier-tagline">History export & more headroom</p>
+          <p class="plan-tier-tagline">History export, more headroom, and forecast freeze</p>
           <ul class="plan-tier-list">
-            <li>6 push devices</li>
+            <li>{MEMBER_MAX_DEVICES} push devices</li>
+            <li>{formatHistoryRetention(MEMBER_HISTORY_DAYS)} of history</li>
+            <li>
+              <span class="plan-feature-badge">Cold-risk</span>
+              Forecast freeze alerts
+            </li>
             <li>CSV history export</li>
-            <li>Everything in Free</li>
           </ul>
           <div class="plan-tier-footer">
             {user ? (
@@ -220,10 +242,12 @@ const schema = [
               data-savings-monthly=""
               data-savings-annual={proPrices.annualSavingsPct != null && proPrices.annualSavingsPct > 0
                 ? `Save ${proPrices.annualSavingsPct}% annually`
-                : ""}
+                : "Save ~20% annually"}
             >
-              {defaultInterval === "annual" && proPrices.annualSavingsPct != null && proPrices.annualSavingsPct > 0
-                ? `Save ${proPrices.annualSavingsPct}% annually`
+              {defaultInterval === "annual"
+                ? (proPrices.annualSavingsPct != null && proPrices.annualSavingsPct > 0
+                  ? `Save ${proPrices.annualSavingsPct}% annually`
+                  : "Save ~20% annually")
                 : "\u00a0"}
             </p>
             <p
@@ -236,12 +260,16 @@ const schema = [
                 : "14-day free trial"}
             </p>
           </div>
-          <p class="plan-tier-tagline">Alerts anywhere + integrations</p>
+          <p class="plan-tier-tagline">NWS cold-risk, alerts anywhere, integrations</p>
           <ul class="plan-tier-list">
-            <li>24 push devices</li>
-            <li>SMS, push, webhooks</li>
+            <li>{PRO_MAX_DEVICES} push devices</li>
+            <li>{formatHistoryRetention(PRO_HISTORY_DAYS)}+ of history</li>
             <li>
-              Share links &amp;
+              <span class="plan-feature-badge">Cold-risk</span>
+              Forecast + official NWS alerts
+            </li>
+            <li>
+              SMS, push, webhooks, share links &amp;
               <a class="text-link" href="/docs/api">API keys</a>
             </li>
           </ul>
@@ -271,7 +299,9 @@ const schema = [
 
     <section class="card">
       <h2 class="card-title">Full feature comparison</h2>
-      <p class="card-subtitle mb-4">Every tier at a glance — anchor links work from upgrade prompts across the app.</p>
+      <p class="card-subtitle mb-4">
+        Device counts and retention windows sit side-by-side so you can see what upgrades. Cold-risk badges mark which plan includes predictive forecast and NWS freeze alerts.
+      </p>
       <PlanComparisonTable highlightTier={currentTier} />
     </section>
 

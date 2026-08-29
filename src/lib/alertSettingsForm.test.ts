@@ -16,8 +16,11 @@ const proEntitlements: Entitlements = {
   canUseOutboundWebhook: true,
   canCreateShareLinks: true,
   canUsePortfolio: true,
+  canUseForecastAlerts: true,
+  canUseNwsAlerts: true,
   maxDevices: 24,
   maxOwnedHouseholds: 50,
+  historyDays: 365,
 };
 
 const freeEntitlements: Entitlements = {
@@ -28,8 +31,11 @@ const freeEntitlements: Entitlements = {
   canUseOutboundWebhook: false,
   canCreateShareLinks: false,
   canUsePortfolio: false,
+  canUseForecastAlerts: false,
+  canUseNwsAlerts: false,
   maxDevices: 2,
   maxOwnedHouseholds: 1,
+  historyDays: 7,
 };
 
 describe("buildAlertSettingsFromFormData", () => {
@@ -153,5 +159,27 @@ describe("buildAlertSettingsFromFormData", () => {
 
     expect(settings.channelSms).toBe(false);
     expect(settings.channelPush).toBe(false);
+  });
+
+  it("gates forecast and NWS alerts by entitlements", () => {
+    const source = new FormData();
+    source.set("forecast_freeze_enabled", "true");
+    source.set("nws_freeze_alerts_enabled", "true");
+
+    const freeSettings = buildAlertSettingsFromFormData(
+      prepareAlertSettingsFormData(source),
+      DEFAULT_ALERT_SETTINGS,
+      freeEntitlements,
+    );
+    expect(freeSettings.forecastFreezeEnabled).toBe(false);
+    expect(freeSettings.nwsFreezeAlertsEnabled).toBe(false);
+
+    const proSettings = buildAlertSettingsFromFormData(
+      prepareAlertSettingsFormData(source),
+      DEFAULT_ALERT_SETTINGS,
+      proEntitlements,
+    );
+    expect(proSettings.forecastFreezeEnabled).toBe(true);
+    expect(proSettings.nwsFreezeAlertsEnabled).toBe(true);
   });
 });

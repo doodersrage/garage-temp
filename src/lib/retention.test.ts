@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { shouldRunDailyRetention, RAW_READING_RETENTION_DAYS } from "./retentionSchedule";
+import {
+  shouldRunDailyRetention,
+  RAW_READING_RETENTION_DAYS,
+  clampIsoToHistoryWindow,
+  historyCutoffIso,
+} from "./retentionSchedule";
+import { formatHistoryRetention } from "./entitlements";
 import { computeIndoorOutdoorDelta } from "./indoorOutdoorDelta";
 import { resolvePlanTierFromPriceId } from "./planTier";
 import { parseIngestPayload, inferSensorKind } from "./ingestPayload";
@@ -12,6 +18,24 @@ describe("retention schedule", () => {
 
   it("keeps a 90-day default retention window", () => {
     expect(RAW_READING_RETENTION_DAYS).toBe(90);
+  });
+
+  it("clamps history queries to the plan window", () => {
+    const now = new Date("2026-08-29T12:00:00.000Z");
+    expect(historyCutoffIso(7, now)).toBe("2026-08-22T12:00:00.000Z");
+    expect(clampIsoToHistoryWindow(undefined, 7, now)).toBe("2026-08-22T12:00:00.000Z");
+    expect(clampIsoToHistoryWindow("2026-01-01T00:00:00.000Z", 7, now)).toBe(
+      "2026-08-22T12:00:00.000Z",
+    );
+    expect(clampIsoToHistoryWindow("2026-08-25T00:00:00.000Z", 7, now)).toBe(
+      "2026-08-25T00:00:00.000Z",
+    );
+  });
+
+  it("formats retention labels for the comparison matrix", () => {
+    expect(formatHistoryRetention(7)).toBe("7 days");
+    expect(formatHistoryRetention(90)).toBe("90 days");
+    expect(formatHistoryRetention(365)).toBe("1 year");
   });
 });
 

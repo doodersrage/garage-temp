@@ -26,6 +26,8 @@ interface Props {
     probes: { key: string; label: string }[];
   };
   freezeThresholdF?: number | null;
+  maxHistoryDays?: number;
+  canCompareYoy?: boolean;
 }
 
 const {
@@ -43,6 +45,8 @@ const {
   anomalies = [],
   filterOptions = { feeds: [], probes: [] },
   freezeThresholdF = null,
+  maxHistoryDays = 7,
+  canCompareYoy = false,
 } = Astro.props;
 const { readings, page, pageSize, totalCount, totalPages, error } = history;
 
@@ -144,16 +148,23 @@ const clearFiltersHref = basePath;
       <label class="form-label" for="days-filter">Chart range</label>
       <select class="form-input" id="days-filter" name="days">
         <option value="7" selected={days === 7}>Last 7 days</option>
-        <option value="30" selected={days === 30}>Last 30 days</option>
+        {maxHistoryDays >= 30 && (
+          <option value="30" selected={days === 30}>Last 30 days</option>
+        )}
+        {maxHistoryDays >= 90 && (
+          <option value="90" selected={days === 90}>Last 90 days</option>
+        )}
       </select>
-      <p class="form-hint">Used when From/To are empty.</p>
+      <p class="form-hint">Used when From/To are empty. Plan window: {maxHistoryDays} days.</p>
     </div>
-    <div class="form-field mb-0 flex items-end">
-      <label class="checkbox-row mb-0">
-        <input type="checkbox" name="yoy" value="1" checked={compareYoy} />
-        <span>Compare to last year</span>
-      </label>
-    </div>
+    {canCompareYoy && (
+      <div class="form-field mb-0 flex items-end">
+        <label class="checkbox-row mb-0">
+          <input type="checkbox" name="yoy" value="1" checked={compareYoy} />
+          <span>Compare to last year</span>
+        </label>
+      </div>
+    )}
     <button type="submit" class="btn-secondary self-end">Apply</button>
     {hasActiveFilters && (
       <a class="btn-ghost self-end" href={clearFiltersHref}>Clear filters</a>

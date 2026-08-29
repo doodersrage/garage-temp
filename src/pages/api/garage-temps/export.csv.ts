@@ -1,6 +1,8 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import { canDownloadHistoryCsv } from "../../../lib/adminAccess";
+import { getUserEntitlements } from "../../../lib/entitlements";
+import { clampIsoToHistoryWindow } from "../../../lib/retentionSchedule";
 import {
   buildGarageTempsCsv,
   fetchAllGarageTempReadings,
@@ -34,10 +36,14 @@ export const GET: APIRoute = async ({ cookies, url }) => {
     });
   }
 
+  const entitlements = await getUserEntitlements(user.id);
   const filters: HistoryFilters = {
     feedName: url.searchParams.get("feed")?.trim() || undefined,
     probeKey: url.searchParams.get("probe")?.trim() || undefined,
-    from: parseDateParam(url.searchParams.get("from")),
+    from: clampIsoToHistoryWindow(
+      parseDateParam(url.searchParams.get("from")),
+      entitlements.historyDays,
+    ),
     to: parseDateParam(url.searchParams.get("to"), true),
   };
 

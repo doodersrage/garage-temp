@@ -161,16 +161,16 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
       <summary>Forecast freeze risk</summary>
       <div class="alert-settings-nested-body">
         <label class="checkbox-row mb-2">
-          <input type="checkbox" name="forecast_freeze_enabled" value="true" checked={settings.forecastFreezeEnabled} />
-          <span>Warn when outdoor forecast may hit freeze threshold</span>
+          <input type="checkbox" name="forecast_freeze_enabled" value="true" checked={settings.forecastFreezeEnabled} disabled={!entitlements.canUseForecastAlerts} />
+          <span>Warn when outdoor forecast may hit freeze threshold {!entitlements.canUseForecastAlerts && <span class="text-[var(--color-text-muted)]">(Member)</span>}</span>
         </label>
         <label class="checkbox-row mb-3">
-          <input type="checkbox" name="nws_freeze_alerts_enabled" value="true" checked={settings.nwsFreezeAlertsEnabled} />
-          <span>NWS official freeze / cold alerts for your weather city</span>
+          <input type="checkbox" name="nws_freeze_alerts_enabled" value="true" checked={settings.nwsFreezeAlertsEnabled} disabled={!entitlements.canUseNwsAlerts} />
+          <span>NWS official freeze / cold alerts for your weather city {!entitlements.canUseNwsAlerts && <span class="text-[var(--color-text-muted)]">(Pro)</span>}</span>
         </label>
         <div class="form-field mb-0">
           <label class="form-label" for="forecast_hours_ahead">Look-ahead hours</label>
-          <input class="form-input" type="number" min="3" max="48" step="1" id="forecast_hours_ahead" name="forecast_hours_ahead" value={settings.forecastHoursAhead} />
+          <input class="form-input" type="number" min="3" max="48" step="1" id="forecast_hours_ahead" name="forecast_hours_ahead" value={settings.forecastHoursAhead} disabled={!entitlements.canUseForecastAlerts} />
         </div>
       </div>
     </details>

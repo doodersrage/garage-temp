@@ -19,12 +19,12 @@ export const marketingFaqs = {
     {
       question: "Does ThermalTrace send freeze alerts?",
       answer:
-        "Yes. Set a freeze threshold and enable channels such as email, Discord, Telegram, Slack, or (on Pro) SMS, WhatsApp, and browser push. Forecast and NWS-backed cold-risk alerts are also available.",
+        "Yes. Set a freeze threshold and enable channels such as email, Discord, Telegram, Slack, or (on Pro) SMS, WhatsApp, and browser push. Predictive forecast freeze alerts are on Member; official NWS freeze and cold alerts are on Pro.",
     },
     {
       question: "Is ThermalTrace free?",
       answer:
-        "Yes—there is a free plan with live curves and basic alerts. Member adds CSV history export and more devices; Pro adds SMS, push, share links, webhooks, and a trial.",
+        "Yes—there is a free plan with live curves, 7-day history, and threshold freeze alerts. Member adds 90-day history, CSV export, more devices, and forecast freeze warnings; Pro adds 1-year+ history, NWS cold-risk alerts, SMS, push, share links, webhooks, and a trial. Annual Member and Pro billing is discounted versus monthly.",
     },
     {
       question: "Is there a ThermalTrace Android app?",
@@ -36,12 +36,12 @@ export const marketingFaqs = {
     {
       question: "What is included on the Free plan?",
       answer:
-        "Live probe curves, basic freeze and humidity alerts on email and chat-style channels, a limited number of devices, and household sharing so family can watch the same sensors.",
+        "Live probe curves, 7 days of history, threshold freeze and humidity alerts on email and chat-style channels, a limited number of devices, and household sharing so family can watch the same sensors.",
     },
     {
       question: "When should I upgrade to Member or Pro?",
       answer:
-        "Choose Member for CSV history export and more devices. Choose Pro for SMS/WhatsApp, browser push, public share links, inbound/outbound webhooks, Prometheus metrics, and a 14-day trial.",
+        "Choose Member for 90-day history, CSV export, more devices, and predictive forecast freeze (cold-risk) alerts. Choose Pro for 1-year+ history, official NWS freeze/cold alerts, SMS/WhatsApp, browser push, public share links, inbound/outbound webhooks, Prometheus metrics, and a 14-day trial. Annual billing is discounted versus paying monthly.",
     },
     {
       question: "Can I cancel or change plans anytime?",

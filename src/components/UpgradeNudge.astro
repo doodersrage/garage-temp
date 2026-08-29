@@ -28,7 +28,7 @@ const checkoutSource = `nudge_${feature}`;
     <a class="btn-secondary" href={nudge.compareHref}>Compare plans</a>
     <form action="/api/stripe/checkout" method="post">
       <input type="hidden" name="plan" value={checkoutPlan} />
-      <input type="hidden" name="interval" value="monthly" />
+      <input type="hidden" name="interval" value="annual" />
       <input type="hidden" name="source" value={checkoutSource} />
       <button class="btn-primary" type="submit">
         {nudge.targetTier === "member" ? "Upgrade to Member" : "Upgrade to Pro"}

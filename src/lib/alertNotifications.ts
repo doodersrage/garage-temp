@@ -44,6 +44,7 @@ import { buildSiteUrl } from "./siteUrl";
 import { computeDoorOpenSessions } from "./doorDuration";
 import { persistDoorSessions } from "./doorEvents";
 import { createAdminClient } from "./supabase";
+import { getUserEntitlements } from "./entitlements";
 
 export {
   buildAlertReadingsFromLatestSensors,
@@ -106,6 +107,8 @@ export async function maybeSendForecastFreezeAlert(
   weatherCityId?: string | null,
 ): Promise<void> {
   if (!settings.enabled || !settings.forecastFreezeEnabled) return;
+  const entitlements = await getUserEntitlements(userId);
+  if (!entitlements.canUseForecastAlerts) return;
   if (isAlertCooldownActive(settings.lastForecastAlertAt)) return;
 
   const prefs = weatherCityId
@@ -156,6 +159,8 @@ export async function maybeSendNwsFreezeAlert(
   weatherCityId?: string | null,
 ): Promise<void> {
   if (!settings.enabled || !settings.nwsFreezeAlertsEnabled) return;
+  const entitlements = await getUserEntitlements(userId);
+  if (!entitlements.canUseNwsAlerts) return;
   if (isAlertCooldownActive(settings.lastNwsAlertAt)) return;
 
   const cityId = await resolveWeatherCityIdForUser(userId, weatherCityId);

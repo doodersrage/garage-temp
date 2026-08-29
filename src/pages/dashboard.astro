@@ -286,7 +286,7 @@ if (hasEmailAlerts) analyticsEvents.push({ name: "onboarding_step_complete", pro
     )}
 
     {upgradeTarget === "member" && (
-      <UpgradeNudge feature="csv_export" tier={entitlements.tier} compact />
+      <UpgradeNudge feature="data_retention" tier={entitlements.tier} compact />
     )}
     {upgradeTarget === "pro" && (
       <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} compact />

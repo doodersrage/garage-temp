@@ -1,14 +1,36 @@
 ---
-import { PLAN_FEATURE_ROWS } from "../lib/planComparison";
+import { PLAN_FEATURE_ROWS, type ComparisonTier, type PlanFeatureRow } from "../lib/planComparison";
+import { getMemberPriceDisplay, getProPriceDisplay } from "../lib/stripePricing";
 
 interface Props {
-  highlightTier?: "free" | "member" | "pro" | null;
+  highlightTier?: ComparisonTier | null;
   showAnchors?: boolean;
 }
 
 const { highlightTier = null, showAnchors = true } = Astro.props;
 
-const categories = [...new Set(PLAN_FEATURE_ROWS.map((row) => row.category))];
+const memberSave = getMemberPriceDisplay().annualSavingsPct;
+const proSave = getProPriceDisplay().annualSavingsPct;
+
+function annualDiscountLabel(pct: number | null): string {
+  if (pct != null && pct > 0) return `Save ${pct}%`;
+  return "Save ~20%";
+}
+
+const rows: PlanFeatureRow[] = PLAN_FEATURE_ROWS.map((row) => {
+  if (row.id !== "annual_billing") return row;
+  return {
+    ...row,
+    member: annualDiscountLabel(memberSave),
+    pro: annualDiscountLabel(proSave),
+  };
+});
+
+const categories = [...new Set(rows.map((row) => row.category))];
+
+function cellValue(row: PlanFeatureRow, tier: ComparisonTier): string {
+  return row[tier];
+}
 ---
 <div class="plan-comparison-wrap overflow-x-auto">
   <table class="plan-comparison-table">
@@ -26,12 +48,20 @@ const categories = [...new Set(PLAN_FEATURE_ROWS.map((row) => row.category))];
           <tr class="plan-comparison-category">
             <th colspan="4" scope="rowgroup">{category}</th>
           </tr>
-          {PLAN_FEATURE_ROWS.filter((row) => row.category === category).map((row) => (
-            <tr id={showAnchors && row.anchor ? row.anchor : undefined}>
+          {rows.filter((row) => row.category === category).map((row) => (
+            <tr
+              id={showAnchors && row.anchor ? row.anchor : undefined}
+              class:list={[row.emphasis && "plan-comparison-emphasis"]}
+            >
               <th scope="row">{row.label}</th>
-              <td class:list={[highlightTier === "free" && "plan-col-highlight"]}>{row.free}</td>
-              <td class:list={[highlightTier === "member" && "plan-col-highlight"]}>{row.member}</td>
-              <td class:list={[highlightTier === "pro" && "plan-col-highlight"]}>{row.pro}</td>
+              {(["free", "member", "pro"] as const).map((tier) => (
+                <td class:list={[highlightTier === tier && "plan-col-highlight"]}>
+                  {cellValue(row, tier)}
+                  {row.cellBadge?.[tier] && (
+                    <span class="plan-cell-badge">{row.cellBadge[tier]}</span>
+                  )}
+                </td>
+              ))}
             </tr>
           ))}
         </>
