@@ -9,9 +9,15 @@ import cloudflare from '@astrojs/cloudflare';
 
 import preact from '@astrojs/preact';
 
+import sentry from '@sentry/astro';
+
 import { buildPublicSitemapUrls } from './src/lib/sitemapPages.ts';
 
 const site = process.env.SITE_URL?.replace(/\/+$/, "") || "https://thermaltrace.dev";
+const sentryDsn = process.env.SENTRY_DSN?.trim() || process.env.PUBLIC_SENTRY_DSN?.trim() || "";
+const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN?.trim() || "";
+const sentryOrg = process.env.SENTRY_ORG?.trim() || "thermaltracedev";
+const sentryProject = process.env.SENTRY_PROJECT?.trim() || "";
 
 /** @param {string} pageUrl */
 function isIndexablePublicPage(pageUrl) {
@@ -56,6 +62,13 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    define: {
+      // DSN is public by design; expose for the browser SDK.
+      'import.meta.env.PUBLIC_SENTRY_DSN': JSON.stringify(
+        process.env.PUBLIC_SENTRY_DSN?.trim() || sentryDsn,
+      ),
+      'import.meta.env.SENTRY_DSN': JSON.stringify(sentryDsn),
+    },
     // Pre-warm Astro Actions runtime so Cloudflare prerender doesn't race
     // a mid-build optimizeDeps reload (missing chunk-*.js in CI).
     optimizeDeps: {
@@ -79,6 +92,21 @@ export default defineConfig({
       customPages: buildPublicSitemapUrls(site),
     }),
     preact(),
+    sentry({
+      // Cloudflare Worker entry (`src/worker.ts`) owns server init via withSentry.
+      // Keep Astro integration for client SDK + source map upload only.
+      enabled: {
+        client: true,
+        server: false,
+      },
+      sourceMapsUploadOptions: {
+        enabled: Boolean(sentryAuthToken && sentryOrg && sentryProject),
+        org: sentryOrg,
+        project: sentryProject || undefined,
+        authToken: sentryAuthToken || undefined,
+      },
+      sentryUrl: process.env.SENTRY_URL?.trim() || "https://us.sentry.io",
+    }),
   ],
 
   experimental: {

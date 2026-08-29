@@ -1,0 +1,55 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import { stories } from "../../lib/stories";
+import {
+  getBreadcrumbSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../../lib/schemaMarkup";
+
+const title = "Customer stories";
+const description =
+  "Real ThermalTrace freeze and heat alerts—garages, cabins, server closets, and near-miss pipe saves from homeowners using ESP/Arduino probes.";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/stories");
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "Customer stories", path: "/stories" },
+  ]),
+].filter(Boolean) as Record<string, unknown>[];
+---
+<Layout
+  title={title}
+  description={description}
+  schema={schema}
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".card-title"]}
+>
+  <div class="page-shell page-stack">
+    <PageHeader
+      kicker="Customer stories"
+      title="Alerts that paid for themselves"
+      lede="How homeowners use ThermalTrace freeze and heat alerts—with ESP32, Arduino, and Pro SMS—to catch heater failures, cabin outages, and cold corners before pipes freeze."
+    >
+      <a slot="actions" class="btn-primary" href="/register">Start free</a>
+      <a slot="actions" class="btn-secondary" href="/pricing">See plans</a>
+    </PageHeader>
+
+    <div class="page-grid">
+      {
+        stories.map((story) => (
+          <section class="card">
+            <p class="text-sm text-[var(--color-text-muted)] mb-2">{story.location}</p>
+            <h2 class="card-title">{story.title}</h2>
+            <p class="card-subtitle">{story.description}</p>
+            <p class="mb-0">
+              <a class="btn-primary" href={story.path}>Read story</a>
+            </p>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</Layout>

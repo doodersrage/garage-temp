@@ -347,5 +347,21 @@ const schema = [
         }
       });
     });
+
+    document.querySelectorAll("form.checkout-form").forEach((form) => {
+      form.addEventListener("submit", () => {
+        const plan =
+          form.querySelector('input[name="plan"]')?.getAttribute("value") ?? "unknown";
+        const interval =
+          form.querySelector('input[name="interval"]')?.getAttribute("value") ?? "unknown";
+        const gtag = window.gtag;
+        if (typeof gtag === "function") {
+          gtag("event", "begin_checkout", {
+            item_list_id: "pricing",
+            items: [{ item_id: plan, item_name: plan, item_category: interval }],
+          });
+        }
+      });
+    });
   </script>
 </Layout>

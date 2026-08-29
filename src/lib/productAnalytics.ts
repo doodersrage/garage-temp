@@ -1,6 +1,16 @@
-/** Lightweight product analytics — opt-in Plausible-style events via GA4 or console. */
+/** GA4-friendly conversion / product events (client gtag). */
+
+export type GaConversionEvent =
+  | "sign_up"
+  | "login"
+  | "generate_lead"
+  | "begin_checkout"
+  | "purchase"
+  | "view_item_list"
+  | "select_item";
 
 export type ProductEvent =
+  | GaConversionEvent
   | "onboarding_step_complete"
   | "first_ingest"
   | "first_alert_test"
@@ -31,4 +41,17 @@ export function shouldTrackProductAnalytics(
 ): boolean {
   if (metadata?.product_analytics_opt_out === true) return false;
   return import.meta.env.PROD;
+}
+
+/** Paths where we allow GA even under /dashboard for post-checkout attribution. */
+export function isDashboardConversionPath(
+  pathname: string,
+  searchParams?: URLSearchParams | string,
+): boolean {
+  if (!pathname.startsWith("/dashboard")) return false;
+  const params =
+    typeof searchParams === "string"
+      ? new URLSearchParams(searchParams)
+      : searchParams;
+  return params?.get("subscription") === "success";
 }

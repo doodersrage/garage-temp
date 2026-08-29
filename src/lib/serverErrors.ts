@@ -25,6 +25,16 @@ export async function recordServerError(input: {
   const stack = input.error instanceof Error ? input.error.stack ?? null : null;
 
   try {
+    const Sentry = await import("@sentry/cloudflare");
+    Sentry.captureException(input.error, {
+      tags: { path: input.path, method: input.method ?? "GET" },
+      user: input.userId ? { id: input.userId } : undefined,
+    });
+  } catch {
+    /* Sentry optional at build/test time */
+  }
+
+  try {
     const admin = createAdminClient();
     await admin.from("server_errors").insert({
       path: input.path.slice(0, 500),

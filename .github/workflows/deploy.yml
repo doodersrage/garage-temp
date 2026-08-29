@@ -40,6 +40,12 @@ env:
   TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
   TWILIO_FROM_NUMBER: ${{ secrets.TWILIO_FROM_NUMBER }}
   FCM_SERVICE_ACCOUNT_JSON: ${{ secrets.FCM_SERVICE_ACCOUNT_JSON }}
+  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+  PUBLIC_SENTRY_DSN: ${{ secrets.PUBLIC_SENTRY_DSN }}
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+  SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+  SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+  SENTRY_URL: ${{ secrets.SENTRY_URL }}
 
 jobs:
   deploy:

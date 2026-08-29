@@ -14,8 +14,11 @@ export function resolveOgImagePath(pathname: string): string {
   if (path.startsWith("/pricing") || path.startsWith("/compare")) {
     return "/og-pricing.jpg";
   }
-  if (path.startsWith("/freeze-map")) {
+  if (path.startsWith("/freeze-map") || path.startsWith("/freeze-season")) {
     return "/og-freeze-map.jpg";
+  }
+  if (path.startsWith("/demo") || path.startsWith("/share-kit")) {
+    return DEFAULT_OG_IMAGE_PATH;
   }
   if (path.startsWith("/about")) {
     return "/og-about.jpg";
@@ -45,8 +48,14 @@ export function resolveOgImageAlt(pathname: string): string {
   if (path.startsWith("/pricing") || path.startsWith("/compare")) {
     return `${BRAND_NAME} plans and pricing — Free, Member, and Pro freeze alert tiers`;
   }
-  if (path.startsWith("/freeze-map")) {
+  if (path.startsWith("/freeze-map") || path.startsWith("/freeze-season")) {
     return `${BRAND_NAME} opt-in freeze-risk map of city-level garage temperatures`;
+  }
+  if (path.startsWith("/demo")) {
+    return `${BRAND_NAME} live garage temperature demo — no account required`;
+  }
+  if (path.startsWith("/share-kit")) {
+    return `${BRAND_NAME} share kit — freeze map embeds and community post copy`;
   }
   if (path.startsWith("/about")) {
     return `${BRAND_NAME} guides for probes, firmware, freeze alerts, and ingest`;

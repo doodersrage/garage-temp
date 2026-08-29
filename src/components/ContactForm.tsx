@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { trackProductEvent } from "../lib/productAnalytics";
 
 const ANDROID_TOPIC_MESSAGE =
   "Please send me a note when the ThermalTrace Android app is live on Google Play.";
@@ -40,6 +41,7 @@ export default function Form() {
       }
       setIsError(false);
       setResponseMessage(data.message ?? "Message sent.");
+      trackProductEvent("generate_lead", { form_id: "contact" });
       (e.target as HTMLFormElement).reset();
       setMessage("");
     } catch {

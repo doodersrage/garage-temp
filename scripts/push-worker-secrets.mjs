@@ -43,6 +43,7 @@ const SECRET_KEYS = [
   "ORIGIN",
   "CRON_SECRET",
   "OPS_DISCORD_WEBHOOK_URL",
+  "SENTRY_DSN",
 ];
 
 function parseEnvFile(path) {

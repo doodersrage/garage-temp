@@ -4,7 +4,9 @@ import AlertSettings from "../../components/AlertSettings.astro";
 import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import PwaInstallCard from "../../components/dashboard/PwaInstallCard.astro";
 import ProductAnalyticsTracker from "../../components/ProductAnalyticsTracker.astro";
+import ReferralCard from "../../components/ReferralCard.astro";
 import { getAuthFromCookies } from "../../lib/auth";
+import { resolveSiteUrl } from "../../lib/schemaMarkup";
 import { getAlertSettingsForUser, isTwilioConfigured } from "../../lib/notify";
 import { getRuntimeEnv } from "../../lib/runtimeEnv";
 import { getUserEntitlements } from "../../lib/entitlements";
@@ -97,6 +99,17 @@ const lastAlertAge = formatRelativeAge(lastAlertAt);
 const analyticsEvents = Astro.url.searchParams.get("test_sent")
   ? [{ name: "first_alert_test" as const }]
   : [];
+
+const showReferralNudge =
+  canEdit &&
+  (Boolean(Astro.url.searchParams.get("test_sent")) ||
+    recentEvents.length > 0 ||
+    Boolean(lastAlertAt));
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const referralRewardDays = Number(
+  (user.user_metadata as Record<string, unknown> | undefined)?.referral_reward_days ?? 0,
+);
 ---
 <DashboardLayout title="Alerts">
   <ProductAnalyticsTracker events={analyticsEvents} />
@@ -123,6 +136,19 @@ const analyticsEvents = Astro.url.searchParams.get("test_sent")
         </p>
       )}
     </section>
+
+    {Astro.url.searchParams.get("test_sent") && (
+      <section class="card">
+        <h2 class="card-title">Alerts are working — invite a neighbor</h2>
+        <p class="card-subtitle mb-0">
+          Friends who join with your link get <strong>7 extra Pro trial days</strong>. You earn bonus trial days when they subscribe.
+        </p>
+      </section>
+    )}
+
+    {showReferralNudge && (
+      <ReferralCard siteUrl={siteUrl} rewardDays={referralRewardDays} />
+    )}
 
     {needsPro && (
       <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} />

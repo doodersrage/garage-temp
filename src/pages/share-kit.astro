@@ -1,0 +1,119 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import {
+  getBreadcrumbSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/share-kit");
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "Share kit", path: "/share-kit" },
+  ]),
+];
+
+const reddit = `I built ThermalTrace for garage freeze alerts (ESP/Arduino → hosted charts + SMS/email) after one too many “hope the space heater is still on” winters.
+
+Public freeze-risk map (opt-in city aggregates): ${siteUrl}/freeze-map
+Live demo (no account): ${siteUrl}/demo
+Freeze season checklist: ${siteUrl}/freeze-season
+
+Happy to answer hardware / Home Assistant webhook questions.`;
+
+const homeAssistant = `**ThermalTrace** — hosted garage / crawlspace freeze monitoring for ESPHome & DIY probes.
+
+- HTTPS ingest (device key) instead of exposing MQTT
+- Email / push / SMS / webhooks into HA
+- Public community freeze map: ${siteUrl}/freeze-map
+- Embed: \`${siteUrl}/embed/freeze-map?compact=1\`
+
+Docs: ${siteUrl}/docs/api · Kit QR: ${siteUrl}/about/kit-qr-onboarding`;
+
+const bluesky = `Garage freezes are boring until they are not.
+
+ThermalTrace: DIY probes → freeze alerts + a public opt-in freeze map.
+Map: ${siteUrl}/freeze-map
+Demo: ${siteUrl}/demo`;
+
+const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="ThermalTrace freeze map" width="100%" height="320" style="border:0;border-radius:12px" loading="lazy"></iframe>`;
+---
+<Layout
+  title="Share kit"
+  description="Copy-paste posts and embeds for Reddit, Home Assistant Community, and Bluesky — freeze map, live demo, and ThermalTrace links."
+  schema={schema}
+>
+  <div class="page-shell page-stack">
+    <PageHeader
+      kicker="Spread the word"
+      title="Share kit"
+      lede="Ready-to-post blurbs and embeds. Tweak the voice, keep the links, ship it to the communities that actually care about cold garages."
+    >
+      <a slot="actions" class="btn-secondary" href="/freeze-map#embed">Freeze map embeds</a>
+      <a slot="actions" class="btn-ghost" href="/stories">Customer stories</a>
+    </PageHeader>
+
+    <section class="card">
+      <h2 class="card-title">Reddit / forums</h2>
+      <textarea class="form-textarea font-mono text-xs" id="share-reddit" rows="10" readonly>{reddit}</textarea>
+      <button type="button" class="btn-secondary mt-2" data-copy-target="share-reddit">Copy</button>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Home Assistant Community</h2>
+      <textarea class="form-textarea font-mono text-xs" id="share-ha" rows="10" readonly>{homeAssistant}</textarea>
+      <button type="button" class="btn-secondary mt-2" data-copy-target="share-ha">Copy</button>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Bluesky / short social</h2>
+      <textarea class="form-textarea font-mono text-xs" id="share-bsky" rows="6" readonly>{bluesky}</textarea>
+      <button type="button" class="btn-secondary mt-2" data-copy-target="share-bsky">Copy</button>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Compact map embed</h2>
+      <textarea class="form-textarea font-mono text-xs" id="share-embed" rows="3" readonly>{embed}</textarea>
+      <button type="button" class="btn-secondary mt-2" data-copy-target="share-embed">Copy iframe</button>
+      <p class="mt-4 mb-0 text-sm">
+        Preview: <a class="text-link" href="/embed/freeze-map?compact=1">open compact embed</a>
+      </p>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Deep links worth including</h2>
+      <ul class="text-sm space-y-2 mb-0">
+        <li><a class="text-link" href="/demo">/demo</a> — live readings, no account</li>
+        <li><a class="text-link" href="/freeze-season">/freeze-season</a> — seasonal checklist</li>
+        <li><a class="text-link" href="/compare/diy-mqtt">/compare/diy-mqtt</a> — vs self-hosted MQTT</li>
+        <li><a class="text-link" href="/stories">/stories</a> — short case studies</li>
+        <li><a class="text-link" href="/android">/android</a> — Play app waitlist angle</li>
+      </ul>
+    </section>
+  </div>
+</Layout>
+
+<script is:inline>
+  document.querySelectorAll("[data-copy-target]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-copy-target");
+      const el = id ? document.getElementById(id) : null;
+      if (!(el instanceof HTMLTextAreaElement) || !(btn instanceof HTMLButtonElement)) return;
+      try {
+        await navigator.clipboard.writeText(el.value);
+        const prev = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(() => {
+          btn.textContent = prev;
+        }, 1800);
+      } catch {
+        btn.textContent = "Copy failed";
+      }
+    });
+  });
+</script>

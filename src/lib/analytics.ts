@@ -1,3 +1,5 @@
+import { isDashboardConversionPath } from "./productAnalytics";
+
 /** Default GA4 measurement ID — override with GA_MEASUREMENT_ID in env. */
 export const DEFAULT_GA_MEASUREMENT_ID = "G-1TLGYJZEQ9";
 
@@ -20,7 +22,11 @@ export function resolveGaMeasurementId(
 
 export function shouldLoadGoogleAnalytics(
   pathname: string,
-  options?: { prod?: boolean; disabled?: boolean },
+  options?: {
+    prod?: boolean;
+    disabled?: boolean;
+    search?: string | URLSearchParams;
+  },
 ): boolean {
   if (options?.disabled) {
     return false;
@@ -29,6 +35,10 @@ export function shouldLoadGoogleAnalytics(
   const prod = options?.prod ?? import.meta.env.PROD;
   if (!prod) {
     return false;
+  }
+
+  if (isDashboardConversionPath(pathname, options?.search)) {
+    return true;
   }
 
   return !ANALYTICS_EXCLUDED_PREFIXES.some((prefix) => pathname.startsWith(prefix));

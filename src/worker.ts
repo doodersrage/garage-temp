@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/cloudflare";
 import { handle } from "@astrojs/cloudflare/handler";
 import { collectHistoryForAllUsers } from "./lib/collectHistory";
 import {
@@ -27,13 +28,38 @@ import { archiveOldReadings } from "./lib/archiveHistory";
 import { runPlaybooksForAllUsers } from "./lib/alertPlaybookRunner";
 import { sendPortfolioAlertsForAllUsers } from "./lib/portfolioAlerts";
 
-export default {
-  fetch(request: Request, env: Env, ctx: ExecutionContext) {
+type WorkerEnv = Env & {
+  SENTRY_DSN?: string;
+  CF_VERSION_METADATA?: { id?: string; tag?: string; timestamp?: string };
+};
+
+function sentryOptions(env: WorkerEnv) {
+  const dsn = env.SENTRY_DSN?.trim();
+  if (!dsn || dsn === "off") {
+    return undefined;
+  }
+
+  return {
+    dsn,
+    environment: "production",
+    release: env.CF_VERSION_METADATA?.id,
+    tracesSampleRate: 0.1,
+    // Cron + waitUntil work continues after the response; stream spans as they finish.
+    traceLifecycle: "stream" as const,
+  };
+}
+
+const worker = {
+  fetch(request: Request, env: WorkerEnv, ctx: ExecutionContext) {
     // @astrojs/cloudflare handler Env typing differs from generated worker Env.
     return handle(request, env as never, ctx);
   },
 
-  async scheduled(_controller: ScheduledController, _env: unknown, ctx: ExecutionContext) {
+  async scheduled(
+    _controller: ScheduledController,
+    _env: WorkerEnv,
+    ctx: ExecutionContext,
+  ) {
     ctx.waitUntil(
       (async () => {
         const historyJobId = await startJobRun("collect-history");
@@ -351,7 +377,12 @@ export default {
             message: error instanceof Error ? error.message : "Unknown error",
           });
         }
-      })(),
+      })().catch((error) => {
+        Sentry.captureException(error);
+        throw error;
+      }),
     );
   },
 };
+
+export default Sentry.withSentry(sentryOptions, worker);

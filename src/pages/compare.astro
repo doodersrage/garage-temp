@@ -9,6 +9,7 @@ import {
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
 import { getMarketingFaqs, getMarketingFaqSchema } from "../lib/marketingFaqs";
+import { compareGuides } from "../lib/compareGuides";
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/compare");
@@ -36,6 +37,21 @@ const schema = [
       <a slot="actions" class="btn-primary" href="/pricing">See plans &amp; pricing</a>
       <a slot="actions" class="btn-secondary" href="/register">Start free</a>
     </PageHeader>
+
+    <section class="card">
+      <h2 class="card-title">Detailed comparisons</h2>
+      <p class="card-subtitle mb-4">
+        Side-by-side guides for common alternatives — ops burden, alerts, and when each option fits.
+      </p>
+      <ul class="space-y-4 mb-0">
+        {compareGuides.map((guide) => (
+          <li>
+            <a class="text-link font-semibold" href={guide.path}>{guide.title}</a>
+            <p class="text-sm text-[var(--color-text-muted)] mt-1 mb-0">{guide.summary}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
 
     <section class="card">
       <h2 class="card-title">ThermalTrace vs alternatives</h2>

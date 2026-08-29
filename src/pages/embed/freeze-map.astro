@@ -8,6 +8,12 @@ const snapshots = await listLatestFreezeMapSnapshots();
 const visible = snapshots.filter((row) => row.sample_count >= 3);
 const capturedAt = snapshots[0]?.captured_at ?? null;
 const captureAge = formatRelativeAge(capturedAt, "not yet");
+const compact = Astro.url.searchParams.get("compact") === "1";
+
+const coldest = [...visible]
+  .filter((row) => row.min_temp_f != null)
+  .sort((a, b) => (a.min_temp_f ?? 999) - (b.min_temp_f ?? 999))
+  .slice(0, 3);
 
 const mapPins = visible
   .filter((row) => row.lat != null && row.lon != null)
@@ -41,9 +47,12 @@ const mapPinsJson = JSON.stringify(mapPins);
       h1 { font-size: 1rem; margin: 0 0 8px; }
       p { font-size: 0.85rem; color: var(--muted); margin: 0 0 12px; }
       .map-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; min-height: 220px; }
+      .map-wrap.compact { min-height: 160px; }
       table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 12px; }
       th, td { text-align: left; padding: 6px 8px; border-top: 1px solid var(--border); }
       a { color: inherit; }
+      .coldest { font-size: 0.8rem; margin: 0 0 10px; padding: 0; list-style: none; }
+      .coldest li { margin: 0 0 4px; }
     </style>
     <link
       rel="stylesheet"
@@ -55,8 +64,17 @@ const mapPinsJson = JSON.stringify(mapPins);
   <body>
     <h1>Garage freeze-risk map</h1>
     <p>Opt-in city aggregates · updated {captureAge.label}</p>
-    <div id="embed-freeze-map" class="map-wrap"></div>
-    {visible.length > 0 && (
+    {coldest.length > 0 && (
+      <ul class="coldest">
+        {coldest.map((row, i) => (
+          <li>
+            <strong>#{i + 1} {row.city_label}</strong> · min {row.min_temp_f?.toFixed(1)}°F
+          </li>
+        ))}
+      </ul>
+    )}
+    <div id="embed-freeze-map" class:list={["map-wrap", compact && "compact"]}></div>
+    {!compact && visible.length > 0 && (
       <table>
         <thead>
           <tr><th>City</th><th>Avg °F</th><th>Risk</th></tr>

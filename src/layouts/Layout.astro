@@ -14,7 +14,6 @@ import {
 } from "../lib/schemaMarkup";
 import { BRAND_NAME, BRAND_NAME_TM } from "../lib/brand";
 import GoogleAnalytics from "../components/GoogleAnalytics.astro";
-import SentryClient from "../components/SentryClient.astro";
 import { shouldLoadGoogleAnalytics } from "../lib/analytics";
 import {
   absoluteOgImageUrl,
@@ -118,7 +117,9 @@ const navItems = [
   { href: "/contact", label: "Contact", match: (path: string) => path.startsWith("/contact") },
 ];
 const isDashboard = currentPath.startsWith("/dashboard");
-const loadAnalytics = shouldLoadGoogleAnalytics(currentPath);
+const loadAnalytics = shouldLoadGoogleAnalytics(currentPath, {
+  search: Astro.url.searchParams,
+});
 const loadTurnstile =
   currentPath.startsWith("/contact") ||
   currentPath.startsWith("/signin") ||
@@ -183,7 +184,6 @@ const registerServiceWorker =
 				hostname={Astro.url.hostname}
 			/>
 		)}
-		<SentryClient />
 	</head>
 	<body class:list={[isDashboard && "is-dashboard"]}>
 		<a class="skip-link" href="#main-content">Skip to content</a>
@@ -271,6 +271,8 @@ const registerServiceWorker =
 									<li><a href="/compare">Compare</a></li>
 									<li><a href="/android">Android app</a></li>
 									<li><a href="/freeze-map">Freeze map</a></li>
+									<li><a href="/freeze-season">Freeze season</a></li>
+									<li><a href="/demo">Live demo</a></li>
 									<li><a href="/system-status">System status</a></li>
 								</ul>
 							</div>
@@ -279,9 +281,9 @@ const registerServiceWorker =
 								<ul class="site-footer-links">
 									<li><a href="/about">About & guides</a></li>
 									<li><a href="/docs/api">HTTP API</a></li>
-									<li><a href="/about/temperature-probe-case-study">Case study</a></li>
+									<li><a href="/stories">Customer stories</a></li>
 									<li><a href="/about/probe-demo">Probe demo</a></li>
-									<li><a href="/stories/garage-freeze-alert">Customer story</a></li>
+									<li><a href="/share-kit">Share kit</a></li>
 									<li>
 										<a
 											href="https://github.com/doodersrage/thermaltrace"

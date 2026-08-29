@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import OAuthButtons from "../components/OAuthButtons.astro";
+import ProductAnalyticsTracker from "../components/ProductAnalyticsTracker.astro";
 import { getAuthFromCookies } from "../lib/auth";
 import { getSignInErrorMessage } from "../lib/signInErrors";
 import {
@@ -38,6 +39,9 @@ const safeNext =
   description="Sign in to your dashboard to manage display preferences, probe feeds, reading history, and CSV export."
   noindex
 >
+  {registered && (
+    <ProductAnalyticsTracker events={[{ name: "sign_up", props: { method: "email" } }]} />
+  )}
   <div class="auth-page">
     <header class="auth-intro page-header">
       <h1 class="page-header-title">Sign in</h1>

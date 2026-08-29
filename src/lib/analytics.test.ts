@@ -35,6 +35,15 @@ describe("shouldLoadGoogleAnalytics", () => {
     expect(shouldLoadGoogleAnalytics("/dashboard", { prod: true })).toBe(false);
     expect(shouldLoadGoogleAnalytics("/api/contact", { prod: true })).toBe(false);
   });
+
+  it("loads on post-checkout success under dashboard", () => {
+    expect(
+      shouldLoadGoogleAnalytics("/dashboard/history", {
+        prod: true,
+        search: "subscription=success",
+      }),
+    ).toBe(true);
+  });
 });
 
 describe("resolveGaCookieDomain", () => {

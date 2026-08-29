@@ -47,6 +47,12 @@ const BUILD_SECRET_KEYS = [
   "ORIGIN",
   "CRON_SECRET",
   "OPS_DISCORD_WEBHOOK_URL",
+  "SENTRY_DSN",
+  "PUBLIC_SENTRY_DSN",
+  "SENTRY_AUTH_TOKEN",
+  "SENTRY_ORG",
+  "SENTRY_PROJECT",
+  "SENTRY_URL",
 ];
 
 function parseEnvFile(path) {

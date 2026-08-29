@@ -1,0 +1,97 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import {
+  listLatestFreezeMapSnapshots,
+} from "../lib/freezeMap";
+import { getAuthFromCookies } from "../lib/auth";
+import {
+  getBreadcrumbSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+
+const { user } = await getAuthFromCookies(Astro.cookies);
+const snapshots = await listLatestFreezeMapSnapshots();
+const visible = snapshots.filter((row) => row.sample_count >= 3);
+const coldest = [...visible]
+  .filter((row) => row.min_temp_f != null)
+  .sort((a, b) => (a.min_temp_f ?? 999) - (b.min_temp_f ?? 999))
+  .slice(0, 3);
+
+const month = new Date().getUTCMonth(); // 0-11
+const inFreezeSeason = month >= 10 || month <= 2; // Nov–Mar
+const seasonLabel = inFreezeSeason ? "Freeze season is here" : "Get ready before freeze season";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/freeze-season");
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "Freeze season", path: "/freeze-season" },
+  ]),
+];
+---
+<Layout
+  title="Freeze season garage watch"
+  description="Set garage freeze alerts before the cold snap. Live community freeze map, ESP probe ingest, and SMS/email when indoor temps drop toward 32°F."
+  schema={schema}
+  speakableSelectors={[".page-header-title", ".page-header-lede"]}
+>
+  <div class="page-shell page-stack">
+    <PageHeader
+      kicker="Seasonal"
+      title={seasonLabel}
+      lede="Pipe freezes happen in spaces you do not walk through every hour. Put a probe where the water is, set a threshold a few degrees above 32°F, and get alerted before damage."
+    >
+      <a slot="actions" class="btn-primary" href={user ? "/dashboard/alerts" : "/register?next=/dashboard/alerts"}>
+        {user ? "Open alert settings" : "Start free — set alerts"}
+      </a>
+      <a slot="actions" class="btn-secondary" href="/freeze-map">Community freeze map</a>
+    </PageHeader>
+
+    <section class="card">
+      <h2 class="card-title">Tonight’s checklist</h2>
+      <ol class="text-sm space-y-2 mb-0">
+        <li>Place a probe in the coldest corner of the garage or crawlspace.</li>
+        <li>Set freeze threshold around <strong>34°F</strong> (not 32 — leave reaction time).</li>
+        <li>Enable email or push on Free; add SMS on Pro if you sleep through notifications.</li>
+        <li>Send a test alert once so you trust the path.</li>
+        <li>Optional: opt your city into the <a class="text-link" href="/freeze-map">public freeze map</a>.</li>
+      </ol>
+    </section>
+
+    {coldest.length > 0 && (
+      <section class="card">
+        <h2 class="card-title">Coldest opt-in cities</h2>
+        <p class="card-subtitle mb-4">From the latest ThermalTrace freeze-map snapshot.</p>
+        <ul class="text-sm space-y-2 mb-0">
+          {coldest.map((row) => (
+            <li>
+              <strong>{row.city_label}</strong> — min {row.min_temp_f?.toFixed(1)}°F
+            </li>
+          ))}
+        </ul>
+        <p class="mt-4 mb-0">
+          <a class="btn-secondary" href="/freeze-map">View full map</a>
+        </p>
+      </section>
+    )}
+
+    <section class="card">
+      <h2 class="card-title">Why indoor probes beat outdoor weather alone</h2>
+      <p class="mb-4 text-sm">
+        A Tempest or airport reading says how cold the yard is. Your pipes care about the unheated bay,
+        the leaky door, and the failed space heater. ThermalTrace watches that space — and can sit next to
+        outdoor weather on your dashboard for context.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a class="btn-primary" href="/compare/tempest">vs outdoor weather stations</a>
+        <a class="btn-secondary" href="/stories">Read freeze stories</a>
+        <a class="btn-ghost" href="/demo">Try the live demo</a>
+      </div>
+    </section>
+  </div>
+</Layout>

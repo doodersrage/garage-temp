@@ -20,6 +20,15 @@ describe("sitemapPages", () => {
     expect(paths).not.toContain("/embed/freeze-map");
   });
 
+  it("includes traffic pages", () => {
+    const paths = getPublicSitemapPaths();
+    expect(paths).toContain("/freeze-season");
+    expect(paths).toContain("/demo");
+    expect(paths).toContain("/share-kit");
+    expect(paths).toContain("/stories");
+    expect(paths).toContain("/compare/diy-mqtt");
+  });
+
   it("builds absolute URLs from site origin", () => {
     const urls = buildPublicSitemapUrls("https://thermaltrace.dev");
     expect(urls).toContain("https://thermaltrace.dev/about/dht22-sensor-overview");

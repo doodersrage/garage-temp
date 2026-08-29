@@ -28,12 +28,16 @@ Allow: /about
 Allow: /pricing
 Allow: /compare
 Allow: /freeze-map
+Allow: /freeze-season
+Allow: /demo
+Allow: /share-kit
 Allow: /stories/
 Allow: /contact
 Allow: /privacy
 Allow: /terms
 Allow: /system-status
 Allow: /android
+Allow: /badge/
 Allow: /openapi.yaml
 
 Sitemap: ${sitemapURL.href}

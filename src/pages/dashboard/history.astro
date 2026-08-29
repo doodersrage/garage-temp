@@ -3,6 +3,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import GarageTempHistory from "../../components/GarageTempHistory.astro";
 import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import HistorySubscription from "../../components/HistorySubscription.astro";
+import ProductAnalyticsTracker from "../../components/ProductAnalyticsTracker.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { canDownloadHistoryCsv } from "../../lib/adminAccess";
 import {
@@ -124,6 +125,20 @@ const showRetentionNote =
   entitlements.tier === "admin";
 ---
 <DashboardLayout title="Reading History">
+  {subscriptionNotice === "success" && (
+    <ProductAnalyticsTracker
+      events={[
+        {
+          name: "purchase",
+          props: {
+            currency: "USD",
+            value: 0,
+            transaction_id: "stripe_checkout",
+          },
+        },
+      ]}
+    />
+  )}
   <div class="space-y-6">
     <section class="card">
       <h2 class="card-title">Historic probe readings</h2>
