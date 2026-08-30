@@ -10,6 +10,13 @@ import {
 } from "../../../lib/alertSnooze";
 import { getUserHouseholdId } from "../../../lib/households";
 import { fetchLatestSensorValues } from "../../../lib/sensorReadings";
+import {
+  filterRowsByLabel,
+  parseTelegramSnoozeHours,
+  parseTelegramVacationDays,
+  telegramStatusQuery,
+  TELEGRAM_HELP,
+} from "../../../lib/telegramCommands";
 
 async function resolveUserByTelegramSecret(
   secret: string,
@@ -62,27 +69,39 @@ export const POST: APIRoute = async ({ request, url }) => {
     });
   }
 
-  const cmd = text.split(/\s+/)[0]?.toLowerCase() ?? "";
+  const cmd = (text.split(/\s+/)[0] ?? "").toLowerCase().replace(/@\S+$/, "");
 
   if (cmd === "/snooze") {
+    const hours = parseTelegramSnoozeHours(text);
     await saveAlertSettingsForUser(userId, {
       ...settings,
-      snoozeUntil: snoozeUntilFromHours(24),
+      snoozeUntil: snoozeUntilFromHours(hours),
     });
-    await sendTelegramReply(token, chatId, "Alerts snoozed for 24 hours.");
+    await sendTelegramReply(
+      token,
+      chatId,
+      `Alerts snoozed for ${hours} hour${hours === 1 ? "" : "s"}. Freeze and leak alerts still fire.`,
+    );
   } else if (cmd === "/vacation") {
+    const days = parseTelegramVacationDays(text);
     await saveAlertSettingsForUser(userId, {
       ...settings,
-      vacationUntil: vacationUntilFromDays(7),
+      vacationUntil: vacationUntilFromDays(days),
     });
-    await sendTelegramReply(token, chatId, "Vacation mode enabled for 7 days.");
+    await sendTelegramReply(
+      token,
+      chatId,
+      `Vacation mode enabled for ${days} day${days === 1 ? "" : "s"}. Freeze and leak alerts still fire.`,
+    );
   } else if (cmd === "/status") {
     const householdId = await getUserHouseholdId(userId);
     if (!householdId) {
       await sendTelegramReply(token, chatId, "No active household.");
     } else {
       const latest = await fetchLatestSensorValues(householdId);
-      const lines = latest.slice(0, 6).map((row) => {
+      const query = telegramStatusQuery(text);
+      const rows = filterRowsByLabel(latest, query);
+      const lines = rows.slice(0, 6).map((row) => {
         const val =
           row.value_num != null
             ? `${row.value_num.toFixed(1)}${row.sensor.unit ?? ""}`
@@ -96,14 +115,18 @@ export const POST: APIRoute = async ({ request, url }) => {
       await sendTelegramReply(
         token,
         chatId,
-        lines.length ? lines.join("\n") : "No readings yet.",
+        lines.length
+          ? lines.join("\n")
+          : query
+            ? `No sensors matching "${query}".`
+            : "No readings yet.",
       );
     }
   } else if (cmd === "/help") {
     await sendTelegramReply(
       token,
       chatId,
-      "Commands: /status, /snooze, /vacation, /help",
+      TELEGRAM_HELP,
     );
   }
 

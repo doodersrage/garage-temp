@@ -32,6 +32,20 @@ export function estimateHeatingLossRate(
   return rate;
 }
 
+/** Dew point °F from air temperature and relative humidity (Magnus-Tetens). */
+export function dewPointF(tempF: number, rhPct: number): number | null {
+  if (!Number.isFinite(tempF) || !Number.isFinite(rhPct) || rhPct <= 0 || rhPct > 100) {
+    return null;
+  }
+  const tC = (tempF - 32) * (5 / 9);
+  const a = 17.62;
+  const b = 243.12;
+  const gamma = Math.log(rhPct / 100) + (a * tC) / (b + tC);
+  const tdC = (b * gamma) / (a - gamma);
+  if (!Number.isFinite(tdC)) return null;
+  return tdC * (9 / 5) + 32;
+}
+
 export function buildHeatingInsights(options: {
   indoorPoints: ChartPoint[];
   outdoorTempF: number | null;
@@ -79,6 +93,18 @@ export function buildHeatingInsights(options: {
       detail: `Outdoor ${options.outdoorTempF.toFixed(0)}°F — ${margin.toFixed(0)}°F margin above your freeze alert.`,
       severity: margin <= 8 ? "warning" : "info",
     });
+  }
+
+  const dewPoint = dewPointF(latest.tempf, latest.humidity);
+  if (dewPoint != null) {
+    const margin = latest.tempf - dewPoint;
+    if (margin <= 5) {
+      insights.push({
+        label: "Condensation risk",
+        detail: `Dew point ~${dewPoint.toFixed(0)}°F — air is within ${Math.max(0, margin).toFixed(0)}°F of saturating. Cold slabs and tools can sweat even if the probe is warmer.`,
+        severity: margin <= 2 ? "warning" : "info",
+      });
+    }
   }
 
   return insights;
