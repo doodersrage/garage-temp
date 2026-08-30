@@ -14,7 +14,7 @@ export const marketingFaqs = {
     {
       question: "How do I connect ESP32 or Arduino sensors?",
       answer:
-        "Create a push device under Dashboard → Devices, copy the one-time ingest key, and POST JSON to /api/ingest/<key>. Sample Arduino and MicroPython sketches ship in the GitHub repo. Besides temperature, ingest supports humidity, CO₂, pressure, PM2.5, VOC, water level, energy, door, power, flood, and motion.",
+        "Create a push device under Dashboard → Devices, copy the one-time ingest key, map sensor keys (or a temp + humidity pair), and POST JSON to /api/ingest/<key>. Step-by-step: thermaltrace.dev/about/adding-devices. Sample Arduino and MicroPython sketches ship in the GitHub repo.",
     },
     {
       question: "Does ThermalTrace send freeze alerts?",

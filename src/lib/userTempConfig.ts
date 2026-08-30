@@ -5,6 +5,7 @@ import {
   getDefaultTempFeeds,
   getDefaultTempProbes,
   getLegacyTempProbes,
+  sanitizeJsonRoot,
   sanitizeTempFeeds,
   sanitizeTempProbes,
 } from "./tempFeedConfig";
@@ -56,6 +57,7 @@ export async function fetchUserTempConfig(userId: string): Promise<{
     name: row.name,
     url: row.url,
     enabled: row.enabled,
+    jsonRoot: "temp",
   }));
 
   const { data: probeRows, error: probesError } = await supabase
@@ -181,6 +183,9 @@ export async function migrateLegacyTempTablesToDevices(
           pull_url: feed.url,
           enabled: feed.enabled,
           sort_order: index,
+          meta: {
+            pull_json_root: sanitizeJsonRoot(feed.jsonRoot),
+          },
         })
         .select("id")
         .single();
@@ -218,6 +223,12 @@ export async function migrateLegacyTempTablesToDevices(
           name: feed.name,
           enabled: feed.enabled,
           sort_order: index,
+          meta: {
+            ...(device.meta && typeof device.meta === "object" && !Array.isArray(device.meta)
+              ? (device.meta as Record<string, unknown>)
+              : {}),
+            pull_json_root: sanitizeJsonRoot(feed.jsonRoot),
+          },
           updated_at: new Date().toISOString(),
         })
         .eq("id", device.id);

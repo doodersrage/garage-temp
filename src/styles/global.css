@@ -1787,6 +1787,38 @@
     @apply sm:grid-cols-3;
   }
 
+  .sensor-map-row {
+    @apply rounded-lg p-3;
+    background-color: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+  }
+
+  .sensor-map-form {
+    @apply min-w-0 flex-1;
+  }
+
+  .sensor-map-primary {
+    @apply grid gap-3;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    align-items: end;
+  }
+
+  .sensor-map-actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .sensor-map-advanced-grid {
+    @apply grid gap-3 sm:grid-cols-2;
+  }
+
+  .sensor-map-delete {
+    @apply mt-2;
+  }
+
+  .sensor-quick-pair {
+    background-color: var(--color-bg);
+  }
+
   .config-row-actions {
     @apply mb-3 flex items-center justify-between gap-3;
   }

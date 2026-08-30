@@ -150,6 +150,18 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
         "Temperature (and humidity) keyed by probe index, plus optional door/power fields, battery, and RSSI. Keep keys stable so dashboard mappings stay valid.",
     },
   ],
+  "adding-devices": [
+    {
+      question: "Should I use push or pull?",
+      answer:
+        "Use push for ESP/Arduino nodes that can POST outbound HTTPS. Use pull when you already have a public HTTPS JSON feed (or a TLS relay) that ThermalTrace can fetch on a schedule.",
+    },
+    {
+      question: "Why don’t readings show on Home after ingest succeeds?",
+      answer:
+        "Map sensor keys on Dashboard → Devices so they match your JSON. For DHT-style probes, use Quick add temperature + humidity pair with the same key. Pull feeds also need the correct JSON root key (default temp).",
+    },
+  ],
   "json-probe-output-schema": [
     {
       question: "What JSON shape does ThermalTrace expect?",

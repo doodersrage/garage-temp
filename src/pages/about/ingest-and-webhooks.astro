@@ -27,7 +27,9 @@ const hero = getAboutPhoto("ethernet-cable");
 
   <h2>Push ingest</h2>
   <p>
-    From <strong>Dashboard → Devices</strong>, create a push device to receive a one-time API key.
+    From <strong>Dashboard → Devices</strong>, create a push device to receive a one-time API key,
+    then map JSON keys (quick temp + humidity pair, or one sensor at a time). Full walkthrough:
+    <a class="text-link" href="/about/adding-devices">Adding push and pull devices</a>.
     Send readings with:
   </p>
   <pre><code>POST /api/ingest/&lt;device-key&gt;

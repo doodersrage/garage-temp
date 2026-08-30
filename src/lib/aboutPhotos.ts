@@ -180,6 +180,8 @@ export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
   "ground-loop-avoidance": "arduino-dht11",
   "backlight-pwm-options": "arduino-uno-board",
   "jumper-wire-standards": "arduino-dht11",
+  "ingest-and-webhooks": "ethernet-cable",
+  "adding-devices": "ethernet-cable",
   "kit-qr-onboarding": "ethernet-cable",
   "esp32-ota-firmware": "arduino-uno-board",
 

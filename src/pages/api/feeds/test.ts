@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
-  const body = (await request.json()) as { url?: string };
+  const body = (await request.json()) as { url?: string; jsonRoot?: string };
   const url = body.url?.trim();
 
   if (!url || !isValidFeedUrl(url)) {
@@ -37,6 +37,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     name: "Test feed",
     url,
     enabled: true,
+    jsonRoot: body.jsonRoot?.trim() || "temp",
   });
 
   if (result.error) {

@@ -10,95 +10,151 @@ interface Props {
 
 const { feeds, probes, redirectTo = "/dashboard/temperature" } = Astro.props;
 
-const probeRows = [...probes];
-if (probeRows.length < MAX_TEMP_PROBES) {
-  probeRows.push({
-    id: "",
-    feedId: feeds[0]?.id ?? "garage",
-    key: "",
-    label: "",
-    visible: true,
-  });
-}
+const existingProbes = probes.filter((probe) => Boolean(probe.key));
+const canAddMore = existingProbes.length < MAX_TEMP_PROBES && feeds.length > 0;
+const defaultFeedId = feeds[0]?.id ?? "";
 ---
 
-<form action="/api/user/temp-probes" method="post" class="card animate-zoom-in">
+<form action="/api/user/temp-probes" method="post" class="space-y-4">
   <input type="hidden" name="redirect" value={redirectTo} />
-  <h2 class="card-title">Temperature probes</h2>
-  <p class="card-subtitle">
-    Map probe keys from each feed to a label and choose which readings appear on the home page.
-  </p>
-
-  <div class="mb-6 flex flex-col gap-3">
-    {probeRows.map((probe, index) => (
-      <div class="config-row">
-        <div class="config-row-actions">
-          <span class="config-row-title">{probe.label || `Probe ${index + 1}`}</span>
-          {probe.id && probe.key && (
-            <button
-              type="submit"
-              class="btn-danger"
-              formaction="/api/user/temp-probes/delete"
-              formmethod="post"
-              name="probe_id"
-              value={probe.id}
-              onclick="return confirm('Delete this probe?');"
-            >
-              Delete probe
-            </button>
-          )}
-        </div>
-        <input type="hidden" name={`probe_${index}_id`} value={probe.id} />
-        <div class="config-row-grid config-row-grid-probes">
-          <div class="form-field mb-0">
-            <label class="form-label" for={`probe_${index}_feed_id`}>Feed</label>
-            <select
-              class="form-input"
-              id={`probe_${index}_feed_id`}
-              name={`probe_${index}_feed_id`}
-            >
-              {feeds.map((feed) => (
-                <option value={feed.id} selected={probe.feedId === feed.id}>
-                  {feed.name || feed.id}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div class="form-field mb-0">
-            <label class="form-label" for={`probe_${index}_key`}>Probe key</label>
-            <input
-              class="form-input"
-              type="text"
-              id={`probe_${index}_key`}
-              name={`probe_${index}_key`}
-              value={probe.key}
-              placeholder="0, 1, avg"
-            />
-          </div>
-          <div class="form-field mb-0">
-            <label class="form-label" for={`probe_${index}_label`}>Label</label>
-            <input
-              class="form-input"
-              type="text"
-              id={`probe_${index}_label`}
-              name={`probe_${index}_label`}
-              value={probe.label}
-              placeholder="Probe 0"
-            />
-          </div>
-        </div>
-        <label class="checkbox-row mt-3">
-          <input
-            type="checkbox"
-            name={`probe_${index}_visible`}
-            value="true"
-            checked={probe.visible}
-          />
-          <span>Visible on home page</span>
-        </label>
-      </div>
-    ))}
+  <div>
+    <h3 class="text-base font-semibold m-0">Probe labels</h3>
+    <p class="card-subtitle mb-0 mt-1">
+      Map keys inside each feed’s JSON root (e.g. <code>0</code>, <code>1</code>, <code>avg</code>) to names on Home.
+    </p>
   </div>
 
-  <button type="submit" class="btn-primary">Save probes</button>
+  {feeds.length === 0 ? (
+    <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+      Save a feed URL first, then map probe keys here.
+    </p>
+  ) : (
+    <div class="flex flex-col gap-3">
+      {existingProbes.map((probe, index) => (
+        <div class="sensor-map-row">
+          <input type="hidden" name={`probe_${index}_id`} value={probe.id} />
+          <div class="sensor-map-primary">
+            <div class="form-field mb-0">
+              <label class="form-label" for={`probe_${index}_feed_id`}>Feed</label>
+              <select
+                class="form-input"
+                id={`probe_${index}_feed_id`}
+                name={`probe_${index}_feed_id`}
+              >
+                {feeds.map((feed) => (
+                  <option value={feed.id} selected={probe.feedId === feed.id}>
+                    {feed.name || feed.id}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div class="form-field mb-0">
+              <label class="form-label" for={`probe_${index}_key`}>JSON key</label>
+              <input
+                class="form-input font-mono"
+                type="text"
+                id={`probe_${index}_key`}
+                name={`probe_${index}_key`}
+                value={probe.key}
+                placeholder="0"
+                required
+              />
+            </div>
+            <div class="form-field mb-0">
+              <label class="form-label" for={`probe_${index}_label`}>Name on Home</label>
+              <input
+                class="form-input"
+                type="text"
+                id={`probe_${index}_label`}
+                name={`probe_${index}_label`}
+                value={probe.label}
+                placeholder="North wall"
+                required
+              />
+            </div>
+            <div class="sensor-map-actions">
+              <label class="checkbox-row mb-0">
+                <input
+                  type="checkbox"
+                  name={`probe_${index}_visible`}
+                  value="true"
+                  checked={probe.visible}
+                />
+                <span>Show on Home</span>
+              </label>
+              <button
+                type="submit"
+                class="btn-ghost"
+                formaction="/api/user/temp-probes/delete"
+                formmethod="post"
+                name="probe_id"
+                value={probe.id}
+                onclick="return confirm('Delete this probe?');"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+
+      {canAddMore && (
+        <div class="sensor-map-row sensor-quick-pair">
+          <p class="m-0 mb-3 text-sm font-medium">Add a probe key</p>
+          <input type="hidden" name={`probe_${existingProbes.length}_id`} value="" />
+          <div class="sensor-map-primary">
+            <div class="form-field mb-0">
+              <label class="form-label" for={`probe_${existingProbes.length}_feed_id`}>Feed</label>
+              <select
+                class="form-input"
+                id={`probe_${existingProbes.length}_feed_id`}
+                name={`probe_${existingProbes.length}_feed_id`}
+              >
+                {feeds.map((feed) => (
+                  <option value={feed.id} selected={feed.id === defaultFeedId}>
+                    {feed.name || feed.id}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div class="form-field mb-0">
+              <label class="form-label" for={`probe_${existingProbes.length}_key`}>JSON key</label>
+              <input
+                class="form-input font-mono"
+                type="text"
+                id={`probe_${existingProbes.length}_key`}
+                name={`probe_${existingProbes.length}_key`}
+                placeholder="0"
+              />
+            </div>
+            <div class="form-field mb-0">
+              <label class="form-label" for={`probe_${existingProbes.length}_label`}>Name on Home</label>
+              <input
+                class="form-input"
+                type="text"
+                id={`probe_${existingProbes.length}_label`}
+                name={`probe_${existingProbes.length}_label`}
+                placeholder="Garage"
+              />
+            </div>
+            <div class="sensor-map-actions">
+              <label class="checkbox-row mb-0">
+                <input
+                  type="checkbox"
+                  name={`probe_${existingProbes.length}_visible`}
+                  value="true"
+                  checked
+                />
+                <span>Show on Home</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )}
+
+  {feeds.length > 0 && (
+    <button type="submit" class="btn-primary">Save probes</button>
+  )}
 </form>

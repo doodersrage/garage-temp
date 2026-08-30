@@ -1,0 +1,158 @@
+---
+import AboutArticle from "../../components/AboutArticle.astro";
+import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutPhoto } from "../../lib/aboutPhotos";
+
+const page = getAboutPage("adding-devices")!;
+const hero = getAboutPhoto("ethernet-cable");
+---
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={hero.image}
+  heroAlt={hero.alt}
+  heroCaption={hero.caption}
+  heroCredit={hero.credit}
+  heroCreditHref={hero.sourceUrl}
+>
+  <p>
+    ThermalTrace accepts readings two ways: your hardware <strong>pushes</strong> JSON to an ingest URL,
+    or we <strong>pull</strong> HTTPS JSON from a public feed on a schedule. Both are configured under
+    <a class="text-link" href="/dashboard/temperature">Dashboard → Devices</a>.
+    New ESP / battery nodes should use push. Pull is for always-on LAN servers or relays that already expose HTTPS JSON.
+  </p>
+
+  <h2>Choose push or pull</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Push ingest</th>
+          <th>Pull feed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Who initiates</td>
+          <td>Your device</td>
+          <td>ThermalTrace</td>
+        </tr>
+        <tr>
+          <td>Network</td>
+          <td>Device needs outbound HTTPS</td>
+          <td>Feed URL must be publicly reachable</td>
+        </tr>
+        <tr>
+          <td>Auth</td>
+          <td>One-time per-device key in the URL</td>
+          <td>Public HTTPS URL (TLS)</td>
+        </tr>
+        <tr>
+          <td>Best for</td>
+          <td>ESP32, Arduino, MicroPython nodes</td>
+          <td>Ethernet garage servers, FastAPI relays</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Push device (recommended)</h2>
+  <ol>
+    <li>
+      Sign in and open <a class="text-link" href="/dashboard/temperature">Devices</a>.
+    </li>
+    <li>
+      Under <strong>Push devices</strong>, enter a name and click <strong>Create push device</strong>.
+    </li>
+    <li>
+      Copy the one-time ingest URL / key immediately (QR is on the same card). You will not see the full key again—rotate if you lose it.
+    </li>
+    <li>
+      Map sensors so JSON keys become names on Home:
+      <ul>
+        <li>
+          <strong>Quick add: temperature + humidity pair</strong> — same JSON key for both (e.g. <code>0</code> or <code>temp1</code>), usual DHT-style probe.
+        </li>
+        <li>
+          Or <strong>Add one sensor</strong> for doors, floods, CO₂, etc. Pick a type; units default from the type. Calibration lives under <strong>Advanced</strong> on each sensor.
+        </li>
+      </ul>
+    </li>
+    <li>
+      Point firmware at <code>POST /api/ingest/&lt;key&gt;</code> with JSON that matches those keys. Sample sketches:
+      <a class="text-link" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches" target="_blank" rel="noreferrer">sketches/</a>.
+    </li>
+    <li>
+      Smoke-test with curl, then open <a class="text-link" href="/">Home</a> while signed in. Within about 30 minutes without a post, Home warns that a probe may be offline.
+    </li>
+  </ol>
+
+  <h3>Example curl</h3>
+  <pre><code>{`curl -X POST "https://thermaltrace.dev/api/ingest/YOUR_DEVICE_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"temp1": 42.5, "door1": false, "battery": 87, "rssi": -62}'`}</code></pre>
+
+  <p>
+    Payload styles (flat keys, classic <code>temp</code> object, or typed <code>sensors[]</code>) are documented in
+    <a class="text-link" href="/about/ingest-and-webhooks">ingest &amp; webhooks</a> and the developer
+    <a class="text-link" href="https://doodersrage.github.io/thermaltrace/ingest/">push ingest</a> reference.
+  </p>
+
+  <h2>Pull feed</h2>
+  <ol>
+    <li>
+      Confirm your feed returns HTTPS JSON. Classic shape (default root key <code>temp</code>):
+    </li>
+  </ol>
+  <pre><code>{`{
+  "temp": {
+    "0": { "c": 18.5, "f": 65.3, "h": 42 },
+    "1": { "c": 19.0, "f": 66.2, "h": 40 },
+    "avg": { "f": 65.75, "c": 18.75, "h": 41 }
+  },
+  "battery_pct": 87,
+  "rssi": -62
+}`}</code></pre>
+  <ol start="2">
+    <li>
+      On <a class="text-link" href="/dashboard/temperature#pull-feeds">Devices → Pull JSON feeds</a>, expand
+      <strong>Edit pull feeds</strong>.
+    </li>
+    <li>
+      Add a feed: name, HTTPS URL, and <strong>JSON root key</strong> (default <code>temp</code>).
+      If your object lives under <code>readings</code> instead of <code>temp</code>, set the root key to <code>readings</code>.
+      Use <strong>Test feed URL</strong> before saving.
+    </li>
+    <li>
+      Under <strong>Probe labels</strong>, map each key inside that root (<code>0</code>, <code>1</code>, <code>avg</code>, …)
+      to a Home name and choose whether it shows on Home.
+    </li>
+    <li>
+      Save feeds, then save probes. Wait for the next poll (or refresh Home while signed in) and confirm cards update.
+    </li>
+  </ol>
+  <p>
+    Pull feeds expect nested probe objects under the configured root—not flat push-style keys.
+    If the MCU cannot do TLS, use a local HTTPS relay (see
+    <a class="text-link" href="/about/python-feeds">Python feeds</a>).
+  </p>
+
+  <h2>Verify you’re live</h2>
+  <ul>
+    <li><strong>Home</strong> — live cards update; lagging probes show a yellow offline warning after ~30 minutes.</li>
+    <li><strong>Devices → Device health</strong> — last seen, battery, and RSSI when the payload includes them.</li>
+    <li><strong>Overview checklist</strong> — map keys and send a test alert before you trust a freeze night.</li>
+  </ul>
+
+  <h2>Related</h2>
+  <ul>
+    <li><a class="text-link" href="/about/ingest-and-webhooks">Ingest API and alert webhooks</a></li>
+    <li><a class="text-link" href="/about/kit-qr-onboarding">Kit QR onboarding</a></li>
+    <li><a class="text-link" href="/about/configuring-temperature-feeds">Configuring temperature feeds</a> (pull deep-dive)</li>
+    <li><a class="text-link" href="/about/debugging-stale-readings">Debugging stale readings</a></li>
+    <li><a class="text-link" href="https://doodersrage.github.io/thermaltrace/ingest/">Developer: push ingest</a> ·
+      <a class="text-link" href="https://doodersrage.github.io/thermaltrace/ingest/pull-feeds">pull feeds</a></li>
+  </ul>
+</AboutArticle>

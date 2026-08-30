@@ -48,14 +48,14 @@ export const aboutJourneys: AboutJourney[] = [
     id: "esp-ingest",
     title: "Push from ESP / Arduino",
     description:
-      "One-time device keys, ingest payloads, QR stickers, and optional OTA.",
-    ctaHref: "/about/ingest-and-webhooks",
-    ctaLabel: "Ingest & webhooks",
+      "Create a device, map keys, send ingest payloads, and optional OTA / QR stickers.",
+    ctaHref: "/about/adding-devices",
+    ctaLabel: "Add a device",
     steps: [
+      { slug: "adding-devices", label: "Add push or pull" },
       { slug: "ingest-and-webhooks", label: "Ingest API" },
       { slug: "kit-qr-onboarding", label: "Kit QR" },
       { slug: "esp32-ota-firmware", label: "ESP32 OTA" },
-      { slug: "json-probe-output-schema", label: "JSON schema" },
     ],
   },
   {

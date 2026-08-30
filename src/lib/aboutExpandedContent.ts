@@ -391,13 +391,15 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
   ],
 
   "configuring-temperature-feeds": [
-      { type: "p", html: "After sign-in, users paste HTTPS URLs pointing at probe JSON—often a FastAPI relay with Redis—and map each numeric key to a human-readable label. Those settings drive both the public home page and history sampling." },
+      { type: "p", html: "Pull feeds let ThermalTrace fetch HTTPS JSON on a schedule when your probe already serves a public URL (or a TLS relay). For the full push <em>and</em> pull walkthrough that matches today’s Devices UI, start with <a class=\"text-link\" href=\"/about/adding-devices\">adding push and pull devices</a>." },
       { type: "h2", text: "Setup steps" },
-      { type: "ol", items: ["Verify feed with **curl** against <a class=\"text-link\" href=\"/about/json-probe-output-schema\">expected schema</a>.","Add URL in **dashboard feed settings**; enable desired probe keys.","Assign **labels** per <a class=\"text-link\" href=\"/about/probe-mapping-labels\">probe mapping guide</a>.","Wait one **poll cycle** and confirm home page cards update."] },
+      { type: "ol", items: ["Verify the feed with **curl** — nested probes under a root object (default <code>temp</code>).","Open <strong>Dashboard → Devices → Pull JSON feeds → Edit pull feeds</strong>.","Add the HTTPS URL and set <strong>JSON root key</strong> if your object is not named <code>temp</code> (e.g. <code>readings</code>).","Use <strong>Test feed URL</strong>, then save.","Map probe keys to Home labels under <strong>Probe labels</strong> and save." ] },
+      { type: "h2", text: "JSON root key" },
+      { type: "p", html: "Pull parsing looks for <code>{ \"&lt;root&gt;\": { \"0\": { \"f\": …, \"h\": … }, … } }</code>. The root defaults to <code>temp</code>. Flat push-style keys and typed <code>sensors[]</code> are for <a class=\"text-link\" href=\"/about/ingest-and-webhooks\">push ingest</a>, not pull feeds." },
       { type: "h2", text: "Multiple feeds" },
-      { type: "p", html: "Advanced setups may separate demo and production relays—document which URL is public. Security: <a class=\"text-link\" href=\"/about/relay-security-and-access\">relay security</a>. Fetch implementation: <a class=\"text-link\" href=\"/about/home-page-probe-fetch\">home page probe fetch</a>." },
+      { type: "p", html: "You can add several pull URLs (plan limits apply). Document which URL is production vs demo. Security: <a class=\"text-link\" href=\"/about/relay-security-and-access\">relay security</a>. Fetch behavior: <a class=\"text-link\" href=\"/about/home-page-probe-fetch\">home page probe fetch</a>." },
       { type: "h2", text: "Troubleshooting" },
-      { type: "p", html: "<a class=\"text-link\" href=\"/about/debugging-stale-readings\">Debugging stale readings</a> when labels look right but numbers do not move." }
+      { type: "p", html: "Wrong root key or probe key typos hide cards even when the URL returns 200. See <a class=\"text-link\" href=\"/about/debugging-stale-readings\">debugging stale readings</a>." }
   ],
 
   "admin-dashboard-features": [

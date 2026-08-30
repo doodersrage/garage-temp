@@ -46,7 +46,7 @@ export async function fetchTempFeed(feed: TempFeedConfig): Promise<TempFeedResul
     }
 
     const payload = await response.json();
-    const probes = parseTempFeedPayload(payload);
+    const probes = parseTempFeedPayload(payload, feed.jsonRoot);
     const deviceMeta = parseFeedDeviceMeta(payload);
 
     return {

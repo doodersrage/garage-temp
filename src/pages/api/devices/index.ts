@@ -184,6 +184,47 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?sensor_added=1`);
   }
 
+  if (action === "add_sensor_pair") {
+    const deviceId = formData.get("device_id")?.toString();
+    const key = formData.get("key")?.toString().trim();
+    const label = formData.get("label")?.toString().trim() || "Probe";
+
+    if (!deviceId || !key) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+
+    const owned = await listHouseholdDevices(householdId);
+    if (!owned.devices.some((d) => d.id === deviceId)) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+
+    const supabase = createServerClient();
+    const { error } = await supabase.from("device_sensors").insert([
+      {
+        device_id: deviceId,
+        key,
+        label,
+        kind: "temperature",
+        unit: defaultUnitForKind("temperature"),
+        visible: true,
+      },
+      {
+        device_id: deviceId,
+        key,
+        label: `${label} humidity`,
+        kind: "humidity",
+        unit: defaultUnitForKind("humidity"),
+        visible: true,
+      },
+    ]);
+
+    if (error) {
+      return redirect(`${redirectTo}?error=1`);
+    }
+
+    return redirect(`${redirectTo}?sensor_added=1`);
+  }
+
   if (action === "update_sensor") {
     const sensorId = formData.get("sensor_id")?.toString();
     const deviceId = formData.get("device_id")?.toString();

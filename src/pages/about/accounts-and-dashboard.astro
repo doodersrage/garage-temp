@@ -42,13 +42,14 @@ const hero = getAboutPhoto("desk-workspace");
     Under <a class="text-link" href="/dashboard/temperature">Devices</a> you can:
   </p>
   <ul>
-    <li><strong>Push devices</strong> — ESP/Arduino POSTs JSON to a unique ingest URL. Save the one-time key, add sensor keys that match your payload, rename devices without rotating keys, and rotate keys when needed.</li>
-    <li><strong>Pull feeds</strong> — HTTPS JSON URLs we fetch on a schedule, with probe labels and feed health.</li>
+    <li><strong>Push devices</strong> — ESP/Arduino POSTs JSON to a unique ingest URL. Save the one-time key, add a temp/humidity pair or single sensors that match your payload, rename devices without rotating keys, and rotate keys when needed.</li>
+    <li><strong>Pull feeds</strong> — HTTPS JSON URLs we fetch on a schedule, with a configurable JSON root key (default <code>temp</code>), probe labels, and feed health tests.</li>
   </ul>
   <p>
-    After sensors are added, verify ingest (or wait for the next pull), then open
-    <a class="text-link" href="/">Home</a> to confirm live values. See
-    <a class="text-link" href="/about/ingest-and-webhooks">ingest &amp; webhooks</a> for payload examples.
+    Step-by-step: <a class="text-link" href="/about/adding-devices">Adding push and pull devices</a>.
+    After sensors are mapped, verify ingest (or wait for the next pull), then open
+    <a class="text-link" href="/">Home</a> to confirm live values. Payload examples:
+    <a class="text-link" href="/about/ingest-and-webhooks">ingest &amp; webhooks</a>.
   </p>
 
   <h2>Display preferences</h2>

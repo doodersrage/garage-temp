@@ -114,6 +114,14 @@ export const coreAboutPages: AboutPage[] = [
       "Device API keys, typed sensor payloads, outbound HMAC webhooks, and Pro alert channels.",
   },
   {
+    slug: "adding-devices",
+    title: "Adding push and pull devices",
+    description:
+      "Step-by-step: create a push ingest device or HTTPS pull feed, map JSON keys to Home labels, and verify live readings.",
+    summary:
+      "Choose push vs pull, create the device or feed, map sensors, and confirm Home shows live values.",
+  },
+  {
     slug: "install-pwa",
     title: "Install as an app (PWA)",
     description:

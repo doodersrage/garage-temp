@@ -9,6 +9,11 @@ export type TempFeedConfig = {
   name: string;
   url: string;
   enabled: boolean;
+  /**
+   * Top-level JSON object that holds probe keys (default `temp`).
+   * Example payload: `{ "temp": { "0": { "f": 42, "h": 50 } } }`
+   */
+  jsonRoot?: string;
 };
 
 export type TempProbeConfig = {
@@ -46,6 +51,7 @@ export function getDefaultTempFeeds(): TempFeedConfig[] {
       name: "Garage",
       url: getDefaultFeedUrl(),
       enabled: true,
+      jsonRoot: "temp",
     },
   ];
 }
@@ -91,14 +97,26 @@ function coerceNumber(value: unknown): number | null {
   return Number.isFinite(num) ? num : null;
 }
 
-export function parseTempFeedPayload(payload: unknown): Record<string, TempReading> {
+/** Sanitize a top-level JSON root key for probe objects (default `temp`). */
+export function sanitizeJsonRoot(raw: unknown): string {
+  const value = typeof raw === "string" ? raw.trim() : "";
+  if (!value) return "temp";
+  if (!/^[A-Za-z_][A-Za-z0-9_]{0,63}$/.test(value)) return "temp";
+  return value;
+}
+
+export function parseTempFeedPayload(
+  payload: unknown,
+  jsonRoot: string = "temp",
+): Record<string, TempReading> {
   if (!payload || typeof payload !== "object") {
     throw new Error("Invalid temperature feed payload");
   }
 
-  const tempRoot = (payload as { temp?: unknown }).temp;
-  if (!tempRoot || typeof tempRoot !== "object") {
-    throw new Error("Temperature feed is missing a temp object");
+  const rootKey = sanitizeJsonRoot(jsonRoot);
+  const tempRoot = (payload as Record<string, unknown>)[rootKey];
+  if (!tempRoot || typeof tempRoot !== "object" || Array.isArray(tempRoot)) {
+    throw new Error(`Temperature feed is missing a "${rootKey}" object`);
   }
 
   const probes: Record<string, TempReading> = {};
@@ -196,6 +214,7 @@ function sanitizeFeed(raw: unknown, index: number): TempFeedConfig | null {
     name,
     url,
     enabled: feed.enabled !== false,
+    jsonRoot: sanitizeJsonRoot(feed.jsonRoot ?? feed.json_root),
   };
 }
 
@@ -287,6 +306,7 @@ export function parseTempFeedsFromFormData(formData: FormData): TempFeedConfig[]
       name,
       url,
       enabled: formData.has(`feed_${index}_enabled`),
+      jsonRoot: sanitizeJsonRoot(formData.get(`feed_${index}_json_root`)),
     });
   }
 

@@ -33,6 +33,7 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
     title: "Hardware setup",
     description: "Sensors, wiring, and firmware for ESP32, Arduino, and HTTPS JSON probes.",
     links: [
+      { href: "/about/adding-devices", slug: "adding-devices" },
       { href: "/about/dht22-sensor-overview", slug: "dht22-sensor-overview" },
       { href: "/about/arduino-circuit-wiring", slug: "arduino-circuit-wiring" },
       { href: "/about/arduino-sketches", slug: "arduino-sketches" },
@@ -67,6 +68,7 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
     title: "API",
     description: "Ingest payloads, dashboard HTTP API, and automation recipes.",
     links: [
+      { href: "/about/adding-devices", slug: "adding-devices" },
       { href: "/about/ingest-and-webhooks", slug: "ingest-and-webhooks" },
       { href: "/docs/api", label: "HTTP API documentation", summary: "Ingest, metrics, webhooks, and the OpenAPI spec." },
       { href: "/about/zapier-make-recipes", slug: "zapier-make-recipes" },

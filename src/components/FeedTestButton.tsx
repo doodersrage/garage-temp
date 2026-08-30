@@ -2,15 +2,21 @@ import { useState } from "preact/hooks";
 
 interface Props {
   inputId: string;
+  /** Optional input that holds the JSON root key (default `temp`). */
+  rootInputId?: string;
 }
 
-export default function FeedTestButton({ inputId }: Props) {
+export default function FeedTestButton({ inputId, rootInputId }: Props) {
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function testFeed() {
     const input = document.getElementById(inputId) as HTMLInputElement | null;
     const url = input?.value.trim();
+    const rootInput = rootInputId
+      ? (document.getElementById(rootInputId) as HTMLInputElement | null)
+      : null;
+    const jsonRoot = rootInput?.value.trim() || "temp";
 
     if (!url) {
       setStatus("Enter a feed URL first.");
@@ -24,7 +30,7 @@ export default function FeedTestButton({ inputId }: Props) {
       const response = await fetch("/api/feeds/test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, jsonRoot }),
       });
       const data = (await response.json()) as { message?: string; ok?: boolean };
       setStatus(data.message ?? (data.ok ? "Feed OK" : "Feed test failed"));

@@ -287,8 +287,9 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "configuring-temperature-feeds",
     parentSlug: "accounts-and-dashboard",
     title: "Configuring temperature feeds",
-    description: "Add HTTPS JSON feeds, enable probes, and map keys to labels in ThermalTrace settings so your home page shows your garage sensors, not demos.",
-    summary: "Personalize the home page with your own probe endpoints.",
+    description:
+      "Add HTTPS pull-feed URLs, set the JSON root key, map probe labels, and verify Home updates—complement to the adding-devices walkthrough.",
+    summary: "Pull-feed URLs, JSON root key, probe labels, and troubleshooting.",
   },
   {
     slug: "admin-dashboard-features",

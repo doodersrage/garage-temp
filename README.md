@@ -75,8 +75,10 @@ docs/               VitePress developer docs (GitHub Pages)
 ## Connecting hardware
 
 1. **Dashboard → Devices** → create a push device and copy the ingest key  
-2. Match sensor keys to your JSON (`door1`, `temp1`, …)  
-3. `POST` to `/api/ingest/<key>`
+2. Map sensors (quick temp + humidity pair, or one key at a time) so labels match your JSON  
+3. `POST` to `/api/ingest/<key>`  
+
+Pull feeds (HTTPS JSON we fetch): Devices → **Edit pull feeds** — set URL, JSON root key (default `temp`), and probe labels.
 
 ```bash
 curl -X POST "https://your-domain/api/ingest/YOUR_KEY" \
@@ -84,7 +86,7 @@ curl -X POST "https://your-domain/api/ingest/YOUR_KEY" \
   -d '{"door1": true, "temp1": 42.5, "battery": 87, "rssi": -62}'
 ```
 
-Guides: [Push ingest](https://doodersrage.github.io/thermaltrace/ingest/) · [Sketches](./sketches) · [Ingest & webhooks](https://thermaltrace.dev/about/ingest-and-webhooks)
+Guides: [Adding devices](https://thermaltrace.dev/about/adding-devices) · [Push ingest](https://doodersrage.github.io/thermaltrace/ingest/) · [Sketches](./sketches) · [Ingest & webhooks](https://thermaltrace.dev/about/ingest-and-webhooks)
 
 Related repos: [arduino JSON probe](https://github.com/doodersrage/arduino-network-json-temperature-sever) · [Python relay](https://github.com/doodersrage/fast-api-relay)
 

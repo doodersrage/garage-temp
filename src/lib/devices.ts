@@ -4,6 +4,7 @@ import { getOrCreateHouseholdForUser, getUserHouseholdId } from "./households";
 import {
   getDefaultTempFeeds,
   getDefaultTempProbes,
+  sanitizeJsonRoot,
   type TempFeedConfig,
   type TempProbeConfig,
 } from "./tempFeedConfig";
@@ -140,6 +141,9 @@ export async function ensureDefaultPullDevice(
       pull_url: feed.url,
       enabled: true,
       sort_order: 0,
+      meta: {
+        pull_json_root: sanitizeJsonRoot(feed.jsonRoot),
+      },
     })
     .select(DEVICE_SELECT)
     .single();
@@ -192,12 +196,19 @@ export function devicesToTempConfig(devices: DeviceWithSensors[]): {
 } {
   const pullDevices = devices.filter((d) => d.source === "pull_url" && d.pull_url);
 
-  const feeds: TempFeedConfig[] = pullDevices.map((device) => ({
-    id: device.id,
-    name: device.name,
-    url: device.pull_url!,
-    enabled: device.enabled,
-  }));
+  const feeds: TempFeedConfig[] = pullDevices.map((device) => {
+    const meta =
+      device.meta && typeof device.meta === "object" && !Array.isArray(device.meta)
+        ? (device.meta as Record<string, unknown>)
+        : {};
+    return {
+      id: device.id,
+      name: device.name,
+      url: device.pull_url!,
+      enabled: device.enabled,
+      jsonRoot: sanitizeJsonRoot(meta.pull_json_root),
+    };
+  });
 
   const probes: TempProbeConfig[] = [];
   const seen = new Set<string>();
@@ -529,6 +540,9 @@ export async function savePullDevicesForHousehold(
         pull_url: feed.url,
         enabled: feed.enabled,
         sort_order: index,
+        meta: {
+          pull_json_root: sanitizeJsonRoot(feed.jsonRoot),
+        },
       })
       .select("id")
       .single();
