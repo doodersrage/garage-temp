@@ -25,7 +25,8 @@ export type NudgeFeatureId =
   | "data_retention"
   | "cold_risk"
   | "prometheus"
-  | "multi_property";
+  | "multi_property"
+  | "claims_pack";
 
 export type PlanFeatureRow = {
   id: string;
@@ -146,6 +147,16 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     member: "Yes",
     pro: "Yes",
     anchor: "csv-export",
+  },
+  {
+    id: "claims_pack",
+    category: "History",
+    label: "Claims / insurance evidence pack",
+    free: "—",
+    member: "—",
+    pro: "Printable HTML + CSVs",
+    anchor: "claims-pack",
+    emphasis: true,
   },
   {
     id: "share_links",
@@ -314,6 +325,12 @@ const NUDGE_CONFIG: Record<
     title: "Monitoring a second property?",
     body: "Pro supports multiple households — vacation home, rental unit, or workshop.",
     anchor: "multi-property",
+  },
+  claims_pack: {
+    targetTier: "pro",
+    title: "Export a claims evidence pack",
+    body: "Pro builds a printable freeze/leak summary with matching readings and alert-event CSVs for a date range you choose.",
+    anchor: "claims-pack",
   },
 };
 

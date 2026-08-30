@@ -29,6 +29,7 @@ export type Entitlements = {
   canUsePush: boolean;
   canUseOutboundWebhook: boolean;
   canCreateShareLinks: boolean;
+  canUseClaimsPack: boolean;
   canUsePortfolio: boolean;
   canUseForecastAlerts: boolean;
   canUseNwsAlerts: boolean;
@@ -48,6 +49,7 @@ function entitlementsFor(tier: PlanTier): Entitlements {
     canUsePush: proOrAbove,
     canUseOutboundWebhook: proOrAbove,
     canCreateShareLinks: proOrAbove,
+    canUseClaimsPack: proOrAbove,
     canUsePortfolio: proOrAbove,
     canUseForecastAlerts: memberOrAbove,
     canUseNwsAlerts: proOrAbove,

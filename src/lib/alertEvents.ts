@@ -89,6 +89,64 @@ export async function listRecentAlertEvents(
   return data as AlertEventRow[];
 }
 
+export const ALERT_EVENTS_EXPORT_MAX = 5000;
+
+/** Alert events in [fromIso, toIso], oldest first, capped for export. */
+export async function listAlertEventsInRange(
+  userId: string,
+  fromIso: string,
+  toIso: string,
+  limit = ALERT_EVENTS_EXPORT_MAX,
+): Promise<AlertEventRow[]> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("alert_events")
+    .select("*")
+    .eq("user_id", userId)
+    .gte("created_at", fromIso)
+    .lte("created_at", toIso)
+    .order("created_at", { ascending: true })
+    .limit(limit);
+
+  if (error || !data) return [];
+  return data as AlertEventRow[];
+}
+
+export function buildAlertEventsCsv(events: AlertEventRow[]): string {
+  const headers = [
+    "created_at",
+    "kind",
+    "title",
+    "body",
+    "channels_sent",
+    "channels_skipped",
+    "acknowledged_at",
+  ];
+
+  const escape = (value: string): string => {
+    if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+      return `"${value.replace(/"/g, '""')}"`;
+    }
+    return value;
+  };
+
+  const rows = events.map((event) =>
+    [
+      event.created_at,
+      event.kind,
+      event.title,
+      event.body,
+      (event.channels_sent ?? []).join("|"),
+      (event.channels_skipped ?? []).join("|"),
+      event.acknowledged_at ?? "",
+    ]
+      .map(escape)
+      .join(","),
+  );
+
+  return [headers.join(","), ...rows].join("\n");
+}
+
 export async function countUnacknowledgedAlerts(userId: string): Promise<number> {
   const supabase = createServerClient();
   const { count } = await supabase

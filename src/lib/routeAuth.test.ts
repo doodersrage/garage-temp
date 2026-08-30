@@ -17,5 +17,12 @@ describe("pathRequiresAuth", () => {
     expect(pathRequiresAuth("/api/stripe/checkout")).toBe(true);
     expect(pathRequiresAuth("/api/user/alert-settings")).toBe(true);
     expect(pathRequiresAuth("/api/devices")).toBe(true);
+    expect(pathRequiresAuth("/api/claims/pack")).toBe(true);
+    expect(pathRequiresAuth("/api/alerts/export.csv")).toBe(true);
+  });
+
+  it("keeps token-based alert links public", () => {
+    expect(pathRequiresAuth("/api/alerts/snooze")).toBe(false);
+    expect(pathRequiresAuth("/api/alerts/ack")).toBe(false);
   });
 });

@@ -145,6 +145,14 @@ for (const device of deviceConfig.devices) {
   }
 }
 const spaceCompare = compareSpaceAverages(chartData.points, probeToSpace);
+
+const claimsFrom = fromDate || cutoffDate;
+const claimsTo = toDate || new Date().toISOString().slice(0, 10);
+const claimsPackQs = new URLSearchParams({
+  from: claimsFrom,
+  to: claimsTo,
+}).toString();
+const claimsPackHref = `/api/claims/pack?${claimsPackQs}`;
 ---
 <DashboardLayout title="Reading History">
   {subscriptionNotice === "success" && (
@@ -259,6 +267,23 @@ const spaceCompare = compareSpaceAverages(chartData.points, probeToSpace);
         </div>
       </section>
     )}
+
+    <section class="card" id="claims-pack">
+      <h2 class="card-title">Claims / insurance pack</h2>
+      <p class="card-subtitle">
+        Printable evidence summary for a date range — freeze exposure, devices, and alert timeline — with links to matching readings and alert-event CSVs.
+      </p>
+      {entitlements.canUseClaimsPack ? (
+        <>
+          <p class="mb-3 text-sm text-[var(--color-text-muted)]">
+            Uses the History filters above when set ({claimsFrom} → {claimsTo}). Opens a printable HTML file; use Print → Save as PDF, then download the linked CSVs for adjusters.
+          </p>
+          <a class="btn-primary" href={claimsPackHref}>Download claims pack</a>
+        </>
+      ) : (
+        <UpgradeNudge feature="claims_pack" tier={entitlements.tier} />
+      )}
+    </section>
 
     {insights.length > 0 && (
       <section class="card">

@@ -14,6 +14,8 @@ const protectedApiPrefixes = [
   "/api/devices",
   "/api/push/",
   "/api/share/manage",
+  "/api/claims",
+  "/api/alerts/export",
 ];
 
 /** Public endpoints that would otherwise match a protected prefix. */
@@ -27,6 +29,7 @@ const publicApiExactPaths = new Set([
 const publicApiPrefixes = [
   "/api/inbound/",
   "/api/alerts/snooze",
+  "/api/alerts/ack",
   "/api/telegram/webhook",
 ];
 

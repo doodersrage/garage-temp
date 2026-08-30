@@ -64,4 +64,15 @@ describe("planComparison", () => {
     expect(getNudgeContent("free", "cold_risk")?.targetTier).toBe("member");
     expect(getNudgeContent("member", "data_retention")).toBeNull();
   });
+
+  it("lists claims pack as Pro-only", () => {
+    const claims = PLAN_FEATURE_ROWS.find((row) => row.id === "claims_pack");
+    expect(claims).toMatchObject({
+      free: "—",
+      member: "—",
+      pro: "Printable HTML + CSVs",
+    });
+    expect(getNudgeContent("member", "claims_pack")?.targetTier).toBe("pro");
+    expect(getNudgeContent("pro", "claims_pack")).toBeNull();
+  });
 });
