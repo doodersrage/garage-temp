@@ -57,7 +57,12 @@ export const aboutMegaGroups: AboutMegaGroup[] = [
     id: "product",
     title: "Dashboard & integrations",
     description: "Accounts, ingest API, alerts, PWA install, and automation.",
-    coreSlugs: ["accounts-and-dashboard", "ingest-and-webhooks", "install-pwa"],
+    coreSlugs: [
+      "accounts-and-dashboard",
+      "adding-devices",
+      "ingest-and-webhooks",
+      "install-pwa",
+    ],
   },
 ];
 
