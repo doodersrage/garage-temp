@@ -101,6 +101,11 @@ const neverSeenWithSensors = pushDevices.some(
 );
 const showVerifyIngest =
   Boolean(Astro.url.searchParams.get("sensor_added")) || neverSeenWithSensors;
+const showReceivingData =
+  !showAddSensorNudge &&
+  pushDevices.some((d) => Boolean(d.last_seen_at)) &&
+  latest.length > 0 &&
+  !neverSeenWithSensors;
 const kindLabels = SENSOR_KIND_LABELS;
 
 function formatLatestValue(row: (typeof latest)[number]): string {
@@ -173,6 +178,20 @@ const ingestKeyDeviceName =
           Your push device is ready. Add at least one sensor key so readings show up on Home.
         </p>
         <a class="btn-primary" href="#add-sensor">Add a sensor</a>
+      </section>
+    )}
+
+    {showReceivingData && (
+      <section class="card alert-success" id="receiving-data">
+        <h2 class="card-title">Receiving data</h2>
+        <p class="mb-4">
+          Ingest looks healthy — readings are showing up. Confirm freeze alerts reach you next.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a class="btn-primary" href="/dashboard/alerts#send-test-alert">Send a test alert</a>
+          <a class="btn-secondary" href="/">Open Home</a>
+          <a class="btn-ghost" href="/dashboard">Overview</a>
+        </div>
       </section>
     )}
 

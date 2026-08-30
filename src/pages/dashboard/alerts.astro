@@ -102,10 +102,10 @@ const analyticsEvents = Astro.url.searchParams.get("test_sent")
 
 const showReferralNudge =
   canEdit &&
-  (Boolean(Astro.url.searchParams.get("test_sent")) ||
-    recentEvents.length > 0 ||
-    Boolean(lastAlertAt));
+  !Astro.url.searchParams.get("test_sent") &&
+  (recentEvents.length > 0 || Boolean(lastAlertAt));
 
+const testSent = Boolean(Astro.url.searchParams.get("test_sent"));
 const siteUrl = resolveSiteUrl(Astro.site);
 const referralRewardDays = Number(
   (user.user_metadata as Record<string, unknown> | undefined)?.referral_reward_days ?? 0,
@@ -137,24 +137,62 @@ const referralRewardDays = Number(
       )}
     </section>
 
-    {Astro.url.searchParams.get("test_sent") && (
-      <section class="card">
-        <h2 class="card-title">Alerts are working — invite a neighbor</h2>
-        <p class="card-subtitle mb-0">
-          Friends who join with your link get <strong>7 extra Pro trial days</strong>. You earn bonus trial days when they subscribe.
+    {testSent && (
+      <section class="card alert-success">
+        <h2 class="card-title">Alerts are working</h2>
+        <p class="card-subtitle mb-4">
+          Delivery path confirmed. A few useful next steps while you’re here:
         </p>
+        <div class="flex flex-wrap gap-3 mb-0">
+          {entitlements.canCreateShareLinks ? (
+            <a class="btn-primary" href="/dashboard/share">Share a live link</a>
+          ) : (
+            <a class="btn-primary" href="/dashboard/share">Share links (Pro)</a>
+          )}
+          <a class="btn-secondary" href="/dashboard/history#claims-pack">
+            {entitlements.canUseClaimsPack ? "Download claims pack" : "Claims evidence pack"}
+          </a>
+          {needsPro && (
+            <a class="btn-ghost" href="/dashboard/plans">Add SMS on Pro</a>
+          )}
+        </div>
       </section>
+    )}
+
+    {testSent && needsPro && (
+      <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} />
+    )}
+
+    {testSent && !entitlements.canUseClaimsPack && (
+      <UpgradeNudge feature="claims_pack" tier={entitlements.tier} />
+    )}
+
+    {testSent && canEdit && (
+      <ReferralCard siteUrl={siteUrl} rewardDays={referralRewardDays} />
     )}
 
     {showReferralNudge && (
       <ReferralCard siteUrl={siteUrl} rewardDays={referralRewardDays} />
     )}
 
-    {!entitlements.canUseForecastAlerts ? (
+    {!testSent && !entitlements.canUseForecastAlerts ? (
       <UpgradeNudge feature="cold_risk" tier={entitlements.tier} />
-    ) : needsPro ? (
+    ) : !testSent && needsPro ? (
       <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} />
     ) : null}
+
+    {canEdit && !lastAlertAt && !testSent && (
+      <section class="card" id="send-test-alert">
+        <h2 class="card-title">Send a test alert</h2>
+        <p class="card-subtitle mb-4">
+          Confirm delivery once before you rely on freeze warnings. Enable at least one channel below, save, then send.
+        </p>
+        <form action="/api/user/alert-test" method="post">
+          <input type="hidden" name="redirect" value="/dashboard/alerts" />
+          <button class="btn-primary" type="submit">Send test now</button>
+        </form>
+      </section>
+    )}
 
     <AlertSettings
       userEmail={user.email ?? ""}
@@ -169,18 +207,34 @@ const referralRewardDays = Number(
 
     <PwaInstallCard />
 
-    {canEdit && (
-      <section class="card">
+    {canEdit && (lastAlertAt || testSent) && (
+      <section class="card" id="send-test-alert">
         <h2 class="card-title">Send a test alert</h2>
-      <p class="card-subtitle mb-4">
-        Fires a sample message to every channel you currently have enabled.
-        Save settings first if you just changed them.
-      </p>
-      <form action="/api/user/alert-test" method="post">
-        <input type="hidden" name="redirect" value="/dashboard/alerts" />
-        <button class="btn-secondary" type="submit">Send test now</button>
-      </form>
-    </section>
+        <p class="card-subtitle mb-4">
+          Fires a sample message to every channel you currently have enabled.
+          Save settings first if you just changed them.
+        </p>
+        <form action="/api/user/alert-test" method="post">
+          <input type="hidden" name="redirect" value="/dashboard/alerts" />
+          <button class="btn-secondary" type="submit">Send test now</button>
+        </form>
+      </section>
+    )}
+
+    {recentEvents.some((event) =>
+      ["threshold", "freeze", "forecast", "nws", "flood", "humidity"].some((kind) =>
+        event.kind?.toLowerCase().includes(kind),
+      ),
+    ) && (
+      <section class="card">
+        <h2 class="card-title">Need evidence for a claim?</h2>
+        <p class="card-subtitle mb-4">
+          After a real freeze or leak event, export a dated summary with matching readings from History.
+        </p>
+        <a class="btn-secondary" href="/dashboard/history#claims-pack">
+          {entitlements.canUseClaimsPack ? "Open claims pack" : "See claims pack (Pro)"}
+        </a>
+      </section>
     )}
 
     <section class="card">

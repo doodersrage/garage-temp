@@ -1,13 +1,22 @@
 ---
 interface Props {
   count: number;
+  showClaimsPackCta?: boolean;
 }
 
-const { count } = Astro.props;
+const { count, showClaimsPackCta = false } = Astro.props;
 ---
 {count > 0 && (
   <div class="alert-warning mb-4" role="status">
     <strong>{count}</strong> unhandled alert{count === 1 ? "" : "s"} —
     <a href="/dashboard/alerts" class="text-link ml-1">Review &amp; acknowledge</a>
+    {showClaimsPackCta && (
+      <>
+        {" · "}
+        <a href="/dashboard/history#claims-pack" class="text-link">
+          Export claims evidence
+        </a>
+      </>
+    )}
   </div>
 )}

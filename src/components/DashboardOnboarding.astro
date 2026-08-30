@@ -7,6 +7,7 @@ interface Props {
   hasHistory: boolean;
   hasAlertsEnabled?: boolean;
   hasEmailAlerts?: boolean;
+  hasTestAlert?: boolean;
   hasHouseholdMembers?: boolean;
   hasLiveSensors?: boolean;
   hasHousehold?: boolean;
@@ -19,6 +20,7 @@ const {
   hasHistory,
   hasAlertsEnabled = false,
   hasEmailAlerts = false,
+  hasTestAlert = false,
   hasHouseholdMembers = false,
   hasLiveSensors = false,
   hasHousehold = false,
@@ -26,8 +28,9 @@ const {
 } = Astro.props;
 
 const showFreezeMapCta = hasLiveSensors && hasHousehold;
+const ingestVerified = hasLiveSensors || hasHistory;
 
-/** Three-step path most users need before winter. */
+/** Path most users need before winter. */
 const essentialSteps = [
   {
     done: hasDevices,
@@ -45,7 +48,13 @@ const essentialSteps = [
     done: hasEmailAlerts,
     href: "/dashboard/alerts#alert-section-channels",
     title: "Enable email alerts",
-    detail: "Check Email under Channels, confirm your address, save, then send a test alert.",
+    detail: "Check Email under Channels, confirm your address, and save.",
+  },
+  {
+    done: hasTestAlert,
+    href: "/dashboard/alerts#send-test-alert",
+    title: "Send a test alert",
+    detail: "Confirm delivery once so you trust the path before a real freeze night.",
   },
 ];
 
@@ -57,13 +66,13 @@ const kitSteps = [
     detail: "Match firmware keys (temp1, door1, …) so ingest maps to readable labels.",
   },
   {
-    done: hasHistory || hasSensors,
-    href: "/about/ingest-and-webhooks",
+    done: ingestVerified,
+    href: "/dashboard/temperature#verify-ingest-step",
     title: "Verify with a test POST",
-    detail: "curl the ingest URL or follow the Arduino wiring guides.",
+    detail: "curl the ingest URL or follow the Arduino wiring guides until Home shows a live reading.",
   },
   {
-    done: hasHistory || hasSensors,
+    done: hasSensors,
     href: "/about/kit-qr-onboarding",
     title: "Optional: QR sticker",
     detail: "Print the in-app ingest QR from Devices for one-scan phone setup.",
@@ -111,7 +120,7 @@ const sectionTitle = !essentialDone
     ? "Hardware setup"
     : "Next steps";
 const sectionSubtitle = !essentialDone
-  ? `${completedCount} of ${essentialSteps.length} essentials — device, threshold, email`
+  ? `${completedCount} of ${essentialSteps.length} essentials — device, threshold, email, test`
   : !kitDone
     ? `${completedCount} of ${kitSteps.length} hardware steps`
     : `${completedCount} of ${nextSteps.length} optional steps`;

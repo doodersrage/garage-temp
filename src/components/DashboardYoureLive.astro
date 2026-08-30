@@ -1,0 +1,40 @@
+---
+import DashboardCard from "./dashboard/DashboardCard.astro";
+
+interface Props {
+  show: boolean;
+  hasAlertsEnabled: boolean;
+  hasEmailAlerts: boolean;
+  hasTestAlert: boolean;
+}
+
+const { show, hasAlertsEnabled, hasEmailAlerts, hasTestAlert } = Astro.props;
+if (!show) return null;
+
+const nextHref =
+  !hasAlertsEnabled || !hasEmailAlerts
+    ? "/dashboard/alerts#alert-section-channels"
+    : !hasTestAlert
+      ? "/dashboard/alerts#send-test-alert"
+      : "/dashboard/history";
+const nextLabel =
+  !hasAlertsEnabled || !hasEmailAlerts
+    ? "Finish alert setup"
+    : !hasTestAlert
+      ? "Send a test alert"
+      : "Review history";
+---
+<DashboardCard>
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h2 class="card-title">You’re receiving data</h2>
+      <p class="card-subtitle mb-0">
+        Live readings are landing. Next: make sure freeze alerts reach you before a cold night.
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a class="btn-primary" href={nextHref}>{nextLabel}</a>
+      <a class="btn-secondary" href="/">Open Home</a>
+    </div>
+  </div>
+</DashboardCard>

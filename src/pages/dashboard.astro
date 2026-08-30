@@ -1,6 +1,7 @@
 ---
 import DashboardLayout from "../layouts/DashboardLayout.astro";
 import DashboardOnboarding from "../components/DashboardOnboarding.astro";
+import DashboardYoureLive from "../components/DashboardYoureLive.astro";
 import AlertSetupNudge from "../components/dashboard/AlertSetupNudge.astro";
 import DashboardStoryCard from "../components/dashboard/DashboardStoryCard.astro";
 import { getAuthFromCookies } from "../lib/auth";
@@ -211,7 +212,14 @@ const feedsValue =
 
 const upgradeTarget = nextUpgradeTier(entitlements.tier);
 
-const essentialDone = hasDevices && hasAlertsEnabled && hasEmailAlerts;
+const essentialDone =
+  hasDevices && hasAlertsEnabled && hasEmailAlerts && Boolean(lastAlertAt);
+const hasTestAlert = Boolean(lastAlertAt);
+const showYoureLive =
+  canEdit &&
+  latest.length > 0 &&
+  !onboardingDismissed &&
+  (!essentialDone || !hasHistory);
 const showSecondaryNudges = onboardingDismissed || essentialDone;
 const showAlertSetupNudge =
   showSecondaryNudges && canEdit && (!hasAlertsEnabled || !hasEmailAlerts);
@@ -225,6 +233,8 @@ if (hasDevices) analyticsEvents.push({ name: "onboarding_step_complete", props: 
 if (hasSensors) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "sensors" } });
 if (hasHistory) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "history" } });
 if (hasEmailAlerts) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "alerts" } });
+if (hasTestAlert) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "alert_test" } });
+if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
 ---
 <DashboardLayout title="Overview">
   <ProductAnalyticsTracker events={analyticsEvents} />
@@ -257,10 +267,18 @@ if (hasEmailAlerts) analyticsEvents.push({ name: "onboarding_step_complete", pro
       hasHistory={hasHistory}
       hasAlertsEnabled={hasAlertsEnabled}
       hasEmailAlerts={hasEmailAlerts}
+      hasTestAlert={hasTestAlert}
       hasHouseholdMembers={hasHouseholdMembers}
       hasLiveSensors={latest.length > 0}
       hasHousehold={Boolean(household.householdId)}
       dismissed={onboardingDismissed}
+    />
+
+    <DashboardYoureLive
+      show={showYoureLive}
+      hasAlertsEnabled={hasAlertsEnabled}
+      hasEmailAlerts={hasEmailAlerts}
+      hasTestAlert={hasTestAlert}
     />
 
     <AlertSetupNudge
@@ -277,7 +295,10 @@ if (hasEmailAlerts) analyticsEvents.push({ name: "onboarding_step_complete", pro
       activeHouseholdId={activeHouseholdId}
     />
 
-    <UnackedAlertsBanner count={unackedAlertCount} />
+    <UnackedAlertsBanner
+      count={unackedAlertCount}
+      showClaimsPackCta={unackedAlertCount > 0}
+    />
 
     {!canEdit && (
       <p class="alert-warning mt-0 mb-0" role="status">
