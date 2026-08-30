@@ -17,6 +17,13 @@ test.describe("public smoke", () => {
   test("pricing page loads", async ({ page }) => {
     await page.goto("/pricing");
     await expect(page.getByRole("heading", { name: /Plans that grow/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Full feature comparison/i })).toBeVisible();
+    const wrap = page.locator("#plan-matrix .plan-comparison-wrap");
+    const { scrollHeight, clientHeight } = await wrap.evaluate((el) => ({
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+    }));
+    expect(scrollHeight).toBe(clientHeight);
   });
 
   test("pricing page billing interval toggle", async ({ page }) => {
