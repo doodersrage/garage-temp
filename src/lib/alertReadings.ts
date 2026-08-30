@@ -24,6 +24,22 @@ export function buildReadingsFromResults(
   });
 }
 
+/** Wet flood / leak sensors from latest DB values (push + pull). */
+export function buildFloodReadingsFromLatestSensors(
+  latest: Array<{
+    sensor: DeviceSensor;
+    deviceSpace?: string | null;
+    value_bool?: boolean | null;
+  }>,
+): Array<{ label: string; space?: string | null }> {
+  return latest
+    .filter((row) => row.sensor.kind === "flood" && row.value_bool === true)
+    .map((row) => ({
+      label: row.sensor.label,
+      space: row.deviceSpace ?? null,
+    }));
+}
+
 /** Build freeze/humidity alert readings from latest DB sensor values (push + pull). */
 export function buildAlertReadingsFromLatestSensors(
   latest: Array<{

@@ -239,8 +239,10 @@ export const POST: APIRoute = async ({ params, request }) => {
     } = await import("../../../lib/notify");
     const {
       sendThresholdAlertsIfNeeded,
+      sendFloodAlertsIfNeeded,
       maybeSendRuleAlerts,
       buildAlertReadingsFromLatestSensors,
+      buildFloodReadingsFromLatestSensors,
     } = await import("../../../lib/alertNotifications");
     const { fetchLatestSensorValues } = await import("../../../lib/sensorReadings");
     const { createAdminClient } = await import("../../../lib/supabase");
@@ -249,6 +251,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     const devices = await listHouseholdDevices(device.household_id);
     const latest = await fetchLatestSensorValues(device.household_id);
     const readings = buildAlertReadingsFromLatestSensors(latest);
+    const floodReadings = buildFloodReadingsFromLatestSensors(latest);
     const admin = createAdminClient();
 
     for (const member of members.members) {
@@ -262,6 +265,12 @@ export const POST: APIRoute = async ({ params, request }) => {
         data.user?.email,
         settings,
         readings,
+      );
+      await sendFloodAlertsIfNeeded(
+        member.user_id,
+        data.user?.email,
+        settings,
+        floodReadings,
       );
       await maybeSendRuleAlerts(
         member.user_id,

@@ -39,6 +39,7 @@ describe("quiet hours", () => {
     expect(shouldSuppressForQuietHours(settings, "rate", noon)).toBe(true);
     expect(shouldSuppressForQuietHours(settings, "threshold", noon)).toBe(false);
     expect(shouldSuppressForQuietHours(settings, "forecast", noon)).toBe(false);
+    expect(shouldSuppressForQuietHours(settings, "flood", noon)).toBe(false);
   });
 });
 

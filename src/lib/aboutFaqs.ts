@@ -104,7 +104,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "How do quiet hours interact with freeze alerts?",
       answer:
-        "You can suppress routine noise overnight while still delivering freeze and forecast alerts—keep bypass enabled for critical kinds.",
+        "You can suppress routine noise overnight while still delivering freeze, flood, and forecast alerts—keep bypass enabled for critical kinds.",
     },
   ],
   "alert-channel-cookbook": [

@@ -237,7 +237,7 @@ export const CONDITION_OPTIONS: Array<{ value: AlertConditionType; label: string
   { value: "door_open_duration", label: "Door open longer than (minutes)" },
   { value: "rate_drop", label: "Rapid temperature drop" },
   { value: "outage", label: "Device outage" },
-  { value: "flood", label: "Flood detected" },
+  { value: "flood", label: "Flood detected (also automatic)" },
   { value: "power_off", label: "Power off" },
   { value: "co2_above", label: "CO₂ above (ppm)" },
   { value: "pressure_below", label: "Pressure below (hPa)" },

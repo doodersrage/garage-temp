@@ -365,7 +365,8 @@ export async function markCooldown(
     | "last_battery_alert_at"
     | "last_battery_trend_alert_at"
     | "last_rssi_alert_at"
-    | "last_nws_alert_at",
+    | "last_nws_alert_at"
+    | "last_flood_alert_at",
 ): Promise<void> {
   const supabase = createServerClient();
   const now = new Date().toISOString();
@@ -380,6 +381,7 @@ export async function markCooldown(
       last_battery_trend_alert_at?: string;
       last_rssi_alert_at?: string;
       last_nws_alert_at?: string;
+      last_flood_alert_at?: string;
       updated_at: string;
     })
     .eq("user_id", userId);

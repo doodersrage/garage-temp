@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildAlertReadingsFromLatestSensors,
+  buildFloodReadingsFromLatestSensors,
   mergeAlertReadings,
 } from "./alertReadings";
 import type { DeviceSensor } from "./devices";
@@ -74,6 +75,46 @@ describe("buildAlertReadingsFromLatestSensors", () => {
     ]);
 
     expect(readings).toEqual([{ label: "Bay", tempf: 40, humidity: 0, space: null }]);
+  });
+});
+
+describe("buildFloodReadingsFromLatestSensors", () => {
+  it("returns only wet flood sensors", () => {
+    const readings = buildFloodReadingsFromLatestSensors([
+      {
+        sensor: sensor({
+          id: "f1",
+          device_id: "d1",
+          key: "leak",
+          kind: "flood",
+          label: "Sump pit",
+        }),
+        deviceSpace: "garage",
+        value_bool: true,
+      },
+      {
+        sensor: sensor({
+          id: "f2",
+          device_id: "d1",
+          key: "leak2",
+          kind: "flood",
+          label: "Water heater",
+        }),
+        value_bool: false,
+      },
+      {
+        sensor: sensor({
+          id: "door",
+          device_id: "d1",
+          key: "door1",
+          kind: "door",
+          label: "Bay door",
+        }),
+        value_bool: true,
+      },
+    ]);
+
+    expect(readings).toEqual([{ label: "Sump pit", space: "garage" }]);
   });
 });
 

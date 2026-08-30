@@ -191,7 +191,7 @@ const { initialRules = [] } = Astro.props;
         } catch {
           routing = {};
         }
-        const uiKinds = new Set(["threshold", "forecast", "nws", "rule", "outage", "rate"]);
+        const uiKinds = new Set(["threshold", "flood", "forecast", "nws", "rule", "outage", "rate"]);
         const spacesTouched = new Set();
         document.querySelectorAll(".space-routing-checkbox").forEach((el) => {
           const space = el.getAttribute("data-space");

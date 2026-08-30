@@ -48,6 +48,7 @@ const ALERT_CHANNELS = [
 /** Space routing matrix kinds (subset of NotifyKind; preserve others on merge). */
 const SPACE_ROUTING_KINDS = [
   { id: "threshold", label: "Threshold" },
+  { id: "flood", label: "Flood / leak" },
   { id: "forecast", label: "Forecast" },
   { id: "nws", label: "NWS" },
   { id: "rule", label: "Rule" },
@@ -57,6 +58,7 @@ const SPACE_ROUTING_KINDS = [
 
 const templateKinds = [
   "threshold",
+  "flood",
   "forecast",
   "nws",
   "rate",
@@ -73,6 +75,7 @@ const needsPro =
 
 const PLAYBOOK_KINDS = [
   { id: "threshold", label: "Threshold" },
+  { id: "flood", label: "Flood / leak" },
   { id: "forecast", label: "Forecast" },
   { id: "nws", label: "NWS" },
   { id: "rate", label: "Rate drop" },
@@ -113,7 +116,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
 
     <h3 class="alert-settings-subheading">Snooze & vacation</h3>
     <p class="form-hint mb-3">
-      Snooze pauses most alerts for 24h (outage still fires). Vacation suppresses non-critical alerts for 7 days.
+      Snooze pauses most alerts for 24h (outage and flood still fire). Vacation suppresses non-critical alerts for 7 days.
       {settings.snoozeUntil && (
         <span class="block mt-1">Snoozed until {new Date(settings.snoozeUntil).toLocaleString()}.</span>
       )}
@@ -136,7 +139,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
   <AlertSettingsPanel
     id="alert-section-triggers"
     title="What triggers alerts"
-    subtitle="Core temperature, humidity, outage, and forecast thresholds."
+    subtitle="Core freeze, humidity, flood, outage, and forecast thresholds."
   >
     <div class="config-row-grid mb-4">
       <div class="form-field mb-0">
@@ -156,6 +159,9 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
         <input class="form-input" type="number" step="0.5" id="outage_hours" name="outage_hours" value={settings.outageHours} />
       </div>
     </div>
+    <p class="form-hint mb-4">
+      Flood / leak sensors also notify automatically when wet. Door, motion, power, air quality, level, and energy use custom rules below.
+    </p>
 
     <details class="alert-settings-nested">
       <summary>Forecast freeze risk</summary>
@@ -417,7 +423,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
   <AlertSettingsPanel
     id="alert-section-quiet"
     title="Quiet hours"
-    subtitle="Suppress non-critical alerts overnight while still allowing freeze warnings through."
+    subtitle="Suppress non-critical alerts overnight while still allowing freeze and flood warnings through."
   >
     <label class="checkbox-row mb-2">
       <input type="checkbox" name="quiet_hours_enabled" value="true" checked={settings.quietHoursEnabled} />
@@ -425,12 +431,12 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     </label>
     <label class="checkbox-row mb-3">
       <input type="checkbox" name="quiet_hours_bypass_freeze" value="true" checked={settings.quietHoursBypassFreeze} />
-      <span>Always deliver freeze / forecast alerts</span>
+      <span>Always deliver freeze, flood, and forecast alerts</span>
     </label>
     <label class="checkbox-row mb-4">
       <input type="checkbox" name="quiet_hours_sms_critical" value="true" checked={settings.quietHoursSmsCritical} disabled={!entitlements.canUseSms} />
       <span>
-        Still send critical freeze/forecast via SMS (Pro)
+        Still send critical freeze/flood/forecast via SMS (Pro)
         {!entitlements.canUseSms && (
           <> — <a class="text-link" href="/dashboard#plans">Upgrade</a></>
         )}
@@ -459,7 +465,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     collapsible
   >
     <h3 class="alert-settings-subheading">Composite rules (AND)</h3>
-    <p class="form-hint mb-3">Fire when every condition in a rule is true (e.g. door open AND temperature drop).</p>
+    <p class="form-hint mb-3">Fire when every condition in a rule is true (e.g. door open AND temperature drop). Flood already alerts when wet; add a flood condition here only to combine it with other checks.</p>
     <div id="alert-rules-list" class="space-y-3 mb-3"></div>
     <button type="button" class="btn-secondary mb-4" id="add-alert-rule">Add rule</button>
 
@@ -499,7 +505,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
         <p class="form-hint mb-3">Leave empty to use global channel checkboxes. Otherwise only selected channels fire for that kind.</p>
         <input type="hidden" name="channel_severity_json" id="channel_severity_json" value={JSON.stringify(settings.channelSeverity ?? {})} />
         <div class="space-y-3" id="severity-routing">
-          {(["threshold", "forecast", "rate", "outage", "rule", "battery", "rssi"] as const).map((kind) => {
+          {(["threshold", "flood", "forecast", "rate", "outage", "rule", "battery", "rssi"] as const).map((kind) => {
             const selected = settings.channelSeverity?.[kind] ?? [];
             return (
               <div class="form-field mb-0">

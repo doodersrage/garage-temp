@@ -118,7 +118,7 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
       { type: "h2", text: "Zone-specific rules" },
       { type: "ul", items: ["**Door-adjacent probe:** Expect brief dips; do not treat every spike as emergency.","**Interior / pipe-wall probe:** Tighter threshold; this zone best represents risk.","**Average key:** Useful summary but can hide a cold corner—check individual zones."] },
       { type: "h2", text: "Related monitoring" },
-      { type: "p", html: "Understand drivers with <a class=\"text-link\" href=\"/about/seasonal-garage-patterns\">seasonal patterns</a> and <a class=\"text-link\" href=\"/about/infiltration-wind-drafts\">infiltration</a>. Hardware reliability matters too—<a class=\"text-link\" href=\"/about/dht22-read-errors-retries\">DHT22 retries</a> prevent false alarms from bad reads." }
+      { type: "p", html: "Understand drivers with <a class=\"text-link\" href=\"/about/seasonal-garage-patterns\">seasonal patterns</a> and <a class=\"text-link\" href=\"/about/infiltration-wind-drafts\">infiltration</a>. Hardware reliability matters too—<a class=\"text-link\" href=\"/about/dht22-read-errors-retries\">DHT22 retries</a> prevent false alarms from bad reads. Leak / flood sensors notify automatically when wet; door, motion, power, and air quality need a custom rule in Dashboard → Alerts." }
   ],
 
   "arduino-ide-setup": [

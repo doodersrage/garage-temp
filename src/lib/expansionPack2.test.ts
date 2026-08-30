@@ -81,6 +81,7 @@ describe("quiet hours SMS critical", () => {
   it("allows SMS for threshold/forecast when sms critical is on", () => {
     expect(quietHoursAllowsSmsCritical(base, "threshold")).toBe(true);
     expect(quietHoursAllowsSmsCritical(base, "forecast")).toBe(true);
+    expect(quietHoursAllowsSmsCritical(base, "flood")).toBe(true);
     expect(quietHoursAllowsSmsCritical(base, "rate")).toBe(false);
   });
 

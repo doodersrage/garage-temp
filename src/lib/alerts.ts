@@ -23,6 +23,7 @@ export type NotifyKind =
   | "generic"
   | "forecast"
   | "nws"
+  | "flood"
   | "rule"
   | "battery"
   | "rssi";
@@ -51,6 +52,7 @@ const NOTIFY_KINDS = new Set<NotifyKind>([
   "generic",
   "forecast",
   "nws",
+  "flood",
   "rule",
   "battery",
   "rssi",
@@ -112,6 +114,7 @@ export type AlertSettings = {
   forecastFreezeEnabled: boolean;
   nwsFreezeAlertsEnabled: boolean;
   lastNwsAlertAt: string | null;
+  lastFloodAlertAt: string | null;
   forecastHoursAhead: number;
   quietHoursEnabled: boolean;
   quietHoursStart: string;
@@ -191,6 +194,7 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   forecastFreezeEnabled: false,
   nwsFreezeAlertsEnabled: false,
   lastNwsAlertAt: null,
+  lastFloodAlertAt: null,
   forecastHoursAhead: 12,
   quietHoursEnabled: false,
   quietHoursStart: "22:00",
@@ -358,6 +362,8 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
     nwsFreezeAlertsEnabled: row.nws_freeze_alerts_enabled === true,
     lastNwsAlertAt:
       typeof row.last_nws_alert_at === "string" ? row.last_nws_alert_at : null,
+    lastFloodAlertAt:
+      typeof row.last_flood_alert_at === "string" ? row.last_flood_alert_at : null,
     forecastHoursAhead:
       typeof row.forecast_hours_ahead === "number"
         ? row.forecast_hours_ahead
@@ -504,6 +510,22 @@ export function evaluateAlerts(
   return messages;
 }
 
+export type FloodAlertReading = {
+  label: string;
+  space?: string | null;
+};
+
+/** Wet flood / leak sensors always notify when alerts are enabled. */
+export function evaluateFloodAlerts(
+  settings: AlertSettings,
+  wetSensors: FloodAlertReading[],
+): string[] {
+  if (!settings.enabled) return [];
+  return wetSensors.map(
+    (sensor) => `${sensor.label} flood / leak sensor is wet.`,
+  );
+}
+
 export function evaluateForecastFreeze(
   settings: AlertSettings,
   forecastMinF: number | null,
@@ -630,6 +652,7 @@ export function serializeAlertSettings(settings: AlertSettings): Record<string, 
     forecast_freeze_enabled: settings.forecastFreezeEnabled,
     nws_freeze_alerts_enabled: settings.nwsFreezeAlertsEnabled,
     last_nws_alert_at: settings.lastNwsAlertAt,
+    last_flood_alert_at: settings.lastFloodAlertAt,
     forecast_hours_ahead: settings.forecastHoursAhead,
     quiet_hours_enabled: settings.quietHoursEnabled,
     quiet_hours_start: settings.quietHoursStart,

@@ -19,6 +19,7 @@ describe("alert snooze and vacation", () => {
     expect(isSnoozeActive(settings)).toBe(true);
     expect(shouldSuppressForSnoozeOrVacation(settings, "threshold")).toBe(true);
     expect(shouldSuppressForSnoozeOrVacation(settings, "outage")).toBe(false);
+    expect(shouldSuppressForSnoozeOrVacation(settings, "flood")).toBe(false);
   });
 
   it("vacation blocks rate alerts", () => {
@@ -29,6 +30,7 @@ describe("alert snooze and vacation", () => {
     expect(isVacationActive(settings)).toBe(true);
     expect(shouldSuppressForSnoozeOrVacation(settings, "rate")).toBe(true);
     expect(shouldSuppressForSnoozeOrVacation(settings, "forecast")).toBe(false);
+    expect(shouldSuppressForSnoozeOrVacation(settings, "flood")).toBe(false);
   });
 });
 

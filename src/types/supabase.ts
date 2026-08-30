@@ -115,6 +115,7 @@ export type Database = {
           last_drip_email_at: string | null
           last_escalation_at: string | null
           last_feed_uptime_alert_at: string | null
+          last_flood_alert_at: string | null
           last_forecast_alert_at: string | null
           last_monthly_report_at: string | null
           last_nws_alert_at: string | null
@@ -199,6 +200,7 @@ export type Database = {
           last_drip_email_at?: string | null
           last_escalation_at?: string | null
           last_feed_uptime_alert_at?: string | null
+          last_flood_alert_at?: string | null
           last_forecast_alert_at?: string | null
           last_monthly_report_at?: string | null
           last_nws_alert_at?: string | null
@@ -283,6 +285,7 @@ export type Database = {
           last_drip_email_at?: string | null
           last_escalation_at?: string | null
           last_feed_uptime_alert_at?: string | null
+          last_flood_alert_at?: string | null
           last_forecast_alert_at?: string | null
           last_monthly_report_at?: string | null
           last_nws_alert_at?: string | null

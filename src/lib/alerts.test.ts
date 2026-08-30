@@ -3,6 +3,7 @@ import {
   ALERT_COOLDOWN_MS,
   DEFAULT_ALERT_SETTINGS,
   evaluateAlerts,
+  evaluateFloodAlerts,
   evaluateOutage,
   evaluateRateChange,
   getAlertSettingsFromMetadata,
@@ -29,6 +30,20 @@ describe("evaluateAlerts", () => {
     ]);
 
     expect(messages).toHaveLength(2);
+  });
+
+  it("flags wet flood sensors when alerts are enabled", () => {
+    const enabled = evaluateFloodAlerts(
+      { ...DEFAULT_ALERT_SETTINGS, enabled: true },
+      [{ label: "Sump pit" }, { label: "Water heater" }],
+    );
+    expect(enabled).toEqual([
+      "Sump pit flood / leak sensor is wet.",
+      "Water heater flood / leak sensor is wet.",
+    ]);
+    expect(
+      evaluateFloodAlerts(DEFAULT_ALERT_SETTINGS, [{ label: "Sump pit" }]),
+    ).toEqual([]);
   });
 });
 

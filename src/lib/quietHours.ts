@@ -60,13 +60,22 @@ export function isInQuietHours(
   );
 }
 
+function isCriticalNotifyKind(kind: NotifyKind | undefined): boolean {
+  return (
+    kind === "threshold" ||
+    kind === "forecast" ||
+    kind === "nws" ||
+    kind === "flood"
+  );
+}
+
 /** Kinds that bypass quiet hours when bypass_freeze is enabled. */
 export function quietHoursBypassed(
   settings: AlertSettings,
   kind: NotifyKind | undefined,
 ): boolean {
   if (!settings.quietHoursBypassFreeze) return false;
-  return kind === "threshold" || kind === "forecast" || kind === "nws";
+  return isCriticalNotifyKind(kind);
 }
 
 export function shouldSuppressForQuietHours(
@@ -81,7 +90,7 @@ export function shouldSuppressForQuietHours(
 
 /**
  * When quiet hours are active and full bypass does not apply, still allow SMS
- * for freeze/forecast if quietHoursSmsCritical is enabled.
+ * for freeze/flood/forecast if quietHoursSmsCritical is enabled.
  */
 export function quietHoursAllowsSmsCritical(
   settings: AlertSettings,
@@ -91,5 +100,5 @@ export function quietHoursAllowsSmsCritical(
   if (!isInQuietHours(settings, now)) return false;
   if (quietHoursBypassed(settings, kind)) return false;
   if (!settings.quietHoursSmsCritical) return false;
-  return kind === "threshold" || kind === "forecast" || kind === "nws";
+  return isCriticalNotifyKind(kind);
 }

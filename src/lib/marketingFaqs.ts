@@ -19,7 +19,7 @@ export const marketingFaqs = {
     {
       question: "Does ThermalTrace send freeze alerts?",
       answer:
-        "Yes. Set a freeze threshold and enable channels such as email, Discord, Telegram, Slack, or (on Pro) SMS, WhatsApp, and browser push. Predictive forecast freeze alerts are on Member; official NWS freeze and cold alerts are on Pro.",
+        "Yes. Set a freeze threshold and enable channels such as email, Discord, Telegram, Slack, or (on Pro) SMS, WhatsApp, and browser push. Predictive forecast freeze alerts are on Member; official NWS freeze and cold alerts are on Pro. Leak / flood sensors also notify automatically when wet; door, motion, power, and air quality use custom rules.",
     },
     {
       question: "Is ThermalTrace free?",

@@ -43,7 +43,7 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
   {
     id: "alerts",
     title: "Alerts",
-    description: "Freeze thresholds, cold-snap playbooks, and notification channels.",
+    description: "Freeze thresholds, leak alerts, cold-snap playbooks, and notification channels.",
     links: [
       { href: "/about/freeze-protection-thresholds", slug: "freeze-protection-thresholds" },
       { href: "/about/cold-snap-playbook", slug: "cold-snap-playbook" },

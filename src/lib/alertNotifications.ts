@@ -2,6 +2,7 @@ import type { TempFeedConfig, TempFeedResult, TempProbeConfig } from "./tempFeed
 import {
   evaluateAlerts,
   evaluateBatteryHealth,
+  evaluateFloodAlerts,
   evaluateForecastFreeze,
   evaluateOutage,
   evaluateRateChange,
@@ -9,6 +10,7 @@ import {
   isAlertCooldownActive,
   type AlertReading,
   type AlertSettings,
+  type FloodAlertReading,
 } from "./alerts";
 import { evaluateAlertRules, type RuleEvalContext } from "./alertRules";
 import {
@@ -35,6 +37,7 @@ import {
 } from "./deviceHealth";
 import {
   buildAlertReadingsFromLatestSensors,
+  buildFloodReadingsFromLatestSensors,
   buildReadingsFromResults,
   mergeAlertReadings,
 } from "./alertReadings";
@@ -49,6 +52,7 @@ import { getUserEntitlements } from "./entitlements";
 
 export {
   buildAlertReadingsFromLatestSensors,
+  buildFloodReadingsFromLatestSensors,
   buildReadingsFromResults,
   mergeAlertReadings,
 } from "./alertReadings";
@@ -99,6 +103,33 @@ export async function sendThresholdAlertsIfNeeded(
     kind: "threshold",
   }, { space: alertSpace });
   await markCooldown(userId, "last_alert_sent_at");
+}
+
+export async function sendFloodAlertsIfNeeded(
+  userId: string,
+  email: string | null | undefined,
+  settings: AlertSettings,
+  wetSensors: FloodAlertReading[],
+): Promise<void> {
+  if (!settings.enabled || wetSensors.length === 0) return;
+  if (isAlertCooldownActive(settings.lastFloodAlertAt)) return;
+
+  const messages = evaluateFloodAlerts(settings, wetSensors);
+  if (messages.length === 0) return;
+
+  const alertSpace = wetSensors.find((sensor) => sensor.space)?.space ?? null;
+  await notifyUser(
+    userId,
+    email,
+    settings,
+    {
+      title: "Flood / leak alert",
+      body: messages.join("\n"),
+      kind: "flood",
+    },
+    { space: alertSpace },
+  );
+  await markCooldown(userId, "last_flood_alert_at");
 }
 
 export async function maybeSendForecastFreezeAlert(
@@ -227,13 +258,16 @@ export async function maybeSendThresholdAlerts(
   }
 
   let sensorReadings: AlertReading[] = [];
+  let floodReadings: FloodAlertReading[] = [];
   if (householdId) {
     const latest = await fetchLatestSensorValues(householdId);
     sensorReadings = buildAlertReadingsFromLatestSensors(latest);
+    floodReadings = buildFloodReadingsFromLatestSensors(latest);
   }
 
   const readings = mergeAlertReadings(feedReadings, sensorReadings);
   await sendThresholdAlertsIfNeeded(userId, email, settings, readings);
+  await sendFloodAlertsIfNeeded(userId, email, settings, floodReadings);
   await maybeSendForecastFreezeAlert(userId, email, settings);
   await maybeSendNwsFreezeAlert(userId, email, settings);
 }
