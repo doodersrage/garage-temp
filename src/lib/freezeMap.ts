@@ -17,6 +17,8 @@ export type FreezeMapSnapshot = {
   captured_at: string;
   lat: number | null;
   lon: number | null;
+  /** True when falling back to illustrative seed cities (not live opt-ins). */
+  isSeed?: boolean;
 };
 
 export type FreezeMapHouseholdSettings = {

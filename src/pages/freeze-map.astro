@@ -7,6 +7,10 @@ import {
   listFreezeMapSparklines,
   listLatestFreezeMapSnapshots,
 } from "../lib/freezeMap";
+import {
+  FREEZE_MAP_SAMPLE_FLOOR,
+  resolveFreezeMapDisplay,
+} from "../lib/freezeMapSeed";
 import { formatRelativeAge } from "../lib/relativeTime";
 import { getAuthFromCookies } from "../lib/auth";
 import {
@@ -18,13 +22,18 @@ import { getMarketingFaqs, getMarketingFaqSchema } from "../lib/marketingFaqs";
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 const showSparse = Astro.url.searchParams.get("sparse") === "1";
-const snapshots = await listLatestFreezeMapSnapshots();
-const sparklines = await listFreezeMapSparklines(7);
+const resolved = resolveFreezeMapDisplay(
+  await listLatestFreezeMapSnapshots(),
+  await listFreezeMapSparklines(7),
+);
+const snapshots = resolved.snapshots;
+const sparklines = resolved.sparklines;
+const isSeed = resolved.isSeed;
 const visible = showSparse
   ? snapshots
-  : snapshots.filter((row) => row.sample_count >= 3);
+  : snapshots.filter((row) => row.sample_count >= FREEZE_MAP_SAMPLE_FLOOR);
 const sparseHidden = snapshots.length - visible.length;
-const capturedAt = snapshots[0]?.captured_at ?? null;
+const capturedAt = isSeed ? null : (snapshots[0]?.captured_at ?? null);
 const captureAge = formatRelativeAge(capturedAt, "not yet");
 
 const coldest = [...visible]
@@ -101,11 +110,35 @@ function sparkPath(values: number[]): string {
       <a slot="actions" class="btn-ghost" href="/share-kit">Share kit</a>
     </PageHeader>
 
+    {isSeed && (
+      <section class="card" role="status">
+        <h2 class="card-title">Sample preview</h2>
+        <p class="card-subtitle mb-0">
+          These cities are illustrative late-winter garage aggregates so you can see how the map works.
+          Live opt-in data will replace them once enough households contribute.
+          {user ? (
+            <>
+              {" "}
+              <a class="text-link" href="/dashboard/household">Opt in from Household</a>.
+            </>
+          ) : (
+            <>
+              {" "}
+              <a class="text-link" href="/register?next=/dashboard/household">Create an account</a>
+              {" "}to contribute your city.
+            </>
+          )}
+        </p>
+      </section>
+    )}
+
     {coldest.length > 0 && (
       <section class="card">
-        <h2 class="card-title">Coldest cities right now</h2>
+        <h2 class="card-title">{isSeed ? "Coldest sample cities" : "Coldest cities right now"}</h2>
         <p class="card-subtitle mb-4">
-          Lowest min °F from the latest opt-in snapshot — share-worthy freeze risk at a glance.
+          {isSeed
+            ? "Illustrative mins from the sample snapshot — not live community readings."
+            : "Lowest min °F from the latest opt-in snapshot — share-worthy freeze risk at a glance."}
         </p>
         <ol class="space-y-2 mb-0 text-sm">
           {coldest.map((row, i) => (
@@ -125,7 +158,9 @@ function sparkPath(values: number[]): string {
     <section class="card">
       <p class="card-subtitle mb-3">
         Updated hourly. Opt out anytime under Household settings.
-        {capturedAt ? (
+        {isSeed ? (
+          <> Showing sample cities until live opt-ins meet the floor.</>
+        ) : capturedAt ? (
           <>
             {" "}Last snapshot {captureAge.label}
             {captureAge.absolute ? ` (${captureAge.absolute})` : ""}.
@@ -136,7 +171,7 @@ function sparkPath(values: number[]): string {
       </p>
       <p class="mb-0 text-sm">
         {showSparse ? (
-          <a class="text-link" href="/freeze-map">Hide sparse samples (&lt;3)</a>
+          <a class="text-link" href="/freeze-map">Hide sparse samples (&lt;{FREEZE_MAP_SAMPLE_FLOOR})</a>
         ) : (
           <a class="text-link" href="/freeze-map?sparse=1">
             Show sparse samples{sparseHidden > 0 ? ` (${sparseHidden} hidden)` : ""}
@@ -243,7 +278,7 @@ function sparkPath(values: number[]): string {
                   row.sample_count > 0
                     ? Math.round((row.freeze_risk_count / row.sample_count) * 100)
                     : 0;
-                const sparse = row.sample_count < 3;
+                const sparse = row.sample_count < FREEZE_MAP_SAMPLE_FLOOR;
                 const spark = sparklines.get(row.city_id) ?? [];
                 const path = sparkPath(spark);
                 return (

@@ -6,6 +6,10 @@ import PageHeader from "../components/PageHeader.astro";
 import {
   listLatestFreezeMapSnapshots,
 } from "../lib/freezeMap";
+import {
+  FREEZE_MAP_SAMPLE_FLOOR,
+  resolveFreezeMapDisplay,
+} from "../lib/freezeMapSeed";
 import { getAuthFromCookies } from "../lib/auth";
 import {
   getBreadcrumbSchema,
@@ -14,8 +18,15 @@ import {
 } from "../lib/schemaMarkup";
 
 const { user } = await getAuthFromCookies(Astro.cookies);
-const snapshots = await listLatestFreezeMapSnapshots();
-const visible = snapshots.filter((row) => row.sample_count >= 3);
+const resolved = resolveFreezeMapDisplay(
+  await listLatestFreezeMapSnapshots(),
+  new Map(),
+);
+const snapshots = resolved.snapshots;
+const isSeed = resolved.isSeed;
+const visible = snapshots.filter(
+  (row) => row.sample_count >= FREEZE_MAP_SAMPLE_FLOOR,
+);
 const coldest = [...visible]
   .filter((row) => row.min_temp_f != null)
   .sort((a, b) => (a.min_temp_f ?? 999) - (b.min_temp_f ?? 999))
@@ -65,8 +76,12 @@ const schema = [
 
     {coldest.length > 0 && (
       <section class="card">
-        <h2 class="card-title">Coldest opt-in cities</h2>
-        <p class="card-subtitle mb-4">From the latest ThermalTrace freeze-map snapshot.</p>
+        <h2 class="card-title">{isSeed ? "Sample coldest cities" : "Coldest opt-in cities"}</h2>
+        <p class="card-subtitle mb-4">
+          {isSeed
+            ? "Illustrative preview until enough households opt into the freeze map."
+            : "From the latest ThermalTrace freeze-map snapshot."}
+        </p>
         <ul class="text-sm space-y-2 mb-0">
           {coldest.map((row) => (
             <li>

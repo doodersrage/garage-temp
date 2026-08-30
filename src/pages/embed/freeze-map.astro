@@ -2,11 +2,22 @@
 export const prerender = false;
 
 import { listLatestFreezeMapSnapshots } from "../../lib/freezeMap";
+import {
+  FREEZE_MAP_SAMPLE_FLOOR,
+  resolveFreezeMapDisplay,
+} from "../../lib/freezeMapSeed";
 import { formatRelativeAge } from "../../lib/relativeTime";
 
-const snapshots = await listLatestFreezeMapSnapshots();
-const visible = snapshots.filter((row) => row.sample_count >= 3);
-const capturedAt = snapshots[0]?.captured_at ?? null;
+const resolved = resolveFreezeMapDisplay(
+  await listLatestFreezeMapSnapshots(),
+  new Map(),
+);
+const snapshots = resolved.snapshots;
+const isSeed = resolved.isSeed;
+const visible = snapshots.filter(
+  (row) => row.sample_count >= FREEZE_MAP_SAMPLE_FLOOR,
+);
+const capturedAt = isSeed ? null : (snapshots[0]?.captured_at ?? null);
 const captureAge = formatRelativeAge(capturedAt, "not yet");
 const compact = Astro.url.searchParams.get("compact") === "1";
 
@@ -63,7 +74,11 @@ const mapPinsJson = JSON.stringify(mapPins);
   </head>
   <body>
     <h1>Garage freeze-risk map</h1>
-    <p>Opt-in city aggregates · updated {captureAge.label}</p>
+    <p>
+      {isSeed
+        ? "Illustrative sample cities · not live opt-ins yet"
+        : `Opt-in city aggregates · updated ${captureAge.label}`}
+    </p>
     {coldest.length > 0 && (
       <ul class="coldest">
         {coldest.map((row, i) => (
