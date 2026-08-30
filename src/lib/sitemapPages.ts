@@ -7,6 +7,7 @@ const EXCLUDED_ABOUT_SLUGS = new Set(["zapier-integration"]);
 const STATIC_PUBLIC_PATHS = [
   "/",
   "/about",
+  "/guides",
   "/pricing",
   "/compare",
   "/compare/diy-mqtt",

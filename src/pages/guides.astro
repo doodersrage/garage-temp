@@ -1,0 +1,56 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import { getGuideHubCategories } from "../lib/guideHub";
+import {
+  getBreadcrumbSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+
+const categories = getGuideHubCategories();
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/guides");
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "Guides", path: "/guides" },
+  ]),
+];
+---
+<Layout
+  title="Guides"
+  description="ThermalTrace guides by job: hardware setup, freeze alerts, household sharing, and the HTTP API — plus the full About library."
+  schema={schema}
+  speakableSelectors={[".page-header-title", ".page-header-lede"]}
+>
+  <div class="page-shell page-stack">
+    <PageHeader
+      kicker="Guides"
+      title="Set up probes, alerts, sharing, and the API"
+      lede="Start with the job you need done. Hardware, freeze alerts, household sharing, and ingest/API docs in one place — then browse the full About library if you want every article."
+    >
+      <a slot="actions" class="btn-primary" href="/register">Start free</a>
+      <a slot="actions" class="btn-secondary" href="/about">All About articles</a>
+    </PageHeader>
+
+    <div class="guide-hub-grid">
+      {categories.map((category) => (
+        <section class="card guide-hub-category" id={category.id} aria-labelledby={`guide-${category.id}`}>
+          <h2 class="card-title" id={`guide-${category.id}`}>{category.title}</h2>
+          <p class="card-subtitle mb-4">{category.description}</p>
+          <ul class="guide-hub-list">
+            {category.links.map((link) => (
+              <li>
+                <a class="guide-hub-link" href={link.href}>
+                  <span class="guide-hub-link-title">{link.label}</span>
+                  <span class="guide-hub-link-summary">{link.summary}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </div>
+</Layout>

@@ -41,22 +41,40 @@ const defaultInterval =
 function priceForInterval(
   prices: ReturnType<typeof getMemberPriceDisplay>,
   interval: "monthly" | "annual",
-): { main: string; sub: string | null } {
+): { amount: string; period: string; sub: string } {
   if (interval === "monthly") {
+    const amount = prices.monthly ?? "Contact us";
     return {
-      main: prices.monthly ?? "Contact us",
-      sub: null,
+      amount,
+      period: prices.monthly ? "/mo" : "",
+      sub: "Billed monthly",
     };
   }
   if (prices.annual) {
     return {
-      main: prices.annual,
+      amount: prices.annual,
+      period: "/yr",
       sub: prices.annualMonthlyEquivalent
         ? `${prices.annualMonthlyEquivalent}/mo billed annually`
         : "Billed annually",
     };
   }
-  return { main: prices.monthly ?? "Contact us", sub: null };
+  const amount = prices.monthly ?? "Contact us";
+  return {
+    amount,
+    period: prices.monthly ? "/mo" : "",
+    sub: "Billed monthly",
+  };
+}
+
+function savingsForInterval(
+  pct: number | null,
+  interval: "monthly" | "annual",
+): string {
+  const label = pct != null && pct > 0 ? `${pct}%` : "~20%";
+  return interval === "annual"
+    ? `Save ${label} vs monthly`
+    : `Switch to annual to save ${label}`;
 }
 
 const memberMonthly = priceForInterval(memberPrices, "monthly");
@@ -69,6 +87,12 @@ const maxAnnualSavings = Math.max(
 );
 const annualSavingsLabel =
   maxAnnualSavings > 0 ? `Save up to ${maxAnnualSavings}%` : "Save ~20%";
+const memberSavingsMonthly = savingsForInterval(memberPrices.annualSavingsPct, "monthly");
+const memberSavingsAnnual = savingsForInterval(memberPrices.annualSavingsPct, "annual");
+const proSavingsMonthly = savingsForInterval(proPrices.annualSavingsPct, "monthly");
+const proSavingsAnnual = savingsForInterval(proPrices.annualSavingsPct, "annual");
+const monthlyHint = `You’re viewing monthly prices. Annual locks in ${maxAnnualSavings > 0 ? `${maxAnnualSavings}%` : "about 20%"} off (${memberAnnual.amount} / ${proAnnual.amount} per year).`;
+const annualHint = `You’re viewing yearly totals. Toggle Monthly to see ${memberMonthly.amount} / ${proMonthly.amount} per month.`;
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/pricing");
@@ -133,8 +157,12 @@ const schema = [
           <span class="billing-interval-badge">{annualSavingsLabel}</span>
         </button>
       </div>
-      <p class="billing-interval-hint">
-        Annual plans lock in {maxAnnualSavings > 0 ? `${maxAnnualSavings}%` : "about 20%"} off versus paying monthly.
+      <p
+        class="billing-interval-hint"
+        data-hint-monthly={monthlyHint}
+        data-hint-annual={annualHint}
+      >
+        {defaultInterval === "annual" ? annualHint : monthlyHint}
       </p>
 
       <div class="plan-tier-grid">
@@ -165,46 +193,43 @@ const schema = [
 
         <article class="plan-tier-card plan-tier-card-featured">
           <div class="plan-tier-badge-slot">
-            <p class="plan-tier-badge">Most popular</p>
+            <span class="plan-tier-badge">Most popular</span>
           </div>
           <h2 class="plan-tier-name">Member</h2>
-          <p
-            class="plan-tier-price"
-            data-price-monthly={memberMonthly.main}
-            data-price-annual={memberAnnual.main}
-          >
-            {defaultInterval === "annual" ? memberAnnual.main : memberMonthly.main}
+          <p class="plan-tier-price" aria-live="polite">
+            <span
+              class="plan-tier-amount"
+              data-price-monthly={memberMonthly.amount}
+              data-price-annual={memberAnnual.amount}
+            >
+              {defaultInterval === "annual" ? memberAnnual.amount : memberMonthly.amount}
+            </span><span
+              class="plan-tier-period"
+              data-period-monthly={memberMonthly.period}
+              data-period-annual={memberAnnual.period}
+            >{defaultInterval === "annual" ? memberAnnual.period : memberMonthly.period}</span>
           </p>
           <div class="plan-tier-meta">
             <p
               class="plan-tier-savings"
-              data-savings-monthly=""
-              data-savings-annual={memberPrices.annualSavingsPct != null && memberPrices.annualSavingsPct > 0
-                ? `Save ${memberPrices.annualSavingsPct}% with annual billing`
-                : "Save ~20% with annual billing"}
+              data-savings-monthly={memberSavingsMonthly}
+              data-savings-annual={memberSavingsAnnual}
             >
-              {defaultInterval === "annual"
-                ? (memberPrices.annualSavingsPct != null && memberPrices.annualSavingsPct > 0
-                  ? `Save ${memberPrices.annualSavingsPct}% with annual billing`
-                  : "Save ~20% with annual billing")
-                : "\u00a0"}
+              {defaultInterval === "annual" ? memberSavingsAnnual : memberSavingsMonthly}
             </p>
             <p
               class="plan-tier-sub"
-              data-sub-monthly=""
-              data-sub-annual={memberAnnual.sub ?? ""}
+              data-sub-monthly={memberMonthly.sub}
+              data-sub-annual={memberAnnual.sub}
             >
-              {defaultInterval === "annual" ? (memberAnnual.sub ?? "\u00a0") : "\u00a0"}
+              {defaultInterval === "annual" ? memberAnnual.sub : memberMonthly.sub}
             </p>
           </div>
           <p class="plan-tier-tagline">History export, more headroom, and forecast freeze</p>
           <ul class="plan-tier-list">
             <li>{MEMBER_MAX_DEVICES} push devices</li>
             <li>{formatHistoryRetention(MEMBER_HISTORY_DAYS)} of history</li>
-            <li>
-              <span class="plan-feature-badge">Cold-risk</span>
-              Forecast freeze alerts
-            </li>
+            <li>Forecast-based cold-risk alerts</li>
             <li>CSV history export</li>
           </ul>
           <div class="plan-tier-footer">
@@ -227,47 +252,42 @@ const schema = [
         <article class="plan-tier-card">
           <div class="plan-tier-badge-slot" aria-hidden="true"></div>
           <h2 class="plan-tier-name">Pro</h2>
-          <p
-            class="plan-tier-price"
-            data-price-monthly={proMonthly.main === "Contact us" ? proMonthly.main : `${proMonthly.main}/mo`}
-            data-price-annual={proAnnual.main === "Contact us" ? proAnnual.main : `${proAnnual.main}/yr`}
-          >
-            {defaultInterval === "annual"
-              ? (proAnnual.main === "Contact us" ? proAnnual.main : `${proAnnual.main}/yr`)
-              : (proMonthly.main === "Contact us" ? proMonthly.main : `${proMonthly.main}/mo`)}
+          <p class="plan-tier-price" aria-live="polite">
+            <span
+              class="plan-tier-amount"
+              data-price-monthly={proMonthly.amount}
+              data-price-annual={proAnnual.amount}
+            >
+              {defaultInterval === "annual" ? proAnnual.amount : proMonthly.amount}
+            </span><span
+              class="plan-tier-period"
+              data-period-monthly={proMonthly.period}
+              data-period-annual={proAnnual.period}
+            >{defaultInterval === "annual" ? proAnnual.period : proMonthly.period}</span>
           </p>
           <div class="plan-tier-meta">
             <p
               class="plan-tier-savings"
-              data-savings-monthly=""
-              data-savings-annual={proPrices.annualSavingsPct != null && proPrices.annualSavingsPct > 0
-                ? `Save ${proPrices.annualSavingsPct}% annually`
-                : "Save ~20% annually"}
+              data-savings-monthly={proSavingsMonthly}
+              data-savings-annual={proSavingsAnnual}
             >
-              {defaultInterval === "annual"
-                ? (proPrices.annualSavingsPct != null && proPrices.annualSavingsPct > 0
-                  ? `Save ${proPrices.annualSavingsPct}% annually`
-                  : "Save ~20% annually")
-                : "\u00a0"}
+              {defaultInterval === "annual" ? proSavingsAnnual : proSavingsMonthly}
             </p>
             <p
               class="plan-tier-sub"
-              data-sub-monthly="14-day free trial"
-              data-sub-annual={proAnnual.sub ? `${proAnnual.sub} · 14-day free trial` : "14-day free trial"}
+              data-sub-monthly={`${proMonthly.sub} · 14-day free trial`}
+              data-sub-annual={`${proAnnual.sub} · 14-day free trial`}
             >
               {defaultInterval === "annual"
-                ? (proAnnual.sub ? `${proAnnual.sub} · 14-day free trial` : "14-day free trial")
-                : "14-day free trial"}
+                ? `${proAnnual.sub} · 14-day free trial`
+                : `${proMonthly.sub} · 14-day free trial`}
             </p>
           </div>
           <p class="plan-tier-tagline">NWS cold-risk, alerts anywhere, integrations</p>
           <ul class="plan-tier-list">
             <li>{PRO_MAX_DEVICES} push devices</li>
             <li>{formatHistoryRetention(PRO_HISTORY_DAYS)}+ of history</li>
-            <li>
-              <span class="plan-feature-badge">Cold-risk</span>
-              Forecast + official NWS alerts
-            </li>
+            <li>Forecast + official NWS cold-risk alerts</li>
             <li>
               SMS, push, webhooks, share links &amp;
               <a class="text-link" href="/docs/api">API keys</a>
@@ -297,10 +317,11 @@ const schema = [
       )}
     </section>
 
-    <section class="card">
+    <section class="card" id="plan-matrix">
       <h2 class="card-title">Full feature comparison</h2>
       <p class="card-subtitle mb-4">
-        Device counts and retention windows sit side-by-side so you can see what upgrades. Cold-risk badges mark which plan includes predictive forecast and NWS freeze alerts.
+        Device counts, retention, and which freeze alerts sit on each plan. Comparing against MQTT, Govee, or a weather station?
+        {" "}<a class="text-link" href="/compare">See alternatives</a>.
       </p>
       <PlanComparisonTable highlightTier={currentTier} />
     </section>
@@ -314,6 +335,7 @@ const schema = [
       <h2 class="card-title">Still deciding?</h2>
       <p class="mb-0">
         Read the <a class="text-link" href="/stories/garage-freeze-alert">garage freeze case study</a>,
+        compare against <a class="text-link" href="/compare">DIY MQTT, Govee, or Tempest</a>,
         see the <a class="text-link" href="/about/accounts-and-dashboard">accounts guide</a>,
         or <a class="text-link" href="/contact">contact us</a> if you're unsure which tier fits.
       </p>
@@ -345,6 +367,10 @@ const schema = [
         el.textContent = price;
       });
 
+      document.querySelectorAll("[data-period-monthly]").forEach((el) => {
+        el.textContent = el.getAttribute(`data-period-${interval}`) ?? "";
+      });
+
       document.querySelectorAll(".plan-tier-sub").forEach((el) => {
         const sub = el.getAttribute(`data-sub-${interval}`) ?? "\u00a0";
         el.textContent = sub || "\u00a0";
@@ -353,6 +379,11 @@ const schema = [
       document.querySelectorAll(".plan-tier-savings").forEach((el) => {
         const savings = el.getAttribute(`data-savings-${interval}`) ?? "";
         el.textContent = savings || "\u00a0";
+      });
+
+      document.querySelectorAll("[data-hint-monthly]").forEach((el) => {
+        const hint = el.getAttribute(`data-hint-${interval}`) ?? "";
+        if (hint) el.textContent = hint;
       });
 
       document.querySelectorAll("[data-interval-input]").forEach((input) => {

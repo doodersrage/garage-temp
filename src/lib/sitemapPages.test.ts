@@ -6,6 +6,7 @@ describe("sitemapPages", () => {
     const paths = getPublicSitemapPaths();
     expect(paths).toContain("/about/dht22-sensor-overview");
     expect(paths).toContain("/about/temperature-probes");
+    expect(paths).toContain("/guides");
     expect(paths).toContain("/docs/api");
     expect(paths).toContain("/android");
     expect(paths).toContain("/privacy");

@@ -1,0 +1,30 @@
+---
+import type { AppStatusSummary } from "../lib/appStatus";
+
+interface Props {
+  status: AppStatusSummary | null;
+}
+
+const { status } = Astro.props;
+const known = status != null;
+const healthy = status?.healthy === true;
+const label = !known
+  ? "System status"
+  : healthy
+    ? "All systems operational"
+    : "Degraded — see status";
+---
+<a
+  class:list={["home-status", known && !healthy && "home-status-warn"]}
+  href="/system-status"
+>
+  <span
+    class:list={[
+      "home-status-dot",
+      known && healthy && "home-status-dot-ok",
+      known && !healthy && "home-status-dot-warn",
+    ]}
+    aria-hidden="true"
+  ></span>
+  {label}
+</a>

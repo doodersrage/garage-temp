@@ -1,0 +1,59 @@
+---
+---
+<section class="card home-guides home-pwa" id="use-on-phone" aria-labelledby="pwa-title">
+  <div class="home-guides-copy">
+    <p class="text-sm text-[var(--color-text-muted)] mb-1">On your phone today</p>
+    <h2 class="card-title" id="pwa-title">Install the web app (PWA)</h2>
+    <p class="card-subtitle mb-3">
+      Add ThermalTrace to your home screen in Chrome or Safari. Same account as the dashboard — live readings and alerts without waiting on Play.
+    </p>
+    <ol class="home-pwa-steps">
+      <li>Open thermaltrace.dev in Chrome (Android) or Safari (iPhone).</li>
+      <li>Use <strong>Install app</strong> or Share → <strong>Add to Home Screen</strong>.</li>
+      <li>Open the icon; enable push later from Dashboard → Alerts (Pro).</li>
+    </ol>
+    <p class="home-pwa-status mb-0 mt-3 text-sm text-[var(--color-text-muted)]" id="home-pwa-status"></p>
+  </div>
+  <div class="home-guides-actions">
+    <button type="button" class="btn-primary" id="home-pwa-install-btn" hidden>
+      Install app
+    </button>
+    <a class="btn-primary" id="home-pwa-guide" href="/about/install-pwa">PWA install steps</a>
+    <a class="btn-secondary" href="/android">Android app coming soon</a>
+  </div>
+</section>
+
+<script is:inline>
+  (() => {
+    const btn = document.getElementById("home-pwa-install-btn");
+    const guide = document.getElementById("home-pwa-guide");
+    const status = document.getElementById("home-pwa-status");
+    let deferredPrompt = null;
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredPrompt = event;
+      if (btn) btn.hidden = false;
+      if (guide) guide.className = "btn-secondary";
+    });
+
+    btn?.addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (status) {
+        status.textContent =
+          choice.outcome === "accepted"
+            ? "Install started."
+            : "Install dismissed — the step-by-step guide still works.";
+      }
+      deferredPrompt = null;
+      if (btn) btn.hidden = true;
+    });
+
+    window.addEventListener("appinstalled", () => {
+      if (status) status.textContent = "App installed.";
+      if (btn) btn.hidden = true;
+    });
+  })();
+</script>

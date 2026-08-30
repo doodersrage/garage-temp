@@ -62,7 +62,7 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
   },
   {
     id: "pull_feeds",
-    category: "Devices",
+    category: "Limits",
     label: "Pull JSON feeds",
     free: "Unlimited",
     member: "Unlimited",
@@ -79,16 +79,12 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
   {
     id: "cold_risk",
     category: "Alerts",
-    label: "Cold-risk / NWS forecasts",
+    label: "Cold-risk alerts",
     free: "Threshold only",
-    member: "Forecast freeze",
-    pro: "Forecast + NWS",
+    member: "Forecast-based cold-risk",
+    pro: "Forecast + official NWS",
     anchor: "cold-risk",
     emphasis: true,
-    cellBadge: {
-      member: "Cold-risk",
-      pro: "Cold-risk",
-    },
   },
   {
     id: "sms_alerts",

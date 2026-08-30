@@ -580,6 +580,16 @@
     animation: home-rise 520ms var(--motion-ease) both;
   }
 
+  .home-hero-audience {
+    margin: 0 0 0.75rem;
+    max-width: 36rem;
+    font-size: 0.9375rem;
+    font-weight: 550;
+    line-height: 1.45;
+    color: var(--color-accent-muted);
+    animation: home-rise 520ms var(--motion-ease) both;
+  }
+
   h1.home-hero-brand {
     font-size: clamp(2.35rem, 6vw, 3.6rem);
     font-weight: 650;
@@ -601,6 +611,109 @@
     animation: home-rise 520ms var(--motion-ease) 140ms both;
   }
 
+  .home-hero-plans {
+    margin: 1.15rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--color-text-muted);
+    animation: home-rise 520ms var(--motion-ease) 180ms both;
+  }
+
+  .home-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    width: fit-content;
+    padding: 0.35rem 0.7rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 550;
+    text-decoration: none;
+  }
+
+  .home-status:hover {
+    border-color: var(--color-border-strong);
+    color: var(--color-text);
+  }
+
+  .home-status-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--color-text-muted);
+  }
+
+  .home-status-dot-ok {
+    background: var(--color-success);
+  }
+
+  .home-status-dot-warn,
+  .home-status-warn .home-status-dot {
+    background: var(--color-danger);
+  }
+
+  .home-pwa-steps {
+    margin: 0;
+    padding-left: 1.15rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+  }
+
+  .home-pwa-steps li + li {
+    margin-top: 0.35rem;
+  }
+
+  .home-oss {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  .guide-hub-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .guide-hub-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .guide-hub-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .guide-hub-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .guide-hub-link-title {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .guide-hub-link:hover .guide-hub-link-title {
+    color: var(--color-accent-muted);
+  }
+
+  .guide-hub-link-summary {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--color-text-muted);
+  }
+
   @keyframes home-rise {
     from {
       opacity: 0;
@@ -615,8 +728,10 @@
 
   @media (prefers-reduced-motion: reduce) {
     .home-hero-brand,
+    .home-hero-audience,
     .home-hero-lead,
-    .home-hero-actions {
+    .home-hero-actions,
+    .home-hero-plans {
       animation: none;
     }
   }
@@ -1051,15 +1166,18 @@
   }
 
   .plan-tier-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     margin: 0;
-    padding: 0.2rem 0.5rem;
-    border-radius: var(--radius-sm);
+    padding: 0.15rem 0.55rem;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
+    border-radius: 999px;
     background: var(--color-accent-soft);
     color: var(--color-accent-muted);
-    font-size: 0.6875rem;
-    font-weight: 650;
-    letter-spacing: 0.04em;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1.2;
     text-transform: uppercase;
   }
 
@@ -1072,12 +1190,26 @@
   }
 
   .plan-tier-price {
+    display: flex;
+    align-items: baseline;
+    gap: 0.12em;
     margin: 0 0 0.35rem;
     font-family: var(--font-display);
     font-size: 1.65rem;
     font-weight: 650;
     letter-spacing: -0.03em;
     color: var(--color-text);
+  }
+
+  .plan-tier-period {
+    font-size: 0.55em;
+    font-weight: 550;
+    letter-spacing: 0;
+    color: var(--color-text-muted);
+  }
+
+  .plan-tier-period:empty {
+    display: none;
   }
 
   .plan-tier-meta {
@@ -1196,6 +1328,11 @@
     display: none;
   }
 
+  .plan-comparison-wrap {
+    overflow: auto;
+    max-height: min(70vh, 44rem);
+  }
+
   .plan-comparison-table {
     width: 100%;
     border-collapse: collapse;
@@ -1211,8 +1348,13 @@
   }
 
   .plan-comparison-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
     font-weight: 600;
     color: var(--color-text-muted);
+    background: var(--color-surface);
+    box-shadow: 0 1px 0 var(--color-border);
   }
 
   .plan-comparison-category th {
@@ -1221,11 +1363,15 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--color-text-muted);
-    background: transparent;
+    background: var(--color-surface);
   }
 
   .plan-col-highlight {
-    background: var(--color-accent-soft);
+    background: color-mix(in srgb, var(--color-accent-soft) 90%, var(--color-surface));
+  }
+
+  .plan-comparison-table thead th.plan-col-highlight {
+    background: color-mix(in srgb, var(--color-accent-soft) 90%, var(--color-surface));
   }
 
   .plan-comparison-emphasis th,

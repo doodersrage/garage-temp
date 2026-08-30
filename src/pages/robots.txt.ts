@@ -25,6 +25,7 @@ Disallow: /embed/
 Allow: /docs/api
 Allow: /docs/
 Allow: /about
+Allow: /guides
 Allow: /pricing
 Allow: /compare
 Allow: /freeze-map

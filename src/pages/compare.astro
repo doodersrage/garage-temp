@@ -1,7 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import PageHeader from "../components/PageHeader.astro";
-import PlanComparisonTable from "../components/PlanComparisonTable.astro";
 import FaqSection from "../components/FaqSection.astro";
 import {
   getBreadcrumbSchema,
@@ -24,7 +23,7 @@ const schema = [
 ---
 <Layout
   title="Compare monitoring options"
-  description="ThermalTrace vs DIY scripts and generic IoT apps for garage freeze alerts, ESP/Arduino ingest, history export, and household sharing—without running your own servers."
+  description="ThermalTrace vs DIY MQTT, Govee, SmartThings, and outdoor weather stations for garage freeze alerts—without running your own servers."
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
@@ -57,13 +56,13 @@ const schema = [
       <h2 class="card-title">ThermalTrace vs alternatives</h2>
       <div class="overflow-x-auto">
         <table class="plan-comparison-table">
-          <caption class="sr-only">ThermalTrace compared to DIY scripts and generic IoT apps</caption>
+          <caption class="sr-only">ThermalTrace compared to DIY scripts and Govee or SmartThings</caption>
           <thead>
             <tr>
               <th scope="col">Capability</th>
               <th scope="col">ThermalTrace</th>
               <th scope="col">DIY script + cron</th>
-              <th scope="col">Generic IoT app</th>
+              <th scope="col">Govee / SmartThings</th>
             </tr>
           </thead>
           <tbody>
@@ -71,13 +70,13 @@ const schema = [
               <th scope="row">Freeze alerts (email/SMS/push)</th>
               <td>Built-in, per-household</td>
               <td>You wire Twilio + cron</td>
-              <td>Varies; often push-only</td>
+              <td>App push; SMS extra or absent</td>
             </tr>
             <tr>
               <th scope="row">ESP/Arduino push ingest</th>
               <td>One-time device key</td>
               <td>Custom endpoint</td>
-              <td>Often cloud-vendor lock-in</td>
+              <td>Govee pods / SmartThings devices</td>
             </tr>
             <tr>
               <th scope="row">History & CSV export</th>
@@ -95,7 +94,7 @@ const schema = [
               <th scope="row">Household multi-user</th>
               <td>Free</td>
               <td>N/A</td>
-              <td>Family plans extra</td>
+              <td>Family sharing is awkward</td>
             </tr>
           </tbody>
         </table>
@@ -117,13 +116,14 @@ const schema = [
     </section>
 
     <section class="card">
-      <h2 class="card-title">Full feature matrix</h2>
-      <p class="card-subtitle mb-4">Every entitlement at a glance — then pick a plan on pricing.</p>
-      <PlanComparisonTable />
-      <p class="mt-4 mb-0 flex flex-wrap gap-3">
-        <a class="btn-primary" href="/pricing">Go to pricing</a>
-        <a class="btn-secondary" href="/register">Create free account</a>
+      <h2 class="card-title">Plan limits live on pricing</h2>
+      <p class="card-subtitle mb-4">
+        Device counts, retention, and which alerts sit on Free vs Member vs Pro are compared on the pricing page so this page can stay focused on alternatives.
       </p>
+      <div class="flex flex-wrap gap-3">
+        <a class="btn-primary" href="/pricing#plan-matrix">Open the plan comparison</a>
+        <a class="btn-secondary" href="/register">Create free account</a>
+      </div>
     </section>
 
     <FaqSection faqs={compareFaqs} />

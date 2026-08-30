@@ -49,3 +49,33 @@ export async function fetchAppStatus(): Promise<AppStatus> {
     recentJobRuns,
   };
 }
+
+export type AppStatusSummary = {
+  healthy: boolean;
+};
+
+/** Latest cron health only — safe for the public homepage chip. */
+export async function fetchAppStatusSummary(): Promise<AppStatusSummary | null> {
+  try {
+    const admin = createAdminClient();
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: jobs, error } = await admin
+      .from("job_runs")
+      .select("status, started_at")
+      .gte("started_at", since)
+      .order("started_at", { ascending: false })
+      .limit(1);
+
+    if (error) return null;
+
+    const latest = jobs?.[0] ?? null;
+    const healthy =
+      latest != null &&
+      latest.status === "success" &&
+      Date.now() - Date.parse(latest.started_at) < 2 * 60 * 60 * 1000;
+
+    return { healthy };
+  } catch {
+    return null;
+  }
+}

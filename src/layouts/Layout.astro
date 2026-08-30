@@ -110,9 +110,10 @@ const navItems = [
     match: (path: string) => path.startsWith("/freeze-map"),
   },
   {
-    href: "/about",
-    label: "About",
-    match: (path: string) => path === "/about" || path.startsWith("/about/"),
+    href: "/guides",
+    label: "Guides",
+    match: (path: string) =>
+      path === "/guides" || path.startsWith("/guides/") || path === "/about" || path.startsWith("/about/"),
   },
   { href: "/contact", label: "Contact", match: (path: string) => path.startsWith("/contact") },
 ];
@@ -279,7 +280,8 @@ const registerServiceWorker =
 							<div>
 								<p class="site-footer-heading">Learn</p>
 								<ul class="site-footer-links">
-									<li><a href="/about">About & guides</a></li>
+									<li><a href="/guides">Guides</a></li>
+									<li><a href="/about">About library</a></li>
 									<li><a href="/docs/api">HTTP API</a></li>
 									<li><a href="/stories">Customer stories</a></li>
 									<li><a href="/about/probe-demo">Probe demo</a></li>

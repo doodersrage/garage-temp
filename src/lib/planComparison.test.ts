@@ -32,6 +32,7 @@ describe("planComparison", () => {
   it("lists device counts and retention side-by-side", () => {
     const devices = PLAN_FEATURE_ROWS.find((row) => row.id === "push_devices");
     const retention = PLAN_FEATURE_ROWS.find((row) => row.id === "data_retention");
+    const pullFeeds = PLAN_FEATURE_ROWS.find((row) => row.id === "pull_feeds");
     expect(devices).toMatchObject({
       free: "2 devices",
       member: "6 devices",
@@ -42,16 +43,16 @@ describe("planComparison", () => {
       member: "90 days",
       pro: "1 year+",
     });
+    expect(pullFeeds?.category).toBe("Limits");
   });
 
-  it("badges cold-risk forecasts on Member and Pro", () => {
+  it("uses complete cold-risk phrases instead of badge fragments", () => {
     const coldRisk = PLAN_FEATURE_ROWS.find((row) => row.id === "cold_risk");
+    expect(coldRisk?.label).toBe("Cold-risk alerts");
     expect(coldRisk?.free).toBe("Threshold only");
-    expect(coldRisk?.member).toBe("Forecast freeze");
-    expect(coldRisk?.pro).toBe("Forecast + NWS");
-    expect(coldRisk?.cellBadge?.member).toBe("Cold-risk");
-    expect(coldRisk?.cellBadge?.pro).toBe("Cold-risk");
-    expect(coldRisk?.cellBadge?.free).toBeUndefined();
+    expect(coldRisk?.member).toBe("Forecast-based cold-risk");
+    expect(coldRisk?.pro).toBe("Forecast + official NWS");
+    expect(coldRisk?.cellBadge).toBeUndefined();
   });
 
   it("nudges free users toward retention and cold-risk", () => {

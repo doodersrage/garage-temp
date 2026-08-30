@@ -20,7 +20,7 @@ export function resolveOgImagePath(pathname: string): string {
   if (path.startsWith("/demo") || path.startsWith("/share-kit")) {
     return DEFAULT_OG_IMAGE_PATH;
   }
-  if (path.startsWith("/about")) {
+  if (path.startsWith("/about") || path.startsWith("/guides")) {
     return "/og-about.jpg";
   }
   if (path.startsWith("/stories")) {
@@ -57,7 +57,7 @@ export function resolveOgImageAlt(pathname: string): string {
   if (path.startsWith("/share-kit")) {
     return `${BRAND_NAME} share kit — freeze map embeds and community post copy`;
   }
-  if (path.startsWith("/about")) {
+  if (path.startsWith("/about") || path.startsWith("/guides")) {
     return `${BRAND_NAME} guides for probes, firmware, freeze alerts, and ingest`;
   }
   if (path.startsWith("/stories")) {

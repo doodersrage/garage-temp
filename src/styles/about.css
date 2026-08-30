@@ -829,6 +829,12 @@
   font-size: 0.8125rem;
 }
 
+.about-topic-sidebar-hubs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
 .about-breadcrumbs {
   display: flex;
   flex-wrap: wrap;

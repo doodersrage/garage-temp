@@ -4,6 +4,14 @@ test.describe("public smoke", () => {
   test("home page loads", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(/ThermalTrace/i);
+    await expect(
+      page.getByText(/Built for homeowners, hobbyists, and makers running ESP32\/Arduino sensors/i),
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: /Free forever/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Install the web app/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Open the guides hub/i })).toBeVisible();
+    const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
+    expect(jsonLd.some((block) => block.includes('"FAQPage"'))).toBe(true);
   });
 
   test("pricing page loads", async ({ page }) => {
@@ -18,11 +26,25 @@ test.describe("public smoke", () => {
     await expect(monthlyBtn).toBeVisible();
     await expect(annualBtn).toBeVisible();
 
+    const memberAmount = page.locator(".plan-tier-card-featured .plan-tier-amount");
+    const memberPeriod = page.locator(".plan-tier-card-featured .plan-tier-period");
+    const proCard = page.locator(".plan-tier-grid .plan-tier-card").last();
+    const proAmount = proCard.locator(".plan-tier-amount");
+    const proPeriod = proCard.locator(".plan-tier-period");
+
     await monthlyBtn.click();
     await expect(monthlyBtn).toHaveAttribute("aria-pressed", "true");
+    await expect(memberPeriod).toHaveText("/mo");
+    await expect(proPeriod).toHaveText("/mo");
+    const monthlyMember = (await memberAmount.innerText()).trim();
+    const monthlyPro = (await proAmount.innerText()).trim();
 
     await annualBtn.click();
     await expect(annualBtn).toHaveAttribute("aria-pressed", "true");
+    await expect(memberPeriod).toHaveText("/yr");
+    await expect(proPeriod).toHaveText("/yr");
+    await expect(memberAmount).not.toHaveText(monthlyMember);
+    await expect(proAmount).not.toHaveText(monthlyPro);
   });
 
   test("500 error page loads", async ({ page }) => {
@@ -33,6 +55,9 @@ test.describe("public smoke", () => {
   test("compare page loads", async ({ page }) => {
     await page.goto("/compare");
     await expect(page.getByRole("heading", { name: /Built for homeowners/i })).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "Govee / SmartThings" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Full feature matrix/i })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /Open the plan comparison/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /See plans & pricing/i }).first()).toBeVisible();
   });
 
@@ -50,6 +75,12 @@ test.describe("public smoke", () => {
   test("API docs page loads", async ({ page }) => {
     await page.goto("/docs/api");
     await expect(page.getByRole("heading", { name: /API documentation/i })).toBeVisible();
+  });
+
+  test("guides hub loads", async ({ page }) => {
+    await page.goto("/guides");
+    await expect(page.getByRole("heading", { name: /Set up probes, alerts/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Hardware setup" })).toBeVisible();
   });
 
   test("about hub loads", async ({ page }) => {

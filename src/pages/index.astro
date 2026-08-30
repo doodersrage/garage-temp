@@ -4,6 +4,8 @@ import DemoTempsPanel from '../components/DemoTempsPanel';
 import WeatherPanel from '../components/WeatherPanel';
 import LiveTempsPanel from '../components/LiveTempsPanel';
 import FaqSection from '../components/FaqSection.astro';
+import HomeStatusChip from '../components/HomeStatusChip.astro';
+import HomePwaCard from '../components/HomePwaCard.astro';
 import { BRAND_NAME_TM } from '../lib/brand';
 import { getAuthFromCookies } from '../lib/auth';
 import { getUserPreferences } from '../lib/userPreferences';
@@ -13,6 +15,8 @@ import {
   resolveSiteUrl,
 } from '../lib/schemaMarkup';
 import { getMarketingFaqs, getMarketingFaqSchema } from '../lib/marketingFaqs';
+import { getMemberPriceDisplay, getProPriceDisplay } from '../lib/stripePricing';
+import { fetchAppStatusSummary } from '../lib/appStatus';
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 const isAuthenticated = !!user;
@@ -31,6 +35,10 @@ const schema = [
 
 const homeDescription =
   "ThermalTrace is an open-source temperature monitoring dashboard for garage and workshop probes—live curves, freeze alerts, ESP/Arduino ingest, and history you can chart and export.";
+
+const memberPrice = getMemberPriceDisplay().monthly;
+const proPrice = getProPriceDisplay().monthly;
+const appStatus = !isAuthenticated ? await fetchAppStatusSummary() : null;
 ---
 
 <Layout
@@ -38,12 +46,15 @@ const homeDescription =
   description={homeDescription}
   schema={schema}
   softwareApplication
-  speakableSelectors={[".home-hero-brand", ".home-hero-lead", ".faq-answer"]}
+  speakableSelectors={[".home-hero-brand", ".home-hero-audience", ".home-hero-lead", ".faq-answer"]}
 >
 	{!isAuthenticated ? (
 		<div class="home-marketing">
 			<section class="home-hero home-hero--bleed">
 				<div class="home-hero-inner">
+					<p class="home-hero-audience">
+						Built for homeowners, hobbyists, and makers running ESP32/Arduino sensors.
+					</p>
 					<h1 class="home-hero-brand">{BRAND_NAME_TM}</h1>
 					<p class="home-hero-lead">
 						Open-source temperature monitoring for garage and workshop probes —
@@ -54,14 +65,27 @@ const homeDescription =
 						<a class="btn-secondary" href="/pricing">See plans</a>
 						<a class="btn-secondary" href="/stories/garage-freeze-alert">Read the case study</a>
 					</div>
+					<p class="home-hero-plans">
+						<a class="text-link" href="/pricing">
+							Free forever
+							<span aria-hidden="true"> · </span>
+							{memberPrice ? `Member ${memberPrice}/mo` : "Member"}
+							<span aria-hidden="true"> · </span>
+							{proPrice ? `Pro ${proPrice}/mo` : "Pro"}
+						</a>
+					</p>
 				</div>
 			</section>
 
 			<div class="page-shell page-stack">
+				<HomeStatusChip status={appStatus} />
+
 				<div class="home-live" aria-label="Live demo readings">
 					{showGarageTemps && <DemoTempsPanel client:visible />}
 					{showWeather && <WeatherPanel client:visible cityId={null} guest />}
 				</div>
+
+				<HomePwaCard />
 
 				<section class="home-features" aria-label="Product highlights">
 					<article class="home-feature">
@@ -93,34 +117,24 @@ const homeDescription =
 					</article>
 				</section>
 
-				<section class="card home-guides" id="android-app" aria-labelledby="android-app-title">
+				<section class="card home-guides">
 					<div class="home-guides-copy">
-						<p class="text-sm text-[var(--color-text-muted)] mb-1">Coming soon</p>
-						<h2 class="card-title" id="android-app-title">Native Android app</h2>
+						<h2 class="card-title">Guides by job</h2>
 						<p class="card-subtitle mb-0">
-							Live readings, alerts, devices, and household tools on your phone — same account as the web dashboard. Google Play listing is in progress.
+							Hardware setup, freeze alerts, sharing, and the API — then the full About library if you want every article.
 						</p>
 					</div>
 					<div class="home-guides-actions">
-						<a class="btn-primary" href="/android">Learn more</a>
-						<a class="btn-secondary" href="/about/install-pwa">Use the PWA today</a>
+						<a class="btn-primary" href="/guides">Open the guides hub</a>
+						<a class="btn-secondary" href="/about">All articles</a>
+						<a class="btn-secondary" href="/about/esp32-ota-firmware">ESP32 setup</a>
 					</div>
 				</section>
 
-				<section class="card home-guides">
-					<div class="home-guides-copy">
-						<h2 class="card-title">Built for probe curves</h2>
-						<p class="card-subtitle mb-0">
-							Probe placement, wiring, firmware, and the data path from sensor wire to chart.
-						</p>
-					</div>
-					<div class="home-guides-actions">
-						<a class="btn-primary" href="/about">Explore the guides</a>
-						<a class="btn-secondary" href="/about/probe-demo">Probe demo</a>
-						<a class="btn-secondary" href="/about/esp32-ota-firmware">ESP32 setup</a>
-						<a class="btn-secondary" href="/freeze-map">Freeze map</a>
-					</div>
-				</section>
+				<p class="home-oss mb-0">
+					The dashboard and sample sensor sketches are public.
+					<a class="text-link" href="https://github.com/doodersrage/thermaltrace" target="_blank" rel="noreferrer">View source on GitHub</a>.
+				</p>
 
 				<FaqSection
 					faqs={homeFaqs}

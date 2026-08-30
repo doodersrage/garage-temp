@@ -13,6 +13,7 @@ describe("ogMeta", () => {
     expect(resolveOgImagePath("/freeze-map")).toBe("/og-freeze-map.jpg");
     expect(resolveOgImagePath("/about")).toBe("/og-about.jpg");
     expect(resolveOgImagePath("/about/ingest-and-webhooks")).toBe("/og-about.jpg");
+    expect(resolveOgImagePath("/guides")).toBe("/og-about.jpg");
     expect(resolveOgImagePath("/stories/garage-freeze-alert")).toBe(
       "/og-story-freeze.jpg",
     );
@@ -32,5 +33,6 @@ describe("ogMeta", () => {
   it("returns descriptive alts", () => {
     expect(resolveOgImageAlt("/freeze-map")).toMatch(/freeze-risk map/i);
     expect(resolveOgImageAlt("/")).toMatch(/dashboard/i);
+    expect(resolveOgImageAlt("/guides")).toMatch(/guides for probes/i);
   });
 });

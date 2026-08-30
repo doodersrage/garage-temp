@@ -46,7 +46,12 @@ export const marketingFaqs = {
     {
       question: "Can I cancel or change plans anytime?",
       answer:
-        "Paid plans bill through Stripe. You can manage or cancel from the customer portal; missing payment may return the account to Free limits.",
+        "Paid plans bill through Stripe. You can manage or cancel from the customer portal; missing payment may return the account to Free limits. Charts and CSV immediately follow the current plan window (7 days on Free). Older readings are not wiped on downgrade — they stay stored on the usual retention schedule and become visible again if you re-upgrade before they expire.",
+    },
+    {
+      question: "What is the refund policy for the Pro trial?",
+      answer:
+        "The Pro trial is free. Cancel before it ends and you are not charged. After a trial converts to a paid plan, the current billing period is generally non-refundable. Contact us if a charge looks wrong and we will review it.",
     },
   ],
   compare: [
@@ -56,14 +61,24 @@ export const marketingFaqs = {
         "ThermalTrace hosts ingest, history, households, and multi-channel freeze alerts for you. A DIY cron script requires you to run servers, databases, Twilio wiring, and uptime yourself.",
     },
     {
-      question: "Is ThermalTrace better than a generic IoT app for freeze risk?",
+      question: "How does ThermalTrace compare to Govee or SmartThings?",
       answer:
-        "It is purpose-built for probe temperature curves and freeze workflows—ESP/Arduino ingest, thresholds, forecast/NWS context, and CSV history—rather than a general device dashboard.",
+        "Govee and SmartThings are general consumer/smart-home apps. ThermalTrace is purpose-built for probe temperature curves and freeze workflows—ESP/Arduino ingest, thresholds, forecast/NWS context, and CSV history—rather than a catch-all device dashboard.",
     },
     {
       question: "Do I need a public IP for my Arduino?",
       answer:
         "No for push ingest: the device POSTs outbound to ThermalTrace. Pull feeds need a reachable HTTPS JSON URL if you use that path instead.",
+    },
+    {
+      question: "Can I keep Home Assistant or MQTT and still use ThermalTrace?",
+      answer:
+        "Yes. Push ingest is just HTTPS from the ESP. Many people dual-run: Home Assistant on the LAN, ThermalTrace for household freeze SMS and history they do not have to back up. Pro webhooks can also fire into HA.",
+    },
+    {
+      question: "I already have Govee or a Tempest—do I still need this?",
+      answer:
+        "Govee is a consumer room sensor; Tempest is outdoor weather. ThermalTrace watches garage and workshop probe curves on hardware you control. They can coexist—see the Govee and Tempest comparison pages for when each tool is the better fit.",
     },
   ],
   "freeze-map": [
