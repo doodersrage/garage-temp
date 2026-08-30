@@ -34,7 +34,7 @@ const schema = [
 ].filter(Boolean) as Record<string, unknown>[];
 
 const homeDescription =
-  "ThermalTrace is an open-source temperature monitoring dashboard for garage and workshop probes—live curves, freeze alerts, ESP/Arduino ingest, and history you can chart and export.";
+  "ThermalTrace is an open-source dashboard for garage and workshop sensors—temperature, humidity, air quality, doors, leaks, power, and energy—with freeze-aware alerts and history you can chart and export.";
 
 const memberPrice = getMemberPriceDisplay().monthly;
 const proPrice = getProPriceDisplay().monthly;
@@ -42,7 +42,7 @@ const appStatus = !isAuthenticated ? await fetchAppStatusSummary() : null;
 ---
 
 <Layout
-  title="Temperature probe dashboard & freeze alerts"
+  title="Garage sensor dashboard & freeze alerts"
   description={homeDescription}
   schema={schema}
   softwareApplication
@@ -57,7 +57,7 @@ const appStatus = !isAuthenticated ? await fetchAppStatusSummary() : null;
 					</p>
 					<h1 class="home-hero-brand">{BRAND_NAME_TM}</h1>
 					<p class="home-hero-lead">
-						Open-source temperature monitoring for garage and workshop probes —
+						Open-source monitoring for garage and workshop sensors —
 						live curves, freeze-aware alerts, and history before pipes and storage take damage.
 					</p>
 					<div class="home-hero-actions">

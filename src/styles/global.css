@@ -1330,6 +1330,14 @@
 
   .plan-comparison-wrap {
     overflow: visible;
+    max-width: 100%;
+  }
+
+  .plan-comparison-scroll-hint {
+    display: none;
+    margin: 0 0 0.65rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
   }
 
   .plan-comparison-table {
@@ -1372,6 +1380,31 @@
 
   .plan-comparison-table thead th.plan-col-highlight {
     background: color-mix(in srgb, var(--color-accent-soft) 90%, var(--color-surface));
+  }
+
+  @media (max-width: 767px) {
+    .plan-comparison-scroll-hint {
+      display: block;
+    }
+
+    .plan-comparison-wrap {
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      touch-action: pan-x pan-y;
+    }
+
+    .plan-comparison-table {
+      min-width: 40rem;
+      width: max-content;
+    }
+
+    .plan-comparison-table thead th {
+      position: static;
+      top: auto;
+      box-shadow: none;
+    }
   }
 
   .plan-comparison-emphasis th,

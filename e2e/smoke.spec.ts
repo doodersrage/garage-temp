@@ -26,6 +26,20 @@ test.describe("public smoke", () => {
     expect(scrollHeight).toBe(clientHeight);
   });
 
+  test("pricing comparison table scrolls horizontally on a phone", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/pricing");
+    const wrap = page.locator("#plan-matrix .plan-comparison-wrap");
+    await expect(page.getByText(/Swipe sideways to compare/i)).toBeVisible();
+    const box = await wrap.evaluate((el) => ({
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+      overflowX: getComputedStyle(el).overflowX,
+    }));
+    expect(box.scrollWidth).toBeGreaterThan(box.clientWidth);
+    expect(["auto", "scroll"]).toContain(box.overflowX);
+  });
+
   test("pricing page billing interval toggle", async ({ page }) => {
     await page.goto("/pricing");
     const monthlyBtn = page.getByRole("button", { name: "Monthly" });

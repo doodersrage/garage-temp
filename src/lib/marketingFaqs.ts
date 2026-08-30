@@ -9,7 +9,7 @@ export const marketingFaqs = {
     {
       question: "What is ThermalTrace?",
       answer:
-        "ThermalTrace is an open-source web dashboard that tracks, logs, and analyzes temperature (and humidity) probe curves for garages, workshops, and other spaces—with live readings, freeze-aware alerts, and exportable history.",
+        "ThermalTrace is an open-source web dashboard for garage and workshop sensors—temperature, humidity, CO₂, pressure, PM2.5, VOC, water level, energy, doors, power, flood, and motion—with live readings, freeze-aware alerts, and exportable history.",
     },
     {
       question: "How do I connect ESP32 or Arduino sensors?",
@@ -36,7 +36,7 @@ export const marketingFaqs = {
     {
       question: "What is included on the Free plan?",
       answer:
-        "Live probe curves, 7 days of history, threshold freeze and humidity alerts on email and chat-style channels, a limited number of devices, and household sharing so family can watch the same sensors.",
+        "Live readings for temperature, humidity, air quality, doors, leaks, energy, and motion; 7 days of history; threshold freeze alerts on email and chat-style channels; a limited number of devices; and household sharing so family can watch the same sensors.",
     },
     {
       question: "When should I upgrade to Member or Pro?",
@@ -63,7 +63,7 @@ export const marketingFaqs = {
     {
       question: "How does ThermalTrace compare to Govee or SmartThings?",
       answer:
-        "Govee and SmartThings are general consumer/smart-home apps. ThermalTrace is purpose-built for probe temperature curves and freeze workflows—ESP/Arduino ingest, thresholds, forecast/NWS context, and CSV history—rather than a catch-all device dashboard.",
+        "Govee and SmartThings are general consumer/smart-home apps. ThermalTrace is purpose-built for garage and workshop sensors—ESP/Arduino or JSON ingest, freeze workflows, air quality, doors, leaks, energy, and CSV history—rather than a catch-all device dashboard.",
     },
     {
       question: "Do I need a public IP for my Arduino?",

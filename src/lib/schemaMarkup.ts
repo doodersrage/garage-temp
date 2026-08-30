@@ -84,9 +84,9 @@ export function getSoftwareApplicationSchema(siteUrl: string) {
       url: `${siteUrl}/pricing`,
     },
     featureList: [
-      "Live probe temperature and humidity curves",
-      "Freeze and humidity threshold alerts",
-      "ESP32 / Arduino push ingest",
+      "Live temperature, humidity, and air-quality curves",
+      "Freeze, leak, door, power, energy, and motion alerts",
+      "ESP32 / Arduino or HTTPS JSON ingest",
       "Household sharing",
       "History charts and CSV export",
       "SMS, push, and webhook channels on Pro",

@@ -69,6 +69,14 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     pro: "Unlimited",
   },
   {
+    id: "sensor_kinds",
+    category: "Limits",
+    label: "Sensor types",
+    free: "Temp, humidity, CO₂, air quality, doors, leaks, energy, motion",
+    member: "Temp, humidity, CO₂, air quality, doors, leaks, energy, motion",
+    pro: "Temp, humidity, CO₂, air quality, doors, leaks, energy, motion",
+  },
+  {
     id: "alerts_basic",
     category: "Alerts",
     label: "Email, Discord, Telegram, Slack",

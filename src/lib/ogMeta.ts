@@ -70,7 +70,7 @@ export function resolveOgImageAlt(pathname: string): string {
     return `${BRAND_NAME} Android companion app — coming soon on Google Play`;
   }
 
-  return `${BRAND_NAME} temperature monitoring dashboard with live probe curves and freeze alerts`;
+  return `${BRAND_NAME} garage sensor dashboard with live curves and freeze alerts`;
 }
 
 export function absoluteOgImageUrl(siteUrl: string, imagePathOrUrl: string): string {

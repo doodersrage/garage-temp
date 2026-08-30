@@ -44,6 +44,10 @@ describe("planComparison", () => {
       pro: "1 year+",
     });
     expect(pullFeeds?.category).toBe("Limits");
+    const kinds = PLAN_FEATURE_ROWS.find((row) => row.id === "sensor_kinds");
+    expect(kinds?.free).toMatch(/air quality/i);
+    expect(kinds?.member).toBe(kinds?.free);
+    expect(kinds?.pro).toBe(kinds?.free);
   });
 
   it("uses complete cold-risk phrases instead of badge fragments", () => {

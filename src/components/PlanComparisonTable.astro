@@ -32,7 +32,9 @@ function cellValue(row: PlanFeatureRow, tier: ComparisonTier): string {
   return row[tier];
 }
 ---
-<div class="plan-comparison-wrap">
+<div class="plan-comparison">
+  <p class="plan-comparison-scroll-hint">Swipe sideways to compare Free, Member, and Pro.</p>
+  <div class="plan-comparison-wrap">
   <table class="plan-comparison-table">
     <thead>
       <tr>
@@ -68,4 +70,5 @@ function cellValue(row: PlanFeatureRow, tier: ComparisonTier): string {
       ))}
     </tbody>
   </table>
+  </div>
 </div>
