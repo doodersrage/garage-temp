@@ -19,12 +19,12 @@ export const marketingFaqs = {
     {
       question: "Does ThermalTrace send freeze alerts?",
       answer:
-        "Yes. Set a freeze threshold and enable channels such as email, Discord, Telegram, Slack, or (on Pro) SMS, WhatsApp, and browser push. Predictive forecast freeze alerts are on Member; official NWS freeze and cold alerts are on Pro. Leak / flood sensors also notify automatically when wet; door, motion, power, and air quality use custom rules.",
+        "Yes. Set a freeze threshold and enable channels such as email, Discord, Telegram, Slack, or (on Pro) SMS, WhatsApp, and browser push. Predictive forecast freeze alerts are on Member; official NWS freeze and cold alerts are on Pro. Leak / flood sensors also notify automatically when wet; door, motion, power, and air quality use custom rules. With a Telegram bot webhook, you can reply /status, /snooze, or /vacation from chat.",
     },
     {
       question: "Is ThermalTrace free?",
       answer:
-        "Yes—there is a free plan with live curves, 7-day history, and threshold freeze and leak alerts. Member adds 90-day history, CSV export, more devices, and forecast freeze warnings; Pro adds 1-year+ history, NWS cold-risk alerts, SMS, push, share links, webhooks, and a trial. Annual Member and Pro billing is discounted versus monthly.",
+        "Yes—there is a free plan with live curves, 7-day history, and threshold freeze and leak alerts. Member adds 90-day history, CSV export, more devices, and forecast freeze warnings; Pro adds 1-year+ history, NWS cold-risk alerts, SMS, push, share links (including guest expiry), a printable claims evidence pack, webhooks, and a trial. Annual Member and Pro billing is discounted versus monthly.",
     },
     {
       question: "Is there a ThermalTrace Android app?",
@@ -41,7 +41,12 @@ export const marketingFaqs = {
     {
       question: "When should I upgrade to Member or Pro?",
       answer:
-        "Choose Member for 90-day history, CSV export, more devices, and predictive forecast freeze (cold-risk) alerts. Choose Pro for 1-year+ history, official NWS freeze/cold alerts, SMS/WhatsApp, browser push, public share links, inbound/outbound webhooks, Prometheus metrics, and a 14-day trial. Annual billing is discounted versus paying monthly.",
+        "Choose Member for 90-day history, CSV export, more devices, and predictive forecast freeze (cold-risk) alerts. Choose Pro for 1-year+ history, official NWS freeze/cold alerts, SMS/WhatsApp, browser push, public share links with guest expiry, a printable claims / insurance evidence pack, inbound/outbound webhooks, Prometheus metrics, and a 14-day trial. Annual billing is discounted versus paying monthly.",
+    },
+    {
+      question: "What is the claims / insurance evidence pack?",
+      answer:
+        "On Pro, History can export a printable HTML summary for a date range you choose—freeze exposure, devices, and alert timeline—with matching readings and alert-event CSVs. It is monitoring evidence for your own use, not a legal or insurance determination. Open the HTML and use Print → Save as PDF if you need a portable copy.",
     },
     {
       question: "Can I cancel or change plans anytime?",

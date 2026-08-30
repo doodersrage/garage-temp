@@ -89,6 +89,7 @@ export function getSoftwareApplicationSchema(siteUrl: string) {
       "ESP32 / Arduino or HTTPS JSON ingest",
       "Household sharing",
       "History charts and CSV export",
+      "Pro claims evidence pack and guest share links",
       "SMS, push, and webhook channels on Pro",
     ],
     screenshot: `${siteUrl}/og-dashboard.jpg`,
