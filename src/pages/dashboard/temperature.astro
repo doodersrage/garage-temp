@@ -9,7 +9,7 @@ import { getUserDevicesAsTempConfig, listHouseholdDevices, SENSOR_KIND_LABELS, f
 import { getOrCreateHouseholdForUser, listUserHouseholds, getUserHouseholdRole, canEditHousehold } from "../../lib/households";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { fetchLatestSensorValues } from "../../lib/sensorReadings";
-import { formatRelativeAge } from "../../lib/relativeTime";
+import { formatRelativeAge, freshnessDetail } from "../../lib/relativeTime";
 import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import { batterySparklinePath, parseBatteryHistory } from "../../lib/batterySparkline";
 import { renderIngestQrSvg } from "../../lib/qrSvg";
@@ -242,8 +242,8 @@ const ingestKeyDeviceName =
                         </span>
                       )}
                     </td>
-                    <td class:list={["py-2 pr-3", age.stale && "text-[var(--color-danger)]"]}>
-                      {age.label}
+                    <td class:list={["py-2 pr-3", age.lagging && "text-[var(--color-danger)]"]}>
+                      {device.last_seen_at ? freshnessDetail(age) : age.label}
                     </td>
                     <td class="py-2 pr-3">{device.sensors.length}</td>
                     <td class="py-2 pr-3">
@@ -356,8 +356,8 @@ const ingestKeyDeviceName =
                   <p class="m-0 text-sm text-[var(--color-text-muted)]">
                     {row.deviceName} · {kindLabels[row.sensor.kind] ?? row.sensor.kind}
                   </p>
-                  <p class:list={["m-0 mt-1 text-sm", age.stale && "text-amber-300"]}>
-                    {age.stale ? `Stale · ${age.label}` : age.label}
+                  <p class:list={["m-0 mt-1 text-sm", age.lagging && "text-amber-300"]}>
+                    {freshnessDetail(age)}
                   </p>
                 </div>
                 <span>{formatLatestValue(row)}</span>
@@ -430,12 +430,10 @@ const ingestKeyDeviceName =
                   <p class="m-0 text-sm text-[var(--color-text-muted)]">
                     key prefix {device.ingest_key_prefix}…
                     {" · "}
-                    <span class={seen.stale ? "text-amber-300" : ""} title={seen.absolute ?? undefined}>
+                    <span class={seen.lagging ? "text-amber-300" : ""} title={seen.absolute ?? undefined}>
                       {seen.label === "never seen"
                         ? "never seen"
-                        : seen.stale
-                          ? `Stale · last seen ${seen.label}`
-                          : `last seen ${seen.label}`}
+                        : freshnessDetail(seen)}
                     </span>
                   </p>
                   {seen.label === "never seen" && (

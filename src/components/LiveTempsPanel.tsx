@@ -33,7 +33,7 @@ interface Props {
   intervalMs?: number;
 }
 
-import { formatRelativeAge } from "../lib/relativeTime";
+import { formatRelativeAge, freshnessDetail } from "../lib/relativeTime";
 import { formatBoolSensorValue, SENSOR_KIND_LABELS } from "../lib/sensorKinds";
 
 function formatSensorValue(sensor: LiveSensor): { primary: string; detail: string } {
@@ -251,6 +251,20 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
     return sensors.filter((s) => s.kind === "temperature" || s.kind === "humidity");
   }, [sensors]);
 
+  const laggingSensors = useMemo(() => {
+    return sensors
+      .map((sensor) => {
+        if (!sensor.recorded_at) {
+          return { sensor, age: formatRelativeAge(null) };
+        }
+        const age = formatRelativeAge(sensor.recorded_at);
+        return age.lagging ? { sensor, age } : null;
+      })
+      .filter((row): row is { sensor: LiveSensor; age: ReturnType<typeof formatRelativeAge> } =>
+        Boolean(row),
+      );
+  }, [sensors]);
+
   const hasAnySensors =
     temperatureCards.length > 0 || groups.length > 0 || sensors.length > 0;
 
@@ -301,16 +315,46 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
         </div>
       )}
 
+      {laggingSensors.length > 0 && (
+        <div class="alert-warning mb-4" role="status">
+          <p class="m-0 font-medium">
+            {laggingSensors.length === 1
+              ? `${laggingSensors[0]!.sensor.label} may be offline — last seen ${laggingSensors[0]!.age.label}`
+              : `${laggingSensors.length} probes look offline or stale`}
+          </p>
+          {laggingSensors.length > 1 && (
+            <ul class="mb-0 mt-2 pl-5 text-sm">
+              {laggingSensors.slice(0, 4).map(({ sensor, age }) => (
+                <li key={`${sensor.deviceId}:${sensor.key}`}>
+                  {sensor.label} — last seen {age.label}
+                  {age.stale ? " (offline)" : ""}
+                </li>
+              ))}
+            </ul>
+          )}
+          <p class="mb-0 mt-3 text-sm">
+            <a class="text-link" href="/dashboard/temperature">Check Devices</a>
+            {" · "}
+            <a class="text-link" href="/about/debugging-stale-readings">Debug stale readings</a>
+          </p>
+        </div>
+      )}
+
       {temperatureCards.length > 0 ? (
         <div class="stat-grid mb-6">
           {temperatureCards.map((sensor) => {
             const display = formatSensorValue(sensor);
             const age = sensor.recorded_at
               ? formatRelativeAge(sensor.recorded_at)
-              : null;
+              : formatRelativeAge(null);
+            const freshnessClass = age.stale
+              ? " stat-item-stale"
+              : age.lagging
+                ? " stat-item-lagging"
+                : "";
             return (
               <article
-                class={`stat-item${age?.stale ? " stat-item-stale" : ""}`}
+                class={`stat-item${freshnessClass}`}
                 key={`${sensor.deviceId}:${sensor.key}:temp`}
               >
                 <span class="stat-label">{sensor.label}</span>
@@ -319,13 +363,13 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
                   {display.detail}
                   {sensor.deviceName ? ` · ${sensor.deviceName}` : ""}
                 </p>
-                {age && (
-                  <p class={`stat-detail m-0${age.stale ? " text-amber-300" : ""}`}>
-                    {age.stale
-                      ? `Stale · Updated ${age.label}`
-                      : `Updated ${age.label}`}
-                  </p>
-                )}
+                <p
+                  class={`stat-detail m-0${
+                    age.lagging ? " text-amber-300" : ""
+                  }`}
+                >
+                  {freshnessDetail(age)}
+                </p>
               </article>
             );
           })}
@@ -386,11 +430,16 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
               const display = formatSensorValue(sensor);
               const age = sensor.recorded_at
                 ? formatRelativeAge(sensor.recorded_at)
-                : null;
+                : formatRelativeAge(null);
               const alert = isSensorAlert(sensor);
+              const freshnessClass = age.stale
+                ? " stat-item-stale"
+                : age.lagging
+                  ? " stat-item-lagging"
+                  : "";
               return (
                 <article
-                  class={`stat-item${age?.stale ? " stat-item-stale" : ""}${alert ? " stat-item-alert" : ""}`}
+                  class={`stat-item${freshnessClass}${alert ? " stat-item-alert" : ""}`}
                   key={`${sensor.deviceId}:${sensor.key}:${sensor.kind}`}
                 >
                   <span class="stat-label">{sensor.label}</span>
@@ -400,13 +449,13 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
                   <p class="stat-detail">
                     {display.detail} · {sensor.deviceName}
                   </p>
-                  {age && (
-                    <p class={`stat-detail m-0${age.stale ? " text-amber-300" : ""}`}>
-                      {age.stale
-                        ? `Stale · Updated ${age.label}`
-                        : `Updated ${age.label}`}
-                    </p>
-                  )}
+                  <p
+                    class={`stat-detail m-0${
+                      age.lagging ? " text-amber-300" : ""
+                    }`}
+                  >
+                    {freshnessDetail(age)}
+                  </p>
                 </article>
               );
             })}

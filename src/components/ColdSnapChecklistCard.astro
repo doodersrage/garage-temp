@@ -1,0 +1,27 @@
+---
+import DashboardCard from "./dashboard/DashboardCard.astro";
+import { COLD_SNAP_CHECKLIST } from "../lib/coldSnapChecklist";
+
+interface Props {
+  show: boolean;
+}
+
+const { show } = Astro.props;
+if (!show) return null;
+---
+<DashboardCard>
+  <h2 class="card-title">Cold-snap checklist</h2>
+  <p class="card-subtitle mb-4">
+    Forecast or outdoor temps look cold. Quick household steps while freeze alerts watch the probes.
+  </p>
+  <ol class="mb-4 space-y-2 pl-5 text-sm">
+    {COLD_SNAP_CHECKLIST.map((item) => (
+      <li>{item}</li>
+    ))}
+  </ol>
+  <div class="flex flex-wrap gap-3">
+    <a class="btn-secondary" href="/freeze-season">Full freeze-season guide</a>
+    <a class="btn-ghost" href="/about/cold-snap-playbook">Cold-snap playbook</a>
+    <a class="btn-ghost" href="/dashboard/alerts#send-test-alert">Send a test alert</a>
+  </div>
+</DashboardCard>

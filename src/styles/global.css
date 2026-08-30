@@ -1907,8 +1907,14 @@
     }
   }
 
+  .stat-item-lagging {
+    border-color: rgb(251 191 36 / 0.45);
+    background-color: rgb(251 191 36 / 0.06);
+  }
+
   .stat-item-stale {
-    border-color: rgb(251 191 36 / 0.35);
+    border-color: rgb(251 146 60 / 0.55);
+    background-color: rgb(251 146 60 / 0.1);
   }
 
   .stat-item-alert {

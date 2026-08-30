@@ -34,7 +34,7 @@ import {
 import { fetchGarageTempChartData } from "../lib/garageTempsHistory";
 import { checkFeedHealth } from "../lib/collectHistory";
 import { fetchLatestSensorValues } from "../lib/sensorReadings";
-import { formatRelativeAge, STALE_MS } from "../lib/relativeTime";
+import { formatRelativeAge, LAG_MS } from "../lib/relativeTime";
 import {
   fetchNightsAtRisk,
   fetchWeatherSnapshot,
@@ -44,6 +44,8 @@ import { buildHeatingInsights } from "../lib/heatingInsights";
 import HeatingInsightsCard from "../components/HeatingInsightsCard.astro";
 import ProductAnalyticsTracker from "../components/ProductAnalyticsTracker.astro";
 import UnackedAlertsBanner from "../components/UnackedAlertsBanner.astro";
+import ColdSnapChecklistCard from "../components/ColdSnapChecklistCard.astro";
+import { shouldShowColdSnapChecklist } from "../lib/coldSnapChecklist";
 import { countUnacknowledgedAlerts } from "../lib/alertEvents";
 
 import DashboardMetricGrid from "../components/dashboard/DashboardMetricGrid.astro";
@@ -148,7 +150,7 @@ const newestReading = latest
 const lastAge = formatRelativeAge(newestReading);
 const staleSensorCount = latest.filter((row) => {
   if (!row.recorded_at) return true;
-  return Date.now() - Date.parse(row.recorded_at) >= STALE_MS;
+  return Date.now() - Date.parse(row.recorded_at) >= LAG_MS;
 }).length;
 const feedIssueCount = feedHealth.statuses.filter((s) => !s.ok).length;
 const sensorCount =
@@ -178,6 +180,12 @@ const nwsAlerts =
         () => null,
       )
     : null;
+
+const showColdSnapChecklist = shouldShowColdSnapChecklist({
+  nightsRiskCount,
+  outdoorTempF: weatherSnapshot?.temp ?? null,
+  hasNwsFreezeAlerts: Boolean(nwsAlerts && nwsAlerts.alerts.length > 0),
+});
 
 const canEdit = canEditHousehold(householdRole);
 
@@ -300,6 +308,20 @@ if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
       showClaimsPackCta={unackedAlertCount > 0}
     />
 
+    {staleSensorCount > 0 && (
+      <div class="alert-warning mb-0" role="status">
+        <strong>{staleSensorCount}</strong> probe
+        {staleSensorCount === 1 ? "" : "s"} haven’t posted in 30+ minutes —
+        <a href="/" class="text-link ml-1">Check Home</a>
+        {" · "}
+        <a href="/dashboard/temperature" class="text-link">Devices</a>
+        {" · "}
+        <a href="/about/debugging-stale-readings" class="text-link">Debug guide</a>
+      </div>
+    )}
+
+    <ColdSnapChecklistCard show={showColdSnapChecklist} />
+
     {!canEdit && (
       <p class="alert-warning mt-0 mb-0" role="status">
         View-only access — you can see live data but cannot change devices, alerts, or sharing.
@@ -322,7 +344,7 @@ if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
           label="Last reading"
           value={newestReading ? lastAge.label : "None yet"}
           href="/"
-          tone={!newestReading || lastAge.stale ? "warning" : "success"}
+          tone={!newestReading || lastAge.lagging ? "warning" : "success"}
         />
         <MetricCard
           label="Sensors"
