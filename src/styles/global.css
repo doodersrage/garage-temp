@@ -1356,12 +1356,15 @@
   }
 
   .plan-comparison-table thead th {
-    position: sticky;
-    top: 4.25rem;
-    z-index: 2;
     font-weight: 600;
     color: var(--color-text-muted);
     background: var(--color-surface);
+  }
+
+  .plan-comparison-wrap .plan-comparison-table thead th {
+    position: sticky;
+    top: 4.25rem;
+    z-index: 2;
     box-shadow: 0 1px 0 var(--color-border);
   }
 
@@ -1395,12 +1398,12 @@
       touch-action: pan-x pan-y;
     }
 
-    .plan-comparison-table {
+    .plan-comparison-wrap .plan-comparison-table {
       min-width: 40rem;
       width: max-content;
     }
 
-    .plan-comparison-table thead th {
+    .plan-comparison-wrap .plan-comparison-table thead th {
       position: static;
       top: auto;
       box-shadow: none;
