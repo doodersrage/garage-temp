@@ -2,6 +2,7 @@ import { createServerClient } from "./supabase";
 import type { Json } from "../types/supabase";
 import type { DeviceSensor, DeviceWithSensors } from "./devices";
 import type { TempFeedResult, TempProbeConfig } from "./tempFeedConfig";
+import { applySensorOffset } from "./sensorCalibration";
 export type { TypedSensorValue } from "./ingestPayload";
 export { parseIngestPayload, inferSensorKind } from "./ingestPayload";
 
@@ -158,7 +159,7 @@ export async function fetchLatestSensorValues(
 
   const { data: sensors } = await supabase
     .from("device_sensors")
-    .select("id, device_id, key, label, kind, unit, visible, sort_order")
+    .select("id, device_id, key, label, kind, unit, visible, sort_order, offset_num")
     .in(
       "device_id",
       devices.map((d) => d.id),
@@ -184,11 +185,21 @@ export async function fetchLatestSensorValues(
 
     if (!reading) continue;
 
+    const offset =
+      typeof (sensor as { offset_num?: number }).offset_num === "number"
+        ? (sensor as { offset_num: number }).offset_num
+        : 0;
+    const valueNum =
+      reading.value_num != null &&
+      (sensor.kind === "temperature" || sensor.kind === "humidity")
+        ? applySensorOffset(reading.value_num, offset)
+        : reading.value_num;
+
     results.push({
       sensor: sensor as DeviceSensor,
       deviceName: deviceName.get(sensor.device_id) ?? "Device",
       deviceSpace: deviceSpace.get(sensor.device_id) ?? null,
-      value_num: reading.value_num,
+      value_num: valueNum,
       value_bool: reading.value_bool,
       value_text: reading.value_text,
       recorded_at: reading.recorded_at,

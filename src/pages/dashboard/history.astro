@@ -23,6 +23,7 @@ import { getUserDevicesAsTempConfig } from "../../lib/devices";
 import { getUserPreferences } from "../../lib/userPreferences";
 import { fetchIndoorOutdoorDelta, buildIndoorOutdoorSeries } from "../../lib/indoorOutdoorDelta";
 import { computeFreezeHours } from "../../lib/freezeHours";
+import { buildColdestDayOverlay, shiftSeriesOntoCurrentWindow } from "../../lib/historyOverlay";
 import IndoorOutdoorChart from "../../components/IndoorOutdoorChart.tsx";
 import { clampIsoToHistoryWindow, historyCutoffIso } from "../../lib/retentionSchedule";
 import { formatHistoryRetention, getUserEntitlements } from "../../lib/entitlements";
@@ -52,8 +53,13 @@ const fromDate =
   fromDateParam && fromDateParam < cutoffDate ? cutoffDate : fromDateParam;
 const requestedDays = daysParam === 90 ? 90 : daysParam === 30 ? 30 : 7;
 const chartDays = Math.min(requestedDays, historyDays);
+const overlayColdest =
+  Astro.url.searchParams.get("overlay") === "coldest" && historyDays >= 365;
 const compareYoy =
-  Astro.url.searchParams.get("yoy") === "1" && historyDays >= 365;
+  !overlayColdest &&
+  Astro.url.searchParams.get("yoy") === "1" &&
+  historyDays >= 365;
+const needPriorYear = compareYoy || overlayColdest;
 
 const filters = {
   feedName: feedFilter || undefined,
@@ -107,8 +113,12 @@ const [
 ] = await Promise.all([
   fetchGarageTempHistory(user.id, pageParam, undefined, filters),
   fetchGarageTempChartData(user.id, chartWindowDays, chartFilters),
-  compareYoy
-    ? fetchGarageTempChartDataPriorYear(user.id, chartWindowDays, chartFilters)
+  needPriorYear
+    ? fetchGarageTempChartDataPriorYear(
+        user.id,
+        overlayColdest ? Math.max(chartWindowDays, 30) : chartWindowDays,
+        chartFilters,
+      )
     : Promise.resolve({ points: [], error: null }),
   fetchHistoryFilterOptions(user.id),
   canDownloadHistoryCsv(user.id),
@@ -125,6 +135,28 @@ const indoorOutdoorSeries = outdoorDelta
   ? buildIndoorOutdoorSeries(chartData.points, outdoorDelta.outdoorF)
   : [];
 const freezeHours = computeFreezeHours(chartData.points, alertSettings.freezeThresholdF);
+
+const coldestOverlay = overlayColdest
+  ? buildColdestDayOverlay(priorYearData.points, chartData.points)
+  : { overlay: [], coldestDay: null as string | null, minTempF: null as number | null };
+
+const overlayPoints = overlayColdest
+  ? coldestOverlay.overlay
+  : compareYoy
+    ? shiftSeriesOntoCurrentWindow(priorYearData.points, chartData.points)
+    : [];
+
+const overlayLegend = overlayColdest
+  ? coldestOverlay.coldestDay
+    ? `Gray = coldest day last year (${coldestOverlay.coldestDay}${
+        coldestOverlay.minTempF != null
+          ? `, low ${coldestOverlay.minTempF.toFixed(1)}°F`
+          : ""
+      })`
+    : "Gray = coldest day last year (no prior-year data)"
+  : compareYoy
+    ? "Gray = same window last year (time-aligned)"
+    : null;
 
 if (history.totalPages > 0 && pageParam > history.totalPages) {
   return Astro.redirect(`/dashboard/history?page=${history.totalPages}`);
@@ -313,8 +345,10 @@ const claimsPackHref = `/api/claims/pack?${claimsPackQs}`;
     <GarageTempHistory
       history={history}
       chartPoints={chartData.points}
-      priorYearPoints={priorYearData.points}
+      priorYearPoints={overlayPoints}
       compareYoy={compareYoy}
+      overlayColdest={overlayColdest}
+      overlayLegend={overlayLegend}
       basePath="/dashboard/history"
       canDownloadCsv={canDownloadCsv}
       feedFilter={feedFilter}

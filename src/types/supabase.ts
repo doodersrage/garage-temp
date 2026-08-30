@@ -442,6 +442,7 @@ export type Database = {
           key: string
           kind: string
           label: string
+          offset_num: number
           sort_order: number
           unit: string | null
           visible: boolean
@@ -453,6 +454,7 @@ export type Database = {
           key: string
           kind: string
           label: string
+          offset_num?: number
           sort_order?: number
           unit?: string | null
           visible?: boolean
@@ -464,6 +466,7 @@ export type Database = {
           key?: string
           kind?: string
           label?: string
+          offset_num?: number
           sort_order?: number
           unit?: string | null
           visible?: boolean

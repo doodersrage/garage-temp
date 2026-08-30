@@ -1,6 +1,7 @@
 import type { TempFeedResult, TempProbeConfig } from "./tempFeedConfig";
 import type { AlertReading } from "./alerts";
 import type { DeviceSensor, DeviceWithSensors } from "./devices";
+import { applySensorOffset } from "./sensorCalibration";
 
 export function buildReadingsFromResults(
   results: TempFeedResult[],
@@ -10,15 +11,23 @@ export function buildReadingsFromResults(
   const spaceByFeedId = new Map(
     devices.filter((d) => d.pull_url).map((d) => [d.id, d.space ?? null]),
   );
+  const devicesById = new Map(devices.map((d) => [d.id, d]));
 
   return probes.flatMap((probe) => {
     const feed = results.find((result) => result.id === probe.feedId);
     const data = feed?.probes[probe.key];
     if (!feed || feed.error || !data) return [];
+    const device = devicesById.get(probe.feedId);
+    const tempSensor = device?.sensors.find(
+      (s) => s.key === probe.key && s.kind === "temperature",
+    );
+    const humiditySensor = device?.sensors.find(
+      (s) => s.key === probe.key && s.kind === "humidity",
+    );
     return [{
       label: probe.label,
-      tempf: data.f,
-      humidity: data.h,
+      tempf: applySensorOffset(data.f, tempSensor?.offset_num ?? 0),
+      humidity: applySensorOffset(data.h, humiditySensor?.offset_num ?? 0),
       space: spaceByFeedId.get(probe.feedId) ?? null,
     }];
   });

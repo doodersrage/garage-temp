@@ -13,6 +13,8 @@ interface Props {
   chartPoints: ChartPoint[];
   priorYearPoints?: ChartPoint[];
   compareYoy?: boolean;
+  overlayColdest?: boolean;
+  overlayLegend?: string | null;
   basePath?: string;
   canDownloadCsv?: boolean;
   feedFilter?: string;
@@ -35,6 +37,8 @@ const {
   chartPoints,
   priorYearPoints = [],
   compareYoy = false,
+  overlayColdest = false,
+  overlayLegend = null,
   basePath = "/dashboard/history",
   canDownloadCsv = false,
   feedFilter = "",
@@ -64,6 +68,7 @@ function buildFilterUrl(nextFeed: string, nextProbe: string, nextPage = 1): stri
   if (toDate) params.set("to", toDate);
   if (days && days !== 7) params.set("days", String(days));
   if (compareYoy) params.set("yoy", "1");
+  if (overlayColdest) params.set("overlay", "coldest");
   return `${basePath}?${params.toString()}`;
 }
 
@@ -158,10 +163,19 @@ const clearFiltersHref = basePath;
       <p class="form-hint">Used when From/To are empty. Plan window: {maxHistoryDays} days.</p>
     </div>
     {canCompareYoy && (
-      <div class="form-field mb-0 flex items-end">
+      <div class="form-field mb-0 flex flex-col gap-2 justify-end">
         <label class="checkbox-row mb-0">
-          <input type="checkbox" name="yoy" value="1" checked={compareYoy} />
-          <span>Compare to last year</span>
+          <input type="checkbox" name="yoy" value="1" checked={compareYoy && !overlayColdest} />
+          <span>Compare to last year (aligned window)</span>
+        </label>
+        <label class="checkbox-row mb-0">
+          <input
+            type="checkbox"
+            name="overlay"
+            value="coldest"
+            checked={overlayColdest}
+          />
+          <span>Overlay last year’s coldest day</span>
         </label>
       </div>
     )}
@@ -174,7 +188,8 @@ const clearFiltersHref = basePath;
   <HistoryChart
     client:visible
     points={chartPoints}
-    priorYearPoints={compareYoy ? priorYearPoints : []}
+    priorYearPoints={priorYearPoints}
+    priorYearLegend={overlayLegend}
     title={chartTitle}
     freezeThresholdF={freezeThresholdF}
   />

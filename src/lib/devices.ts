@@ -8,6 +8,7 @@ import {
   type TempProbeConfig,
 } from "./tempFeedConfig";
 import type { SensorKind } from "./sensorKinds";
+import { clampSensorOffset } from "./sensorCalibration";
 
 export type { SensorKind } from "./sensorKinds";
 export {
@@ -43,6 +44,8 @@ export type DeviceSensor = {
   unit: string | null;
   visible: boolean;
   sort_order: number;
+  /** Calibration offset applied at read time (°F for temp, %RH for humidity). */
+  offset_num: number;
 };
 
 export type DeviceWithSensors = Device & { sensors: DeviceSensor[] };
@@ -50,7 +53,7 @@ export type DeviceWithSensors = Device & { sensors: DeviceSensor[] };
 const DEVICE_SELECT =
   "id, household_id, name, source, pull_url, ingest_key_prefix, enabled, last_seen_at, sort_order, meta, space";
 const SENSOR_SELECT =
-  "id, device_id, key, label, kind, unit, visible, sort_order";
+  "id, device_id, key, label, kind, unit, visible, sort_order, offset_num";
 
 export async function listHouseholdDevices(
   householdId: string,
@@ -416,6 +419,7 @@ export async function updateDeviceSensor(
     label: string;
     kind: SensorKind;
     unit?: string | null;
+    offsetNum?: number;
   },
 ): Promise<{ error: string | null }> {
   const supabase = createServerClient();
@@ -426,6 +430,7 @@ export async function updateDeviceSensor(
       label: patch.label,
       kind: patch.kind,
       unit: patch.unit ?? null,
+      offset_num: clampSensorOffset(patch.offsetNum ?? 0, patch.kind),
     })
     .eq("id", sensorId)
     .eq("device_id", deviceId);

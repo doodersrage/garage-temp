@@ -10,6 +10,7 @@ type Point = {
 interface Props {
   points: Point[];
   priorYearPoints?: Point[];
+  priorYearLegend?: string | null;
   title?: string;
   /** Freeze / low alert line from account settings (°F). */
   freezeThresholdF?: number | null;
@@ -59,6 +60,7 @@ function segmentColor(
 export default function HistoryChart({
   points,
   priorYearPoints = [],
+  priorYearLegend = null,
   title = "Temperature trend (last 7 days)",
   freezeThresholdF = null,
   defaultHighTempF = null,
@@ -288,7 +290,7 @@ export default function HistoryChart({
       )}
       {priorYearPoints.length >= 2 && (
         <p class="m-0 mb-2 text-xs text-[var(--color-text-muted)]">
-          Gray = same window last year
+          {priorYearLegend ?? "Gray = comparison overlay"}
         </p>
       )}
       <p class="m-0 mb-2 text-xs text-[var(--color-text-muted)]">

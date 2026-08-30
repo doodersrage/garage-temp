@@ -530,6 +530,28 @@ const ingestKeyDeviceName =
                             <label class="form-label" for={`unit-${sensor.id}`}>Unit</label>
                             <input class="form-input" id={`unit-${sensor.id}`} name="unit" value={sensor.unit ?? ""} placeholder="optional" />
                           </div>
+                          <div class="form-field mb-0">
+                            <label class="form-label" for={`offset-${sensor.id}`}>
+                              Calibration offset
+                            </label>
+                            <input
+                              class="form-input"
+                              id={`offset-${sensor.id}`}
+                              name="offset_num"
+                              type="number"
+                              step="0.1"
+                              min={sensor.kind === "humidity" ? -15 : -10}
+                              max={sensor.kind === "humidity" ? 15 : 10}
+                              value={sensor.offset_num ?? 0}
+                            />
+                            <p class="form-hint mb-0">
+                              {sensor.kind === "humidity"
+                                ? "Added to %RH (±15). Raw readings stay unchanged."
+                                : sensor.kind === "temperature"
+                                  ? "Added to °F (±10). Raw readings stay unchanged."
+                                  : "Added to numeric readings (±10)."}
+                            </p>
+                          </div>
                         </div>
                         <div class="flex flex-wrap gap-2">
                           <button class="btn-secondary" type="submit">Save sensor</button>

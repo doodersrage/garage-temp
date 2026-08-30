@@ -1,5 +1,6 @@
 import { createServerClient } from "./supabase";
 import { getUserHouseholdId } from "./households";
+import { applySensorOffset } from "./sensorCalibration";
 
 export type GarageTempReading = {
   tempc: number;
@@ -45,6 +46,7 @@ type SensorRow = {
     key: string;
     label: string;
     kind: string;
+    offset_num?: number | null;
     devices: {
       name: string;
     } | null;
@@ -89,18 +91,26 @@ function pairTempHumidityRows(
     const sensor = tempRow.device_sensors!;
     const deviceName = sensor.devices?.name ?? "Device";
     const humidityRow = humidities.get(key);
-    const tempf = Number(tempRow.value_num);
+    const rawTempF = Number(tempRow.value_num);
+    const tempOffset =
+      typeof sensor.offset_num === "number" ? sensor.offset_num : 0;
+    const tempf = applySensorOffset(rawTempF, tempOffset);
     const meta = tempRow.meta ?? {};
     const tempc =
-      typeof meta.tempc === "number"
+      typeof meta.tempc === "number" && tempOffset === 0
         ? meta.tempc
         : Number((((tempf - 32) * 5) / 9).toFixed(1));
-    const humidity =
+    const humidityRaw =
       humidityRow?.value_num != null
         ? Number(humidityRow.value_num)
         : typeof meta.humidity === "number"
           ? Number(meta.humidity)
           : 0;
+    const humidityOffset =
+      typeof humidityRow?.device_sensors?.offset_num === "number"
+        ? humidityRow.device_sensors.offset_num
+        : 0;
+    const humidity = applySensorOffset(humidityRaw, humidityOffset);
 
     readings.push({
       tempc,
@@ -122,7 +132,10 @@ function pairTempHumidityRows(
     readings.push({
       tempc: 0,
       tempf: 0,
-      humidity: Number(humidityRow.value_num ?? 0),
+      humidity: applySensorOffset(
+        Number(humidityRow.value_num ?? 0),
+        typeof sensor.offset_num === "number" ? sensor.offset_num : 0,
+      ),
       timestamp: humidityRow.recorded_at,
       feed_name: deviceName,
       probe_label: sensor.label.replace(/ humidity$/i, ""),
@@ -178,6 +191,7 @@ async function fetchPairedFromSensorReadings(
         key,
         label,
         kind,
+        offset_num,
         devices!inner (
           name
         )
@@ -340,6 +354,7 @@ async function fetchRollupChartPointsForHousehold(
         key,
         label,
         kind,
+        offset_num,
         devices!inner ( name )
       )
     `,
@@ -359,6 +374,7 @@ async function fetchRollupChartPointsForHousehold(
       key: string;
       label: string;
       kind: string;
+      offset_num?: number | null;
       devices: { name: string } | null;
     } | null;
   }>) {
@@ -372,7 +388,12 @@ async function fetchRollupChartPointsForHousehold(
     if (filters.probeKey && row.device_sensors.key !== filters.probeKey) continue;
     points.push({
       timestamp: row.bucket_start,
-      tempf: Number(row.avg_num),
+      tempf: applySensorOffset(
+        Number(row.avg_num),
+        typeof row.device_sensors.offset_num === "number"
+          ? row.device_sensors.offset_num
+          : 0,
+      ),
       humidity: 0,
       probeLabel,
     });
@@ -400,6 +421,7 @@ export async function fetchHouseholdChartData(
         key,
         label,
         kind,
+        offset_num,
         devices!inner ( name )
       )
     `,

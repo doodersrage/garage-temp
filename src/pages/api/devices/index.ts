@@ -192,6 +192,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     const kindRaw = formData.get("kind")?.toString() ?? "generic";
     const kind = isSensorKind(kindRaw) ? kindRaw : "generic";
     const unit = formData.get("unit")?.toString().trim() || defaultUnitForKind(kind);
+    const offsetNum = Number.parseFloat(
+      formData.get("offset_num")?.toString() ?? "0",
+    );
 
     if (!sensorId || !deviceId || !key || !label) {
       return redirect(`${redirectTo}?error=1`);
@@ -207,6 +210,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       label,
       kind,
       unit,
+      offsetNum: Number.isFinite(offsetNum) ? offsetNum : 0,
     });
 
     if (result.error) {

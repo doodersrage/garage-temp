@@ -14,6 +14,7 @@ function sensor(
     unit: partial.unit ?? null,
     visible: partial.visible ?? true,
     sort_order: partial.sort_order ?? 0,
+    offset_num: partial.offset_num ?? 0,
     ...partial,
   };
 }
