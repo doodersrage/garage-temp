@@ -14,6 +14,15 @@ import {
   requireHouseholdEditor,
 } from "../../../lib/householdAuth";
 
+const SNOOZE_MAX_HOURS = 168;
+const VACATION_MAX_DAYS = 30;
+
+function parsePositiveInt(raw: FormDataEntryValue | null): number | null {
+  if (raw == null) return null;
+  const n = Number.parseInt(String(raw), 10);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
   if (!session || !user) {
@@ -33,18 +42,26 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     user.user_metadata as Record<string, unknown>,
   );
 
-  if (action === "snooze_24") {
+  if (action === "snooze_24" || action === "snooze") {
+    const hours =
+      action === "snooze_24"
+        ? 24
+        : Math.min(parsePositiveInt(formData.get("hours")) ?? 24, SNOOZE_MAX_HOURS);
     await saveAlertSettingsForUser(user.id, {
       ...settings,
-      snoozeUntil: snoozeUntilFromHours(24),
+      snoozeUntil: snoozeUntilFromHours(hours),
     });
     return redirect(`${redirectTo}?snooze=1`);
   }
 
-  if (action === "vacation_7") {
+  if (action === "vacation_7" || action === "vacation") {
+    const days =
+      action === "vacation_7"
+        ? 7
+        : Math.min(parsePositiveInt(formData.get("days")) ?? 7, VACATION_MAX_DAYS);
     await saveAlertSettingsForUser(user.id, {
       ...settings,
-      vacationUntil: vacationUntilFromDays(7),
+      vacationUntil: vacationUntilFromDays(days),
     });
     return redirect(`${redirectTo}?vacation=1`);
   }
