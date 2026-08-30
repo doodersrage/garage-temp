@@ -1,12 +1,21 @@
 import { useEffect, useState } from "preact/hooks";
 import { trackProductEvent } from "../lib/productAnalytics";
+import { CONTACT_HONEYPOT_FIELD, CONTACT_MAX_MESSAGE_CHARS } from "../lib/contactLimits";
 
 const ANDROID_TOPIC_MESSAGE =
   "Please send me a note when the ThermalTrace Android app is live on Google Play.";
 
+const SUCCESS_MESSAGE =
+  "Thanks — we got your message. We usually reply within 1–2 business days.";
+
 function topicDefaultMessage(topic: string | null): string {
   if (topic === "android") return ANDROID_TOPIC_MESSAGE;
   return "";
+}
+
+function resetTurnstile(): void {
+  const api = (window as { turnstile?: { reset: () => void } }).turnstile;
+  api?.reset();
 }
 
 export default function Form() {
@@ -28,7 +37,8 @@ export default function Form() {
     setIsError(false);
 
     try {
-      const formData = new FormData(e.target as HTMLFormElement);
+      const form = e.target as HTMLFormElement;
+      const formData = new FormData(form);
       const response = await fetch("/api/contact", {
         method: "POST",
         body: formData,
@@ -37,16 +47,19 @@ export default function Form() {
       if (!response.ok) {
         setIsError(true);
         setResponseMessage(data.message ?? "Something went wrong. Please try again.");
+        resetTurnstile();
         return;
       }
       setIsError(false);
-      setResponseMessage(data.message ?? "Message sent.");
+      setResponseMessage(data.message ?? SUCCESS_MESSAGE);
       trackProductEvent("generate_lead", { form_id: "contact" });
-      (e.target as HTMLFormElement).reset();
+      form.reset();
       setMessage("");
+      resetTurnstile();
     } catch {
       setIsError(true);
       setResponseMessage("Something went wrong. Please try again.");
+      resetTurnstile();
     } finally {
       setSubmitting(false);
     }
@@ -58,13 +71,31 @@ export default function Form() {
         <label class="form-label" for="name">
           Name<sup>*</sup>
         </label>
-        <input class="form-input" type="text" name="name" id="name" placeholder="Your name" required />
+        <input
+          class="form-input"
+          type="text"
+          name="name"
+          id="name"
+          placeholder="Your name"
+          autoComplete="name"
+          required
+          maxLength={120}
+        />
       </div>
       <div class="form-field">
         <label class="form-label" for="email">
           Email<sup>*</sup>
         </label>
-        <input class="form-input" type="email" name="email" id="email" placeholder="you@example.com" required />
+        <input
+          class="form-input"
+          type="email"
+          name="email"
+          id="email"
+          placeholder="you@example.com"
+          autoComplete="email"
+          required
+          maxLength={254}
+        />
       </div>
       <div class="form-field">
         <label class="form-label" for="message">
@@ -74,14 +105,27 @@ export default function Form() {
           class="form-textarea"
           name="message"
           id="message"
-          placeholder="How can we help?"
+          placeholder="How can we help? For probe issues, include board, sensors, expected vs observed readings, and feed URLs."
           required
+          minLength={10}
+          maxLength={CONTACT_MAX_MESSAGE_CHARS}
           value={message}
           onInput={(e) => setMessage((e.target as HTMLTextAreaElement).value)}
         />
       </div>
+      <div class="sr-only" aria-hidden="true">
+        <label for={CONTACT_HONEYPOT_FIELD}>Company</label>
+        <input
+          type="text"
+          name={CONTACT_HONEYPOT_FIELD}
+          id={CONTACT_HONEYPOT_FIELD}
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
       <div class="form-field">
         <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
+        <p class="form-hint mb-0">Protected by Cloudflare Turnstile.</p>
       </div>
       <button class="btn-primary" type="submit" disabled={submitting}>
         {submitting ? "Sending…" : "Send message"}

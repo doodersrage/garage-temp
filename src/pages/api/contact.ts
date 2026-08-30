@@ -6,9 +6,41 @@ import { createMimeMessage } from "mimetext";
 import { createServerClient } from "../../lib/supabase";
 import { getTurnstileToken, verifyTurnstileToken } from "../../lib/turnstile";
 import { requireSmtpMailFrom, sendMailerRaw } from "../../lib/mailer";
+import {
+  checkContactRateLimit,
+  CONTACT_HONEYPOT_FIELD,
+  CONTACT_MAX_MESSAGE_CHARS,
+  isContactHoneypotTriggered,
+} from "../../lib/contactLimits";
+
+const SUCCESS_BODY = {
+  success: true,
+  message: "Thanks — we got your message. We usually reply within 1–2 business days.",
+};
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {
   const data = await request.formData();
+
+  if (isContactHoneypotTriggered(data.get(CONTACT_HONEYPOT_FIELD))) {
+    return new Response(JSON.stringify(SUCCESS_BODY), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const rate = checkContactRateLimit(clientAddress || "unknown");
+  if (!rate.ok) {
+    return new Response(JSON.stringify({ message: rate.error }), {
+      status: 429,
+      headers: {
+        "Content-Type": "application/json",
+        ...(rate.retryAfterSec
+          ? { "Retry-After": String(rate.retryAfterSec) }
+          : {}),
+      },
+    });
+  }
+
   const turnstile = await verifyTurnstileToken(
     getTurnstileToken(data),
     clientAddress,
@@ -28,6 +60,13 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   if (!name || !email || !message) {
     return new Response(
       JSON.stringify({ message: "Missing required fields." }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  if (message.length > CONTACT_MAX_MESSAGE_CHARS) {
+    return new Response(
+      JSON.stringify({ message: "Message is too long." }),
       { status: 400, headers: { "Content-Type": "application/json" } },
     );
   }
@@ -64,13 +103,10 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
       console.error("Failed to store contact submission:", error.message);
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Contact form submitted successfully.",
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify(SUCCESS_BODY), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : "Unknown error";
     console.error("Contact form error:", errorMessage);

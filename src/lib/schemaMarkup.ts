@@ -85,7 +85,7 @@ export function getSoftwareApplicationSchema(siteUrl: string) {
     },
     featureList: [
       "Live temperature, humidity, and air-quality curves",
-      "Freeze, leak, door, power, energy, and motion alerts",
+      "Freeze and leak alerts; custom rules for doors, power, energy, and motion",
       "ESP32 / Arduino or HTTPS JSON ingest",
       "Household sharing",
       "History charts and CSV export",

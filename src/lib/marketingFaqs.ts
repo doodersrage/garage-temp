@@ -24,7 +24,7 @@ export const marketingFaqs = {
     {
       question: "Is ThermalTrace free?",
       answer:
-        "Yes—there is a free plan with live curves, 7-day history, and threshold freeze alerts. Member adds 90-day history, CSV export, more devices, and forecast freeze warnings; Pro adds 1-year+ history, NWS cold-risk alerts, SMS, push, share links, webhooks, and a trial. Annual Member and Pro billing is discounted versus monthly.",
+        "Yes—there is a free plan with live curves, 7-day history, and threshold freeze and leak alerts. Member adds 90-day history, CSV export, more devices, and forecast freeze warnings; Pro adds 1-year+ history, NWS cold-risk alerts, SMS, push, share links, webhooks, and a trial. Annual Member and Pro billing is discounted versus monthly.",
     },
     {
       question: "Is there a ThermalTrace Android app?",
@@ -36,7 +36,7 @@ export const marketingFaqs = {
     {
       question: "What is included on the Free plan?",
       answer:
-        "Live readings for temperature, humidity, air quality, doors, leaks, energy, and motion; 7 days of history; threshold freeze alerts on email and chat-style channels; a limited number of devices; and household sharing so family can watch the same sensors.",
+        "Live readings for temperature, humidity, air quality, doors, leaks, energy, and motion; 7 days of history; threshold freeze and leak alerts on email and chat-style channels; a limited number of devices; and household sharing so family can watch the same sensors.",
     },
     {
       question: "When should I upgrade to Member or Pro?",
@@ -97,7 +97,17 @@ export const marketingFaqs = {
     {
       question: "What should I ask about before contacting support?",
       answer:
-        "Probe wiring, ingest payloads, freeze alerts, and dashboard setup are covered in the About guides. Use Contact for account, billing, Android launch notes, or bugs the docs do not answer.",
+        "Probe wiring, ingest payloads, freeze alerts, and dashboard setup are covered in the guides hub and About library. Use this form for account, billing, Android launch notes, or questions the docs do not answer.",
+    },
+    {
+      question: "Should I use the form or GitHub?",
+      answer:
+        "Account, billing, and household questions belong on this form. Bugs, firmware patches, and feature ideas belong in GitHub issues so other builders can follow along.",
+    },
+    {
+      question: "How soon will I get a reply?",
+      answer:
+        "We usually reply within 1–2 business days. The form is protected by Cloudflare Turnstile; we do not publish a support inbox so that mailbox stays off spam lists.",
     },
   ],
   docsApi: [

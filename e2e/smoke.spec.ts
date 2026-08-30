@@ -9,6 +9,7 @@ test.describe("public smoke", () => {
     ).toBeVisible();
     await expect(page.getByRole("link", { name: /Free forever/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Install the web app/i })).toBeVisible();
+    await expect(page.getByText(/automatic leak alerts when a flood sensor is wet/i)).toBeVisible();
     await expect(page.getByRole("link", { name: /Open the guides hub/i })).toBeVisible();
     const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
     expect(jsonLd.some((block) => block.includes('"FAQPage"'))).toBe(true);
@@ -18,6 +19,7 @@ test.describe("public smoke", () => {
     await page.goto("/pricing");
     await expect(page.getByRole("heading", { name: /Plans that grow/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Full feature comparison/i })).toBeVisible();
+    await expect(page.getByText("Threshold freeze and leak alerts", { exact: true })).toBeVisible();
     const wrap = page.locator("#plan-matrix .plan-comparison-wrap");
     const { scrollHeight, clientHeight } = await wrap.evaluate((el) => ({
       scrollHeight: el.scrollHeight,
@@ -113,6 +115,20 @@ test.describe("public smoke", () => {
   test("about guide loads", async ({ page }) => {
     await page.goto("/about/temperature-probes/");
     await expect(page.getByRole("heading", { name: /Temperature probes/i })).toBeVisible();
+  });
+
+  test("contact page routes support vs GitHub", async ({ page }) => {
+    await page.goto("/contact");
+    await expect(page.getByRole("heading", { name: /Get in touch/i })).toBeVisible();
+    await expect(page.getByText(/usually reply within 1–2 business days/i).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: /This form/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /GitHub issues/i })).toBeVisible();
+    const issues = page.getByRole("link", { name: /GitHub issues/i }).first();
+    await expect(issues).toHaveAttribute("href", /github.com\/doodersrage\/thermaltrace\/issues/);
+    await expect(page.getByLabel(/Name/i)).toBeVisible();
+    await expect(page.getByText("Protected by Cloudflare Turnstile.")).toBeVisible();
+    await page.getByRole("button", { name: /Send message/i }).click();
+    await expect(page.locator("#name")).toHaveJSProperty("validity.valueMissing", true);
   });
 
   test("privacy page loads", async ({ page }) => {
