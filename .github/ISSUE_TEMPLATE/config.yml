@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Account or billing
+    url: https://thermaltrace.dev/contact
+    about: Use the contact form for account, billing, household access, and Android launch notes.
+  - name: Product guides
+    url: https://thermaltrace.dev/guides
+    about: Hardware, freeze alerts, sharing, and ingest docs.
+  - name: Developer docs
+    url: https://doodersrage.github.io/thermaltrace/
+    about: Local setup, architecture, deploy, API, and sketches.

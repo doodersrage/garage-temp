@@ -6,7 +6,7 @@ const docs = "https://doodersrage.github.io/thermaltrace/";
 export default defineConfig({
   title: "ThermalTrace Docs",
   description:
-    "Developer documentation for ThermalTrace — ingest, API, sketches, Home Assistant, and local development.",
+    "Developer documentation for ThermalTrace — ingest, API, sketches, local development, and deploy.",
   base: "/thermaltrace/",
   cleanUrls: true,
   lastUpdated: true,
@@ -49,6 +49,7 @@ export default defineConfig({
             { text: "Overview", link: "/" },
             { text: "Architecture", link: "/guide/architecture" },
             { text: "Local development", link: "/guide/local-dev" },
+            { text: "Deploy & ops", link: "/guide/deploy" },
             { text: "Troubleshooting", link: "/guide/troubleshooting" },
           ],
         },

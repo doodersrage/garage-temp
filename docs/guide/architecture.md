@@ -32,7 +32,38 @@ Sensors / relays ──push or pull──► Cloudflare Worker (Astro)
 - **Households** own devices and memberships (roles: owner, member, viewer, …)
 - **Devices** are push or pull; **sensors** map JSON keys → labels / kinds
 - **Readings** store history; raw rows roll up on a retention schedule
-- **Alert settings** drive freeze / humidity / outage / forecast / channel fan-out
+- **Alert settings** drive freeze / humidity / leak / outage / forecast / channel fan-out (`src/lib/alerts.ts`, `notify.ts`). Shared form parsing: `src/lib/alertSettingsForm.ts`
+- Canonical storage is **household devices + sensors + readings** (legacy temp-feed rows auto-migrate into Devices)
+
+## Background jobs
+
+Hourly cron (`0 * * * *` in `wrangler.jsonc`) runs via `src/worker.ts`:
+
+- Collect history snapshots
+- Evaluate alerts (pull feeds when available; otherwise latest stored readings — push-only households included)
+- Freeze-map city aggregates (opt-in)
+- Trial reminders and onboarding drips
+- Monthly / quarterly reports on schedule
+- Retention / housekeeping as configured
+
+Push ingest also evaluates threshold, leak, and rule alerts immediately (same cooldowns as cron). Weekly digests send **Monday 08:00 UTC** when enabled.
+
+Failed jobs appear on the Jobs admin UI and notify ops via `SMTP_MAIL_TO` and optional `OPS_DISCORD_WEBHOOK_URL`.
+
+Manual history collection (Bearer `CRON_SECRET`; per-IP rate limited):
+
+```bash
+curl -X POST https://your-domain/api/cron/collect-history \
+  -H "Authorization: Bearer $CRON_SECRET"
+```
+
+Push ingest (`POST /api/ingest/<key>`): ~64KB max payload, ~60 req/min/device (per Worker isolate).
+
+## Conventions
+
+Cursor rules under [`.cursor/rules/`](https://github.com/doodersrage/thermaltrace/tree/main/.cursor/rules) cover Astro architecture, design tokens, dashboard hydration, and performance.
+
+An **import-guard** Vitest suite (`src/lib/astroImportGuard.test.ts`) fails CI if a page renders a component it never imports.
 
 ## Repo map
 
@@ -46,6 +77,8 @@ docs/                   This VitePress site → GitHub Pages
 public/openapi.yaml     HTTP API contract
 ```
 
-## Related product docs
+## Related
 
-Long-form DIY and ops writing: [thermaltrace.dev/about](https://thermaltrace.dev/about)
+- [Local development](/guide/local-dev) — env, database, scripts
+- [Deploy & ops](/guide/deploy) — Worker secrets, email sending, post-deploy checklist
+- Product DIY guides: [thermaltrace.dev/about](https://thermaltrace.dev/about)

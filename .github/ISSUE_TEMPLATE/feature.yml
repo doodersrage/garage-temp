@@ -1,0 +1,34 @@
+name: Feature request
+description: A change you would like in ThermalTrace.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For account or billing help, use the [contact form](https://thermaltrace.dev/contact).
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or missing today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should change? Keep it concrete.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Alerts
+        - Ingest / hardware
+        - Dashboard / history
+        - Billing / plans
+        - Docs
+        - Other

@@ -4,7 +4,7 @@ title: ThermalTrace Docs
 hero:
   name: ThermalTrace
   text: Developer documentation
-  tagline: Push ingest, HTTP API, sensor sketches, and integrations for the open-source temperature dashboard.
+  tagline: Push ingest, HTTP API, sensor sketches, deploy notes, and integrations for the open-source garage dashboard.
   image:
     src: https://thermaltrace.dev/og-dashboard.jpg
     alt: ThermalTrace dashboard
@@ -53,6 +53,7 @@ features:
 | Automate on freeze alerts | [Alert webhooks](/integrations/webhooks) → [Home Assistant](/integrations/home-assistant) |
 | Scrape metrics | [Grafana / Prometheus](/integrations/grafana) |
 | Run the app locally | [Local development](/guide/local-dev) |
+| Deploy or check production | [Deploy & ops](/guide/deploy) |
 | Read product / DIY guides | [About hub](https://thermaltrace.dev/about) |
 
 ::: tip Repo links

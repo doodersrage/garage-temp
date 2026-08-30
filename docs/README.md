@@ -2,7 +2,7 @@
 
 **Live:** https://doodersrage.github.io/thermaltrace/
 
-Product guides stay on https://thermaltrace.dev/about — this site is the developer reference (ingest, API, sketches, HA, Grafana).
+Product guides stay on https://thermaltrace.dev/about — this site is the developer reference (ingest, API, sketches, HA, Grafana, local setup, and deploy).
 
 ```bash
 pnpm --dir docs --ignore-workspace install

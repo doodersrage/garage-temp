@@ -31,6 +31,10 @@ Site is published at the **project** base path:
 
 Not at `https://doodersrage.github.io/` (user site).
 
+## Manual cron returns 401
+
+`POST /api/cron/collect-history` requires `Authorization: Bearer $CRON_SECRET`. The path is rate-limited per IP. Do not commit the secret.
+
 ## Still stuck
 
 - [System status](https://thermaltrace.dev/system-status)  

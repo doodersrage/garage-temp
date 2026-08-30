@@ -1,7 +1,21 @@
 import type { APIRoute } from "astro";
 import { collectHistoryForAllUsers } from "../../../lib/collectHistory";
+import { checkCronRateLimit } from "../../../lib/cronLimits";
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, clientAddress }) => {
+  const rate = checkCronRateLimit(clientAddress || "unknown");
+  if (!rate.ok) {
+    return new Response(JSON.stringify({ error: rate.error }), {
+      status: 429,
+      headers: {
+        "Content-Type": "application/json",
+        ...(rate.retryAfterSec
+          ? { "Retry-After": String(rate.retryAfterSec) }
+          : {}),
+      },
+    });
+  }
+
   const secret = import.meta.env.CRON_SECRET;
   const authHeader = request.headers.get("authorization");
 

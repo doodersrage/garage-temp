@@ -1,0 +1,40 @@
+name: Bug report
+description: Something is broken in the app, ingest, alerts, or firmware samples.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Account, billing, and household access questions belong on the [contact form](https://thermaltrace.dev/contact), not here.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Expected vs observed behavior.
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      description: Page, API route, or sketch (e.g. Dashboard → Alerts, POST /api/ingest/…).
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Hardware / ingest (if relevant)
+      description: Board, sensors, firmware, feed URLs. Same details we ask on the contact page.
+      placeholder: ESP32, DHT22 + leak sensor, expected dry / observed wet, https://…
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+  - type: dropdown
+    id: plan
+    attributes:
+      label: Plan
+      options:
+        - Free
+        - Member
+        - Pro
+        - Self-hosted / unknown
