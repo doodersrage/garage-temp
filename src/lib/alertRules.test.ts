@@ -150,6 +150,45 @@ describe("alert rules", () => {
       })[0],
     ).toContain("High CO2");
   });
+
+  it("matches workshop numeric and motion rules", () => {
+    const rules: AlertRule[] = [
+      { id: "aqi", enabled: true, name: "Dusty", all: [{ type: "pm25_above", value: 35 }] },
+      { id: "pir", enabled: true, name: "Motion", all: [{ type: "motion_detected" }] },
+      { id: "sump", enabled: true, name: "Sump high", all: [{ type: "level_above", value: 80 }] },
+    ];
+    const base = {
+      readings: [] as Array<{ label: string; tempf: number; humidity: number }>,
+      doorOpenSessions: [] as Array<{
+        label: string;
+        durationMs: number | null;
+        stillOpen: boolean;
+      }>,
+      rateDrops: [] as Array<{ label: string; dropF: number }>,
+      outages: [] as Array<{ deviceName: string; hoursSilent: number }>,
+      freezeThresholdF: 34,
+      humidityThreshold: 75,
+      rateChangeF: 15,
+      outageHours: 2,
+    };
+    expect(
+      evaluateAlertRules(rules, {
+        ...base,
+        boolSensors: [{ label: "Bay", kind: "motion", value: false }],
+        numericSensors: [{ label: "Air", kind: "pm25", value: 12 }],
+      }),
+    ).toHaveLength(0);
+    expect(
+      evaluateAlertRules(rules, {
+        ...base,
+        boolSensors: [{ label: "Bay", kind: "motion", value: true }],
+        numericSensors: [
+          { label: "Air", kind: "pm25", value: 40 },
+          { label: "Sump", kind: "level", value: 90 },
+        ],
+      }),
+    ).toHaveLength(3);
+  });
 });
 
 describe("year over year", () => {

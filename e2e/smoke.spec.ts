@@ -5,7 +5,7 @@ test.describe("public smoke", () => {
     await page.goto("/");
     await expect(page).toHaveTitle(/ThermalTrace/i);
     await expect(
-      page.getByText(/Built for homeowners, hobbyists, and makers running ESP32\/Arduino sensors/i),
+      page.getByText(/Built for homeowners, hobbyists, and makers with ESP32, Arduino, or any HTTPS JSON probe/i),
     ).toBeVisible();
     await expect(page.getByRole("link", { name: /Free forever/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Install the web app/i })).toBeVisible();

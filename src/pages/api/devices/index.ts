@@ -7,6 +7,8 @@ import {
 import {
   createPushDevice,
   deleteDeviceSensor,
+  defaultUnitForKind,
+  isSensorKind,
   listHouseholdDevices,
   renamePushDevice,
   rotatePushDeviceKey,
@@ -156,8 +158,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     const deviceId = formData.get("device_id")?.toString();
     const key = formData.get("key")?.toString().trim();
     const label = formData.get("label")?.toString().trim();
-    const kind = formData.get("kind")?.toString() ?? "generic";
-    const unit = formData.get("unit")?.toString().trim() || null;
+    const kindRaw = formData.get("kind")?.toString() ?? "generic";
+    const kind = isSensorKind(kindRaw) ? kindRaw : "generic";
+    const unit = formData.get("unit")?.toString().trim() || defaultUnitForKind(kind);
 
     if (!deviceId || !key || !label) {
       return redirect(`${redirectTo}?error=1`);
@@ -186,8 +189,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     const deviceId = formData.get("device_id")?.toString();
     const key = formData.get("key")?.toString().trim();
     const label = formData.get("label")?.toString().trim();
-    const kind = formData.get("kind")?.toString() ?? "generic";
-    const unit = formData.get("unit")?.toString().trim() || null;
+    const kindRaw = formData.get("kind")?.toString() ?? "generic";
+    const kind = isSensorKind(kindRaw) ? kindRaw : "generic";
+    const unit = formData.get("unit")?.toString().trim() || defaultUnitForKind(kind);
 
     if (!sensorId || !deviceId || !key || !label) {
       return redirect(`${redirectTo}?error=1`);
@@ -201,7 +205,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     const result = await updateDeviceSensor(sensorId, deviceId, {
       key,
       label,
-      kind: kind as never,
+      kind,
       unit,
     });
 

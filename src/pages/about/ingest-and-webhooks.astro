@@ -47,14 +47,18 @@ Content-Type: application/json</code></pre>
     { "key": "garage_temp", "kind": "temperature", "value": 65.3, "unit": "F" },
     { "key": "garage_rh", "kind": "humidity", "value": 42, "unit": "%" },
     { "key": "door1", "kind": "door", "bool": true },
-    { "key": "co2", "kind": "co2", "value": 820, "unit": "ppm" }
+    { "key": "co2", "kind": "co2", "value": 820, "unit": "ppm" },
+    { "key": "pm25", "kind": "pm25", "value": 12, "unit": "µg/m³" },
+    { "key": "sump", "kind": "level", "value": 22, "unit": "%" }
   ],
   "battery": 87,
   "rssi": -62
 }`}</code></pre>
   <p>
     Supported kinds: <code>temperature</code>, <code>humidity</code>, <code>co2</code>,
-    <code>door</code>, <code>power</code>, <code>flood</code>, <code>generic</code>.
+    <code>pressure</code>, <code>pm25</code>, <code>voc</code>, <code>level</code>,
+    <code>energy</code>, <code>door</code>, <code>power</code>, <code>flood</code>,
+    <code>motion</code>, <code>generic</code>.
     Optional top-level <code>battery</code> / <code>battery_pct</code> and <code>rssi</code> update device health metadata.
     Sample MicroPython and Arduino sketches for DS18B20 / MAX31855 / MAX6675:
     <a class="text-link" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches" target="_blank" rel="noreferrer">sketches/</a>.

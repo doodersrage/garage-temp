@@ -5,7 +5,7 @@ import TempProbesSettings from "../../components/TempProbesSettings.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getUserPreferences } from "../../lib/userPreferences";
 import { checkFeedHealth } from "../../lib/collectHistory";
-import { getUserDevicesAsTempConfig, listHouseholdDevices } from "../../lib/devices";
+import { getUserDevicesAsTempConfig, listHouseholdDevices, SENSOR_KIND_LABELS, formatBoolSensorValue } from "../../lib/devices";
 import { getOrCreateHouseholdForUser, listUserHouseholds, getUserHouseholdRole, canEditHousehold } from "../../lib/households";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { fetchLatestSensorValues } from "../../lib/sensorReadings";
@@ -101,22 +101,11 @@ const neverSeenWithSensors = pushDevices.some(
 );
 const showVerifyIngest =
   Boolean(Astro.url.searchParams.get("sensor_added")) || neverSeenWithSensors;
-const kindLabels: Record<string, string> = {
-  temperature: "Temperature",
-  humidity: "Humidity",
-  co2: "CO₂",
-  door: "Door",
-  power: "Power",
-  flood: "Flood",
-  generic: "Generic",
-};
+const kindLabels = SENSOR_KIND_LABELS;
 
 function formatLatestValue(row: (typeof latest)[number]): string {
   if (row.value_bool != null) {
-    if (row.sensor.kind === "door") return row.value_bool ? "Open" : "Closed";
-    if (row.sensor.kind === "power") return row.value_bool ? "On" : "Off";
-    if (row.sensor.kind === "flood") return row.value_bool ? "Wet" : "Dry";
-    return row.value_bool ? "On/Open" : "Off/Closed";
+    return formatBoolSensorValue(row.sensor.kind, row.value_bool);
   }
   if (row.value_num != null) {
     return `${row.value_num.toFixed(1)}${row.sensor.unit ? ` ${row.sensor.unit}` : ""}`;

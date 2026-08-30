@@ -31,7 +31,7 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
   {
     id: "hardware",
     title: "Hardware setup",
-    description: "Sensors, wiring, and firmware for ESP32 and Arduino probes.",
+    description: "Sensors, wiring, and firmware for ESP32, Arduino, and HTTPS JSON probes.",
     links: [
       { href: "/about/dht22-sensor-overview", slug: "dht22-sensor-overview" },
       { href: "/about/arduino-circuit-wiring", slug: "arduino-circuit-wiring" },

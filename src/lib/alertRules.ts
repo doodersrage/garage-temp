@@ -7,7 +7,13 @@ export type AlertConditionType =
   | "outage"
   | "flood"
   | "power_off"
-  | "co2_above";
+  | "co2_above"
+  | "pressure_below"
+  | "pm25_above"
+  | "voc_above"
+  | "level_above"
+  | "energy_below"
+  | "motion_detected";
 
 export type AlertCondition = {
   type: AlertConditionType;
@@ -103,6 +109,58 @@ function evaluateCondition(
           s.value >= threshold,
       );
     }
+    case "pressure_below": {
+      const threshold = condition.value ?? 980;
+      return ctx.numericSensors.some(
+        (s) =>
+          s.kind === "pressure" &&
+          matchesLabel(s.label, condition.labelIncludes) &&
+          s.value <= threshold,
+      );
+    }
+    case "pm25_above": {
+      const threshold = condition.value ?? 35;
+      return ctx.numericSensors.some(
+        (s) =>
+          s.kind === "pm25" &&
+          matchesLabel(s.label, condition.labelIncludes) &&
+          s.value >= threshold,
+      );
+    }
+    case "voc_above": {
+      const threshold = condition.value ?? 400;
+      return ctx.numericSensors.some(
+        (s) =>
+          s.kind === "voc" &&
+          matchesLabel(s.label, condition.labelIncludes) &&
+          s.value >= threshold,
+      );
+    }
+    case "level_above": {
+      const threshold = condition.value ?? 80;
+      return ctx.numericSensors.some(
+        (s) =>
+          s.kind === "level" &&
+          matchesLabel(s.label, condition.labelIncludes) &&
+          s.value >= threshold,
+      );
+    }
+    case "energy_below": {
+      const threshold = condition.value ?? 10;
+      return ctx.numericSensors.some(
+        (s) =>
+          s.kind === "energy" &&
+          matchesLabel(s.label, condition.labelIncludes) &&
+          s.value <= threshold,
+      );
+    }
+    case "motion_detected":
+      return ctx.boolSensors.some(
+        (s) =>
+          s.kind === "motion" &&
+          s.value === true &&
+          matchesLabel(s.label, condition.labelIncludes),
+      );
     case "rate_drop": {
       const threshold = condition.value ?? ctx.rateChangeF;
       return ctx.rateDrops.some(
@@ -182,4 +240,10 @@ export const CONDITION_OPTIONS: Array<{ value: AlertConditionType; label: string
   { value: "flood", label: "Flood detected" },
   { value: "power_off", label: "Power off" },
   { value: "co2_above", label: "CO₂ above (ppm)" },
+  { value: "pressure_below", label: "Pressure below (hPa)" },
+  { value: "pm25_above", label: "PM2.5 above (µg/m³)" },
+  { value: "voc_above", label: "VOC above (ppb)" },
+  { value: "level_above", label: "Water / sump level above (%)" },
+  { value: "energy_below", label: "Energy below (W)" },
+  { value: "motion_detected", label: "Motion detected" },
 ];

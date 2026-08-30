@@ -57,6 +57,7 @@ const readingsUrl = `/api/share/${token}/readings`;
         if (r.kind === "door") return r.value_bool ? "Open" : "Closed";
         if (r.kind === "power") return r.value_bool ? "On" : "Off";
         if (r.kind === "flood") return r.value_bool ? "Wet" : "Dry";
+        if (r.kind === "motion") return r.value_bool ? "Detected" : "Clear";
         return r.value_bool ? "On / Open" : "Off / Closed";
       }
       if (r.value_num != null) {
@@ -71,9 +72,15 @@ const readingsUrl = `/api/share/${token}/readings`;
           temperature: "Temperature",
           humidity: "Humidity",
           co2: "CO₂",
+          pressure: "Pressure",
+          pm25: "PM2.5",
+          voc: "VOC",
+          level: "Level",
+          energy: "Energy",
           door: "Door",
           power: "Power",
           flood: "Flood",
+          motion: "Motion",
           generic: "Sensor",
         }[kind] || kind
       );

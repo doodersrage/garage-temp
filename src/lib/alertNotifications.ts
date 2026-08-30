@@ -24,6 +24,7 @@ import {
   fetchRecentBoolReadings,
   getRecentNumericReadings,
 } from "./sensorReadings";
+import { isBoolSensorKind, isNumericSensorKind } from "./sensorKinds";
 import {
   detectBatteryTrendDrop,
   type BatterySample,
@@ -251,23 +252,15 @@ async function buildRuleContext(
   if (householdId) {
     const latest = await fetchLatestSensorValues(householdId);
     for (const row of latest) {
-      if (
-        row.sensor.kind === "door" ||
-        row.sensor.kind === "flood" ||
-        row.sensor.kind === "power"
-      ) {
-        if (typeof row.value_bool === "boolean") {
-          boolSensors.push({
-            label: row.sensor.label,
-            kind: row.sensor.kind,
-            value: row.value_bool,
-          });
-        }
+      if (isBoolSensorKind(row.sensor.kind) && typeof row.value_bool === "boolean") {
+        boolSensors.push({
+          label: row.sensor.label,
+          kind: row.sensor.kind,
+          value: row.value_bool,
+        });
       }
       if (
-        (row.sensor.kind === "co2" ||
-          row.sensor.kind === "humidity" ||
-          row.sensor.kind === "generic") &&
+        isNumericSensorKind(row.sensor.kind) &&
         typeof row.value_num === "number" &&
         Number.isFinite(row.value_num)
       ) {

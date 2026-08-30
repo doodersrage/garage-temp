@@ -65,14 +65,16 @@ Matches the Ethernet garage firmware JSON shape:
     { "key": "garage_temp", "kind": "temperature", "value": 65.3, "unit": "F" },
     { "key": "garage_rh", "kind": "humidity", "value": 42, "unit": "%" },
     { "key": "door1", "kind": "door", "bool": true },
-    { "key": "co2", "kind": "co2", "value": 820, "unit": "ppm" }
+    { "key": "co2", "kind": "co2", "value": 820, "unit": "ppm" },
+    { "key": "pm25", "kind": "pm25", "value": 12, "unit": "µg/m³" },
+    { "key": "sump", "kind": "level", "value": 22, "unit": "%" }
   ],
   "battery": 87,
   "rssi": -62
 }
 ```
 
-Supported `kind` values: `temperature`, `humidity`, `co2`, `door`, `power`, `flood`, `generic`.
+Supported `kind` values: `temperature`, `humidity`, `co2`, `pressure`, `pm25`, `voc`, `level`, `energy`, `door`, `power`, `flood`, `motion`, `generic`.
 
 ## MQTT-over-HTTP bridge
 

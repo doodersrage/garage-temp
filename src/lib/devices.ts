@@ -7,15 +7,16 @@ import {
   type TempFeedConfig,
   type TempProbeConfig,
 } from "./tempFeedConfig";
+import type { SensorKind } from "./sensorKinds";
 
-export type SensorKind =
-  | "temperature"
-  | "humidity"
-  | "co2"
-  | "door"
-  | "power"
-  | "flood"
-  | "generic";
+export type { SensorKind } from "./sensorKinds";
+export {
+  SENSOR_KINDS,
+  SENSOR_KIND_LABELS,
+  isSensorKind,
+  formatBoolSensorValue,
+  defaultUnitForKind,
+} from "./sensorKinds";
 
 export type DeviceSource = "pull_url" | "push";
 

@@ -34,6 +34,7 @@ interface Props {
 }
 
 import { formatRelativeAge } from "../lib/relativeTime";
+import { formatBoolSensorValue, SENSOR_KIND_LABELS } from "../lib/sensorKinds";
 
 function formatSensorValue(sensor: LiveSensor): { primary: string; detail: string } {
   switch (sensor.kind) {
@@ -67,35 +68,56 @@ function formatSensorValue(sensor: LiveSensor): { primary: string; detail: strin
         };
       }
       break;
+    case "pressure":
+      if (sensor.value_num != null) {
+        return {
+          primary: `${sensor.value_num.toFixed(1)} ${sensor.unit ?? "hPa"}`,
+          detail: "Barometric pressure",
+        };
+      }
+      break;
+    case "pm25":
+      if (sensor.value_num != null) {
+        return {
+          primary: `${sensor.value_num.toFixed(1)} ${sensor.unit ?? "µg/m³"}`,
+          detail: "Fine particles",
+        };
+      }
+      break;
+    case "voc":
+      if (sensor.value_num != null) {
+        return {
+          primary: `${Math.round(sensor.value_num)} ${sensor.unit ?? "ppb"}`,
+          detail: "VOCs",
+        };
+      }
+      break;
+    case "level":
+      if (sensor.value_num != null) {
+        return {
+          primary: `${sensor.value_num.toFixed(0)}${sensor.unit ? ` ${sensor.unit}` : "%"}`,
+          detail: "Sump / tank level",
+        };
+      }
+      break;
+    case "energy":
+      if (sensor.value_num != null) {
+        return {
+          primary: `${sensor.value_num.toFixed(0)} ${sensor.unit ?? "W"}`,
+          detail: "Power draw",
+        };
+      }
+      break;
     case "door":
-      return {
-        primary:
-          sensor.value_bool == null
-            ? "—"
-            : sensor.value_bool
-              ? "Open"
-              : "Closed",
-        detail: "Door contact",
-      };
     case "power":
-      return {
-        primary:
-          sensor.value_bool == null
-            ? "—"
-            : sensor.value_bool
-              ? "On"
-              : "Off",
-        detail: "Power / relay",
-      };
     case "flood":
+    case "motion":
       return {
         primary:
           sensor.value_bool == null
             ? "—"
-            : sensor.value_bool
-              ? "Wet"
-              : "Dry",
-        detail: "Flood / leak",
+            : formatBoolSensorValue(sensor.kind, sensor.value_bool),
+        detail: SENSOR_KIND_LABELS[sensor.kind as keyof typeof SENSOR_KIND_LABELS] ?? sensor.kind,
       };
     default:
       if (sensor.value_bool != null) {
@@ -122,7 +144,17 @@ function isSensorAlert(sensor: LiveSensor): boolean {
   if (sensor.kind === "door" && sensor.value_bool === true) return true;
   if (sensor.kind === "flood" && sensor.value_bool === true) return true;
   if (sensor.kind === "power" && sensor.value_bool === false) return true;
+  if (sensor.kind === "motion" && sensor.value_bool === true) return true;
   if (sensor.kind === "co2" && sensor.value_num != null && sensor.value_num >= 1000) {
+    return true;
+  }
+  if (sensor.kind === "pm25" && sensor.value_num != null && sensor.value_num >= 35) {
+    return true;
+  }
+  if (sensor.kind === "voc" && sensor.value_num != null && sensor.value_num >= 400) {
+    return true;
+  }
+  if (sensor.kind === "level" && sensor.value_num != null && sensor.value_num >= 80) {
     return true;
   }
   return false;

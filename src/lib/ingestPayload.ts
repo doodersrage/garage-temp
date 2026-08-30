@@ -1,4 +1,5 @@
-import type { SensorKind } from "./devices";
+import type { SensorKind } from "./sensorKinds";
+import { isSensorKind } from "./sensorKinds";
 import type { TempReading } from "./tempFeedConfig";
 
 export type TypedSensorValue = {
@@ -43,7 +44,7 @@ export function parseIngestPayload(payload: unknown): {
       if (typeof row.key !== "string") continue;
       typed.push({
         key: row.key,
-        kind: typeof row.kind === "string" ? (row.kind as SensorKind) : undefined,
+        kind: typeof row.kind === "string" && isSensorKind(row.kind) ? row.kind : undefined,
         value: typeof row.value === "number" ? row.value : null,
         bool: typeof row.bool === "boolean" ? row.bool : null,
         text: typeof row.text === "string" ? row.text : null,
@@ -64,9 +65,28 @@ export function inferSensorKind(key: string, value: TypedSensorValue): SensorKin
     if (k.includes("door")) return "door";
     if (k.includes("power") || k.includes("relay")) return "power";
     if (k.includes("flood") || k.includes("leak")) return "flood";
+    if (k.includes("motion") || k.includes("occup") || k.includes("pir")) return "motion";
     return "generic";
   }
   const k = key.toLowerCase();
+  if (k.includes("pm2") || k.includes("pm_2") || k.includes("particle")) return "pm25";
+  if (k.includes("voc") || k.includes("tvoc")) return "voc";
+  if (k.includes("pressure") || k.includes("baro") || k.includes("hpa") || k.includes("mbar")) {
+    return "pressure";
+  }
+  if (k.includes("level") || k.includes("sump") || k.includes("tank") || k.includes("depth")) {
+    return "level";
+  }
+  if (
+    k.includes("watt") ||
+    k.includes("kwh") ||
+    k.includes("energy") ||
+    k.endsWith("_w") ||
+    k.includes("amps") ||
+    /(^|_)amp($|_s?)/.test(k)
+  ) {
+    return "energy";
+  }
   if (k.includes("co2") || k.includes("co₂")) return "co2";
   if (k.includes("humid")) return "humidity";
   if (k.includes("temp")) return "temperature";
