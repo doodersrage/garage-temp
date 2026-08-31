@@ -26,7 +26,7 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   cookies.delete(OAUTH_REF_COOKIE, { path: "/" });
 
   if (refCode && data.user && isLikelyNewUser(data.user.created_at)) {
-    await applyReferralForNewUser(data.user.id, refCode, data.user.user_metadata);
+    await applyReferralForNewUser(data.user.id, refCode, data.user.app_metadata);
   }
 
   const nextCookie = cookies.get(OAUTH_NEXT_COOKIE)?.value;

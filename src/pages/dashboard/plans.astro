@@ -27,7 +27,7 @@ const upgradeTarget = nextUpgradeTier(entitlements.tier);
 const subscriptionNotice = Astro.url.searchParams.get("subscription");
 const siteUrl = getSiteUrl(Astro.request);
 const referralRewardDays = Number(
-  (user.user_metadata as Record<string, unknown> | undefined)?.referral_reward_days ?? 0,
+  (user.app_metadata as Record<string, unknown> | undefined)?.referral_reward_days ?? 0,
 );
 ---
 <DashboardLayout title="Plans">

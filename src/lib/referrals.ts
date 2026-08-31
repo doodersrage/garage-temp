@@ -94,13 +94,22 @@ export function isLikelyNewUser(createdAt: string): boolean {
   return Date.now() - created < 10 * 60 * 1000;
 }
 
+// referred_by and referral_reward_days deliberately live in app_metadata,
+// not user_metadata: Supabase's client-side auth.updateUser({ data }) call
+// lets an end user rewrite their own user_metadata directly against
+// Supabase's Auth API using nothing but their own session and the public
+// anon key -- entirely bypassing this app's server. app_metadata can only
+// be written via the service-role admin API (admin.auth.admin.updateUserById),
+// which is exactly what these two functions already use, so storing the
+// referral trust state there instead costs nothing and closes a
+// self-service "grant myself extra trial days" hole.
 export async function applyReferralForNewUser(
   userId: string,
   refCode: string,
-  userMetadata?: Record<string, unknown> | null,
+  userAppMetadata?: Record<string, unknown> | null,
 ): Promise<void> {
   const normalized = refCode.trim().toLowerCase();
-  if (!normalized || userMetadata?.referred_by) return;
+  if (!normalized || userAppMetadata?.referred_by) return;
 
   const referrerId = await resolveReferrerUserId(normalized);
   if (!referrerId) return;
@@ -108,8 +117,8 @@ export async function applyReferralForNewUser(
   await recordReferralSignup(referrerId, userId);
   const admin = createAdminClient();
   await admin.auth.admin.updateUserById(userId, {
-    user_metadata: {
-      ...(userMetadata ?? {}),
+    app_metadata: {
+      ...(userAppMetadata ?? {}),
       referred_by: normalized,
     },
   });
@@ -141,10 +150,10 @@ export async function grantReferrerRewardOnSubscription(
   const { data: referrerUser } = await admin.auth.admin.getUserById(
     signup.referrer_user_id,
   );
-  const meta = referrerUser.user?.user_metadata ?? {};
+  const meta = referrerUser.user?.app_metadata ?? {};
   const current = referralRewardTrialDays(meta);
   await admin.auth.admin.updateUserById(signup.referrer_user_id, {
-    user_metadata: {
+    app_metadata: {
       ...meta,
       referral_reward_days: current + 7,
     },

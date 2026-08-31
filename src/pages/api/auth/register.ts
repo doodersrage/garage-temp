@@ -38,7 +38,7 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
   }
 
   if (data.user && refCode) {
-    await applyReferralForNewUser(data.user.id, refCode, data.user.user_metadata);
+    await applyReferralForNewUser(data.user.id, refCode, data.user.app_metadata);
   }
 
   const next = formData.get("next")?.toString() ?? "";

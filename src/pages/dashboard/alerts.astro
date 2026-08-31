@@ -110,7 +110,7 @@ const showReferralNudge =
 const testSent = Boolean(Astro.url.searchParams.get("test_sent"));
 const siteUrl = resolveSiteUrl(Astro.site);
 const referralRewardDays = Number(
-  (user.user_metadata as Record<string, unknown> | undefined)?.referral_reward_days ?? 0,
+  (user.app_metadata as Record<string, unknown> | undefined)?.referral_reward_days ?? 0,
 );
 ---
 <DashboardLayout title="Alerts">
