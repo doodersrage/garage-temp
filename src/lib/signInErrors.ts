@@ -6,6 +6,11 @@ export const SIGNIN_ERROR_MESSAGES = {
     "Please confirm your email address before signing in. Check your inbox for the confirmation link.",
   oauth_failed:
     "We couldn't start social sign-in. Please try again or sign in with email.",
+  oauth_denied: "Social sign-in was cancelled. Try again when you're ready.",
+  oauth_provider_failed:
+    "Social sign-in failed at the provider. Try again or sign in with email.",
+  oauth_exchange_failed:
+    "Something went wrong while completing social sign-in. Please try again.",
   turnstile_failed:
     "Please complete the human verification checkbox, then try again.",
   rate_limited:
@@ -47,11 +52,16 @@ export function mapSignInError(error: { message: string }): SignInErrorCode {
 export function buildSignInRedirectUrl(
   errorCode: SignInErrorCode,
   email?: string,
+  oauthDetail?: string | null,
 ): string {
   const params = new URLSearchParams({ error: errorCode });
 
   if (email) {
     params.set("email", email);
+  }
+
+  if (oauthDetail) {
+    params.set("oauth_detail", oauthDetail);
   }
 
   return `/signin?${params.toString()}`;

@@ -31,6 +31,7 @@ if (session && user) {
 }
 
 const errorMessage = getSignInErrorMessage(Astro.url.searchParams.get("error"));
+const oauthDetail = Astro.url.searchParams.get("oauth_detail")?.trim() ?? "";
 const registered = Astro.url.searchParams.get("registered") === "1";
 const emailValue = Astro.url.searchParams.get("email") ?? "";
 const nextPath = Astro.url.searchParams.get("next") ?? "";
@@ -67,6 +68,9 @@ const registerHref = buildRegisterHref({ next: safeNext || REGISTER_NEXT_DEVICES
       {errorMessage && (
         <div class="alert-warning mb-4" role="alert">
           <p class="m-0">{errorMessage}</p>
+          {oauthDetail && (
+            <p class="m-0 mt-2 text-sm opacity-90">{oauthDetail}</p>
+          )}
         </div>
       )}
 

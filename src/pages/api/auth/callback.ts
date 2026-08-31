@@ -2,6 +2,10 @@ import type { APIRoute } from "astro";
 import { buildSignInRedirectUrl } from "../../../lib/signInErrors";
 import { applySessionCookiesAfterAuth } from "../../../lib/mfa";
 import {
+  mapOAuthCallbackError,
+  sanitizeOAuthErrorDetail,
+} from "../../../lib/oauthCallbackErrors";
+import {
   clearOAuthPkceCookie,
   createOAuthAuthClient,
 } from "../../../lib/oauthAuthClient";
@@ -15,11 +19,19 @@ import { REGISTER_NEXT_DEVICES } from "../../../lib/registerUrl";
 
 export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   const oauthError = url.searchParams.get("error");
+  const oauthErrorDescription = url.searchParams.get("error_description");
   const authCode = url.searchParams.get("code");
 
   if (oauthError) {
     clearOAuthPkceCookie(cookies);
-    return redirect(buildSignInRedirectUrl("oauth_failed"));
+    const detail = sanitizeOAuthErrorDetail(oauthErrorDescription);
+    console.error(
+      "OAuth provider callback error:",
+      oauthError,
+      detail ?? "(no description)",
+    );
+    const errorCode = mapOAuthCallbackError(oauthError, oauthErrorDescription);
+    return redirect(buildSignInRedirectUrl(errorCode, undefined, detail));
   }
 
   if (!authCode) {
@@ -33,8 +45,9 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   clearOAuthPkceCookie(cookies);
 
   if (error || !data.session) {
-    console.error("OAuth callback exchange failed:", error?.message ?? "no session");
-    return redirect(buildSignInRedirectUrl("generic"));
+    const detail = sanitizeOAuthErrorDetail(error?.message);
+    console.error("OAuth callback exchange failed:", detail ?? "no session");
+    return redirect(buildSignInRedirectUrl("oauth_exchange_failed", undefined, detail));
   }
 
   const refCode = cookies.get(OAUTH_REF_COOKIE)?.value?.trim().toLowerCase() ?? "";

@@ -5,6 +5,10 @@ import {
   mapSignInError,
 } from "../../../lib/signInErrors";
 import { applySessionCookiesAfterAuth, createAuthClient } from "../../../lib/mfa";
+import {
+  mapOAuthCallbackError,
+  sanitizeOAuthErrorDetail,
+} from "../../../lib/oauthCallbackErrors";
 import { createOAuthAuthClient } from "../../../lib/oauthAuthClient";
 import {
   buildOAuthCallbackUrl,
@@ -18,6 +22,17 @@ import {
   clearSigninFailures,
   recordSigninFailure,
 } from "../../../lib/signinLimits";
+
+function oauthProviderOptions(provider: string, redirectTo: string) {
+  const options: { redirectTo: string; scopes?: string } = { redirectTo };
+
+  // GitHub accounts with private email need read:user + user:email for Supabase.
+  if (provider === "github") {
+    options.scopes = "read:user user:email";
+  }
+
+  return options;
+}
 
 export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress, site }) => {
   const formData = await request.formData();
@@ -61,12 +76,16 @@ export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress
     const oauthClient = createOAuthAuthClient(cookies);
     const { data, error } = await oauthClient.auth.signInWithOAuth({
       provider: provider as Provider,
-      options: {
-        redirectTo: buildOAuthCallbackUrl(request, site),
-      },
+      options: oauthProviderOptions(provider, buildOAuthCallbackUrl(request, site)),
     });
 
     if (error) {
+      console.error(`OAuth sign-in start failed (${provider}):`, error.message);
+      return redirect(buildSignInRedirectUrl("oauth_failed"));
+    }
+
+    if (!data.url) {
+      console.error(`OAuth sign-in start failed (${provider}): missing redirect URL`);
       return redirect(buildSignInRedirectUrl("oauth_failed"));
     }
 
