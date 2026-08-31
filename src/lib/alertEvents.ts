@@ -1,4 +1,5 @@
 import { createServerClient } from "./supabase";
+import { escapeCsvField } from "./csvEscape";
 
 export type AlertEventRow = {
   id: number;
@@ -123,13 +124,6 @@ export function buildAlertEventsCsv(events: AlertEventRow[]): string {
     "acknowledged_at",
   ];
 
-  const escape = (value: string): string => {
-    if (value.includes(",") || value.includes('"') || value.includes("\n")) {
-      return `"${value.replace(/"/g, '""')}"`;
-    }
-    return value;
-  };
-
   const rows = events.map((event) =>
     [
       event.created_at,
@@ -140,7 +134,7 @@ export function buildAlertEventsCsv(events: AlertEventRow[]): string {
       (event.channels_skipped ?? []).join("|"),
       event.acknowledged_at ?? "",
     ]
-      .map(escape)
+      .map(escapeCsvField)
       .join(","),
   );
 

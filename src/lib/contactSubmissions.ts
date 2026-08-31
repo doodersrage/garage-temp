@@ -1,4 +1,5 @@
 import { createServerClient } from "./supabase";
+import { escapeCsvField } from "./csvEscape";
 
 export type ContactSubmission = {
   id: number;
@@ -139,14 +140,6 @@ export async function fetchAllContactSubmissions(): Promise<{
   }
 
   return { submissions, error: null };
-}
-
-function escapeCsvField(value: string | number): string {
-  const str = String(value);
-  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-  return str;
 }
 
 export function buildContactsCsv(submissions: ContactSubmission[]): string {

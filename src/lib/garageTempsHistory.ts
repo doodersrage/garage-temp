@@ -1,4 +1,5 @@
 import { createServerClient } from "./supabase";
+import { escapeCsvField } from "./csvEscape";
 import { getUserHouseholdId } from "./households";
 import { applySensorOffset } from "./sensorCalibration";
 
@@ -550,14 +551,6 @@ export async function fetchHistoryFilterOptions(userId: string): Promise<{
     probes: [...probeMap.entries()].map(([key, label]) => ({ key, label })),
     error: null,
   };
-}
-
-function escapeCsvField(value: string | number): string {
-  const str = String(value);
-  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-  return str;
 }
 
 export function buildGarageTempsCsv(readings: GarageTempReading[]): string {
