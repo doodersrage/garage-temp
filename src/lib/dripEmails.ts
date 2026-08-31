@@ -1,4 +1,5 @@
 import { createAdminClient } from "./supabase";
+import { PRO_MAX_DEVICES } from "./entitlements";
 import { resolveSiteUrl } from "./schemaMarkup";
 import {
   brandedEmailParts,
@@ -83,7 +84,7 @@ export const DRIP_STAGES: DripStage[] = [
       bullets: [
         "SMS and browser push freeze alerts",
         "Public share links and embed widgets",
-        "Outbound webhooks plus up to 24 devices",
+        `Outbound webhooks plus up to ${PRO_MAX_DEVICES} devices per property`,
       ],
       cta: { label: "Compare plans & start trial", url: `${site}/pricing` },
       secondaryCta: { label: "Open dashboard", url: `${site}/dashboard` },

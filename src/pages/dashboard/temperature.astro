@@ -100,7 +100,7 @@ const deviceNotice =
                       Astro.url.searchParams.get("probes_error")
                     ? "Could not save changes. Please try again."
                     : noticeParam === "device_limit"
-                      ? `Push device limit reached (${entitlements.maxDevices}). Upgrade to add more.`
+                      ? `Push device limit reached (${entitlements.maxDevices} per property). Upgrade to add more.`
                       : noticeParam === "viewer"
                         ? "View-only access — you cannot change devices or feeds."
                       : noticeParam === "1" || noticeParam === "true"
@@ -499,7 +499,7 @@ const ingestKeyDeviceName =
     <section class="card" id="push-devices">
       <h2 class="card-title">Push from ESP / Arduino</h2>
       <p class="card-subtitle">
-        Your device POSTs readings to an ingest URL. Limit: {entitlements.maxDevices} devices ({entitlements.tier}).
+        Your device POSTs readings to an ingest URL. Limit: {entitlements.maxDevices} devices per property ({entitlements.tier}).
         See <a class="text-link" href="/about/ingest-and-webhooks">ingest docs</a>.
       </p>
 

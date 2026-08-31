@@ -73,7 +73,7 @@ const activeSubscriptionLabel = isPortfolioOrAbove
 
   <p class="mb-4 text-sm text-[var(--color-text-muted)]">
     Current plan: <strong class="text-[var(--color-text)]">{tierLabel}</strong>
-    {entitlements ? ` · up to ${entitlements.maxDevices} push devices · ${formatHistoryRetention(entitlements.historyDays)} history · ${entitlements.maxOwnedHouseholds} owned propert${entitlements.maxOwnedHouseholds === 1 ? "y" : "ies"}` : ""}
+    {entitlements ? ` · up to ${entitlements.maxDevices} push devices per property · ${formatHistoryRetention(entitlements.historyDays)} history · ${entitlements.maxOwnedHouseholds} owned propert${entitlements.maxOwnedHouseholds === 1 ? "y" : "ies"}` : ""}
     {" · "}
     <a class="text-link" href="/pricing">Full comparison</a>
   </p>

@@ -51,7 +51,7 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
   {
     id: "push_devices",
     category: "Limits",
-    label: "Push ingest devices",
+    label: "Push ingest devices (per property)",
     free: `${FREE_MAX_DEVICES} devices`,
     member: `${MEMBER_MAX_DEVICES} devices`,
     pro: `${PRO_MAX_DEVICES} devices`,
@@ -360,7 +360,7 @@ const NUDGE_CONFIG: Record<
   device_limit: {
     targetTier: "pro",
     title: "Need more push devices?",
-    body: `Free allows ${FREE_MAX_DEVICES} push devices, Member ${MEMBER_MAX_DEVICES}, Pro ${PRO_MAX_DEVICES} — upgrade when you outgrow the limit.`,
+    body: `Free allows ${FREE_MAX_DEVICES} push devices per property, Member ${MEMBER_MAX_DEVICES}, Pro ${PRO_MAX_DEVICES} — upgrade when you outgrow the limit.`,
     anchor: "push_devices",
   },
   data_retention: {
