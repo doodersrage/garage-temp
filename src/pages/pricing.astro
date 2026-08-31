@@ -73,11 +73,11 @@ function priceForInterval(
         : "Billed annually",
     };
   }
-  const amount = prices.monthly ?? "Contact us";
+  // Don't reuse monthly under the annual toggle -- that looks like a bug.
   return {
-    amount,
-    period: prices.monthly ? "/mo" : "",
-    sub: "Billed monthly",
+    amount: "Contact us",
+    period: "",
+    sub: "Annual pricing not configured",
   };
 }
 
