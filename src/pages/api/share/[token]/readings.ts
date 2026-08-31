@@ -4,6 +4,7 @@ import { fetchLatestSensorValues } from "../../../../lib/sensorReadings";
 import { listHouseholdDevices } from "../../../../lib/devices";
 import { buildPrometheusText } from "../../../../lib/prometheusMetrics";
 import { fetchHouseholdChartData } from "../../../../lib/garageTempsHistory";
+import { checkShareReadingsRateLimit } from "../../../../lib/shareReadingsLimits";
 
 async function resolveShare(token: string) {
   const supabase = createServerClient();
@@ -18,12 +19,25 @@ async function resolveShare(token: string) {
   return data;
 }
 
-export const GET: APIRoute = async ({ params, request, url }) => {
+export const GET: APIRoute = async ({ params, request, url, clientAddress }) => {
   const token = params.token;
   if (!token) {
     return new Response(JSON.stringify({ error: "Missing token" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const rate = checkShareReadingsRateLimit(
+    `${clientAddress || "unknown"}:${token.slice(0, 12)}`,
+  );
+  if (!rate.ok) {
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: {
+        "Content-Type": "application/json",
+        ...(rate.retryAfterSec ? { "Retry-After": String(rate.retryAfterSec) } : {}),
+      },
     });
   }
 

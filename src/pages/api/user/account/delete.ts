@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../../lib/auth";
 import { deleteUserAccount } from "../../../../lib/accountLifecycle";
+import { formRedirectPath } from "../../../../lib/siteUrl";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { user } = await getAuthFromCookies(cookies);
@@ -10,7 +11,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   const formData = await request.formData();
   const confirm = formData.get("confirm")?.toString();
-  const redirectTo = formData.get("redirect")?.toString() || "/";
+  const redirectTo = formRedirectPath(formData, "/");
 
   if (confirm !== "DELETE") {
     return redirect("/dashboard/settings?delete_error=confirm");

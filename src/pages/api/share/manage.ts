@@ -8,6 +8,8 @@ import {
   requireHouseholdManager,
 } from "../../../lib/householdAuth";
 import { recordHouseholdActivity } from "../../../lib/householdActivity";
+import { formRedirectPath } from "../../../lib/siteUrl";
+import { FLASH_SHARE_TOKEN, setSecretFlash } from "../../../lib/secretFlash";
 
 function randomToken(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(24));
@@ -59,7 +61,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   const entitlements = await getUserEntitlements(user.id);
   const formData = await request.formData();
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard/share";
+  const redirectTo = formRedirectPath(formData, "/dashboard/share");
   const action = formData.get("action")?.toString() ?? "create";
 
   const manager = await requireHouseholdManager(user.id);
@@ -124,7 +126,6 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     detail: scope,
   });
 
-  return redirect(
-    `${redirectTo}?created=1&new_token=${encodeURIComponent(token)}`,
-  );
+  setSecretFlash(cookies, FLASH_SHARE_TOKEN, token);
+  return redirect(`${redirectTo}?created=1`);
 };

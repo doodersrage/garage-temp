@@ -24,6 +24,8 @@ import {
   requireHouseholdEditor,
 } from "../../../lib/householdAuth";
 import { recordHouseholdActivity } from "../../../lib/householdActivity";
+import { formRedirectPath } from "../../../lib/siteUrl";
+import { FLASH_INGEST_KEY, setSecretFlash } from "../../../lib/secretFlash";
 
 async function sha256Hex(value: string): Promise<string> {
   const digest = await crypto.subtle.digest(
@@ -47,7 +49,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const formData = await request.formData();
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard/temperature";
+  const redirectTo = formRedirectPath(formData, "/dashboard/temperature");
   const action = formData.get("action")?.toString() ?? "create_push";
 
   const editor = await requireHouseholdEditor(user.id);
@@ -149,9 +151,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       return redirect(`${redirectTo}?error=1`);
     }
 
-    return redirect(
-      `${redirectTo}?ingest_key=${encodeURIComponent(rawKey)}&key_rotated=1`,
-    );
+    setSecretFlash(cookies, FLASH_INGEST_KEY, rawKey);
+    return redirect(`${redirectTo}?key_rotated=1`);
   }
 
   if (action === "add_sensor") {
@@ -301,7 +302,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?error=1`);
   }
 
+  setSecretFlash(cookies, FLASH_INGEST_KEY, rawKey);
   return redirect(
-    `${redirectTo}?ingest_key=${encodeURIComponent(rawKey)}&device_created=1&focus_device=${encodeURIComponent(device.id)}`,
+    `${redirectTo}?device_created=1&focus_device=${encodeURIComponent(device.id)}`,
   );
 };

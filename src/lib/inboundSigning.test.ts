@@ -44,9 +44,11 @@ describe("verifyInboundSignature", () => {
     ).toBe(false);
   });
 
-  it("allows the request through when no secret is configured (legacy webhooks)", async () => {
-    expect(await verifyInboundSignature(null, "{}", null)).toBe(true);
-    expect(await verifyInboundSignature(undefined, "{}", "sha256=whatever")).toBe(true);
+  it("rejects when no signing secret is configured (fail closed)", async () => {
+    expect(await verifyInboundSignature(null, "{}", null)).toBe(false);
+    expect(await verifyInboundSignature(undefined, "{}", "sha256=whatever")).toBe(
+      false,
+    );
   });
 
   it("generated secrets round-trip through the verifier", async () => {

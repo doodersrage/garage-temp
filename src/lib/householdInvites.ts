@@ -102,7 +102,7 @@ export async function acceptHouseholdInvite(
   }
 
   if (
-    userEmail &&
+    !userEmail?.trim() ||
     invite.email.toLowerCase() !== userEmail.trim().toLowerCase()
   ) {
     return {

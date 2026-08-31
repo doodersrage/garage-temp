@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../../lib/auth";
 import { isUserAdmin } from "../../../../lib/adminAccess";
 import { createServerClient } from "../../../../lib/supabase";
+import { formRedirectPath } from "../../../../lib/siteUrl";
 
 const ALLOWED_STATUSES = new Set(["new", "read", "spam"]);
 
@@ -16,7 +17,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const id = Number(formData.get("id"));
   const status = formData.get("status")?.toString();
   const adminNotes = formData.get("admin_notes")?.toString();
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard/contacts";
+  const redirectTo = formRedirectPath(formData, "/dashboard/contacts");
 
   if (!Number.isFinite(id)) {
     return redirect(`${redirectTo}?contact_error=1`);

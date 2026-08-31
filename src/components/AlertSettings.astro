@@ -326,7 +326,11 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
         <div class="form-field mb-0">
           <label class="form-label" for="telegram_command_secret">Webhook secret (optional)</label>
           <input class="form-input" type="text" id="telegram_command_secret" name="telegram_command_secret" value={settings.telegramCommandSecret ?? ""} placeholder="random-secret" autocomplete="off" />
-          <p class="form-hint mb-0">Set bot webhook to <code>/api/telegram/webhook?secret=…</code> for /status [name], /snooze [hours], /vacation [days].</p>
+          <p class="form-hint mb-0">
+            Prefer <code>setWebhook</code> with <code>secret_token</code> (Telegram sends
+            <code>X-Telegram-Bot-Api-Secret-Token</code>). Legacy URL
+            <code>/api/telegram/webhook?secret=…</code> still works. Commands only accepted from your configured chat id when set: /status [name], /snooze [hours], /vacation [days].
+          </p>
         </div>
       </div>
 

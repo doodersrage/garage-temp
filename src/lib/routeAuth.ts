@@ -1,6 +1,6 @@
 /** Session-auth route rules shared by middleware and tests. */
 
-const protectedPaths = ["/dashboard"];
+const protectedPaths = ["/dashboard", "/_actions"];
 
 /** Session-protected API prefixes. Exact public exceptions win first. */
 const protectedApiPrefixes = [
@@ -16,6 +16,13 @@ const protectedApiPrefixes = [
   "/api/share/manage",
   "/api/claims",
   "/api/alerts/export",
+  "/api/api-keys",
+  "/api/inbound-webhooks",
+  "/api/status/manage",
+  "/api/contacts",
+  "/api/ical",
+  "/api/auth/update-password",
+  "/api/auth/mfa-manage",
 ];
 
 /** Public endpoints that would otherwise match a protected prefix. */

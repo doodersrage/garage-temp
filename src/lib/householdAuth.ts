@@ -5,6 +5,7 @@ import {
   getUserHouseholdRole,
   type HouseholdRole,
 } from "./households";
+import { sanitizeNextPath } from "./siteUrl";
 
 export type HouseholdEditorContext = {
   householdId: string;
@@ -47,17 +48,22 @@ export async function requireHouseholdManager(
   return { ok: true, ctx };
 }
 
+function safeRedirectBase(redirectTo: string): string {
+  return sanitizeNextPath(redirectTo) ?? "/dashboard";
+}
+
 /** Redirect when user lacks household manager (owner/member) role. */
 export function redirectUnlessManager(
   manager: Awaited<ReturnType<typeof requireHouseholdManager>>,
   redirectTo: string,
   redirect: (url: string) => Response,
 ): Response | null {
+  const base = safeRedirectBase(redirectTo);
   if (manager.ok) return null;
   if (manager.error === "manager_required") {
-    return redirect(`${redirectTo}?error=manager_required`);
+    return redirect(`${base}?error=manager_required`);
   }
-  return redirect(`${redirectTo}?error=1`);
+  return redirect(`${base}?error=1`);
 }
 
 export function householdManagerCtx(
@@ -75,14 +81,15 @@ export function redirectUnlessEditor(
   redirectTo: string,
   redirect: (url: string) => Response,
 ): Response | null {
+  const base = safeRedirectBase(redirectTo);
   if (editor.ok) return null;
   if (editor.error === "viewer" || editor.error === "alert_only") {
-    return redirect(`${redirectTo}?error=viewer`);
+    return redirect(`${base}?error=viewer`);
   }
   if (editor.error === "manager_required") {
-    return redirect(`${redirectTo}?error=manager_required`);
+    return redirect(`${base}?error=manager_required`);
   }
-  return redirect(`${redirectTo}?error=1`);
+  return redirect(`${base}?error=1`);
 }
 
 /** Narrow after redirectUnlessEditor returns null. */

@@ -86,6 +86,15 @@ const readingsUrl = `/api/share/${token}/readings`;
       );
     }
 
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     function retryButtonHtml() {
       return '<p class="mt-4 mb-0"><button type="button" class="btn-secondary" id="share-retry">Retry</button></p>';
     }
@@ -172,11 +181,11 @@ const readingsUrl = `/api/share/${token}/readings`;
                 }">${age.stale ? "Stale · " + age.label : age.label}</p>`
               : "";
             return `<div class="card${staleClass}">
-            <strong>${r.label}</strong>
-            <p class="m-0 text-sm text-[var(--color-text-muted)]">${r.device} · ${kindLabel(
-              r.kind,
+            <strong>${escapeHtml(r.label)}</strong>
+            <p class="m-0 text-sm text-[var(--color-text-muted)]">${escapeHtml(r.device)} · ${escapeHtml(
+              kindLabel(r.kind),
             )}</p>
-            <p class="text-2xl m-0 mt-2">${formatValue(r)}</p>
+            <p class="text-2xl m-0 mt-2">${escapeHtml(formatValue(r))}</p>
             ${ageHtml}
           </div>`;
           })
@@ -189,9 +198,9 @@ const readingsUrl = `/api/share/${token}/readings`;
         const data = await res.json();
         if (!res.ok) {
           root.innerHTML =
-            `<div class="empty-state"><p>${
-              data.error || "Unable to load this share link."
-            }</p>${retryButtonHtml()}</div>`;
+            `<div class="empty-state"><p>${escapeHtml(
+              data.error || "Unable to load this share link.",
+            )}</p>${retryButtonHtml()}</div>`;
           if (metaEl) metaEl.textContent = "";
           bindRetry();
           return;

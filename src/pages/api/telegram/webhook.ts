@@ -18,6 +18,7 @@ import {
   TELEGRAM_HELP,
 } from "../../../lib/telegramCommands";
 import { checkTelegramWebhookRateLimit } from "../../../lib/telegramWebhookLimits";
+import { timingSafeEqual } from "../../../lib/timingSafeEqual";
 
 async function resolveUserByTelegramSecret(
   secret: string,
@@ -44,6 +45,14 @@ async function sendTelegramReply(
   });
 }
 
+function resolveTelegramSecret(request: Request, url: URL): string {
+  const header =
+    request.headers.get("X-Telegram-Bot-Api-Secret-Token")?.trim() ?? "";
+  if (header) return header;
+  // Legacy: query string still accepted so existing setWebhook URLs keep working.
+  return url.searchParams.get("secret")?.trim() ?? "";
+}
+
 export const POST: APIRoute = async ({ request, url, clientAddress }) => {
   const rate = checkTelegramWebhookRateLimit(clientAddress ?? "unknown");
   if (!rate.ok) {
@@ -53,7 +62,7 @@ export const POST: APIRoute = async ({ request, url, clientAddress }) => {
     });
   }
 
-  const secret = url.searchParams.get("secret")?.trim() ?? "";
+  const secret = resolveTelegramSecret(request, url);
   const userId = await resolveUserByTelegramSecret(secret);
   if (!userId) {
     return new Response("Unauthorized", { status: 401 });
@@ -76,6 +85,15 @@ export const POST: APIRoute = async ({ request, url, clientAddress }) => {
     return new Response(JSON.stringify({ ok: true }), {
       headers: { "Content-Type": "application/json" },
     });
+  }
+
+  // When a chat id is configured for alerts, only accept commands from that chat
+  // so a leaked secret cannot exfiltrate /status to an attacker chat.
+  if (settings.telegramChatId?.trim()) {
+    const expected = settings.telegramChatId.trim();
+    if (!timingSafeEqual(String(chatId), expected)) {
+      return new Response("Unauthorized", { status: 401 });
+    }
   }
 
   const cmd = (text.split(/\s+/)[0] ?? "").toLowerCase().replace(/@\S+$/, "");

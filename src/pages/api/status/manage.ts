@@ -11,13 +11,15 @@ import {
   createStatusPageToken,
   revokeStatusPageToken,
 } from "../../../lib/statusPage";
+import { formRedirectPath } from "../../../lib/siteUrl";
+import { FLASH_STATUS_TOKEN, setSecretFlash } from "../../../lib/secretFlash";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { user } = await getAuthFromCookies(cookies);
   if (!user) return redirect("/signin");
 
   const formData = await request.formData();
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard/share";
+  const redirectTo = formRedirectPath(formData, "/dashboard/share");
   const action = formData.get("action")?.toString() ?? "create";
 
   const manager = await requireHouseholdManager(user.id);
@@ -58,7 +60,6 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     detail: label,
   });
 
-  return redirect(
-    `${redirectTo}?status_created=1&status_token=${encodeURIComponent(token)}`,
-  );
+  setSecretFlash(cookies, FLASH_STATUS_TOKEN, token);
+  return redirect(`${redirectTo}?status_created=1`);
 };

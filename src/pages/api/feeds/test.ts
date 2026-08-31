@@ -3,8 +3,9 @@ import { getAuthFromCookies } from "../../../lib/auth";
 import { fetchTempFeed } from "../../../lib/FetchTemps";
 import { isValidFeedUrl } from "../../../lib/tempFeedConfig";
 import { requireHouseholdEditor } from "../../../lib/householdAuth";
+import { checkFeedTestRateLimit } from "../../../lib/feedTestLimits";
 
-export const POST: APIRoute = async ({ request, cookies }) => {
+export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
   const { session, user } = await getAuthFromCookies(cookies);
 
   if (!session || !user) {
@@ -12,6 +13,20 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       status: 401,
       headers: { "Content-Type": "application/json" },
     });
+  }
+
+  const rate = checkFeedTestRateLimit(user.id || clientAddress || "unknown");
+  if (!rate.ok) {
+    return new Response(
+      JSON.stringify({ ok: false, message: "Too many feed tests. Try again shortly." }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          ...(rate.retryAfterSec ? { "Retry-After": String(rate.retryAfterSec) } : {}),
+        },
+      },
+    );
   }
 
   const editor = await requireHouseholdEditor(user.id);

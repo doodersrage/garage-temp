@@ -13,6 +13,7 @@ import {
   redirectUnlessEditor,
   requireHouseholdEditor,
 } from "../../../lib/householdAuth";
+import { formRedirectPath } from "../../../lib/siteUrl";
 
 const SNOOZE_MAX_HOURS = 168;
 const VACATION_MAX_DAYS = 30;
@@ -30,7 +31,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const formData = await request.formData();
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard/alerts";
+  const redirectTo = formRedirectPath(formData, "/dashboard/alerts");
 
   const editor = await requireHouseholdEditor(user.id);
   const blocked = redirectUnlessEditor(editor, redirectTo, redirect);

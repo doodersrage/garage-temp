@@ -17,7 +17,8 @@ export async function verifyInboundSignature(
   rawBody: string,
   header: string | null,
 ): Promise<boolean> {
-  if (!secret?.trim()) return true;
+  // Fail closed: unsigned legacy rows must rotate/recreate to get a secret.
+  if (!secret?.trim()) return false;
   if (!header?.trim()) return false;
 
   const expected = await hmacSha256Hex(secret.trim(), rawBody);

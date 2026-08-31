@@ -312,13 +312,9 @@ export function findInvalidAlertWebhookUrl(settings: AlertSettings): string | nu
 
 /**
  * Minimum length required for the Telegram command webhook secret. That
- * endpoint (/api/telegram/webhook) authenticates entirely with this
- * shared secret in a query string -- there's no per-request signature, no
- * bot-token check, nothing else. A short or guessable value lets anyone
- * probe the endpoint until they land on some user's secret, at which
- * point they can silently snooze or vacation-mode that household's
- * freeze/leak alerts (the state change happens before any reply is
- * attempted, so it doesn't even require a working chat with the bot).
+ * endpoint (/api/telegram/webhook) authenticates with this shared secret
+ * (prefer X-Telegram-Bot-Api-Secret-Token; query ?secret= still accepted)
+ * and, when configured, binds commands to the alert chat id.
  */
 export const MIN_TELEGRAM_COMMAND_SECRET_LENGTH = 16;
 

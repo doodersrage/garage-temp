@@ -5,6 +5,7 @@ import {
   redirectUnlessEditor,
   requireHouseholdEditor,
 } from "../../../lib/householdAuth";
+import { formRedirectPath } from "../../../lib/siteUrl";
 
 function wantsJson(request: Request): boolean {
   const accept = request.headers.get("accept") ?? "";
@@ -32,7 +33,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     contentType.includes("application/x-www-form-urlencoded")
   ) {
     const formData = await request.formData();
-    redirectTo = formData.get("redirect")?.toString() || redirectTo;
+    redirectTo = formRedirectPath(formData, redirectTo);
   }
 
   const editor = await requireHouseholdEditor(user.id);

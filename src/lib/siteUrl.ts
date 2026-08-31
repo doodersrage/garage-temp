@@ -29,7 +29,25 @@ export function sanitizeNextPath(next: string | null | undefined): string | null
   if (!next) return null;
   const trimmed = next.trim();
   if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return null;
+  // Block scheme-relative and backslash tricks some browsers normalize oddly.
+  if (trimmed.includes("\\") || trimmed.includes("\0")) return null;
   return trimmed;
+}
+
+/**
+ * Read a form `redirect` field safely. Absolute URLs and protocol-relative
+ * paths fall back so open redirects cannot exfiltrate secrets via Location.
+ */
+export function formRedirectPath(
+  formData: FormData,
+  fallback: string,
+  field = "redirect",
+): string {
+  return (
+    sanitizeNextPath(formData.get(field)?.toString()) ??
+    sanitizeNextPath(fallback) ??
+    "/dashboard"
+  );
 }
 
 export const OAUTH_NEXT_COOKIE = "oauth_next";

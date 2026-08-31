@@ -8,6 +8,7 @@ import {
   updateUserDisplayPreferences,
   type ThemePreference,
 } from "../../../lib/userPreferences";
+import { formRedirectPath } from "../../../lib/siteUrl";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -17,7 +18,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const formData = await request.formData();
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard";
+  const redirectTo = formRedirectPath(formData, "/dashboard");
   const weatherCityIdRaw = formData.get("weather_city_id")?.toString().trim() ?? "";
   const weatherCityId = /^\d+$/.test(weatherCityIdRaw) ? weatherCityIdRaw : null;
   const themeRaw = formData.get("theme")?.toString();

@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../../lib/auth";
 import { acknowledgeAlertEvent } from "../../../../lib/alertEvents";
+import { formRedirectPath } from "../../../../lib/siteUrl";
 
 function wantsJson(request: Request): boolean {
   const accept = request.headers.get("accept") ?? "";
@@ -36,7 +37,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   } else {
     const formData = await request.formData();
     eventId = Number(formData.get("event_id"));
-    redirectTo = formData.get("redirect")?.toString() || redirectTo;
+    redirectTo = formRedirectPath(formData, redirectTo);
   }
 
   if (!Number.isFinite(eventId)) {

@@ -11,6 +11,12 @@ import {
   revokeInboundWebhook,
 } from "../../../lib/inboundWebhooks";
 import { getUserEntitlements } from "../../../lib/entitlements";
+import { formRedirectPath } from "../../../lib/siteUrl";
+import {
+  FLASH_INBOUND_SIGNING,
+  FLASH_INBOUND_TOKEN,
+  setSecretFlash,
+} from "../../../lib/secretFlash";
 
 export const GET: APIRoute = async ({ cookies }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -54,7 +60,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   const formData = await request.formData();
   const action = formData.get("action")?.toString();
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard/share";
+  const redirectTo = formRedirectPath(formData, "/dashboard/share");
 
   if (action === "create") {
     const name = formData.get("name")?.toString() || "Inbound webhook";
@@ -62,9 +68,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     if (error || !token) {
       return redirect(`${redirectTo}?inbound_error=1`);
     }
-    const params = new URLSearchParams({ inbound_created: "1", inbound_token: token });
-    if (signingSecret) params.set("inbound_signing_secret", signingSecret);
-    return redirect(`${redirectTo}?${params.toString()}`);
+    setSecretFlash(cookies, FLASH_INBOUND_TOKEN, token);
+    if (signingSecret) {
+      setSecretFlash(cookies, FLASH_INBOUND_SIGNING, signingSecret);
+    }
+    return redirect(`${redirectTo}?inbound_created=1`);
   }
 
   if (action === "revoke") {

@@ -12,13 +12,15 @@ import {
   requireHouseholdManager,
 } from "../../../lib/householdAuth";
 import { recordHouseholdActivity } from "../../../lib/householdActivity";
+import { formRedirectPath } from "../../../lib/siteUrl";
+import { FLASH_API_KEY, setSecretFlash } from "../../../lib/secretFlash";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { user } = await getAuthFromCookies(cookies);
   if (!user) return redirect("/signin");
 
   const formData = await request.formData();
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard/share";
+  const redirectTo = formRedirectPath(formData, "/dashboard/share");
   const action = formData.get("action")?.toString() ?? "create";
 
   const manager = await requireHouseholdManager(user.id);
@@ -61,7 +63,6 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     detail: name,
   });
 
-  return redirect(
-    `${redirectTo}?api_key_created=1&new_api_key=${encodeURIComponent(result.plaintext)}`,
-  );
+  setSecretFlash(cookies, FLASH_API_KEY, result.plaintext);
+  return redirect(`${redirectTo}?api_key_created=1`);
 };

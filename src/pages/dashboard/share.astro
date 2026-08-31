@@ -20,14 +20,22 @@ import {
   getUserHouseholdRole,
   canManageHousehold,
 } from "../../lib/households";
+import {
+  FLASH_API_KEY,
+  FLASH_INBOUND_SIGNING,
+  FLASH_INBOUND_TOKEN,
+  FLASH_SHARE_TOKEN,
+  FLASH_STATUS_TOKEN,
+  consumeSecretFlash,
+} from "../../lib/secretFlash";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const inboundToken = Astro.url.searchParams.get("inbound_token");
-const inboundSigningSecret = Astro.url.searchParams.get("inbound_signing_secret");
+const inboundToken = consumeSecretFlash(Astro.cookies, FLASH_INBOUND_TOKEN);
+const inboundSigningSecret = consumeSecretFlash(Astro.cookies, FLASH_INBOUND_SIGNING);
 
 const entitlements = await getUserEntitlements(user.id);
 const household = await getOrCreateHouseholdForUser(user.id, user.email);
@@ -67,10 +75,10 @@ const canManage = canManageHousehold(householdRole);
 
 const siteUrl = getSiteUrl(Astro.request);
 const webhookDeliveries = await listRecentWebhookDeliveries(user.id, 15);
-const newToken = Astro.url.searchParams.get("new_token");
-const statusToken = Astro.url.searchParams.get("status_token");
+const newToken = consumeSecretFlash(Astro.cookies, FLASH_SHARE_TOKEN);
+const statusToken = consumeSecretFlash(Astro.cookies, FLASH_STATUS_TOKEN);
 const newHref = newToken ? `${siteUrl}/share/${newToken}` : null;
-const newApiKey = Astro.url.searchParams.get("new_api_key");
+const newApiKey = consumeSecretFlash(Astro.cookies, FLASH_API_KEY);
 const notice = Astro.url.searchParams.get("created")
   ? "Share link created — copy it below to send to family."
   : Astro.url.searchParams.get("revoked")

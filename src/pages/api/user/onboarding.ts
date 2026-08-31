@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies, setAuthCookies } from "../../../lib/auth";
 import { createAuthClient } from "../../../lib/supabase";
+import { formRedirectPath } from "../../../lib/siteUrl";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -9,7 +10,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const formData = await request.formData();
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard";
+  const redirectTo = formRedirectPath(formData, "/dashboard");
   const action = formData.get("action")?.toString() ?? "dismiss";
 
   const accessToken = cookies.get("sb-access-token")!.value;

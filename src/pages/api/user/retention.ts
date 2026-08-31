@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import { getUserEntitlements } from "../../../lib/entitlements";
 import { getAlertSettingsForUser, saveAlertSettingsForUser } from "../../../lib/notify";
+import { formRedirectPath } from "../../../lib/siteUrl";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { user } = await getAuthFromCookies(cookies);
@@ -10,7 +11,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const formData = await request.formData();
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard/settings";
+  const redirectTo = formRedirectPath(formData, "/dashboard/settings");
   const raw = formData.get("data_retention_days");
   const [settings, entitlements] = await Promise.all([
     getAlertSettingsForUser(user.id, user.user_metadata),

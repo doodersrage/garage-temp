@@ -19,10 +19,20 @@ describe("pathRequiresAuth", () => {
     expect(pathRequiresAuth("/api/devices")).toBe(true);
     expect(pathRequiresAuth("/api/claims/pack")).toBe(true);
     expect(pathRequiresAuth("/api/alerts/export.csv")).toBe(true);
+    expect(pathRequiresAuth("/api/api-keys")).toBe(true);
+    expect(pathRequiresAuth("/api/inbound-webhooks")).toBe(true);
+    expect(pathRequiresAuth("/api/status/manage")).toBe(true);
+    expect(pathRequiresAuth("/api/contacts/export.csv")).toBe(true);
+    expect(pathRequiresAuth("/api/ical/outlook")).toBe(true);
+    expect(pathRequiresAuth("/api/auth/update-password")).toBe(true);
+    expect(pathRequiresAuth("/api/auth/mfa-manage")).toBe(true);
+    expect(pathRequiresAuth("/_actions/updateAlertSettings")).toBe(true);
   });
 
   it("keeps token-based alert links public", () => {
     expect(pathRequiresAuth("/api/alerts/snooze")).toBe(false);
     expect(pathRequiresAuth("/api/alerts/ack")).toBe(false);
+    expect(pathRequiresAuth("/api/telegram/webhook")).toBe(false);
+    expect(pathRequiresAuth("/api/status/subscribe")).toBe(false);
   });
 });

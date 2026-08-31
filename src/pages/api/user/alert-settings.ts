@@ -15,6 +15,7 @@ import {
 } from "../../../lib/householdAuth";
 import { recordHouseholdActivity } from "../../../lib/householdActivity";
 import { getUserHouseholdId } from "../../../lib/households";
+import { formRedirectPath } from "../../../lib/siteUrl";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -24,7 +25,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const formData = await request.formData();
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard/alerts";
+  const redirectTo = formRedirectPath(formData, "/dashboard/alerts");
 
   const editor = await requireHouseholdEditor(user.id);
   const blocked = redirectUnlessEditor(editor, redirectTo, redirect);

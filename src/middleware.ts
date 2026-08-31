@@ -16,8 +16,12 @@ function isMfaExemptPath(pathname: string): boolean {
   return (
     pathname === "/signin/mfa" ||
     pathname === "/api/auth/mfa-verify" ||
+    pathname === "/api/auth/mfa-manage" ||
     pathname === "/api/auth/signout" ||
-    pathname === "/api/auth/set-session"
+    pathname === "/api/auth/set-session" ||
+    // Password recovery session is typically aal1; allow completing reset.
+    pathname === "/api/auth/update-password" ||
+    pathname === "/reset-password"
   );
 }
 

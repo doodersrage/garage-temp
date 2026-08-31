@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getAuthFromCookies, setAuthCookies } from "../../../lib/auth";
 import {
   createAuthClientFromSession,
+  getAalClaim,
   syncMfaRequiredCookieFromClient,
 } from "../../../lib/mfa";
 
@@ -125,6 +126,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   if (action === "unenroll") {
+    if (getAalClaim(auth.session.access_token) !== "aal2") {
+      return json(
+        { error: "Verify MFA again before removing authenticators" },
+        401,
+      );
+    }
+
     const factorId = body.factorId?.trim();
     if (!factorId) return json({ error: "Missing factorId" }, 400);
 

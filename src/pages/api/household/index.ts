@@ -27,6 +27,7 @@ import {
   requireHouseholdManager,
 } from "../../../lib/householdAuth";
 import { recordHouseholdActivity } from "../../../lib/householdActivity";
+import { formRedirectPath } from "../../../lib/siteUrl";
 
 export const GET: APIRoute = async ({ cookies }) => {
   const { user } = await getAuthFromCookies(cookies);
@@ -70,7 +71,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   const formData = await request.formData();
   const action = formData.get("action")?.toString() ?? "invite";
-  const redirectTo = formData.get("redirect")?.toString() || "/dashboard/household";
+  const redirectTo = formRedirectPath(formData, "/dashboard/household");
 
   if (action === "switch") {
     const householdId = formData.get("household_id")?.toString();

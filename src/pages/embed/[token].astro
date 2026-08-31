@@ -26,6 +26,28 @@ if (!token) {
   const root = document.getElementById("embed-root");
   const url = `/api/share/${encodeURIComponent(token)}/readings`;
 
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function formatReading(r) {
+    if (typeof r.tempf === "number" && Number.isFinite(r.tempf)) {
+      return `${r.tempf.toFixed(1)}°F`;
+    }
+    if (typeof r.value_num === "number" && Number.isFinite(r.value_num)) {
+      return `${r.value_num.toFixed(1)}${r.unit ? ` ${r.unit}` : ""}`;
+    }
+    if (r.value_bool != null) return r.value_bool ? "OPEN" : "closed";
+    if (r.value_text) return String(r.value_text);
+    if (r.value != null) return String(r.value);
+    return "—";
+  }
+
   async function render() {
     try {
       const res = await fetch(url);
@@ -40,12 +62,15 @@ if (!token) {
         '<h2 class="card-title" style="font-size:1.1rem">Live readings</h2>' +
         readings
           .slice(0, 8)
-          .map(
-            (r) =>
+          .map((r) => {
+            const label = escapeHtml(r.label ?? r.sensor ?? "Sensor");
+            const value = escapeHtml(formatReading(r));
+            return (
               `<div style="display:flex;justify-content:space-between;padding:0.35rem 0;border-bottom:1px solid var(--color-border)">` +
-              `<span>${r.label ?? r.sensor ?? "Sensor"}</span>` +
-              `<strong>${r.tempf != null ? r.tempf.toFixed(1) + "°F" : r.value ?? "—"}</strong></div>`,
-          )
+              `<span>${label}</span>` +
+              `<strong>${value}</strong></div>`
+            );
+          })
           .join("");
     } catch {
       root.innerHTML = '<p class="mb-0 text-[var(--color-text-muted)]">Could not load share.</p>';

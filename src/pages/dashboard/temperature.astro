@@ -18,6 +18,7 @@ import {
   buildWaitingIngestPayload,
 } from "../../lib/waitingIngest";
 import ProductAnalyticsTracker from "../../components/ProductAnalyticsTracker.astro";
+import { FLASH_INGEST_KEY, consumeSecretFlash } from "../../lib/secretFlash";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -51,7 +52,7 @@ const latest = household.householdId
   : [];
 
 const redirectTo = "/dashboard/temperature";
-const ingestKey = Astro.url.searchParams.get("ingest_key");
+const ingestKey = consumeSecretFlash(Astro.cookies, FLASH_INGEST_KEY);
 const focusDevice = Astro.url.searchParams.get("focus_device") ?? "";
 const atDeviceLimit =
   devices.filter((d) => d.source === "push").length >= entitlements.maxDevices;
@@ -852,7 +853,6 @@ const ingestKeyDeviceName =
       const dismiss = document.getElementById("ingest-key-dismiss");
       dismiss?.addEventListener("click", () => {
         const url = new URL(window.location.href);
-        url.searchParams.delete("ingest_key");
         url.searchParams.delete("device_created");
         url.searchParams.delete("key_rotated");
         window.history.replaceState({}, "", url.pathname + (url.search || ""));

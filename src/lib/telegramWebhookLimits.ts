@@ -1,13 +1,9 @@
 /**
  * Per-isolate abuse controls for the inbound Telegram command webhook.
  *
- * /api/telegram/webhook authenticates entirely with a shared secret in
- * the query string (?secret=...) -- there's no bot-token check or
- * request signature. This limiter slows down an attacker probing that
- * endpoint with guessed secrets from one source; it's defense in depth
- * alongside requiring a sufficiently long secret at save time
- * (see isWeakTelegramSecret in alertSettingsForm.ts) which is the real
- * fix for guessability.
+ * Auth prefers X-Telegram-Bot-Api-Secret-Token (setWebhook secret_token),
+ * with legacy ?secret= still accepted, plus optional chat-id binding.
+ * This limiter slows secret guessing from one client address.
  */
 
 export const TELEGRAM_WEBHOOK_RATE_LIMIT_WINDOW_MS = 60 * 1000;
