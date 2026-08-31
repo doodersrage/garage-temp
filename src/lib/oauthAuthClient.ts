@@ -57,7 +57,9 @@ export function createOAuthAuthClient(cookies: AstroCookies): SupabaseClient<Dat
   return createClient<Database>(getSupabaseUrl(), getAnonKey(), {
     auth: {
       autoRefreshToken: false,
-      persistSession: false,
+      // Must be true or GoTrueClient ignores `storage` and keeps PKCE in memory
+      // (lost across Worker isolates on the OAuth callback hop).
+      persistSession: true,
       detectSessionInUrl: false,
       flowType: "pkce",
       storageKey: OAUTH_STORAGE_KEY,

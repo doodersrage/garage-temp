@@ -62,6 +62,26 @@ describe("createOAuthAuthClient", () => {
     const client = createOAuthAuthClient(cookies);
     expect(client).toBeTruthy();
   });
+
+  it("stores the PKCE verifier in a cookie during signInWithOAuth", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_ANON_KEY", "anon-key");
+
+    const cookies = makeMockCookies();
+    const client = createOAuthAuthClient(cookies);
+    const { data, error } = await client.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: "https://example.com/api/auth/callback" },
+    });
+
+    expect(error).toBeNull();
+    expect(data.url).toContain("code_challenge=");
+    expect(cookies.set).toHaveBeenCalledWith(
+      OAUTH_PKCE_COOKIE,
+      expect.any(String),
+      expect.objectContaining({ httpOnly: true, sameSite: "lax" }),
+    );
+  });
 });
 
 describe("clearOAuthPkceCookie", () => {
