@@ -1,6 +1,10 @@
 import type { APIRoute } from "astro";
 import { buildSignInRedirectUrl } from "../../../lib/signInErrors";
-import { applySessionCookiesAfterAuth, createAuthClient } from "../../../lib/mfa";
+import { applySessionCookiesAfterAuth } from "../../../lib/mfa";
+import {
+  clearOAuthPkceCookie,
+  createOAuthAuthClient,
+} from "../../../lib/oauthAuthClient";
 import {
   OAUTH_NEXT_COOKIE,
   OAUTH_REF_COOKIE,
@@ -10,16 +14,26 @@ import { applyReferralForNewUser, isLikelyNewUser } from "../../../lib/referrals
 import { REGISTER_NEXT_DEVICES } from "../../../lib/registerUrl";
 
 export const GET: APIRoute = async ({ url, cookies, redirect }) => {
+  const oauthError = url.searchParams.get("error");
   const authCode = url.searchParams.get("code");
 
+  if (oauthError) {
+    clearOAuthPkceCookie(cookies);
+    return redirect(buildSignInRedirectUrl("oauth_failed"));
+  }
+
   if (!authCode) {
+    clearOAuthPkceCookie(cookies);
     return redirect(buildSignInRedirectUrl("generic"));
   }
 
-  const authClient = createAuthClient();
+  const authClient = createOAuthAuthClient(cookies);
   const { data, error } = await authClient.auth.exchangeCodeForSession(authCode);
 
+  clearOAuthPkceCookie(cookies);
+
   if (error || !data.session) {
+    console.error("OAuth callback exchange failed:", error?.message ?? "no session");
     return redirect(buildSignInRedirectUrl("generic"));
   }
 

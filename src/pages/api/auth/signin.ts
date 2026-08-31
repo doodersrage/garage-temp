@@ -1,11 +1,11 @@
 import type { APIRoute } from "astro";
-import { supabase } from "../../../lib/supabase";
 import type { Provider } from "@supabase/supabase-js";
 import {
   buildSignInRedirectUrl,
   mapSignInError,
 } from "../../../lib/signInErrors";
 import { applySessionCookiesAfterAuth, createAuthClient } from "../../../lib/mfa";
+import { createOAuthAuthClient } from "../../../lib/oauthAuthClient";
 import {
   buildOAuthCallbackUrl,
   OAUTH_NEXT_COOKIE,
@@ -58,7 +58,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress
       cookies.delete(OAUTH_REF_COOKIE, { path: "/" });
     }
 
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const oauthClient = createOAuthAuthClient(cookies);
+    const { data, error } = await oauthClient.auth.signInWithOAuth({
       provider: provider as Provider,
       options: {
         redirectTo: buildOAuthCallbackUrl(request, site),
