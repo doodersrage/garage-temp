@@ -1,4 +1,5 @@
 ---
+import { Image } from "astro:assets";
 import Layout from '../layouts/Layout.astro';
 import DemoTempsPanel from '../components/DemoTempsPanel';
 import WeatherPanel from '../components/WeatherPanel';
@@ -17,6 +18,7 @@ import {
 import { getMarketingFaqs, getMarketingFaqSchema } from '../lib/marketingFaqs';
 import { getMemberPriceDisplay, getProPriceDisplay } from '../lib/stripePricing';
 import { fetchAppStatusSummary } from '../lib/appStatus';
+import garageInstallLifestyle from '../assets/thermaltrace-garage-install-lifestyle.jpg';
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 const isAuthenticated = !!user;
@@ -51,29 +53,40 @@ const appStatus = !isAuthenticated ? await fetchAppStatusSummary() : null;
 	{!isAuthenticated ? (
 		<div class="home-marketing">
 			<section class="home-hero home-hero--bleed">
-				<div class="home-hero-inner">
-					<p class="home-hero-audience">
-						Built for homeowners, hobbyists, and makers with ESP32, Arduino, or any HTTPS JSON probe.
-					</p>
-					<h1 class="home-hero-brand">{BRAND_NAME_TM}</h1>
-					<p class="home-hero-lead">
-						Open-source monitoring for garage and workshop sensors —
-						live curves, freeze-aware alerts, and history before pipes and storage take damage.
-					</p>
-					<div class="home-hero-actions">
-						<a class="btn-primary" href="/register">Create free account</a>
-						<a class="btn-secondary" href="/pricing">See plans</a>
-						<a class="btn-secondary" href="/stories/garage-freeze-alert">Read the case study</a>
+				<div class="home-hero-inner home-hero-grid">
+					<div class="home-hero-copy">
+						<p class="home-hero-audience">
+							Built for homeowners, hobbyists, and makers with ESP32, Arduino, or any HTTPS JSON probe.
+						</p>
+						<h1 class="home-hero-brand">{BRAND_NAME_TM}</h1>
+						<p class="home-hero-lead">
+							Open-source monitoring for garage and workshop sensors —
+							live curves, freeze-aware alerts, and history before pipes and storage take damage.
+						</p>
+						<div class="home-hero-actions">
+							<a class="btn-primary" href="/register">Create free account</a>
+							<a class="btn-secondary" href="/pricing">See plans</a>
+							<a class="btn-secondary" href="/stories/garage-freeze-alert">Read the case study</a>
+						</div>
+						<p class="home-hero-plans">
+							<a class="text-link" href="/pricing">
+								Free forever
+								<span aria-hidden="true"> · </span>
+								{memberPrice ? `Member ${memberPrice}/mo` : "Member"}
+								<span aria-hidden="true"> · </span>
+								{proPrice ? `Pro ${proPrice}/mo` : "Pro"}
+							</a>
+						</p>
 					</div>
-					<p class="home-hero-plans">
-						<a class="text-link" href="/pricing">
-							Free forever
-							<span aria-hidden="true"> · </span>
-							{memberPrice ? `Member ${memberPrice}/mo` : "Member"}
-							<span aria-hidden="true"> · </span>
-							{proPrice ? `Pro ${proPrice}/mo` : "Pro"}
-						</a>
-					</p>
+					<figure class="home-hero-visual">
+						<Image
+							src={garageInstallLifestyle}
+							alt="Garage probe install beside copper pipes — checking readings on phone and laptop"
+							widths={[480, 720, 960]}
+							sizes="(max-width: 959px) 100vw, 42vw"
+							class="home-hero-visual-img"
+						/>
+					</figure>
 				</div>
 			</section>
 
