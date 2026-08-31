@@ -819,6 +819,53 @@ export type Database = {
           },
         ]
       }
+      household_thermostat_connections: {
+        Row: {
+          access_token: string | null
+          access_token_expires_at: string | null
+          connected_by: string | null
+          created_at: string
+          external_device_id: string | null
+          household_id: string
+          id: string
+          provider: string
+          refresh_token: string
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          access_token_expires_at?: string | null
+          connected_by?: string | null
+          created_at?: string
+          external_device_id?: string | null
+          household_id: string
+          id?: string
+          provider: string
+          refresh_token: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          access_token_expires_at?: string | null
+          connected_by?: string | null
+          created_at?: string
+          external_device_id?: string | null
+          household_id?: string
+          id?: string
+          provider?: string
+          refresh_token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_thermostat_connections_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       household_invites: {
         Row: {
           accepted_at: string | null

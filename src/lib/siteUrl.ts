@@ -52,3 +52,6 @@ export function formRedirectPath(
 
 export const OAUTH_NEXT_COOKIE = "oauth_next";
 export const OAUTH_REF_COOKIE = "oauth_ref";
+
+/** CSRF state cookie for the thermostat-provider connect/callback round trip. */
+export const THERMOSTAT_OAUTH_STATE_COOKIE = "thermostat_oauth_state";

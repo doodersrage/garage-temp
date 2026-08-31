@@ -26,7 +26,8 @@ export type NudgeFeatureId =
   | "cold_risk"
   | "prometheus"
   | "multi_property"
-  | "claims_pack";
+  | "claims_pack"
+  | "thermostat_integration";
 
 export type PlanFeatureRow = {
   id: string;
@@ -204,6 +205,15 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     anchor: "prometheus",
   },
   {
+    id: "thermostat_integration",
+    category: "Integrations",
+    label: "Nest / Ecobee thermostat connection",
+    free: "—",
+    member: "—",
+    pro: "Yes",
+    anchor: "thermostat-integration",
+  },
+  {
     id: "multi_property",
     category: "Households",
     label: "Multiple properties / households",
@@ -331,6 +341,12 @@ const NUDGE_CONFIG: Record<
     title: "Export a claims evidence pack",
     body: "Pro builds a printable freeze/leak summary with matching readings and alert-event CSVs for a date range you choose.",
     anchor: "claims-pack",
+  },
+  thermostat_integration: {
+    targetTier: "pro",
+    title: "Connect your Nest or Ecobee",
+    body: "Pro shows your house thermostat's reading and setpoint alongside this probe, and adds that context to freeze alerts.",
+    anchor: "thermostat-integration",
   },
 };
 

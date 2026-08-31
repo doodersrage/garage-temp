@@ -33,6 +33,7 @@ export type Entitlements = {
   canUsePortfolio: boolean;
   canUseForecastAlerts: boolean;
   canUseNwsAlerts: boolean;
+  canUseThermostatIntegration: boolean;
   maxDevices: number;
   maxOwnedHouseholds: number;
   historyDays: number;
@@ -53,6 +54,7 @@ function entitlementsFor(tier: PlanTier): Entitlements {
     canUsePortfolio: proOrAbove,
     canUseForecastAlerts: memberOrAbove,
     canUseNwsAlerts: proOrAbove,
+    canUseThermostatIntegration: proOrAbove,
     maxDevices: proOrAbove
       ? PRO_MAX_DEVICES
       : memberOrAbove

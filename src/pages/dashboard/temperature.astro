@@ -6,7 +6,10 @@ import { getAuthFromCookies } from "../../lib/auth";
 import { getUserPreferences } from "../../lib/userPreferences";
 import { checkFeedHealth } from "../../lib/collectHistory";
 import { getUserDevicesAsTempConfig, listHouseholdDevices, SENSOR_KIND_LABELS, formatBoolSensorValue } from "../../lib/devices";
-import { getOrCreateHouseholdForUser, listUserHouseholds, getUserHouseholdRole, canEditHousehold } from "../../lib/households";
+import { getOrCreateHouseholdForUser, listUserHouseholds, getUserHouseholdRole, canEditHousehold, canManageHousehold } from "../../lib/households";
+import ThermostatConnectCard from "../../components/ThermostatConnectCard.astro";
+import { listConnectionsForHousehold } from "../../lib/thermostatConnections";
+import { fetchThermostatContext } from "../../lib/thermostatCorrelation";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { fetchLatestSensorValues } from "../../lib/sensorReadings";
 import { formatRelativeAge, freshnessDetail } from "../../lib/relativeTime";
@@ -39,8 +42,22 @@ const householdRole = household.householdId
   ? await getUserHouseholdRole(user.id, household.householdId)
   : null;
 const canEdit = canEditHousehold(householdRole);
+const canManageThermostat = canManageHousehold(householdRole);
 const transferTargets = userHouseholds.households.filter(
   (h) => h.household_id !== household.householdId,
+);
+
+const thermostatConnections =
+  entitlements.canUseThermostatIntegration && household.householdId
+    ? await listConnectionsForHousehold(household.householdId)
+    : [];
+const thermostatConnectionsWithSnapshots = await Promise.all(
+  thermostatConnections.map(async (connection) => ({
+    provider: connection.provider,
+    snapshot: household.householdId
+      ? await fetchThermostatContext(household.householdId, connection.provider)
+      : null,
+  })),
 );
 
 const devices = household.householdId
@@ -804,6 +821,13 @@ const ingestKeyDeviceName =
         </div>
       )}
     </section>
+
+    <ThermostatConnectCard
+      entitled={entitlements.canUseThermostatIntegration}
+      tier={entitlements.tier}
+      canManage={canManageThermostat}
+      connections={thermostatConnectionsWithSnapshots}
+    />
 
     <section class="card" id="pull-feeds">
       <h2 class="card-title">Pull JSON feeds</h2>

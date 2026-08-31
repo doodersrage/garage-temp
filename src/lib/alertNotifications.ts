@@ -49,6 +49,7 @@ import { computeDoorOpenSessions } from "./doorDuration";
 import { persistDoorSessions } from "./doorEvents";
 import { createAdminClient } from "./supabase";
 import { getUserEntitlements } from "./entitlements";
+import { fetchThermostatAnnotationForHousehold } from "./thermostatCorrelation";
 
 export {
   buildAlertReadingsFromLatestSensors,
@@ -62,6 +63,7 @@ export async function sendThresholdAlertsIfNeeded(
   email: string | null | undefined,
   settings: AlertSettings,
   readings: AlertReading[],
+  householdId?: string | null,
 ): Promise<void> {
   if (!settings.enabled || readings.length === 0) return;
 
@@ -97,9 +99,21 @@ export async function sendThresholdAlertsIfNeeded(
   if (messages.length === 0) return;
 
   const alertSpace = readings.find((r) => r.space)?.space ?? null;
+  // Annotate, never suppress: the annotation only adds context to an alert
+  // that's already been decided on above -- it can't stop, delay, or
+  // change whether this alert fires. A real freeze reading in the
+  // monitored space is real regardless of what an unrelated house
+  // thermostat reports.
+  // Belt-and-suspenders on top of that helper's own internal try/catch: even
+  // a bug in the thermostat-lookup path must never be able to block this
+  // alert from sending.
+  const annotation = await fetchThermostatAnnotationForHousehold(householdId).catch(
+    () => null,
+  );
+  const body = annotation ? `${messages.join("\n")}\n\n${annotation}` : messages.join("\n");
   await notifyUser(userId, email, settings, {
     title: "Temperature alert",
-    body: messages.join("\n"),
+    body,
     kind: "threshold",
   }, { space: alertSpace });
   await markCooldown(userId, "last_alert_sent_at");
@@ -266,7 +280,7 @@ export async function maybeSendThresholdAlerts(
   }
 
   const readings = mergeAlertReadings(feedReadings, sensorReadings);
-  await sendThresholdAlertsIfNeeded(userId, email, settings, readings);
+  await sendThresholdAlertsIfNeeded(userId, email, settings, readings, householdId);
   await sendFloodAlertsIfNeeded(userId, email, settings, floodReadings);
   await maybeSendForecastFreezeAlert(userId, email, settings);
   await maybeSendNwsFreezeAlert(userId, email, settings);

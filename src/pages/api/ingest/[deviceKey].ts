@@ -265,6 +265,7 @@ export const POST: APIRoute = async ({ params, request }) => {
         data.user?.email,
         settings,
         readings,
+        device.household_id,
       );
       await sendFloodAlertsIfNeeded(
         member.user_id,
