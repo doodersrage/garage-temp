@@ -17,6 +17,7 @@ import {
   telegramStatusQuery,
   TELEGRAM_HELP,
 } from "../../../lib/telegramCommands";
+import { checkTelegramWebhookRateLimit } from "../../../lib/telegramWebhookLimits";
 
 async function resolveUserByTelegramSecret(
   secret: string,
@@ -43,7 +44,15 @@ async function sendTelegramReply(
   });
 }
 
-export const POST: APIRoute = async ({ request, url }) => {
+export const POST: APIRoute = async ({ request, url, clientAddress }) => {
+  const rate = checkTelegramWebhookRateLimit(clientAddress ?? "unknown");
+  if (!rate.ok) {
+    return new Response("Rate limit exceeded", {
+      status: 429,
+      headers: rate.retryAfterSec ? { "Retry-After": String(rate.retryAfterSec) } : {},
+    });
+  }
+
   const secret = url.searchParams.get("secret")?.trim() ?? "";
   const userId = await resolveUserByTelegramSecret(secret);
   if (!userId) {

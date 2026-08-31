@@ -310,6 +310,25 @@ export function findInvalidAlertWebhookUrl(settings: AlertSettings): string | nu
   return null;
 }
 
+/**
+ * Minimum length required for the Telegram command webhook secret. That
+ * endpoint (/api/telegram/webhook) authenticates entirely with this
+ * shared secret in a query string -- there's no per-request signature, no
+ * bot-token check, nothing else. A short or guessable value lets anyone
+ * probe the endpoint until they land on some user's secret, at which
+ * point they can silently snooze or vacation-mode that household's
+ * freeze/leak alerts (the state change happens before any reply is
+ * attempted, so it doesn't even require a working chat with the bot).
+ */
+export const MIN_TELEGRAM_COMMAND_SECRET_LENGTH = 16;
+
+/** True only when a *non-empty* secret is set but too short to resist guessing. */
+export function isWeakTelegramSecret(secret: string | null): boolean {
+  if (!secret) return false;
+  const trimmed = secret.trim();
+  return trimmed.length > 0 && trimmed.length < MIN_TELEGRAM_COMMAND_SECRET_LENGTH;
+}
+
 /** Rebuild FormData from an Astro Action form input object. */
 export function objectToFormData(
   input: Record<string, unknown>,

@@ -5,6 +5,7 @@ import {
   alertChannelsIncomplete,
   buildAlertSettingsFromFormData,
   findInvalidAlertWebhookUrl,
+  isWeakTelegramSecret,
 } from "../../../lib/alertSettingsForm";
 import { getAlertSettingsForUser } from "../../../lib/notify";
 import { getUserEntitlements } from "../../../lib/entitlements";
@@ -41,6 +42,10 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   if (findInvalidAlertWebhookUrl(settings)) {
     return redirect(`${redirectTo}?alert_error=invalid_webhook_url`);
+  }
+
+  if (isWeakTelegramSecret(settings.telegramCommandSecret)) {
+    return redirect(`${redirectTo}?alert_error=weak_telegram_secret`);
   }
 
   const { error } = await updateUserAlertSettings(

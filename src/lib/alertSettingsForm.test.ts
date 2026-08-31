@@ -5,6 +5,7 @@ import type { Entitlements } from "./entitlements";
 import {
   buildAlertSettingsFromFormData,
   findInvalidAlertWebhookUrl,
+  isWeakTelegramSecret,
   objectToFormData,
   prepareAlertSettingsFormData,
 } from "./alertSettingsForm";
@@ -218,5 +219,23 @@ describe("findInvalidAlertWebhookUrl", () => {
       readingWebhookUrl: "https://192.168.1.50/hook",
     };
     expect(findInvalidAlertWebhookUrl(settings)).toBe("readingWebhookUrl");
+  });
+});
+
+describe("isWeakTelegramSecret", () => {
+  it("allows an empty/unset secret", () => {
+    expect(isWeakTelegramSecret(null)).toBe(false);
+    expect(isWeakTelegramSecret("")).toBe(false);
+    expect(isWeakTelegramSecret("   ")).toBe(false);
+  });
+
+  it("rejects a short secret", () => {
+    expect(isWeakTelegramSecret("short")).toBe(true);
+    expect(isWeakTelegramSecret("fifteencharsxx")).toBe(true);
+  });
+
+  it("allows a sufficiently long secret", () => {
+    expect(isWeakTelegramSecret("a-reasonably-long-random-secret")).toBe(false);
+    expect(isWeakTelegramSecret("exactlysixteench")).toBe(false);
   });
 });

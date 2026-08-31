@@ -10,6 +10,8 @@ import { updateUserAlertSettings } from "../lib/alertNotifications";
 import {
   alertChannelsIncomplete,
   buildAlertSettingsFromFormData,
+  findInvalidAlertWebhookUrl,
+  isWeakTelegramSecret,
 } from "../lib/alertSettingsForm";
 import {
   getAlertSettingsForUser,
@@ -164,6 +166,21 @@ export const server = {
         existing,
         entitlements,
       );
+
+      const invalidWebhookField = findInvalidAlertWebhookUrl(settings);
+      if (invalidWebhookField) {
+        throw new ActionError({
+          code: "BAD_REQUEST",
+          message: "One of your webhook URLs isn't a valid https:// address, or points to a private network.",
+        });
+      }
+
+      if (isWeakTelegramSecret(settings.telegramCommandSecret)) {
+        throw new ActionError({
+          code: "BAD_REQUEST",
+          message: `Telegram webhook secret must be at least 16 characters.`,
+        });
+      }
 
       const { error } = await updateUserAlertSettings(
         session.access_token,

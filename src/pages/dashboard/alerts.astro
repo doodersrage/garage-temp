@@ -61,7 +61,9 @@ const alertNotice = Astro.url.searchParams.get("alert_saved")
   : Astro.url.searchParams.get("alert_error")
     ? Astro.url.searchParams.get("alert_error") === "invalid_webhook_url"
       ? "One of your webhook URLs isn't a valid https:// address, or points to a private network. Fix it and save again."
-      : "Unable to save alert settings."
+      : Astro.url.searchParams.get("alert_error") === "weak_telegram_secret"
+        ? "Telegram webhook secret must be at least 16 characters -- it's the only thing protecting that endpoint. Use a longer random value and save again."
+        : "Unable to save alert settings."
     : Astro.url.searchParams.get("test_sent")
       ? skippedChannels
         ? `Test sent via ${sentChannels}. Skipped incomplete: ${skippedChannels}.`
