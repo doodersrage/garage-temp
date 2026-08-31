@@ -10,7 +10,9 @@ const HOUSEHOLD_ERROR_MESSAGES: Record<string, string> = {
     "Only household owners and full members can manage invites, share links, and billing integrations.",
   viewer: "View-only — you cannot change settings on this account.",
   property_limit:
-    "You've reached the owned-property limit for your plan. Upgrade to Pro to manage multiple households.",
+    "You've reached the owned-property limit for your plan. Upgrade to unlock more households.",
+  portfolio_required:
+    "Property-manager invites require the Portfolio plan.",
 };
 
 export function getHouseholdErrorMessage(code: string | null): string | null {

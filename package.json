@@ -27,6 +27,8 @@
     "e2e:reset-password": "node scripts/e2e-reset-password.mjs",
     "typecheck": "astro sync && tsc --noEmit",
     "audit:stripe": "node --env-file=.env scripts/audit-stripe-prices.mjs",
+    "stripe:portal": "node --env-file=.env scripts/configure-stripe-portal.mjs",
+    "smoke:portfolio-billing": "node --env-file=.env scripts/smoke-portfolio-billing.mjs",
     "generate:vapid": "node scripts/generate-vapid-keys.mjs",
     "astro": "astro",
     "docs:dev": "pnpm --dir docs --ignore-workspace dev",

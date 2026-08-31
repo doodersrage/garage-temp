@@ -17,6 +17,7 @@ import { getUserEntitlements } from "../../../lib/entitlements";
 import {
   createHouseholdInvite,
   listPendingInvites,
+  parseHouseholdInviteRole,
   revokeHouseholdInvite,
   sendInviteEmail,
 } from "../../../lib/householdInvites";
@@ -191,7 +192,13 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?error=missing_email`);
   }
 
-  const role = formData.get("role")?.toString() === "viewer" ? "viewer" : "member";
+  const role = parseHouseholdInviteRole(formData.get("role")?.toString()) ?? "member";
+  if (role === "property_manager") {
+    const entitlements = await getUserEntitlements(user.id);
+    if (entitlements.tier !== "portfolio" && entitlements.tier !== "admin") {
+      return redirect(`${redirectTo}?error=portfolio_required`);
+    }
+  }
   const { invite, error } = await createHouseholdInvite(manageId, email, user.id, 7, role);
   if (error || !invite) {
     return redirect(`${redirectTo}?error=1`);

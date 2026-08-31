@@ -1,15 +1,17 @@
-import type { PlanTier } from "./entitlements";
 import {
   FREE_HISTORY_DAYS,
   FREE_MAX_DEVICES,
   MEMBER_HISTORY_DAYS,
   MEMBER_MAX_DEVICES,
+  PORTFOLIO_MAX_OWNED_HOUSEHOLDS,
   PRO_HISTORY_DAYS,
   PRO_MAX_DEVICES,
+  PRO_MAX_OWNED_HOUSEHOLDS,
   formatHistoryRetention,
+  type PlanTier,
 } from "./entitlements";
 
-export type ComparisonTier = "free" | "member" | "pro";
+export type ComparisonTier = "free" | "member" | "pro" | "portfolio";
 
 export type NudgeFeatureId =
   | "csv_export"
@@ -26,6 +28,7 @@ export type NudgeFeatureId =
   | "cold_risk"
   | "prometheus"
   | "multi_property"
+  | "portfolio_scale"
   | "claims_pack"
   | "thermostat_integration";
 
@@ -36,10 +39,13 @@ export type PlanFeatureRow = {
   free: string;
   member: string;
   pro: string;
+  portfolio: string;
   anchor?: string;
   emphasis?: boolean;
   cellBadge?: Partial<Record<ComparisonTier, string>>;
 };
+
+const PRO_LIKE = "Yes";
 
 export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
   {
@@ -49,6 +55,7 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     free: `${FREE_MAX_DEVICES} devices`,
     member: `${MEMBER_MAX_DEVICES} devices`,
     pro: `${PRO_MAX_DEVICES} devices`,
+    portfolio: `${PRO_MAX_DEVICES} devices`,
     anchor: "push_devices",
     emphasis: true,
   },
@@ -59,6 +66,7 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     free: formatHistoryRetention(FREE_HISTORY_DAYS),
     member: formatHistoryRetention(MEMBER_HISTORY_DAYS),
     pro: `${formatHistoryRetention(PRO_HISTORY_DAYS)}+`,
+    portfolio: `${formatHistoryRetention(PRO_HISTORY_DAYS)}+`,
     anchor: "data-retention",
     emphasis: true,
   },
@@ -69,6 +77,7 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     free: "Unlimited",
     member: "Unlimited",
     pro: "Unlimited",
+    portfolio: "Unlimited",
   },
   {
     id: "sensor_kinds",
@@ -77,14 +86,16 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     free: "Temp, humidity, CO₂, air quality, doors, leaks, energy, motion",
     member: "Temp, humidity, CO₂, air quality, doors, leaks, energy, motion",
     pro: "Temp, humidity, CO₂, air quality, doors, leaks, energy, motion",
+    portfolio: "Temp, humidity, CO₂, air quality, doors, leaks, energy, motion",
   },
   {
     id: "alerts_basic",
     category: "Alerts",
     label: "Email, Discord, Telegram, Slack",
-    free: "Yes",
-    member: "Yes",
-    pro: "Yes",
+    free: PRO_LIKE,
+    member: PRO_LIKE,
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
   },
   {
     id: "cold_risk",
@@ -93,6 +104,7 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     free: "Threshold only",
     member: "Forecast-based cold-risk",
     pro: "Forecast + official NWS",
+    portfolio: "Forecast + official NWS",
     anchor: "cold-risk",
     emphasis: true,
   },
@@ -102,7 +114,8 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     label: "SMS alerts (Twilio)",
     free: "—",
     member: "—",
-    pro: "Yes",
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
     anchor: "sms-alerts",
   },
   {
@@ -111,7 +124,8 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     label: "Browser push notifications",
     free: "—",
     member: "—",
-    pro: "Yes",
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
     anchor: "push-alerts",
   },
   {
@@ -120,7 +134,8 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     label: "Outbound + reading webhooks",
     free: "—",
     member: "—",
-    pro: "Yes",
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
     anchor: "webhooks",
   },
   {
@@ -129,24 +144,27 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     label: "Inbound snooze / status webhooks",
     free: "—",
     member: "—",
-    pro: "Yes",
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
     anchor: "webhooks",
   },
   {
     id: "history_charts",
     category: "History",
     label: "Charts, YoY overlay, anomaly hints",
-    free: "Yes",
-    member: "Yes",
-    pro: "Yes",
+    free: PRO_LIKE,
+    member: PRO_LIKE,
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
   },
   {
     id: "csv_export",
     category: "History",
     label: "CSV export",
     free: "—",
-    member: "Yes",
-    pro: "Yes",
+    member: PRO_LIKE,
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
     anchor: "csv-export",
   },
   {
@@ -156,6 +174,7 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     free: "—",
     member: "—",
     pro: "Printable HTML + CSVs",
+    portfolio: "Printable HTML + CSVs",
     anchor: "claims-pack",
     emphasis: true,
   },
@@ -165,7 +184,8 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     label: "Public share links (live, history, embed)",
     free: "—",
     member: "—",
-    pro: "Yes",
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
     anchor: "share-links",
   },
   {
@@ -174,7 +194,8 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     label: "Dashboard API keys",
     free: "—",
     member: "—",
-    pro: "Yes",
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
     anchor: "api-keys",
   },
   {
@@ -183,7 +204,8 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     label: "Embeddable live widget",
     free: "—",
     member: "—",
-    pro: "Yes",
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
     anchor: "embed-widget",
   },
   {
@@ -192,7 +214,8 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     label: "Public status pages + iCal feed",
     free: "—",
     member: "—",
-    pro: "Yes",
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
     anchor: "status-pages",
   },
   {
@@ -201,7 +224,8 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     label: "Prometheus metrics + Grafana JSON",
     free: "—",
     member: "—",
-    pro: "Yes",
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
     anchor: "prometheus",
   },
   {
@@ -210,17 +234,41 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     label: "Nest / Ecobee thermostat connection",
     free: "—",
     member: "—",
-    pro: "Yes",
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
     anchor: "thermostat-integration",
   },
   {
     id: "multi_property",
     category: "Households",
-    label: "Multiple properties / households",
+    label: "Owned properties",
     free: "1",
     member: "1",
-    pro: "Multiple",
+    pro: `Up to ${PRO_MAX_OWNED_HOUSEHOLDS}`,
+    portfolio: `Up to ${PORTFOLIO_MAX_OWNED_HOUSEHOLDS}`,
     anchor: "multi-property",
+    emphasis: true,
+  },
+  {
+    id: "property_manager",
+    category: "Households",
+    label: "Property-manager logins",
+    free: "—",
+    member: "—",
+    pro: "—",
+    portfolio: "Devices & alerts only (no billing)",
+    anchor: "property-manager",
+    emphasis: true,
+  },
+  {
+    id: "portfolio_dashboard",
+    category: "Households",
+    label: "Cross-property freeze dashboard",
+    free: "—",
+    member: "—",
+    pro: PRO_LIKE,
+    portfolio: PRO_LIKE,
+    anchor: "portfolio",
   },
   {
     id: "annual_billing",
@@ -229,15 +277,17 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     free: "—",
     member: "Save ~20%",
     pro: "Save ~20%",
+    portfolio: "Save ~20%",
     anchor: "annual-billing",
   },
   {
     id: "pro_trial",
     category: "Billing",
-    label: "Pro free trial",
+    label: "Paid-plan free trial",
     free: "—",
     member: "—",
     pro: "14 days (+7 with referral)",
+    portfolio: "14 days (+7 with referral)",
   },
 ];
 
@@ -334,8 +384,14 @@ const NUDGE_CONFIG: Record<
   multi_property: {
     targetTier: "pro",
     title: "Monitoring a second property?",
-    body: "Pro supports multiple households — vacation home, rental unit, or workshop.",
+    body: `Pro supports up to ${PRO_MAX_OWNED_HOUSEHOLDS} owned properties — vacation home, rental unit, or workshop.`,
     anchor: "multi-property",
+  },
+  portfolio_scale: {
+    targetTier: "portfolio",
+    title: "Running a larger property portfolio?",
+    body: `Portfolio raises the owned-property ceiling to ${PORTFOLIO_MAX_OWNED_HOUSEHOLDS} and adds property-manager logins for on-site staff.`,
+    anchor: "portfolio",
   },
   claims_pack: {
     targetTier: "pro",
@@ -356,10 +412,8 @@ export function tierRank(tier: PlanTier): number {
 }
 
 export function normalizeComparisonTier(tier: PlanTier): ComparisonTier {
-  // Portfolio is a strict superset of Pro (see entitlements.ts) and deliberately
-  // sits outside the Free/Member/Pro comparison ladder -- treat it as pro-equivalent
-  // here rather than adding a 4th column to every PLAN_FEATURE_ROWS entry.
-  if (tier === "admin" || tier === "pro" || tier === "portfolio") return "pro";
+  if (tier === "admin" || tier === "portfolio") return "portfolio";
+  if (tier === "pro") return "pro";
   if (tier === "member") return "member";
   return "free";
 }
@@ -392,7 +446,8 @@ export function getNudgeContent(
 }
 
 export function nextUpgradeTier(tier: PlanTier): ComparisonTier | null {
-  if (tier === "admin" || tier === "pro" || tier === "portfolio") return null;
+  if (tier === "admin" || tier === "portfolio") return null;
+  if (tier === "pro") return "portfolio";
   if (tier === "member") return "pro";
   return "member";
 }

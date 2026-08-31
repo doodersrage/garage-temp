@@ -21,6 +21,9 @@ const atRisk = properties.filter((p) => p.atRisk);
 ---
 <DashboardLayout title="Portfolio">
   <div class="space-y-6">
+    {entitlements.tier === "pro" && (
+      <UpgradeNudge feature="portfolio_scale" tier={entitlements.tier} />
+    )}
     {!entitlements.canUsePortfolio && (
       <UpgradeNudge feature="multi_property" tier={entitlements.tier} />
     )}
@@ -28,7 +31,11 @@ const atRisk = properties.filter((p) => p.atRisk);
       <h2 class="card-title">All properties</h2>
       <p class="card-subtitle mb-0">
         Cross-property freeze risk at a glance
-        {entitlements.canUsePortfolio ? "" : " — upgrade to Pro to unlock portfolio view and alerts"}.
+        {!entitlements.canUsePortfolio
+          ? " — upgrade to Pro to unlock portfolio view and alerts"
+          : entitlements.tier === "pro"
+            ? " — Portfolio raises the property ceiling and adds property-manager logins"
+            : ""}.
       </p>
       {error && <p class="alert-warning mt-3" role="alert">{error}</p>}
     </section>

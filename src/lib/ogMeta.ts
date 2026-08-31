@@ -46,7 +46,7 @@ export function resolveOgImageAlt(pathname: string): string {
   const path = pathname.split("?")[0] || "/";
 
   if (path.startsWith("/pricing") || path.startsWith("/compare")) {
-    return `${BRAND_NAME} plans and pricing — Free, Member, and Pro freeze alert tiers`;
+    return `${BRAND_NAME} plans and pricing — Free, Member, Pro, and Portfolio freeze alert tiers`;
   }
   if (path.startsWith("/freeze-map") || path.startsWith("/freeze-season")) {
     return `${BRAND_NAME} opt-in freeze-risk map of city-level garage temperatures`;

@@ -12,6 +12,8 @@ interface Props {
   subscriptionNotice?: string | null;
   title?: string;
   showCsvNote?: boolean;
+  /** When false, hide Portfolio upgrade CTAs (e.g. display price unset). Default true. */
+  portfolioCheckoutAvailable?: boolean;
 }
 
 const {
@@ -21,30 +23,39 @@ const {
   subscriptionNotice = null,
   title = "Plans",
   showCsvNote = true,
+  portfolioCheckoutAvailable = true,
 } = Astro.props;
 
 const hasActiveSubscription =
   subscription !== null && isActiveSubscriptionStatus(subscription.status);
-// "Pro or above" -- Portfolio is a strict superset of Pro (see entitlements.ts),
-// so it needs to be included everywhere this gates "already has Pro-tier access"
-// (upgrade-button visibility, etc.) rather than showing a Portfolio subscriber
-// "Upgrade to Pro" buttons for a tier they've already surpassed.
-const isProOrAbove =
-  entitlements?.tier === "pro" ||
+
+const isPortfolioOrAbove =
   entitlements?.tier === "portfolio" ||
   entitlements?.tier === "admin" ||
-  subscription?.plan_tier === "pro" ||
   subscription?.plan_tier === "portfolio";
+
+const isProOrAbove =
+  isPortfolioOrAbove ||
+  entitlements?.tier === "pro" ||
+  subscription?.plan_tier === "pro";
+
+const isProOnly = isProOrAbove && !isPortfolioOrAbove;
+
 const tierLabel =
-  entitlements?.tier ?? (isProOrAbove ? "pro" : canDownloadCsv ? "member" : "free");
-const activeSubscriptionLabel =
-  entitlements?.tier === "portfolio" ? "Portfolio" : isProOrAbove ? "Pro" : "Member";
+  entitlements?.tier ??
+  (isPortfolioOrAbove ? "portfolio" : isProOrAbove ? "pro" : canDownloadCsv ? "member" : "free");
+
+const activeSubscriptionLabel = isPortfolioOrAbove
+  ? "Portfolio"
+  : isProOrAbove
+    ? "Pro"
+    : "Member";
 ---
 
 <DashboardCard id="plans">
   <h2 class="card-title">{title}</h2>
   <p class="card-subtitle">
-    Member unlocks CSV export, 90-day history, and forecast freeze warnings. Pro adds NWS cold-risk alerts, SMS, browser push, guest share links, a claims evidence pack, inbound/outbound webhooks, embed widgets, and a 14-day free trial.
+    Member unlocks CSV export, 90-day history, and forecast freeze warnings. Pro adds NWS cold-risk alerts, SMS, browser push, guest share links, a claims evidence pack, inbound/outbound webhooks, embed widgets, and a 14-day free trial. Portfolio raises the owned-property ceiling for landlords and property managers, with property-manager logins for on-site staff.
     Annual billing is discounted versus monthly when those prices are configured in Stripe.
   </p>
 
@@ -62,7 +73,7 @@ const activeSubscriptionLabel =
 
   <p class="mb-4 text-sm text-[var(--color-text-muted)]">
     Current plan: <strong class="text-[var(--color-text)]">{tierLabel}</strong>
-    {entitlements ? ` · up to ${entitlements.maxDevices} push devices · ${formatHistoryRetention(entitlements.historyDays)} history` : ""}
+    {entitlements ? ` · up to ${entitlements.maxDevices} push devices · ${formatHistoryRetention(entitlements.historyDays)} history · ${entitlements.maxOwnedHouseholds} owned propert${entitlements.maxOwnedHouseholds === 1 ? "y" : "ies"}` : ""}
     {" · "}
     <a class="text-link" href="/pricing">Full comparison</a>
   </p>
@@ -96,6 +107,28 @@ const activeSubscriptionLabel =
             <button class="btn-secondary" type="submit">Pro annual</button>
           </form>
         </div>
+      )}
+      {isProOnly && portfolioCheckoutAvailable && (
+        <div class="inline-flex flex-wrap gap-2 mt-3">
+          <form action="/api/stripe/checkout" method="post">
+            <input type="hidden" name="plan" value="portfolio" />
+            <input type="hidden" name="interval" value="monthly" />
+            <input type="hidden" name="source" value="plans_card" />
+            <button class="btn-primary" type="submit">Upgrade to Portfolio (monthly)</button>
+          </form>
+          <form action="/api/stripe/checkout" method="post">
+            <input type="hidden" name="plan" value="portfolio" />
+            <input type="hidden" name="interval" value="annual" />
+            <input type="hidden" name="source" value="plans_card" />
+            <button class="btn-secondary" type="submit">Portfolio annual</button>
+          </form>
+        </div>
+      )}
+      {isProOnly && !portfolioCheckoutAvailable && (
+        <p class="mt-3 mb-0 text-sm">
+          <a class="text-link" href="/pricing#portfolio">See Portfolio pricing</a>
+          {" "}for multi-property scale.
+        </p>
       )}
       {!hasActiveSubscription && !isProOrAbove && (
         <div class="flex flex-wrap gap-2">

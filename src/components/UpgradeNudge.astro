@@ -12,8 +12,19 @@ const { feature, tier, compact = false } = Astro.props;
 const nudge = getNudgeContent(tier, feature);
 if (!nudge) return null;
 
-const checkoutPlan = nudge.targetTier === "member" ? "member" : "pro";
+const checkoutPlan =
+  nudge.targetTier === "member"
+    ? "member"
+    : nudge.targetTier === "portfolio"
+      ? "portfolio"
+      : "pro";
 const checkoutSource = `nudge_${feature}`;
+const upgradeLabel =
+  nudge.targetTier === "member"
+    ? "Upgrade to Member"
+    : nudge.targetTier === "portfolio"
+      ? "Upgrade to Portfolio"
+      : "Upgrade to Pro";
 ---
 <aside
   class:list={["upgrade-nudge", compact && "upgrade-nudge-compact"]}
@@ -31,7 +42,7 @@ const checkoutSource = `nudge_${feature}`;
       <input type="hidden" name="interval" value="annual" />
       <input type="hidden" name="source" value={checkoutSource} />
       <button class="btn-primary" type="submit">
-        {nudge.targetTier === "member" ? "Upgrade to Member" : "Upgrade to Pro"}
+        {upgradeLabel}
       </button>
     </form>
     <button type="button" class="btn-ghost" data-dismiss={nudge.dismissKey}>

@@ -10,6 +10,7 @@ import { canDownloadHistoryCsv } from "../../lib/adminAccess";
 import { getUserSubscription } from "../../lib/stripeSubscriptions";
 import { normalizeComparisonTier, nextUpgradeTier } from "../../lib/planComparison";
 import { getSiteUrl } from "../../lib/stripe";
+import { resolveStripePriceId } from "../../lib/planTier";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
@@ -26,6 +27,10 @@ const currentTier = normalizeComparisonTier(entitlements.tier);
 const upgradeTarget = nextUpgradeTier(entitlements.tier);
 const subscriptionNotice = Astro.url.searchParams.get("subscription");
 const siteUrl = getSiteUrl(Astro.request);
+const portfolioCheckoutAvailable = Boolean(
+  resolveStripePriceId("portfolio", "monthly") ||
+    resolveStripePriceId("portfolio", "annual"),
+);
 const referralRewardDays = Number(
   (user.app_metadata as Record<string, unknown> | undefined)?.referral_reward_days ?? 0,
 );
@@ -35,7 +40,7 @@ const referralRewardDays = Number(
     <section class="card">
       <h2 class="card-title">Plans & billing</h2>
       <p class="card-subtitle mb-0">
-        Compare tiers, upgrade when you need longer retention, forecast freeze, CSV export, SMS, share links, claims pack, or more devices.
+        Compare tiers, upgrade when you need longer retention, forecast freeze, CSV export, SMS, share links, claims pack, more devices, or Portfolio-scale property limits.
         {" "}
         <a class="text-link" href="/pricing">Public comparison page</a>
       </p>
@@ -47,12 +52,16 @@ const referralRewardDays = Number(
     {upgradeTarget === "pro" && (
       <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} />
     )}
+    {upgradeTarget === "portfolio" && (
+      <UpgradeNudge feature="portfolio_scale" tier={entitlements.tier} />
+    )}
 
     <PlansCard
       canDownloadCsv={canDownloadCsv}
       subscription={subscription}
       entitlements={entitlements}
       subscriptionNotice={subscriptionNotice}
+      portfolioCheckoutAvailable={portfolioCheckoutAvailable}
     />
 
     <ReferralCard siteUrl={siteUrl} rewardDays={referralRewardDays} />

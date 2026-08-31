@@ -1,6 +1,14 @@
 ---
-import { PLAN_FEATURE_ROWS, type ComparisonTier, type PlanFeatureRow } from "../lib/planComparison";
-import { getMemberPriceDisplay, getProPriceDisplay } from "../lib/stripePricing";
+import {
+  PLAN_FEATURE_ROWS,
+  type ComparisonTier,
+  type PlanFeatureRow,
+} from "../lib/planComparison";
+import {
+  getMemberPriceDisplay,
+  getPortfolioPriceDisplay,
+  getProPriceDisplay,
+} from "../lib/stripePricing";
 
 interface Props {
   highlightTier?: ComparisonTier | null;
@@ -11,6 +19,7 @@ const { highlightTier = null, showAnchors = true } = Astro.props;
 
 const memberSave = getMemberPriceDisplay().annualSavingsPct;
 const proSave = getProPriceDisplay().annualSavingsPct;
+const portfolioSave = getPortfolioPriceDisplay().annualSavingsPct;
 
 function annualDiscountLabel(pct: number | null): string {
   if (pct != null && pct > 0) return `Save ${pct}%`;
@@ -23,17 +32,19 @@ const rows: PlanFeatureRow[] = PLAN_FEATURE_ROWS.map((row) => {
     ...row,
     member: annualDiscountLabel(memberSave),
     pro: annualDiscountLabel(proSave),
+    portfolio: annualDiscountLabel(portfolioSave),
   };
 });
 
 const categories = [...new Set(rows.map((row) => row.category))];
+const tiers: ComparisonTier[] = ["free", "member", "pro", "portfolio"];
 
 function cellValue(row: PlanFeatureRow, tier: ComparisonTier): string {
   return row[tier];
 }
 ---
 <div class="plan-comparison">
-  <p class="plan-comparison-scroll-hint">Swipe sideways to compare Free, Member, and Pro.</p>
+  <p class="plan-comparison-scroll-hint">Swipe sideways to compare Free, Member, Pro, and Portfolio.</p>
   <div class="plan-comparison-wrap">
   <table class="plan-comparison-table">
     <thead>
@@ -42,13 +53,14 @@ function cellValue(row: PlanFeatureRow, tier: ComparisonTier): string {
         <th scope="col" class:list={[highlightTier === "free" && "plan-col-highlight"]}>Free</th>
         <th scope="col" class:list={[highlightTier === "member" && "plan-col-highlight"]}>Member</th>
         <th scope="col" class:list={[highlightTier === "pro" && "plan-col-highlight"]}>Pro</th>
+        <th scope="col" class:list={[highlightTier === "portfolio" && "plan-col-highlight"]}>Portfolio</th>
       </tr>
     </thead>
     <tbody>
       {categories.map((category) => (
         <>
           <tr class="plan-comparison-category">
-            <th colspan="4" scope="rowgroup">{category}</th>
+            <th colspan="5" scope="rowgroup">{category}</th>
           </tr>
           {rows.filter((row) => row.category === category).map((row) => (
             <tr
@@ -56,7 +68,7 @@ function cellValue(row: PlanFeatureRow, tier: ComparisonTier): string {
               class:list={[row.emphasis && "plan-comparison-emphasis"]}
             >
               <th scope="row">{row.label}</th>
-              {(["free", "member", "pro"] as const).map((tier) => (
+              {tiers.map((tier) => (
                 <td class:list={[highlightTier === tier && "plan-col-highlight"]}>
                   {cellValue(row, tier)}
                   {row.cellBadge?.[tier] && (

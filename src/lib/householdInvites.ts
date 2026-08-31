@@ -1,6 +1,12 @@
 import { createServerClient } from "./supabase";
 import { addHouseholdMemberByUserId, setActiveHouseholdForUser } from "./households";
 
+export type HouseholdInviteRole =
+  | "member"
+  | "viewer"
+  | "alert_only"
+  | "property_manager";
+
 export type HouseholdInvite = {
   id: string;
   household_id: string;
@@ -10,8 +16,24 @@ export type HouseholdInvite = {
   expires_at: string;
   accepted_at: string | null;
   created_at: string;
-  role: "member" | "viewer" | "alert_only" | "property_manager";
+  role: HouseholdInviteRole;
 };
+
+const INVITE_ROLES = new Set<HouseholdInviteRole>([
+  "member",
+  "viewer",
+  "alert_only",
+  "property_manager",
+]);
+
+/** Parse invite role from form input; returns null when invalid. */
+export function parseHouseholdInviteRole(
+  raw: string | null | undefined,
+): HouseholdInviteRole | null {
+  const value = raw?.trim();
+  if (!value || !INVITE_ROLES.has(value as HouseholdInviteRole)) return null;
+  return value as HouseholdInviteRole;
+}
 
 function randomToken(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(24));
@@ -23,7 +45,7 @@ export async function createHouseholdInvite(
   email: string,
   invitedBy: string,
   expiresInDays = 7,
-  role: "member" | "viewer" | "alert_only" | "property_manager" = "member",
+  role: HouseholdInviteRole = "member",
 ): Promise<{ invite: HouseholdInvite | null; error: string | null }> {
   const supabase = createServerClient();
   const normalized = email.trim().toLowerCase();

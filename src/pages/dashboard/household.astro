@@ -48,6 +48,8 @@ const [membersResult, householdsResult, invitesResult, householdRow, entitlement
 
 const atPropertyLimit = ownedCount >= entitlements.maxOwnedHouseholds;
 const canCreateProperty = !atPropertyLimit;
+const canInvitePropertyManager =
+  entitlements.tier === "portfolio" || entitlements.tier === "admin";
 
 const admin = createAdminClient();
 const membersWithEmail = await Promise.all(
@@ -334,10 +336,18 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
             <label class="form-label" for="invite_role">Role</label>
             <select class="form-input" id="invite_role" name="role">
               <option value="member">Member (can edit devices & alerts)</option>
-              <option value="property_manager">Property manager (devices & alerts only)</option>
+              {canInvitePropertyManager ? (
+                <option value="property_manager">Property manager (devices & alerts only)</option>
+              ) : null}
               <option value="viewer">Viewer (read-only dashboard)</option>
               <option value="alert_only">Alert only (notifications, read-only)</option>
             </select>
+            {!canInvitePropertyManager && (
+              <p class="form-hint mb-0 mt-2">
+                <a class="text-link" href="/pricing#portfolio">Portfolio</a>
+                {" "}adds property-manager logins for on-site staff (no billing access).
+              </p>
+            )}
           </div>
           <button class="btn-primary" type="submit" id="invite-submit">Send invite link</button>
         </form>

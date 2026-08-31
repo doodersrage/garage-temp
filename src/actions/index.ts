@@ -35,6 +35,7 @@ import {
 } from "../lib/households";
 import {
   createHouseholdInvite,
+  parseHouseholdInviteRole,
   sendInviteEmail,
 } from "../lib/householdInvites";
 import { buildSiteUrl } from "../lib/stripe";
@@ -290,7 +291,9 @@ export const server = {
     accept: "form",
     input: z.object({
       email: z.string().email("Enter a valid email."),
-      role: z.enum(["member", "viewer"]).optional(),
+      role: z
+        .enum(["member", "viewer", "alert_only", "property_manager"])
+        .optional(),
       redirect: z.string().optional(),
       action: z.string().optional(),
     }),
@@ -309,7 +312,17 @@ export const server = {
       }
 
       const email = input.email.trim().toLowerCase();
-      const role = input.role === "viewer" ? "viewer" : "member";
+      const role = parseHouseholdInviteRole(input.role) ?? "member";
+      if (role === "property_manager") {
+        const entitlements = await getUserEntitlements(user.id);
+        if (entitlements.tier !== "portfolio" && entitlements.tier !== "admin") {
+          throw new ActionError({
+            code: "FORBIDDEN",
+            message:
+              "Property-manager invites require the Portfolio plan.",
+          });
+        }
+      }
       const { invite, error } = await createHouseholdInvite(
         manageId,
         email,

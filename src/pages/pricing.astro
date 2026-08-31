@@ -36,11 +36,9 @@ const { user } = await getAuthFromCookies(Astro.cookies);
 const entitlements = user ? await getUserEntitlements(user.id) : null;
 const subscription = user ? await getUserSubscription(user.id) : null;
 const currentTier = entitlements ? normalizeComparisonTier(entitlements.tier) : null;
-// Raw (non-normalized) tier -- normalizeComparisonTier treats Portfolio as
-// pro-equivalent for the Free/Member/Pro comparison table, but each pricing
-// card's own button state needs to know if the visitor is actually on
-// Portfolio (otherwise they'd see "Upgrade to Pro" for a tier they've
-// already surpassed).
+// Raw tier for pricing card CTAs -- normalizeComparisonTier maps Portfolio to
+// its own comparison column, but each card button still needs the raw tier so
+// Portfolio subscribers don't see "Upgrade to Pro".
 const rawTier = entitlements?.tier ?? null;
 const hasBilling =
   subscription !== null && isActiveSubscriptionStatus(subscription.status);

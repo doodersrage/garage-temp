@@ -21,7 +21,7 @@ export const PRO_HISTORY_DAYS = 365;
 
 const FREE_MAX_OWNED_HOUSEHOLDS = 1;
 const MEMBER_MAX_OWNED_HOUSEHOLDS = 1;
-const PRO_MAX_OWNED_HOUSEHOLDS = 50;
+export const PRO_MAX_OWNED_HOUSEHOLDS = 50;
 /** Portfolio tier -- landlords/property managers running many properties. */
 export const PORTFOLIO_MAX_OWNED_HOUSEHOLDS = 500;
 
