@@ -17,7 +17,12 @@ import {
   formatHistoryRetention,
 } from "../lib/entitlements";
 import { normalizeComparisonTier } from "../lib/planComparison";
-import { getMemberPriceDisplay, getProPriceDisplay } from "../lib/stripePricing";
+import {
+  getMemberPriceDisplay,
+  getPortfolioPriceDisplay,
+  getProPriceDisplay,
+} from "../lib/stripePricing";
+import { PORTFOLIO_MAX_OWNED_HOUSEHOLDS } from "../lib/entitlements";
 import { getUserSubscription } from "../lib/stripeSubscriptions";
 import { isActiveSubscriptionStatus } from "../lib/stripe";
 import {
@@ -31,10 +36,19 @@ const { user } = await getAuthFromCookies(Astro.cookies);
 const entitlements = user ? await getUserEntitlements(user.id) : null;
 const subscription = user ? await getUserSubscription(user.id) : null;
 const currentTier = entitlements ? normalizeComparisonTier(entitlements.tier) : null;
+// Raw (non-normalized) tier -- normalizeComparisonTier treats Portfolio as
+// pro-equivalent for the Free/Member/Pro comparison table, but each pricing
+// card's own button state needs to know if the visitor is actually on
+// Portfolio (otherwise they'd see "Upgrade to Pro" for a tier they've
+// already surpassed).
+const rawTier = entitlements?.tier ?? null;
 const hasBilling =
   subscription !== null && isActiveSubscriptionStatus(subscription.status);
 const memberPrices = getMemberPriceDisplay();
 const proPrices = getProPriceDisplay();
+const portfolioPrices = getPortfolioPriceDisplay();
+const portfolioPricingConfigured =
+  portfolioPrices.monthly != null || portfolioPrices.annual != null;
 const defaultInterval =
   import.meta.env.PRICING_DEFAULT_INTERVAL === "monthly" ? "monthly" : "annual";
 
@@ -81,9 +95,18 @@ const memberMonthly = priceForInterval(memberPrices, "monthly");
 const memberAnnual = priceForInterval(memberPrices, "annual");
 const proMonthly = priceForInterval(proPrices, "monthly");
 const proAnnual = priceForInterval(proPrices, "annual");
+const portfolioMonthly = priceForInterval(portfolioPrices, "monthly");
+const portfolioAnnual = priceForInterval(portfolioPrices, "annual");
+if (!portfolioPricingConfigured) {
+  // Avoid "Billed monthly" / "Save ~20%" placeholder copy sitting under a
+  // "Contact us" price before you've set the Stripe price + display env vars.
+  portfolioMonthly.sub = "Custom pricing";
+  portfolioAnnual.sub = "Custom pricing";
+}
 const maxAnnualSavings = Math.max(
   memberPrices.annualSavingsPct ?? 0,
   proPrices.annualSavingsPct ?? 0,
+  portfolioPrices.annualSavingsPct ?? 0,
 );
 const annualSavingsLabel =
   maxAnnualSavings > 0 ? `Save up to ${maxAnnualSavings}%` : "Save ~20%";
@@ -91,6 +114,12 @@ const memberSavingsMonthly = savingsForInterval(memberPrices.annualSavingsPct, "
 const memberSavingsAnnual = savingsForInterval(memberPrices.annualSavingsPct, "annual");
 const proSavingsMonthly = savingsForInterval(proPrices.annualSavingsPct, "monthly");
 const proSavingsAnnual = savingsForInterval(proPrices.annualSavingsPct, "annual");
+const portfolioSavingsMonthly = portfolioPricingConfigured
+  ? savingsForInterval(portfolioPrices.annualSavingsPct, "monthly")
+  : "";
+const portfolioSavingsAnnual = portfolioPricingConfigured
+  ? savingsForInterval(portfolioPrices.annualSavingsPct, "annual")
+  : "";
 const monthlyHint = `You’re viewing monthly prices. Annual locks in ${maxAnnualSavings > 0 ? `${maxAnnualSavings}%` : "about 20%"} off (${memberAnnual.amount} / ${proAnnual.amount} per year).`;
 const annualHint = `You’re viewing yearly totals. Toggle Monthly to see ${memberMonthly.amount} / ${proMonthly.amount} per month.`;
 
@@ -107,7 +136,7 @@ const schema = [
 ---
 <Layout
   title="Plans & pricing"
-  description="Compare ThermalTrace Free, Member, and Pro—device counts, 7-day vs 90-day vs 1-year history, cold-risk/NWS forecasts, and annual billing savings. Start free; upgrade when winter hits."
+  description="Compare ThermalTrace Free, Member, Pro, and Portfolio—device counts, 7-day vs 90-day vs 1-year history, cold-risk/NWS forecasts, and annual billing savings. Start free; upgrade when winter hits, or scale up to Portfolio for multiple properties."
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
@@ -115,7 +144,7 @@ const schema = [
     <PageHeader
       kicker="Pricing"
       title="Plans that grow with your probes"
-      lede="Start free with live curves, threshold freeze alerts, and automatic leak alerts. Every plan ingests temperature, humidity, air quality, doors, leaks, power, energy, and motion. Member adds 90-day history, more devices, and predictive forecast warnings. Pro unlocks official NWS cold-risk alerts, SMS, push, guest share links, a claims evidence pack, webhooks, and a 14-day trial."
+      lede="Start free with live curves, threshold freeze alerts, and automatic leak alerts. Every plan ingests temperature, humidity, air quality, doors, leaks, power, energy, and motion. Member adds 90-day history, more devices, and predictive forecast warnings. Pro unlocks official NWS cold-risk alerts, SMS, push, guest share links, a claims evidence pack, webhooks, and a 14-day trial. Managing more than a couple of properties? Portfolio adds a cross-property risk dashboard and room for up to 500 owned properties — see below."
     >
       {user ? (
         <p class="page-header-meta">
@@ -296,7 +325,9 @@ const schema = [
           </ul>
           <div class="plan-tier-footer">
             {user ? (
-              currentTier !== "pro" ? (
+              rawTier === "portfolio" || rawTier === "admin" ? (
+                <p>Included in your plan</p>
+              ) : rawTier !== "pro" ? (
                 <form action="/api/stripe/checkout" method="post" class="checkout-form">
                   <input type="hidden" name="plan" value="pro" />
                   <input type="hidden" name="interval" value={defaultInterval} data-interval-input />
@@ -307,6 +338,68 @@ const schema = [
               )
             ) : (
               <a class="btn-primary" href="/signin?next=/pricing">Sign in for Pro trial</a>
+            )}
+          </div>
+        </article>
+
+        <article class="plan-tier-card" id="portfolio">
+          <div class="plan-tier-badge-slot">
+            <span class="plan-tier-badge">For portfolios</span>
+          </div>
+          <h2 class="plan-tier-name">Portfolio</h2>
+          <p class="plan-tier-price" aria-live="polite">
+            <span
+              class="plan-tier-amount"
+              data-price-monthly={portfolioMonthly.amount}
+              data-price-annual={portfolioAnnual.amount}
+            >
+              {defaultInterval === "annual" ? portfolioAnnual.amount : portfolioMonthly.amount}
+            </span><span
+              class="plan-tier-period"
+              data-period-monthly={portfolioMonthly.period}
+              data-period-annual={portfolioAnnual.period}
+            >{defaultInterval === "annual" ? portfolioAnnual.period : portfolioMonthly.period}</span>
+          </p>
+          <div class="plan-tier-meta">
+            <p
+              class="plan-tier-savings"
+              data-savings-monthly={portfolioSavingsMonthly}
+              data-savings-annual={portfolioSavingsAnnual}
+            >
+              {defaultInterval === "annual" ? portfolioSavingsAnnual : portfolioSavingsMonthly}
+            </p>
+            <p
+              class="plan-tier-sub"
+              data-sub-monthly={portfolioMonthly.sub}
+              data-sub-annual={portfolioAnnual.sub}
+            >
+              {defaultInterval === "annual" ? portfolioAnnual.sub : portfolioMonthly.sub}
+            </p>
+          </div>
+          <p class="plan-tier-tagline">Multiple properties, one dashboard</p>
+          <ul class="plan-tier-list">
+            <li>Everything in Pro, plus—</li>
+            <li>Up to {PORTFOLIO_MAX_OWNED_HOUSEHOLDS} owned properties</li>
+            <li>Cross-property freeze-risk dashboard</li>
+            <li>Property-manager logins (devices &amp; alerts only, no billing access)</li>
+          </ul>
+          <div class="plan-tier-footer">
+            {user ? (
+              rawTier === "portfolio" || rawTier === "admin" ? (
+                <p>You're on Portfolio</p>
+              ) : portfolioPricingConfigured ? (
+                <form action="/api/stripe/checkout" method="post" class="checkout-form">
+                  <input type="hidden" name="plan" value="portfolio" />
+                  <input type="hidden" name="interval" value={defaultInterval} data-interval-input />
+                  <button class="btn-primary" type="submit">Upgrade to Portfolio</button>
+                </form>
+              ) : (
+                <a class="btn-primary" href="/contact">Contact us about Portfolio</a>
+              )
+            ) : portfolioPricingConfigured ? (
+              <a class="btn-primary" href="/signin?next=/pricing">Sign in to subscribe</a>
+            ) : (
+              <a class="btn-primary" href="/contact">Contact us about Portfolio</a>
             )}
           </div>
         </article>
@@ -323,6 +416,9 @@ const schema = [
       <p class="card-subtitle mb-4">
         Device counts, retention, and which freeze alerts sit on each plan. Comparing against MQTT, Govee, or a weather station?
         {" "}<a class="text-link" href="/compare">See alternatives</a>.
+      </p>
+      <p class="text-sm text-[var(--color-text-muted)] mb-4">
+        Portfolio includes everything below under Pro, plus a much higher owned-property ceiling — see the Portfolio card above.
       </p>
       <PlanComparisonTable highlightTier={currentTier} />
     </section>

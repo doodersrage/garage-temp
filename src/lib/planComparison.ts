@@ -245,7 +245,8 @@ const TIER_RANK: Record<PlanTier, number> = {
   free: 0,
   member: 1,
   pro: 2,
-  admin: 3,
+  portfolio: 3,
+  admin: 4,
 };
 
 const NUDGE_CONFIG: Record<
@@ -355,7 +356,10 @@ export function tierRank(tier: PlanTier): number {
 }
 
 export function normalizeComparisonTier(tier: PlanTier): ComparisonTier {
-  if (tier === "admin" || tier === "pro") return "pro";
+  // Portfolio is a strict superset of Pro (see entitlements.ts) and deliberately
+  // sits outside the Free/Member/Pro comparison ladder -- treat it as pro-equivalent
+  // here rather than adding a 4th column to every PLAN_FEATURE_ROWS entry.
+  if (tier === "admin" || tier === "pro" || tier === "portfolio") return "pro";
   if (tier === "member") return "member";
   return "free";
 }
@@ -388,7 +392,7 @@ export function getNudgeContent(
 }
 
 export function nextUpgradeTier(tier: PlanTier): ComparisonTier | null {
-  if (tier === "admin" || tier === "pro") return null;
+  if (tier === "admin" || tier === "pro" || tier === "portfolio") return null;
   if (tier === "member") return "pro";
   return "member";
 }

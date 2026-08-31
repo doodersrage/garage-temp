@@ -28,3 +28,51 @@ describe("annual stripe price mapping", () => {
     env.STRIPE_PRICE_ID_PRO_ANNUAL = prev.proA;
   });
 });
+
+describe("portfolio tier price mapping", () => {
+  it("resolves a configured portfolio price id to the portfolio tier", () => {
+    const env = import.meta.env as unknown as Record<string, string | undefined>;
+    const prev = {
+      portfolioM: env.STRIPE_PRICE_ID_PORTFOLIO,
+      portfolioA: env.STRIPE_PRICE_ID_PORTFOLIO_ANNUAL,
+    };
+    env.STRIPE_PRICE_ID_PORTFOLIO = "price_portfolio_monthly";
+    env.STRIPE_PRICE_ID_PORTFOLIO_ANNUAL = "price_portfolio_annual";
+
+    expect(resolvePlanTierFromPriceId("price_portfolio_monthly")).toBe("portfolio");
+    expect(resolvePlanTierFromPriceId("price_portfolio_annual")).toBe("portfolio");
+    expect(resolvePlanTierFromPriceId("price_something_else")).toBe("member");
+
+    env.STRIPE_PRICE_ID_PORTFOLIO = prev.portfolioM;
+    env.STRIPE_PRICE_ID_PORTFOLIO_ANNUAL = prev.portfolioA;
+  });
+
+  it("resolveStripePriceId prefers a configured portfolio price, falling back to pro/member", () => {
+    const env = import.meta.env as unknown as Record<string, string | undefined>;
+    const prev = {
+      portfolioM: env.STRIPE_PRICE_ID_PORTFOLIO,
+      portfolioA: env.STRIPE_PRICE_ID_PORTFOLIO_ANNUAL,
+      proM: env.STRIPE_PRICE_ID_PRO,
+      proA: env.STRIPE_PRICE_ID_PRO_ANNUAL,
+    };
+
+    env.STRIPE_PRICE_ID_PORTFOLIO = "price_portfolio_monthly";
+    env.STRIPE_PRICE_ID_PORTFOLIO_ANNUAL = "";
+    env.STRIPE_PRICE_ID_PRO = "price_pro_monthly";
+    env.STRIPE_PRICE_ID_PRO_ANNUAL = "price_pro_annual";
+
+    expect(resolveStripePriceId("portfolio", "monthly")).toBe("price_portfolio_monthly");
+    // Annual unset for portfolio -- falls back through pro annual before
+    // portfolio/pro monthly, same fallback-chain style as the existing pro branch.
+    expect(resolveStripePriceId("portfolio", "annual")).toBe("price_pro_annual");
+
+    env.STRIPE_PRICE_ID_PORTFOLIO = "";
+    env.STRIPE_PRICE_ID_PORTFOLIO_ANNUAL = "";
+    expect(resolveStripePriceId("portfolio", "monthly")).toBe("price_pro_monthly");
+
+    env.STRIPE_PRICE_ID_PORTFOLIO = prev.portfolioM;
+    env.STRIPE_PRICE_ID_PORTFOLIO_ANNUAL = prev.portfolioA;
+    env.STRIPE_PRICE_ID_PRO = prev.proM;
+    env.STRIPE_PRICE_ID_PRO_ANNUAL = prev.proA;
+  });
+});

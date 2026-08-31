@@ -1,0 +1,113 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import FaqSection from "../components/FaqSection.astro";
+import { getAuthFromCookies } from "../lib/auth";
+import {
+  getBreadcrumbSchema,
+  getFaqPageSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+import type { AboutFaqItem } from "../lib/aboutFaqs";
+
+const { user } = await getAuthFromCookies(Astro.cookies);
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/property-management");
+
+const propertyFaqs: AboutFaqItem[] = [
+  {
+    question: "How is Portfolio different from Pro?",
+    answer:
+      "Portfolio includes everything on the Pro plan -- SMS/push alerts, official NWS cold-risk forecasts, the claims evidence pack, webhooks, share links -- plus a much higher ceiling on how many properties you can own (Pro already allows up to 50; Portfolio raises that to 500) and it's priced for that scale rather than for a single garage.",
+  },
+  {
+    question: "Do I need Portfolio if I only have 2-3 properties?",
+    answer:
+      "Probably not -- Pro already covers a handful of properties (up to 50 owned households) with the same cross-property dashboard and alert digest. Portfolio is built for larger operations: a property-management company or a landlord running many units where a single flat individual price doesn't reflect the scale.",
+  },
+  {
+    question: "Can my property managers or on-site staff get their own login?",
+    answer:
+      "Yes. Invite them with the property-manager role and they can manage devices and alert settings for the property they're assigned to, without seeing your billing, other properties, or account settings.",
+  },
+  {
+    question: "Do I need a separate ThermalTrace account per property?",
+    answer:
+      "No -- one account owns all your properties as separate households, switches between them from the dashboard, and rolls them all up into a single portfolio risk view.",
+  },
+  {
+    question: "What does the portfolio dashboard actually show?",
+    answer:
+      "One table across every property you own: current risk status, minimum recent temperature against your freeze threshold, device count, and last reading time -- so you can see which properties need attention without opening each one individually.",
+  },
+];
+
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "Property management", path: "/property-management" },
+  ]),
+  getFaqPageSchema(pageUrl, propertyFaqs),
+].filter(Boolean) as Record<string, unknown>[];
+---
+<Layout
+  title="Freeze & leak monitoring for property portfolios"
+  description="Cross-property freeze-risk dashboard, portfolio-wide alert digest, and property-manager logins for landlords, vacation-rental owners, and property-management companies running multiple units on ThermalTrace."
+  schema={schema}
+  speakableSelectors={[".page-header-title", ".page-header-lede"]}
+>
+  <div class="page-shell page-stack">
+    <PageHeader
+      kicker="For portfolios"
+      title="One dashboard for every property you're responsible for"
+      lede="A single garage and a ten-unit rental portfolio don't have the same monitoring problem. ThermalTrace's Portfolio tier rolls every property you own into one freeze-risk view, lets on-site managers handle devices and alerts without touching your billing, and is priced for that scale instead of a single-garage plan stretched thin."
+    >
+      <a slot="actions" class="btn-primary" href={user ? "/dashboard/portfolio" : "/register?next=/dashboard/temperature"}>
+        {user ? "Open portfolio dashboard" : "Start free — add your first property"}
+      </a>
+      <a slot="actions" class="btn-secondary" href="/pricing#portfolio">See Portfolio pricing</a>
+    </PageHeader>
+
+    <section class="card">
+      <h2 class="card-title">What's already built</h2>
+      <p class="card-subtitle mb-4">
+        This isn't a roadmap item -- it's live functionality every Pro and Portfolio account can use today.
+      </p>
+      <ul class="text-sm space-y-2 mb-0">
+        <li><strong>Cross-property risk dashboard</strong> — every property you own in one table: current risk, minimum recent temperature vs. your freeze threshold, device count, last reading.</li>
+        <li><strong>Portfolio-wide alert digest</strong> — a rollup notification when any property in your portfolio needs attention, instead of watching each one separately.</li>
+        <li><strong>Property-manager logins</strong> — invite on-site staff or contractors to manage devices and alert settings for one property, with no access to your billing or the rest of your portfolio.</li>
+        <li><strong>Per-property everything else</strong> — each property gets its own device limit, alert thresholds, and history, exactly like a standalone ThermalTrace account would.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Built for the people who actually run these</h2>
+      <p class="mb-0 text-sm">
+        Vacation-rental owners juggling a handful of cabins, small landlords with a
+        few rental units, and property-management companies responsible for units
+        they don't live in — anyone whose job is knowing which of many properties is
+        at risk right now, not just one garage.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Pro vs. Portfolio</h2>
+      <p class="mb-4 text-sm">
+        Pro already includes the portfolio dashboard and up to 50 owned properties —
+        plenty for a couple of rentals or a vacation home alongside your main house.
+        Portfolio is for real scale: a much higher property ceiling, and pricing that
+        reflects a business running many units rather than one person with one house.
+      </p>
+      <p class="mt-4 mb-0">
+        <a class="btn-primary" href="/pricing#portfolio">Compare Pro and Portfolio pricing</a>
+      </p>
+    </section>
+
+    <FaqSection faqs={propertyFaqs} lede="What Portfolio is, who it's for, and how it differs from Pro." />
+  </div>
+</Layout>

@@ -29,6 +29,13 @@ describe("planComparison", () => {
     expect(normalizeComparisonTier("admin")).toBe("pro");
   });
 
+  it("treats portfolio as a superset of pro, ranked above it", () => {
+    expect(tierRank("pro")).toBeLessThan(tierRank("portfolio"));
+    expect(tierRank("portfolio")).toBeLessThan(tierRank("admin"));
+    expect(normalizeComparisonTier("portfolio")).toBe("pro");
+    expect(nextUpgradeTier("portfolio")).toBeNull();
+  });
+
   it("lists device counts and retention side-by-side", () => {
     const devices = PLAN_FEATURE_ROWS.find((row) => row.id === "push_devices");
     const retention = PLAN_FEATURE_ROWS.find((row) => row.id === "data_retention");

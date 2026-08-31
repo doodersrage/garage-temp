@@ -7,8 +7,9 @@ import {
 export { resolvePlanTierFromPriceId } from "./planTier";
 
 export const PRO_GROUP_NAME = "pro";
+export const PORTFOLIO_GROUP_NAME = "portfolio";
 
-export type PlanTier = "free" | "member" | "pro" | "admin";
+export type PlanTier = "free" | "member" | "pro" | "portfolio" | "admin";
 
 export const FREE_MAX_DEVICES = 2;
 export const MEMBER_MAX_DEVICES = 6;
@@ -21,6 +22,8 @@ export const PRO_HISTORY_DAYS = 365;
 const FREE_MAX_OWNED_HOUSEHOLDS = 1;
 const MEMBER_MAX_OWNED_HOUSEHOLDS = 1;
 const PRO_MAX_OWNED_HOUSEHOLDS = 50;
+/** Portfolio tier -- landlords/property managers running many properties. */
+export const PORTFOLIO_MAX_OWNED_HOUSEHOLDS = 500;
 
 export type Entitlements = {
   tier: PlanTier;
@@ -40,8 +43,13 @@ export type Entitlements = {
 };
 
 function entitlementsFor(tier: PlanTier): Entitlements {
-  const memberOrAbove = tier === "member" || tier === "pro" || tier === "admin";
-  const proOrAbove = tier === "pro" || tier === "admin";
+  const memberOrAbove =
+    tier === "member" || tier === "pro" || tier === "portfolio" || tier === "admin";
+  // Portfolio is a strict superset of Pro -- same feature gates, higher property
+  // ceiling. See the plan doc for why the ceiling doesn't come at the expense of
+  // lowering Pro's existing cap.
+  const proOrAbove = tier === "pro" || tier === "portfolio" || tier === "admin";
+  const portfolioOrAbove = tier === "portfolio" || tier === "admin";
 
   return {
     tier,
@@ -60,11 +68,13 @@ function entitlementsFor(tier: PlanTier): Entitlements {
       : memberOrAbove
         ? MEMBER_MAX_DEVICES
         : FREE_MAX_DEVICES,
-    maxOwnedHouseholds: proOrAbove
-      ? PRO_MAX_OWNED_HOUSEHOLDS
-      : memberOrAbove
-        ? MEMBER_MAX_OWNED_HOUSEHOLDS
-        : FREE_MAX_OWNED_HOUSEHOLDS,
+    maxOwnedHouseholds: portfolioOrAbove
+      ? PORTFOLIO_MAX_OWNED_HOUSEHOLDS
+      : proOrAbove
+        ? PRO_MAX_OWNED_HOUSEHOLDS
+        : memberOrAbove
+          ? MEMBER_MAX_OWNED_HOUSEHOLDS
+          : FREE_MAX_OWNED_HOUSEHOLDS,
     historyDays: proOrAbove
       ? PRO_HISTORY_DAYS
       : memberOrAbove
@@ -82,13 +92,15 @@ export function formatHistoryRetention(days: number): string {
 }
 
 export async function getUserEntitlements(userId: string): Promise<Entitlements> {
-  const [admin, pro, member] = await Promise.all([
+  const [admin, portfolio, pro, member] = await Promise.all([
     isUserAdmin(userId),
+    isUserInGroup(userId, PORTFOLIO_GROUP_NAME),
     isUserInGroup(userId, PRO_GROUP_NAME),
     isUserInGroup(userId, MEMBER_GROUP_NAME),
   ]);
 
   if (admin) return entitlementsFor("admin");
+  if (portfolio) return entitlementsFor("portfolio");
   if (pro) return entitlementsFor("pro");
   if (member) return entitlementsFor("member");
   return entitlementsFor("free");

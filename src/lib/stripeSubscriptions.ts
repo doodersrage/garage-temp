@@ -71,7 +71,7 @@ export async function upsertUserSubscription(
 
 export async function syncPlanGroupForUser(
   userId: string,
-  planTier: "member" | "pro",
+  planTier: "member" | "pro" | "portfolio",
   isActive: boolean,
 ): Promise<{ error: string | null }> {
   const supabase = createServerClient();

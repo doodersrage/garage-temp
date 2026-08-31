@@ -18,7 +18,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const formData = await request.formData().catch(() => null);
-  const plan = formData?.get("plan")?.toString() === "pro" ? "pro" : "member";
+  const planRaw = formData?.get("plan")?.toString();
+  const plan =
+    planRaw === "portfolio" ? "portfolio" : planRaw === "pro" ? "pro" : "member";
   const interval =
     formData?.get("interval")?.toString() === "annual" ? "annual" : "monthly";
   const checkoutSource = formData?.get("source")?.toString().trim() || null;
@@ -43,7 +45,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const referredBy =
     typeof appMetadata?.referred_by === "string" ? appMetadata.referred_by : null;
   const proTrialDays =
-    plan === "pro"
+    plan === "pro" || plan === "portfolio"
       ? PRO_TRIAL_DAYS +
         referralBonusTrialDays(referredBy) +
         referralRewardTrialDays(appMetadata)

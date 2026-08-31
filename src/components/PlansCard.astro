@@ -25,11 +25,20 @@ const {
 
 const hasActiveSubscription =
   subscription !== null && isActiveSubscriptionStatus(subscription.status);
-const isPro =
+// "Pro or above" -- Portfolio is a strict superset of Pro (see entitlements.ts),
+// so it needs to be included everywhere this gates "already has Pro-tier access"
+// (upgrade-button visibility, etc.) rather than showing a Portfolio subscriber
+// "Upgrade to Pro" buttons for a tier they've already surpassed.
+const isProOrAbove =
   entitlements?.tier === "pro" ||
+  entitlements?.tier === "portfolio" ||
   entitlements?.tier === "admin" ||
-  subscription?.plan_tier === "pro";
-const tierLabel = entitlements?.tier ?? (isPro ? "pro" : canDownloadCsv ? "member" : "free");
+  subscription?.plan_tier === "pro" ||
+  subscription?.plan_tier === "portfolio";
+const tierLabel =
+  entitlements?.tier ?? (isProOrAbove ? "pro" : canDownloadCsv ? "member" : "free");
+const activeSubscriptionLabel =
+  entitlements?.tier === "portfolio" ? "Portfolio" : isProOrAbove ? "Pro" : "Member";
 ---
 
 <DashboardCard id="plans">
@@ -58,12 +67,12 @@ const tierLabel = entitlements?.tier ?? (isPro ? "pro" : canDownloadCsv ? "membe
     <a class="text-link" href="/pricing">Full comparison</a>
   </p>
 
-  {canDownloadCsv || isPro ? (
+  {canDownloadCsv || isProOrAbove ? (
     <div class="card-muted">
       {showCsvNote && (
         <p class="m-0 mb-3 text-sm">
           {hasActiveSubscription
-            ? `Your ${isPro ? "Pro" : "Member"} subscription is active.`
+            ? `Your ${activeSubscriptionLabel} subscription is active.`
             : "Your account includes CSV export access."}
         </p>
       )}
@@ -74,7 +83,7 @@ const tierLabel = entitlements?.tier ?? (isPro ? "pro" : canDownloadCsv ? "membe
           </button>
         </form>
       )}
-      {hasActiveSubscription && !isPro && (
+      {hasActiveSubscription && !isProOrAbove && (
         <div class="inline-flex flex-wrap gap-2 mt-3 sm:mt-0">
           <form action="/api/stripe/checkout" method="post">
             <input type="hidden" name="plan" value="pro" />
@@ -88,7 +97,7 @@ const tierLabel = entitlements?.tier ?? (isPro ? "pro" : canDownloadCsv ? "membe
           </form>
         </div>
       )}
-      {!hasActiveSubscription && !isPro && (
+      {!hasActiveSubscription && !isProOrAbove && (
         <div class="flex flex-wrap gap-2">
           <form action="/api/stripe/checkout" method="post">
             <input type="hidden" name="plan" value="pro" />

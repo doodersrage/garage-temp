@@ -52,7 +52,7 @@ async function handleCheckoutCompleted(
 
   const planTier =
     session.metadata?.plan_tier ?? subscription.metadata?.plan_tier;
-  if (planTier === "pro") {
+  if (planTier === "pro" || planTier === "portfolio") {
     await grantReferrerRewardOnSubscription(userId);
   }
 }

@@ -62,3 +62,10 @@ export function getProPriceDisplay(): PlanPriceDisplay {
     getRuntimeEnv("STRIPE_DISPLAY_PRO_ANNUAL"),
   );
 }
+
+export function getPortfolioPriceDisplay(): PlanPriceDisplay {
+  return buildPriceDisplay(
+    getRuntimeEnv("STRIPE_DISPLAY_PORTFOLIO_MONTHLY"),
+    getRuntimeEnv("STRIPE_DISPLAY_PORTFOLIO_ANNUAL"),
+  );
+}
