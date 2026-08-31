@@ -64,10 +64,16 @@ async function main() {
   const providers = await checkSupabaseProviders();
   console.log("Supabase providers:", JSON.stringify(providers));
 
-  console.log("\nGitHub OAuth app checklist:");
-  console.log("  App name on GitHub: garage-temp-probe");
-  console.log("  Callback URL: https://pjulkiuwwomgyzknytfg.supabase.co/auth/v1/callback");
-  console.log("  Supabase → Authentication → Providers → GitHub: Client ID + Secret must match");
+  const supabaseCallback = supabaseUrl
+    ? `${supabaseUrl}/auth/v1/callback`
+    : "https://pjulkiuwwomgyzknytfg.supabase.co/auth/v1/callback";
+
+  console.log("\nProvider console checklist (redirect/callback must be Supabase, NOT thermaltrace.dev):");
+  console.log(`  Supabase callback URL: ${supabaseCallback}`);
+  console.log("  Google Cloud → Authorized redirect URIs: (above)");
+  console.log("  GitHub OAuth app → Authorization callback URL: (above)");
+  console.log("  Discord app → OAuth2 Redirects: (above)");
+  console.log("  Supabase → Authentication → Providers: Client ID + Secret must match each app");
 }
 
 main().catch((err) => {

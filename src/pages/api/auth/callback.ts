@@ -31,7 +31,9 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
       detail ?? "(no description)",
     );
     const errorCode = mapOAuthCallbackError(oauthError, oauthErrorDescription);
-    return redirect(buildSignInRedirectUrl(errorCode, undefined, detail));
+    const showDetail =
+      errorCode === "oauth_provider_failed" ? detail : null;
+    return redirect(buildSignInRedirectUrl(errorCode, undefined, showDetail));
   }
 
   if (!authCode) {

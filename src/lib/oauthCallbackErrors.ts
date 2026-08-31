@@ -2,7 +2,11 @@
 export function mapOAuthCallbackError(
   error: string,
   errorDescription?: string | null,
-): "oauth_denied" | "oauth_provider_failed" {
+):
+  | "oauth_denied"
+  | "oauth_secret_mismatch"
+  | "oauth_github_profile"
+  | "oauth_provider_failed" {
   if (error === "access_denied") {
     return "oauth_denied";
   }
@@ -10,6 +14,14 @@ export function mapOAuthCallbackError(
   const detail = (errorDescription ?? "").toLowerCase();
   if (detail.includes("access_denied") || detail.includes("user denied")) {
     return "oauth_denied";
+  }
+
+  if (detail.includes("unable to exchange external code")) {
+    return "oauth_secret_mismatch";
+  }
+
+  if (detail.includes("getting user profile from external provider")) {
+    return "oauth_github_profile";
   }
 
   return "oauth_provider_failed";

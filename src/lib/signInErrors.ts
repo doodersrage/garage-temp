@@ -9,6 +9,10 @@ export const SIGNIN_ERROR_MESSAGES = {
   oauth_denied: "Social sign-in was cancelled. Try again when you're ready.",
   oauth_provider_failed:
     "Social sign-in failed at the provider. Try again or sign in with email.",
+  oauth_secret_mismatch:
+    "Social sign-in credentials are out of date. Regenerate the client secret in the provider app (Discord, GitHub, or Google) and paste the new value into Supabase → Authentication → Providers.",
+  oauth_github_profile:
+    "GitHub did not share an email address. In GitHub → Settings → Emails, verify your primary email (or uncheck “Keep my email addresses private”), then revoke garage-temp-probe under Settings → Applications → Authorized OAuth Apps and try again.",
   oauth_exchange_failed:
     "Something went wrong while completing social sign-in. Please try again.",
   turnstile_failed:
