@@ -153,12 +153,15 @@ const appStatus = !isAuthenticated ? await fetchAppStatusSummary() : null;
 						<li>Arduino</li>
 						<li>HTTPS JSON push</li>
 						<li>HTTPS JSON pull</li>
+						<li>MQTT bridge</li>
 						<li>Home Assistant webhooks</li>
 						<li>Discord · Telegram · Slack</li>
 					</ul>
 					<p class="home-compat-note">
-						Devices POST outbound HTTPS — no public IP or native MQTT broker required.
-						<a class="text-link" href="/compare/diy-mqtt">Compare vs DIY MQTT</a>
+						Keep MQTT on your LAN; mirror to ThermalTrace over HTTPS for household freeze alerts and history.
+						<a class="text-link" href="/about/adding-devices#mqtt-bridge">MQTT bridge recipe</a>
+						·
+						<a class="text-link" href="/compare/diy-mqtt">vs DIY MQTT</a>
 					</p>
 				</section>
 

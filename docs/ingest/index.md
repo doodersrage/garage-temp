@@ -88,7 +88,7 @@ Supported `kind` values: `temperature`, `humidity`, `co2`, `pressure`, `pm25`, `
 
 ## MQTT-over-HTTP bridge
 
-Cloudflare Workers are not an MQTT broker. If your bridge can POST HTTP:
+Cloudflare Workers are not an MQTT broker. Keep Mosquitto / Home Assistant MQTT on your LAN and mirror readings with:
 
 ```http
 POST https://thermaltrace.dev/api/ingest/mqtt
@@ -96,7 +96,9 @@ X-Ingest-Key: <device-key>
 Content-Type: application/json
 ```
 
-Body may include `topic`, `payload` (string), or `message` (object). The Worker forwards into the same ingest path. Details: [OpenAPI](/api/).
+Body may include `topic`, `payload` (JSON string), or `message` (object). The Worker unwraps and forwards into the same ingest path.
+
+Recipes (Home Assistant + Node-RED import): [MQTT bridge](/integrations/mqtt-bridge). Product page: [Adding devices § MQTT](https://thermaltrace.dev/about/adding-devices#mqtt-bridge).
 
 ## Common mistakes
 

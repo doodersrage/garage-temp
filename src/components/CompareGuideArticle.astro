@@ -92,9 +92,18 @@ const schema = [
       <div class="flex flex-wrap gap-3 mb-4">
         <a class="btn-primary" href="/pricing">See plans &amp; pricing</a>
         <a class="btn-secondary" href="/register?next=/dashboard/temperature">Start free</a>
+        {guide.slug === "diy-mqtt" && (
+          <a class="btn-secondary" href="/about/adding-devices#mqtt-bridge">MQTT bridge recipe</a>
+        )}
       </div>
       <p class="mb-0 text-sm">
         <a class="text-link" href="/compare">← Back to all comparisons</a>
+        {guide.slug === "diy-mqtt" && (
+          <>
+            {" · "}
+            <a class="text-link" href="/nodered/mqtt-to-thermaltrace.json" download>Node-RED flow</a>
+          </>
+        )}
       </p>
     </section>
   </div>

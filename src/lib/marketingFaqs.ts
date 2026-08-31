@@ -83,12 +83,12 @@ export const marketingFaqs = {
     {
       question: "Can I keep Home Assistant or MQTT and still use ThermalTrace?",
       answer:
-        "Yes. Push ingest is just HTTPS from the ESP. Many people dual-run: Home Assistant on the LAN, ThermalTrace for household freeze SMS and history they do not have to back up. Pro webhooks can also fire into HA.",
+        "Yes. Keep MQTT on your LAN (Mosquitto / Home Assistant). Mirror readings with POST /api/ingest/mqtt (X-Ingest-Key) from HA rest_command or Node-RED—recipe at thermaltrace.dev/about/adding-devices#mqtt-bridge. Many people dual-run: HA locally, ThermalTrace for household freeze SMS and history. Pro webhooks can also fire back into HA.",
     },
     {
       question: "Why does ThermalTrace require an account?",
       answer:
-        "ThermalTrace is hosted so you do not run MQTT brokers, databases, or SMS wiring yourself. A free account (no credit card) attaches your ingest key to your household. You can still dual-run with Home Assistant or keep sensors local—ThermalTrace is the off-site alerts and history layer.",
+        "ThermalTrace is hosted so you do not run databases or SMS wiring yourself. A free account (no credit card) attaches your ingest key to your household. You can still dual-run with Home Assistant or MQTT on the LAN—ThermalTrace is the off-site alerts and history layer.",
     },
     {
       question: "I already have Govee or a Tempest—do I still need this?",

@@ -24,11 +24,11 @@ export const compareGuides: CompareGuide[] = [
     summary:
       "DIY MQTT is powerful if you enjoy running brokers, dashboards, and alert scripts. ThermalTrace is the same outcome—live probes, freeze alerts, history—without babysitting the stack at 2 a.m.",
     lede:
-      "A Mosquitto broker, Node-RED flows, and a cron job can freeze-alert a garage. The cost is patching, TLS, Twilio, and a Pi that has to stay up. ThermalTrace is the hosted version of that pipeline: the ESP posts HTTPS, we store curves, and alerts leave through channels you tick in the dashboard.",
+      "A Mosquitto broker, Node-RED flows, and a cron job can freeze-alert a garage. The cost is patching, TLS, Twilio, and a Pi that has to stay up. ThermalTrace is the hosted alerts and history layer: keep MQTT on the LAN if you want, bridge readings over HTTPS, and let household freeze channels live in the cloud.",
     whenThermalTrace: [
       "You want freeze SMS/email/push without wiring Twilio yourself",
       "Household members need access without VPN to your Pi",
-      "You still use ESP/Arduino—just point ingest at an HTTPS endpoint",
+      "You still use ESP/Arduino—HTTPS ingest or MQTT→HTTP bridge",
     ],
     whenOther: [
       "You already run a hardened MQTT + Grafana stack and like maintaining it",
@@ -36,9 +36,9 @@ export const compareGuides: CompareGuide[] = [
       "You need custom industrial protocols ThermalTrace does not speak",
     ],
     rows: [
-      { capability: "Broker / server upkeep", thermaltrace: "Hosted", other: "You patch Mosquitto/HA" },
+      { capability: "Broker / server upkeep", thermaltrace: "Hosted (no Mosquitto to patch)", other: "You patch Mosquitto/HA" },
       { capability: "Freeze alerts", thermaltrace: "Built-in channels", other: "Node-RED + Twilio/email" },
-      { capability: "ESP ingest", thermaltrace: "HTTPS device key", other: "MQTT topic design" },
+      { capability: "ESP ingest", thermaltrace: "HTTPS device key or MQTT bridge", other: "MQTT topic design" },
       { capability: "History & CSV", thermaltrace: "Member+", other: "Influx/Postgres you manage" },
       { capability: "Share with family", thermaltrace: "Household invites", other: "VPN or reverse proxy" },
     ],

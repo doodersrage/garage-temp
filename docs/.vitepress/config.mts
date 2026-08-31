@@ -67,6 +67,7 @@ export default defineConfig({
             { text: "HTTP API", link: "/api/" },
             { text: "Alert webhooks", link: "/integrations/webhooks" },
             { text: "Home Assistant", link: "/integrations/home-assistant" },
+            { text: "MQTT bridge", link: "/integrations/mqtt-bridge" },
             { text: "Grafana / Prometheus", link: "/integrations/grafana" },
           ],
         },

@@ -1,6 +1,6 @@
 # Home Assistant
 
-ThermalTrace does **not** run MQTT inside Cloudflare Workers. Prefer HTTPS:
+ThermalTrace does **not** run MQTT inside Cloudflare Workers. Prefer HTTPS for alerts, and the [MQTT bridge](/integrations/mqtt-bridge) when readings already live on Mosquitto:
 
 1. Enable **outbound webhook** (Pro) in Dashboard → Alerts  
 2. Point it at HA: `https://<ha-host>/api/webhook/<id>`  

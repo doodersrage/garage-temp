@@ -53,6 +53,7 @@ features:
 | Wire an ESP and see live temps | [Push ingest](/ingest/) → [Sketches](/sketches/) |
 | Pull HTTPS JSON instead | [Pull feeds](/ingest/pull-feeds) |
 | Automate on freeze alerts | [Alert webhooks](/integrations/webhooks) → [Home Assistant](/integrations/home-assistant) |
+| Keep Mosquitto / dual-run MQTT | [MQTT bridge](/integrations/mqtt-bridge) |
 | Scrape metrics | [Grafana / Prometheus](/integrations/grafana) |
 | Run the app locally | [Local development](/guide/local-dev) |
 | Deploy or check production | [Deploy & ops](/guide/deploy) |
