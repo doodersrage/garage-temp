@@ -1291,6 +1291,24 @@ export type Database = {
           },
         ]
       }
+      status_notify_state: {
+        Row: {
+          id: number
+          last_healthy: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          last_healthy?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          last_healthy?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       status_page_tokens: {
         Row: {
           created_at: string

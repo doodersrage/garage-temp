@@ -1,46 +1,40 @@
 import type { APIRoute } from "astro";
-import { createServerClient } from "../../../lib/supabase";
+import { getTurnstileToken, verifyTurnstileToken } from "../../../lib/turnstile";
+import {
+  checkStatusSubscribeRateLimit,
+  isStatusSubscribeHoneypotTriggered,
+  STATUS_SUBSCRIBE_HONEYPOT_FIELD,
+} from "../../../lib/statusSubscribeLimits";
+import { subscribeToStatusUpdates } from "../../../lib/statusSubscriptions";
 
-function randomToken(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(24));
-  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
+export const prerender = false;
 
-export const POST: APIRoute = async ({ request }) => {
-  let body: { email?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ error: "Invalid JSON" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
+  const formData = await request.formData();
+  const redirectTo = "/system-status";
+
+  if (isStatusSubscribeHoneypotTriggered(formData.get(STATUS_SUBSCRIBE_HONEYPOT_FIELD))) {
+    return redirect(`${redirectTo}?subscribed=1`);
   }
 
-  const email = body.email?.trim().toLowerCase();
-  if (!email || !email.includes("@")) {
-    return new Response(JSON.stringify({ error: "Valid email required" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+  const rate = checkStatusSubscribeRateLimit(clientAddress || "unknown");
+  if (!rate.ok) {
+    return redirect(`${redirectTo}?status_error=rate_limited`);
   }
 
-  const supabase = createServerClient();
-  const token = randomToken();
-  const { error } = await supabase.from("status_subscriptions").insert({
-    email,
-    token,
-    confirmed_at: new Date().toISOString(),
-  });
-
-  if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+  const turnstile = await verifyTurnstileToken(
+    getTurnstileToken(formData),
+    clientAddress,
+  );
+  if (!turnstile.success) {
+    return redirect(`${redirectTo}?status_error=verification`);
   }
 
-  return new Response(JSON.stringify({ ok: true }), {
-    headers: { "Content-Type": "application/json" },
-  });
+  const email = formData.get("email")?.toString() ?? "";
+  const result = await subscribeToStatusUpdates(email);
+  if (!result.ok) {
+    return redirect(`${redirectTo}?status_error=invalid_email`);
+  }
+
+  return redirect(`${redirectTo}?subscribed=1`);
 };

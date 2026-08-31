@@ -20,6 +20,21 @@ const schema = [
     { name: "System status", path: "/system-status" },
   ]),
 ];
+
+const subscribed = Astro.url.searchParams.get("subscribed") === "1";
+const confirmed = Astro.url.searchParams.get("confirmed") === "1";
+const unsubscribed = Astro.url.searchParams.get("unsubscribed") === "1";
+const statusError = Astro.url.searchParams.get("status_error");
+const statusErrorMessage =
+  statusError === "invalid_email"
+    ? "Enter a valid email address."
+    : statusError === "verification"
+      ? "Verification failed. Please try again."
+      : statusError === "rate_limited"
+        ? "Too many attempts. Please try again in a few minutes."
+        : statusError === "invalid_token"
+          ? "That link is invalid or has already been used."
+          : null;
 ---
 <Layout
   title="System status"
@@ -103,6 +118,51 @@ const schema = [
         <li>Sensor reading retention and freeze-map aggregates</li>
         <li>Trial reminders and onboarding drip emails</li>
       </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Get notified</h2>
+      <p class="card-subtitle mb-4">
+        Get a one-off email if this status changes (degraded or back to normal). No routine emails.
+      </p>
+      {subscribed && (
+        <div class="alert-success mt-0" role="status">
+          <p class="m-0">
+            Check your inbox for a confirmation link -- you're not subscribed until you click it.
+          </p>
+        </div>
+      )}
+      {confirmed && (
+        <div class="alert-success mt-0" role="status">
+          <p class="m-0">You're subscribed to status updates.</p>
+        </div>
+      )}
+      {unsubscribed && (
+        <div class="alert-success mt-0" role="status">
+          <p class="m-0">You've been unsubscribed from status updates.</p>
+        </div>
+      )}
+      {statusErrorMessage && (
+        <div class="alert-warning mt-0" role="alert">
+          <p class="m-0">{statusErrorMessage}</p>
+        </div>
+      )}
+      {!subscribed && !confirmed && (
+        <form action="/api/status/subscribe" method="post" class="mt-4">
+          <div class="sr-only" aria-hidden="true">
+            <label for="status-subscribe-company">Company</label>
+            <input type="text" id="status-subscribe-company" name="company" tabindex="-1" autocomplete="off" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="status-subscribe-email">Email</label>
+            <input class="form-input" type="email" name="email" id="status-subscribe-email" required />
+          </div>
+          <div class="form-field">
+            <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
+          </div>
+          <button class="btn-primary" type="submit">Notify me of status changes</button>
+        </form>
+      )}
     </section>
   </div>
 </Layout>

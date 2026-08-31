@@ -27,6 +27,7 @@ import { runFeedUptimeForAllUsers } from "./lib/feedUptimeMonitor";
 import { archiveOldReadings } from "./lib/archiveHistory";
 import { runPlaybooksForAllUsers } from "./lib/alertPlaybookRunner";
 import { sendPortfolioAlertsForAllUsers } from "./lib/portfolioAlerts";
+import { checkAndNotifyStatusSubscribers } from "./lib/statusNotify";
 
 type WorkerEnv = Env & {
   SENTRY_DSN?: string;
@@ -374,6 +375,20 @@ const worker = {
           );
         } catch (error) {
           await finishJobRun(portfolioJobId, "error", {
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+
+        const statusNotifyJobId = await startJobRun("status-notify");
+        try {
+          const statusNotify = await checkAndNotifyStatusSubscribers();
+          await finishJobRun(
+            statusNotifyJobId,
+            statusNotify.errors.length ? "error" : "success",
+            statusNotify,
+          );
+        } catch (error) {
+          await finishJobRun(statusNotifyJobId, "error", {
             message: error instanceof Error ? error.message : "Unknown error",
           });
         }
