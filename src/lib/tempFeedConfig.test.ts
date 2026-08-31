@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  parseFeedDeviceMeta,
   parseTempFeedPayload,
   sanitizeJsonRoot,
 } from "./tempFeedConfig";
@@ -37,5 +38,14 @@ describe("parseTempFeedPayload", () => {
     expect(() =>
       parseTempFeedPayload({ temp: { "0": { f: 40 } } }, "readings"),
     ).toThrow(/missing a "readings" object/);
+  });
+});
+
+describe("parseFeedDeviceMeta", () => {
+  it("extracts battery and rssi from feed root or meta object", () => {
+    expect(
+      parseFeedDeviceMeta({ battery_pct: 88, rssi: -62, temp: { t1: { f: 40, h: 50 } } }),
+    ).toEqual({ battery_pct: 88, rssi: -62 });
+    expect(parseFeedDeviceMeta({ meta: { battery_pct: 50 } })).toEqual({ battery_pct: 50 });
   });
 });

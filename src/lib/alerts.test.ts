@@ -3,11 +3,14 @@ import {
   ALERT_COOLDOWN_MS,
   DEFAULT_ALERT_SETTINGS,
   evaluateAlerts,
+  evaluateBatteryHealth,
   evaluateFloodAlerts,
   evaluateOutage,
   evaluateRateChange,
+  evaluateRssiHealth,
   getAlertSettingsFromMetadata,
   isAlertCooldownActive,
+  parseChannelSeverity,
 } from "./alerts";
 import { detectTemperatureAnomalies } from "./anomalyDetection";
 import { parseIngestPayload, inferSensorKind } from "./ingestPayload";
@@ -150,5 +153,42 @@ describe("detectTemperatureAnomalies", () => {
 
     expect(notices).toHaveLength(1);
     expect(notices[0]?.severity).toBe("warning");
+  });
+});
+
+describe("parseChannelSeverity", () => {
+  it("keeps known kinds and channels only", () => {
+    expect(
+      parseChannelSeverity({
+        threshold: ["sms", "email", "carrier-pigeon"],
+        mystery: ["email"],
+        forecast: "sms",
+      }),
+    ).toEqual({
+      threshold: ["sms", "email"],
+    });
+  });
+
+  it("returns empty for invalid JSON shapes", () => {
+    expect(parseChannelSeverity(null)).toEqual({});
+    expect(parseChannelSeverity([])).toEqual({});
+  });
+});
+
+describe("device health alerts", () => {
+  it("flags low battery", () => {
+    const settings = { ...DEFAULT_ALERT_SETTINGS, enabled: true, batteryAlertsEnabled: true };
+    const msgs = evaluateBatteryHealth(settings, [
+      { deviceName: "ESP", batteryPct: 15, rssi: null },
+    ]);
+    expect(msgs).toHaveLength(1);
+  });
+
+  it("flags weak rssi", () => {
+    const settings = { ...DEFAULT_ALERT_SETTINGS, enabled: true, rssiAlertsEnabled: true };
+    const msgs = evaluateRssiHealth(settings, [
+      { deviceName: "ESP", batteryPct: null, rssi: -90 },
+    ]);
+    expect(msgs).toHaveLength(1);
   });
 });

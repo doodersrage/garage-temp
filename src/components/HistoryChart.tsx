@@ -98,6 +98,31 @@ export default function HistoryChart({
     writeStoredNumber(STORAGE_TARGET, targetAmbientF);
   }, [targetAmbientF, hydrated]);
 
+  const chartSummary = useMemo(() => {
+    if (points.length < 2) return "Not enough readings yet for a chart.";
+    let min = points[0]!;
+    let max = points[0]!;
+    let below = 0;
+    for (const p of points) {
+      if (p.tempf < min.tempf) min = p;
+      if (p.tempf > max.tempf) max = p;
+      if (freezeThresholdF != null && p.tempf <= freezeThresholdF) below += 1;
+    }
+    const latest = points[points.length - 1]!;
+    const parts = [
+      `Latest reading ${latest.tempf.toFixed(1)}°F.`,
+      `Range over this period: ${min.tempf.toFixed(1)}°F to ${max.tempf.toFixed(1)}°F.`,
+    ];
+    if (freezeThresholdF != null) {
+      parts.push(
+        below > 0
+          ? `Dropped to or below the ${freezeThresholdF}°F freeze line in ${below} of ${points.length} readings.`
+          : `Stayed above the ${freezeThresholdF}°F freeze line the whole period.`,
+      );
+    }
+    return parts.join(" ");
+  }, [points, freezeThresholdF]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || points.length < 2) return;
@@ -303,7 +328,9 @@ export default function HistoryChart({
         style={{ height: "220px" }}
         role="img"
         aria-label={`Line chart of ${title}`}
+        aria-describedby="history-chart-summary"
       />
+      <p id="history-chart-summary" class="sr-only">{chartSummary}</p>
       <form
         class="chart-threshold-controls"
         onSubmit={(e) => e.preventDefault()}

@@ -71,6 +71,27 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     needs: build
+    # Authenticated specs (checkout, device-ingest, alert-settings, ops) call
+    # test.skip() when E2E_TEST_EMAIL/E2E_TEST_PASSWORD are unset, so this job is
+    # safe to run before any of the secrets below exist — it just runs the public
+    # smoke tests. To turn the authenticated coverage on:
+    #   1. In the target Supabase project, create a dedicated low-privilege test
+    #      user (Member or Pro tier, not an admin) and add its email/password as
+    #      the SUPABASE_E2E_TEST_EMAIL / SUPABASE_E2E_TEST_PASSWORD repo secrets.
+    #   2. Add SUPABASE_URL / SUPABASE_ANON_KEY repo secrets for that project (the
+    #      anon key is safe for CI — it's the same key already shipped to the
+    #      browser — but do NOT use the service-role key here).
+    #   3. For e2e/checkout.spec.ts to exercise a real Checkout Session, also add
+    #      STRIPE_SECRET_KEY_TEST (a Stripe TEST MODE key — starts with sk_test_,
+    #      never a live sk_live_ key) plus test-mode STRIPE_PRICE_ID_TEST /
+    #      STRIPE_PRICE_ID_PRO_TEST, and wire them into this job's env below. Left
+    #      out for now on purpose — that's a live-Stripe-adjacent secret and
+    #      shouldn't be added without you choosing the values.
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://example.supabase.co' }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ci-build-placeholder' }}
+      E2E_TEST_EMAIL: ${{ secrets.SUPABASE_E2E_TEST_EMAIL }}
+      E2E_TEST_PASSWORD: ${{ secrets.SUPABASE_E2E_TEST_PASSWORD }}
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -85,3 +106,37 @@ jobs:
       - run: pnpm build || (rm -rf node_modules/.vite && pnpm build)
       # Do not set PLAYWRIGHT_BASE_URL here — that disables webServer and nothing listens on :4321.
       - run: pnpm test:e2e
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    needs: build
+    # Informational only: catches perf/SEO/accessibility regressions on the public
+    # marketing pages without blocking merges. Scores are reported, not enforced —
+    # tighten lighthouserc.json's assertions (warn -> error) once there's a baseline.
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build || (rm -rf node_modules/.vite && pnpm build)
+      - name: Start preview server
+        run: |
+          pnpm preview --host 127.0.0.1 --port 4321 &
+          echo $! > preview.pid
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:4321/ > /dev/null && exit 0
+            sleep 2
+          done
+          echo "Preview server did not become ready in time" >&2
+          exit 1
+      - name: Run Lighthouse CI
+        run: npx --yes @lhci/cli@0.15.x autorun --config=./lighthouserc.json
+        continue-on-error: true
+      - name: Stop preview server
+        if: always()
+        run: kill "$(cat preview.pid)" 2>/dev/null || true
