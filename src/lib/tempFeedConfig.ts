@@ -1,3 +1,5 @@
+import { isSafeHttpsUrl } from "./ssrfGuard";
+
 export type TempReading = {
   c: number;
   f: number;
@@ -65,12 +67,7 @@ export function getDefaultTempProbes(): TempProbeConfig[] {
 };
 
 export function isValidFeedUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === "https:";
-  } catch {
-    return false;
-  }
+  return isSafeHttpsUrl(url);
 }
 
 export function slugifyFeedId(value: string, index: number): string {
