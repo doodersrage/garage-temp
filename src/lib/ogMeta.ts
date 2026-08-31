@@ -67,7 +67,7 @@ export function resolveOgImageAlt(pathname: string): string {
     return `${BRAND_NAME} HTTP API — ingest, metrics, webhooks, and OpenAPI`;
   }
   if (path.startsWith("/android")) {
-    return `${BRAND_NAME} Android companion app — coming soon on Google Play`;
+    return `${BRAND_NAME} Android companion — garage probe monitoring on phone and laptop, coming soon on Google Play`;
   }
 
   return `${BRAND_NAME} garage sensor dashboard with live curves and freeze alerts`;

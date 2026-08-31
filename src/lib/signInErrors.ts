@@ -8,6 +8,8 @@ export const SIGNIN_ERROR_MESSAGES = {
     "We couldn't start social sign-in. Please try again or sign in with email.",
   turnstile_failed:
     "Please complete the human verification checkbox, then try again.",
+  rate_limited:
+    "Too many sign-in attempts for this account. Please wait a few minutes and try again.",
   generic:
     "Something went wrong while signing in. Please try again.",
 } as const;

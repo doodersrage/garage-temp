@@ -13,6 +13,11 @@ import {
   sanitizeNextPath,
 } from "../../../lib/siteUrl";
 import { getTurnstileToken, verifyTurnstileToken } from "../../../lib/turnstile";
+import {
+  checkSigninRateLimit,
+  clearSigninFailures,
+  recordSigninFailure,
+} from "../../../lib/signinLimits";
 
 export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress, site }) => {
   const formData = await request.formData();
@@ -80,6 +85,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress
     return redirect(buildSignInRedirectUrl("missing_fields", email));
   }
 
+  const rateLimit = checkSigninRateLimit(email);
+  if (!rateLimit.ok) {
+    return redirect(buildSignInRedirectUrl("rate_limited", email));
+  }
+
   const authClient = createAuthClient();
   const { data, error } = await authClient.auth.signInWithPassword({
     email,
@@ -87,8 +97,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress
   });
 
   if (error || !data.session) {
+    recordSigninFailure(email);
     return redirect(buildSignInRedirectUrl(mapSignInError(error ?? { message: "generic" }), email));
   }
+
+  clearSigninFailures(email);
 
   const { redirectTo } = await applySessionCookiesAfterAuth(
     cookies,

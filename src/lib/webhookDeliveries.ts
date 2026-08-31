@@ -63,6 +63,19 @@ export async function listRecentWebhookDeliveries(
   return (data ?? []) as WebhookDeliveryRow[];
 }
 
+// Momentary blips on the receiving end (a redeploying Zapier/n8n hook, a cold
+// serverless function) are the most common real-world failure mode here, and
+// this delivery can carry a freeze/leak alert -- so one retry is worth a short,
+// bounded delay. Non-retryable statuses (4xx other than 408/429) mean the URL
+// or auth is wrong, so a retry would just waste time.
+const WEBHOOK_RETRYABLE_STATUS = new Set([408, 429, 500, 502, 503, 504]);
+const WEBHOOK_MAX_ATTEMPTS = 2;
+const WEBHOOK_RETRY_DELAY_MS = 400;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function deliverWebhookPost(
   userId: string | null | undefined,
   webhookType: "outbound_alert" | "reading",
@@ -71,28 +84,52 @@ export async function deliverWebhookPost(
   body: string,
 ): Promise<Response | null> {
   const started = Date.now();
-  try {
-    const response = await fetch(url, { method: "POST", headers, body });
+  let attempt = 0;
+  let response: Response | null = null;
+  let networkError: unknown = null;
+
+  while (attempt < WEBHOOK_MAX_ATTEMPTS) {
+    attempt += 1;
+    networkError = null;
+    try {
+      response = await fetch(url, { method: "POST", headers, body });
+      if (response.ok || !WEBHOOK_RETRYABLE_STATUS.has(response.status)) break;
+    } catch (error) {
+      networkError = error;
+      response = null;
+    }
+    if (attempt < WEBHOOK_MAX_ATTEMPTS) {
+      await sleep(WEBHOOK_RETRY_DELAY_MS);
+    }
+  }
+
+  const retried = attempt > 1;
+
+  if (response) {
     await recordWebhookDelivery({
       userId,
       webhookType,
       url,
       statusCode: response.status,
       success: response.ok,
-      errorMessage: response.ok ? null : `HTTP ${response.status}`,
+      errorMessage: response.ok
+        ? null
+        : `HTTP ${response.status}${retried ? " (after retry)" : ""}`,
       durationMs: Date.now() - started,
     });
     return response;
-  } catch (error) {
-    await recordWebhookDelivery({
-      userId,
-      webhookType,
-      url,
-      statusCode: null,
-      success: false,
-      errorMessage: error instanceof Error ? error.message : "fetch failed",
-      durationMs: Date.now() - started,
-    });
-    return null;
   }
+
+  await recordWebhookDelivery({
+    userId,
+    webhookType,
+    url,
+    statusCode: null,
+    success: false,
+    errorMessage:
+      (networkError instanceof Error ? networkError.message : "fetch failed") +
+      (retried ? " (after retry)" : ""),
+    durationMs: Date.now() - started,
+  });
+  return null;
 }
