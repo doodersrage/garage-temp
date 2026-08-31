@@ -32,9 +32,11 @@ const errorMessage =
     ? "That code was incorrect or expired. Enter a fresh code from your authenticator app."
     : errorCode === "no_factor"
       ? "No authenticator is enrolled on this account. Sign in again and add one under Settings."
-      : errorCode === "generic"
-        ? "Something went wrong verifying your code. Try again."
-        : null;
+      : errorCode === "rate_limited"
+        ? "Too many incorrect codes. Please wait a few minutes and try again."
+        : errorCode === "generic"
+          ? "Something went wrong verifying your code. Try again."
+          : null;
 
 const safeNext =
   sanitizeNextPath(Astro.url.searchParams.get("next")) ?? "/dashboard";

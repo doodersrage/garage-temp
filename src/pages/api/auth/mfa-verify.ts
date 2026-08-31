@@ -7,6 +7,11 @@ import {
   setMfaRequiredCookie,
 } from "../../../lib/mfa";
 import { sanitizeNextPath } from "../../../lib/siteUrl";
+import {
+  checkMfaVerifyRateLimit,
+  clearMfaVerifyFailures,
+  recordMfaVerifyFailure,
+} from "../../../lib/mfaVerifyLimits";
 
 function buildMfaErrorRedirect(code: string, next?: string | null): string {
   const params = new URLSearchParams({ error: code });
@@ -16,8 +21,8 @@ function buildMfaErrorRedirect(code: string, next?: string | null): string {
 }
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
-  const { session } = await getAuthFromCookies(cookies);
-  if (!session) {
+  const { session, user } = await getAuthFromCookies(cookies);
+  if (!session || !user) {
     return redirect("/signin?error=generic");
   }
 
@@ -26,7 +31,13 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const next = formData.get("next")?.toString();
   const safeNext = sanitizeNextPath(next) ?? "/dashboard";
 
+  const rateLimit = checkMfaVerifyRateLimit(user.id);
+  if (!rateLimit.ok) {
+    return redirect(buildMfaErrorRedirect("rate_limited", safeNext));
+  }
+
   if (!/^\d{6}$/.test(code)) {
+    recordMfaVerifyFailure(user.id);
     return redirect(buildMfaErrorRedirect("invalid_code", safeNext));
   }
 
@@ -65,9 +76,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   });
 
   if (error || !data?.access_token || !data.refresh_token) {
+    recordMfaVerifyFailure(user.id);
     return redirect(buildMfaErrorRedirect("invalid_code", safeNext));
   }
 
+  clearMfaVerifyFailures(user.id);
   setAuthCookies(cookies, data.access_token, data.refresh_token);
   setMfaRequiredCookie(cookies, false);
   return redirect(safeNext);
