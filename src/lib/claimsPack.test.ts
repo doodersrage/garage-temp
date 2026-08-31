@@ -6,6 +6,7 @@ import {
   CLAIMS_DISCLAIMER,
   filterCriticalAlertEvents,
 } from "./claimsPack";
+import { escapeHtml } from "./htmlEscape";
 
 const sampleEvents: AlertEventRow[] = [
   {
@@ -96,7 +97,9 @@ describe("claimsPack", () => {
     const html = buildClaimsPackHtml(pack);
     expect(html).toContain("<!DOCTYPE html>");
     expect(html).toContain("28.5°F");
-    expect(html).toContain(CLAIMS_DISCLAIMER);
+    // The disclaimer contains an apostrophe, which the shared escapeHtml
+    // (unlike the old local copy this file used to duplicate) does escape.
+    expect(html).toContain(escapeHtml(CLAIMS_DISCLAIMER));
     expect(html).toContain("https://example.com/readings.csv");
     expect(html).toContain("https://example.com/alerts.csv");
     expect(html).toContain("Freeze alert");
@@ -124,6 +127,44 @@ describe("claimsPack", () => {
     expect(html).not.toContain("<script>");
     expect(html).not.toContain("<img onerror");
     expect(html).toContain("&lt;script&gt;");
+  });
+
+  it("omits the verification section when neither field is set", () => {
+    const pack = buildClaimsPackData({
+      householdLabel: "Main garage",
+      rangeFrom: "2026-01-14T00:00:00.000Z",
+      rangeTo: "2026-01-16T23:59:59.999Z",
+      freezeThresholdF: 34,
+      points: [],
+      events: [],
+      devices: [],
+      readingsCsvUrl: "/r.csv",
+      alertsCsvUrl: "/a.csv",
+    });
+    const html = buildClaimsPackHtml(pack);
+    expect(html).not.toContain("Verification");
+  });
+
+  it("renders the verification code and link when set", () => {
+    const pack = buildClaimsPackData({
+      householdLabel: "Main garage",
+      rangeFrom: "2026-01-14T00:00:00.000Z",
+      rangeTo: "2026-01-16T23:59:59.999Z",
+      freezeThresholdF: 34,
+      points: [],
+      events: [],
+      devices: [],
+      readingsCsvUrl: "/r.csv",
+      alertsCsvUrl: "/a.csv",
+    });
+    const html = buildClaimsPackHtml({
+      ...pack,
+      contentHash: "deadbeef",
+      verifyUrl: "https://thermaltrace.dev/api/claims/pack/abc123",
+    });
+    expect(html).toContain("Verification code");
+    expect(html).toContain("deadbeef");
+    expect(html).toContain("https://thermaltrace.dev/api/claims/pack/abc123");
   });
 });
 

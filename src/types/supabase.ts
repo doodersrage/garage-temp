@@ -404,6 +404,50 @@ export type Database = {
           },
         ]
       }
+      claims_pack_exports: {
+        Row: {
+          content_hash: string
+          created_at: string
+          generated_by: string | null
+          household_id: string
+          id: string
+          pack_data: Json
+          range_from: string
+          range_to: string
+          token: string
+        }
+        Insert: {
+          content_hash: string
+          created_at?: string
+          generated_by?: string | null
+          household_id: string
+          id?: string
+          pack_data: Json
+          range_from: string
+          range_to: string
+          token: string
+        }
+        Update: {
+          content_hash?: string
+          created_at?: string
+          generated_by?: string | null
+          household_id?: string
+          id?: string
+          pack_data?: Json
+          range_from?: string
+          range_to?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claims_pack_exports_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           admin_notes: string | null

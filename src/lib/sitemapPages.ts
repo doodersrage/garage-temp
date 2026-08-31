@@ -18,6 +18,7 @@ const STATIC_PUBLIC_PATHS = [
   "/terms",
   "/freeze-map",
   "/freeze-season",
+  "/claims-pack",
   "/demo",
   "/share-kit",
   "/system-status",

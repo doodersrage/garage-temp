@@ -5,6 +5,7 @@ import {
   summarizeProbesForReport,
   type MonthlyProbeSummary,
 } from "./monthlyReportHtml";
+import { escapeHtml } from "./htmlEscape";
 
 export const CLAIMS_CRITICAL_KINDS = new Set([
   "threshold",
@@ -34,18 +35,13 @@ export type ClaimsPackData = {
   readingsCsvUrl: string;
   alertsCsvUrl: string;
   disclaimer: string;
+  /** Set after the pack is persisted as a durable export -- see claimsPackExports.ts. */
+  verifyUrl?: string | null;
+  contentHash?: string | null;
 };
 
 export const CLAIMS_DISCLAIMER =
   "This pack is a monitoring record exported by ThermalTrace for the household's own use. It is not a legal determination, insurance appraisal, or proof of coverage. Adjusters should verify timestamps against original sensor hardware and delivery channels where required.";
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 function formatTemp(value: number | null): string {
   return value != null ? `${value.toFixed(1)}°F` : "—";
@@ -99,6 +95,8 @@ export function buildClaimsPackData(input: {
     readingsCsvUrl: input.readingsCsvUrl,
     alertsCsvUrl: input.alertsCsvUrl,
     disclaimer: CLAIMS_DISCLAIMER,
+    verifyUrl: null,
+    contentHash: null,
   };
 }
 
@@ -275,6 +273,18 @@ export function buildClaimsPackHtml(data: ClaimsPackData): string {
         <tbody>${eventRows}</tbody>
       </table>
     </section>
+
+    ${
+      data.verifyUrl || data.contentHash
+        ? `<section>
+      <h2>Verification</h2>
+      <p class="mb-0" style="font-family: system-ui, sans-serif; font-size: 12px; color: #4b5563;">
+        ${data.contentHash ? `Verification code: <code>${escapeHtml(data.contentHash)}</code><br />` : ""}
+        ${data.verifyUrl ? `Re-view or verify this export at <a href="${escapeHtml(data.verifyUrl)}">${escapeHtml(data.verifyUrl)}</a>.` : ""}
+      </p>
+    </section>`
+        : ""
+    }
 
     <p class="disclaimer">${escapeHtml(data.disclaimer)}</p>
   </div>

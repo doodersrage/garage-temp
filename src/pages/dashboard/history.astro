@@ -185,6 +185,21 @@ const claimsPackQs = new URLSearchParams({
   to: claimsTo,
 }).toString();
 const claimsPackHref = `/api/claims/pack?${claimsPackQs}`;
+
+const claimsEmailed = Astro.url.searchParams.get("claims_emailed") === "1";
+const claimsErrorCode = Astro.url.searchParams.get("claims_error");
+const claimsErrorMessage =
+  claimsErrorCode === "pro_required"
+    ? "Pro plan required for the claims pack."
+    : claimsErrorCode === "invalid_email"
+      ? "Enter a valid adjuster email address."
+      : claimsErrorCode === "no_household"
+        ? "No household found to generate a claims pack for."
+        : claimsErrorCode === "recipient_not_allowed"
+          ? "That email address could not be delivered to."
+          : claimsErrorCode === "send_failed"
+            ? "Couldn't send the claims pack email. Try again."
+            : null;
 ---
 <DashboardLayout title="Reading History">
   {subscriptionNotice === "success" && (
@@ -305,12 +320,34 @@ const claimsPackHref = `/api/claims/pack?${claimsPackQs}`;
       <p class="card-subtitle">
         Printable evidence summary for a date range — freeze exposure, devices, and alert timeline — with links to matching readings and alert-event CSVs.
       </p>
+      {claimsEmailed && <p class="alert-success mt-0 mb-4">Claims pack emailed.</p>}
+      {claimsErrorMessage && (
+        <p class="alert-warning mt-0 mb-4" role="alert">{claimsErrorMessage}</p>
+      )}
       {entitlements.canUseClaimsPack ? (
         <>
           <p class="mb-3 text-sm text-[var(--color-text-muted)]">
             Uses the History filters above when set ({claimsFrom} → {claimsTo}). Opens a printable HTML file; use Print → Save as PDF, then download the linked CSVs for adjusters.
           </p>
           <a class="btn-primary" href={claimsPackHref}>Download claims pack</a>
+
+          <form action="/api/claims/email" method="post" class="mt-4 flex flex-wrap items-end gap-3">
+            <input type="hidden" name="from" value={claimsFrom} />
+            <input type="hidden" name="to" value={claimsTo} />
+            <input type="hidden" name="redirect" value="/dashboard/history" />
+            <div class="form-field mb-0">
+              <label class="form-label" for="adjuster_email">Email to adjuster</label>
+              <input
+                class="form-input"
+                type="email"
+                id="adjuster_email"
+                name="adjuster_email"
+                placeholder="adjuster@insurer.com"
+                required
+              />
+            </div>
+            <button type="submit" class="btn-secondary">Send claims pack</button>
+          </form>
         </>
       ) : (
         <UpgradeNudge feature="claims_pack" tier={entitlements.tier} />
