@@ -1,4 +1,5 @@
 import { acknowledgeLatestUnackedAlert } from "./alertEvents";
+import { timingSafeEqualHex } from "./timingSafeEqual";
 
 function getAckSecret(): string {
   return (
@@ -32,7 +33,7 @@ export async function verifyAckPayload(
   if (!userId || !Number.isFinite(expMs) || !sig) return false;
   if (expMs < Date.now()) return false;
   const expected = await signAckPayload(userId, expMs);
-  return expected === sig.toLowerCase();
+  return timingSafeEqualHex(expected, sig.toLowerCase());
 }
 
 export async function buildUserAckUrl(baseUrl: string, userId: string): Promise<string> {

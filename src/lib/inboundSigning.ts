@@ -1,3 +1,5 @@
+import { timingSafeEqualHex } from "./timingSafeEqual";
+
 async function hmacSha256Hex(secret: string, body: string): Promise<string> {
   const key = await crypto.subtle.importKey(
     "raw",
@@ -20,7 +22,7 @@ export async function verifyInboundSignature(
 
   const expected = await hmacSha256Hex(secret.trim(), rawBody);
   const provided = header.replace(/^sha256=/i, "").trim().toLowerCase();
-  return expected === provided;
+  return timingSafeEqualHex(expected, provided);
 }
 
 export function randomSigningSecret(): string {
