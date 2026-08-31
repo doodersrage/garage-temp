@@ -61,7 +61,7 @@ export function resolveOgImageAlt(pathname: string): string {
     return `${BRAND_NAME} guides for probes, firmware, freeze alerts, and ingest`;
   }
   if (path.startsWith("/stories")) {
-    return `${BRAND_NAME} customer story: garage freeze alert before pipes froze`;
+    return `${BRAND_NAME} customer story: freeze-risk alert before garage pipes freeze`;
   }
   if (path.startsWith("/docs")) {
     return `${BRAND_NAME} HTTP API — ingest, metrics, webhooks, and OpenAPI`;
