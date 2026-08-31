@@ -47,7 +47,7 @@ describe("portfolio tier price mapping", () => {
     env.STRIPE_PRICE_ID_PORTFOLIO_ANNUAL = prev.portfolioA;
   });
 
-  it("resolveStripePriceId prefers a configured portfolio price, falling back to pro/member", () => {
+  it("resolveStripePriceId prefers a configured portfolio price without cross-tier fallback", () => {
     const env = import.meta.env as unknown as Record<string, string | undefined>;
     const prev = {
       portfolioM: env.STRIPE_PRICE_ID_PORTFOLIO,
@@ -62,13 +62,13 @@ describe("portfolio tier price mapping", () => {
     env.STRIPE_PRICE_ID_PRO_ANNUAL = "price_pro_annual";
 
     expect(resolveStripePriceId("portfolio", "monthly")).toBe("price_portfolio_monthly");
-    // Annual unset for portfolio -- falls back through pro annual before
-    // portfolio/pro monthly, same fallback-chain style as the existing pro branch.
-    expect(resolveStripePriceId("portfolio", "annual")).toBe("price_pro_annual");
+    // Annual unset -- fall back to portfolio monthly only (same tier).
+    expect(resolveStripePriceId("portfolio", "annual")).toBe("price_portfolio_monthly");
 
     env.STRIPE_PRICE_ID_PORTFOLIO = "";
     env.STRIPE_PRICE_ID_PORTFOLIO_ANNUAL = "";
-    expect(resolveStripePriceId("portfolio", "monthly")).toBe("price_pro_monthly");
+    expect(resolveStripePriceId("portfolio", "monthly")).toBeUndefined();
+    expect(resolveStripePriceId("portfolio", "annual")).toBeUndefined();
 
     env.STRIPE_PRICE_ID_PORTFOLIO = prev.portfolioM;
     env.STRIPE_PRICE_ID_PORTFOLIO_ANNUAL = prev.portfolioA;

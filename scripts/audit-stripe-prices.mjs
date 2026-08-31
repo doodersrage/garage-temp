@@ -17,6 +17,8 @@ const rows = [
   ["member", "annual", process.env.STRIPE_PRICE_ID_ANNUAL, process.env.STRIPE_DISPLAY_MEMBER_ANNUAL],
   ["pro", "monthly", process.env.STRIPE_PRICE_ID_PRO, process.env.STRIPE_DISPLAY_PRO_MONTHLY],
   ["pro", "annual", process.env.STRIPE_PRICE_ID_PRO_ANNUAL, process.env.STRIPE_DISPLAY_PRO_ANNUAL],
+  ["portfolio", "monthly", process.env.STRIPE_PRICE_ID_PORTFOLIO, process.env.STRIPE_DISPLAY_PORTFOLIO_MONTHLY],
+  ["portfolio", "annual", process.env.STRIPE_PRICE_ID_PORTFOLIO_ANNUAL, process.env.STRIPE_DISPLAY_PORTFOLIO_ANNUAL],
 ];
 
 let mismatches = 0;

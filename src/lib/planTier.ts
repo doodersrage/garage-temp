@@ -41,12 +41,13 @@ export function resolveStripePriceId(
   const portfolioAnnual = cleanPriceId(getRuntimeEnv("STRIPE_PRICE_ID_PORTFOLIO_ANNUAL"));
 
   if (plan === "portfolio") {
+    // Never fall back to pro/member prices -- that would charge the wrong amount
+    // while metadata still says portfolio, and webhooks would resolve the tier
+    // from the price id as pro/member.
     if (interval === "annual") {
-      return (
-        portfolioAnnual || proAnnual || memberAnnual || portfolioMonthly || proMonthly || memberMonthly
-      );
+      return portfolioAnnual || portfolioMonthly;
     }
-    return portfolioMonthly || proMonthly || memberMonthly;
+    return portfolioMonthly;
   }
 
   if (plan === "pro") {

@@ -63,7 +63,7 @@ const groups = [
   },
   {
     label: "Stripe",
-    keys: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID", "STRIPE_PRICE_ID_PRO"],
+    keys: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID", "STRIPE_PRICE_ID_PRO", "STRIPE_PRICE_ID_PORTFOLIO"],
   },
   {
     label: "Cron & ack links",

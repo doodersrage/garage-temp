@@ -99,7 +99,12 @@ export async function sendTrialRemindersForAllUsers(): Promise<{
         continue;
       }
 
-      const plan = sub.plan_tier === "pro" ? "Pro" : "Member";
+      const plan =
+        sub.plan_tier === "portfolio"
+          ? "Portfolio"
+          : sub.plan_tier === "pro"
+            ? "Pro"
+            : "Member";
       const mail = buildTrialReminderEmail({ plan, remaining, siteUrl });
       await sendEmail(email, mail.subject, mail.text, { html: mail.html });
       await supabase

@@ -28,8 +28,12 @@ env:
   STRIPE_DISPLAY_MEMBER_ANNUAL: "40"
   STRIPE_DISPLAY_PRO_MONTHLY: "10"
   STRIPE_DISPLAY_PRO_ANNUAL: "100"
+  STRIPE_DISPLAY_PORTFOLIO_MONTHLY: "29"
+  STRIPE_DISPLAY_PORTFOLIO_ANNUAL: "290"
   STRIPE_PRICE_ID_ANNUAL: price_ci_placeholder_annual
   STRIPE_PRICE_ID_PRO_ANNUAL: price_ci_placeholder_pro_annual
+  STRIPE_PRICE_ID_PORTFOLIO: price_ci_placeholder_portfolio
+  STRIPE_PRICE_ID_PORTFOLIO_ANNUAL: price_ci_placeholder_portfolio_annual
   PRICING_DEFAULT_INTERVAL: annual
   CRON_SECRET: ci-cron-secret
   VAPID_PUBLIC_KEY: ci-placeholder

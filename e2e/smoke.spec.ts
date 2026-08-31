@@ -51,7 +51,7 @@ test.describe("public smoke", () => {
 
     const memberAmount = page.locator(".plan-tier-card-featured .plan-tier-amount");
     const memberPeriod = page.locator(".plan-tier-card-featured .plan-tier-period");
-    const proCard = page.locator(".plan-tier-grid .plan-tier-card").last();
+    const proCard = page.locator(".plan-tier-grid .plan-tier-card").nth(2);
     const proAmount = proCard.locator(".plan-tier-amount");
     const proPeriod = proCard.locator(".plan-tier-period");
 

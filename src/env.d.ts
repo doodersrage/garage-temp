@@ -15,10 +15,14 @@ interface ImportMetaEnv {
   readonly STRIPE_PRICE_ID_PRO?: string;
   readonly STRIPE_PRICE_ID_ANNUAL?: string;
   readonly STRIPE_PRICE_ID_PRO_ANNUAL?: string;
+  readonly STRIPE_PRICE_ID_PORTFOLIO?: string;
+  readonly STRIPE_PRICE_ID_PORTFOLIO_ANNUAL?: string;
   readonly STRIPE_DISPLAY_MEMBER_MONTHLY?: string;
   readonly STRIPE_DISPLAY_MEMBER_ANNUAL?: string;
   readonly STRIPE_DISPLAY_PRO_MONTHLY?: string;
   readonly STRIPE_DISPLAY_PRO_ANNUAL?: string;
+  readonly STRIPE_DISPLAY_PORTFOLIO_MONTHLY?: string;
+  readonly STRIPE_DISPLAY_PORTFOLIO_ANNUAL?: string;
   readonly SITE_URL?: string;
   readonly ORIGIN?: string;
   readonly CRON_SECRET?: string;

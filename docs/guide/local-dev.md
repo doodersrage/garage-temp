@@ -46,9 +46,9 @@ Configure in `.env` (local) and Cloudflare Worker secrets / vars (production). F
 | `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_TOKEN` | Bot protection on contact and auth forms |
 | `SMTP_MAIL_FROM` / `SMTP_MAIL_TO` | From address + ops/contact To |
 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | Billing + webhooks |
-| `STRIPE_PRICE_ID` / `STRIPE_PRICE_ID_PRO` | Monthly Member / Pro price IDs |
-| `STRIPE_PRICE_ID_ANNUAL` / `STRIPE_PRICE_ID_PRO_ANNUAL` | Annual Member / Pro price IDs |
-| `STRIPE_DISPLAY_MEMBER_*` / `STRIPE_DISPLAY_PRO_*` | Display-only USD amounts on `/pricing` (must match Stripe) |
+| `STRIPE_PRICE_ID` / `STRIPE_PRICE_ID_PRO` / `STRIPE_PRICE_ID_PORTFOLIO` | Monthly Member / Pro / Portfolio price IDs |
+| `STRIPE_PRICE_ID_ANNUAL` / `STRIPE_PRICE_ID_PRO_ANNUAL` / `STRIPE_PRICE_ID_PORTFOLIO_ANNUAL` | Annual Member / Pro / Portfolio price IDs |
+| `STRIPE_DISPLAY_MEMBER_*` / `STRIPE_DISPLAY_PRO_*` / `STRIPE_DISPLAY_PORTFOLIO_*` | Display-only USD amounts on `/pricing` (must match Stripe) |
 | `PRICING_DEFAULT_INTERVAL` | `annual` or `monthly` default on `/pricing` |
 | `TWILIO_*` | Pro SMS |
 | `VAPID_*` | Pro browser Web Push — `pnpm generate:vapid` |

@@ -20,12 +20,13 @@ describe("stripePriceAudit", () => {
     const { auditStripeDisplayPrices } = await import("./stripePriceAudit");
     const { rows } = await auditStripeDisplayPrices();
 
-    expect(rows).toHaveLength(4);
+    expect(rows).toHaveLength(6);
     expect(rows.find((r) => r.plan === "member" && r.interval === "monthly")).toMatchObject({
       displayAmountUsd: 6,
       stripeAmountUsd: null,
       match: null,
     });
+    expect(rows.some((r) => r.plan === "portfolio")).toBe(true);
 
     env.STRIPE_SECRET_KEY = prev.key;
     env.STRIPE_DISPLAY_MEMBER_MONTHLY = prev.memberM;

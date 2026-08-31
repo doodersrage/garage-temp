@@ -78,10 +78,14 @@ export default defineConfig({
       'import.meta.env.STRIPE_DISPLAY_MEMBER_ANNUAL': defineProcessEnv('STRIPE_DISPLAY_MEMBER_ANNUAL'),
       'import.meta.env.STRIPE_DISPLAY_PRO_MONTHLY': defineProcessEnv('STRIPE_DISPLAY_PRO_MONTHLY'),
       'import.meta.env.STRIPE_DISPLAY_PRO_ANNUAL': defineProcessEnv('STRIPE_DISPLAY_PRO_ANNUAL'),
+      'import.meta.env.STRIPE_DISPLAY_PORTFOLIO_MONTHLY': defineProcessEnv('STRIPE_DISPLAY_PORTFOLIO_MONTHLY'),
+      'import.meta.env.STRIPE_DISPLAY_PORTFOLIO_ANNUAL': defineProcessEnv('STRIPE_DISPLAY_PORTFOLIO_ANNUAL'),
       'import.meta.env.STRIPE_PRICE_ID': defineProcessEnv('STRIPE_PRICE_ID'),
       'import.meta.env.STRIPE_PRICE_ID_ANNUAL': defineProcessEnv('STRIPE_PRICE_ID_ANNUAL'),
       'import.meta.env.STRIPE_PRICE_ID_PRO': defineProcessEnv('STRIPE_PRICE_ID_PRO'),
       'import.meta.env.STRIPE_PRICE_ID_PRO_ANNUAL': defineProcessEnv('STRIPE_PRICE_ID_PRO_ANNUAL'),
+      'import.meta.env.STRIPE_PRICE_ID_PORTFOLIO': defineProcessEnv('STRIPE_PRICE_ID_PORTFOLIO'),
+      'import.meta.env.STRIPE_PRICE_ID_PORTFOLIO_ANNUAL': defineProcessEnv('STRIPE_PRICE_ID_PORTFOLIO_ANNUAL'),
     },
     // Pre-warm Astro Actions runtime so Cloudflare prerender doesn't race
     // a mid-build optimizeDeps reload (missing chunk-*.js in CI).
