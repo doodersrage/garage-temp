@@ -118,6 +118,38 @@ describe("buildNestAuthorizeUrl / buildEcobeeAuthorizeUrl", () => {
   });
 });
 
+describe("listConfiguredThermostatProviders", () => {
+  it("returns empty when no OAuth env vars are set", async () => {
+    const {
+      isNestOAuthConfigured,
+      isEcobeeOAuthConfigured,
+      listConfiguredThermostatProviders,
+    } = await import("./thermostatOAuth");
+    expect(isNestOAuthConfigured()).toBe(false);
+    expect(isEcobeeOAuthConfigured()).toBe(false);
+    expect(listConfiguredThermostatProviders()).toEqual([]);
+  });
+
+  it("lists only providers with complete credentials", async () => {
+    vi.stubEnv("ECOBEE_CLIENT_ID", "ecobee-cid");
+    vi.stubEnv("NEST_CLIENT_ID", "nest-cid");
+    // Nest secret / project missing -> Nest stays hidden
+    const { listConfiguredThermostatProviders } = await import("./thermostatOAuth");
+    expect(listConfiguredThermostatProviders()).toEqual(["ecobee"]);
+  });
+
+  it("lists Nest once client id, secret, and project id are set", async () => {
+    vi.stubEnv("NEST_CLIENT_ID", "nest-cid");
+    vi.stubEnv("NEST_CLIENT_SECRET", "nest-secret");
+    vi.stubEnv("NEST_PROJECT_ID", "proj-1");
+    const { isNestOAuthConfigured, listConfiguredThermostatProviders } = await import(
+      "./thermostatOAuth"
+    );
+    expect(isNestOAuthConfigured()).toBe(true);
+    expect(listConfiguredThermostatProviders()).toEqual(["nest"]);
+  });
+});
+
 describe("resolveAccessTokenForHousehold", () => {
   it("returns null when there's no connection", async () => {
     mockGetConnectionForHousehold.mockResolvedValue(null);

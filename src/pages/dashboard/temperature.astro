@@ -10,6 +10,7 @@ import { getOrCreateHouseholdForUser, listUserHouseholds, getUserHouseholdRole, 
 import ThermostatConnectCard from "../../components/ThermostatConnectCard.astro";
 import { listConnectionsForHousehold } from "../../lib/thermostatConnections";
 import { fetchThermostatContext } from "../../lib/thermostatCorrelation";
+import { listConfiguredThermostatProviders } from "../../lib/thermostatOAuth";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { fetchLatestSensorValues } from "../../lib/sensorReadings";
 import { formatRelativeAge, freshnessDetail } from "../../lib/relativeTime";
@@ -51,6 +52,7 @@ const thermostatConnections =
   entitlements.canUseThermostatIntegration && household.householdId
     ? await listConnectionsForHousehold(household.householdId)
     : [];
+const availableThermostatProviders = listConfiguredThermostatProviders();
 const thermostatConnectionsWithSnapshots = await Promise.all(
   thermostatConnections.map(async (connection) => ({
     provider: connection.provider,
@@ -826,6 +828,7 @@ const ingestKeyDeviceName =
       entitled={entitlements.canUseThermostatIntegration}
       tier={entitlements.tier}
       canManage={canManageThermostat}
+      availableProviders={availableThermostatProviders}
       connections={thermostatConnectionsWithSnapshots}
     />
 

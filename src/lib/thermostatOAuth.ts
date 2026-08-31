@@ -189,6 +189,27 @@ export function buildEcobeeAuthorizeUrl(state: string, redirectUri: string): str
   return `https://api.ecobee.com/authorize?${params.toString()}`;
 }
 
+/** Nest connect needs client id, secret, and Device Access project id. */
+export function isNestOAuthConfigured(): boolean {
+  return Boolean(
+    getRuntimeEnv("NEST_CLIENT_ID")?.trim() &&
+      getRuntimeEnv("NEST_CLIENT_SECRET")?.trim() &&
+      getRuntimeEnv("NEST_PROJECT_ID")?.trim(),
+  );
+}
+
+/** Ecobee connect needs client id only (no client secret). */
+export function isEcobeeOAuthConfigured(): boolean {
+  return Boolean(getRuntimeEnv("ECOBEE_CLIENT_ID")?.trim());
+}
+
+export function listConfiguredThermostatProviders(): Array<"nest" | "ecobee"> {
+  const providers: Array<"nest" | "ecobee"> = [];
+  if (isEcobeeOAuthConfigured()) providers.push("ecobee");
+  if (isNestOAuthConfigured()) providers.push("nest");
+  return providers;
+}
+
 /**
  * A stored access token is treated as expired slightly early so a request
  * never races a token that dies mid-flight.

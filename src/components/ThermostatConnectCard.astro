@@ -9,15 +9,26 @@ interface Props {
   entitled: boolean;
   tier: PlanTier;
   canManage: boolean;
+  /** Providers with OAuth env vars set on this deployment. */
+  availableProviders: ThermostatProvider[];
   connections: Array<{ provider: ThermostatProvider; snapshot: ThermostatSnapshot | null }>;
 }
 
-const { entitled, tier, canManage, connections } = Astro.props;
+const { entitled, tier, canManage, availableProviders, connections } = Astro.props;
 
 const PROVIDER_LABEL: Record<ThermostatProvider, string> = {
   nest: "Nest",
   ecobee: "Ecobee",
 };
+
+const ALL_PROVIDERS: ThermostatProvider[] = ["ecobee", "nest"];
+
+/** Show configured providers, plus any already-connected ones (so disconnect stays available). */
+const visibleProviders = ALL_PROVIDERS.filter(
+  (provider) =>
+    availableProviders.includes(provider) ||
+    connections.some((c) => c.provider === provider),
+);
 
 const connectedThermostat = entitled
   ? Astro.url.searchParams.get("thermostat_connected")
@@ -35,84 +46,93 @@ function formatMode(mode: string | null): string | null {
   if (!mode) return null;
   return mode.charAt(0).toUpperCase() + mode.slice(1).toLowerCase();
 }
+
+const showCard = entitled
+  ? visibleProviders.length > 0
+  : availableProviders.length > 0;
 ---
-{entitled ? (
-  <DashboardCard id="thermostat-integration">
-    <h2 class="card-title">Thermostat</h2>
-    <p class="card-subtitle mb-4">
-      Connect your house thermostat to see its reading and setpoint next to this
-      probe, and add that context to freeze alerts.
-    </p>
-    {connectedThermostat && (
-      <p class="alert-success text-sm mb-4" role="status">
-        {PROVIDER_LABEL[connectedThermostat as ThermostatProvider] ?? connectedThermostat} connected.
+{showCard && (
+  entitled ? (
+    <DashboardCard id="thermostat-integration">
+      <h2 class="card-title">Thermostat</h2>
+      <p class="card-subtitle mb-4">
+        Connect your house thermostat to see its reading and setpoint next to this
+        probe, and add that context to freeze alerts.
       </p>
-    )}
-    {disconnectedThermostat && (
-      <p class="text-sm text-[var(--color-text-muted)] mb-4" role="status">
-        {PROVIDER_LABEL[disconnectedThermostat as ThermostatProvider] ?? disconnectedThermostat} disconnected.
-      </p>
-    )}
-    {thermostatError && (
-      <p class="alert-warning text-sm mb-4" role="alert">
-        {thermostatError === "state_mismatch" &&
-          "That connection attempt expired -- try again."}
-        {thermostatError === "denied" && "Connection was cancelled."}
-        {thermostatError === "not_configured" &&
-          "This provider isn't set up on this deployment yet."}
-        {thermostatError === "exchange_failed" &&
-          "Couldn't complete the connection -- try again."}
-        {thermostatError === "save_failed" && "Connected, but saving the connection failed -- try again."}
-        {!["state_mismatch", "denied", "not_configured", "exchange_failed", "save_failed"].includes(
-          thermostatError,
-        ) && "Something went wrong connecting your thermostat."}
-      </p>
-    )}
-    <div class="space-y-4">
-      {(["ecobee", "nest"] as const).map((provider) => {
-        const connection = connectionFor(provider);
-        const snapshot = connection?.snapshot ?? null;
-        return (
-          <div class="flex items-center justify-between gap-4 rounded-lg border border-[var(--color-border)] p-3">
-            <div>
-              <p class="mb-0 font-medium">{PROVIDER_LABEL[provider]}</p>
-              {connection ? (
-                snapshot ? (
-                  <p class="mb-0 text-sm text-[var(--color-text-muted)]">
-                    {snapshot.ambientTempF != null
-                      ? `${snapshot.ambientTempF.toFixed(0)}°F`
-                      : "Reading unavailable"}
-                    {snapshot.heatSetpointF != null && `, set to ${snapshot.heatSetpointF.toFixed(0)}°F`}
-                    {formatMode(snapshot.hvacMode) && `, ${formatMode(snapshot.hvacMode)}`}
-                  </p>
+      {connectedThermostat && (
+        <p class="alert-success text-sm mb-4" role="status">
+          {PROVIDER_LABEL[connectedThermostat as ThermostatProvider] ?? connectedThermostat} connected.
+        </p>
+      )}
+      {disconnectedThermostat && (
+        <p class="text-sm text-[var(--color-text-muted)] mb-4" role="status">
+          {PROVIDER_LABEL[disconnectedThermostat as ThermostatProvider] ?? disconnectedThermostat} disconnected.
+        </p>
+      )}
+      {thermostatError && (
+        <p class="alert-warning text-sm mb-4" role="alert">
+          {thermostatError === "state_mismatch" &&
+            "That connection attempt expired -- try again."}
+          {thermostatError === "denied" && "Connection was cancelled."}
+          {thermostatError === "not_configured" &&
+            "This provider isn't set up on this deployment yet."}
+          {thermostatError === "exchange_failed" &&
+            "Couldn't complete the connection -- try again."}
+          {thermostatError === "save_failed" && "Connected, but saving the connection failed -- try again."}
+          {!["state_mismatch", "denied", "not_configured", "exchange_failed", "save_failed"].includes(
+            thermostatError,
+          ) && "Something went wrong connecting your thermostat."}
+        </p>
+      )}
+      <div class="space-y-4">
+        {visibleProviders.map((provider) => {
+          const connection = connectionFor(provider);
+          const snapshot = connection?.snapshot ?? null;
+          const canConnect = availableProviders.includes(provider);
+          return (
+            <div class="flex items-center justify-between gap-4 rounded-lg border border-[var(--color-border)] p-3">
+              <div>
+                <p class="mb-0 font-medium">{PROVIDER_LABEL[provider]}</p>
+                {connection ? (
+                  snapshot ? (
+                    <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+                      {snapshot.ambientTempF != null
+                        ? `${snapshot.ambientTempF.toFixed(0)}°F`
+                        : "Reading unavailable"}
+                      {snapshot.heatSetpointF != null && `, set to ${snapshot.heatSetpointF.toFixed(0)}°F`}
+                      {formatMode(snapshot.hvacMode) && `, ${formatMode(snapshot.hvacMode)}`}
+                    </p>
+                  ) : (
+                    <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+                      Connected -- couldn't fetch a live reading right now.
+                    </p>
+                  )
                 ) : (
-                  <p class="mb-0 text-sm text-[var(--color-text-muted)]">
-                    Connected -- couldn't fetch a live reading right now.
-                  </p>
+                  <p class="mb-0 text-sm text-[var(--color-text-muted)]">Not connected</p>
+                )}
+              </div>
+              {canManage ? (
+                connection ? (
+                  <form action={`/api/integrations/${provider}/disconnect`} method="post">
+                    <input type="hidden" name="redirect" value="/dashboard/temperature" />
+                    <button type="submit" class="btn-secondary">Disconnect</button>
+                  </form>
+                ) : canConnect ? (
+                  <a class="btn-secondary" href={`/api/integrations/${provider}/connect`}>Connect</a>
+                ) : (
+                  <span class="text-xs text-[var(--color-text-muted)]">Unavailable</span>
                 )
               ) : (
-                <p class="mb-0 text-sm text-[var(--color-text-muted)]">Not connected</p>
+                connection ? null : (
+                  <span class="text-xs text-[var(--color-text-muted)]">Owner/member only</span>
+                )
               )}
             </div>
-            {canManage ? (
-              connection ? (
-                <form action={`/api/integrations/${provider}/disconnect`} method="post">
-                  <input type="hidden" name="redirect" value="/dashboard/temperature" />
-                  <button type="submit" class="btn-secondary">Disconnect</button>
-                </form>
-              ) : (
-                <a class="btn-secondary" href={`/api/integrations/${provider}/connect`}>Connect</a>
-              )
-            ) : (
-              connection ? null : (
-                <span class="text-xs text-[var(--color-text-muted)]">Owner/member only</span>
-              )
-            )}
-          </div>
-        );
-      })}
-    </div>
-  </DashboardCard>
-) : (
-  <UpgradeNudge feature="thermostat_integration" tier={tier} />
+          );
+        })}
+      </div>
+    </DashboardCard>
+  ) : (
+    <UpgradeNudge feature="thermostat_integration" tier={tier} />
+  )
 )}
