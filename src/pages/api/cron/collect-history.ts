@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { collectHistoryForAllUsers } from "../../../lib/collectHistory";
 import { checkCronRateLimit } from "../../../lib/cronLimits";
+import { timingSafeEqual } from "../../../lib/timingSafeEqual";
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {
   const rate = checkCronRateLimit(clientAddress || "unknown");
@@ -17,9 +18,9 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   }
 
   const secret = import.meta.env.CRON_SECRET;
-  const authHeader = request.headers.get("authorization");
+  const authHeader = request.headers.get("authorization") ?? "";
 
-  if (!secret || authHeader !== `Bearer ${secret}`) {
+  if (!secret || !timingSafeEqual(authHeader, `Bearer ${secret}`)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
