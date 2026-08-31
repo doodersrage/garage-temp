@@ -50,6 +50,31 @@ export async function deleteUserAccount(
     if ((count ?? 0) <= 1) {
       await supabase.from("households").delete().eq("id", row.household_id);
     } else {
+      // This household has other members and this deleted account is its
+      // only owner. Promote someone else to owner first -- otherwise the
+      // household is left with members but no owner, and nobody can rename
+      // it, manage billing, or invite/remove members afterward. Prefer an
+      // existing "member" (already trusted with owner-level management),
+      // falling back to whoever else has been in the household longest.
+      const { data: candidates } = await supabase
+        .from("household_members")
+        .select("id, role, created_at")
+        .eq("household_id", row.household_id)
+        .neq("user_id", userId)
+        .order("created_at", { ascending: true });
+
+      const promotee =
+        (candidates ?? []).find((member) => member.role === "member") ??
+        candidates?.[0] ??
+        null;
+
+      if (promotee) {
+        await supabase
+          .from("household_members")
+          .update({ role: "owner" })
+          .eq("id", promotee.id);
+      }
+
       await supabase
         .from("household_members")
         .delete()
