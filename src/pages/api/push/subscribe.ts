@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import { createAdminClient } from "../../../lib/supabase";
 import { getUserEntitlements } from "../../../lib/entitlements";
+import { releasePushSubscriptionFromOtherUsers } from "../../../lib/webPush";
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   const { user } = await getAuthFromCookies(cookies);
@@ -38,6 +39,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   const supabase = createAdminClient();
+  await releasePushSubscriptionFromOtherUsers(supabase, user.id, body.endpoint);
   const { error } = await supabase.from("push_subscriptions").upsert(
     {
       user_id: user.id,

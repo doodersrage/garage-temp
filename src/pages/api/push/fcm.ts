@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import { createAdminClient } from "../../../lib/supabase";
 import { getUserEntitlements } from "../../../lib/entitlements";
+import { releaseFcmTokenFromOtherUsers } from "../../../lib/fcm";
 
 const PLATFORMS = new Set(["android", "ios", "web"]);
 
@@ -49,6 +50,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   const supabase = createAdminClient();
+  await releaseFcmTokenFromOtherUsers(supabase, user.id, token);
   const { error } = await supabase.from("fcm_device_tokens").upsert(
     {
       user_id: user.id,

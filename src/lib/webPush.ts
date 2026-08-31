@@ -20,6 +20,23 @@ export function isVapidConfigured(): boolean {
   return hasRuntimeEnv("VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY");
 }
 
+/**
+ * A single browser push subscription (endpoint) can only belong to one
+ * Supabase account at a time. If a different user previously subscribed
+ * this exact endpoint (e.g. a shared browser profile where a different
+ * household member was signed in before), drop their subscription for it
+ * first -- otherwise that other account's alerts would keep arriving as
+ * push notifications in this browser after the handoff, silently leaking
+ * their data to whoever is signed in now.
+ */
+export async function releasePushSubscriptionFromOtherUsers(
+  supabase: ReturnType<typeof createAdminClient>,
+  userId: string,
+  endpoint: string,
+): Promise<void> {
+  await supabase.from("push_subscriptions").delete().eq("endpoint", endpoint).neq("user_id", userId);
+}
+
 export async function sendWebPushToUser(
   userId: string,
   payload: WebPushPayload,

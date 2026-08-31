@@ -149,6 +149,23 @@ export function isStaleFcmError(status: number, errorCode?: string): boolean {
   );
 }
 
+/**
+ * A single physical FCM token can only belong to one Supabase account at a
+ * time. If a different user previously registered this exact token (e.g. a
+ * shared tablet or garage display where a different household member was
+ * signed in before), drop their registration for it first -- otherwise that
+ * other account's alerts would keep arriving as push notifications on this
+ * device after the handoff, silently leaking their data to whoever is
+ * signed in now.
+ */
+export async function releaseFcmTokenFromOtherUsers(
+  supabase: ReturnType<typeof createAdminClient>,
+  userId: string,
+  token: string,
+): Promise<void> {
+  await supabase.from("fcm_device_tokens").delete().eq("token", token).neq("user_id", userId);
+}
+
 export async function sendFcmToUser(
   userId: string,
   payload: FcmPayload,
