@@ -67,6 +67,46 @@ describe("deliverWebhookPost retry", () => {
     );
   });
 
+  it("refuses to fetch a private-network URL without ever calling fetch", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { deliverWebhookPost } = await import("./webhookDeliveries");
+    const response = await deliverWebhookPost(
+      "user-1",
+      "outbound_alert",
+      "https://192.168.1.50/hook",
+      {},
+      "{}",
+    );
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(response).toBeNull();
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        error_message: expect.stringContaining("Refused"),
+      }),
+    );
+  });
+
+  it("refuses a non-https URL without ever calling fetch", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { deliverWebhookPost } = await import("./webhookDeliveries");
+    const response = await deliverWebhookPost(
+      "user-1",
+      "reading",
+      "http://example.com/hook",
+      {},
+      "{}",
+    );
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(response).toBeNull();
+  });
+
   it("records failure after two network errors", async () => {
     const fetchMock = vi.fn().mockRejectedValue(new Error("network down"));
     vi.stubGlobal("fetch", fetchMock);

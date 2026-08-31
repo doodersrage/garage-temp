@@ -4,6 +4,7 @@ import { updateUserAlertSettings } from "../../../lib/alertNotifications";
 import {
   alertChannelsIncomplete,
   buildAlertSettingsFromFormData,
+  findInvalidAlertWebhookUrl,
 } from "../../../lib/alertSettingsForm";
 import { getAlertSettingsForUser } from "../../../lib/notify";
 import { getUserEntitlements } from "../../../lib/entitlements";
@@ -37,6 +38,10 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     existing,
     entitlements,
   );
+
+  if (findInvalidAlertWebhookUrl(settings)) {
+    return redirect(`${redirectTo}?alert_error=invalid_webhook_url`);
+  }
 
   const { error } = await updateUserAlertSettings(
     session.access_token,

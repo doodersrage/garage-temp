@@ -4,6 +4,7 @@ import type { AlertRule } from "./alertRules";
 import type { Entitlements } from "./entitlements";
 import {
   buildAlertSettingsFromFormData,
+  findInvalidAlertWebhookUrl,
   objectToFormData,
   prepareAlertSettingsFormData,
 } from "./alertSettingsForm";
@@ -183,5 +184,39 @@ describe("buildAlertSettingsFromFormData", () => {
     );
     expect(proSettings.forecastFreezeEnabled).toBe(true);
     expect(proSettings.nwsFreezeAlertsEnabled).toBe(true);
+  });
+});
+
+describe("findInvalidAlertWebhookUrl", () => {
+  it("allows settings with no webhook URLs configured", () => {
+    expect(findInvalidAlertWebhookUrl(DEFAULT_ALERT_SETTINGS)).toBeNull();
+  });
+
+  it("allows safe https webhook URLs", () => {
+    const settings: AlertSettings = {
+      ...DEFAULT_ALERT_SETTINGS,
+      discordWebhookUrl: "https://discord.com/api/webhooks/abc",
+      slackWebhookUrl: "https://hooks.slack.com/services/abc",
+      teamsWebhookUrl: "https://outlook.office.com/webhook/abc",
+      outboundWebhookUrl: "https://example.com/hook",
+      readingWebhookUrl: "https://example.com/readings",
+    };
+    expect(findInvalidAlertWebhookUrl(settings)).toBeNull();
+  });
+
+  it("rejects a non-https webhook URL", () => {
+    const settings: AlertSettings = {
+      ...DEFAULT_ALERT_SETTINGS,
+      outboundWebhookUrl: "http://example.com/hook",
+    };
+    expect(findInvalidAlertWebhookUrl(settings)).toBe("outboundWebhookUrl");
+  });
+
+  it("rejects a webhook URL pointed at a private network", () => {
+    const settings: AlertSettings = {
+      ...DEFAULT_ALERT_SETTINGS,
+      readingWebhookUrl: "https://192.168.1.50/hook",
+    };
+    expect(findInvalidAlertWebhookUrl(settings)).toBe("readingWebhookUrl");
   });
 });

@@ -1,3 +1,4 @@
+import { isSafeHttpsUrl } from "./ssrfGuard";
 import {
   type AlertChannelName,
   type AlertSettings,
@@ -52,6 +53,10 @@ async function sendEmail(to: string, subject: string, body: string): Promise<voi
 }
 
 async function sendDiscord(webhookUrl: string, title: string, body: string): Promise<void> {
+  if (!isSafeHttpsUrl(webhookUrl)) {
+    console.error("Refusing to send Discord webhook: unsafe URL");
+    return;
+  }
   try {
     await fetch(webhookUrl, {
       method: "POST",
@@ -66,6 +71,10 @@ async function sendDiscord(webhookUrl: string, title: string, body: string): Pro
 }
 
 async function sendSlack(webhookUrl: string, title: string, body: string): Promise<void> {
+  if (!isSafeHttpsUrl(webhookUrl)) {
+    console.error("Refusing to send Slack webhook: unsafe URL");
+    return;
+  }
   try {
     await fetch(webhookUrl, {
       method: "POST",
@@ -80,6 +89,10 @@ async function sendSlack(webhookUrl: string, title: string, body: string): Promi
 }
 
 async function sendTeams(webhookUrl: string, title: string, body: string): Promise<void> {
+  if (!isSafeHttpsUrl(webhookUrl)) {
+    console.error("Refusing to send Teams webhook: unsafe URL");
+    return;
+  }
   try {
     await fetch(webhookUrl, {
       method: "POST",

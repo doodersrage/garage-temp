@@ -7,6 +7,7 @@ import { parseAlertPlaybooksFromForm } from "./alertPlaybooks";
 import { parseSpaceChannelRouting } from "./spaceChannelRouting";
 import { parseAlertTemplates } from "./alertTemplates";
 import type { Entitlements } from "./entitlements";
+import { isSafeHttpsUrl } from "./ssrfGuard";
 
 /** Checkbox fields use value="true" when checked; omitted when unchecked. */
 function formCheckbox(formData: FormData, key: string): boolean {
@@ -282,6 +283,31 @@ export function alertChannelsIncomplete(settings: AlertSettings): boolean {
     (settings.channelSms && !settings.smsPhone) ||
     (settings.channelWebhook && !settings.outboundWebhookUrl)
   );
+}
+
+/**
+ * These five fields are URLs the *server* fetches (outbound alert delivery,
+ * per-reading webhook), not links a browser follows -- so an invalid one
+ * isn't just a broken alert, it's a way to point the server's own outbound
+ * requests at an arbitrary or private target. Empty is fine (channel
+ * simply isn't configured); anything non-empty must be a safe https URL.
+ */
+export function findInvalidAlertWebhookUrl(settings: AlertSettings): string | null {
+  const fields: Array<[string, string | null]> = [
+    ["discordWebhookUrl", settings.discordWebhookUrl],
+    ["teamsWebhookUrl", settings.teamsWebhookUrl],
+    ["slackWebhookUrl", settings.slackWebhookUrl],
+    ["outboundWebhookUrl", settings.outboundWebhookUrl],
+    ["readingWebhookUrl", settings.readingWebhookUrl],
+  ];
+
+  for (const [field, value] of fields) {
+    if (value && !isSafeHttpsUrl(value)) {
+      return field;
+    }
+  }
+
+  return null;
 }
 
 /** Rebuild FormData from an Astro Action form input object. */

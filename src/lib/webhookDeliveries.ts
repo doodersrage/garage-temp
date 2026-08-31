@@ -1,4 +1,5 @@
 import { createServerClient } from "./supabase";
+import { isSafeHttpsUrl } from "./ssrfGuard";
 
 export type WebhookDeliveryRow = {
   id: string;
@@ -84,6 +85,20 @@ export async function deliverWebhookPost(
   body: string,
 ): Promise<Response | null> {
   const started = Date.now();
+
+  if (!isSafeHttpsUrl(url)) {
+    await recordWebhookDelivery({
+      userId,
+      webhookType,
+      url,
+      statusCode: null,
+      success: false,
+      errorMessage: "Refused: not a valid https URL, or points to a private network",
+      durationMs: Date.now() - started,
+    });
+    return null;
+  }
+
   let attempt = 0;
   let response: Response | null = null;
   let networkError: unknown = null;

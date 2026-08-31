@@ -59,7 +59,9 @@ const alertNotice = Astro.url.searchParams.get("alert_saved")
     ? "Alert settings saved. Some enabled channels are missing a destination and will be skipped until filled in."
     : "Alert settings saved."
   : Astro.url.searchParams.get("alert_error")
-    ? "Unable to save alert settings."
+    ? Astro.url.searchParams.get("alert_error") === "invalid_webhook_url"
+      ? "One of your webhook URLs isn't a valid https:// address, or points to a private network. Fix it and save again."
+      : "Unable to save alert settings."
     : Astro.url.searchParams.get("test_sent")
       ? skippedChannels
         ? `Test sent via ${sentChannels}. Skipped incomplete: ${skippedChannels}.`
