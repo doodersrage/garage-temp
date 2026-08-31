@@ -27,6 +27,11 @@ export const marketingFaqs = {
         "Yes—there is a free plan with live curves, 7-day history, and threshold freeze and leak alerts. Member adds 90-day history, CSV export, more devices, and forecast freeze warnings; Pro adds 1-year+ history, NWS cold-risk alerts, SMS, push, share links (including guest expiry), a printable claims evidence pack, webhooks, and a trial. Annual Member and Pro billing is discounted versus monthly.",
     },
     {
+      question: "Why do I need an account?",
+      answer:
+        "An account links your ingest keys, history, and alerts to your household—it is how we keep your probes private. Registration is free with no credit card. You can watch the live demo on the home page or /demo without signing up; create an account when you are ready to connect your own hardware.",
+    },
+    {
       question: "Is there a ThermalTrace Android app?",
       answer:
         "A native Android app is coming soon on Google Play. Until then you can use the full web dashboard or install the Progressive Web App. The phone does not sense temperature — it connects to your ThermalTrace account.",
@@ -79,6 +84,11 @@ export const marketingFaqs = {
       question: "Can I keep Home Assistant or MQTT and still use ThermalTrace?",
       answer:
         "Yes. Push ingest is just HTTPS from the ESP. Many people dual-run: Home Assistant on the LAN, ThermalTrace for household freeze SMS and history they do not have to back up. Pro webhooks can also fire into HA.",
+    },
+    {
+      question: "Why does ThermalTrace require an account?",
+      answer:
+        "ThermalTrace is hosted so you do not run MQTT brokers, databases, or SMS wiring yourself. A free account (no credit card) attaches your ingest key to your household. You can still dual-run with Home Assistant or keep sensors local—ThermalTrace is the off-site alerts and history layer.",
     },
     {
       question: "I already have Govee or a Tempest—do I still need this?",
