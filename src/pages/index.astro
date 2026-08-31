@@ -41,6 +41,9 @@ const homeDescription =
 const memberPrice = getMemberPriceDisplay().monthly;
 const proPrice = getProPriceDisplay().monthly;
 const appStatus = !isAuthenticated ? await fetchAppStatusSummary() : null;
+const owmApiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "")
+  .replace(/\r/g, "")
+  .trim();
 ---
 
 <Layout
@@ -100,7 +103,7 @@ const appStatus = !isAuthenticated ? await fetchAppStatusSummary() : null;
 
 				<div class="home-live" aria-label="Live demo readings">
 					{showGarageTemps && <DemoTempsPanel client:visible />}
-					{showWeather && <WeatherPanel client:visible cityId={null} guest />}
+					{showWeather && <WeatherPanel client:visible cityId={null} guest owmApiKey={owmApiKey || null} />}
 				</div>
 
 				<section class="home-steps" aria-labelledby="home-steps-title">
@@ -227,7 +230,7 @@ const appStatus = !isAuthenticated ? await fetchAppStatusSummary() : null;
 			<div class="grid gap-6">
 				{showGarageTemps && <LiveTempsPanel client:visible />}
 				{showWeather && (
-					<WeatherPanel client:visible cityId={preferences?.weatherCityId ?? null} />
+					<WeatherPanel client:visible cityId={preferences?.weatherCityId ?? null} owmApiKey={owmApiKey || null} />
 				)}
 				{!showGarageTemps && !showWeather && (
 					<div class="empty-state">

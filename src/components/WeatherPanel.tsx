@@ -1,15 +1,22 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
 import type { WeatherSnapshot } from "../lib/FetchWeather";
-import { weatherMapEmbedUrl, weatherMapExternalUrl } from "../lib/FetchWeather";
+import WeatherMap from "./WeatherMap";
 
 interface Props {
   cityId?: string | null;
   intervalMs?: number;
   /** Guest marketing home — avoid dashboard-only CTAs */
   guest?: boolean;
+  /** OpenWeather tile key for live temp/precip overlays on the map */
+  owmApiKey?: string | null;
 }
 
-export default function WeatherPanel({ cityId = null, intervalMs = 300000, guest = false }: Props) {
+export default function WeatherPanel({
+  cityId = null,
+  intervalMs = 300000,
+  guest = false,
+  owmApiKey = null,
+}: Props) {
   const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -128,26 +135,12 @@ export default function WeatherPanel({ cityId = null, intervalMs = 300000, guest
         </div>
       )}
       {hasCoords && (
-        <figure class="weather-map mb-6">
-          <iframe
-            class="weather-map-frame"
-            title={`Map of ${locationLabel}`}
-            src={weatherMapEmbedUrl(weather.lat!, weather.lon!)}
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-          />
-          <figcaption class="weather-map-caption">
-            <a
-              class="text-link"
-              href={weatherMapExternalUrl(weather.lat!, weather.lon!)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Open larger map
-            </a>
-            <span class="text-[var(--color-text-muted)]"> · © OpenStreetMap</span>
-          </figcaption>
-        </figure>
+        <WeatherMap
+          lat={weather.lat!}
+          lon={weather.lon!}
+          label={locationLabel}
+          owmApiKey={owmApiKey}
+        />
       )}
       <div class="stat-grid">
         {stats.map(({ label, value, detail }) => (
