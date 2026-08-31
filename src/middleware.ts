@@ -1,5 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 import { getAuthFromCookies } from "./lib/auth";
+import { prefersJsonAuthError } from "./lib/authResponse";
 import { pathRequiresAuth } from "./lib/routeAuth";
 import {
   buildMfaChallengeUrl,
@@ -48,7 +49,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       const { session, user } = await getAuthFromCookies(context.cookies);
 
       if (!session) {
-        if (pathname.startsWith("/api/")) {
+        if (pathname.startsWith("/api/") && prefersJsonAuthError(context.request)) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), {
             status: 401,
             headers: { "Content-Type": "application/json" },
@@ -78,7 +79,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
         }
 
         if (needsMfa) {
-          if (pathname.startsWith("/api/")) {
+          if (pathname.startsWith("/api/") && prefersJsonAuthError(context.request)) {
             return new Response(JSON.stringify({ error: "MFA required" }), {
               status: 401,
               headers: { "Content-Type": "application/json" },

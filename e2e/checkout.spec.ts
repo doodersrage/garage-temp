@@ -7,8 +7,9 @@ import { getE2ECredentials, signIn } from "./helpers/auth";
 // Stripe's hosted page, which is where a silent regression would cost revenue.
 test.describe("checkout", () => {
   test("checkout requires sign-in", async ({ request }) => {
+    // Match the pricing page form POST (not JSON fetch) so middleware redirects.
     const res = await request.post("/api/stripe/checkout", {
-      data: { plan: "member", interval: "monthly" },
+      form: { plan: "member", interval: "monthly" },
       maxRedirects: 0,
     });
     expect([302, 303]).toContain(res.status());
