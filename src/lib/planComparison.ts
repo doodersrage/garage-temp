@@ -301,7 +301,7 @@ const TIER_RANK: Record<PlanTier, number> = {
 
 const NUDGE_CONFIG: Record<
   NudgeFeatureId,
-  { targetTier: ComparisonTier; title: string; body: string; anchor: string }
+  { targetTier: ComparisonTier; title: string; body: string; anchor: string; href?: string }
 > = {
   csv_export: {
     targetTier: "member",
@@ -398,6 +398,7 @@ const NUDGE_CONFIG: Record<
     title: "Export a claims evidence pack",
     body: "Pro builds a printable freeze/leak summary with matching readings and alert-event CSVs for a date range you choose.",
     anchor: "claims-pack",
+    href: "/claims-pack",
   },
   thermostat_integration: {
     targetTier: "pro",
@@ -440,7 +441,7 @@ export function getNudgeContent(
 
   return {
     ...config,
-    compareHref: `/pricing#${config.anchor}`,
+    compareHref: config.href ?? `/pricing#${config.anchor}`,
     dismissKey: `nudge-${feature}`,
   };
 }

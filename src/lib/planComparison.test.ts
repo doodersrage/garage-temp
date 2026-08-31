@@ -88,6 +88,7 @@ describe("planComparison", () => {
     });
     expect(getNudgeContent("member", "claims_pack")?.targetTier).toBe("pro");
     expect(getNudgeContent("pro", "claims_pack")).toBeNull();
+    expect(getNudgeContent("member", "claims_pack")?.compareHref).toBe("/claims-pack");
   });
 
   it("differentiates property ceiling and property-manager on Portfolio", () => {
