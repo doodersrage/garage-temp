@@ -1,7 +1,19 @@
 import type { APIRoute } from "astro";
 import { normalizeGeocodeResults } from "../../../lib/weatherCities";
+import { checkWeatherSearchRateLimit } from "../../../lib/weatherSearchLimits";
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url, clientAddress }) => {
+  const rate = checkWeatherSearchRateLimit(clientAddress || "unknown");
+  if (!rate.ok) {
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: {
+        "Content-Type": "application/json",
+        ...(rate.retryAfterSec ? { "Retry-After": String(rate.retryAfterSec) } : {}),
+      },
+    });
+  }
+
   const q = url.searchParams.get("q")?.trim() ?? "";
   if (q.length < 2) {
     return new Response(JSON.stringify({ results: [] }), {
