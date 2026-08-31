@@ -996,6 +996,47 @@
     );
   }
 
+  .ingest-waiting-callout {
+    border-color: rgb(59 130 246 / 0.35);
+    background: linear-gradient(
+      160deg,
+      rgb(59 130 246 / 0.08),
+      var(--color-surface)
+    );
+  }
+
+  .waiting-ingest-checklist {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: grid;
+    gap: 0.45rem;
+    font-size: 0.9375rem;
+  }
+
+  .waiting-ingest-done {
+    color: var(--color-text-secondary);
+  }
+
+  .waiting-ingest-done::marker {
+    content: "✓ ";
+    color: var(--color-success);
+  }
+
+  .waiting-ingest-pending {
+    color: var(--color-text);
+    font-weight: 550;
+  }
+
+  .waiting-ingest-pending::marker {
+    content: "○ ";
+    color: var(--color-accent);
+  }
+
+  .waiting-ingest-status {
+    font-weight: 500;
+    color: var(--color-text-muted);
+  }
+
   .ingest-key-value {
     @apply rounded-lg px-3 py-3 mb-3;
     background-color: var(--color-bg-elevated);

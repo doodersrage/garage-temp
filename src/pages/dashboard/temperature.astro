@@ -13,6 +13,11 @@ import { formatRelativeAge, freshnessDetail } from "../../lib/relativeTime";
 import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import { batterySparklinePath, parseBatteryHistory } from "../../lib/batterySparkline";
 import { renderIngestQrSvg } from "../../lib/qrSvg";
+import {
+  buildWaitingIngestCurl,
+  buildWaitingIngestPayload,
+} from "../../lib/waitingIngest";
+import ProductAnalyticsTracker from "../../components/ProductAnalyticsTracker.astro";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -96,9 +101,10 @@ const showAddSensorNudge =
   Boolean(Astro.url.searchParams.get("device_created")) && Boolean(focusDevice);
 
 const pushDevices = devices.filter((d) => d.source === "push");
-const neverSeenWithSensors = pushDevices.some(
+const waitingPushDevices = pushDevices.filter(
   (d) => !d.last_seen_at && d.sensors.length > 0,
 );
+const neverSeenWithSensors = waitingPushDevices.length > 0;
 const showVerifyIngest =
   Boolean(Astro.url.searchParams.get("sensor_added")) || neverSeenWithSensors;
 const showReceivingData =
@@ -107,6 +113,21 @@ const showReceivingData =
   latest.length > 0 &&
   !neverSeenWithSensors;
 const kindLabels = SENSOR_KIND_LABELS;
+
+const waitingSensors = waitingPushDevices.flatMap((d) =>
+  d.sensors.map((s) => ({ key: s.key, kind: s.kind, deviceName: d.name })),
+);
+const waitingPayload = buildWaitingIngestPayload(waitingSensors);
+const waitingCurl = buildWaitingIngestCurl(
+  Astro.url.origin,
+  waitingSensors,
+  ingestKey || "YOUR_KEY",
+);
+const waitingKeyList = [...new Set(waitingSensors.map((s) => s.key))];
+const ingestOk = Astro.url.searchParams.get("ingest_ok") === "1";
+const analyticsEvents = [
+  ...(ingestOk ? [{ name: "first_ingest" as const }] : []),
+];
 
 function formatLatestValue(row: (typeof latest)[number]): string {
   if (row.value_bool != null) {
@@ -135,7 +156,9 @@ function formatDeviceRssi(meta: unknown): string {
 }
 
 const ingestCurlExample = ingestKey
-  ? `curl -X POST "${Astro.url.origin}/api/ingest/${ingestKey}" \\\n  -H "Content-Type: application/json" \\\n  -d '{"door1": true, "temp1": 42.5}'`
+  ? waitingKeyList.length > 0
+    ? waitingCurl
+    : `curl -X POST "${Astro.url.origin}/api/ingest/${ingestKey}" \\\n  -H "Content-Type: application/json" \\\n  -d '{"door1": true, "temp1": 42.5}'`
   : "";
 const ingestUrl = ingestKey
   ? `${Astro.url.origin}/api/ingest/${ingestKey}`
@@ -147,6 +170,7 @@ const ingestKeyDeviceName =
   "Push device";
 ---
 <DashboardLayout title="Devices">
+  <ProductAnalyticsTracker events={analyticsEvents} />
   <div class="space-y-6">
     <section class="card">
       <h2 class="card-title">Devices & sensors</h2>
@@ -181,17 +205,154 @@ const ingestKeyDeviceName =
       </section>
     )}
 
+    {ingestKey && (
+      <section class="card ingest-key-callout" id="ingest-key-callout">
+        <h2 class="card-title">{keyCalloutTitle}</h2>
+        <p class="card-subtitle">
+          This key is shown once. Copy it into your ESP/Arduino firmware now — you will not see the full key again.
+          The QR below is generated on this page (no third-party QR service).
+        </p>
+        <div class="flex flex-wrap gap-6 items-start mb-4">
+          <div
+            class="ingest-key-qr shrink-0 rounded-lg bg-white p-2"
+            id="ingest-key-qr"
+            aria-label="Ingest URL QR code"
+            set:html={ingestQrSvg}
+          />
+          <div class="min-w-0 flex-1">
+            <p class="form-label mb-1">Ingest URL</p>
+            <p class="ingest-key-value break-all font-mono text-sm mb-2" id="ingest-url-value">{ingestUrl}</p>
+            <p class="ingest-key-value break-all font-mono text-sm mb-0" id="ingest-key-value">{ingestKey}</p>
+            <p class="text-sm text-[var(--color-text-muted)] mt-2 mb-0">
+              POST JSON to <code>/api/ingest/{ingestKey}</code>
+            </p>
+          </div>
+        </div>
+        <pre class="ingest-key-curl text-xs overflow-x-auto mb-4"><code>{ingestCurlExample}</code></pre>
+        <div class="flex flex-wrap gap-3">
+          <button
+            type="button"
+            class="btn-primary"
+            data-copy={ingestKey}
+            data-copy-label="Copy key"
+          >
+            Copy key
+          </button>
+          <button
+            type="button"
+            class="btn-secondary"
+            data-copy={ingestUrl}
+            data-copy-label="Copy URL"
+          >
+            Copy URL
+          </button>
+          <a
+            class="btn-secondary"
+            id="ingest-qr-download"
+            href="#"
+            download="thermaltrace-ingest-qr.svg"
+          >
+            Download SVG
+          </a>
+          <button type="button" class="btn-secondary" id="ingest-qr-print">
+            Print label
+          </button>
+          <button type="button" class="btn-ghost" id="ingest-key-dismiss">
+            I've saved this
+          </button>
+        </div>
+      </section>
+    )}
+
     {showReceivingData && (
       <section class="card alert-success" id="receiving-data">
         <h2 class="card-title">Receiving data</h2>
         <p class="mb-4">
-          Ingest looks healthy — readings are showing up. Confirm freeze alerts reach you next.
+          {ingestOk
+            ? "First POST received — readings are live. Confirm freeze alerts reach you next."
+            : "Ingest looks healthy — readings are showing up. Confirm freeze alerts reach you next."}
         </p>
         <div class="flex flex-wrap gap-3">
           <a class="btn-primary" href="/dashboard/alerts#send-test-alert">Send a test alert</a>
           <a class="btn-secondary" href="/">Open Home</a>
           <a class="btn-ghost" href="/dashboard">Overview</a>
         </div>
+      </section>
+    )}
+
+    {showVerifyIngest && (
+      <section
+        class="card ingest-waiting-callout"
+        id="verify-ingest-step"
+        data-waiting-ingest
+        data-waiting={neverSeenWithSensors ? "1" : "0"}
+      >
+        <h2 class="card-title">
+          {neverSeenWithSensors ? "Waiting for first POST" : "Next: verify ingest"}
+        </h2>
+        <p class="card-subtitle mb-4">
+          Sensors are mapped. Point firmware at your ingest URL and POST JSON that includes the keys below.
+          This page checks for the first reading automatically.
+        </p>
+
+        <ol class="waiting-ingest-checklist mb-4">
+          <li class="waiting-ingest-done">Push device created</li>
+          <li class="waiting-ingest-done">
+            Sensors mapped
+            {waitingKeyList.length > 0 && (
+              <>
+                {" "}
+                (
+                <code class="text-xs">{waitingKeyList.join(", ")}</code>
+                )
+              </>
+            )}
+          </li>
+          <li
+            class="waiting-ingest-pending"
+            data-waiting-step="post"
+          >
+            First ingest POST
+            <span class="waiting-ingest-status" data-waiting-status>
+              {neverSeenWithSensors ? " — listening…" : " — send a test POST"}
+            </span>
+          </li>
+        </ol>
+
+        {waitingKeyList.length > 0 && (
+          <>
+            <p class="form-label mb-1">Sample payload for your keys</p>
+            <pre class="ingest-key-curl text-xs overflow-x-auto mb-3"><code>{JSON.stringify(waitingPayload, null, 2)}</code></pre>
+            <p class="form-label mb-1">Test with curl</p>
+            <pre class="ingest-key-curl text-xs overflow-x-auto mb-3"><code>{waitingCurl}</code></pre>
+            <p class="text-sm text-[var(--color-text-muted)] mb-4">
+              {ingestKey ? (
+                <>
+                  Use the key from the callout above (not the <code>YOUR_KEY</code> placeholder).
+                </>
+              ) : (
+                <>
+                  Replace <code>YOUR_KEY</code> with the one-time key from device creation.
+                  Lost it? Use <strong>Rotate key</strong> on the device card below.
+                </>
+              )}
+            </p>
+          </>
+        )}
+
+        <div class="flex flex-wrap gap-3 items-center">
+          <a class="btn-primary" href="/">Open Home</a>
+          <a class="btn-secondary" href="/about/adding-devices">Adding devices guide</a>
+          <a class="btn-ghost" href="/about/ingest-and-webhooks">Ingest docs</a>
+          <button type="button" class="btn-ghost" data-waiting-refresh>
+            Check now
+          </button>
+        </div>
+        <p class="mt-3 mb-0 text-sm text-[var(--color-text-muted)]" data-waiting-meta>
+          {neverSeenWithSensors
+            ? "Auto-checking every 5 seconds while this page is open."
+            : "Send a POST, then click Check now or refresh."}
+        </p>
       </section>
     )}
 
@@ -269,79 +430,6 @@ const ingestKeyDeviceName =
         </div>
       )}
     </section>
-
-    {showVerifyIngest && !ingestKey && (
-      <section class="card ingest-key-callout" id="verify-ingest-step">
-        <h2 class="card-title">Next: verify ingest</h2>
-        <p class="mb-4">
-          Sensors are configured. Point your firmware at the ingest URL and POST sample JSON, then open Home to confirm live values.
-        </p>
-        <div class="flex flex-wrap gap-3">
-          <a class="btn-primary" href="/">Open Home</a>
-          <a class="btn-secondary" href="/about/ingest-and-webhooks">Ingest docs</a>
-          <a class="btn-ghost" href="#push-devices">Review devices</a>
-        </div>
-      </section>
-    )}
-
-    {ingestKey && (
-      <section class="card ingest-key-callout" id="ingest-key-callout">
-        <h2 class="card-title">{keyCalloutTitle}</h2>
-        <p class="card-subtitle">
-          This key is shown once. Copy it into your ESP/Arduino firmware now — you will not see the full key again.
-          The QR below is generated on this page (no third-party QR service).
-        </p>
-        <div class="flex flex-wrap gap-6 items-start mb-4">
-          <div
-            class="ingest-key-qr shrink-0 rounded-lg bg-white p-2"
-            id="ingest-key-qr"
-            aria-label="Ingest URL QR code"
-            set:html={ingestQrSvg}
-          />
-          <div class="min-w-0 flex-1">
-            <p class="form-label mb-1">Ingest URL</p>
-            <p class="ingest-key-value break-all font-mono text-sm mb-2" id="ingest-url-value">{ingestUrl}</p>
-            <p class="ingest-key-value break-all font-mono text-sm mb-0" id="ingest-key-value">{ingestKey}</p>
-            <p class="text-sm text-[var(--color-text-muted)] mt-2 mb-0">
-              POST JSON to <code>/api/ingest/{ingestKey}</code>
-            </p>
-          </div>
-        </div>
-        <pre class="ingest-key-curl text-xs overflow-x-auto mb-4"><code>{ingestCurlExample}</code></pre>
-        <div class="flex flex-wrap gap-3">
-          <button
-            type="button"
-            class="btn-primary"
-            data-copy={ingestKey}
-            data-copy-label="Copy key"
-          >
-            Copy key
-          </button>
-          <button
-            type="button"
-            class="btn-secondary"
-            data-copy={ingestUrl}
-            data-copy-label="Copy URL"
-          >
-            Copy URL
-          </button>
-          <a
-            class="btn-secondary"
-            id="ingest-qr-download"
-            href="#"
-            download="thermaltrace-ingest-qr.svg"
-          >
-            Download SVG
-          </a>
-          <button type="button" class="btn-secondary" id="ingest-qr-print">
-            Print label
-          </button>
-          <button type="button" class="btn-ghost" id="ingest-key-dismiss">
-            I've saved this
-          </button>
-        </div>
-      </section>
-    )}
 
     {latest.length > 0 && (
       <section class="card">
@@ -438,7 +526,18 @@ const ingestKeyDeviceName =
                   </p>
                   {seen.label === "never seen" && (
                     <p class="m-0 mt-1 text-sm text-[var(--color-text-muted)]">
-                      No POSTs yet — check firmware and ingest key.
+                      {device.sensors.length === 0
+                        ? "No POSTs yet — add a sensor mapping first."
+                        : (
+                          <>
+                            Waiting for first POST with keys{" "}
+                            <code class="text-xs">
+                              {device.sensors.map((s) => s.key).join(", ")}
+                            </code>
+                            .{" "}
+                            <a class="text-link" href="#verify-ingest-step">See waiting checklist</a>
+                          </>
+                        )}
                     </p>
                   )}
                 </div>
@@ -798,12 +897,87 @@ const ingestKeyDeviceName =
   </script>
 )}
 
-{!ingestKey && Astro.url.searchParams.get("sensor_added") && (
+{!ingestKey && (Astro.url.searchParams.get("sensor_added") || neverSeenWithSensors) && (
   <script is:inline>
     (() => {
       document.getElementById("verify-ingest-step")?.scrollIntoView({
         behavior: "smooth",
         block: "start",
+      });
+    })();
+  </script>
+)}
+
+{neverSeenWithSensors && (
+  <script is:inline>
+    (() => {
+      const root = document.querySelector("[data-waiting-ingest]");
+      if (!(root instanceof HTMLElement)) return;
+
+      const statusEl = root.querySelector("[data-waiting-status]");
+      const metaEl = root.querySelector("[data-waiting-meta]");
+      const stepEl = root.querySelector('[data-waiting-step="post"]');
+      const refreshBtn = root.querySelector("[data-waiting-refresh]");
+      let timer = 0;
+      let inFlight = false;
+
+      async function checkOnce() {
+        if (inFlight) return;
+        inFlight = true;
+        try {
+          const response = await fetch("/api/devices/ingest-status", {
+            credentials: "same-origin",
+            headers: { Accept: "application/json" },
+          });
+          if (!response.ok) throw new Error("status " + response.status);
+          const payload = await response.json();
+          const checked = payload.checkedAt
+            ? new Date(payload.checkedAt).toLocaleTimeString()
+            : new Date().toLocaleTimeString();
+          if (metaEl) {
+            metaEl.textContent = payload.waiting
+              ? `Still waiting — last check ${checked}. Auto-checking every 5 seconds.`
+              : `Last check ${checked}.`;
+          }
+          if (!payload.waiting && (payload.seenCount > 0 || payload.latestCount > 0)) {
+            if (statusEl) statusEl.textContent = " — received!";
+            if (stepEl) {
+              stepEl.classList.remove("waiting-ingest-pending");
+              stepEl.classList.add("waiting-ingest-done");
+            }
+            const url = new URL(window.location.href);
+            url.searchParams.set("ingest_ok", "1");
+            url.searchParams.delete("sensor_added");
+            window.location.replace(url.pathname + "?" + url.searchParams.toString());
+            return;
+          }
+          if (statusEl) statusEl.textContent = " — listening…";
+        } catch {
+          if (metaEl) metaEl.textContent = "Could not check status — try Check now.";
+        } finally {
+          inFlight = false;
+        }
+      }
+
+      refreshBtn?.addEventListener("click", () => {
+        void checkOnce();
+      });
+
+      void checkOnce();
+      timer = window.setInterval(() => {
+        void checkOnce();
+      }, 5000);
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") {
+          window.clearInterval(timer);
+          timer = 0;
+        } else if (!timer) {
+          void checkOnce();
+          timer = window.setInterval(() => {
+            void checkOnce();
+          }, 5000);
+        }
       });
     })();
   </script>
