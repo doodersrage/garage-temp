@@ -13,6 +13,8 @@ const STATIC_PUBLIC_PATHS = [
   "/compare/diy-mqtt",
   "/compare/govee",
   "/compare/tempest",
+  "/compare/nest",
+  "/compare/ecobee",
   "/contact",
   "/privacy",
   "/terms",

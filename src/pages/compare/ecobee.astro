@@ -1,0 +1,7 @@
+---
+import CompareGuideArticle from "../../components/CompareGuideArticle.astro";
+import { getCompareGuide } from "../../lib/compareGuides";
+
+const guide = getCompareGuide("ecobee")!;
+---
+<CompareGuideArticle guide={guide} />

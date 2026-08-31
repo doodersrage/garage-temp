@@ -103,6 +103,68 @@ export const compareGuides: CompareGuide[] = [
       { capability: "Complements the other?", thermaltrace: "Yes — use both", other: "Yes — outdoor context" },
     ],
   },
+  {
+    slug: "nest",
+    path: "/compare/nest",
+    title: "ThermalTrace vs Nest Thermostat",
+    headline: "ThermalTrace vs a Nest Thermostat for garage freeze protection",
+    description:
+      "A Nest thermostat runs your home's conditioned living space -- it has no signal from an unheated garage. Compare that to a dedicated ThermalTrace probe, which can now show your Nest's reading alongside every freeze alert.",
+    competitor: "Nest Thermostat",
+    summary:
+      "Nest is excellent at running your HVAC and reporting the temperature where it (or a Nest Temperature Sensor) is installed -- almost never the garage, crawlspace, or shop where pipes actually freeze. ThermalTrace watches that space directly, and if you connect your Nest account, pulls its reading and heating status into every freeze alert for context.",
+    lede:
+      "Nest does one job very well: run the furnace and track the temperature of the room it's in. An unheated garage, crawlspace, or workshop is unconditioned by design, so Nest has no reading from it at all -- there's nothing to alert on. ThermalTrace puts a dedicated probe in that space, and if you connect your Nest account (Pro), every freeze alert shows your house's indoor temperature and whether it's actively heating, so you can tell at a glance whether the cold is expected (garage is unconditioned, house is fine) or something's actually wrong.",
+    whenThermalTrace: [
+      "You have a garage, crawlspace, basement, or shop that isn't on Nest's heating loop",
+      "You want an alert from the specific unconditioned space, not an inference from the thermostat",
+      "You already use Nest and want its reading shown alongside freeze alerts, not replaced",
+    ],
+    whenOther: [
+      "You only need the temperature of Nest-conditioned living space",
+      "You want to control heating/cooling schedules, not just monitor a cold space",
+      "You don't have a separate unconditioned space that needs its own probe",
+    ],
+    rows: [
+      { capability: "Primary job", thermaltrace: "Freeze/leak monitoring for any space", other: "HVAC control for conditioned space" },
+      { capability: "Sees an unheated garage/crawlspace", thermaltrace: "Yes — dedicated probe", other: "No — unconditioned spaces aren't on the loop" },
+      { capability: "Freeze/leak alerts (SMS, push, email)", thermaltrace: "Yes", other: "No" },
+      { capability: "Shows thermostat reading on freeze alerts", thermaltrace: "Yes, if connected (Pro)", other: "N/A" },
+      { capability: "Controls heating schedules", thermaltrace: "No", other: "Yes" },
+      { capability: "Complements the other?", thermaltrace: "Yes — connect both", other: "Yes — connect both" },
+    ],
+  },
+  {
+    slug: "ecobee",
+    path: "/compare/ecobee",
+    title: "ThermalTrace vs Ecobee Thermostat",
+    headline: "ThermalTrace vs an Ecobee Thermostat for garage freeze protection",
+    description:
+      "An Ecobee thermostat runs your home's conditioned living space -- it has no signal from an unheated garage. Compare that to a dedicated ThermalTrace probe, which can now show your Ecobee's reading alongside every freeze alert.",
+    competitor: "Ecobee Thermostat",
+    summary:
+      "Ecobee is excellent at running your HVAC and reporting the temperature where it (or an Ecobee SmartSensor) is installed -- almost never the garage, crawlspace, or shop where pipes actually freeze. ThermalTrace watches that space directly, and if you connect your Ecobee account, pulls its reading and heating status into every freeze alert for context.",
+    lede:
+      "Ecobee does one job very well: run the furnace and track the temperature of the room it's in. An unheated garage, crawlspace, or workshop is unconditioned by design, so Ecobee has no reading from it at all -- there's nothing to alert on. ThermalTrace puts a dedicated probe in that space, and if you connect your Ecobee account (Pro), every freeze alert shows your house's indoor temperature and whether it's actively heating, so you can tell at a glance whether the cold is expected (garage is unconditioned, house is fine) or something's actually wrong.",
+    whenThermalTrace: [
+      "You have a garage, crawlspace, basement, or shop that isn't on Ecobee's heating loop",
+      "You want an alert from the specific unconditioned space, not an inference from the thermostat",
+      "You already use Ecobee and want its reading shown alongside freeze alerts, not replaced",
+    ],
+    whenOther: [
+      "You only need the temperature of Ecobee-conditioned living space",
+      "You want to control heating/cooling schedules, not just monitor a cold space",
+      "You don't have a separate unconditioned space that needs its own probe",
+    ],
+    rows: [
+      { capability: "Primary job", thermaltrace: "Freeze/leak monitoring for any space", other: "HVAC control for conditioned space" },
+      { capability: "Sees an unheated garage/crawlspace", thermaltrace: "Yes — dedicated probe", other: "No — unconditioned spaces aren't on the loop" },
+      { capability: "Freeze/leak alerts (SMS, push, email)", thermaltrace: "Yes", other: "No" },
+      { capability: "Shows thermostat reading on freeze alerts", thermaltrace: "Yes, if connected (Pro)", other: "N/A" },
+      { capability: "Controls heating schedules", thermaltrace: "No", other: "Yes" },
+      { capability: "Complements the other?", thermaltrace: "Yes — connect both", other: "Yes — connect both" },
+    ],
+  },
 ];
 
 export function getCompareGuide(slug: string): CompareGuide | undefined {

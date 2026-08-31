@@ -95,6 +95,11 @@ const schema = [
         {guide.slug === "diy-mqtt" && (
           <a class="btn-secondary" href="/about/adding-devices#mqtt-bridge">MQTT bridge recipe</a>
         )}
+        {(guide.slug === "nest" || guide.slug === "ecobee") && (
+          <a class="btn-secondary" href="/dashboard/temperature#thermostat-integration">
+            Connect your {guide.competitor.replace(" Thermostat", "")} (Pro)
+          </a>
+        )}
       </div>
       <p class="mb-0 text-sm">
         <a class="text-link" href="/compare">← Back to all comparisons</a>
