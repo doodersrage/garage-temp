@@ -13,6 +13,9 @@ export type MonthlyProbeSummary = {
 
 export type MonthlyReportData = {
   monthLabel: string;
+  /** Lookback window used for readings (30 monthly / 90 quarterly). */
+  periodDays: number;
+  reportKind: "monthly" | "quarterly";
   readingCount: number;
   minTempF: number | null;
   maxTempF: number | null;
@@ -36,6 +39,14 @@ function escapeHtml(value: string): string {
 
 function formatTemp(value: number | null): string {
   return value != null ? `${value.toFixed(1)}°F` : "—";
+}
+
+function reportTitle(data: MonthlyReportData): string {
+  return data.reportKind === "quarterly" ? "Quarterly report" : "Monthly report";
+}
+
+function periodPhrase(data: MonthlyReportData): string {
+  return `${data.periodDays}-day`;
 }
 
 export function summarizeProbesForReport(points: ChartPoint[]): MonthlyProbeSummary[] {
@@ -62,9 +73,9 @@ export function summarizeProbesForReport(points: ChartPoint[]): MonthlyProbeSumm
 
 export function buildMonthlyReportPlainText(data: MonthlyReportData): string {
   const lines = [
-    `ThermalTrace monthly report — ${data.monthLabel}`,
+    `ThermalTrace ${data.reportKind} report — ${data.monthLabel}`,
     "",
-    `Readings (30d): ${data.readingCount}`,
+    `Readings (${periodPhrase(data)}): ${data.readingCount}`,
     `Coldest: ${formatTemp(data.minTempF)}`,
     `Warmest: ${formatTemp(data.maxTempF)}`,
     `Average: ${formatTemp(data.avgTempF)}`,
@@ -112,7 +123,7 @@ function statBlock(label: string, value: string, detail?: string): string {
 export function buildMonthlyReportHtmlDocument(data: MonthlyReportData): string {
   const probeRows =
     data.probes.length === 0
-      ? `<tr><td colspan="4" style="padding:12px;color:#94a3b8">No probe readings in the last 30 days.</td></tr>`
+      ? `<tr><td colspan="4" style="padding:12px;color:#94a3b8">No probe readings in the last ${data.periodDays} days.</td></tr>`
       : data.probes
           .map(
             (probe) =>
@@ -150,8 +161,8 @@ export function buildMonthlyReportHtmlDocument(data: MonthlyReportData): string 
   <div style="max-width:720px;margin:0 auto">
     <header style="margin-bottom:24px">
       <p style="margin:0 0 8px;font-size:13px;font-weight:800;letter-spacing:-0.02em"><span style="color:#c5cbd3">Thermal</span><span style="color:#e85500">Trace</span></p>
-      <h1 style="margin:0 0 8px;font-size:28px;color:#f8fafc">Monthly report — ${escapeHtml(data.monthLabel)}</h1>
-      <p style="margin:0;color:#94a3b8">30-day snapshot from your saved readings and forecast outlook.</p>
+      <h1 style="margin:0 0 8px;font-size:28px;color:#f8fafc">${escapeHtml(reportTitle(data))} — ${escapeHtml(data.monthLabel)}</h1>
+      <p style="margin:0;color:#94a3b8">${escapeHtml(periodPhrase(data))} snapshot from your saved readings and forecast outlook.</p>
     </header>
 
     <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px">
@@ -207,11 +218,11 @@ export function buildMonthlyReportHtmlDocument(data: MonthlyReportData): string 
 
 /** Shorter HTML for the email body (stats only). */
 export function buildMonthlyReportHtmlEmail(data: MonthlyReportData): string {
+  const kindLabel = data.reportKind === "quarterly" ? "Quarterly report" : "Monthly report";
   return buildBrandedEmailHtml({
-    eyebrow: "Monthly report",
+    eyebrow: kindLabel,
     title: `Garage report — ${data.monthLabel}`,
-    intro:
-      "30-day summary from your saved readings. A full HTML report is attached — open it in a browser or print to PDF.",
+    intro: `${periodPhrase(data)} summary from your saved readings. A full HTML report is attached — open it in a browser or print to PDF.`,
     bullets: [
       `Readings: ${data.readingCount}`,
       `Coldest: ${formatTemp(data.minTempF)}`,
@@ -224,6 +235,14 @@ export function buildMonthlyReportHtmlEmail(data: MonthlyReportData): string {
     secondaryCta: { label: "Manage alerts", url: data.alertsUrl },
     tone: "brand",
   });
+}
+
+/** Subject line with coldest reading for inbox scanability. */
+export function formatPeriodReportSubject(data: MonthlyReportData): string {
+  const kind = data.reportKind === "quarterly" ? "Quarterly" : "Monthly";
+  const coldest =
+    data.minTempF != null ? ` · coldest ${data.minTempF.toFixed(1)}°F` : "";
+  return `${kind} garage report — ${data.monthLabel}${coldest}`;
 }
 
 export function encodeBase64Utf8(text: string): string {

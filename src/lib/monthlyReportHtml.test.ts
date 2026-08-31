@@ -7,6 +7,8 @@ import {
 
 const sampleData = {
   monthLabel: "August 2026",
+  periodDays: 30,
+  reportKind: "monthly" as const,
   readingCount: 42,
   minTempF: 28.5,
   maxTempF: 72.1,
@@ -49,8 +51,20 @@ describe("monthly report html", () => {
   it("includes stats in plain text", () => {
     const text = buildMonthlyReportPlainText(sampleData);
     expect(text).toContain("August 2026");
+    expect(text).toContain("Readings (30-day)");
     expect(text).toContain("12.5");
     expect(text).toContain("HTML report is attached");
+  });
+
+  it("uses quarterly copy when reportKind is quarterly", () => {
+    const text = buildMonthlyReportPlainText({
+      ...sampleData,
+      reportKind: "quarterly",
+      periodDays: 90,
+      monthLabel: "Q4 2025 (Oct–Dec)",
+    });
+    expect(text).toContain("quarterly report");
+    expect(text).toContain("Readings (90-day)");
   });
 
   it("builds printable html document", () => {

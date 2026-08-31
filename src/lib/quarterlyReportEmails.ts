@@ -11,6 +11,7 @@ import {
   buildMonthlyReportHtmlEmail,
   buildMonthlyReportPlainText,
   encodeBase64Utf8,
+  formatPeriodReportSubject,
   summarizeProbesForReport,
   type MonthlyReportData,
 } from "./monthlyReportHtml";
@@ -19,6 +20,22 @@ export function shouldSendQuarterlyReport(now = new Date()): boolean {
   const month = now.getUTCMonth();
   const isQuarterStart = month === 0 || month === 3 || month === 6 || month === 9;
   return isQuarterStart && now.getUTCDate() === 1 && now.getUTCHours() === 8;
+}
+
+/** Label for the 90-day window ending at a quarter-start send. */
+export function formatQuarterlyWindowLabel(now = new Date()): string {
+  const month = now.getUTCMonth();
+  const year = now.getUTCFullYear();
+  // Sent on quarter start looking back ~90 days → previous calendar quarter.
+  const completedQuarter = month === 0 ? 4 : month / 3;
+  const qYear = month === 0 ? year - 1 : year;
+  const ranges: Record<number, string> = {
+    1: "Jan–Mar",
+    2: "Apr–Jun",
+    3: "Jul–Sep",
+    4: "Oct–Dec",
+  };
+  return `Q${completedQuarter} ${qYear} (${ranges[completedQuarter]})`;
 }
 
 async function sendQuarterlyReportEmail(
@@ -106,15 +123,13 @@ async function sendQuarterlyReportForUser(userId: string): Promise<boolean> {
     ? temps.reduce((a, b) => a + b, 0) / temps.length
     : null;
 
-  const quarterLabel = new Date().toLocaleString("en-US", {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+  const quarterLabel = formatQuarterlyWindowLabel();
 
   const siteUrl = resolveSiteUrl(null);
   const reportData: MonthlyReportData = {
-    monthLabel: `Quarter ending ${quarterLabel}`,
+    monthLabel: quarterLabel,
+    periodDays: 90,
+    reportKind: "quarterly",
     readingCount: points.length,
     minTempF: minTemp,
     maxTempF: maxTemp,
@@ -128,7 +143,7 @@ async function sendQuarterlyReportForUser(userId: string): Promise<boolean> {
     historyUrl: `${siteUrl}/dashboard/history`,
   };
 
-  const subject = `Quarterly garage report — ${quarterLabel}`;
+  const subject = formatPeriodReportSubject(reportData);
   const plainBody = buildMonthlyReportPlainText(reportData);
   const htmlBody = buildMonthlyReportHtmlEmail(reportData);
   const attachmentHtml = buildMonthlyReportHtmlDocument(reportData);

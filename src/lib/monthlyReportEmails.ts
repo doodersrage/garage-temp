@@ -11,6 +11,7 @@ import {
   buildMonthlyReportHtmlEmail,
   buildMonthlyReportPlainText,
   encodeBase64Utf8,
+  formatPeriodReportSubject,
   summarizeProbesForReport,
   type MonthlyReportData,
 } from "./monthlyReportHtml";
@@ -113,6 +114,8 @@ async function sendMonthlyReportForUser(userId: string): Promise<boolean> {
   const siteUrl = resolveSiteUrl(null);
   const reportData: MonthlyReportData = {
     monthLabel,
+    periodDays: 30,
+    reportKind: "monthly",
     readingCount: points.length,
     minTempF: minTemp,
     maxTempF: maxTemp,
@@ -126,7 +129,7 @@ async function sendMonthlyReportForUser(userId: string): Promise<boolean> {
     historyUrl: `${siteUrl}/dashboard/history`,
   };
 
-  const subject = `Monthly garage report — ${monthLabel}`;
+  const subject = formatPeriodReportSubject(reportData);
   const plainBody = buildMonthlyReportPlainText(reportData);
   const htmlBody = buildMonthlyReportHtmlEmail(reportData);
   const attachmentHtml = buildMonthlyReportHtmlDocument(reportData);

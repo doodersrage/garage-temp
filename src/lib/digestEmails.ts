@@ -6,6 +6,7 @@ import { summarizeSeasonal } from "./seasonalInsights";
 import { brandedEmailParts } from "./emailLayout";
 import { resolveSiteUrl } from "./schemaMarkup";
 import { sendEmail } from "./mailer";
+import { computeFreezeHours } from "./freezeHours";
 
 async function sendDigestEmail(
   to: string,
@@ -87,6 +88,35 @@ export function summarizePointsByDay(points: ChartPoint[]): string[] {
     });
 }
 
+/** Coldest reading in the window — used for subject lines and freeze callouts. */
+export function coldestPoint(points: ChartPoint[]): ChartPoint | null {
+  if (points.length === 0) return null;
+  return points.reduce((a, b) => (a.tempf <= b.tempf ? a : b));
+}
+
+export function formatDigestFreezeLine(
+  points: ChartPoint[],
+  freezeThresholdF: number,
+): string {
+  const freeze = computeFreezeHours(points, freezeThresholdF);
+  if (freeze.readingsBelow34 === 0) {
+    return `Freeze exposure: none at or below ${freezeThresholdF}°F`;
+  }
+  return `Freeze exposure: ~${freeze.hoursBelow34.toFixed(1)} h at or below ${freezeThresholdF}°F (${freeze.readingsBelow34} readings · coldest ${freeze.coldestF?.toFixed(1)}°F)`;
+}
+
+export function formatWeeklyDigestSubject(points: ChartPoint[]): string {
+  const coldest = coldestPoint(points);
+  if (!coldest) return "Weekly garage temperature digest";
+  const dayLabel = new Date(coldest.timestamp).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+  return `Weekly digest — coldest ${dayLabel} ${coldest.tempf.toFixed(1)}°F`;
+}
+
 export async function sendWeeklyDigestsForAllUsers(): Promise<{
   sent: number;
   skipped: number;
@@ -136,13 +166,16 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
 
       const summary = summarizePoints(points);
       const byDay = summarizePointsByDay(points);
+      const freezeLine = formatDigestFreezeLine(points, settings.freezeThresholdF);
       const seasonal = summarizeSeasonal(points, 7);
+      const subject = formatWeeklyDigestSubject(points);
       const parts = brandedEmailParts({
         eyebrow: "Weekly digest",
-        preheader: summary[0] ?? "Your last 7 days of garage temperatures.",
+        preheader: freezeLine,
         title: "This week in your garage",
         intro: "Here’s a quick look at the last 7 days of probe readings.",
         bullets: [
+          freezeLine,
           ...summary,
           ...(byDay.length ? ["Day by day:", ...byDay] : []),
           ...seasonal.map((item) => `${item.title}: ${item.detail}`),
@@ -159,14 +192,14 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
 
       await sendDigestEmail(
         digestEmail,
-        "Weekly garage temperature digest",
+        subject,
         parts.text,
         parts.html,
       );
 
       await notifyUser(userId, digestEmail, { ...settings, channelEmail: false }, {
-        title: "Weekly garage digest",
-        body: [...summary, ...byDay].join("\n"),
+        title: subject,
+        body: [freezeLine, ...summary, ...byDay].join("\n"),
         kind: "digest",
       });
 

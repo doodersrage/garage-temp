@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { summarizePointsByDay } from "./digestEmails";
+import {
+  formatDigestFreezeLine,
+  formatWeeklyDigestSubject,
+  summarizePointsByDay,
+} from "./digestEmails";
 import type { ChartPoint } from "./garageTempsHistory";
 
 describe("summarizePointsByDay", () => {
@@ -55,5 +59,36 @@ describe("summarizePointsByDay", () => {
 
   it("returns empty for no points", () => {
     expect(summarizePointsByDay([])).toEqual([]);
+  });
+});
+
+describe("weekly digest freeze + subject", () => {
+  const points: ChartPoint[] = [
+    {
+      timestamp: "2026-01-05T08:00:00Z",
+      tempf: 40,
+      humidity: 50,
+      probeLabel: "Garage",
+    },
+    {
+      timestamp: "2026-01-06T04:00:00Z",
+      tempf: 30,
+      humidity: 55,
+      probeLabel: "Garage",
+    },
+  ];
+
+  it("summarizes freeze exposure against the user threshold", () => {
+    expect(formatDigestFreezeLine(points, 34)).toContain("at or below 34°F");
+    expect(formatDigestFreezeLine(points, 34)).toContain("30.0°F");
+    expect(formatDigestFreezeLine(points, 20)).toBe(
+      "Freeze exposure: none at or below 20°F",
+    );
+  });
+
+  it("puts the coldest day in the subject line", () => {
+    expect(formatWeeklyDigestSubject(points)).toMatch(
+      /^Weekly digest — coldest Tue, Jan 6 30\.0°F$/,
+    );
   });
 });
