@@ -66,7 +66,12 @@ const appStatus = !isAuthenticated ? await fetchAppStatusSummary() : null;
 						<div class="home-hero-actions">
 							<a class="btn-primary" href="/demo">Try live demo</a>
 							<a class="btn-secondary" href="/register?next=/dashboard/temperature">Create free account</a>
-							<a class="btn-secondary" href="/pricing">See plans</a>
+							<a
+								class="btn-secondary"
+								href="https://github.com/doodersrage/thermaltrace"
+								target="_blank"
+								rel="noreferrer"
+							>View source</a>
 						</div>
 						<p class="home-hero-plans">
 							<a class="text-link" href="/pricing">
@@ -97,6 +102,65 @@ const appStatus = !isAuthenticated ? await fetchAppStatusSummary() : null;
 					{showGarageTemps && <DemoTempsPanel client:visible />}
 					{showWeather && <WeatherPanel client:visible cityId={null} guest />}
 				</div>
+
+				<section class="home-steps" aria-labelledby="home-steps-title">
+					<div class="home-steps-intro">
+						<h2 class="home-steps-title" id="home-steps-title">3 steps to first reading</h2>
+						<p class="home-steps-lede">
+							Free account, no credit card — from blank dashboard to a live curve in one sitting.
+						</p>
+					</div>
+					<ol class="home-steps-list">
+						<li class="home-step">
+							<span class="home-step-num" aria-hidden="true">1</span>
+							<div>
+								<h3 class="home-step-title">Create a push device</h3>
+								<p class="home-step-copy">
+									Sign up and open Devices. Copy the one-time ingest URL (or QR) for your ESP/Arduino.
+								</p>
+							</div>
+						</li>
+						<li class="home-step">
+							<span class="home-step-num" aria-hidden="true">2</span>
+							<div>
+								<h3 class="home-step-title">Map sensors &amp; POST JSON</h3>
+								<p class="home-step-copy">
+									Add a temp + humidity pair (or a single key), then POST to
+									<code>/api/ingest/&lt;key&gt;</code>. The page waits for the first reading.
+								</p>
+							</div>
+						</li>
+						<li class="home-step">
+							<span class="home-step-num" aria-hidden="true">3</span>
+							<div>
+								<h3 class="home-step-title">Watch Home &amp; set alerts</h3>
+								<p class="home-step-copy">
+									Confirm live values, set a freeze threshold, and send a test alert before the next cold night.
+								</p>
+							</div>
+						</li>
+					</ol>
+					<div class="home-steps-actions">
+						<a class="btn-primary" href="/register?next=/dashboard/temperature">Start free — open Devices</a>
+						<a class="btn-secondary" href="/about/adding-devices">Adding devices guide</a>
+					</div>
+				</section>
+
+				<section class="home-compat" aria-label="Works with">
+					<p class="home-compat-label">Works with</p>
+					<ul class="home-compat-list">
+						<li>ESP32</li>
+						<li>Arduino</li>
+						<li>HTTPS JSON push</li>
+						<li>HTTPS JSON pull</li>
+						<li>Home Assistant webhooks</li>
+						<li>Discord · Telegram · Slack</li>
+					</ul>
+					<p class="home-compat-note">
+						Devices POST outbound HTTPS — no public IP or native MQTT broker required.
+						<a class="text-link" href="/compare/diy-mqtt">Compare vs DIY MQTT</a>
+					</p>
+				</section>
 
 				<HomePwaCard />
 
