@@ -6,6 +6,7 @@ import {
   upsertUserSubscription,
 } from "../../../lib/stripeSubscriptions";
 import { grantReferrerRewardOnSubscription } from "../../../lib/referrals";
+import { claimStripeWebhookEvent } from "../../../lib/stripeWebhookEvents";
 
 export const prerender = false;
 
@@ -105,6 +106,14 @@ export const POST: APIRoute = async ({ request }) => {
     const message =
       error instanceof Error ? error.message : "Invalid webhook signature";
     return new Response(message, { status: 400 });
+  }
+
+  const { alreadyProcessed } = await claimStripeWebhookEvent(event.id, event.type);
+  if (alreadyProcessed) {
+    return new Response(JSON.stringify({ received: true, duplicate: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   try {

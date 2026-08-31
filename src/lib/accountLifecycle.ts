@@ -1,8 +1,37 @@
 import { createAdminClient, createServerClient } from "./supabase";
+import { createStripeClient, isActiveSubscriptionStatus } from "./stripe";
+import { getUserSubscription } from "./stripeSubscriptions";
+import { notifyOps } from "./opsNotify";
+
+// Deleting the account must not leave a live subscription billing someone who
+// can no longer sign in to cancel it themselves. Cancel first; if Stripe is
+// unreachable, alert ops so a human can cancel it manually rather than
+// silently deleting the account with billing still running.
+export async function cancelStripeSubscriptionForDeletedAccount(
+  userId: string,
+): Promise<void> {
+  const subscription = await getUserSubscription(userId);
+  if (!subscription || !isActiveSubscriptionStatus(subscription.status)) {
+    return;
+  }
+
+  try {
+    const stripe = createStripeClient();
+    await stripe.subscriptions.cancel(subscription.stripe_subscription_id);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown error";
+    await notifyOps(
+      "ThermalTrace: Stripe cancellation failed during account deletion",
+      `User ${userId} deleted their account but subscription ${subscription.stripe_subscription_id} could not be cancelled: ${message}. Cancel it manually in Stripe.`,
+    );
+  }
+}
 
 export async function deleteUserAccount(
   userId: string,
 ): Promise<{ error: string | null }> {
+  await cancelStripeSubscriptionForDeletedAccount(userId);
+
   const supabase = createServerClient();
 
   // Remove owned households where user is sole owner (cascade deletes devices)
