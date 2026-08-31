@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
-import { supabase } from "../../../lib/supabase";
+import { createAuthClient } from "../../../lib/supabase";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session } = await getAuthFromCookies(cookies);
@@ -21,7 +21,14 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect("/reset-password?error=mismatch");
   }
 
-  const { error: sessionError } = await supabase.auth.setSession({
+  // Fresh client per request -- never the shared `supabase` singleton for
+  // this. Cloudflare Workers can interleave concurrent requests within one
+  // isolate's shared global scope, so a shared client's setSession() call
+  // here would race against any other in-flight request's auth calls, and
+  // this updateUser({ password }) call (no explicit token) would silently
+  // apply to whichever session most recently "won" the shared client.
+  const client = createAuthClient();
+  const { error: sessionError } = await client.auth.setSession({
     access_token: session.access_token,
     refresh_token: session.refresh_token,
   });
@@ -30,7 +37,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect("/reset-password?error=session");
   }
 
-  const { error } = await supabase.auth.updateUser({ password });
+  const { error } = await client.auth.updateUser({ password });
 
   if (error) {
     return redirect("/reset-password?error=update");

@@ -1,5 +1,5 @@
 import type { AstroCookies } from "astro";
-import { supabase } from "./supabase";
+import { createAuthClient } from "./supabase";
 import type { Session, User } from "@supabase/supabase-js";
 
 export type AuthResult = {
@@ -18,7 +18,14 @@ export async function getAuthFromCookies(
   }
 
   try {
-    const { data, error } = await supabase.auth.setSession({
+    // Fresh client per call -- never the shared `supabase` singleton here.
+    // getAuthFromCookies runs on essentially every request, and Cloudflare
+    // Workers can interleave concurrent requests within one isolate's
+    // shared global scope, so a shared client's setSession() would be a
+    // race: whichever request last called it "wins" the ambient session
+    // that other in-flight requests' auth calls would then silently read.
+    const client = createAuthClient();
+    const { data, error } = await client.auth.setSession({
       access_token: accessToken.value,
       refresh_token: refreshToken.value,
     });

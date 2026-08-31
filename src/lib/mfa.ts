@@ -1,7 +1,8 @@
-import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
+import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import type { AstroCookies } from "astro";
 import type { Database } from "../types/supabase";
 import { sanitizeNextPath } from "./siteUrl";
+import { createAuthClient } from "./supabase";
 
 export const MFA_REQUIRED_COOKIE = "sb-mfa-required";
 
@@ -12,25 +13,8 @@ export type AssuranceLevels = {
   nextLevel: AalLevel | null;
 };
 
-function getSupabaseUrl(): string {
-  return import.meta.env.SUPABASE_URL;
-}
-
-function getAnonKey(): string {
-  return import.meta.env.SUPABASE_ANON_KEY;
-}
-
-/** Ephemeral auth client so MFA/sign-in does not race the shared singleton. */
-export function createAuthClient(): SupabaseClient<Database> {
-  return createClient<Database>(getSupabaseUrl(), getAnonKey(), {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false,
-      flowType: "pkce",
-    },
-  });
-}
+/** Re-exported so existing "from ./mfa" imports keep working unchanged. */
+export { createAuthClient };
 
 export function decodeAccessTokenPayload(
   accessToken: string,

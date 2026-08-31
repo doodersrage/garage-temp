@@ -5,7 +5,7 @@ import {
   updateUserDisplayPreferences,
   type ThemePreference,
 } from "../lib/userPreferences";
-import { supabase, createServerClient } from "../lib/supabase";
+import { createServerClient, createAuthClient } from "../lib/supabase";
 import { updateUserAlertSettings } from "../lib/alertNotifications";
 import {
   alertChannelsIncomplete,
@@ -114,7 +114,12 @@ export const server = {
         maxAge: 60 * 60 * 24 * 365,
       });
 
-      const { data: refreshedSession } = await supabase.auth.refreshSession({
+      // Fresh client -- never the shared `supabase` singleton, whose
+      // ambient session is effectively shared mutable state across
+      // concurrent requests under Cloudflare Workers, and whose
+      // refreshSession() result here gets turned straight into this
+      // response's auth cookies.
+      const { data: refreshedSession } = await createAuthClient().auth.refreshSession({
         refresh_token: refreshToken,
       });
 

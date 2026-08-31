@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { supabase } from "../../../lib/supabase";
+import { createAuthClient } from "../../../lib/supabase";
 import { getTurnstileToken, verifyTurnstileToken } from "../../../lib/turnstile";
 import {
   applyReferralForNewUser,
@@ -28,7 +28,10 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
     return redirect("/register?error=weak_password");
   }
 
-  const { data, error } = await supabase.auth.signUp({
+  // Fresh client -- never the shared `supabase` singleton, which would
+  // leave this newly-created session sitting as ambient state for any
+  // other concurrent request on the same Worker isolate to pick up.
+  const { data, error } = await createAuthClient().auth.signUp({
     email,
     password,
   });

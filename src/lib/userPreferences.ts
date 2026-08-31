@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { supabase } from "./supabase";
+import { createAuthClient } from "./supabase";
 import type { TempFeedConfig, TempProbeConfig } from "./tempFeedConfig";
 import {
   getDefaultTempFeeds,
@@ -88,7 +88,11 @@ export async function updateUserDisplayPreferences(
     "showGarageTemps" | "showWeather" | "weatherCityId" | "useCelsius" | "theme"
   >,
 ): Promise<{ user: User | null; error: Error | null }> {
-  const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+  // Fresh client per call -- the shared `supabase` singleton would race
+  // against any other concurrent request's auth calls (see its doc comment
+  // in ./supabase.ts).
+  const client = createAuthClient();
+  const { data: sessionData, error: sessionError } = await client.auth.setSession({
     access_token: accessToken,
     refresh_token: refreshToken,
   });
@@ -97,7 +101,7 @@ export async function updateUserDisplayPreferences(
     return { user: null, error: sessionError ?? new Error("Invalid session") };
   }
 
-  const { data, error } = await supabase.auth.updateUser({
+  const { data, error } = await client.auth.updateUser({
     data: {
       show_garage_temps: preferences.showGarageTemps,
       show_weather: preferences.showWeather,
