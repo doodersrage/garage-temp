@@ -3,8 +3,10 @@ import {
   getAboutJourneys,
   resolveJourneyStepPages,
 } from "../lib/aboutJourneys";
+import { buildRegisterHref } from "../lib/registerUrl";
 
 const journeys = getAboutJourneys();
+const registerHref = buildRegisterHref();
 ---
 <section class="card about-journeys" aria-labelledby="about-journeys-title">
   <div class="about-journeys-header">
@@ -14,7 +16,7 @@ const journeys = getAboutJourneys();
         Job-based journeys through the guides—start with the outcome you care about, then dig into topics.
       </p>
     </div>
-    <a class="btn-primary" href="/register">Start free</a>
+    <a class="btn-primary" href={registerHref}>Start free</a>
   </div>
 
   <div class="about-journeys-grid">

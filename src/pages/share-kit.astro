@@ -22,6 +22,7 @@ const reddit = `I built ThermalTrace for garage freeze alerts (ESP/Arduino → h
 
 Public freeze-risk map (opt-in city aggregates): ${siteUrl}/freeze-map
 Live demo (no account): ${siteUrl}/demo
+Start free (no card) → Devices: ${siteUrl}/register?next=/dashboard/temperature
 Freeze season checklist: ${siteUrl}/freeze-season
 
 Happy to answer hardware / Home Assistant webhook questions.`;
@@ -30,16 +31,29 @@ const homeAssistant = `**ThermalTrace** — hosted garage / crawlspace freeze mo
 
 - HTTPS ingest (device key) instead of exposing MQTT
 - Email / push / SMS / webhooks into HA
+- Free plan, no credit card — ${siteUrl}/register?next=/dashboard/temperature
 - Public community freeze map: ${siteUrl}/freeze-map
 - Embed: \`${siteUrl}/embed/freeze-map?compact=1\`
 
-Docs: ${siteUrl}/docs/api · Kit QR: ${siteUrl}/about/kit-qr-onboarding`;
+Live demo: ${siteUrl}/demo · Docs: ${siteUrl}/docs/api · Kit QR: ${siteUrl}/about/kit-qr-onboarding`;
 
 const bluesky = `Garage freezes are boring until they are not.
 
 ThermalTrace: DIY probes → freeze alerts + a public opt-in freeze map.
+Demo (no account): ${siteUrl}/demo
 Map: ${siteUrl}/freeze-map
-Demo: ${siteUrl}/demo`;
+Start free: ${siteUrl}/register?next=/dashboard/temperature`;
+
+const hackerNews = `ThermalTrace – hosted freeze alerts for ESP/Arduino garage probes (live demo, free plan)
+
+${siteUrl}/demo
+${siteUrl}/`;
+
+const discord = `Built a hosted garage freeze dashboard for DIY probes (ESP/Arduino → HTTPS ingest).
+
+Live demo (no signup): ${siteUrl}/demo
+Free account → Devices: ${siteUrl}/register?next=/dashboard/temperature
+Freeze map: ${siteUrl}/freeze-map`;
 
 const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="ThermalTrace freeze map" width="100%" height="320" style="border:0;border-radius:12px" loading="lazy"></iframe>`;
 ---
@@ -72,8 +86,20 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
 
     <section class="card">
       <h2 class="card-title">Bluesky / short social</h2>
-      <textarea class="form-textarea font-mono text-xs" id="share-bsky" rows="6" readonly>{bluesky}</textarea>
+      <textarea class="form-textarea font-mono text-xs" id="share-bsky" rows="7" readonly>{bluesky}</textarea>
       <button type="button" class="btn-secondary mt-2" data-copy-target="share-bsky">Copy</button>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Hacker News / Show HN</h2>
+      <textarea class="form-textarea font-mono text-xs" id="share-hn" rows="5" readonly>{hackerNews}</textarea>
+      <button type="button" class="btn-secondary mt-2" data-copy-target="share-hn">Copy</button>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Discord / chat</h2>
+      <textarea class="form-textarea font-mono text-xs" id="share-discord" rows="6" readonly>{discord}</textarea>
+      <button type="button" class="btn-secondary mt-2" data-copy-target="share-discord">Copy</button>
     </section>
 
     <section class="card">
@@ -89,6 +115,7 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
       <h2 class="card-title">Deep links worth including</h2>
       <ul class="text-sm space-y-2 mb-0">
         <li><a class="text-link" href="/demo">/demo</a> — live readings, no account</li>
+        <li><a class="text-link" href="/register?next=/dashboard/temperature">/register</a> — free, no card → Devices</li>
         <li><a class="text-link" href="/freeze-season">/freeze-season</a> — seasonal checklist</li>
         <li><a class="text-link" href="/compare/diy-mqtt">/compare/diy-mqtt</a> — vs self-hosted MQTT</li>
         <li><a class="text-link" href="/stories">/stories</a> — short case studies</li>

@@ -1,9 +1,12 @@
 ---
+import { buildRegisterHref } from "../lib/registerUrl";
+
 interface Props {
   slug: string;
 }
 
 const { slug } = Astro.props;
+const registerHref = buildRegisterHref();
 
 const productCtas: Record<
   string,
@@ -39,22 +42,29 @@ const productCtas: Record<
     href: "/dashboard/temperature",
     label: "Open devices",
   },
+  "adding-devices": {
+    title: "Create your free device key",
+    body: "Free forever, no credit card — land on Devices, create a push key, and POST a test reading.",
+    href: registerHref,
+    label: "Start free",
+  },
   "dht22-sensor-overview": {
     title: "See it on a live dashboard",
-    body: "Create a free account, map your probe keys, and watch freeze risk overnight.",
-    href: "/register",
+    body: "Create a free account (no card), map your probe keys, and watch freeze risk overnight.",
+    href: registerHref,
     label: "Start free",
   },
 };
 
 const fallback = {
   title: "Set this up in ThermalTrace",
-  body: "Track probes, freeze alerts, and history without running your own server.",
-  href: "/register",
+  body: "Free forever, no credit card — track probes, freeze alerts, and history without running your own server.",
+  href: registerHref,
   label: "Create free account",
 };
 
 const cta = productCtas[slug] ?? fallback;
+const showDemo = cta.href.startsWith("/register");
 ---
 <aside class="card about-product-cta" role="note">
   <div class="about-product-cta-body">
@@ -63,6 +73,10 @@ const cta = productCtas[slug] ?? fallback;
   </div>
   <div class="about-product-cta-actions">
     <a class="btn-primary" href={cta.href}>{cta.label}</a>
-    <a class="btn-secondary" href="/pricing">See plans</a>
+    {showDemo ? (
+      <a class="btn-secondary" href="/demo">Live demo</a>
+    ) : (
+      <a class="btn-secondary" href="/pricing">See plans</a>
+    )}
   </div>
 </aside>

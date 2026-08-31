@@ -244,7 +244,7 @@ const registerServiceWorker =
 										Sign in
 									</a>
 									{!isDashboard && (
-										<a href="/register" class="nav-cta">Get started</a>
+										<a href="/register?next=/dashboard/temperature" class="nav-cta">Start free</a>
 									)}
 								</>
 							)}
@@ -314,7 +314,8 @@ const registerServiceWorker =
 									) : (
 										<>
 											<li><a href="/signin">Sign in</a></li>
-											<li><a href="/register">Create account</a></li>
+											<li><a href="/demo">Live demo</a></li>
+											<li><a href="/register?next=/dashboard/temperature">Create free account</a></li>
 										</>
 									)}
 									<li><a href="/contact">Contact</a></li>

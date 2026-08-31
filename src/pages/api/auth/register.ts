@@ -4,6 +4,7 @@ import { getTurnstileToken, verifyTurnstileToken } from "../../../lib/turnstile"
 import {
   applyReferralForNewUser,
 } from "../../../lib/referrals";
+import { REGISTER_NEXT_DEVICES, sanitizeRegisterNext } from "../../../lib/registerUrl";
 
 export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
   const formData = await request.formData();
@@ -45,8 +46,7 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
   }
 
   const next = formData.get("next")?.toString() ?? "";
-  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "";
-  const params = new URLSearchParams({ registered: "1" });
-  if (safeNext) params.set("next", safeNext);
+  const safeNext = sanitizeRegisterNext(next) ?? REGISTER_NEXT_DEVICES;
+  const params = new URLSearchParams({ registered: "1", next: safeNext });
   return redirect(`/signin?${params.toString()}`);
 };

@@ -26,20 +26,21 @@ export const DRIP_STAGES: DripStage[] = [
     subject: "Add your first probe to ThermalTrace",
     content: (site) => ({
       eyebrow: "Getting started",
-      preheader: "Connect a device or JSON feed so live readings show up on your dashboard.",
-      title: "Add your first probe",
+      preheader: "Create a device key, map sensors, and POST JSON — about 10 minutes.",
+      title: "Connect your first probe",
       intro:
-        "Welcome to ThermalTrace. Your account is ready — the next step is getting live temperature into the dashboard.",
+        "Welcome to ThermalTrace. Your free account is ready — next step is a live reading on Home.",
       paragraphs: [
-        "Create a push device (ESP/Arduino) or add an HTTPS JSON feed. Once readings arrive, Home and History light up automatically.",
+        "Open Devices, create a push device, copy the one-time ingest URL, then map a temperature + humidity pair (or a single sensor). Point your ESP/Arduino sketch at that URL and you should see values within a few minutes.",
       ],
       bullets: [
-        "Push ingest: Dashboard → Devices → create a device key",
-        "Pull feeds: paste a HTTPS JSON URL and map probe labels",
-        "About guides cover DHT22 wiring, Arduino sketches, and ESP OTA",
+        "Devices → Create push device → copy ingest URL / QR",
+        "Quick-add a temp + humidity pair so JSON keys become labels",
+        `POST to ${site}/api/ingest/<your-key> — sample sketches are in the GitHub repo`,
+        "Prefer reading first? Live demo (no account): /demo",
       ],
       cta: { label: "Open Devices", url: `${site}/dashboard/temperature` },
-      secondaryCta: { label: "Browse setup guides", url: `${site}/about` },
+      secondaryCta: { label: "Adding devices guide", url: `${site}/about/adding-devices` },
       tone: "brand",
     }),
   },
@@ -127,12 +128,15 @@ export async function sendDripEmailsForAllUsers(): Promise<{
         continue;
       }
 
-      const ageDays = Math.floor(
-        (Date.now() - Date.parse(user.created_at)) / (24 * 60 * 60 * 1000),
-      );
-      const nextStage = DRIP_STAGES.find(
-        (stage) => stage.day > (row.drip_email_stage ?? 0) && ageDays >= stage.day,
-      );
+      const ageMs = Date.now() - Date.parse(user.created_at);
+      const ageDays = Math.floor(ageMs / (24 * 60 * 60 * 1000));
+      const ageHours = ageMs / (60 * 60 * 1000);
+      const nextStage = DRIP_STAGES.find((stage) => {
+        if (stage.day <= (row.drip_email_stage ?? 0)) return false;
+        // First “day1” tip can go out about an hour after signup; later stages stay day-based.
+        if (stage.id === "day1") return ageHours >= 1;
+        return ageDays >= stage.day;
+      });
       if (!nextStage) {
         skipped += 1;
         continue;

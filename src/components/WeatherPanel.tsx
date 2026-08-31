@@ -73,7 +73,7 @@ export default function WeatherPanel({ cityId = null, intervalMs = 300000, guest
               Retry
             </button>
             {guest ? (
-              <a class="btn-ghost" href="/register">
+              <a class="btn-ghost" href="/register?next=/dashboard/temperature">
                 Create account to set location
               </a>
             ) : (

@@ -79,7 +79,7 @@ export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
   return (
     <section class="card animate-slide-in-left">
       <h2 class="card-title">Live demo readings</h2>
-      <p class="card-subtitle">Public garage temperatures — create an account to connect your own probes.</p>
+      <p class="card-subtitle">Public garage temperatures — free account (no card) to connect your own probes.</p>
 
       {error && (
         <div class="alert-warning mb-4">
@@ -93,8 +93,8 @@ export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
       {!error && groups.length === 0 ? (
         <div class="empty-state">
           <p class="mb-4">No temperature feeds are available yet.</p>
-          <a class="btn-primary" href="/register">
-            Create an account to connect probes
+          <a class="btn-primary" href="/register?next=/dashboard/temperature">
+            Create free account — connect probes
           </a>
         </div>
       ) : (
@@ -142,6 +142,10 @@ export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
         {updatedAt
           ? `Updated ${new Date(updatedAt).toLocaleTimeString()}. Next refresh in ${countdown}s.`
           : `Next refresh in ${countdown}s.`}
+        {" "}
+        <a class="text-link" href="/register?next=/dashboard/temperature">
+          Free account — connect your probes
+        </a>
       </p>
     </section>
   );

@@ -1,0 +1,16 @@
+---
+import { buildRegisterHref } from "../lib/registerUrl";
+
+const registerHref = buildRegisterHref();
+---
+
+<aside class="about-convert-bar" aria-label="Try ThermalTrace">
+  <p class="about-convert-bar-copy">
+    <strong>Live demo</strong> — no account.
+    Ready to connect probes? Free forever, no card.
+  </p>
+  <div class="about-convert-bar-actions">
+    <a class="btn-secondary" href="/demo">Try live demo</a>
+    <a class="btn-primary" href={registerHref}>Start free</a>
+  </div>
+</aside>

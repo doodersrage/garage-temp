@@ -1187,3 +1187,39 @@ a.about-figure-credit:hover {
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+
+.about-convert-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.about-convert-bar-copy {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  max-width: 36rem;
+}
+
+.about-convert-bar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-convert-bar {
+    backdrop-filter: none;
+    background: var(--color-surface);
+  }
+}
+

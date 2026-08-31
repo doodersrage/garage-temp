@@ -21,7 +21,7 @@ export const aboutJourneys: AboutJourney[] = [
     title: "Protect pipes this winter",
     description:
       "Set freeze thresholds, wire alerts, and see how a real cold snap looked in the case study.",
-    ctaHref: "/register",
+    ctaHref: "/register?next=/dashboard/temperature",
     ctaLabel: "Start free monitoring",
     steps: [
       { slug: "freeze-protection-thresholds", label: "Freeze thresholds" },
@@ -77,7 +77,7 @@ export const aboutJourneys: AboutJourney[] = [
     title: "Share with my household",
     description:
       "Invite family, understand roles, and keep freeze alerts in one place.",
-    ctaHref: "/register",
+    ctaHref: "/register?next=/dashboard/temperature",
     ctaLabel: "Create a free account",
     steps: [
       { slug: "household-sharing-walkthrough", label: "Sharing walkthrough" },

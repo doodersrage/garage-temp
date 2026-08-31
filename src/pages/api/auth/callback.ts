@@ -7,6 +7,7 @@ import {
   sanitizeNextPath,
 } from "../../../lib/siteUrl";
 import { applyReferralForNewUser, isLikelyNewUser } from "../../../lib/referrals";
+import { REGISTER_NEXT_DEVICES } from "../../../lib/registerUrl";
 
 export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   const authCode = url.searchParams.get("code");
@@ -31,7 +32,11 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
 
   const nextCookie = cookies.get(OAUTH_NEXT_COOKIE)?.value;
   cookies.delete(OAUTH_NEXT_COOKIE, { path: "/" });
-  const safeNext = sanitizeNextPath(nextCookie) ?? "/dashboard";
+  const defaultNext =
+    data.user && isLikelyNewUser(data.user.created_at)
+      ? REGISTER_NEXT_DEVICES
+      : "/dashboard";
+  const safeNext = sanitizeNextPath(nextCookie) ?? defaultNext;
 
   const { redirectTo } = await applySessionCookiesAfterAuth(
     cookies,

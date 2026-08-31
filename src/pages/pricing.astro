@@ -131,7 +131,7 @@ const schema = [
         </p>
       ) : (
         <>
-          <a slot="actions" class="btn-primary" href="/register">Create free account</a>
+          <a slot="actions" class="btn-primary" href="/register?next=/dashboard/temperature">Create free account</a>
           <a slot="actions" class="btn-secondary" href="/signin">Sign in</a>
         </>
       )}
@@ -174,7 +174,7 @@ const schema = [
             <p class="plan-tier-savings">&nbsp;</p>
             <p class="plan-tier-sub">&nbsp;</p>
           </div>
-          <p class="plan-tier-tagline">Live monitoring for one garage</p>
+          <p class="plan-tier-tagline">Live monitoring for one garage — no credit card</p>
           <ul class="plan-tier-list">
             <li>{FREE_MAX_DEVICES} push devices</li>
             <li>{formatHistoryRetention(FREE_HISTORY_DAYS)} of history</li>
@@ -182,7 +182,7 @@ const schema = [
           </ul>
           <div class="plan-tier-footer">
             {!user ? (
-              <a class="btn-secondary" href="/register">Get started</a>
+              <a class="btn-secondary" href="/register?next=/dashboard/temperature">Get started</a>
             ) : currentTier === "free" ? (
               <p>Current plan</p>
             ) : (
