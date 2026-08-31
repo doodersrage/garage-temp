@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
+import { formatLiveTempDetail, formatLiveTempF } from "../lib/temperatureFormat";
 
 type ProbeReading = {
   key: string;
@@ -121,9 +122,9 @@ export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
                       <span class="stat-label">{probe.label}</span>
                       {probe.data ? (
                         <>
-                          <p class="stat-value">{probe.data.f}°F</p>
+                          <p class="stat-value">{formatLiveTempF(probe.data.f)}</p>
                           <p class="stat-detail">
-                            {probe.data.c}°C · {probe.data.h}% humidity
+                            {formatLiveTempDetail(probe.data.c, probe.data.h)}
                           </p>
                         </>
                       ) : (

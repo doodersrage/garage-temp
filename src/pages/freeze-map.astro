@@ -55,6 +55,9 @@ const mapPins = visible
         : 0,
   }));
 const mapPinsJson = JSON.stringify(mapPins);
+const owmApiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "")
+  .replace(/\r/g, "")
+  .trim();
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/freeze-map");
@@ -184,7 +187,10 @@ function sparkPath(values: number[]): string {
       <section class="card">
         <h2 class="card-title">Map</h2>
         <p class="card-subtitle mb-4">
-          Pin color reflects freeze-risk share (green = low, red = high). Only cities with coordinates are shown.
+          Pin color reflects freeze-risk share (green = low, red = high).
+          {owmApiKey
+            ? " Toggle OpenWeather temperature or precipitation under the layers control."
+            : " Only cities with coordinates are shown."}
         </p>
         <div id="freeze-map-leaflet" class="weather-map-frame freeze-map-frame" style="height:22rem">
           <div class="loading-state freeze-map-loading" id="freeze-map-loading">
@@ -196,7 +202,7 @@ function sparkPath(values: number[]): string {
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           crossorigin=""
         />
-        <script is:inline define:vars={{ mapPinsJson }}>
+        <script is:inline define:vars={{ mapPinsJson, owmApiKey }}>
           (() => {
             const pins = JSON.parse(mapPinsJson);
             function init() {
@@ -205,12 +211,31 @@ function sparkPath(values: number[]): string {
               if (!el || typeof L === "undefined" || pins.length === 0) return;
               if (loading) loading.remove();
               const map = L.map(el).setView([pins[0].lat, pins[0].lon], 4);
-              L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+              const base = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                 attribution:
                   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
                 maxZoom: 18,
                 subdomains: "abc",
               }).addTo(map);
+
+              const overlays = {};
+              if (owmApiKey) {
+                const owmAttr =
+                  'Weather &copy; <a href="https://openweathermap.org/">OpenWeather</a>';
+                overlays["Temperature"] = L.tileLayer(
+                  "https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=" +
+                    encodeURIComponent(owmApiKey),
+                  { opacity: 0.55, maxZoom: 18, attribution: owmAttr },
+                );
+                overlays["Precipitation"] = L.tileLayer(
+                  "https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=" +
+                    encodeURIComponent(owmApiKey),
+                  { opacity: 0.55, maxZoom: 18, attribution: owmAttr },
+                );
+                overlays["Temperature"].addTo(map);
+                L.control.layers({ Map: base }, overlays, { collapsed: false }).addTo(map);
+              }
+
               for (const pin of pins) {
                 const color =
                   pin.riskPct >= 50 ? "#ef4444" : pin.riskPct >= 25 ? "#f59e0b" : "#22c55e";

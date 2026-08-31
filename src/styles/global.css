@@ -1755,6 +1755,8 @@
   .stat-value {
     @apply text-2xl font-bold tracking-tight;
     color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
   }
 
   .stat-detail {

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
+import { formatLiveTempDetail, formatLiveTempF } from "../lib/temperatureFormat";
 
 type ProbeReading = {
   key: string;
@@ -41,8 +42,8 @@ function formatSensorValue(sensor: LiveSensor): { primary: string; detail: strin
     case "temperature":
       if (sensor.temp) {
         return {
-          primary: `${sensor.temp.f.toFixed(1)}°F`,
-          detail: `${sensor.temp.c.toFixed(1)}°C · ${sensor.temp.h.toFixed(0)}% humidity`,
+          primary: `${formatLiveTempF(sensor.temp.f)}`,
+          detail: formatLiveTempDetail(sensor.temp.c, sensor.temp.h),
         };
       }
       if (sensor.value_num != null) {
@@ -398,9 +399,9 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
                       <span class="stat-label">{probe.label}</span>
                       {probe.data ? (
                         <>
-                          <p class="stat-value">{probe.data.f}°F</p>
+                          <p class="stat-value">{formatLiveTempF(probe.data.f)}</p>
                           <p class="stat-detail">
-                            {probe.data.c}°C · {probe.data.h}% humidity
+                            {formatLiveTempDetail(probe.data.c, probe.data.h)}
                           </p>
                         </>
                       ) : (

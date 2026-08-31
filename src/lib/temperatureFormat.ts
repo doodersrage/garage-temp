@@ -14,6 +14,22 @@ export function formatTemperature(
   return `${tempF.toFixed(decimals)}°F`;
 }
 
+/** Live tile °F — hundredths avoid float junk overflow in compact cards. */
+export function formatLiveTempF(tempF: number, decimals = 2): string {
+  if (!Number.isFinite(tempF)) return "—";
+  return `${tempF.toFixed(decimals)}°F`;
+}
+
+export function formatLiveTempDetail(
+  tempC: number,
+  humidity: number,
+  decimals = 2,
+): string {
+  const c = Number.isFinite(tempC) ? tempC.toFixed(decimals) : "—";
+  const h = Number.isFinite(humidity) ? humidity.toFixed(decimals) : "—";
+  return `${c}°C · ${h}% humidity`;
+}
+
 export function formatDeltaF(deltaF: number, useCelsius: boolean): string {
   if (!Number.isFinite(deltaF)) return "—";
   const sign = deltaF > 0 ? "+" : "";
