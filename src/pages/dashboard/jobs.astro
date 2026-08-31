@@ -3,6 +3,22 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import { listRecentJobRuns } from "../../lib/jobRuns";
 import { listRecentIngestStatsAdmin } from "../../lib/ingestStats";
 import { flagIngestAbuse } from "../../lib/ingestAbuse";
+import { getAuthFromCookies } from "../../lib/auth";
+import { isUserAdmin } from "../../lib/adminAccess";
+
+const { session, user } = await getAuthFromCookies(Astro.cookies);
+if (!session || !user) {
+  return Astro.redirect("/signin");
+}
+
+// Gate before admin-only fetches -- this page had no auth check of its
+// own at all, relying entirely on DashboardLayout's requireAdmin, which
+// runs too late to stop the frontmatter below from already having
+// queried job-run and ingest-abuse data (Astro.redirect() from a nested
+// layout isn't a reliable way to abort a page's response; see ops.astro).
+if (!(await isUserAdmin(user.id))) {
+  return Astro.redirect("/dashboard");
+}
 
 const { runs, error } = await listRecentJobRuns(40);
 const ingestStats = await listRecentIngestStatsAdmin(7);

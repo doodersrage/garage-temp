@@ -3,11 +3,20 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import ContactSubmissions from "../../components/ContactSubmissions.astro";
 import { fetchContactSubmissions } from "../../lib/contactSubmissions";
 import { getAuthFromCookies } from "../../lib/auth";
+import { isUserAdmin } from "../../lib/adminAccess";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
 if (!session || !user) {
   return Astro.redirect("/signin");
+}
+
+// Gate before admin-only fetches -- DashboardLayout's own requireAdmin
+// check runs too late to stop this page's frontmatter from already
+// having queried admin-only data (Astro.redirect() from a nested layout
+// isn't a reliable way to abort a page's response; see ops.astro).
+if (!(await isUserAdmin(user.id))) {
+  return Astro.redirect("/dashboard");
 }
 
 const pageParam = Number(Astro.url.searchParams.get("page") ?? "1");
