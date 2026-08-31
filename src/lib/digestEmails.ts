@@ -47,6 +47,46 @@ function summarizePoints(points: ChartPoint[]): string[] {
   return lines;
 }
 
+/** One line per calendar day (UTC): min–max, avg, and coldest probe when mixed. */
+export function summarizePointsByDay(points: ChartPoint[]): string[] {
+  if (points.length === 0) return [];
+
+  const byDay = new Map<string, ChartPoint[]>();
+  for (const point of points) {
+    const key = new Date(point.timestamp).toISOString().slice(0, 10);
+    const group = byDay.get(key) ?? [];
+    group.push(point);
+    byDay.set(key, group);
+  }
+
+  return [...byDay.keys()]
+    .sort()
+    .map((key) => {
+      const dayPoints = byDay.get(key) ?? [];
+      const temps = dayPoints.map((point) => point.tempf);
+      const min = Math.min(...temps);
+      const max = Math.max(...temps);
+      const avg = temps.reduce((sum, value) => sum + value, 0) / temps.length;
+      const coldest = dayPoints.reduce((a, b) =>
+        a.tempf <= b.tempf ? a : b,
+      );
+      const dayLabel = new Date(`${key}T12:00:00.000Z`).toLocaleDateString(
+        "en-US",
+        {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          timeZone: "UTC",
+        },
+      );
+      const mixedProbes = dayPoints.some(
+        (point) => point.probeLabel !== coldest.probeLabel,
+      );
+      const coldestNote = mixedProbes ? ` · coldest ${coldest.probeLabel}` : "";
+      return `${dayLabel}: ${min.toFixed(1)}–${max.toFixed(1)} °F (avg ${avg.toFixed(1)}°${coldestNote})`;
+    });
+}
+
 export async function sendWeeklyDigestsForAllUsers(): Promise<{
   sent: number;
   skipped: number;
@@ -95,6 +135,7 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
       }
 
       const summary = summarizePoints(points);
+      const byDay = summarizePointsByDay(points);
       const seasonal = summarizeSeasonal(points, 7);
       const parts = brandedEmailParts({
         eyebrow: "Weekly digest",
@@ -103,6 +144,7 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
         intro: "Here’s a quick look at the last 7 days of probe readings.",
         bullets: [
           ...summary,
+          ...(byDay.length ? ["Day by day:", ...byDay] : []),
           ...seasonal.map((item) => `${item.title}: ${item.detail}`),
         ],
         cta: { label: "Open history", url: `${siteUrl}/dashboard/history` },
@@ -124,7 +166,7 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
 
       await notifyUser(userId, digestEmail, { ...settings, channelEmail: false }, {
         title: "Weekly garage digest",
-        body: summary.join("\n"),
+        body: [...summary, ...byDay].join("\n"),
         kind: "digest",
       });
 
