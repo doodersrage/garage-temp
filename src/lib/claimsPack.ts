@@ -220,7 +220,6 @@ export function buildClaimsPackHtml(data: ClaimsPackData): string {
     <p class="muted">
       Household: ${escapeHtml(data.householdLabel)} · Window: ${escapeHtml(fromLabel)} → ${escapeHtml(toLabel)} · Exported ${escapeHtml(formatDateTime(data.exportedAt))}
     </p>
-    <p class="print-hint">Use your browser’s Print → Save as PDF for a portable copy. Companion CSVs are linked below.</p>
 
     <div class="downloads">
       <strong>Companion downloads</strong>

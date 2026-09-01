@@ -51,7 +51,7 @@ export const marketingFaqs = {
     {
       question: "What is the claims / insurance evidence pack?",
       answer:
-        "On Pro, History can export a printable HTML summary for a date range you choose—freeze exposure, devices, and alert timeline—with matching readings and alert-event CSVs. It is monitoring evidence for your own use, not a legal or insurance determination. Open the HTML and use Print → Save as PDF if you need a portable copy.",
+        "On Pro, History can export a PDF claims summary for a date range you choose—freeze exposure, devices, and alert timeline—with matching readings and alert-event CSVs. It is monitoring evidence for your own use, not a legal or insurance determination. An HTML version is also available if you need to edit or re-print.",
     },
     {
       question: "Can I cancel or change plans anytime?",

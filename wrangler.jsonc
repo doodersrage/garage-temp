@@ -63,5 +63,9 @@
 			"binding": "HISTORY_ARCHIVE",
 			"bucket_name": "thermaltrace-history"
 		}
-	]
+	],
+	"browser": {
+		"binding": "BROWSER",
+		"remote": true
+	}
 }

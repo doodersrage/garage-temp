@@ -52,10 +52,20 @@ function listConfiguredAlertChannels(settings: AlertSettings): string[] {
 export async function generateMonitoringCertificateForUser(
   user: Pick<User, "id" | "email" | "user_metadata">,
   siteUrl: string,
-): Promise<{ html: string | null; filename: string; error: string | null }> {
+): Promise<{
+  html: string | null;
+  data: MonitoringCertificateData | null;
+  filenameBase: string;
+  error: string | null;
+}> {
   const householdId = await getUserHouseholdId(user.id);
   if (!householdId) {
-    return { html: null, filename: "thermaltrace-monitoring-certificate.html", error: "No household" };
+    return {
+      html: null,
+      data: null,
+      filenameBase: "thermaltrace-monitoring-certificate",
+      error: "No household",
+    };
   }
 
   const [alertSettings, devicesResult, householdRow] = await Promise.all([
@@ -100,7 +110,8 @@ export async function generateMonitoringCertificateForUser(
 
   return {
     html: buildMonitoringCertificateHtml(data),
-    filename: `thermaltrace-monitoring-${slug || "certificate"}.html`,
+    data,
+    filenameBase: `thermaltrace-monitoring-${slug || "certificate"}`,
     error: null,
   };
 }

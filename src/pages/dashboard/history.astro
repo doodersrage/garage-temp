@@ -329,9 +329,10 @@ const claimsErrorMessage =
       {entitlements.canUseClaimsPack ? (
         <>
           <p class="mb-3 text-sm text-[var(--color-text-muted)]">
-            Uses the History filters above when set ({claimsFrom} → {claimsTo}). Opens a printable HTML file; use Print → Save as PDF, then download the linked CSVs for adjusters.
+            Uses the History filters above when set ({claimsFrom} → {claimsTo}). Downloads a PDF summary; companion CSVs cover the same window.
           </p>
-          <a class="btn-primary" href={claimsPackHref}>Download claims pack</a>
+          <a class="btn-primary" href={claimsPackHref}>Download claims pack (PDF)</a>
+          <a class="btn-ghost text-sm ml-2" href={`${claimsPackHref}?format=html`}>HTML version</a>
 
           <form action="/api/claims/email" method="post" class="mt-4 flex flex-wrap items-end gap-3">
             <input type="hidden" name="from" value={claimsFrom} />
@@ -359,9 +360,10 @@ const claimsErrorMessage =
     <section class="card" id="monitoring-certificate">
       <h2 class="card-title">Monitoring certificate</h2>
       <p class="card-subtitle mb-3">
-        One-page summary of your alert configuration and monitored devices — useful for insurers, landlords, or property managers. Print → Save as PDF.
+        One-page PDF summary of your alert configuration and monitored devices — useful for insurers, landlords, or property managers.
       </p>
-      <a class="btn-secondary" href="/api/monitoring/certificate">Download monitoring certificate</a>
+      <a class="btn-secondary" href="/api/monitoring/certificate">Download monitoring certificate (PDF)</a>
+      <a class="btn-ghost text-sm ml-2" href="/api/monitoring/certificate?format=html">HTML version</a>
     </section>
 
     {insights.length > 0 && (

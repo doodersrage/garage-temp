@@ -5,6 +5,7 @@ import { getSiteUrl } from "../../../lib/stripe";
 import { buildClaimsPackHtml } from "../../../lib/claimsPack";
 import { generateClaimsPackForUser } from "../../../lib/claimsPackGenerate";
 import { createClaimsPackExport } from "../../../lib/claimsPackExports";
+import { renderDocumentPdf } from "../../../lib/documentPdf";
 
 export const GET: APIRoute = async ({ cookies, url, request }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -25,11 +26,6 @@ export const GET: APIRoute = async ({ cookies, url, request }) => {
     siteUrl,
   );
 
-  // Persist a durable, tokenized export so the pack can be independently
-  // re-viewed/verified later (e.g. via a link sent to an insurance
-  // adjuster) instead of only existing as this one-time download. If the
-  // user has no household yet, there's nothing to scope the export to --
-  // the download still works, it just won't carry a verification block.
   let packToRender = pack;
   if (householdId) {
     const { token, contentHash } = await createClaimsPackExport(householdId, pack, user.id);
@@ -43,13 +39,33 @@ export const GET: APIRoute = async ({ cookies, url, request }) => {
   }
 
   const html = buildClaimsPackHtml(packToRender);
-  const filename = `thermaltrace-claims-${fromQ}-to-${toQ}.html`;
+  const filenameBase = `thermaltrace-claims-${fromQ}-to-${toQ}`;
+  const format = url.searchParams.get("format")?.toLowerCase();
 
-  return new Response(html, {
+  if (format === "html") {
+    return new Response(html, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${filenameBase}.html"`,
+      },
+    });
+  }
+
+  const pdf = await renderDocumentPdf({ html });
+  if (!pdf) {
+    return new Response(
+      "PDF generation is temporarily unavailable. Try ?format=html or retry shortly.",
+      { status: 503 },
+    );
+  }
+
+  return new Response(pdf.bytes, {
     status: 200,
     headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${filenameBase}.pdf"`,
+      "X-Pdf-Source": pdf.source,
     },
   });
 };

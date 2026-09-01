@@ -47,6 +47,7 @@
     "@tailwindcss/vite": "^4.2.4",
     "astro": "^6.4.3",
     "mimetext": "^3.0.28",
+    "pdf-lib": "^1.17.1",
     "preact": "^10.29.1",
     "stripe": "^22.3.0",
     "tailwind-animations": "^1.0.1",
