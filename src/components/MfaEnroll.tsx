@@ -4,6 +4,10 @@ import {
   browserSupportsWebAuthn,
   performWebAuthnCreate,
 } from "../lib/webauthnMfaBrowser";
+import {
+  MFA_WEBAUTHN_UI_ENABLED,
+  YUBIKEY_TOTP_ENROLL_HINT,
+} from "../lib/mfaWebAuthnUi";
 
 type FactorRow = {
   id: string;
@@ -36,7 +40,8 @@ export default function MfaEnroll() {
   const [webauthnFactors, setWebauthnFactors] = useState<FactorRow[]>([]);
   const [verifyCode, setVerifyCode] = useState("");
   const [busy, setBusy] = useState(false);
-  const webauthnSupported = browserSupportsWebAuthn();
+  const webauthnSupported =
+    MFA_WEBAUTHN_UI_ENABLED && browserSupportsWebAuthn();
 
   async function refreshFactorList() {
     const res = await mfaFetch({ method: "GET" });
@@ -63,8 +68,12 @@ export default function MfaEnroll() {
     if (total === 0) {
       setStatus("No MFA factors enrolled.");
     } else if (verified > 0 && pending === 0) {
+      const keyPart =
+        verifiedKeys > 0
+          ? ` (${verifiedTotp} app · ${verifiedKeys} key${verifiedKeys === 1 ? "" : "s"})`
+          : "";
       setStatus(
-        `${verified} MFA factor${verified === 1 ? "" : "s"} enrolled (${verifiedTotp} app · ${verifiedKeys} key${verifiedKeys === 1 ? "" : "s"}).`,
+        `${verified} MFA factor${verified === 1 ? "" : "s"} enrolled${keyPart}.`,
       );
     } else if (verified > 0) {
       setStatus(
@@ -112,7 +121,9 @@ export default function MfaEnroll() {
       if (!res.ok) throw new Error(payload.error ?? "Enrollment failed");
       setQrCode(payload.qrCode ?? null);
       setFactorId(payload.factorId ?? null);
-      setMessage("Scan the QR code, then enter a verification code below.");
+      setMessage(
+        "Scan the QR code with your authenticator app (or Yubico Authenticator on a YubiKey), then enter a verification code below.",
+      );
       await refreshFactorList();
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Enrollment failed");
@@ -183,7 +194,9 @@ export default function MfaEnroll() {
         error?: string;
       };
       if (!challengeRes.ok || !challenge.publicKey) {
-        throw new Error(challenge.error ?? "Could not start security key registration");
+        throw new Error(
+          challenge.error ?? "Could not start security key registration",
+        );
       }
 
       const credentialResponse = await performWebAuthnCreate(challenge.publicKey);
@@ -312,6 +325,9 @@ export default function MfaEnroll() {
           ))}
         </ul>
       )}
+      <p class="text-sm text-[var(--color-text-muted)] mb-3">
+        {YUBIKEY_TOTP_ENROLL_HINT}
+      </p>
       <div class="flex flex-wrap gap-2 mb-3">
         <button
           type="button"

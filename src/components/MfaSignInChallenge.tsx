@@ -1,8 +1,4 @@
-import { useState } from "preact/hooks";
-import {
-  browserSupportsWebAuthn,
-  performWebAuthnGet,
-} from "../lib/webauthnMfaBrowser";
+import { YUBIKEY_TOTP_SIGNIN_HINT } from "../lib/mfaWebAuthnUi";
 
 type Props = {
   safeNext: string;
@@ -10,95 +6,24 @@ type Props = {
   initialError?: string | null;
 };
 
-type ChallengePayload = {
-  factorId?: string;
-  challengeId?: string;
-  ceremonyType?: "create" | "request";
-  publicKey?: Record<string, unknown>;
-  error?: string;
-};
-
 export default function MfaSignInChallenge({
   safeNext,
   userEmail,
   initialError = null,
 }: Props) {
-  const [webauthnBusy, setWebauthnBusy] = useState(false);
-  const [webauthnError, setWebauthnError] = useState<string | null>(
-    initialError,
-  );
-  const webauthnSupported = browserSupportsWebAuthn();
-
-  async function verifyWithSecurityKey() {
-    if (!webauthnSupported) return;
-    setWebauthnBusy(true);
-    setWebauthnError(null);
-    try {
-      const challengeRes = await fetch("/api/auth/mfa-verify", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ action: "webauthn_challenge" }),
-      });
-      const challenge = (await challengeRes.json().catch(() => ({}))) as ChallengePayload;
-      if (!challengeRes.ok) {
-        throw new Error(challenge.error ?? "Could not start security key verification");
-      }
-
-      const credentialResponse = await performWebAuthnGet(
-        challenge.publicKey ?? {},
-      );
-
-      const verifyRes = await fetch("/api/auth/mfa-verify", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "webauthn_verify",
-          factorId: challenge.factorId,
-          challengeId: challenge.challengeId,
-          ceremonyType: challenge.ceremonyType ?? "request",
-          credentialResponse,
-        }),
-      });
-      const verify = (await verifyRes.json().catch(() => ({}))) as {
-        ok?: boolean;
-        error?: string;
-      };
-      if (!verifyRes.ok || !verify.ok) {
-        throw new Error(verify.error ?? "Security key verification failed");
-      }
-
-      window.location.assign(safeNext);
-    } catch (err) {
-      setWebauthnError(
-        err instanceof Error ? err.message : "Security key verification failed",
-      );
-    } finally {
-      setWebauthnBusy(false);
-    }
-  }
-
   return (
     <div>
       <header class="auth-intro page-header">
-        <h1 class="page-header-title">Two-factor authentication</h1>
+        <h1 class="page-header-title">Authenticator code</h1>
         <p class="page-header-lede">
-          Enter a code from your authenticator app or use a security key for{" "}
-          {userEmail}.
+          Enter the 6-digit code from your authenticator app for {userEmail}.
         </p>
       </header>
 
       <div class="form-panel">
-        {webauthnError && (
+        {initialError && (
           <div class="alert-warning mb-4" role="alert">
-            <p class="m-0">{webauthnError}</p>
+            <p class="m-0">{initialError}</p>
           </div>
         )}
         <form action="/api/auth/mfa-verify" method="post">
@@ -125,21 +50,9 @@ export default function MfaSignInChallenge({
           </button>
         </form>
 
-        {webauthnSupported && (
-          <div class="mt-4 pt-4 border-t border-[var(--color-border)]">
-            <p class="text-sm text-[var(--color-text-muted)] mb-3">
-              Or tap your YubiKey or other security key.
-            </p>
-            <button
-              type="button"
-              class="btn-secondary w-full"
-              disabled={webauthnBusy}
-              onClick={() => void verifyWithSecurityKey()}
-            >
-              {webauthnBusy ? "Waiting for security key…" : "Use security key"}
-            </button>
-          </div>
-        )}
+        <p class="text-sm text-[var(--color-text-muted)] mt-4 mb-0">
+          {YUBIKEY_TOTP_SIGNIN_HINT}
+        </p>
 
         <p class="m-0 mt-4 text-sm text-center">
           <a class="text-link" href="/api/auth/signout">
