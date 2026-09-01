@@ -6,10 +6,12 @@ import { buildFeedDisplayGroups } from "../../../lib/tempFeedConfig";
 import { getUserDevicesAsTempConfig } from "../../../lib/devices";
 import { fetchLatestSensorValues } from "../../../lib/sensorReadings";
 import type { SensorKind } from "../../../lib/devices";
+import type { DeviceSource } from "../../../lib/devices";
 
 export type LiveSensorCard = {
   deviceId: string;
   deviceName: string;
+  deviceSource: DeviceSource | null;
   space: string | null;
   key: string;
   label: string;
@@ -91,6 +93,7 @@ export const GET: APIRoute = async ({ cookies, url }) => {
       sensors.push({
         deviceId: device.id,
         deviceName: device.name,
+        deviceSource: device.source,
         space: device.space ?? null,
         key: sensor.key,
         label: sensor.label,
@@ -128,6 +131,9 @@ export const GET: APIRoute = async ({ cookies, url }) => {
         sensors.push({
           deviceId: row.sensor.device_id,
           deviceName: row.deviceName,
+          deviceSource:
+            deviceConfig.devices.find((d) => d.id === row.sensor.device_id)?.source ??
+            null,
           space:
             deviceConfig.devices.find((d) => d.id === row.sensor.device_id)?.space ??
             null,

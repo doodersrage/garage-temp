@@ -14,6 +14,7 @@ import { listConfiguredThermostatProviders } from "../../lib/thermostatOAuth";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { fetchLatestSensorValues } from "../../lib/sensorReadings";
 import { formatRelativeAge, freshnessDetail } from "../../lib/relativeTime";
+import { freshnessDetailForSource } from "../../lib/sensorFreshness";
 import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import { batterySparklinePath, parseBatteryHistory } from "../../lib/batterySparkline";
 import { renderIngestQrSvg } from "../../lib/qrSvg";
@@ -196,7 +197,7 @@ const ingestKeyDeviceName =
       <h2 class="card-title">Devices & sensors</h2>
       <p class="card-subtitle">
         Connect hardware that <strong>pushes</strong> readings to this site, or configure HTTPS JSON feeds that we
-        <strong>pull</strong> on a schedule.
+        <strong>pull</strong> every 15 minutes on a schedule.
       </p>
       {deviceNotice && (
         <p class:list={[noticeIsError ? "alert-warning" : "alert-success", "mt-0"]}>
@@ -456,6 +457,7 @@ const ingestKeyDeviceName =
         <h2 class="card-title">Latest sensor values</h2>
         <div class="feed-health-grid">
           {latest.map((row) => {
+            const device = devices.find((d) => d.id === row.sensor.device_id);
             const age = formatRelativeAge(row.recorded_at);
             return (
               <div class="feed-health-item">
@@ -463,9 +465,10 @@ const ingestKeyDeviceName =
                   <strong>{row.sensor.label}</strong>
                   <p class="m-0 text-sm text-[var(--color-text-muted)]">
                     {row.deviceName} · {kindLabels[row.sensor.kind] ?? row.sensor.kind}
+                    {device?.source === "pull_url" ? " · pull" : device?.source === "push" ? " · push" : ""}
                   </p>
                   <p class:list={["m-0 mt-1 text-sm", age.lagging && "text-amber-300"]}>
-                    {freshnessDetail(age)}
+                    {freshnessDetailForSource(row.recorded_at, device?.source ?? null)}
                   </p>
                 </div>
                 <span>{formatLatestValue(row)}</span>

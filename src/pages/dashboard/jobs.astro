@@ -55,7 +55,7 @@ const ingestAbuse = flagIngestAbuse(ingestStats);
       {error ? (
         <p class="alert-warning">Unable to load job runs: {error}</p>
       ) : runs.length === 0 ? (
-        <p class="mb-0">No job runs recorded yet. They appear after the hourly cron fires.</p>
+        <p class="mb-0">No job runs recorded yet. They appear after the first scheduled poll (every 15 minutes).</p>
       ) : (
         <div class="table-wrap">
           <table class="data-table">

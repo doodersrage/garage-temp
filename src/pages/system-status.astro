@@ -12,6 +12,7 @@ import {
 
 const status = await fetchAppStatus();
 const cronAge = formatRelativeAge(status.lastCronAt, "never");
+const historyPollAge = formatRelativeAge(status.lastHistoryPollAt, "never");
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const schema = [
@@ -54,6 +55,17 @@ const statusErrorMessage =
         {status.healthy ? "All systems operational" : "Degraded — investigating"}
       </p>
       <dl class="text-sm space-y-2 mb-0">
+        <div class="flex flex-wrap gap-x-2">
+          <dt class="text-[var(--color-text-muted)]">Last history poll</dt>
+          <dd class:list={[status.historyPollStale && "text-[var(--color-danger)]"]}>
+            {historyPollAge.label}
+            {status.historyPollStale ? " (overdue)" : ""}
+          </dd>
+        </div>
+        <div class="flex flex-wrap gap-x-2">
+          <dt class="text-[var(--color-text-muted)]">Poll schedule</dt>
+          <dd>Every 15 minutes (:00, :15, :30, :45 UTC)</dd>
+        </div>
         <div class="flex flex-wrap gap-x-2">
           <dt class="text-[var(--color-text-muted)]">Last cron job</dt>
           <dd>{status.lastCronJob ?? "—"} ({cronAge.label})</dd>

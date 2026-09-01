@@ -24,7 +24,11 @@ Before readings appear as labeled cards on Home:
 2. Or **Add one sensor** for doors, floods, air quality, etc.
 3. Keys must match the JSON you POST; calibration offset is under **Advanced** on each sensor
 
-After the first successful POST, open **[Home](https://thermaltrace.dev/)** while signed in to confirm live values. History snapshots collect from Home refreshes and the hourly cron.
+After the first successful POST, open **[Home](https://thermaltrace.dev/)** while signed in to confirm live values. History snapshots collect from Home refreshes and the **15-minute** background poll.
+
+## Home Assistant
+
+REST sensors, MQTT bridge, and inbound webhook examples: [Home Assistant integration](/ingest/home-assistant).
 
 ## curl smoke test
 
@@ -106,11 +110,12 @@ Recipes (Home Assistant + Node-RED import): [MQTT bridge](/integrations/mqtt-bri
 |---------|--------|
 | `401` | Wrong or rotated device key |
 | Readings missing on Home | Sensor **keys** on Devices don’t match JSON keys |
-| No history | Need successful ingest **and** signed-in Home / hourly job |
+| No history | Need successful ingest **and** signed-in Home / 15-minute poll |
 | TLS failures on MCU | Use a local HTTPS relay ([python feeds](https://thermaltrace.dev/about/python-feeds)) |
 
 ## Related
 
 - [Sensor sketches](/sketches/)
 - [Pull feeds](/ingest/pull-feeds) (alternative to push)
+- [Home Assistant](/ingest/home-assistant)
 - Product: [Adding devices](https://thermaltrace.dev/about/adding-devices) · [ingest & webhooks](https://thermaltrace.dev/about/ingest-and-webhooks)

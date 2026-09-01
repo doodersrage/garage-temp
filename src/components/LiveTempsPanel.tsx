@@ -18,6 +18,7 @@ type FeedGroup = {
 type LiveSensor = {
   deviceId: string;
   deviceName: string;
+  deviceSource?: "push" | "pull_url" | null;
   space?: string | null;
   key: string;
   label: string;
@@ -34,7 +35,8 @@ interface Props {
   intervalMs?: number;
 }
 
-import { formatRelativeAge, freshnessDetail } from "../lib/relativeTime";
+import { formatRelativeAge } from "../lib/relativeTime";
+import { freshnessDetailForSource } from "../lib/sensorFreshness";
 import { formatBoolSensorValue, SENSOR_KIND_LABELS } from "../lib/sensorKinds";
 
 function formatSensorValue(sensor: LiveSensor): { primary: string; detail: string } {
@@ -320,15 +322,18 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
         <div class="alert-warning mb-4" role="status">
           <p class="m-0 font-medium">
             {laggingSensors.length === 1
-              ? `${laggingSensors[0]!.sensor.label} may be offline — last seen ${laggingSensors[0]!.age.label}`
+              ? `${laggingSensors[0]!.sensor.label} — ${freshnessDetailForSource(
+                  laggingSensors[0]!.sensor.recorded_at,
+                  laggingSensors[0]!.sensor.deviceSource ?? null,
+                )}`
               : `${laggingSensors.length} probes look offline or stale`}
           </p>
           {laggingSensors.length > 1 && (
             <ul class="mb-0 mt-2 pl-5 text-sm">
               {laggingSensors.slice(0, 4).map(({ sensor, age }) => (
                 <li key={`${sensor.deviceId}:${sensor.key}`}>
-                  {sensor.label} — last seen {age.label}
-                  {age.stale ? " (offline)" : ""}
+                  {sensor.label} —{" "}
+                  {freshnessDetailForSource(sensor.recorded_at, sensor.deviceSource ?? null)}
                 </li>
               ))}
             </ul>
@@ -369,7 +374,10 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
                     age.lagging ? " text-amber-300" : ""
                   }`}
                 >
-                  {freshnessDetail(age)}
+                  {freshnessDetailForSource(
+                    sensor.recorded_at,
+                    sensor.deviceSource ?? null,
+                  )}
                 </p>
               </article>
             );
@@ -455,7 +463,10 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
                       age.lagging ? " text-amber-300" : ""
                     }`}
                   >
-                    {freshnessDetail(age)}
+                    {freshnessDetailForSource(
+                    sensor.recorded_at,
+                    sensor.deviceSource ?? null,
+                  )}
                   </p>
                 </article>
               );

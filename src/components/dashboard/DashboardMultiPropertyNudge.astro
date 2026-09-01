@@ -1,0 +1,20 @@
+---
+interface Props {
+  show: boolean;
+}
+
+const { show } = Astro.props;
+---
+{show && (
+  <div class="card mb-0" role="complementary">
+    <h2 class="card-title">More than one property?</h2>
+    <p class="card-subtitle mb-3">
+      Pro already supports multiple households from one account — add a second garage, rental, or workshop
+      and switch between them from the dashboard. Portfolio raises the property ceiling for larger landlords.
+    </p>
+    <p class="mb-0 flex flex-wrap gap-3">
+      <a class="btn-secondary" href="/dashboard/household">Add another property</a>
+      <a class="text-link self-center" href="/property-management">Portfolio for landlords</a>
+    </p>
+  </div>
+)}

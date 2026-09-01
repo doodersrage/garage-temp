@@ -34,7 +34,14 @@ import {
 import { fetchGarageTempChartData } from "../lib/garageTempsHistory";
 import { checkFeedHealth } from "../lib/collectHistory";
 import { fetchLatestSensorValues } from "../lib/sensorReadings";
-import { formatRelativeAge, LAG_MS } from "../lib/relativeTime";
+import { formatRelativeAge } from "../lib/relativeTime";
+import {
+  summarizeStaleSensors,
+} from "../lib/sensorFreshness";
+import {
+  listLowBatteryDevices,
+  lowBatteryBannerMessage,
+} from "../lib/deviceBatteryUi";
 import {
   fetchNightsAtRisk,
   fetchWeatherSnapshot,
@@ -47,6 +54,8 @@ import UnackedAlertsBanner from "../components/UnackedAlertsBanner.astro";
 import ColdSnapChecklistCard from "../components/ColdSnapChecklistCard.astro";
 import { shouldShowColdSnapChecklist } from "../lib/coldSnapChecklist";
 import { countUnacknowledgedAlerts } from "../lib/alertEvents";
+import LowBatteryBanner from "../components/dashboard/LowBatteryBanner.astro";
+import DashboardMultiPropertyNudge from "../components/dashboard/DashboardMultiPropertyNudge.astro";
 
 import DashboardMetricGrid from "../components/dashboard/DashboardMetricGrid.astro";
 import MetricCard from "../components/dashboard/MetricCard.astro";
@@ -148,10 +157,18 @@ const newestReading = latest
   .filter(Boolean)
   .sort((a, b) => Date.parse(b!) - Date.parse(a!))[0] ?? null;
 const lastAge = formatRelativeAge(newestReading);
-const staleSensorCount = latest.filter((row) => {
-  if (!row.recorded_at) return true;
-  return Date.now() - Date.parse(row.recorded_at) >= LAG_MS;
-}).length;
+const staleSummary = summarizeStaleSensors(latest, devices);
+const staleSensorCount = staleSummary.total;
+const lowBatteryDevices = listLowBatteryDevices(
+  devices,
+  alertSettings.batteryThresholdPct,
+);
+const lowBatteryMessage = lowBatteryBannerMessage(lowBatteryDevices);
+const showMultiPropertyNudge =
+  userHouseholds.households.length === 1 &&
+  devices.length > 0 &&
+  (entitlements.tier === "pro" || entitlements.tier === "member") &&
+  canEdit;
 const feedIssueCount = feedHealth.statuses.filter((s) => !s.ok).length;
 const sensorCount =
   latest.length > 0
@@ -311,10 +328,11 @@ if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
       showClaimsPackCta={unackedAlertCount > 0}
     />
 
+    <LowBatteryBanner message={lowBatteryMessage} />
+
     {staleSensorCount > 0 && (
       <div class="alert-warning mb-0" role="status">
-        <strong>{staleSensorCount}</strong> probe
-        {staleSensorCount === 1 ? "" : "s"} haven’t posted in 30+ minutes —
+        {staleSummary.bannerMessage} —
         <a href="/" class="text-link ml-1">Check Home</a>
         {" · "}
         <a href="/dashboard/temperature" class="text-link">Devices</a>
@@ -322,6 +340,8 @@ if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
         <a href="/about/debugging-stale-readings" class="text-link">Debug guide</a>
       </div>
     )}
+
+    <DashboardMultiPropertyNudge show={showMultiPropertyNudge} />
 
     <ColdSnapChecklistCard show={showColdSnapChecklist} />
 

@@ -60,7 +60,7 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
       { href: "/about/household-sharing-walkthrough", slug: "household-sharing-walkthrough" },
       { href: "/about/accounts-and-dashboard", slug: "accounts-and-dashboard" },
       { href: "/about/install-pwa", slug: "install-pwa" },
-      { href: "/android", label: "Android app (coming soon)", summary: "Native Play listing is in review; use the PWA until it ships." },
+      { href: "/android", label: "Android app (early access)", summary: "GitHub build/sideload while Play review finishes; PWA works today." },
     ],
   },
   {

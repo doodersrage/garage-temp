@@ -29,6 +29,11 @@ import { runPlaybooksForAllUsers } from "./lib/alertPlaybookRunner";
 import { sendPortfolioAlertsForAllUsers } from "./lib/portfolioAlerts";
 import { checkAndNotifyStatusSubscribers } from "./lib/statusNotify";
 import { isFullHourlyCronRun } from "./lib/cronSchedule";
+import {
+  collectHistoryStaleMessage,
+  fetchLastSuccessfulCollectHistory,
+  isCollectHistoryStale,
+} from "./lib/cronHealth";
 
 type WorkerEnv = Env & {
   SENTRY_DSN?: string;
@@ -94,6 +99,17 @@ async function runCollectHistoryJob(): Promise<void> {
 }
 
 async function runHourlyMaintenanceJobs(env: WorkerEnv): Promise<void> {
+  const lastHistoryPollAt = await fetchLastSuccessfulCollectHistory();
+  if (isCollectHistoryStale(lastHistoryPollAt)) {
+    await notifyOps(
+      "ThermalTrace: collect-history overdue",
+      formatJobFailureBody("collect-history", {
+        message: collectHistoryStaleMessage(lastHistoryPollAt),
+        lastSuccessAt: lastHistoryPollAt,
+      }),
+    );
+  }
+
   if (shouldSendWeeklyDigest()) {
           const digestJobId = await startJobRun("weekly-digest");
           try {

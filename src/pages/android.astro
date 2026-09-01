@@ -41,7 +41,9 @@ const schema = [
   getMarketingFaqSchema(pageUrl, "android"),
 ].filter(Boolean) as Record<string, unknown>[];
 
-const description = `${BRAND_NAME} Android companion app is coming soon on Google Play—live probe readings, freeze alerts, and household tools for your existing account. Phone is not a sensor.`;
+const ANDROID_REPO = "https://github.com/doodersrage/thermaltrace-android";
+
+const description = `${BRAND_NAME} Android companion — early access via GitHub while Google Play review finishes. Live probes, freeze alerts, MFA, and household tools for your existing account. Phone is not a sensor.`;
 ---
 <Layout
   title="Android app"
@@ -52,13 +54,15 @@ const description = `${BRAND_NAME} Android companion app is coming soon on Googl
 >
   <div class="page-shell page-stack">
     <PageHeader
-      kicker="Coming soon on Google Play"
+      kicker="Early access · Google Play in review"
       title="ThermalTrace for Android"
-      lede="A native companion for your ThermalTrace account—same live readings, history, alerts, devices, and household tools as the web dashboard."
+      lede="Native companion for your ThermalTrace account—live readings, history, alerts, devices, MFA, and household tools. Build from source or sideload while the Play listing is pending."
     >
-      <a slot="actions" class="btn-primary" href="/contact?topic=android">Request a launch note</a>
+      <a slot="actions" class="btn-primary" href={ANDROID_REPO} target="_blank" rel="noreferrer">
+        GitHub · build or sideload
+      </a>
       <a slot="actions" class="btn-secondary" href="/about/install-pwa">Install the PWA today</a>
-      <a slot="actions" class="btn-ghost" href="/register?next=/dashboard/temperature">Create free account</a>
+      <a slot="actions" class="btn-ghost" href="/contact?topic=android">Request Play launch note</a>
     </PageHeader>
 
     <figure class="card overflow-hidden p-0 mb-0">
@@ -87,6 +91,30 @@ const description = `${BRAND_NAME} Android companion app is coming soon on Googl
           keep posting to thermaltrace.dev; the app is a client over HTTPS.
         </li>
       </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Early access (GitHub)</h2>
+      <p class="card-subtitle mb-4">
+        The open-source app at
+        <a class="text-link" href={ANDROID_REPO} target="_blank" rel="noreferrer">thermaltrace-android</a>
+        matches production: sign-in (including MFA / YubiKey OTP), home readings, alerts, devices, history, and portfolio view.
+        Clone the repo, open in Android Studio, and run on your phone—or download a CI-built debug APK from GitHub Actions artifacts.
+      </p>
+      <ol class="text-sm space-y-2 pl-5 list-decimal mb-0">
+        <li>
+          <a class="text-link" href="/register?next=/dashboard/temperature">Create a free ThermalTrace account</a>
+          and connect at least one probe.
+        </li>
+        <li>
+          Build or sideload the Android app and sign in with the same credentials.
+        </li>
+        <li>
+          Enable Pro push alerts in
+          <a class="text-link" href="/dashboard/alerts">Alert settings</a>
+          for Firebase freeze notifications on the phone.
+        </li>
+      </ol>
     </section>
 
     <section class="card">
@@ -126,7 +154,7 @@ const description = `${BRAND_NAME} Android companion app is coming soon on Googl
         App repository:
         <a
           class="text-link"
-          href="https://github.com/doodersrage/thermaltrace-android"
+          href={ANDROID_REPO}
           target="_blank"
           rel="noreferrer"
         >thermaltrace-android</a>

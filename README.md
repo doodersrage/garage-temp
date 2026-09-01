@@ -2,7 +2,7 @@
 
 Open-source dashboard to **track, log, and analyze garage and workshop sensors** — **Astro 6**, **Cloudflare Workers**, **Supabase**, and **Stripe**.
 
-Runs in production at [thermaltrace.dev](https://thermaltrace.dev) with hourly cron, CI, Playwright smoke, and `pnpm ops:smoke`.
+Runs in production at [thermaltrace.dev](https://thermaltrace.dev) with 15-minute history polling, CI, Playwright smoke, and `pnpm ops:smoke`.
 
 [![App](https://img.shields.io/badge/app-thermaltrace.dev-f97316)](https://thermaltrace.dev)
 [![Live demo](https://img.shields.io/badge/demo-no%20account-0ea5e9)](https://thermaltrace.dev/demo)
@@ -69,7 +69,7 @@ pnpm ops:smoke         # public smoke + sitemap ping
 ```
 src/pages/          Routes; API under pages/api/
 src/lib/            Auth, devices, alerts, Stripe, ingest
-src/worker.ts       Cloudflare fetch + hourly cron
+src/worker.ts       Cloudflare fetch + scheduled jobs (15-min poll)
 src/actions/        Astro Actions (prefs, alerts, invites)
 supabase/migrations/
 sketches/           Arduino / MicroPython ingest samples

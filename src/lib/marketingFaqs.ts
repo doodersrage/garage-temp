@@ -34,7 +34,7 @@ export const marketingFaqs = {
     {
       question: "Is there a ThermalTrace Android app?",
       answer:
-        "A native Android app is coming soon on Google Play. Until then you can use the full web dashboard or install the Progressive Web App. The phone does not sense temperature — it connects to your ThermalTrace account.",
+        "A native Android app is available in early access on GitHub while Google Play review finishes. You can also use the full web dashboard or install the Progressive Web App. The phone does not sense temperature — it connects to your ThermalTrace account.",
     },
   ],
   pricing: [
@@ -146,7 +146,7 @@ export const marketingFaqs = {
     {
       question: "When will ThermalTrace be on Google Play?",
       answer:
-        "The Play listing is in review. Until it is live, use the web dashboard or install the Progressive Web App from Chrome on Android.",
+        "Google Play listing is in review. Build or sideload from github.com/doodersrage/thermaltrace-android, or use the web dashboard / PWA from Chrome on Android until the store link goes live.",
     },
     {
       question: "Will my web account work in the Android app?",
