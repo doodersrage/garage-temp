@@ -22,6 +22,7 @@ const body = {
   uri_allow_list: "https://thermaltrace.dev/api/auth/callback",
   external_github_enabled: true,
   external_github_email_optional: true,
+  external_github_client_id: "Iv23liHaziDDyWmsvtlv",
 };
 
 const res = await fetch(

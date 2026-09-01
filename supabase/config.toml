@@ -339,10 +339,11 @@ skip_nonce_check = false
 # If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
 email_optional = false
 
-# GitHub OAuth: client_id is public; secret must be set via env when running config push.
+# GitHub OAuth — credentials MUST match Supabase Dashboard (never push without secret env set).
+# Do not run `supabase config push` for auth unless SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET is set.
 [auth.external.github]
 enabled = true
-client_id = "Iv23liR6Ua9ZbNxJokDS"
+client_id = "Iv23liHaziDDyWmsvtlv"
 secret = "env(SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET)"
 email_optional = true
 
