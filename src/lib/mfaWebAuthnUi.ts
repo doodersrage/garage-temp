@@ -1,7 +1,7 @@
 export const MFA_WEBAUTHN_UI_ENABLED = false;
 
 export const YUBIKEY_OTP_ENROLL_HINT =
-  "Tap your YubiKey in the field below to register its one-time password (OTP slot). Requires YUBICO_CLIENT_ID and YUBICO_API_KEY on the server.";
+  "Tap your YubiKey in the field below to register OTP mode (long touch — the key types a 44-character code).";
 
 export const YUBIKEY_OTP_SIGNIN_HINT =
   "Or tap your YubiKey in the OTP field below (long touch — not Yubico Authenticator codes).";
