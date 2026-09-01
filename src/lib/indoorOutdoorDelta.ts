@@ -1,5 +1,6 @@
 import { fetchWeatherSnapshot, resolveWeatherCityId } from "./FetchWeather";
 import { fetchWeatherSnapshotForConfig, getPersonalWeatherConfig } from "./weatherContext";
+import type { User } from "@supabase/supabase-js";
 import type { ChartPoint } from "./garageTempsHistory";
 
 export type IndoorOutdoorDelta = {
@@ -55,7 +56,7 @@ export function computeIndoorOutdoorDelta(
 export async function fetchIndoorOutdoorDelta(
   points: ChartPoint[],
   weatherCityId?: string | null,
-  user?: { user_metadata?: Record<string, unknown> } | null,
+  user?: User | null,
 ): Promise<IndoorOutdoorDelta | null> {
   if (points.length === 0) return null;
 

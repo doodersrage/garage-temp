@@ -1,5 +1,34 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+function displayPrefs(
+  overrides: {
+    showGarageTemps?: boolean;
+    showWeather?: boolean;
+    weatherCityId?: string | null;
+    weatherSource?: "openweather" | "ambient" | "weatherflow";
+    ambientWeatherMac?: string | null;
+    ambientWeatherApiKey?: string | null;
+    weatherflowStationId?: string | null;
+    weatherflowToken?: string | null;
+    useCelsius?: boolean;
+    theme?: "dark" | "light" | "system";
+  } = {},
+) {
+  return {
+    showGarageTemps: true,
+    showWeather: true,
+    weatherCityId: null,
+    weatherSource: "openweather" as const,
+    ambientWeatherMac: null,
+    ambientWeatherApiKey: null,
+    weatherflowStationId: null,
+    weatherflowToken: null,
+    useCelsius: false,
+    theme: "dark" as const,
+    ...overrides,
+  };
+}
+
 // updateUserDisplayPreferences must create a fresh auth client per call
 // rather than using the shared `supabase` singleton -- see the doc
 // comment on that export in ./supabase.ts. A shared client's setSession()
@@ -60,13 +89,10 @@ describe("updateUserDisplayPreferences", () => {
     mockCreateAuthClient.mockReturnValue(fakeClient);
 
     const { updateUserDisplayPreferences } = await import("./userPreferences");
-    const result = await updateUserDisplayPreferences("at-1", "rt-1", {
-      showGarageTemps: true,
+    const result = await updateUserDisplayPreferences("at-1", "rt-1", displayPrefs({
       showWeather: false,
       weatherCityId: "123",
-      useCelsius: false,
-      theme: "dark",
-    });
+    }));
 
     expect(mockCreateAuthClient).toHaveBeenCalledTimes(1);
     expect(fakeClient.auth.setSession).toHaveBeenCalledWith({
@@ -84,13 +110,7 @@ describe("updateUserDisplayPreferences", () => {
     mockCreateAuthClient.mockReturnValueOnce(clientA).mockReturnValueOnce(clientB);
 
     const { updateUserDisplayPreferences } = await import("./userPreferences");
-    const prefs = {
-      showGarageTemps: true,
-      showWeather: true,
-      weatherCityId: null,
-      useCelsius: false,
-      theme: "dark" as const,
-    };
+    const prefs = displayPrefs();
 
     const resultA = await updateUserDisplayPreferences("at-a", "rt-a", prefs);
     const resultB = await updateUserDisplayPreferences("at-b", "rt-b", prefs);
@@ -105,13 +125,7 @@ describe("updateUserDisplayPreferences", () => {
     mockCreateAuthClient.mockReturnValue(fakeClient);
 
     const { updateUserDisplayPreferences } = await import("./userPreferences");
-    const result = await updateUserDisplayPreferences("at-1", "rt-1", {
-      showGarageTemps: true,
-      showWeather: true,
-      weatherCityId: null,
-      useCelsius: false,
-      theme: "dark",
-    });
+    const result = await updateUserDisplayPreferences("at-1", "rt-1", displayPrefs());
 
     expect(result.user).toBeNull();
     expect(result.error).toBeTruthy();

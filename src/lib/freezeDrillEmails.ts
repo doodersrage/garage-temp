@@ -8,7 +8,8 @@ import { listAllHouseholdOwnerUserIds } from "./households";
 import { listHouseholdDevices } from "./devices";
 import { fetchLatestSensorValues } from "./sensorReadings";
 import { getUserEntitlements } from "./entitlements";
-import { getUserPreferences } from "./userPreferences";
+import { getUserPreferences, personalWeatherConfigFromPreferences } from "./userPreferences";
+import { isWeatherLocationConfigured } from "./personalWeatherStations";
 
 /** Sep 1 – Nov 15 (Northern Hemisphere pre-season). */
 export function shouldSendFreezeDrill(now = new Date()): boolean {
@@ -82,7 +83,9 @@ export async function sendFreezeDrillsForAllUsers(): Promise<{
         alertSettings: settings,
         devices: devicesResult.devices,
         latest,
-        weatherCityId: prefs.weatherCityId,
+        weatherLocationConfigured: isWeatherLocationConfigured(
+          personalWeatherConfigFromPreferences(prefs),
+        ),
         canUseForecast: entitlements.canUseForecastAlerts,
         canUseNws: entitlements.canUseNwsAlerts,
         hasSentAnyAlert: Boolean(settings.lastAlertSentAt),
