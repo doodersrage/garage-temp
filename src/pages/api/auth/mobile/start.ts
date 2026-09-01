@@ -1,19 +1,19 @@
 import type { APIRoute } from "astro";
 import type { Provider } from "@supabase/supabase-js";
-import { buildSignInRedirectUrl } from "../../../lib/signInErrors";
-import { createOAuthAuthClient } from "../../../lib/oauthAuthClient";
+import { buildSignInRedirectUrl } from "../../../../lib/signInErrors";
+import { createOAuthAuthClient } from "../../../../lib/oauthAuthClient";
 import {
   buildGitHubOAuthCallbackUrl,
   buildOAuthCallbackUrl,
   GITHUB_OAUTH_STATE_COOKIE,
   OAUTH_NEXT_COOKIE,
   OAUTH_REF_COOKIE,
-} from "../../../lib/siteUrl";
+} from "../../../../lib/siteUrl";
 import {
   buildGitHubAuthorizeUrl,
   isGitHubOAuthConfigured,
-} from "../../../lib/githubOAuth";
-import { setMobileOAuthCookie } from "../../../lib/mobileAuthRedirect";
+} from "../../../../lib/githubOAuth";
+import { setMobileOAuthCookie } from "../../../../lib/mobileAuthRedirect";
 
 const VALID = ["google", "github", "discord"] as const;
 
