@@ -6,7 +6,7 @@ export type ExpandedAboutPageMeta = {
   summary: string;
 };
 
-/** Metadata for 70 expanded about guides (content lives in aboutExpandedContent.ts). */
+/** Metadata for expanded about guides (content lives in aboutExpandedContent.ts). */
 export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
   {
     slug: "temperature-probe-case-study",
@@ -570,5 +570,23 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
       "Simulate garage probe readings by changing outdoor temperature, sun load, and door state.",
     summary:
       "See live JSON output like the real monitoring feed with three probe zones.",
+  },
+  {
+    slug: "esphome-shelly-recipes",
+    parentSlug: "ingest-and-webhooks",
+    title: "ESPHome and Shelly recipes",
+    description:
+      "Post temperature, humidity, and door contact readings from ESPHome or Shelly firmware to ThermalTrace push ingest without custom Arduino sketches.",
+    summary:
+      "Copy-paste HTTP POST recipes for common LAN sensors — dual-run with Home Assistant MQTT.",
+  },
+  {
+    slug: "garage-door-cold-playbook",
+    parentSlug: "accounts-and-dashboard",
+    title: "Garage door + cold alert playbook",
+    description:
+      "Alert when a bay door stays open while temperatures drop — door contact ingest, combined alert rules, and household response steps.",
+    summary:
+      "Stop heat loss and freeze risk when a garage door is left open on a cold night.",
   },
 ];

@@ -776,6 +776,37 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
       { type: "h2", text: "Multiple properties" },
       { type: "p", html: "Pro portfolios can watch more than one property. Start with a single household garage, prove alerts, then expand—see <a class=\"text-link\" href=\"/pricing\">pricing</a> for portfolio limits." }
   ],
+
+  "esphome-shelly-recipes": [
+      { type: "p", html: "Many garages already run <strong>ESPHome</strong> or <strong>Shelly</strong> modules for lights, doors, and climate. You do not need a custom Arduino sketch to feed ThermalTrace — POST the same typed <code>sensors[]</code> JSON the ingest API accepts from any HTTPS client on your LAN." },
+      { type: "h2", text: "Before you wire YAML" },
+      { type: "ol", items: ["Create a <strong>push device</strong> under <a class=\"text-link\" href=\"/dashboard/temperature\">Dashboard → Devices</a> and copy the ingest URL.","Send one test POST (curl or firmware) and map keys when readings appear.","Keep Mosquitto local if you want — see <a class=\"text-link\" href=\"/about/adding-devices\">MQTT bridge</a> or the <a class=\"text-link\" href=\"/integrations/home-assistant\">HACS integration</a> for dual-run."] },
+      { type: "h2", text: "ESPHome pattern" },
+      { type: "p", html: "Enable the <code>http_request</code> component, poll your DHT/BME probe on an interval, and POST a JSON body with <code>temperature</code> and <code>humidity</code> kinds. Store the ingest URL in <code>secrets.yaml</code> — never commit the device key." },
+      { type: "pre", code: "# secrets.yaml\nthermaltrace_ingest_url: https://thermaltrace.dev/api/ingest/YOUR_DEVICE_KEY\n\n# interval action (simplified)\n# POST {\"sensors\":[\n#   {\"key\":\"garage_temp\",\"kind\":\"temperature\",\"value\":42.1,\"unit\":\"F\"},\n#   {\"key\":\"garage_rh\",\"kind\":\"humidity\",\"value\":38,\"unit\":\"%\"}\n# ]}" },
+      { type: "p", html: "Full YAML with lambda body: <a class=\"text-link\" href=\"https://doodersrage.github.io/thermaltrace/integrations/esphome-shelly\">developer docs</a> · payload reference in <a class=\"text-link\" href=\"/about/ingest-and-webhooks\">ingest and webhooks</a>." },
+      { type: "h2", text: "Shelly door contact" },
+      { type: "p", html: "On Shelly Plus / Gen2, fire an HTTP POST when the garage door input toggles. Use <code>kind: door</code> with <code>bool: true</code> when open and <code>false</code> when closed. Map the key (for example <code>garage_door</code>) under Devices." },
+      { type: "pre", code: "{\n  \"sensors\": [\n    { \"key\": \"garage_door\", \"kind\": \"door\", \"bool\": true }\n  ]\n}" },
+      { type: "h2", text: "What to do with door + temp data" },
+      { type: "p", html: "Combine a door sensor with freeze thresholds using Dashboard → Alerts → <strong>Rules</strong>. Walkthrough: <a class=\"text-link\" href=\"/about/garage-door-cold-playbook\">garage door + cold playbook</a>. Pair with the <a class=\"text-link\" href=\"/about/cold-snap-playbook\">cold-snap playbook</a> for household response steps." }
+  ],
+
+  "garage-door-cold-playbook": [
+      { type: "p", html: "An open garage door on a cold night can drop indoor probe readings fast — sometimes before your main freeze threshold would have warned you on temperature alone. This playbook wires a <strong>door contact</strong> plus a <strong>combined alert rule</strong> so the household gets a clear signal to close the bay." },
+      { type: "h2", text: "Hardware options" },
+      { type: "ul", items: ["**Shelly door input** — HTTP POST on open/close (see <a class=\"text-link\" href=\"/about/esphome-shelly-recipes\">ESPHome & Shelly recipes</a>).","**ESPHome binary sensor** — include <code>door</code> in the same ingest POST as your temp probe.","**Home Assistant** — mirror an existing <code>binary_sensor</code> through the <a class=\"text-link\" href=\"/integrations/home-assistant\">HACS integration</a> or MQTT bridge."] },
+      { type: "h2", text: "Map sensors in Devices" },
+      { type: "ol", items: ["Confirm at least one **temperature** probe reports in Home.","Confirm the **door** key shows Open/Closed (bool kind).","Label probes clearly (for example “Garage door”, “Crawlspace”) — rules can filter by label substring."] },
+      { type: "h2", text: "Create a combined rule" },
+      { type: "p", html: "Open <a class=\"text-link\" href=\"/dashboard/alerts\">Dashboard → Alerts</a>, expand <strong>Rules</strong>, and add a rule with <strong>all</strong> of these conditions:" },
+      { type: "ul", items: ["**Door open** — fires while the contact reads open.","**Temperature below threshold** — uses your freeze threshold (or set a custom °F value per condition).","Optional: **Door open longer than (minutes)** instead of instant door open — reduces noise from quick trips to the car."] },
+      { type: "p", html: "Example name: <em>Garage door open while cold</em>. Save alert settings, then send a <strong>test alert</strong> from the same page." },
+      { type: "h2", text: "When the alert fires" },
+      { type: "ol", items: ["Acknowledge the alert so escalations pause if you use playbooks.","Close the door — readings often recover within minutes.","If temperature keeps falling, follow the <a class=\"text-link\" href=\"/about/cold-snap-playbook\">cold-snap playbook</a> (space heaters, faucet drip, household SMS)."] },
+      { type: "h2", text: "Tuning tips" },
+      { type: "ul", items: ["Use **door open duration** (15–30 min) if short openings should not notify.","Add **rate drop** or forecast triggers for regional cold snaps without relying on the door alone.","Enable SMS or push (Pro) when email is not loud enough at night — see <a class=\"text-link\" href=\"/about/alert-channel-cookbook\">alert channel cookbook</a>."] }
+  ],
 };
 
 export const EXPANDED_ABOUT_SLUGS: readonly string[] = [
@@ -851,7 +882,9 @@ export const EXPANDED_ABOUT_SLUGS: readonly string[] = [
   "display-preferences-deep-dive",
   "cold-snap-playbook",
   "alert-channel-cookbook",
-  "household-sharing-walkthrough"
+  "household-sharing-walkthrough",
+  "esphome-shelly-recipes",
+  "garage-door-cold-playbook"
 ] as const;
 
 export const expandedAboutSlugs: Set<string> = new Set(EXPANDED_ABOUT_SLUGS);

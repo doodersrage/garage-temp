@@ -4,6 +4,7 @@ import ShareNav from "../../../components/dashboard/ShareNav.astro";
 import GrafanaWizard from "../../../components/GrafanaWizard.astro";
 import WebhookDeliveryLog from "../../../components/WebhookDeliveryLog.astro";
 import HaSetupCard from "../../../components/HaSetupCard.astro";
+import LanSensorSetupCard from "../../../components/LanSensorSetupCard.astro";
 import ZapierSetupCard from "../../../components/ZapierSetupCard.astro";
 import { loadShareDashboardContext } from "../../../lib/shareDashboardContext";
 
@@ -61,6 +62,8 @@ const {
           inboundToken ? `${siteUrl}/api/inbound/${inboundToken}` : null
         }
       />
+
+      <LanSensorSetupCard />
 
       <section class="card">
         <h2 class="card-title">Recent activity</h2>

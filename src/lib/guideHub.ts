@@ -48,6 +48,7 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
     links: [
       { href: "/about/freeze-protection-thresholds", slug: "freeze-protection-thresholds" },
       { href: "/about/cold-snap-playbook", slug: "cold-snap-playbook" },
+      { href: "/about/garage-door-cold-playbook", slug: "garage-door-cold-playbook" },
       { href: "/about/alert-channel-cookbook", slug: "alert-channel-cookbook" },
       { href: "/stories/garage-freeze-alert", label: "Garage freeze case study", summary: "How a probe curve caught a cold night before pipes froze." },
     ],
@@ -79,6 +80,7 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
         summary: "Official custom integration — share-link sensors, snooze/vacation services, optional push ingest.",
       },
       { href: "/about/adding-devices", slug: "adding-devices", label: "MQTT bridge recipe", summary: "Keep Mosquitto local; mirror readings over HTTPS." },
+      { href: "/about/esphome-shelly-recipes", slug: "esphome-shelly-recipes" },
       { href: "/compare/diy-mqtt", label: "vs DIY MQTT", summary: "When hosted freeze alerts beat self-hosting Mosquitto and cron." },
       { href: "/about/ingest-and-webhooks", slug: "ingest-and-webhooks" },
     ],

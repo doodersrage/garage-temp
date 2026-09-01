@@ -246,6 +246,30 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
         "Audit overnight lows, compare seasons, and document freeze near-misses for insurance or workshop planning in any spreadsheet tool.",
     },
   ],
+  "esphome-shelly-recipes": [
+    {
+      question: "Do I need to stop using Home Assistant MQTT?",
+      answer:
+        "No. Many households dual-run: Mosquitto locally for automations, plus HTTPS push ingest for ThermalTrace freeze SMS and history.",
+    },
+    {
+      question: "Which Shelly models work?",
+      answer:
+        "Any Shelly that can send an HTTP POST (Plus / Gen2 scripting or webhook actions). Map the door key under Dashboard → Devices after the first POST.",
+    },
+  ],
+  "garage-door-cold-playbook": [
+    {
+      question: "Can I alert on door open alone?",
+      answer:
+        "Yes with a door-open rule, but pairing door + temperature below threshold reduces false alarms when you are working in a warm garage.",
+    },
+    {
+      question: "Where do I create the combined rule?",
+      answer:
+        "Dashboard → Alerts → Rules. Add conditions for door open (or door open duration) AND temperature below your freeze threshold, then save and send a test alert.",
+    },
+  ],
 };
 
 export function getAboutFaqs(slug: string): AboutFaqItem[] {

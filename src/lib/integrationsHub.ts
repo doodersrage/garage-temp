@@ -65,6 +65,14 @@ export const INTEGRATION_CARDS: IntegrationCard[] = [
     cta: "Operator setup",
   },
   {
+    id: "esphome-shelly",
+    title: "ESPHome & Shelly",
+    summary:
+      "HTTP POST recipes for DHT/BME probes and Shelly door contacts — no custom Arduino firmware required.",
+    href: "/about/esphome-shelly-recipes",
+    cta: "LAN sensor recipes",
+  },
+  {
     id: "zapier",
     title: "Zapier & Make",
     summary:
