@@ -4,6 +4,7 @@
  * which reads/refreshes it from the per-household connection stored in
  * thermostatConnections.ts -- there is no global/site-wide credential here.
  */
+import { getRuntimeEnv } from "./runtimeEnv";
 
 export type ThermostatSnapshot = {
   provider: "nest" | "ecobee";
@@ -16,33 +17,49 @@ function celsiusToFahrenheit(c: number): number {
   return (c * 9) / 5 + 32;
 }
 
+type NestDeviceTraits = {
+  "sdm.devices.traits.Temperature"?: { ambientTemperatureCelsius?: number };
+  "sdm.devices.traits.ThermostatTemperatureSetpoint"?: {
+    heatCelsius?: number;
+    coolCelsius?: number;
+  };
+  "sdm.devices.traits.ThermostatMode"?: { mode?: string };
+};
+
+type NestDevice = {
+  type?: string;
+  traits?: NestDeviceTraits;
+};
+
+function pickNestThermostatDevice(devices: NestDevice[]): NestDevice | undefined {
+  return (
+    devices.find((d) => d.type === "sdm.devices.types.THERMOSTAT") ??
+    devices.find((d) => d.traits?.["sdm.devices.traits.Temperature"]) ??
+    devices[0]
+  );
+}
+
 export async function fetchNestSnapshot(
   accessToken: string,
 ): Promise<ThermostatSnapshot | null> {
+  const projectId = getRuntimeEnv("NEST_PROJECT_ID")?.trim();
+  if (!projectId) return null;
+
   try {
     const res = await fetch(
-      "https://smartdevicemanagement.googleapis.com/v1/enterprises/project-id/devices",
+      `https://smartdevicemanagement.googleapis.com/v1/enterprises/${encodeURIComponent(projectId)}/devices`,
       {
         headers: { Authorization: `Bearer ${accessToken}` },
         signal: AbortSignal.timeout(8000),
       },
     );
     if (!res.ok) return null;
-    const data = (await res.json()) as {
-      devices?: Array<{
-        traits?: {
-          "sdm.devices.traits.Temperature"?: { ambientTemperatureCelsius?: number };
-          "sdm.devices.traits.ThermostatTemperatureSetpoint"?: {
-            heatCelsius?: number;
-          };
-          "sdm.devices.traits.ThermostatMode"?: { mode?: string };
-        };
-      }>;
-    };
-    const device = data.devices?.[0];
+    const data = (await res.json()) as { devices?: NestDevice[] };
+    const device = pickNestThermostatDevice(data.devices ?? []);
     const traits = device?.traits;
     const ambientC = traits?.["sdm.devices.traits.Temperature"]?.ambientTemperatureCelsius;
-    const heatC = traits?.["sdm.devices.traits.ThermostatTemperatureSetpoint"]?.heatCelsius;
+    const setpoint = traits?.["sdm.devices.traits.ThermostatTemperatureSetpoint"];
+    const heatC = setpoint?.heatCelsius ?? setpoint?.coolCelsius;
     const mode = traits?.["sdm.devices.traits.ThermostatMode"]?.mode ?? null;
     return {
       provider: "nest",

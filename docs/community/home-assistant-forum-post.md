@@ -10,7 +10,7 @@ Copy/paste into a new topic on [community.home-assistant.io](https://community.h
 
 ---
 
-Hi all — we run [ThermalTrace](https://thermaltrace.dev), a hosted dashboard for ESP/Arduino garage and workshop probes with freeze alerts, history, and household sharing. We just shipped an **official HACS custom integration** and wanted to share it here.
+Hi all — we run [ThermalTrace](https://thermaltrace.dev), a hosted dashboard for ESP/Arduino garage and workshop probes with freeze alerts, history, and household sharing. We shipped an **official HACS custom integration** and wanted to share it here.
 
 ### What it does
 
@@ -29,6 +29,12 @@ Hi all — we run [ThermalTrace](https://thermaltrace.dev), a hosted dashboard f
 
 Full guide: https://thermaltrace.dev/integrations/home-assistant
 
+### Beyond HACS (optional)
+
+- **MQTT → HTTP bridge** — mirror Mosquitto to ThermalTrace without exposing your broker: [MQTT bridge docs](https://doodersrage.github.io/thermaltrace/integrations/mqtt-bridge) · import [Node-RED flow](https://thermaltrace.dev/nodered/mqtt-to-thermaltrace.json) (temp + garage door tabs)
+- **ESPHome / Shelly** — push ingest recipes if you do not want HA in the middle: https://thermaltrace.dev/about/esphome-shelly-recipes
+- **Garage door + cold alerts** — combined rule when a bay door is open while temps drop: https://thermaltrace.dev/about/garage-door-cold-playbook
+
 ### Example automation
 
 Snooze freeze alerts while the garage door is open for maintenance:
@@ -38,8 +44,8 @@ automation:
   - alias: Snooze ThermalTrace while garage door open
     trigger:
       - platform: state
-        entity_id: cover.garage_door
-        to: "open"
+        entity_id: binary_sensor.garage_door
+        to: "on"
     action:
       - service: thermaltrace.snooze
         data:
@@ -50,11 +56,11 @@ automation:
 
 - HACS repo: https://github.com/doodersrage/thermaltrace-home-assistant
 - Product + docs: https://thermaltrace.dev/integrations/home-assistant
-- Developer MQTT bridge: https://doodersrage.github.io/thermaltrace/integrations/mqtt-bridge
+- Integrations hub: https://thermaltrace.dev/integrations
 - OpenAPI: https://thermaltrace.dev/openapi.yaml
 
 Happy to answer setup questions in this thread. If you try it, we'd love feedback on entity naming and poll interval defaults.
 
 ---
 
-*Note for maintainers:* default HACS store submission is in progress; until merged, use the custom repository URL above.
+*Note for maintainers:* default HACS store submission is in progress ([#10550](https://github.com/hacs/default/pull/10550)); until merged, use the custom repository URL above.

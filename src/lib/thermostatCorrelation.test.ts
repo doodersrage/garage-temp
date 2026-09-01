@@ -7,6 +7,38 @@ afterEach(() => {
 
 describe("fetchNestSnapshot", () => {
   it("converts celsius traits to Fahrenheit", async () => {
+    vi.stubEnv("NEST_PROJECT_ID", "nest-project-uuid");
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          devices: [
+            {
+              type: "sdm.devices.types.THERMOSTAT",
+              traits: {
+                "sdm.devices.traits.Temperature": { ambientTemperatureCelsius: 20 },
+                "sdm.devices.traits.ThermostatTemperatureSetpoint": { heatCelsius: 0 },
+                "sdm.devices.traits.ThermostatMode": { mode: "HEAT" },
+              },
+            },
+          ],
+        }),
+        { status: 200 },
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const { fetchNestSnapshot } = await import("./thermostatCorrelation");
+    const snapshot = await fetchNestSnapshot("token");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://smartdevicemanagement.googleapis.com/v1/enterprises/nest-project-uuid/devices",
+      expect.any(Object),
+    );
+    expect(snapshot?.ambientTempF).toBeCloseTo(68, 0);
+    expect(snapshot?.heatSetpointF).toBe(32);
+    expect(snapshot?.hvacMode).toBe("HEAT");
+  });
+
+  it("prefers a thermostat device when multiple devices are returned", async () => {
+    vi.stubEnv("NEST_PROJECT_ID", "nest-project-uuid");
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -14,10 +46,16 @@ describe("fetchNestSnapshot", () => {
           JSON.stringify({
             devices: [
               {
+                type: "sdm.devices.types.CAMERA",
                 traits: {
-                  "sdm.devices.traits.Temperature": { ambientTemperatureCelsius: 20 },
-                  "sdm.devices.traits.ThermostatTemperatureSetpoint": { heatCelsius: 0 },
-                  "sdm.devices.traits.ThermostatMode": { mode: "HEAT" },
+                  "sdm.devices.traits.Temperature": { ambientTemperatureCelsius: 5 },
+                },
+              },
+              {
+                type: "sdm.devices.types.THERMOSTAT",
+                traits: {
+                  "sdm.devices.traits.Temperature": { ambientTemperatureCelsius: 21 },
+                  "sdm.devices.traits.ThermostatMode": { mode: "COOL" },
                 },
               },
             ],
@@ -28,12 +66,21 @@ describe("fetchNestSnapshot", () => {
     );
     const { fetchNestSnapshot } = await import("./thermostatCorrelation");
     const snapshot = await fetchNestSnapshot("token");
-    expect(snapshot?.ambientTempF).toBeCloseTo(68, 0);
-    expect(snapshot?.heatSetpointF).toBe(32);
-    expect(snapshot?.hvacMode).toBe("HEAT");
+    expect(snapshot?.ambientTempF).toBeCloseTo(69.8, 0);
+    expect(snapshot?.hvacMode).toBe("COOL");
+  });
+
+  it("returns null when NEST_PROJECT_ID is not configured", async () => {
+    vi.stubEnv("NEST_PROJECT_ID", "");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const { fetchNestSnapshot } = await import("./thermostatCorrelation");
+    expect(await fetchNestSnapshot("token")).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("returns null on a non-ok response", async () => {
+    vi.stubEnv("NEST_PROJECT_ID", "nest-project-uuid");
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("nope", { status: 401 })));
     const { fetchNestSnapshot } = await import("./thermostatCorrelation");
     expect(await fetchNestSnapshot("token")).toBeNull();

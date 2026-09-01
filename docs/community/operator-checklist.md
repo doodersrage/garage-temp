@@ -16,6 +16,8 @@ Tasks only **you** can complete — everything else in the HACS/integration pass
 
 Connect UI stays hidden until Worker secrets exist. Full steps: [thermaltrace.dev/about/thermostat-oauth](https://thermaltrace.dev/about/thermostat-oauth)
 
+Check what's missing locally: `pnpm operator:check`
+
 1. **Nest** — [Device Access Console](https://console.nest.google.com/device-access) + Google Cloud OAuth web client  
    Redirect URI: `https://thermaltrace.dev/api/integrations/nest/callback`  
    Secrets: `NEST_CLIENT_ID`, `NEST_CLIENT_SECRET`, `NEST_PROJECT_ID`

@@ -11,6 +11,7 @@
     "db:push": "supabase db push --linked",
     "secrets:push": "node scripts/push-worker-secrets.mjs",
     "secrets:push:dry": "node scripts/push-worker-secrets.mjs --dry-run",
+    "operator:check": "node scripts/check-operator-secrets.mjs",
     "setup:github-secrets": "node scripts/setup-github-secrets.mjs",
     "smoke:public": "node scripts/smoke-public.mjs",
     "ops:check": "node scripts/ops-check.mjs",
