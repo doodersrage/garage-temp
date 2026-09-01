@@ -21,7 +21,7 @@ const checks = [
   { path: "/about/zapier-make-recipes", heading: /Zapier.*Make/i },
   { path: "/about/cold-snap-playbook", heading: /Cold-snap/i },
   { path: "/about/esphome-shelly-recipes", heading: /ESPHome.*Shelly/i },
-  { path: "/about/garage-door-cold-playbook", heading: /Garage door/i },
+  { path: "/about/personal-weather-stations", heading: /Personal weather/i },
   { path: "/sitemap-0.xml", bodyIncludes: "esphome-shelly-recipes" },
   { path: "/sitemap-index.xml", bodyIncludes: "sitemap-0.xml" },
   { path: "/robots.txt", bodyIncludes: "Sitemap:" },

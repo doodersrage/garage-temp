@@ -73,6 +73,14 @@ export const INTEGRATION_CARDS: IntegrationCard[] = [
     cta: "LAN sensor recipes",
   },
   {
+    id: "personal-weather",
+    title: "Ambient & WeatherFlow",
+    summary:
+      "Use your backyard weather station for outdoor context, NWS alerts, and forecast freeze risk.",
+    href: "/about/personal-weather-stations",
+    cta: "Station setup",
+  },
+  {
     id: "zapier",
     title: "Zapier & Make",
     summary:

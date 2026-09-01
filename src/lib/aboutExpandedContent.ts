@@ -807,6 +807,20 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
       { type: "h2", text: "Tuning tips" },
       { type: "ul", items: ["Use **door open duration** (15–30 min) if short openings should not notify.","Add **rate drop** or forecast triggers for regional cold snaps without relying on the door alone.","Enable SMS or push (Pro) when email is not loud enough at night — see <a class=\"text-link\" href=\"/about/alert-channel-cookbook\">alert channel cookbook</a>."] }
   ],
+
+  "personal-weather-stations": [
+      { type: "p", html: "OpenWeather city IDs are fine for a rough regional forecast. If you already run an <strong>Ambient Weather</strong> or <strong>WeatherFlow Tempest</strong> station in the yard, ThermalTrace can read outdoor temp/humidity from <em>your</em> property — and use those coordinates for NWS and forecast freeze alerts." },
+      { type: "h2", text: "Dashboard → Settings" },
+      { type: "ol", items: ["Open <a class=\"text-link\" href=\"/dashboard/settings\">Dashboard → Settings</a> → Home page display.","Under <strong>Outdoor weather source</strong>, choose Ambient or WeatherFlow.","Enter your station credentials (see below) and save.","Confirm the home weather card shows your station name."] },
+      { type: "h2", text: "Ambient Weather" },
+      { type: "ul", items: ["**MAC address** — shown on the Ambient dashboard for your station.","**API key** — from ambientweather.net → Account → API keys (your personal key).","Site operator: set <code>AMBIENT_APPLICATION_KEY</code> in Worker secrets (developer application key)."] },
+      { type: "h2", text: "WeatherFlow Tempest" },
+      { type: "ul", items: ["**Station ID** — tempestwx.com → station settings.","**Personal access token** — Settings → Data Authorizations → Create token.","Readings use your Tempest outdoor air temperature and humidity."] },
+      { type: "h2", text: "What updates automatically" },
+      { type: "p", html: "Outdoor card on Home, indoor/outdoor delta on History, forecast freeze alerts, NWS freeze advisories, and cold-snap checklist context all use the configured source. OpenWeather remains the fallback if a personal fetch fails." },
+      { type: "h2", text: "Also mirror station data via ingest" },
+      { type: "p", html: "Prefer pushing every sensor into ThermalTrace history? Use <a class=\"text-link\" href=\"/about/esphome-shelly-recipes\">ESPHome/Shelly recipes</a>, the <a class=\"text-link\" href=\"/nodered/mqtt-to-thermaltrace.json\">Node-RED MQTT flow</a>, or Home Assistant HACS — separate from the outdoor weather card." }
+  ],
 };
 
 export const EXPANDED_ABOUT_SLUGS: readonly string[] = [
@@ -884,7 +898,8 @@ export const EXPANDED_ABOUT_SLUGS: readonly string[] = [
   "alert-channel-cookbook",
   "household-sharing-walkthrough",
   "esphome-shelly-recipes",
-  "garage-door-cold-playbook"
+  "garage-door-cold-playbook",
+  "personal-weather-stations"
 ] as const;
 
 export const expandedAboutSlugs: Set<string> = new Set(EXPANDED_ABOUT_SLUGS);

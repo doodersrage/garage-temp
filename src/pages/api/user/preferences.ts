@@ -6,7 +6,7 @@ import {
 } from "../../../lib/auth";
 import {
   updateUserDisplayPreferences,
-  type ThemePreference,
+  parseDisplayPreferencesInput,
 } from "../../../lib/userPreferences";
 import { formRedirectPath } from "../../../lib/siteUrl";
 
@@ -19,11 +19,18 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   const formData = await request.formData();
   const redirectTo = formRedirectPath(formData, "/dashboard");
-  const weatherCityIdRaw = formData.get("weather_city_id")?.toString().trim() ?? "";
-  const weatherCityId = /^\d+$/.test(weatherCityIdRaw) ? weatherCityIdRaw : null;
-  const themeRaw = formData.get("theme")?.toString();
-  const theme: ThemePreference =
-    themeRaw === "light" || themeRaw === "system" ? themeRaw : "dark";
+  const prefs = parseDisplayPreferencesInput({
+    show_garage_temps: formData.has("show_garage_temps") ? "on" : "",
+    show_weather: formData.has("show_weather") ? "on" : "",
+    use_celsius: formData.has("use_celsius") ? "on" : "",
+    weather_city_id: formData.get("weather_city_id")?.toString(),
+    weather_source: formData.get("weather_source")?.toString(),
+    ambient_weather_mac: formData.get("ambient_weather_mac")?.toString(),
+    ambient_weather_api_key: formData.get("ambient_weather_api_key")?.toString(),
+    weatherflow_station_id: formData.get("weatherflow_station_id")?.toString(),
+    weatherflow_token: formData.get("weatherflow_token")?.toString(),
+    theme: formData.get("theme")?.toString(),
+  });
 
   const accessToken = cookies.get("sb-access-token")!.value;
   const refreshToken = cookies.get("sb-refresh-token")!.value;
@@ -31,20 +38,14 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { error } = await updateUserDisplayPreferences(
     accessToken,
     refreshToken,
-    {
-      showGarageTemps: formData.has("show_garage_temps"),
-      showWeather: formData.has("show_weather"),
-      weatherCityId,
-      useCelsius: formData.has("use_celsius"),
-      theme,
-    },
+    prefs,
   );
 
   if (error) {
     return redirect(`${redirectTo}?prefs_error=1`);
   }
 
-  cookies.set("theme", theme, {
+  cookies.set("theme", prefs.theme, {
     path: "/",
     httpOnly: false,
     sameSite: "lax",

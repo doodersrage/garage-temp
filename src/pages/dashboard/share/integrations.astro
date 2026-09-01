@@ -5,6 +5,7 @@ import GrafanaWizard from "../../../components/GrafanaWizard.astro";
 import WebhookDeliveryLog from "../../../components/WebhookDeliveryLog.astro";
 import HaSetupCard from "../../../components/HaSetupCard.astro";
 import LanSensorSetupCard from "../../../components/LanSensorSetupCard.astro";
+import NodeRedSetupCard from "../../../components/NodeRedSetupCard.astro";
 import ZapierSetupCard from "../../../components/ZapierSetupCard.astro";
 import { loadShareDashboardContext } from "../../../lib/shareDashboardContext";
 
@@ -64,6 +65,8 @@ const {
       />
 
       <LanSensorSetupCard />
+
+      <NodeRedSetupCard />
 
       <section class="card">
         <h2 class="card-title">Recent activity</h2>

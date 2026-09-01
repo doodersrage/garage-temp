@@ -58,7 +58,7 @@ Put `thermaltrace_ingest_key` in `secrets.yaml`. If your MQTT payload is already
 
 ## Node-RED
 
-Import [`/nodered/mqtt-to-thermaltrace.json`](https://thermaltrace.dev/nodered/mqtt-to-thermaltrace.json):
+Import [`/nodered/mqtt-to-thermaltrace.json`](https://thermaltrace.dev/nodered/mqtt-to-thermaltrace.json) — includes **temperature** and optional **garage door** tabs:
 
 1. Set your Mosquitto broker on the **mqtt in** node.  
 2. Set env `THERMALTRACE_INGEST_KEY` (or edit the function node).  

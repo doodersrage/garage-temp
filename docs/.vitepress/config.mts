@@ -69,6 +69,7 @@ export default defineConfig({
             { text: "Home Assistant", link: "/integrations/home-assistant" },
             { text: "MQTT bridge", link: "/integrations/mqtt-bridge" },
             { text: "ESPHome & Shelly", link: "/integrations/esphome-shelly" },
+            { text: "Personal weather stations", link: "/integrations/personal-weather-stations" },
             { text: "Grafana / Prometheus", link: "/integrations/grafana" },
           ],
         },

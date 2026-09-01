@@ -589,4 +589,13 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     summary:
       "Stop heat loss and freeze risk when a garage door is left open on a cold night.",
   },
+  {
+    slug: "personal-weather-stations",
+    parentSlug: "accounts-and-dashboard",
+    title: "Personal weather stations (Ambient & WeatherFlow)",
+    description:
+      "Use your backyard Ambient Weather or WeatherFlow Tempest station for outdoor context, NWS alerts, and forecast freeze risk instead of a distant OpenWeather city.",
+    summary:
+      "Point ThermalTrace at the station on your property — better yard-level freeze context.",
+  },
 ];

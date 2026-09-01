@@ -14,6 +14,7 @@ export type WeatherSnapshot = {
   windGust: number | null;
   cloudCover: number;
   description: string;
+  source?: "openweather" | "ambient" | "weatherflow";
 };
 
 /** OpenStreetMap embed centered on coords with a marker. */

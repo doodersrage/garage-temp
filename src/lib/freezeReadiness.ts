@@ -21,13 +21,20 @@ export function computeFreezeReadiness(input: {
   alertSettings: AlertSettings;
   devices: DeviceWithSensors[];
   latest: LatestSensorRow[];
-  weatherCityId: string | null;
+  weatherLocationConfigured: boolean;
   canUseForecast: boolean;
   canUseNws: boolean;
   hasSentAnyAlert: boolean;
 }): FreezeReadinessResult {
-  const { alertSettings, devices, latest, weatherCityId, canUseForecast, canUseNws, hasSentAnyAlert } =
-    input;
+  const {
+    alertSettings,
+    devices,
+    latest,
+    weatherLocationConfigured,
+    canUseForecast,
+    canUseNws,
+    hasSentAnyAlert,
+  } = input;
 
   const stale: StaleSensorSummary = summarizeStaleSensors(latest, devices);
   const lowBattery = listLowBatteryDevices(devices, alertSettings.batteryThresholdPct);
@@ -94,8 +101,10 @@ export function computeFreezeReadiness(input: {
     {
       id: "weather",
       label: "Weather / NWS location configured",
-      ok: Boolean(weatherCityId?.trim()),
-      hint: weatherCityId ? undefined : "Set your city in Dashboard → Settings for forecast/NWS alerts.",
+      ok: weatherLocationConfigured,
+      hint: weatherLocationConfigured
+        ? undefined
+        : "Set outdoor weather in Dashboard → Settings (OpenWeather city, Ambient station, or WeatherFlow).",
     },
   ];
 

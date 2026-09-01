@@ -217,6 +217,7 @@ export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
   "zapier-make-recipes": "desk-workspace",
   "esphome-shelly-recipes": "ethernet-cable",
   "garage-door-cold-playbook": "garage-workbench",
+  "personal-weather-stations": "cold-weather-road",
 
   // Stack / hosting (atmospheric, not literal)
   "astro-server-side-rendering": "desk-workspace",

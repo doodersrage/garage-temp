@@ -41,7 +41,8 @@ import {
   buildReadingsFromResults,
   mergeAlertReadings,
 } from "./alertReadings";
-import { fetchForecastMinTemp, fetchWeatherSnapshot } from "./FetchWeather";
+import { fetchForecastMinTempForConfig, fetchWeatherSnapshotForConfig } from "./weatherContext";
+import { personalWeatherConfigFromMetadata } from "./personalWeatherStations";
 import { fetchNwsAlerts, hasFreezeRelatedNwsAlert } from "./nwsAlerts";
 import { buildSnoozeUrl } from "./alertSnoozeTokens";
 import { buildSiteUrl } from "./siteUrl";
@@ -158,6 +159,21 @@ export async function sendFloodAlertsIfNeeded(
   await markCooldown(userId, "last_flood_alert_at");
 }
 
+async function getWeatherConfigForUser(userId: string): Promise<import("./personalWeatherStations").PersonalWeatherConfig> {
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin.auth.admin.getUserById(userId);
+    const meta = data.user?.user_metadata as Record<string, unknown> | undefined;
+    const cityId =
+      typeof meta?.weather_city_id === "string" && /^\d+$/.test(meta.weather_city_id.trim())
+        ? meta.weather_city_id.trim()
+        : null;
+    return personalWeatherConfigFromMetadata(meta, cityId);
+  } catch {
+    return personalWeatherConfigFromMetadata(undefined, null);
+  }
+}
+
 export async function maybeSendForecastFreezeAlert(
   userId: string,
   email: string | null | undefined,
@@ -169,14 +185,8 @@ export async function maybeSendForecastFreezeAlert(
   if (!entitlements.canUseForecastAlerts) return;
   if (isAlertCooldownActive(settings.lastForecastAlertAt)) return;
 
-  const prefs = weatherCityId
-    ? { weatherCityId }
-    : null;
-  // Prefer explicit city; otherwise fall back to OpenWeather default via null.
-  const window = await fetchForecastMinTemp(
-    prefs?.weatherCityId ?? weatherCityId ?? null,
-    settings.forecastHoursAhead,
-  );
+  const config = await getWeatherConfigForUser(userId);
+  const window = await fetchForecastMinTempForConfig(config, settings.forecastHoursAhead);
   const message = evaluateForecastFreeze(
     settings,
     window?.minTempF ?? null,
@@ -192,24 +202,6 @@ export async function maybeSendForecastFreezeAlert(
   await markCooldown(userId, "last_forecast_alert_at");
 }
 
-async function resolveWeatherCityIdForUser(
-  userId: string,
-  weatherCityId?: string | null,
-): Promise<string | null> {
-  if (weatherCityId) return weatherCityId;
-  try {
-    const admin = createAdminClient();
-    const { data } = await admin.auth.admin.getUserById(userId);
-    const meta = data.user?.user_metadata;
-    if (typeof meta?.weather_city_id === "string" && meta.weather_city_id.trim()) {
-      return meta.weather_city_id.trim();
-    }
-  } catch {
-    // fall through to OpenWeather default
-  }
-  return null;
-}
-
 export async function maybeSendNwsFreezeAlert(
   userId: string,
   email: string | null | undefined,
@@ -221,8 +213,8 @@ export async function maybeSendNwsFreezeAlert(
   if (!entitlements.canUseNwsAlerts) return;
   if (isAlertCooldownActive(settings.lastNwsAlertAt)) return;
 
-  const cityId = await resolveWeatherCityIdForUser(userId, weatherCityId);
-  const snapshot = await fetchWeatherSnapshot(cityId);
+  const config = await getWeatherConfigForUser(userId);
+  const snapshot = await fetchWeatherSnapshotForConfig(config);
   if (
     snapshot?.lat == null ||
     snapshot?.lon == null ||

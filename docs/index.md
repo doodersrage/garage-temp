@@ -63,6 +63,7 @@ features:
 | Automate on freeze alerts | [Home Assistant (HACS)](/integrations/home-assistant) · [Alert webhooks](/integrations/webhooks) |
 | Keep Mosquitto / dual-run MQTT | [MQTT bridge](/integrations/mqtt-bridge) |
 | ESPHome or Shelly on the LAN | [ESPHome & Shelly](/integrations/esphome-shelly) |
+| Backyard weather station | [Ambient & WeatherFlow](/integrations/personal-weather-stations) |
 | Scrape metrics | [Grafana / Prometheus](/integrations/grafana) |
 | Run the app locally | [Local development](/guide/local-dev) |
 | Deploy or check production | [Deploy & ops](/guide/deploy) |

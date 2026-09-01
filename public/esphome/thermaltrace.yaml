@@ -1,0 +1,43 @@
+# ThermalTrace push ingest — ESPHome snippet
+# Add to your device YAML after creating a push device (Dashboard → Devices).
+#
+# secrets.yaml:
+#   thermaltrace_ingest_url: https://thermaltrace.dev/api/ingest/YOUR_DEVICE_KEY
+#
+# Example sensor IDs — rename to match your entities:
+#   id(garage_temp_c)   — Celsius temperature
+#   id(garage_rh)       — humidity %
+#   id(garage_door)     — binary door contact (optional)
+
+http_request:
+  id: tt_http
+  verify_ssl: true
+  timeout: 10s
+
+interval:
+  - interval: 60s
+    then:
+      - http_request.post:
+          url: !secret thermaltrace_ingest_url
+          request_headers:
+            Content-Type: application/json
+          body: !lambda |-
+            char buf[420];
+            snprintf(buf, sizeof(buf),
+              "{\"sensors\":["
+              "{\"key\":\"garage_temp\",\"kind\":\"temperature\",\"value\":%.1f,\"unit\":\"F\"},"
+              "{\"key\":\"garage_rh\",\"kind\":\"humidity\",\"value\":%.0f,\"unit\":\"%%\"}"
+              "]}",
+              id(garage_temp_c).state * 9.0f / 5.0f + 32.0f,
+              id(garage_rh).state);
+            return std::string(buf);
+
+# Door contact (separate POST on state change — add a binary_sensor platform with on_state):
+# on_state:
+#   - http_request.post:
+#       url: !secret thermaltrace_ingest_url
+#       request_headers:
+#         Content-Type: application/json
+#       body: !lambda |-
+#         return std::string("{\"sensors\":[{\"key\":\"garage_door\",\"kind\":\"door\",\"bool\":") +
+#           (id(garage_door).state ? "true" : "false") + "}]}";

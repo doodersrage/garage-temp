@@ -49,6 +49,7 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
       { href: "/about/freeze-protection-thresholds", slug: "freeze-protection-thresholds" },
       { href: "/about/cold-snap-playbook", slug: "cold-snap-playbook" },
       { href: "/about/garage-door-cold-playbook", slug: "garage-door-cold-playbook" },
+      { href: "/about/personal-weather-stations", slug: "personal-weather-stations" },
       { href: "/about/alert-channel-cookbook", slug: "alert-channel-cookbook" },
       { href: "/stories/garage-freeze-alert", label: "Garage freeze case study", summary: "How a probe curve caught a cold night before pipes froze." },
     ],

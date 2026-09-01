@@ -48,43 +48,117 @@ const selectValue = !currentId ? "" : isCustom ? "custom" : currentId;
       </label>
 
       <fieldset class="checkbox-group-nested" id="weather">
-        <legend class="checkbox-group-label">Weather location</legend>
-        <div class="form-field mb-0">
-          <label class="form-label" for="weather_city_preset">City</label>
-          <select class="form-input" id="weather_city_preset">
-            <option value="" selected={selectValue === ""}>
-              Site default{defaultCityId ? ` (${defaultCityId})` : ""}
+        <legend class="checkbox-group-label">Outdoor weather source</legend>
+        <div class="form-field mb-3">
+          <label class="form-label" for="weather_source">Source</label>
+          <select class="form-input" id="weather_source" name="weather_source">
+            <option value="openweather" selected={preferences.weatherSource === "openweather"}>
+              OpenWeather (city)
             </option>
-            {WEATHER_CITY_PRESETS.map((city) => (
-              <option value={city.id} selected={selectValue === city.id}>
-                {city.label}
-              </option>
-            ))}
-            <option value="custom" selected={selectValue === "custom"}>Custom city ID…</option>
+            <option value="ambient" selected={preferences.weatherSource === "ambient"}>
+              Ambient Weather (your station)
+            </option>
+            <option value="weatherflow" selected={preferences.weatherSource === "weatherflow"}>
+              WeatherFlow Tempest
+            </option>
           </select>
-        </div>
-        <div class="form-field mb-0 mt-3" id="weather-custom-field" hidden={selectValue !== "custom"}>
-          <label class="form-label" for="weather_city_custom">OpenWeather city ID</label>
-          <input
-            type="text"
-            id="weather_city_custom"
-            class="form-input"
-            value={isCustom ? currentId : ""}
-            placeholder="e.g. 5128581"
-            inputmode="numeric"
-            pattern="\d*"
-          />
-          <p class="preference-hint">
-            Find IDs in the
-            <a
-              class="text-link"
-              href="https://openweathermap.org/find"
-              target="_blank"
-              rel="noreferrer"
-            >
-              OpenWeather city list
-            </a>.
+          <p class="preference-hint mb-0">
+            Personal stations drive outdoor context, NWS alerts, and forecast freeze risk at your yard — not a distant city.
+            <a class="text-link" href="/about/personal-weather-stations">Setup guide</a>
           </p>
+        </div>
+
+        <div id="weather-openweather-fields" hidden={preferences.weatherSource !== "openweather"}>
+          <div class="form-field mb-0">
+            <label class="form-label" for="weather_city_preset">City</label>
+            <select class="form-input" id="weather_city_preset">
+              <option value="" selected={selectValue === ""}>
+                Site default{defaultCityId ? ` (${defaultCityId})` : ""}
+              </option>
+              {WEATHER_CITY_PRESETS.map((city) => (
+                <option value={city.id} selected={selectValue === city.id}>
+                  {city.label}
+                </option>
+              ))}
+              <option value="custom" selected={selectValue === "custom"}>Custom city ID…</option>
+            </select>
+          </div>
+          <div class="form-field mb-0 mt-3" id="weather-custom-field" hidden={selectValue !== "custom"}>
+            <label class="form-label" for="weather_city_custom">OpenWeather city ID</label>
+            <input
+              type="text"
+              id="weather_city_custom"
+              class="form-input"
+              value={isCustom ? currentId : ""}
+              placeholder="e.g. 5128581"
+              inputmode="numeric"
+              pattern="\d*"
+            />
+            <p class="preference-hint">
+              Find IDs in the
+              <a class="text-link" href="https://openweathermap.org/find" target="_blank" rel="noreferrer">
+                OpenWeather city list
+              </a>.
+            </p>
+          </div>
+        </div>
+
+        <div id="weather-ambient-fields" class="mt-3" hidden={preferences.weatherSource !== "ambient"}>
+          <div class="form-field mb-3">
+            <label class="form-label" for="ambient_weather_mac">Station MAC address</label>
+            <input
+              type="text"
+              class="form-input font-mono text-sm"
+              id="ambient_weather_mac"
+              name="ambient_weather_mac"
+              value={preferences.ambientWeatherMac ?? ""}
+              placeholder="AA:BB:CC:DD:EE:FF"
+              autocomplete="off"
+            />
+          </div>
+          <div class="form-field mb-0">
+            <label class="form-label" for="ambient_weather_api_key">Ambient API key</label>
+            <input
+              type="password"
+              class="form-input font-mono text-sm"
+              id="ambient_weather_api_key"
+              name="ambient_weather_api_key"
+              value={preferences.ambientWeatherApiKey ?? ""}
+              autocomplete="off"
+            />
+            <p class="preference-hint mb-0">
+              From your Ambient account → API keys. Stored on your account for outdoor readings only.
+            </p>
+          </div>
+        </div>
+
+        <div id="weather-weatherflow-fields" class="mt-3" hidden={preferences.weatherSource !== "weatherflow"}>
+          <div class="form-field mb-3">
+            <label class="form-label" for="weatherflow_station_id">Station ID</label>
+            <input
+              type="text"
+              class="form-input"
+              id="weatherflow_station_id"
+              name="weatherflow_station_id"
+              value={preferences.weatherflowStationId ?? ""}
+              placeholder="12345"
+              inputmode="numeric"
+            />
+          </div>
+          <div class="form-field mb-0">
+            <label class="form-label" for="weatherflow_token">Personal access token</label>
+            <input
+              type="password"
+              class="form-input font-mono text-sm"
+              id="weatherflow_token"
+              name="weatherflow_token"
+              value={preferences.weatherflowToken ?? ""}
+              autocomplete="off"
+            />
+            <p class="preference-hint mb-0">
+              From tempestwx.com → Settings → Data Authorizations → create token.
+            </p>
+          </div>
         </div>
       </fieldset>
 
@@ -114,12 +188,29 @@ const selectValue = !currentId ? "" : isCustom ? "custom" : currentId;
 
   const form = document.querySelector<HTMLFormElement>("[data-prefs-form]");
   const preset = document.getElementById("weather_city_preset");
+  const sourceSelect = document.getElementById("weather_source");
+  const openWeatherFields = document.getElementById("weather-openweather-fields");
+  const ambientFields = document.getElementById("weather-ambient-fields");
+  const weatherflowFields = document.getElementById("weather-weatherflow-fields");
   const hidden = document.getElementById("weather_city_id_value");
   const customField = document.getElementById("weather-custom-field");
   const customInput = document.getElementById("weather_city_custom");
   const statusEl = document.getElementById("prefs-status");
   const errorEl = document.getElementById("prefs-error");
   const submitBtn = document.getElementById("prefs-submit");
+
+  function syncWeatherPanels() {
+    if (!(sourceSelect instanceof HTMLSelectElement)) return;
+    const source = sourceSelect.value;
+    if (openWeatherFields) openWeatherFields.hidden = source !== "openweather";
+    if (ambientFields) ambientFields.hidden = source !== "ambient";
+    if (weatherflowFields) weatherflowFields.hidden = source !== "weatherflow";
+  }
+
+  if (sourceSelect instanceof HTMLSelectElement) {
+    sourceSelect.addEventListener("change", syncWeatherPanels);
+    syncWeatherPanels();
+  }
 
   if (preset instanceof HTMLSelectElement && hidden instanceof HTMLInputElement) {
     const sync = () => {

@@ -131,6 +131,7 @@ const [
 const outdoorDelta = await fetchIndoorOutdoorDelta(
   chartData.points,
   preferences.weatherCityId,
+  user,
 );
 const indoorOutdoorSeries = outdoorDelta
   ? buildIndoorOutdoorSeries(chartData.points, outdoorDelta.outdoorF)

@@ -1,11 +1,13 @@
 import type { APIRoute } from "astro";
+import { getAuthFromCookies } from "../../../lib/auth";
 import { fetchWeatherSnapshot, resolveWeatherCityId } from "../../../lib/FetchWeather";
 import { checkWeatherSearchRateLimit } from "../../../lib/weatherSearchLimits";
+import {
+  fetchWeatherSnapshotForConfig,
+  getPersonalWeatherConfig,
+} from "../../../lib/weatherContext";
 
-export const GET: APIRoute = async ({ url, clientAddress }) => {
-  // Shares a rate-limit budget with /api/weather/city-search -- both draw
-  // on the same OpenWeatherMap API key/quota, and varying ?cityId defeats
-  // the Cache-Control hint below for anyone who wants to burn it.
+export const GET: APIRoute = async ({ url, cookies, clientAddress }) => {
   const rate = checkWeatherSearchRateLimit(clientAddress || "unknown");
   if (!rate.ok) {
     return new Response(JSON.stringify({ error: "Too many requests" }), {
@@ -17,15 +19,42 @@ export const GET: APIRoute = async ({ url, clientAddress }) => {
     });
   }
 
-  const cityId = url.searchParams.get("cityId");
-  const resolved = resolveWeatherCityId(cityId);
-  const weather = await fetchWeatherSnapshot(resolved);
+  const { user } = await getAuthFromCookies(cookies);
+  const cityParam = url.searchParams.get("cityId");
+  const sourceParam = url.searchParams.get("source");
+
+  let weather = null;
+  let cityId: string | null = null;
+  let source: string | null = null;
+
+  if (user && sourceParam !== "openweather") {
+    const config = getPersonalWeatherConfig(user);
+    weather = await fetchWeatherSnapshotForConfig(config);
+    source = weather?.source ?? config.source;
+    cityId = config.openWeatherCityId;
+  } else if (user && !cityParam) {
+    const config = getPersonalWeatherConfig(user);
+    if (config.source !== "openweather") {
+      weather = await fetchWeatherSnapshotForConfig(config);
+      source = weather?.source ?? config.source;
+      cityId = config.openWeatherCityId;
+    }
+  }
+
+  if (!weather) {
+    cityId = resolveWeatherCityId(cityParam);
+    weather = await fetchWeatherSnapshot(cityId);
+    if (weather) {
+      weather = { ...weather, source: "openweather" };
+      source = "openweather";
+    }
+  }
 
   if (!weather) {
     return new Response(
       JSON.stringify({
         error: "Unable to load weather for this location.",
-        cityId: resolved || null,
+        cityId: cityId || null,
       }),
       {
         status: 502,
@@ -34,7 +63,7 @@ export const GET: APIRoute = async ({ url, clientAddress }) => {
     );
   }
 
-  return new Response(JSON.stringify({ weather, cityId: resolved }), {
+  return new Response(JSON.stringify({ weather, cityId, source }), {
     status: 200,
     headers: {
       "Content-Type": "application/json",

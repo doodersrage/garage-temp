@@ -1,8 +1,12 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
-import { fetchNightsAtRisk, fetchWeatherSnapshot } from "../../../lib/FetchWeather";
 import { fetchNwsAlerts } from "../../../lib/nwsAlerts";
 import { getAlertSettingsForUser } from "../../../lib/notify";
+import {
+  fetchNightsAtRiskForConfig,
+  fetchWeatherSnapshotForConfig,
+  getPersonalWeatherConfig,
+} from "../../../lib/weatherContext";
 import { getUserPreferences } from "../../../lib/userPreferences";
 
 export const GET: APIRoute = async ({ cookies }) => {
@@ -19,13 +23,10 @@ export const GET: APIRoute = async ({ cookies }) => {
     getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
   ]);
 
-  const cityId = preferences.weatherCityId;
+  const weatherConfig = getPersonalWeatherConfig(user);
   const [nightsAtRisk, weatherSnapshot] = await Promise.all([
-    fetchNightsAtRisk({
-      cityId,
-      freezeThresholdF: alertSettings.freezeThresholdF,
-    }),
-    fetchWeatherSnapshot(cityId),
+    fetchNightsAtRiskForConfig(weatherConfig, alertSettings.freezeThresholdF),
+    fetchWeatherSnapshotForConfig(weatherConfig),
   ]);
 
   let nwsAlerts: Awaited<ReturnType<typeof fetchNwsAlerts>> | null = null;
@@ -36,6 +37,7 @@ export const GET: APIRoute = async ({ cookies }) => {
   return new Response(
     JSON.stringify({
       freeze_threshold_f: alertSettings.freezeThresholdF,
+      weather_source: weatherSnapshot?.source ?? preferences.weatherSource,
       nights_at_risk: nightsAtRisk.map((night) => ({
         date_label: night.dateLabel,
         min_temp_f: night.minTempF,
@@ -44,20 +46,13 @@ export const GET: APIRoute = async ({ cookies }) => {
       nws_alerts: nwsAlerts?.alerts?.map((alert) => ({
         event: alert.event,
         headline: alert.headline,
-        severity: alert.severity,
-        expires: alert.expires,
-      })) ?? [],
-      weather: weatherSnapshot
-        ? {
-            name: weatherSnapshot.name,
-            temp_f: weatherSnapshot.temp,
-            description: weatherSnapshot.description,
-          }
-        : null,
+        ends: alert.ends,
+      })),
+      outdoor_temp_f: weatherSnapshot?.temp ?? null,
     }),
     {
       status: 200,
-      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      headers: { "Content-Type": "application/json", "Cache-Control": "private, max-age=120" },
     },
   );
 };

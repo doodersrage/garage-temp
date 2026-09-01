@@ -8,6 +8,7 @@ interface ImportMetaEnv {
   readonly GARAGE_TEMP_FEED_URL?: string;
   readonly NEXT_PUBLIC_OPENWEATHER_API_KEY?: string;
   readonly NEXT_PUBLIC_OPENWEATHER_CITY_ID?: string;
+  readonly AMBIENT_APPLICATION_KEY?: string;
   readonly TURNSTILE_SITE_KEY?: string;
   readonly TURNSTILE_SECRET_TOKEN?: string;
   readonly SMTP_MAIL_FROM?: string;

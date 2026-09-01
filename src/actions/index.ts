@@ -3,6 +3,7 @@ import { z } from "astro/zod";
 import { getAuthFromCookies, setAuthCookies } from "../lib/auth";
 import {
   updateUserDisplayPreferences,
+  parseDisplayPreferencesInput,
   type ThemePreference,
 } from "../lib/userPreferences";
 import { createServerClient, createAuthClient } from "../lib/supabase";
@@ -75,6 +76,11 @@ export const server = {
       show_weather: z.string().optional(),
       use_celsius: z.string().optional(),
       weather_city_id: z.string().optional(),
+      weather_source: z.enum(["openweather", "ambient", "weatherflow"]).optional(),
+      ambient_weather_mac: z.string().optional(),
+      ambient_weather_api_key: z.string().optional(),
+      weatherflow_station_id: z.string().optional(),
+      weatherflow_token: z.string().optional(),
       theme: z.enum(["dark", "light", "system"]).optional(),
       redirect: z.string().optional(),
     }),
@@ -90,18 +96,9 @@ export const server = {
         });
       }
 
-      const weatherCityIdRaw = input.weather_city_id?.trim() ?? "";
-      const weatherCityId = /^\d+$/.test(weatherCityIdRaw) ? weatherCityIdRaw : null;
-      const theme: ThemePreference =
-        input.theme === "light" || input.theme === "system" ? input.theme : "dark";
+      const prefs = parseDisplayPreferencesInput(input);
 
-      const { error } = await updateUserDisplayPreferences(accessToken, refreshToken, {
-        showGarageTemps: input.show_garage_temps === "true" || input.show_garage_temps === "on",
-        showWeather: input.show_weather === "true" || input.show_weather === "on",
-        weatherCityId,
-        useCelsius: input.use_celsius === "true" || input.use_celsius === "on",
-        theme,
-      });
+      const { error } = await updateUserDisplayPreferences(accessToken, refreshToken, prefs);
 
       if (error) {
         throw new ActionError({
@@ -110,7 +107,7 @@ export const server = {
         });
       }
 
-      context.cookies.set("theme", theme, {
+      context.cookies.set("theme", prefs.theme, {
         path: "/",
         httpOnly: false,
         sameSite: "lax",
@@ -136,7 +133,7 @@ export const server = {
 
       return {
         ok: true as const,
-        theme,
+        theme: prefs.theme,
         message: "Display preferences saved.",
       };
     },

@@ -96,7 +96,12 @@ export default function WeatherPanel({
 
   if (!weather) return null;
 
-  const locationLabel = `${weather.name}${weather.country ? `, ${weather.country}` : ""}`;
+  const locationLabel =
+    weather.source === "ambient"
+      ? `${weather.name} (Ambient Weather)`
+      : weather.source === "weatherflow"
+        ? `${weather.name} (WeatherFlow)`
+        : `${weather.name}${weather.country ? `, ${weather.country}` : ""}`;
   const hasCoords =
     weather.lat != null &&
     weather.lon != null &&

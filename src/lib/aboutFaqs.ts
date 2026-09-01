@@ -270,6 +270,18 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
         "Dashboard → Alerts → Rules. Add conditions for door open (or door open duration) AND temperature below your freeze threshold, then save and send a test alert.",
     },
   ],
+  "personal-weather-stations": [
+    {
+      question: "Do I still need OpenWeather?",
+      answer:
+        "OpenWeather is the default and fallback. Personal stations replace the outdoor card and improve NWS/forecast context at your yard.",
+    },
+    {
+      question: "Where are my Ambient/WeatherFlow keys stored?",
+      answer:
+        "In your account metadata (Dashboard → Settings), same as display preferences — not in the public git repo.",
+    },
+  ],
 };
 
 export function getAboutFaqs(slug: string): AboutFaqItem[] {
