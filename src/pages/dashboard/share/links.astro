@@ -1,0 +1,260 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import ShareNav from "../../../components/dashboard/ShareNav.astro";
+import UpgradeNudge from "../../../components/UpgradeNudge.astro";
+import { loadShareDashboardContext } from "../../../lib/shareDashboardContext";
+
+const ctx = await loadShareDashboardContext(Astro.cookies, Astro.request, Astro.url);
+if (ctx.redirect) return Astro.redirect(ctx.redirect);
+
+const {
+  entitlements,
+  links,
+  canManage,
+  siteUrl,
+  newToken,
+  statusToken,
+  newHref,
+  notice,
+  noticeIsError,
+  statusPages,
+} = ctx;
+
+const redirectTo = "/dashboard/share/links";
+---
+<DashboardLayout title="Share — Links">
+  <ShareNav active="links">
+    <div class="space-y-6">
+      <section class="card">
+        <h2 class="card-title">Public share links</h2>
+        <p class="card-subtitle">Read-only live views for family, guests, or a short renter check-in. Pro feature.</p>
+        {notice && (
+          <p class:list={[noticeIsError ? "alert-warning" : "alert-success", "mt-4"]}>{notice}</p>
+        )}
+        {!canManage && (
+          <p class="alert-warning mt-4 mb-0" role="status">
+            View-only — you cannot create or revoke share links.
+          </p>
+        )}
+      </section>
+
+      {newHref && (
+        <section class="card ingest-key-callout" id="new-share-link">
+          <h2 class="card-title">New share link</h2>
+          <p class="card-subtitle">Copy and send this link. Anyone with it can view live sensors.</p>
+          <p class="ingest-key-value break-all text-sm mb-4">
+            <a href={newHref}>{newHref}</a>
+          </p>
+          <button
+            type="button"
+            class="btn-primary"
+            data-copy={newHref}
+            data-copy-label="Copy link"
+            id="copy-new-share"
+          >
+            Copy link
+          </button>
+        </section>
+      )}
+
+      {newHref && entitlements.canCreateShareLinks && (
+        <section class="card" id="ha-hacs-nudge">
+          <h2 class="card-title">Use this link in Home Assistant</h2>
+          <p class="card-subtitle mb-4">
+            Install the official
+            <a class="text-link" href="/integrations/home-assistant">HACS integration</a>,
+            then paste the token from your share URL (<code>/share/YOUR_TOKEN</code>) in
+            <strong>Settings → Devices &amp; services → ThermalTrace</strong>.
+            Optional: add an inbound webhook on the API tab for <code>thermaltrace.snooze</code> automations.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a class="btn-primary" href="/integrations/home-assistant">HACS install guide</a>
+            <a class="btn-secondary" href="https://github.com/doodersrage/thermaltrace-home-assistant" target="_blank" rel="noreferrer">
+              GitHub repo
+            </a>
+          </div>
+        </section>
+      )}
+
+      {!entitlements.canCreateShareLinks ? (
+        <UpgradeNudge feature="share_links" tier={entitlements.tier} />
+      ) : canManage ? (
+        <form action="/api/share/manage" method="post" class="card">
+          <input type="hidden" name="action" value="create" />
+          <input type="hidden" name="redirect" value={redirectTo} />
+          <h2 class="card-title">Create link</h2>
+          <div class="config-row-grid">
+            <div class="form-field mb-0">
+              <label class="form-label" for="label">Label</label>
+              <input class="form-input" id="label" name="label" placeholder="Family live view" />
+            </div>
+            <div class="form-field mb-0">
+              <label class="form-label" for="scope">Scope</label>
+              <select class="form-input" id="scope" name="scope">
+                <option value="live">Live sensors</option>
+                <option value="history">History (7-day chart)</option>
+                <option value="metrics">Metrics (Prometheus / Grafana)</option>
+              </select>
+              <p class="form-hint">
+                Metrics links expose scrape URLs at <code>/api/share/&lt;token&gt;/readings?format=prometheus</code>.
+              </p>
+            </div>
+            <div class="form-field mb-0">
+              <label class="form-label" for="expires_days">Expires</label>
+              <select class="form-input" id="expires_days" name="expires_days">
+                <option value="0">Never (household)</option>
+                <option value="2">2 days</option>
+                <option value="7">7 days (guest / renter)</option>
+                <option value="14">14 days</option>
+                <option value="30">30 days</option>
+              </select>
+              <p class="form-hint">Use 7 days for a temporary Airbnb or landlord visit. Revoke anytime.</p>
+            </div>
+          </div>
+          <button class="btn-primary mt-4" type="submit">Create</button>
+        </form>
+      ) : (
+        <section class="card">
+          <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+            Share link creation requires editor access.
+          </p>
+        </section>
+      )}
+
+      <section class="card">
+        <h2 class="card-title">Your links</h2>
+        {(links ?? []).length === 0 ? (
+          <p class="mb-0">No share links yet.</p>
+        ) : (
+          <ul class="space-y-4">
+            {(links ?? []).map((link) => {
+              const href = `${siteUrl}/share/${link.token}`;
+              const isNew = newToken === link.token;
+              const expired =
+                Boolean(link.expires_at) &&
+                Date.parse(link.expires_at as string) <= Date.now();
+              return (
+                <li
+                  class:list={[
+                    "flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-xl p-3",
+                    isNew && "share-link-new",
+                    expired && "share-link-expired",
+                  ]}
+                  id={isNew ? "share-link-highlighted" : undefined}
+                >
+                  <div>
+                    <strong>{link.label || link.scope}</strong>
+                    {isNew && <span class="feed-health-ok ml-2">New</span>}
+                    {expired && <span class="feed-health-error ml-2">Expired</span>}
+                    <p class="m-0 text-sm break-all">
+                      {expired ? (
+                        <span class="text-[var(--color-text-muted)]">{href}</span>
+                      ) : (
+                        <a href={href}>{href}</a>
+                      )}
+                    </p>
+                    <p class="m-0 text-sm text-[var(--color-text-muted)]">
+                      Scope: {link.scope}
+                      {link.expires_at
+                        ? expired
+                          ? ` · Expired ${new Date(link.expires_at).toLocaleDateString()}`
+                          : ` · Expires ${new Date(link.expires_at).toLocaleDateString()}`
+                        : " · No expiry"}
+                    </p>
+                    {link.scope === "live" && !expired && (
+                      <p class="m-0 text-sm break-all text-[var(--color-text-muted)]">
+                        Embed: {siteUrl}/embed/{link.token}
+                      </p>
+                    )}
+                    {link.scope === "metrics" && !expired && (
+                      <p class="m-0 text-sm break-all text-[var(--color-text-muted)]">
+                        Scrape: {siteUrl}/api/share/{link.token}/readings?format=prometheus
+                      </p>
+                    )}
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    {!expired && (
+                      <button
+                        type="button"
+                        class="btn-secondary"
+                        data-copy={href}
+                        data-copy-label="Copy link"
+                      >
+                        Copy link
+                      </button>
+                    )}
+                    <form action="/api/share/manage" method="post">
+                      <input type="hidden" name="action" value="revoke" />
+                      <input type="hidden" name="id" value={link.id} />
+                      <input type="hidden" name="redirect" value={redirectTo} />
+                      <button class="btn-ghost" type="submit" onclick="return confirm('Revoke this share link?');">
+                        {expired ? "Remove" : "Revoke"}
+                      </button>
+                    </form>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
+      {entitlements.canCreateShareLinks && canManage && (
+        <section class="card">
+          <h2 class="card-title">Public status pages</h2>
+          <p class="card-subtitle mb-4">
+            Minimal read-only status board at <code>/status/&lt;token&gt;</code> — no login required.
+          </p>
+          {statusToken && (
+            <div class="ingest-key-callout mb-4">
+              <p class="ingest-key-value break-all text-sm mb-2">{siteUrl}/status/{statusToken}</p>
+              <button type="button" class="btn-primary" data-copy={`${siteUrl}/status/${statusToken}`} data-copy-label="Copy link">
+                Copy status URL
+              </button>
+            </div>
+          )}
+          <form action="/api/status/manage" method="post" class="mb-4 flex flex-wrap gap-2 items-end">
+            <input type="hidden" name="action" value="create" />
+            <input type="hidden" name="redirect" value={redirectTo} />
+            <div class="form-field mb-0">
+              <label class="form-label" for="status-label">Label</label>
+              <input class="form-input" id="status-label" name="label" value="Household status" />
+            </div>
+            <button class="btn-secondary" type="submit">Create status page</button>
+          </form>
+          {statusPages.length === 0 ? (
+            <p class="mb-0 text-sm text-[var(--color-text-muted)]">No status pages yet.</p>
+          ) : (
+            <ul class="space-y-3">
+              {statusPages.map((page) => (
+                <li class="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <strong>{page.label}</strong>
+                    <p class="m-0 text-sm break-all">
+                      <a href={`${siteUrl}/status/${page.token}`}>{siteUrl}/status/{page.token}</a>
+                    </p>
+                  </div>
+                  <form action="/api/status/manage" method="post">
+                    <input type="hidden" name="action" value="revoke" />
+                    <input type="hidden" name="id" value={page.id} />
+                    <input type="hidden" name="redirect" value={redirectTo} />
+                    <button class="btn-ghost" type="submit">Revoke</button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+    </div>
+  </ShareNav>
+</DashboardLayout>
+
+{newHref && (
+  <script is:inline>
+    (() => {
+      const el = document.getElementById("new-share-link");
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    })();
+  </script>
+)}

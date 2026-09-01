@@ -1,0 +1,26 @@
+---
+interface TabItem {
+  id: string;
+  label: string;
+  href: string;
+}
+
+interface Props {
+  tabs: TabItem[];
+  activeId: string;
+  ariaLabel: string;
+}
+
+const { tabs, activeId, ariaLabel } = Astro.props;
+---
+<nav class="dashboard-tab-nav" aria-label={ariaLabel}>
+  {tabs.map((tab) => (
+    <a
+      class:list={["dashboard-tab-nav-link", tab.id === activeId && "is-active"]}
+      href={tab.href}
+      aria-current={tab.id === activeId ? "page" : undefined}
+    >
+      {tab.label}
+    </a>
+  ))}
+</nav>

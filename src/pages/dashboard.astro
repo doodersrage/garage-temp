@@ -58,6 +58,8 @@ import { computeFreezeReadiness } from "../lib/freezeReadiness";
 import { countUnacknowledgedAlerts } from "../lib/alertEvents";
 import LowBatteryBanner from "../components/dashboard/LowBatteryBanner.astro";
 import DashboardMultiPropertyNudge from "../components/dashboard/DashboardMultiPropertyNudge.astro";
+import DashboardOverviewToggle from "../components/dashboard/DashboardOverviewToggle.astro";
+import { getDashboardOverviewMode } from "../lib/dashboardOverviewMode";
 
 import DashboardMetricGrid from "../components/dashboard/DashboardMetricGrid.astro";
 import MetricCard from "../components/dashboard/MetricCard.astro";
@@ -275,6 +277,32 @@ if (hasHistory) analyticsEvents.push({ name: "onboarding_step_complete", props: 
 if (hasEmailAlerts) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "alerts" } });
 if (hasTestAlert) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "alert_test" } });
 if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
+
+const overviewMode = getDashboardOverviewMode(user);
+const showInsights = overviewMode === "insights";
+
+type OverviewBanner = { id: string; priority: number; show: boolean };
+const overviewBannerQueue: OverviewBanner[] = [
+  { id: "lowBattery", priority: 2, show: Boolean(lowBatteryMessage) },
+  { id: "stale", priority: 3, show: staleSensorCount > 0 },
+  { id: "alertSetup", priority: 4, show: showAlertSetupNudge },
+  { id: "youreLive", priority: 5, show: showYoureLive },
+  { id: "story", priority: 6, show: showStoryCard },
+  { id: "multiProperty", priority: 7, show: showMultiPropertyNudge },
+  { id: "coldSnap", priority: 8, show: showColdSnapChecklist },
+  { id: "freezeReadiness", priority: 9, show: true },
+  { id: "upgrade", priority: 10, show: upgradeTarget === "member" || upgradeTarget === "pro" },
+];
+const activeOverviewBanners = overviewBannerQueue
+  .filter((banner) => banner.show)
+  .sort((a, b) => a.priority - b.priority);
+const primaryBannerIds = new Set(
+  activeOverviewBanners.slice(0, 2).map((banner) => banner.id),
+);
+const secondaryBannerIds = new Set(
+  activeOverviewBanners.slice(2).map((banner) => banner.id),
+);
+const hasSecondaryBanners = secondaryBannerIds.size > 0;
 ---
 <DashboardLayout title="Overview">
   <ProductAnalyticsTracker events={analyticsEvents} />
@@ -315,7 +343,7 @@ if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
     />
 
     <DashboardYoureLive
-      show={showYoureLive}
+      show={primaryBannerIds.has("youreLive")}
       hasAlertsEnabled={hasAlertsEnabled}
       hasEmailAlerts={hasEmailAlerts}
       hasTestAlert={hasTestAlert}
@@ -325,10 +353,10 @@ if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
       hasAlertsEnabled={hasAlertsEnabled}
       hasEmailAlerts={hasEmailAlerts}
       canEdit={canEdit}
-      show={showAlertSetupNudge}
+      show={primaryBannerIds.has("alertSetup")}
     />
 
-    <DashboardStoryCard show={showStoryCard} />
+    <DashboardStoryCard show={primaryBannerIds.has("story")} />
 
     <HouseholdSwitcher
       households={userHouseholds.households}
@@ -340,9 +368,9 @@ if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
       showClaimsPackCta={unackedAlertCount > 0}
     />
 
-    <LowBatteryBanner message={lowBatteryMessage} />
+    <LowBatteryBanner message={primaryBannerIds.has("lowBattery") ? lowBatteryMessage : null} />
 
-    {staleSensorCount > 0 && (
+    {primaryBannerIds.has("stale") && staleSensorCount > 0 && (
       <div class="alert-warning mb-0" role="status">
         {staleSummary.bannerMessage} —
         <a href="/" class="text-link ml-1">Check Home</a>
@@ -353,11 +381,58 @@ if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
       </div>
     )}
 
-    <DashboardMultiPropertyNudge show={showMultiPropertyNudge} />
+    {hasSecondaryBanners && (
+      <details class="card dashboard-recommendations">
+        <summary class="dashboard-recommendations-summary">
+          More recommendations ({secondaryBannerIds.size})
+        </summary>
+        <div class="dashboard-recommendations-body space-y-4">
+          <DashboardYoureLive
+            show={secondaryBannerIds.has("youreLive")}
+            hasAlertsEnabled={hasAlertsEnabled}
+            hasEmailAlerts={hasEmailAlerts}
+            hasTestAlert={hasTestAlert}
+          />
+          <AlertSetupNudge
+            hasAlertsEnabled={hasAlertsEnabled}
+            hasEmailAlerts={hasEmailAlerts}
+            canEdit={canEdit}
+            show={secondaryBannerIds.has("alertSetup")}
+          />
+          <DashboardStoryCard show={secondaryBannerIds.has("story")} />
+          <DashboardMultiPropertyNudge show={secondaryBannerIds.has("multiProperty")} />
+          <ColdSnapChecklistCard show={secondaryBannerIds.has("coldSnap")} />
+          {secondaryBannerIds.has("freezeReadiness") && (
+            <FreezeReadinessCard readiness={freezeReadiness} />
+          )}
+          {secondaryBannerIds.has("upgrade") && upgradeTarget === "member" && (
+            <UpgradeNudge feature="data_retention" tier={entitlements.tier} compact />
+          )}
+          {secondaryBannerIds.has("upgrade") && upgradeTarget === "pro" && (
+            <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} compact />
+          )}
+          {secondaryBannerIds.has("stale") && staleSensorCount > 0 && (
+            <div class="alert-warning mb-0" role="status">
+              {staleSummary.bannerMessage} —
+              <a href="/" class="text-link ml-1">Check Home</a>
+              {" · "}
+              <a href="/dashboard/temperature" class="text-link">Devices</a>
+            </div>
+          )}
+          <LowBatteryBanner message={secondaryBannerIds.has("lowBattery") ? lowBatteryMessage : null} />
+        </div>
+      </details>
+    )}
 
-    <ColdSnapChecklistCard show={showColdSnapChecklist} />
-
-    <FreezeReadinessCard readiness={freezeReadiness} />
+    {!hasSecondaryBanners && (
+      <>
+        <DashboardMultiPropertyNudge show={primaryBannerIds.has("multiProperty")} />
+        <ColdSnapChecklistCard show={primaryBannerIds.has("coldSnap")} />
+        {primaryBannerIds.has("freezeReadiness") && (
+          <FreezeReadinessCard readiness={freezeReadiness} />
+        )}
+      </>
+    )}
 
     {!canEdit && (
       <p class="alert-warning mt-0 mb-0" role="status">
@@ -365,10 +440,10 @@ if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
       </p>
     )}
 
-    {upgradeTarget === "member" && (
+    {primaryBannerIds.has("upgrade") && upgradeTarget === "member" && (
       <UpgradeNudge feature="data_retention" tier={entitlements.tier} compact />
     )}
-    {upgradeTarget === "pro" && (
+    {primaryBannerIds.has("upgrade") && upgradeTarget === "pro" && (
       <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} compact />
     )}
 
@@ -408,8 +483,15 @@ if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
 
     <section class="dashboard-section" aria-labelledby="curves-heading">
       <div class="dashboard-section-head">
-        <h2 id="curves-heading" class="dashboard-section-title">Probe curves</h2>
-        <p class="dashboard-section-desc">Seven-day traces, freeze outlook, and week-over-week change.</p>
+        <div>
+          <h2 id="curves-heading" class="dashboard-section-title">Probe curves</h2>
+          <p class="dashboard-section-desc">
+            {showInsights
+              ? "Seven-day traces, freeze outlook, and week-over-week change."
+              : "Seven-day temperature trend. Switch to Insights for freeze outlook and comparisons."}
+          </p>
+        </div>
+        <DashboardOverviewToggle mode={overviewMode} />
       </div>
       <div class="dashboard-insights">
         <div class="dashboard-insights-primary">
@@ -420,28 +502,37 @@ if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
             exportFrom={exportFrom}
             exportTo={exportTo}
           />
-          <NightsAtRiskCard
-            nightsAtRisk={nightsAtRisk}
-            nightsRiskCount={nightsRiskCount}
-            freezeThresholdF={alertSettings.freezeThresholdF}
-            weatherSnapshot={weatherSnapshot}
-            weatherHasCoords={weatherHasCoords}
-            nwsAlerts={nwsAlerts}
-            owmApiKey={owmApiKey || null}
-          />
+          {showInsights && (
+            <NightsAtRiskCard
+              nightsAtRisk={nightsAtRisk}
+              nightsRiskCount={nightsRiskCount}
+              freezeThresholdF={alertSettings.freezeThresholdF}
+              weatherSnapshot={weatherSnapshot}
+              weatherHasCoords={weatherHasCoords}
+              nwsAlerts={nwsAlerts}
+              owmApiKey={owmApiKey || null}
+            />
+          )}
         </div>
-        <aside class="dashboard-insights-side">
-          <TimeToFreezeCard
-            estimate={timeToFreeze}
-            freezeThresholdF={alertSettings.freezeThresholdF}
-            useCelsius={useCelsius}
-          />
-          <WeekCompareCard compare={weekCompareResult.compare} useCelsius={useCelsius} />
-          <HeatingInsightsCard insights={heatingInsights} />
-          <DoorDurationCard devices={devices} />
-          <DoorEventHistory householdId={household.householdId} />
-        </aside>
+        {showInsights && (
+          <aside class="dashboard-insights-side">
+            <TimeToFreezeCard
+              estimate={timeToFreeze}
+              freezeThresholdF={alertSettings.freezeThresholdF}
+              useCelsius={useCelsius}
+            />
+            <WeekCompareCard compare={weekCompareResult.compare} useCelsius={useCelsius} />
+            <HeatingInsightsCard insights={heatingInsights} />
+            <DoorDurationCard devices={devices} />
+            <DoorEventHistory householdId={household.householdId} />
+          </aside>
+        )}
       </div>
+      {!showInsights && (
+        <p class="mt-4 mb-0 text-sm text-[var(--color-text-muted)]">
+          <a class="text-link" href="/dashboard/history">Open History</a> for full charts, CSV export, and claims pack.
+        </p>
+      )}
     </section>
   </div>
 </DashboardLayout>

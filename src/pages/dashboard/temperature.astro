@@ -189,6 +189,23 @@ const ingestKeyDeviceName =
   (focusDevice && devices.find((d) => d.id === focusDevice)?.name) ||
   pushDevices[0]?.name ||
   "Push device";
+
+const showAllDevices = Astro.url.searchParams.get("view") === "all";
+const hasLiveIngest =
+  latest.length > 0 || pushDevices.some((d) => Boolean(d.last_seen_at));
+const showDeviceWizard =
+  canEdit &&
+  !showAllDevices &&
+  !hasLiveIngest &&
+  (devices.length === 0 || pushDevices.length > 0);
+const wizardStep =
+  devices.length === 0
+    ? 1
+    : pushDevices.some((d) => d.sensors.length === 0)
+      ? 2
+      : neverSeenWithSensors
+        ? 3
+        : 4;
 ---
 <DashboardLayout title="Devices">
   <ProductAnalyticsTracker events={analyticsEvents} />
@@ -377,6 +394,24 @@ const ingestKeyDeviceName =
       </section>
     )}
 
+    {showDeviceWizard && (
+      <section class="card" id="device-setup-wizard">
+        <h2 class="card-title">Device setup</h2>
+        <p class="card-subtitle mb-4">
+          Step {wizardStep} of 3 — create a push device, map sensor keys, then verify your first POST.
+        </p>
+        <ol class="waiting-ingest-checklist mb-4">
+          <li class:list={[wizardStep > 1 && "waiting-ingest-done"]}>Create push device</li>
+          <li class:list={[wizardStep > 2 && "waiting-ingest-done", wizardStep === 2 && "waiting-ingest-pending"]}>
+            Map sensor keys
+          </li>
+          <li class:list={[wizardStep >= 3 && "waiting-ingest-pending"]}>Verify first ingest</li>
+        </ol>
+        <a class="btn-ghost" href="/dashboard/temperature?view=all">Show all device settings</a>
+      </section>
+    )}
+
+    {!showDeviceWizard && (
     <section class="card" id="device-health">
       <h2 class="card-title">Device health</h2>
       <p class="card-subtitle mb-4">
@@ -497,6 +532,8 @@ const ingestKeyDeviceName =
           ))}
         </div>
       </section>
+    )}
+
     )}
 
     <section class="card" id="push-devices">
@@ -827,6 +864,8 @@ const ingestKeyDeviceName =
       )}
     </section>
 
+    {!showDeviceWizard && (
+      <>
     <ThermostatConnectCard
       entitled={entitlements.canUseThermostatIntegration}
       tier={entitlements.tier}
@@ -866,6 +905,8 @@ const ingestKeyDeviceName =
           View-only access — feed and probe settings are hidden.
         </p>
       </section>
+    )}
+      </>
     )}
   </div>
   <datalist id="space-suggestions">

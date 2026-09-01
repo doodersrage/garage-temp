@@ -108,6 +108,8 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     id="alert-section-basics"
     title="Basics"
     subtitle="Turn alerts on or pause them temporarily without changing your thresholds."
+    collapsible
+    open
   >
     <label class="checkbox-row mb-4">
       <input type="checkbox" name="alerts_enabled" value="true" checked={settings.enabled} />
@@ -140,6 +142,8 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     id="alert-section-triggers"
     title="What triggers alerts"
     subtitle="Core freeze, humidity, flood, outage, and forecast thresholds."
+    collapsible
+    open
   >
     <div class="config-row-grid mb-4">
       <div class="form-field mb-0">
@@ -233,6 +237,8 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     id="alert-section-channels"
     title="Channels & destinations"
     subtitle="Pick how we reach you. Destination fields appear only for enabled channels."
+    collapsible
+    open
   >
     <p class="form-hint mb-3">
       Free: email, Discord, Telegram, Slack, Teams, ntfy, Pushover. Pro: SMS, WhatsApp, browser push, outbound webhooks.
@@ -428,6 +434,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     id="alert-section-quiet"
     title="Quiet hours"
     subtitle="Suppress non-critical alerts overnight while still allowing freeze and flood warnings through."
+    collapsible
   >
     <label class="checkbox-row mb-2">
       <input type="checkbox" name="quiet_hours_enabled" value="true" checked={settings.quietHoursEnabled} />

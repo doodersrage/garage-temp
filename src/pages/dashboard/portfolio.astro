@@ -21,12 +21,11 @@ const atRisk = properties.filter((p) => p.atRisk);
 ---
 <DashboardLayout title="Portfolio">
   <div class="space-y-6">
-    {entitlements.tier === "pro" && (
-      <UpgradeNudge feature="portfolio_scale" tier={entitlements.tier} />
-    )}
-    {!entitlements.canUsePortfolio && (
+    {!entitlements.canUsePortfolio ? (
       <UpgradeNudge feature="multi_property" tier={entitlements.tier} />
-    )}
+    ) : entitlements.tier === "pro" ? (
+      <UpgradeNudge feature="portfolio_scale" tier={entitlements.tier} />
+    ) : null}
     <section class="card">
       <h2 class="card-title">All properties</h2>
       <p class="card-subtitle mb-0">

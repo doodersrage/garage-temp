@@ -1,0 +1,60 @@
+---
+import type { DashboardOverviewMode } from "../../lib/dashboardOverviewMode";
+
+interface Props {
+  mode: DashboardOverviewMode;
+}
+
+const { mode } = Astro.props;
+---
+<form
+  action="/api/user/dashboard-overview-mode"
+  method="post"
+  class="dashboard-overview-toggle"
+>
+  <input type="hidden" name="redirect" value="/dashboard" />
+  <span class="dashboard-overview-toggle-label">View</span>
+  <button
+    type="submit"
+    name="mode"
+    value="simple"
+    class:list={["btn-ghost btn-sm", mode === "simple" && "is-active"]}
+    aria-pressed={mode === "simple"}
+  >
+    Simple
+  </button>
+  <button
+    type="submit"
+    name="mode"
+    value="insights"
+    class:list={["btn-ghost btn-sm", mode === "insights" && "is-active"]}
+    aria-pressed={mode === "insights"}
+  >
+    Insights
+  </button>
+</form>
+
+<style>
+  .dashboard-overview-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .dashboard-overview-toggle-label {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    margin-right: 0.25rem;
+  }
+
+  .dashboard-overview-toggle :global(.btn-sm) {
+    padding: 0.25rem 0.625rem;
+    font-size: 0.8125rem;
+  }
+
+  .dashboard-overview-toggle :global(.is-active) {
+    background: var(--color-surface-elevated);
+    color: var(--color-text);
+  }
+</style>

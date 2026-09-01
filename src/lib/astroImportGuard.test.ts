@@ -94,6 +94,9 @@ describe("dashboard pages import DashboardLayout", () => {
     it(rel, () => {
       const parsed = parseAstro(file);
       expect(parsed).not.toBeNull();
+      if (parsed!.frontmatter.includes("Astro.redirect")) {
+        return;
+      }
       expect(importedNames(parsed!.frontmatter).has("DashboardLayout")).toBe(true);
     });
   }

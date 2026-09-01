@@ -46,14 +46,17 @@ const referralRewardDays = Number(
       </p>
     </section>
 
-    {upgradeTarget === "member" && (
-      <UpgradeNudge feature="data_retention" tier={entitlements.tier} />
-    )}
-    {upgradeTarget === "pro" && (
-      <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} />
-    )}
-    {upgradeTarget === "portfolio" && (
-      <UpgradeNudge feature="portfolio_scale" tier={entitlements.tier} />
+    {upgradeTarget && (
+      <UpgradeNudge
+        feature={
+          upgradeTarget === "member"
+            ? "data_retention"
+            : upgradeTarget === "pro"
+              ? "sms_alerts"
+              : "portfolio_scale"
+        }
+        tier={entitlements.tier}
+      />
     )}
 
     <PlansCard

@@ -1,0 +1,94 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import ShareNav from "../../../components/dashboard/ShareNav.astro";
+import GrafanaWizard from "../../../components/GrafanaWizard.astro";
+import WebhookDeliveryLog from "../../../components/WebhookDeliveryLog.astro";
+import HaSetupCard from "../../../components/HaSetupCard.astro";
+import ZapierSetupCard from "../../../components/ZapierSetupCard.astro";
+import { loadShareDashboardContext } from "../../../lib/shareDashboardContext";
+
+const ctx = await loadShareDashboardContext(Astro.cookies, Astro.request, Astro.url);
+if (ctx.redirect) return Astro.redirect(ctx.redirect);
+
+const {
+  entitlements,
+  apiKeys,
+  inboundWebhooks,
+  activity,
+  siteUrl,
+  webhookDeliveries,
+  newApiKey,
+  inboundToken,
+  notice,
+  noticeIsError,
+} = ctx;
+---
+<DashboardLayout title="Share — Integrations">
+  <ShareNav active="integrations">
+    <div class="space-y-6">
+      <section class="card">
+        <h2 class="card-title">Integrations</h2>
+        <p class="card-subtitle mb-0">
+          Grafana, Home Assistant, Zapier setup guides, webhook delivery logs, and household activity.
+        </p>
+        {notice && (
+          <p class:list={[noticeIsError ? "alert-warning" : "alert-success", "mt-4"]}>{notice}</p>
+        )}
+      </section>
+
+      <GrafanaWizard
+        siteUrl={siteUrl}
+        apiKeyPrefix={apiKeys[0]?.key_prefix ?? null}
+        apiKey={newApiKey}
+      />
+
+      {entitlements.canUseOutboundWebhook && (
+        <WebhookDeliveryLog deliveries={webhookDeliveries} />
+      )}
+
+      <ZapierSetupCard
+        siteUrl={siteUrl}
+        inboundWebhookUrl={
+          inboundToken ? `${siteUrl}/api/inbound/${inboundToken}` : null
+        }
+        hasInboundWebhook={inboundWebhooks.length > 0 || Boolean(inboundToken)}
+      />
+
+      <HaSetupCard
+        siteUrl={siteUrl}
+        apiKey={newApiKey}
+        inboundWebhookUrl={
+          inboundToken ? `${siteUrl}/api/inbound/${inboundToken}` : null
+        }
+      />
+
+      <section class="card">
+        <h2 class="card-title">Recent activity</h2>
+        {activity.length === 0 ? (
+          <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+            Household actions (share links, alert saves, device transfers) will appear here.
+          </p>
+        ) : (
+          <ul class="space-y-2 mb-0 text-sm">
+            {activity.map((row) => (
+              <li>
+                <strong>{row.action}</strong>
+                {row.detail ? `: ${row.detail}` : ""}
+                <span class="text-[var(--color-text-muted)]">
+                  {" · "}
+                  {new Date(row.created_at).toLocaleString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Export your data</h2>
+        <p class="card-subtitle mb-3">Download preferences, alert settings, history sample, and devices as JSON.</p>
+        <a class="btn-secondary" href="/api/user/export">Download export.json</a>
+      </section>
+    </div>
+  </ShareNav>
+</DashboardLayout>

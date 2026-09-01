@@ -30,6 +30,9 @@ interface Props {
   freezeThresholdF?: number | null;
   maxHistoryDays?: number;
   canCompareYoy?: boolean;
+  viewMode?: "all" | "chart" | "table";
+  hideTitle?: boolean;
+  tab?: string;
 }
 
 const {
@@ -51,6 +54,9 @@ const {
   freezeThresholdF = null,
   maxHistoryDays = 7,
   canCompareYoy = false,
+  viewMode = "all",
+  hideTitle = false,
+  tab = "",
 } = Astro.props;
 const { readings, page, pageSize, totalCount, totalPages, error } = history;
 
@@ -62,6 +68,7 @@ const nextPage = page < totalPages ? page + 1 : null;
 function buildFilterUrl(nextFeed: string, nextProbe: string, nextPage = 1): string {
   const params = new URLSearchParams();
   params.set("page", String(nextPage));
+  if (tab) params.set("tab", tab);
   if (nextFeed) params.set("feed", nextFeed);
   if (nextProbe) params.set("probe", nextProbe);
   if (fromDate) params.set("from", fromDate);
@@ -93,14 +100,16 @@ const clearFiltersHref = basePath;
 
 <DashboardCard>
   <div class="card-header-row">
-    <div>
-      <h2 class="card-title">Historic probe readings</h2>
-      <p class="card-subtitle">
-        Temperature and humidity snapshots saved hourly in the background and when you refresh live readings while signed in.
-        Door, flood, power, and CO₂ live on <a class="text-link" href="/">Home</a>.
-      </p>
-    </div>
-    {!error && totalCount > 0 && canDownloadCsv && (
+    {!hideTitle && (
+      <div>
+        <h2 class="card-title">Historic probe readings</h2>
+        <p class="card-subtitle">
+          Temperature and humidity snapshots saved hourly in the background and when you refresh live readings while signed in.
+          Door, flood, power, and CO₂ live on <a class="text-link" href="/">Home</a>.
+        </p>
+      </div>
+    )}
+    {!error && totalCount > 0 && canDownloadCsv && viewMode !== "chart" && (
       <a class="btn-secondary" href={buildExportUrl()} download>
         Download CSV
       </a>
@@ -119,6 +128,7 @@ const clearFiltersHref = basePath;
   )}
 
   <form class="history-filters" method="get" action={basePath}>
+    {tab && <input type="hidden" name="tab" value={tab} />}
     {(filterOptions.feeds.length > 0 || filterOptions.probes.length > 0) && (
       <>
         <div class="form-field mb-0">
@@ -185,107 +195,111 @@ const clearFiltersHref = basePath;
     )}
   </form>
 
-  <HistoryChart
-    client:visible
-    points={chartPoints}
-    priorYearPoints={priorYearPoints}
-    priorYearLegend={overlayLegend}
-    title={chartTitle}
-    freezeThresholdF={freezeThresholdF}
-  />
+  {viewMode !== "table" && (
+    <HistoryChart
+      client:visible
+      points={chartPoints}
+      priorYearPoints={priorYearPoints}
+      priorYearLegend={overlayLegend}
+      title={chartTitle}
+      freezeThresholdF={freezeThresholdF}
+    />
+  )}
 
-  {error ? (
-    <div class="empty-state">
-      <p>Unable to load historic readings: {error}</p>
-    </div>
-  ) : readings.length === 0 ? (
-    <div class="empty-state">
-      {hasActiveFilters ? (
-        <>
-          <p class="mb-4">No readings match these filters. Try a wider date range or clear filters.</p>
-          <a class="btn-primary" href={clearFiltersHref}>Clear filters</a>
-        </>
-      ) : (
-        <>
-          <p class="mb-4">
-            No climate history yet. Snapshots collect when devices are online and when you open Home while signed in.
-          </p>
-          <ol class="mb-4 pl-5 text-sm text-left max-w-md mx-auto space-y-1 text-[var(--color-text-muted)]">
-            <li>
-              <a class="text-link" href="/dashboard/temperature">Add a device or feed</a>
-            </li>
-            <li>Verify ingest on the Devices page</li>
-            <li>
-              <a class="text-link" href="/">Open Home</a> to confirm live readings
-            </li>
-          </ol>
-          <a class="btn-primary" href="/dashboard/temperature">Go to Devices</a>
-        </>
-      )}
-    </div>
-  ) : (
-    <>
-      <div class="history-mobile-list">
-        {readings.map((reading) => (
-          <article class="history-mobile-card">
-            <p class="history-mobile-time m-0">{formatReadingTimestamp(reading.timestamp)}</p>
-            <p class="m-0 font-medium">{getReadingProbeLabel(reading)}</p>
-            <p class="m-0 text-sm text-[var(--color-text-muted)]">{getReadingFeedName(reading)}</p>
-            <p class="m-0 mt-2">
-              {Number(reading.tempf).toFixed(1)}°F
-              <span class="text-[var(--color-text-muted)]">
-                {" "}({Number(reading.tempc).toFixed(1)}°C) · {Number(reading.humidity).toFixed(1)}% RH
-              </span>
+  {viewMode !== "chart" && (
+    error ? (
+      <div class="empty-state">
+        <p>Unable to load historic readings: {error}</p>
+      </div>
+    ) : readings.length === 0 ? (
+      <div class="empty-state">
+        {hasActiveFilters ? (
+          <>
+            <p class="mb-4">No readings match these filters. Try a wider date range or clear filters.</p>
+            <a class="btn-primary" href={clearFiltersHref}>Clear filters</a>
+          </>
+        ) : (
+          <>
+            <p class="mb-4">
+              No climate history yet. Snapshots collect when devices are online and when you open Home while signed in.
             </p>
-          </article>
-        ))}
+            <ol class="mb-4 pl-5 text-sm text-left max-w-md mx-auto space-y-1 text-[var(--color-text-muted)]">
+              <li>
+                <a class="text-link" href="/dashboard/temperature">Add a device or feed</a>
+              </li>
+              <li>Verify ingest on the Devices page</li>
+              <li>
+                <a class="text-link" href="/">Open Home</a> to confirm live readings
+              </li>
+            </ol>
+            <a class="btn-primary" href="/dashboard/temperature">Go to Devices</a>
+          </>
+        )}
       </div>
-
-      <div class="table-wrap history-desktop-table">
-        <table class="data-table data-table-history">
-          <thead>
-            <tr>
-              <th scope="col">Recorded</th>
-              <th scope="col">Feed</th>
-              <th scope="col">Probe</th>
-              <th scope="col">Temperature (°F)</th>
-              <th scope="col">Temperature (°C)</th>
-              <th scope="col">Humidity</th>
-            </tr>
-          </thead>
-          <tbody>
-            {readings.map((reading) => (
-              <tr>
-                <td>{formatReadingTimestamp(reading.timestamp)}</td>
-                <td>{getReadingFeedName(reading)}</td>
-                <td>{getReadingProbeLabel(reading)}</td>
-                <td>{Number(reading.tempf).toFixed(1)}</td>
-                <td>{Number(reading.tempc).toFixed(1)}</td>
-                <td>{Number(reading.humidity).toFixed(1)}%</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="pagination">
-        <p class="pagination-summary">
-          Showing {showingFrom}–{showingTo} of {totalCount} readings
-        </p>
-        <div class="pagination-controls">
-          {prevPage ? (
-            <a class="btn-secondary" href={buildFilterUrl(feedFilter, probeFilter, prevPage)}>Previous</a>
-          ) : (
-            <span class="btn-secondary pagination-disabled">Previous</span>
-          )}
-          <span class="pagination-current">Page {page} of {totalPages}</span>
-          {nextPage ? (
-            <a class="btn-secondary" href={buildFilterUrl(feedFilter, probeFilter, nextPage)}>Next</a>
-          ) : (
-            <span class="btn-secondary pagination-disabled">Next</span>
-          )}
+    ) : (
+      <>
+        <div class="history-mobile-list">
+          {readings.map((reading) => (
+            <article class="history-mobile-card">
+              <p class="history-mobile-time m-0">{formatReadingTimestamp(reading.timestamp)}</p>
+              <p class="m-0 font-medium">{getReadingProbeLabel(reading)}</p>
+              <p class="m-0 text-sm text-[var(--color-text-muted)]">{getReadingFeedName(reading)}</p>
+              <p class="m-0 mt-2">
+                {Number(reading.tempf).toFixed(1)}°F
+                <span class="text-[var(--color-text-muted)]">
+                  {" "}({Number(reading.tempc).toFixed(1)}°C) · {Number(reading.humidity).toFixed(1)}% RH
+                </span>
+              </p>
+            </article>
+          ))}
         </div>
-      </div>
-    </>
+
+        <div class="table-wrap history-desktop-table">
+          <table class="data-table data-table-history">
+            <thead>
+              <tr>
+                <th scope="col">Recorded</th>
+                <th scope="col">Feed</th>
+                <th scope="col">Probe</th>
+                <th scope="col">Temperature (°F)</th>
+                <th scope="col">Temperature (°C)</th>
+                <th scope="col">Humidity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {readings.map((reading) => (
+                <tr>
+                  <td>{formatReadingTimestamp(reading.timestamp)}</td>
+                  <td>{getReadingFeedName(reading)}</td>
+                  <td>{getReadingProbeLabel(reading)}</td>
+                  <td>{Number(reading.tempf).toFixed(1)}</td>
+                  <td>{Number(reading.tempc).toFixed(1)}</td>
+                  <td>{Number(reading.humidity).toFixed(1)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <p class="pagination-summary">
+            Showing {showingFrom}–{showingTo} of {totalCount} readings
+          </p>
+          <div class="pagination-controls">
+            {prevPage ? (
+              <a class="btn-secondary" href={buildFilterUrl(feedFilter, probeFilter, prevPage)}>Previous</a>
+            ) : (
+              <span class="btn-secondary pagination-disabled">Previous</span>
+            )}
+            <span class="pagination-current">Page {page} of {totalPages}</span>
+            {nextPage ? (
+              <a class="btn-secondary" href={buildFilterUrl(feedFilter, probeFilter, nextPage)}>Next</a>
+            ) : (
+              <span class="btn-secondary pagination-disabled">Next</span>
+            )}
+          </div>
+        </div>
+      </>
+    )
   )}
 </DashboardCard>

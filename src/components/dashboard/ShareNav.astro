@@ -1,0 +1,27 @@
+---
+interface Props {
+  active: "links" | "api" | "integrations";
+}
+
+const { active } = Astro.props;
+
+const tabs = [
+  { id: "links", label: "Links", href: "/dashboard/share/links" },
+  { id: "api", label: "API & webhooks", href: "/dashboard/share/api" },
+  { id: "integrations", label: "Integrations", href: "/dashboard/share/integrations" },
+];
+---
+<div class="share-dashboard-shell">
+  <nav class="dashboard-tab-nav mb-4" aria-label="Share sections">
+    {tabs.map((tab) => (
+      <a
+        class:list={["dashboard-tab-nav-link", tab.id === active && "is-active"]}
+        href={tab.href}
+        aria-current={tab.id === active ? "page" : undefined}
+      >
+        {tab.label}
+      </a>
+    ))}
+  </nav>
+  <slot />
+</div>
