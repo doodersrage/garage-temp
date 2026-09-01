@@ -24,7 +24,11 @@ The Worker unwraps `payload` / `message` and forwards into the same path as `POS
 
 ## Home Assistant (MQTT trigger → HTTP)
 
-1. Create a push device and copy the ingest key.  
+For automatic entities without YAML, use the [official HACS integration](https://github.com/doodersrage/thermatrace-HACS-component) ([product guide](https://thermaltrace.dev/integrations/home-assistant)).
+
+Manual MQTT → HTTP bridge:
+
+1. Create a push device and copy the ingest key.
 2. Map sensor keys to match your MQTT JSON.  
 3. Automation sketch:
 

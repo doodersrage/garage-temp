@@ -30,6 +30,8 @@ After the first successful POST, open **[Home](https://thermaltrace.dev/)** whil
 
 REST sensors, MQTT bridge, and inbound webhook examples: [Home Assistant integration](/ingest/home-assistant).
 
+**Product page:** [thermaltrace.dev/integrations/home-assistant](https://thermaltrace.dev/integrations/home-assistant) · **HACS:** [github.com/doodersrage/thermatrace-HACS-component](https://github.com/doodersrage/thermatrace-HACS-component)
+
 ## curl smoke test
 
 ```bash

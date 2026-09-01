@@ -87,6 +87,8 @@ Step-by-step: [Adding devices](https://thermaltrace.dev/about/adding-devices) ·
 
 Pull feeds (HTTPS JSON we fetch): Devices → **Edit pull feeds** — set URL, JSON root key (default `temp`), and probe labels.
 
+**Integrations:** [Home Assistant (HACS)](https://thermaltrace.dev/integrations/home-assistant) · [Developer docs](https://doodersrage.github.io/thermaltrace/)
+
 ```bash
 curl -X POST "https://your-domain/api/ingest/YOUR_KEY" \
   -H "Content-Type: application/json" \

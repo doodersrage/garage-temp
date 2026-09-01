@@ -157,9 +157,11 @@ const hero = getAboutPhoto("ethernet-cable");
     <code>POST /api/ingest/mqtt</code> with header <code>X-Ingest-Key</code>.
   </p>
 
-  <h3>Home Assistant</h3>
+  <h3 id="home-assistant">Home Assistant</h3>
   <p>
-    Trigger on your MQTT topic and POST via <code>rest_command</code>:
+    Prefer automatic entities? Install the official
+    <a class="text-link" href="/integrations/home-assistant">HACS integration</a>
+    with a Pro share-link token. For MQTT-only setups, trigger on your topic and POST via <code>rest_command</code>:
   </p>
   <pre><code>{`# configuration.yaml
 rest_command:

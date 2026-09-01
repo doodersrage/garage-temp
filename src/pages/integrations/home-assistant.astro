@@ -1,0 +1,162 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import FaqSection from "../../components/FaqSection.astro";
+import {
+  getBreadcrumbSchema,
+  getFaqPageSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../../lib/schemaMarkup";
+import { getMarketingFaqs } from "../../lib/marketingFaqs";
+import {
+  HACS_REPO_URL,
+  HA_BLUEPRINT_URL,
+  HA_DEV_DOCS_INGEST,
+  HA_ENTITIES_YAML,
+} from "../../lib/homeAssistantIntegration";
+import { getAuthFromCookies } from "../../lib/auth";
+
+const { user } = await getAuthFromCookies(Astro.cookies);
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/integrations/home-assistant");
+const haFaqs = getMarketingFaqs("homeAssistant");
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "Home Assistant", path: "/integrations/home-assistant" },
+  ]),
+  getFaqPageSchema(pageUrl, haFaqs),
+].filter(Boolean) as Record<string, unknown>[];
+---
+<Layout
+  title="Home Assistant integration"
+  description="Official ThermalTrace HACS integration for Home Assistant — auto-create sensors from share links, snooze freeze alerts, push readings, and dual-run with MQTT on your LAN."
+  schema={schema}
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
+>
+  <div class="page-shell page-stack">
+    <PageHeader
+      kicker="HACS integration"
+      title="ThermalTrace in Home Assistant"
+      lede="Install the official custom integration, paste a Pro share-link token, and get temperature, humidity, door, and leak entities — plus optional snooze, vacation, and push services. Keep Mosquitto local; use ThermalTrace for household freeze SMS, history, and off-site alerts."
+    >
+      <a slot="actions" class="btn-primary" href={HACS_REPO_URL} target="_blank" rel="noreferrer">
+        HACS repo on GitHub
+      </a>
+      <a slot="actions" class="btn-secondary" href={user ? "/dashboard/share" : "/register?next=/dashboard/share"}>
+        {user ? "Create a share link" : "Start free → share link"}
+      </a>
+      <a slot="actions" class="btn-ghost" href="/compare/diy-mqtt">vs DIY MQTT</a>
+    </PageHeader>
+
+    <section class="card">
+      <h2 class="card-title">Install via HACS</h2>
+      <ol class="text-sm space-y-2 pl-5 list-decimal mb-4">
+        <li>
+          In Home Assistant: <strong>HACS → Integrations → ⋮ → Custom repositories</strong>
+        </li>
+        <li>
+          Add repository <code class="text-xs break-all">{HACS_REPO_URL}</code> (category: Integration)
+        </li>
+        <li>Install <strong>ThermalTrace</strong> and restart Home Assistant</li>
+        <li>
+          <strong>Settings → Devices & services → Add integration → ThermalTrace</strong>
+        </li>
+        <li>
+          Create a <strong>readings</strong> share link under
+          <a class="text-link" href="/dashboard/share">Dashboard → Share</a> (Pro) and paste the token from
+          <code>/share/YOUR_TOKEN</code>
+        </li>
+      </ol>
+      <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+        Developer walkthrough:
+        <a class="text-link" href={HA_DEV_DOCS_INGEST}>Home Assistant guide</a>
+        · Manual YAML recipes still work if you prefer REST sensors over HACS.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">What shows up in HA</h2>
+      <ul class="text-sm space-y-2 mb-0">
+        <li>
+          <strong>Sensors</strong> — temperature, humidity, CO₂, pressure, PM2.5, VOC, level, energy, and generic numeric probes
+        </li>
+        <li>
+          <strong>Binary sensors</strong> — door, flood/leak, motion, and power states
+        </li>
+        <li>
+          <strong>Polling</strong> — default every 5 minutes (60–3600 s configurable); push devices on ThermalTrace update immediately on ingest
+        </li>
+        <li>
+          <strong>Services</strong> (optional inbound webhook + secret from Dashboard → Share):
+          <code>thermaltrace.snooze</code>, <code>vacation</code>, <code>clear_snooze</code>, <code>clear_vacation</code>, <code>status</code>
+        </li>
+        <li>
+          <strong>Push service</strong> (optional ingest key): <code>thermaltrace.push</code> with a JSON <code>payload</code> dict
+        </li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Dual-run with MQTT (usual pattern)</h2>
+      <p class="card-subtitle mb-4">
+        ThermalTrace is not an MQTT broker. Most homelabbers keep Mosquitto / ESPHome / HA MQTT on the LAN and mirror selected topics over HTTPS when they want cloud freeze alerts and history.
+      </p>
+      <ul class="text-sm space-y-2 mb-0">
+        <li>
+          <a class="text-link" href="/about/adding-devices#mqtt-bridge">MQTT → HTTPS bridge recipe</a>
+          — <code>POST /api/ingest/mqtt</code> with your device key
+        </li>
+        <li>
+          <a class="text-link" href="/nodered/mqtt-to-thermaltrace.json" download>Node-RED flow</a> for Mosquitto subscribers
+        </li>
+        <li>
+          <a class="text-link" href="/compare/diy-mqtt">ThermalTrace vs self-hosted MQTT</a> — when hosted alerts beat running your own stack
+        </li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Alerts into Home Assistant</h2>
+      <p class="card-subtitle mb-4">
+        Pro outbound webhooks fire when ThermalTrace sends a freeze, leak, or custom-rule alert. Point the URL at your HA webhook endpoint or import the blueprint.
+      </p>
+      <ul class="text-sm space-y-2 mb-0">
+        <li>
+          <a class="text-link" href={HA_BLUEPRINT_URL} download>Download webhook blueprint YAML</a>
+        </li>
+        <li>
+          <a class="text-link" href={HA_ENTITIES_YAML} download>Entity naming YAML</a> for push devices
+        </li>
+        <li>
+          Product guide:
+          <a class="text-link" href="/about/ingest-and-webhooks">Ingest & webhooks</a>
+        </li>
+        <li>
+          Configure outbound + inbound tokens under
+          <a class="text-link" href="/dashboard/share">Dashboard → Share</a>
+        </li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Example automation</h2>
+      <p class="card-subtitle mb-4">Snooze ThermalTrace freeze alerts while a garage door is open for maintenance:</p>
+      <pre class="text-xs overflow-x-auto mb-0"><code>{`automation:
+  - alias: Snooze ThermalTrace while garage door open
+    trigger:
+      - platform: state
+        entity_id: cover.garage_door
+        to: "open"
+    action:
+      - service: thermaltrace.snooze
+        data:
+          hours: 4`}</code></pre>
+    </section>
+
+    <FaqSection faqs={haFaqs} lede="Common questions about HACS, share links, and dual-running with MQTT." />
+  </div>
+</Layout>

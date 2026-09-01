@@ -64,6 +64,21 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
     ],
   },
   {
+    id: "integrations",
+    title: "Integrations",
+    description: "Home Assistant HACS, MQTT bridge, webhooks, and comparison guides.",
+    links: [
+      {
+        href: "/integrations/home-assistant",
+        label: "Home Assistant (HACS)",
+        summary: "Official custom integration — share-link sensors, snooze/vacation services, optional push ingest.",
+      },
+      { href: "/about/adding-devices", slug: "adding-devices", label: "MQTT bridge recipe", summary: "Keep Mosquitto local; mirror readings over HTTPS." },
+      { href: "/compare/diy-mqtt", label: "vs DIY MQTT", summary: "When hosted freeze alerts beat self-hosting Mosquitto and cron." },
+      { href: "/about/ingest-and-webhooks", slug: "ingest-and-webhooks" },
+    ],
+  },
+  {
     id: "api",
     title: "API",
     description: "Ingest payloads, dashboard HTTP API, and automation recipes.",
@@ -71,6 +86,7 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
       { href: "/about/adding-devices", slug: "adding-devices" },
       { href: "/about/ingest-and-webhooks", slug: "ingest-and-webhooks" },
       { href: "/docs/api", label: "HTTP API documentation", summary: "Ingest, metrics, webhooks, and the OpenAPI spec." },
+      { href: "/integrations/home-assistant", label: "Home Assistant (HACS)", summary: "Official custom integration for automatic HA entities." },
       { href: "/about/zapier-make-recipes", slug: "zapier-make-recipes" },
     ],
   },

@@ -3,12 +3,13 @@ import { getGuideHubCategories } from "./guideHub";
 import { getAboutPage } from "./aboutPages";
 
 describe("guideHub", () => {
-  it("groups guides into hardware, alerts, sharing, and API", () => {
+  it("groups guides into hardware, alerts, sharing, integrations, and API", () => {
     const categories = getGuideHubCategories();
     expect(categories.map((category) => category.id)).toEqual([
       "hardware",
       "alerts",
       "sharing",
+      "integrations",
       "api",
     ]);
     for (const category of categories) {

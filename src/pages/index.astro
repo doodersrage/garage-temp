@@ -157,11 +157,13 @@ const owmApiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "")
 						<li>HTTPS JSON push</li>
 						<li>HTTPS JSON pull</li>
 						<li>MQTT bridge</li>
-						<li>Home Assistant webhooks</li>
+						<li><a class="text-link" href="/integrations/home-assistant">Home Assistant (HACS)</a></li>
 						<li>Discord · Telegram · Slack</li>
 					</ul>
 					<p class="home-compat-note">
 						Keep MQTT on your LAN; mirror to ThermalTrace over HTTPS for household freeze alerts and history.
+						<a class="text-link" href="/integrations/home-assistant">HACS integration</a>
+						·
 						<a class="text-link" href="/about/adding-devices#mqtt-bridge">MQTT bridge recipe</a>
 						·
 						<a class="text-link" href="/compare/diy-mqtt">vs DIY MQTT</a>

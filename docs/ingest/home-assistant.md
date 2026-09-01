@@ -1,6 +1,8 @@
 # Home Assistant integration
 
-Use the official **[HACS custom integration](https://github.com/doodersrage/thermatrace-HACS-component)** for automatic entity setup, or wire manually below.
+Install the official **[HACS custom integration](https://github.com/doodersrage/thermatrace-HACS-component)** for automatic entities, or wire manually below.
+
+**Product page:** [thermaltrace.dev/integrations/home-assistant](https://thermaltrace.dev/integrations/home-assistant)
 
 ThermalTrace works with Home Assistant via **HTTPS push ingest** (recommended), the **MQTT-over-HTTP bridge**, **share-link polling**, or **inbound webhooks** for automations.
 

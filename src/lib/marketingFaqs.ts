@@ -83,7 +83,7 @@ export const marketingFaqs = {
     {
       question: "Can I keep Home Assistant or MQTT and still use ThermalTrace?",
       answer:
-        "Yes. Keep MQTT on your LAN (Mosquitto / Home Assistant). Mirror readings with POST /api/ingest/mqtt (X-Ingest-Key) from HA rest_command or Node-RED—recipe at thermaltrace.dev/about/adding-devices#mqtt-bridge. Many people dual-run: HA locally, ThermalTrace for household freeze SMS and history. Pro webhooks can also fire back into HA.",
+        "Yes. Install the official HACS integration (github.com/doodersrage/thermatrace-HACS-component) for automatic entities from a share link, or keep MQTT on your LAN and mirror with POST /api/ingest/mqtt. Many people dual-run: HA locally, ThermalTrace for household freeze SMS and history. See thermaltrace.dev/integrations/home-assistant.",
     },
     {
       question: "Why does ThermalTrace require an account?",
@@ -135,6 +135,28 @@ export const marketingFaqs = {
       question: "How do I authenticate to the HTTP API?",
       answer:
         "Device firmware uses a per-device ingest key in the URL. Pro integrations use a Bearer API key from Dashboard → Share. The browser dashboard uses session cookies.",
+    },
+  ],
+  homeAssistant: [
+    {
+      question: "Is there an official Home Assistant integration?",
+      answer:
+        "Yes — a HACS custom integration at github.com/doodersrage/thermatrace-HACS-component. It polls your Pro share link and creates sensors/binary sensors automatically. Install guide: thermaltrace.dev/integrations/home-assistant.",
+    },
+    {
+      question: "Do I need Pro for the HACS integration?",
+      answer:
+        "You need a Pro share link with readings scope to poll sensor data into Home Assistant. Inbound webhook services (snooze, vacation, status) also require a Pro inbound token from Dashboard → Share. Push via thermaltrace.push uses any push device ingest key.",
+    },
+    {
+      question: "Can I use ThermalTrace with MQTT and Home Assistant together?",
+      answer:
+        "Yes — the usual pattern keeps Mosquitto/ESPHome on your LAN and mirrors selected topics to ThermalTrace over HTTPS (POST /api/ingest/mqtt). ThermalTrace handles off-site freeze SMS/email and history; HA keeps local automations. Recipe: thermaltrace.dev/about/adding-devices#mqtt-bridge.",
+    },
+    {
+      question: "How do freeze alerts reach Home Assistant?",
+      answer:
+        "Configure a Pro outbound webhook in ThermalTrace pointing at your HA webhook URL, or import the garage_temp_webhook.yaml blueprint from thermaltrace.dev/ha/garage_temp_webhook.yaml. Verify X-Signature when you set a webhook secret.",
     },
   ],
   android: [

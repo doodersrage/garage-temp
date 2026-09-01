@@ -330,7 +330,7 @@ const NUDGE_CONFIG: Record<
   webhooks: {
     targetTier: "pro",
     title: "Wire alerts into Home Assistant or Zapier",
-    body: "Pro adds outbound alert webhooks, reading webhooks on ingest, and inbound snooze/status endpoints.",
+    body: "Pro adds outbound alert webhooks, reading webhooks on ingest, inbound snooze/status endpoints, and the official Home Assistant HACS integration.",
     anchor: "webhooks",
   },
   share_links: {

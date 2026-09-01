@@ -27,6 +27,10 @@ features:
     details: Drop-in samples for DS18B20, MAX31855, and MAX6675 — Arduino and MicroPython — already in this repo.
     link: /sketches/
     linkText: Browse sketches
+  - title: Home Assistant (HACS)
+    details: Official custom integration — share-link sensors, snooze/vacation services, MQTT bridge recipes.
+    link: /integrations/home-assistant
+    linkText: HACS integration
   - title: Alert webhooks
     details: Pro outbound webhooks with optional HMAC, plus Home Assistant blueprint and Zapier/Make hooks.
     link: /integrations/webhooks
@@ -52,7 +56,7 @@ features:
 | Add a push or pull device (UI) | [Adding devices](https://thermaltrace.dev/about/adding-devices) |
 | Wire an ESP and see live temps | [Push ingest](/ingest/) → [Sketches](/sketches/) |
 | Pull HTTPS JSON instead | [Pull feeds](/ingest/pull-feeds) |
-| Automate on freeze alerts | [Alert webhooks](/integrations/webhooks) → [Home Assistant](/integrations/home-assistant) |
+| Automate on freeze alerts | [Home Assistant (HACS)](/integrations/home-assistant) · [Alert webhooks](/integrations/webhooks) |
 | Keep Mosquitto / dual-run MQTT | [MQTT bridge](/integrations/mqtt-bridge) |
 | Scrape metrics | [Grafana / Prometheus](/integrations/grafana) |
 | Run the app locally | [Local development](/guide/local-dev) |
