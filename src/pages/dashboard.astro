@@ -344,6 +344,9 @@ const showFreezeMapOptInNudge =
   latest.length > 0 &&
   Boolean(household.householdId) &&
   !freezeMapSettings.optIn;
+
+const overviewMode = getDashboardOverviewMode(user);
+const showInsights = overviewMode === "insights";
 const showClaimsPackPrompt = showInsights && canEdit && hasHistory;
 const showStoryCard = showSecondaryNudges && canEdit && !showAlertSetupNudge;
 
@@ -357,9 +360,6 @@ if (hasHistory) analyticsEvents.push({ name: "onboarding_step_complete", props: 
 if (hasEmailAlerts) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "alerts" } });
 if (hasTestAlert) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "alert_test" } });
 if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
-
-const overviewMode = getDashboardOverviewMode(user);
-const showInsights = overviewMode === "insights";
 
 type OverviewBanner = { id: string; priority: number; show: boolean };
 const overviewBannerQueue: OverviewBanner[] = [
