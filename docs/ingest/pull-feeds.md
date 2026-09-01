@@ -10,7 +10,7 @@ Product walkthrough (UI steps): [Adding push and pull devices](https://thermaltr
 2. Add an HTTPS URL and set **JSON root key** (default `temp`)
 3. Click **Test feed URL**, then **Save feeds**
 4. Under **Probe labels**, map keys inside that root (`0`, `1`, `avg`, …) to Home names → **Save probes**
-5. ThermalTrace fetches on the hourly cron and when you refresh live readings while signed in
+5. ThermalTrace fetches every 15 minutes on cron and when you refresh live readings while signed in
 
 ## Expected shape
 

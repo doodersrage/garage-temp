@@ -25,7 +25,7 @@ Sensors / relays ──push or pull──► Cloudflare Worker (Astro)
 |------|-----------|
 | Prefs, alert settings, snooze, invites | Astro Actions (`src/actions/`) |
 | Devices, feeds, Stripe, ingest, admin | `src/pages/api/**` |
-| Background | `src/worker.ts` `scheduled` (hourly cron) |
+| Background | `src/worker.ts` `scheduled` (15‑min history poll; hourly maintenance) |
 
 ## Data model (conceptual)
 
@@ -37,10 +37,10 @@ Sensors / relays ──push or pull──► Cloudflare Worker (Astro)
 
 ## Background jobs
 
-Hourly cron (`0 * * * *` in `wrangler.jsonc`) runs via `src/worker.ts`:
+Hourly cron (`0 * * * *`) plus quarter-hour history polls (`15,30,45 * * * *`) in `wrangler.jsonc` run via `src/worker.ts`:
 
-- Collect history snapshots
-- Evaluate alerts (pull feeds when available; otherwise latest stored readings — push-only households included)
+- Collect history snapshots (every 15 minutes)
+- Evaluate alerts on each poll (pull feeds when available; otherwise latest stored readings — push-only households included)
 - Freeze-map city aggregates (opt-in)
 - Trial reminders and onboarding drips
 - Monthly / quarterly reports on schedule

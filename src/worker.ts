@@ -28,6 +28,7 @@ import { archiveOldReadings } from "./lib/archiveHistory";
 import { runPlaybooksForAllUsers } from "./lib/alertPlaybookRunner";
 import { sendPortfolioAlertsForAllUsers } from "./lib/portfolioAlerts";
 import { checkAndNotifyStatusSubscribers } from "./lib/statusNotify";
+import { isFullHourlyCronRun } from "./lib/cronSchedule";
 
 type WorkerEnv = Env & {
   SENTRY_DSN?: string;
@@ -50,60 +51,50 @@ function sentryOptions(env: WorkerEnv) {
   };
 }
 
-const worker = {
-  fetch(request: Request, env: WorkerEnv, ctx: ExecutionContext) {
-    // @astrojs/cloudflare handler Env typing differs from generated worker Env.
-    return handle(request, env as never, ctx);
-  },
+async function runCollectHistoryJob(): Promise<void> {
+  const historyJobId = await startJobRun("collect-history");
+  try {
+    const result = await collectHistoryForAllUsers();
+    if (result.errors.length > 0) {
+      console.error("Scheduled history collection errors:", result.errors);
+      await finishJobRun(historyJobId, "error", {
+        householdsProcessed: result.householdsProcessed,
+        usersProcessed: result.usersProcessed,
+        errors: result.errors.slice(0, 20),
+      });
+      await notifyOps(
+        "ThermalTrace job failed: collect-history",
+        formatJobFailureBody("collect-history", {
+          householdsProcessed: result.householdsProcessed,
+          usersProcessed: result.usersProcessed,
+          errors: result.errors.slice(0, 20),
+        }),
+      );
+    } else {
+      console.info(
+        `Scheduled history collection finished: ${result.householdsProcessed} household(s), ${result.usersProcessed} member alert pass(es)`,
+      );
+      await finishJobRun(historyJobId, "success", {
+        householdsProcessed: result.householdsProcessed,
+        usersProcessed: result.usersProcessed,
+        errors: [],
+      });
+    }
+  } catch (error) {
+    const details = {
+      message: error instanceof Error ? error.message : "Unknown error",
+    };
+    await finishJobRun(historyJobId, "error", details);
+    await notifyOps(
+      "ThermalTrace job failed: collect-history",
+      formatJobFailureBody("collect-history", details),
+    );
+    throw error;
+  }
+}
 
-  async scheduled(
-    _controller: ScheduledController,
-    _env: WorkerEnv,
-    ctx: ExecutionContext,
-  ) {
-    ctx.waitUntil(
-      (async () => {
-        const historyJobId = await startJobRun("collect-history");
-        try {
-          const result = await collectHistoryForAllUsers();
-          if (result.errors.length > 0) {
-            console.error("Scheduled history collection errors:", result.errors);
-            await finishJobRun(historyJobId, "error", {
-              householdsProcessed: result.householdsProcessed,
-              usersProcessed: result.usersProcessed,
-              errors: result.errors.slice(0, 20),
-            });
-            await notifyOps(
-              "ThermalTrace job failed: collect-history",
-              formatJobFailureBody("collect-history", {
-                householdsProcessed: result.householdsProcessed,
-                usersProcessed: result.usersProcessed,
-                errors: result.errors.slice(0, 20),
-              }),
-            );
-          } else {
-            console.info(
-              `Scheduled history collection finished: ${result.householdsProcessed} household(s), ${result.usersProcessed} member alert pass(es)`,
-            );
-            await finishJobRun(historyJobId, "success", {
-              householdsProcessed: result.householdsProcessed,
-              usersProcessed: result.usersProcessed,
-              errors: [],
-            });
-          }
-        } catch (error) {
-          const details = {
-            message: error instanceof Error ? error.message : "Unknown error",
-          };
-          await finishJobRun(historyJobId, "error", details);
-          await notifyOps(
-            "ThermalTrace job failed: collect-history",
-            formatJobFailureBody("collect-history", details),
-          );
-          throw error;
-        }
-
-        if (shouldSendWeeklyDigest()) {
+async function runHourlyMaintenanceJobs(env: WorkerEnv): Promise<void> {
+  if (shouldSendWeeklyDigest()) {
           const digestJobId = await startJobRun("weekly-digest");
           try {
             const digest = await sendWeeklyDigestsForAllUsers();
@@ -337,8 +328,8 @@ const worker = {
         if (shouldRunDailyRetention()) {
           const archiveJobId = await startJobRun("history-archive");
           try {
-            const env = _env as { HISTORY_ARCHIVE?: R2Bucket };
-            const archive = await archiveOldReadings({ r2: env.HISTORY_ARCHIVE });
+            const envWithR2 = env as { HISTORY_ARCHIVE?: R2Bucket };
+            const archive = await archiveOldReadings({ r2: envWithR2.HISTORY_ARCHIVE });
             await finishJobRun(archiveJobId, archive.error ? "error" : "success", {
               archived: archive.archived,
               skipped: archive.skipped,
@@ -392,6 +383,26 @@ const worker = {
             message: error instanceof Error ? error.message : "Unknown error",
           });
         }
+}
+
+const worker = {
+  fetch(request: Request, env: WorkerEnv, ctx: ExecutionContext) {
+    // @astrojs/cloudflare handler Env typing differs from generated worker Env.
+    return handle(request, env as never, ctx);
+  },
+
+  async scheduled(
+    controller: ScheduledController,
+    env: WorkerEnv,
+    ctx: ExecutionContext,
+  ) {
+    ctx.waitUntil(
+      (async () => {
+        await runCollectHistoryJob();
+        if (!isFullHourlyCronRun(controller.cron)) {
+          return;
+        }
+        await runHourlyMaintenanceJobs(env);
       })().catch((error) => {
         Sentry.captureException(error);
         throw error;

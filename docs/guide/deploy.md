@@ -14,7 +14,7 @@ After deploy:
 
 1. **Infra IDs vs brand** — Cloudflare Worker name may stay `garage-temp`; some API paths like `/api/garage-temps/*` are stable URLs. User-facing brand is **ThermalTrace**.
 2. Set `SITE_URL` / `ORIGIN` Worker secrets to `https://thermaltrace.dev`
-3. Confirm hourly cron (`0 * * * *` in `wrangler.jsonc`) is active
+3. Confirm cron triggers (`0 * * * *` and `15,30,45 * * * *` in `wrangler.jsonc`) are active
 4. Enable Cloudflare **Email Sending** for the domain in `SMTP_MAIL_FROM` (see below)
 5. Point Stripe webhooks at `/api/stripe/webhook` with `STRIPE_WEBHOOK_SECRET`
 6. Optional: `node --env-file=.env scripts/rename-stripe-products.mjs` to rename Stripe product labels
