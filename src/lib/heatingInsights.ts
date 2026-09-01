@@ -1,4 +1,6 @@
 import type { ChartPoint } from "./garageTempsHistory";
+import type { ThermostatSnapshot } from "./thermostatCorrelation";
+import { isThermostatCooling, isThermostatHeating } from "./thermostatCorrelation";
 
 export type HeatingInsight = {
   label: string;
@@ -51,6 +53,7 @@ export function buildHeatingInsights(options: {
   outdoorTempF: number | null;
   freezeThresholdF: number;
   doorOpenMinutes?: number | null;
+  thermostatSnapshot?: ThermostatSnapshot | null;
 }): HeatingInsight[] {
   const insights: HeatingInsight[] = [];
   const latest = options.indoorPoints.filter((p) => Number.isFinite(p.tempf)).at(-1);
@@ -103,6 +106,42 @@ export function buildHeatingInsights(options: {
         label: "Condensation risk",
         detail: `Dew point ~${dewPoint.toFixed(0)}°F — air is within ${Math.max(0, margin).toFixed(0)}°F of saturating. Cold slabs and tools can sweat even if the probe is warmer.`,
         severity: margin <= 2 ? "warning" : "info",
+      });
+    }
+  }
+
+  const house = options.thermostatSnapshot;
+  if (house?.ambientTempF != null && Number.isFinite(latest.tempf)) {
+    const delta = house.ambientTempF - latest.tempf;
+    if (delta >= 12) {
+      insights.push({
+        label: "Garage–house gap",
+        detail: `House thermostat ${house.ambientTempF.toFixed(0)}°F vs probe ${latest.tempf.toFixed(1)}°F (${delta.toFixed(0)}°F warmer inside). Freeze alerts still apply to the unconditioned probe.`,
+        severity: latest.tempf <= options.freezeThresholdF + 5 ? "warning" : "info",
+      });
+    }
+
+    if (latest.tempf <= options.freezeThresholdF && house.ambientTempF > options.freezeThresholdF + 10) {
+      insights.push({
+        label: "Warm house, cold probe",
+        detail: `Probe is at or below ${options.freezeThresholdF}°F while the house reads ${house.ambientTempF.toFixed(0)}°F — expected for an unheated garage or shop.`,
+        severity: "info",
+      });
+    }
+
+    if (isThermostatHeating(house.hvacMode) && latest.tempf < house.ambientTempF - 15) {
+      insights.push({
+        label: "HVAC heating",
+        detail: `Furnace is on (house ${house.ambientTempF.toFixed(0)}°F) but the monitored space is unconditioned — it will stay colder than living areas.`,
+        severity: "info",
+      });
+    }
+
+    if (isThermostatCooling(house.hvacMode) && latest.tempf > house.ambientTempF + 10) {
+      insights.push({
+        label: "HVAC cooling",
+        detail: `AC is running (house ${house.ambientTempF.toFixed(0)}°F). A hot garage or attic probe can still spike on sunny days.`,
+        severity: "info",
       });
     }
   }

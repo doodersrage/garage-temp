@@ -263,6 +263,36 @@ export async function fetchThermostatContext(
 }
 
 const HEATING_MODES = new Set(["HEAT", "HEATCOOL", "heat", "auxHeatOnly"]);
+const COOLING_MODES = new Set(["COOL", "cool"]);
+
+export function formatThermostatMode(mode: string | null): string | null {
+  if (!mode) return null;
+  return mode.charAt(0).toUpperCase() + mode.slice(1).toLowerCase();
+}
+
+/** Overview Status metric — whole °F when available. */
+export function formatThermostatMetricValue(snapshot: ThermostatSnapshot): string {
+  return snapshot.ambientTempF != null ? `${snapshot.ambientTempF.toFixed(0)}°F` : "—";
+}
+
+/** Subline for Status metric, e.g. "Cool · set 80°F". */
+export function formatThermostatMetricDetail(snapshot: ThermostatSnapshot): string | null {
+  const parts: string[] = [];
+  const mode = formatThermostatMode(snapshot.hvacMode);
+  if (mode) parts.push(mode);
+  if (snapshot.heatSetpointF != null) {
+    parts.push(`set ${snapshot.heatSetpointF.toFixed(0)}°F`);
+  }
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
+export function isThermostatHeating(mode: string | null): boolean {
+  return mode ? HEATING_MODES.has(mode) : false;
+}
+
+export function isThermostatCooling(mode: string | null): boolean {
+  return mode ? COOLING_MODES.has(mode) : false;
+}
 
 /**
  * Short, informational suffix for a freeze-alert message -- never used to
@@ -273,11 +303,18 @@ const HEATING_MODES = new Set(["HEAT", "HEATCOOL", "heat", "auxHeatOnly"]);
 export function buildThermostatAnnotation(snapshot: ThermostatSnapshot | null): string | null {
   if (!snapshot || snapshot.ambientTempF == null) return null;
   const isHeating = snapshot.hvacMode ? HEATING_MODES.has(snapshot.hvacMode) : false;
+  const isCooling = snapshot.hvacMode ? COOLING_MODES.has(snapshot.hvacMode) : false;
   const parts = [`House thermostat: ${snapshot.ambientTempF.toFixed(0)}°F`];
   if (snapshot.heatSetpointF != null) {
     parts.push(`set to ${snapshot.heatSetpointF.toFixed(0)}°F`);
   }
-  parts.push(isHeating ? "actively heating" : "not actively heating");
+  if (isHeating) {
+    parts.push("actively heating");
+  } else if (isCooling) {
+    parts.push("actively cooling");
+  } else {
+    parts.push("not actively heating");
+  }
   return `${parts.join(", ")} -- this alert is from an unconditioned space and is expected to run colder.`;
 }
 

@@ -51,6 +51,12 @@ import { personalWeatherConfigFromPreferences } from "../lib/userPreferences";
 import { fetchNwsAlerts } from "../lib/nwsAlerts";
 import { buildHeatingInsights } from "../lib/heatingInsights";
 import HeatingInsightsCard from "../components/HeatingInsightsCard.astro";
+import { listConnectionsForHousehold } from "../lib/thermostatConnections";
+import {
+  fetchThermostatContextWithStatus,
+  formatThermostatMetricDetail,
+  formatThermostatMetricValue,
+} from "../lib/thermostatCorrelation";
 import ProductAnalyticsTracker from "../components/ProductAnalyticsTracker.astro";
 import UnackedAlertsBanner from "../components/UnackedAlertsBanner.astro";
 import ColdSnapChecklistCard from "../components/ColdSnapChecklistCard.astro";
@@ -133,6 +139,16 @@ const [
 ]);
 
 const devices = householdDevicesResult.devices;
+
+const thermostatOverview =
+  entitlements.canUseThermostatIntegration && household.householdId
+    ? await (async () => {
+        const connections = await listConnectionsForHousehold(household.householdId!);
+        const connection = connections[0];
+        if (!connection) return null;
+        return fetchThermostatContextWithStatus(household.householdId!, connection.provider);
+      })()
+    : null;
 
 const hasDevices =
   tempConfig.hasCustomConfig ||
@@ -238,6 +254,7 @@ const heatingInsights = buildHeatingInsights({
   indoorPoints: chartWeek.points,
   outdoorTempF: weatherSnapshot?.temp ?? null,
   freezeThresholdF: alertSettings.freezeThresholdF,
+  thermostatSnapshot: thermostatOverview?.snapshot ?? null,
 });
 
 const sensorsValue =
@@ -479,6 +496,15 @@ const hasSecondaryBanners = secondaryBannerIds.size > 0;
           href="/dashboard/alerts"
           tone={alertSettings.enabled ? "success" : "neutral"}
         />
+        {thermostatOverview?.snapshot?.ambientTempF != null && (
+          <MetricCard
+            label="House"
+            value={formatThermostatMetricValue(thermostatOverview.snapshot)}
+            detail={formatThermostatMetricDetail(thermostatOverview.snapshot)}
+            href="/dashboard/temperature#thermostat-integration"
+            tone="neutral"
+          />
+        )}
       </DashboardMetricGrid>
     </section>
 

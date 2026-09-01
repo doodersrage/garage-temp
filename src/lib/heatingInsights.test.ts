@@ -34,4 +34,38 @@ describe("heatingInsights", () => {
     });
     expect(insights.some((i) => i.label === "Condensation risk")).toBe(true);
   });
+
+  it("adds garage–house gap insight when a thermostat is connected", () => {
+    const insights = buildHeatingInsights({
+      indoorPoints: [
+        { timestamp: "2026-01-01T10:00:00Z", tempf: 38, humidity: 40, probeLabel: "garage" },
+      ],
+      outdoorTempF: 20,
+      freezeThresholdF: 34,
+      thermostatSnapshot: {
+        provider: "nest",
+        ambientTempF: 79,
+        heatSetpointF: 80,
+        hvacMode: "COOL",
+      },
+    });
+    expect(insights.some((i) => i.label === "Garage–house gap")).toBe(true);
+  });
+
+  it("notes HVAC cooling when the probe runs hotter than the house", () => {
+    const insights = buildHeatingInsights({
+      indoorPoints: [
+        { timestamp: "2026-07-01T14:00:00Z", tempf: 95, humidity: 35, probeLabel: "garage" },
+      ],
+      outdoorTempF: 88,
+      freezeThresholdF: 34,
+      thermostatSnapshot: {
+        provider: "nest",
+        ambientTempF: 79,
+        heatSetpointF: 80,
+        hvacMode: "COOL",
+      },
+    });
+    expect(insights.some((i) => i.label === "HVAC cooling")).toBe(true);
+  });
 });

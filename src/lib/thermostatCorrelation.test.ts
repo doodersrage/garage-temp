@@ -246,4 +246,15 @@ describe("buildThermostatAnnotation", () => {
     });
     expect(text).toContain("not actively heating");
   });
+
+  it("describes a thermostat that is cooling", async () => {
+    const { buildThermostatAnnotation } = await import("./thermostatCorrelation");
+    const text = buildThermostatAnnotation({
+      provider: "nest",
+      ambientTempF: 79,
+      heatSetpointF: 80,
+      hvacMode: "COOL",
+    });
+    expect(text).toContain("actively cooling");
+  });
 });
