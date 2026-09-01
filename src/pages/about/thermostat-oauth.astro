@@ -39,7 +39,7 @@ const hero = getAboutPhoto("ethernet-cable");
     <li>Create a project in the <a class="text-link" href="https://console.nest.google.com/device-access" target="_blank" rel="noreferrer">Device Access Console</a> (one-time fee).</li>
     <li>Create a Google Cloud OAuth client (Web application).</li>
     <li>Add the redirect URI above (self-hosted: <code>https://YOUR_SITE/api/integrations/nest/callback</code>).</li>
-    <li>Set Worker secrets: <code>NEST_CLIENT_ID</code>, <code>NEST_CLIENT_SECRET</code>, <code>NEST_PROJECT_ID</code> (Device Access project id).</li>
+    <li>Set Worker secrets: <code>NEST_CLIENT_ID</code>, <code>NEST_CLIENT_SECRET</code>, <code>NEST_PROJECT_ID</code> (the UUID at the top of your Device Access project — not the Google Cloud project number).</li>
     <li>Add keys to <code>.env</code> and push: <code>pnpm secrets:push</code></li>
   </ol>
 

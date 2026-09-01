@@ -117,6 +117,7 @@ describe("fetchThermostatContext", () => {
   it("returns null without ever calling the provider when there's no access token", async () => {
     vi.doMock("./thermostatOAuth", () => ({
       resolveAccessTokenForHousehold: vi.fn().mockResolvedValue(null),
+      forceRefreshAccessTokenForHousehold: vi.fn(),
     }));
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
@@ -124,6 +125,38 @@ describe("fetchThermostatContext", () => {
     const result = await fetchThermostatContext("house-1", "ecobee");
     expect(result).toBeNull();
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("retries Nest fetch after forcing token refresh on 401", async () => {
+    vi.stubEnv("NEST_PROJECT_ID", "nest-project-uuid");
+    const forceRefresh = vi.fn().mockResolvedValue("fresh-token");
+    vi.doMock("./thermostatOAuth", () => ({
+      resolveAccessTokenForHousehold: vi.fn().mockResolvedValue("stale-token"),
+      forceRefreshAccessTokenForHousehold: forceRefresh,
+    }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("unauthorized", { status: 401 }))
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            devices: [
+              {
+                type: "sdm.devices.types.THERMOSTAT",
+                traits: {
+                  "sdm.devices.traits.Temperature": { ambientTemperatureCelsius: 22 },
+                },
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    const { fetchThermostatContext } = await import("./thermostatCorrelation");
+    const snapshot = await fetchThermostatContext("house-1", "nest");
+    expect(forceRefresh).toHaveBeenCalledWith("house-1", "nest");
+    expect(snapshot?.ambientTempF).toBeCloseTo(71.6, 0);
   });
 });
 

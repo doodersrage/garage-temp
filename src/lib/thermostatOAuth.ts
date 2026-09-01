@@ -246,7 +246,28 @@ export async function resolveAccessTokenForHousehold(
     provider === "nest"
       ? await refreshNestTokensForHousehold(connection.refreshToken)
       : await refreshEcobeeTokensForHousehold(connection.refreshToken);
-  if (!tokens) return null;
+  if (!tokens) return connection.accessToken;
+
+  await updateTokensAfterRefresh(householdId, provider, tokens);
+  return tokens.accessToken;
+}
+
+/** Force-refresh tokens (e.g. after a 401 from the provider API). */
+export async function forceRefreshAccessTokenForHousehold(
+  householdId: string,
+  provider: "nest" | "ecobee",
+): Promise<string | null> {
+  const { getConnectionForHousehold, updateTokensAfterRefresh } = await import(
+    "./thermostatConnections"
+  );
+  const connection = await getConnectionForHousehold(householdId, provider);
+  if (!connection) return null;
+
+  const tokens =
+    provider === "nest"
+      ? await refreshNestTokensForHousehold(connection.refreshToken)
+      : await refreshEcobeeTokensForHousehold(connection.refreshToken);
+  if (!tokens) return connection.accessToken;
 
   await updateTokensAfterRefresh(householdId, provider, tokens);
   return tokens.accessToken;

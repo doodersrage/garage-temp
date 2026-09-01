@@ -39,37 +39,53 @@ function pickNestThermostatDevice(devices: NestDevice[]): NestDevice | undefined
   );
 }
 
+export type NestSnapshotResult =
+  | { ok: true; snapshot: ThermostatSnapshot }
+  | { ok: false; status: number | null; reason: "no_project" | "http_error" | "network" };
+
+function nestDevicesUrl(projectId: string): string {
+  return `https://smartdevicemanagement.googleapis.com/v1/enterprises/${encodeURIComponent(projectId)}/devices`;
+}
+
+function snapshotFromNestDevice(device: NestDevice | undefined): ThermostatSnapshot {
+  const traits = device?.traits;
+  const ambientC = traits?.["sdm.devices.traits.Temperature"]?.ambientTemperatureCelsius;
+  const setpoint = traits?.["sdm.devices.traits.ThermostatTemperatureSetpoint"];
+  const heatC = setpoint?.heatCelsius ?? setpoint?.coolCelsius;
+  const mode = traits?.["sdm.devices.traits.ThermostatMode"]?.mode ?? null;
+  return {
+    provider: "nest",
+    ambientTempF: ambientC != null ? celsiusToFahrenheit(ambientC) : null,
+    heatSetpointF: heatC != null ? celsiusToFahrenheit(heatC) : null,
+    hvacMode: mode,
+  };
+}
+
+export async function fetchNestSnapshotDetailed(
+  accessToken: string,
+): Promise<NestSnapshotResult> {
+  const projectId = getRuntimeEnv("NEST_PROJECT_ID")?.trim();
+  if (!projectId) return { ok: false, status: null, reason: "no_project" };
+
+  try {
+    const res = await fetch(nestDevicesUrl(projectId), {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return { ok: false, status: res.status, reason: "http_error" };
+    const data = (await res.json()) as { devices?: NestDevice[] };
+    const device = pickNestThermostatDevice(data.devices ?? []);
+    return { ok: true, snapshot: snapshotFromNestDevice(device) };
+  } catch {
+    return { ok: false, status: null, reason: "network" };
+  }
+}
+
 export async function fetchNestSnapshot(
   accessToken: string,
 ): Promise<ThermostatSnapshot | null> {
-  const projectId = getRuntimeEnv("NEST_PROJECT_ID")?.trim();
-  if (!projectId) return null;
-
-  try {
-    const res = await fetch(
-      `https://smartdevicemanagement.googleapis.com/v1/enterprises/${encodeURIComponent(projectId)}/devices`,
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        signal: AbortSignal.timeout(8000),
-      },
-    );
-    if (!res.ok) return null;
-    const data = (await res.json()) as { devices?: NestDevice[] };
-    const device = pickNestThermostatDevice(data.devices ?? []);
-    const traits = device?.traits;
-    const ambientC = traits?.["sdm.devices.traits.Temperature"]?.ambientTemperatureCelsius;
-    const setpoint = traits?.["sdm.devices.traits.ThermostatTemperatureSetpoint"];
-    const heatC = setpoint?.heatCelsius ?? setpoint?.coolCelsius;
-    const mode = traits?.["sdm.devices.traits.ThermostatMode"]?.mode ?? null;
-    return {
-      provider: "nest",
-      ambientTempF: ambientC != null ? celsiusToFahrenheit(ambientC) : null,
-      heatSetpointF: heatC != null ? celsiusToFahrenheit(heatC) : null,
-      hvacMode: mode,
-    };
-  } catch {
-    return null;
-  }
+  const result = await fetchNestSnapshotDetailed(accessToken);
+  return result.ok ? result.snapshot : null;
 }
 
 export async function fetchEcobeeSnapshot(
@@ -117,12 +133,27 @@ export async function fetchThermostatContext(
   householdId: string,
   provider: "nest" | "ecobee",
 ): Promise<ThermostatSnapshot | null> {
-  const { resolveAccessTokenForHousehold } = await import("./thermostatOAuth");
+  const { resolveAccessTokenForHousehold, forceRefreshAccessTokenForHousehold } =
+    await import("./thermostatOAuth");
   const accessToken = await resolveAccessTokenForHousehold(householdId, provider);
   if (!accessToken) return null;
-  return provider === "nest"
-    ? fetchNestSnapshot(accessToken)
-    : fetchEcobeeSnapshot(accessToken);
+
+  if (provider === "ecobee") {
+    return fetchEcobeeSnapshot(accessToken);
+  }
+
+  let result = await fetchNestSnapshotDetailed(accessToken);
+  if (result.ok) return result.snapshot;
+
+  if (result.status === 401 || result.status === 403) {
+    const refreshed = await forceRefreshAccessTokenForHousehold(householdId, "nest");
+    if (refreshed) {
+      result = await fetchNestSnapshotDetailed(refreshed);
+      if (result.ok) return result.snapshot;
+    }
+  }
+
+  return null;
 }
 
 const HEATING_MODES = new Set(["HEAT", "HEATCOOL", "heat", "auxHeatOnly"]);
