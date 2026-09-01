@@ -32,6 +32,12 @@ const errorCode = Astro.url.searchParams.get("error");
 const errorMessage =
   errorCode === "invalid_code"
     ? "That code was incorrect or expired. Enter a fresh code from your authenticator app."
+    : errorCode === "invalid_yubikey"
+      ? "That YubiKey OTP was not accepted. Click the YubiKey OTP field, tap your key (long touch), and wait for the full code before submitting."
+      : errorCode === "replayed_otp"
+        ? "That YubiKey OTP was already used. Tap your key again to generate a fresh code."
+      : errorCode === "yubikey_not_enrolled"
+        ? "That YubiKey is not enrolled on this account. Add it under Settings → Security, or use your authenticator code."
     : errorCode === "no_factor"
       ? "No MFA factor is enrolled on this account. Sign in again and add one under Settings."
       : errorCode === "rate_limited"

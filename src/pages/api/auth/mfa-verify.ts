@@ -217,17 +217,26 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       return redirect(buildMfaErrorRedirect("generic", safeNext));
     }
 
-    const enrolled = getYubiKeyPublicIdsFromUser(user);
+    const { data: freshUserData } = await client.auth.getUser();
+    const enrolled = getYubiKeyPublicIdsFromUser(freshUserData.user ?? user);
     if (enrolled.length === 0) {
       if (asJson) return jsonResponse({ error: "no_factor" }, 400);
       return redirect(buildMfaErrorRedirect("no_factor", safeNext));
     }
 
     const verified = await verifyYubiKeyOtpWithYubiCloud(yubikeyOtp);
-    if (!verified.ok || !enrolled.includes(verified.publicId)) {
+    if (!verified.ok) {
       recordMfaVerifyFailure(user.id);
-      if (asJson) return jsonResponse({ error: "invalid_code" }, 400);
-      return redirect(buildMfaErrorRedirect("invalid_code", safeNext));
+      const errorCode = verified.error.includes("already used")
+        ? "replayed_otp"
+        : "invalid_yubikey";
+      if (asJson) return jsonResponse({ error: errorCode }, 400);
+      return redirect(buildMfaErrorRedirect(errorCode, safeNext));
+    }
+    if (!enrolled.includes(verified.publicId)) {
+      recordMfaVerifyFailure(user.id);
+      if (asJson) return jsonResponse({ error: "yubikey_not_enrolled" }, 400);
+      return redirect(buildMfaErrorRedirect("yubikey_not_enrolled", safeNext));
     }
 
     clearMfaVerifyFailures(user.id);

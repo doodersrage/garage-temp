@@ -61,7 +61,8 @@ export const GET: APIRoute = async ({ cookies }) => {
 
   const totp = (data?.totp ?? []).map(mapFactor);
   const webauthn = (data?.webauthn ?? []).map(mapFactor);
-  const yubikeyPublicIds = getYubiKeyPublicIdsFromUser(auth.user);
+  const { data: userData } = await client.auth.getUser();
+  const yubikeyPublicIds = getYubiKeyPublicIdsFromUser(userData.user ?? auth.user);
 
   return json({
     factors: totp,
@@ -249,7 +250,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const verified = await verifyYubiKeyOtpWithYubiCloud(otp);
     if (!verified.ok) return json({ error: verified.error }, 400);
 
-    const existing = getYubiKeyPublicIdsFromUser(auth.user);
+    const { data: userData } = await client.auth.getUser();
+    const existing = getYubiKeyPublicIdsFromUser(userData.user ?? auth.user);
     if (existing.includes(verified.publicId)) {
       return json({ error: "This YubiKey is already enrolled" }, 400);
     }
@@ -262,6 +264,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
     if (updateError) return json({ error: updateError.message }, 400);
 
+    const { data: sessionData } = await client.auth.getSession();
+    if (sessionData.session) {
+      setAuthCookies(
+        cookies,
+        sessionData.session.access_token,
+        sessionData.session.refresh_token,
+      );
+    }
+
     return json({ ok: true, publicId: verified.publicId });
   }
 
@@ -270,7 +281,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const otp = body.otp?.trim() ?? "";
     if (!publicId) return json({ error: "Missing publicId" }, 400);
 
-    const existing = getYubiKeyPublicIdsFromUser(auth.user);
+    const { data: userData } = await client.auth.getUser();
+    const existing = getYubiKeyPublicIdsFromUser(userData.user ?? auth.user);
     if (!existing.includes(publicId)) {
       return json({ error: "YubiKey not found on this account" }, 400);
     }

@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useRef, useState } from "preact/hooks";
 import {
   YUBIKEY_OTP_SIGNIN_HINT,
   YUBIKEY_TOTP_SIGNIN_HINT,
@@ -15,7 +15,9 @@ export default function MfaSignInChallenge({
   userEmail,
   initialError = null,
 }: Props) {
-  const [yubikeyOtp, setYubikeyOtp] = useState("");
+  // Uncontrolled: YubiKey types 44 chars + Enter faster than React state can sync.
+  const yubikeyInputRef = useRef<HTMLInputElement>(null);
+  const [yubikeyReady, setYubikeyReady] = useState(false);
 
   return (
     <div>
@@ -67,22 +69,23 @@ export default function MfaSignInChallenge({
                 YubiKey OTP
               </label>
               <input
+                ref={yubikeyInputRef}
                 class="form-input font-mono text-sm"
                 type="text"
                 name="yubikey_otp"
                 id="yubikey_otp"
                 autocomplete="off"
                 maxLength={48}
-                value={yubikeyOtp}
-                onInput={(e) =>
-                  setYubikeyOtp((e.target as HTMLInputElement).value.trim())
-                }
+                onInput={() => {
+                  const value = yubikeyInputRef.current?.value.trim() ?? "";
+                  setYubikeyReady(value.length >= 44);
+                }}
               />
             </div>
             <button
               class="btn-secondary w-full"
               type="submit"
-              disabled={yubikeyOtp.length < 44}
+              disabled={!yubikeyReady}
             >
               Verify with YubiKey
             </button>

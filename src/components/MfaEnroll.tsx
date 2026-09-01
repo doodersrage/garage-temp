@@ -1,4 +1,4 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { trackProductEvent } from "../lib/productAnalytics";
 import {
   browserSupportsWebAuthn,
@@ -41,7 +41,8 @@ export default function MfaEnroll() {
   const [webauthnFactors, setWebauthnFactors] = useState<FactorRow[]>([]);
   const [yubikeyPublicIds, setYubikeyPublicIds] = useState<string[]>([]);
   const [yubikeyConfigured, setYubikeyConfigured] = useState(false);
-  const [yubikeyOtp, setYubikeyOtp] = useState("");
+  const yubikeyInputRef = useRef<HTMLInputElement>(null);
+  const [yubikeyReady, setYubikeyReady] = useState(false);
   const [verifyCode, setVerifyCode] = useState("");
   const [busy, setBusy] = useState(false);
   const webauthnSupported =
@@ -250,7 +251,8 @@ export default function MfaEnroll() {
   }
 
   async function enrollYubiKey() {
-    if (!yubikeyOtp.trim()) return;
+    const otp = yubikeyInputRef.current?.value.trim() ?? "";
+    if (!otp) return;
     setBusy(true);
     setMessage("");
     try {
@@ -258,7 +260,7 @@ export default function MfaEnroll() {
         method: "POST",
         body: JSON.stringify({
           action: "yubikey_enroll",
-          otp: yubikeyOtp.trim(),
+          otp,
         }),
       });
       const payload = (await res.json().catch(() => ({}))) as {
@@ -267,7 +269,8 @@ export default function MfaEnroll() {
         error?: string;
       };
       if (!res.ok) throw new Error(payload.error ?? "YubiKey enrollment failed");
-      setYubikeyOtp("");
+      if (yubikeyInputRef.current) yubikeyInputRef.current.value = "";
+      setYubikeyReady(false);
       setMessage(
         "YubiKey enrolled. Sign-in will ask for a YubiKey tap or authenticator code next time.",
       );
@@ -285,18 +288,20 @@ export default function MfaEnroll() {
   async function unenrollYubiKey(publicId: string) {
     setBusy(true);
     setMessage("");
+    const otp = yubikeyInputRef.current?.value.trim() ?? "";
     try {
       const res = await mfaFetch({
         method: "POST",
         body: JSON.stringify({
           action: "yubikey_unenroll",
           publicId,
-          otp: yubikeyOtp.trim() || undefined,
+          otp: otp || undefined,
         }),
       });
       const payload = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(payload.error ?? "Could not remove YubiKey");
-      setYubikeyOtp("");
+      if (yubikeyInputRef.current) yubikeyInputRef.current.value = "";
+      setYubikeyReady(false);
       setMessage("YubiKey removed.");
       await refreshFactorList();
     } catch (err) {
@@ -448,18 +453,21 @@ export default function MfaEnroll() {
               YubiKey OTP
             </label>
             <input
+              ref={yubikeyInputRef}
               class="form-input font-mono text-sm"
               id="yubikey-enroll-otp"
               type="text"
               autoComplete="off"
-              value={yubikeyOtp}
-              onInput={(e) => setYubikeyOtp((e.target as HTMLInputElement).value.trim())}
+              onInput={() => {
+                const value = yubikeyInputRef.current?.value.trim() ?? "";
+                setYubikeyReady(value.length >= 44);
+              }}
             />
           </div>
           <button
             type="button"
             class="btn-secondary"
-            disabled={blocked || yubikeyOtp.length < 44}
+            disabled={blocked || !yubikeyReady}
             onClick={() => void enrollYubiKey()}
           >
             Add YubiKey (OTP)
