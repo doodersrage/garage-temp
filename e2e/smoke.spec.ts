@@ -152,6 +152,28 @@ test.describe("public smoke", () => {
     await expect(page.getByRole("heading", { name: /Zapier.*Make/i })).toBeVisible();
   });
 
+  test("integrations hub loads", async ({ page }) => {
+    await page.goto("/integrations");
+    await expect(page.getByRole("heading", { name: /Wire ThermalTrace into your stack/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Home Assistant \(HACS\)/i }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Nest & Ecobee/i })).toBeVisible();
+  });
+
+  test("Home Assistant integration page loads", async ({ page }) => {
+    await page.goto("/integrations/home-assistant");
+    await expect(page.getByRole("heading", { name: /ThermalTrace in Home Assistant/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Install via HACS/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /HACS repo on GitHub/i })).toBeVisible();
+    const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
+    expect(jsonLd.some((block) => block.includes('"FAQPage"'))).toBe(true);
+  });
+
+  test("thermostat OAuth operator guide loads", async ({ page }) => {
+    await page.goto("/about/thermostat-oauth");
+    await expect(page.getByRole("heading", { name: /Nest & Ecobee thermostat OAuth/i })).toBeVisible();
+    await expect(page.getByText("thermaltrace.dev/api/integrations/nest/callback")).toBeVisible();
+  });
+
   test("portfolio requires sign-in", async ({ page }) => {
     await page.goto("/dashboard/portfolio");
     await expect(page).toHaveURL(/signin/);

@@ -31,20 +31,28 @@ const hero = getAboutPhoto("ethernet-cable");
   </p>
 
   <h2>Nest (Google Device Access)</h2>
+  <p class="text-sm text-[var(--color-text-muted)] mb-3">
+    Production (<strong>thermaltrace.dev</strong>) redirect URI — copy exactly into Google Cloud Console:
+  </p>
+  <pre class="text-xs mb-4 overflow-x-auto"><code>https://thermaltrace.dev/api/integrations/nest/callback</code></pre>
   <ol class="text-sm space-y-2 pl-5 list-decimal">
     <li>Create a project in the <a class="text-link" href="https://console.nest.google.com/device-access" target="_blank" rel="noreferrer">Device Access Console</a> (one-time fee).</li>
     <li>Create a Google Cloud OAuth client (Web application).</li>
-    <li>Add authorized redirect URI: <code>https://YOUR_SITE/api/integrations/nest/callback</code></li>
+    <li>Add the redirect URI above (self-hosted: <code>https://YOUR_SITE/api/integrations/nest/callback</code>).</li>
     <li>Set Worker secrets: <code>NEST_CLIENT_ID</code>, <code>NEST_CLIENT_SECRET</code>, <code>NEST_PROJECT_ID</code> (Device Access project id).</li>
-    <li>Push secrets: <code>pnpm secrets:push</code> from a <code>.env</code> that includes those keys.</li>
+    <li>Add keys to <code>.env</code> and push: <code>pnpm secrets:push</code></li>
   </ol>
 
   <h2>Ecobee</h2>
+  <p class="text-sm text-[var(--color-text-muted)] mb-3">
+    Production redirect URI:
+  </p>
+  <pre class="text-xs mb-4 overflow-x-auto"><code>https://thermaltrace.dev/api/integrations/ecobee/callback</code></pre>
   <ol class="text-sm space-y-2 pl-5 list-decimal">
     <li>Register at the <a class="text-link" href="https://www.ecobee.com/en-us/developer/" target="_blank" rel="noreferrer">Ecobee developer portal</a>.</li>
-    <li>Create an app with redirect URI: <code>https://YOUR_SITE/api/integrations/ecobee/callback</code></li>
+    <li>Create an app with the redirect URI above (self-hosted: <code>https://YOUR_SITE/api/integrations/ecobee/callback</code>).</li>
     <li>Set Worker secret: <code>ECOBEE_CLIENT_ID</code> (Ecobee does not use a client secret).</li>
-    <li>Push secrets via <code>pnpm secrets:push</code>.</li>
+    <li>Add to <code>.env</code> and <code>pnpm secrets:push</code>.</li>
   </ol>
 
   <h2>User experience</h2>

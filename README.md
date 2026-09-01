@@ -87,7 +87,9 @@ Step-by-step: [Adding devices](https://thermaltrace.dev/about/adding-devices) ·
 
 Pull feeds (HTTPS JSON we fetch): Devices → **Edit pull feeds** — set URL, JSON root key (default `temp`), and probe labels.
 
-**Integrations:** [Home Assistant (HACS)](https://thermaltrace.dev/integrations/home-assistant) · [Developer docs](https://doodersrage.github.io/thermaltrace/)
+**Integrations:** [Home Assistant (HACS)](https://thermaltrace.dev/integrations/home-assistant) · [HACS repo](https://github.com/doodersrage/thermaltrace-home-assistant) · [Developer docs](https://doodersrage.github.io/thermaltrace/)
+
+**Operator launch checklist:** [docs/community/operator-checklist.md](./docs/community/operator-checklist.md) (forum post, thermostat OAuth, HACS default PR status)
 
 ```bash
 curl -X POST "https://your-domain/api/ingest/YOUR_KEY" \
@@ -97,7 +99,7 @@ curl -X POST "https://your-domain/api/ingest/YOUR_KEY" \
 
 Guides: [Adding devices](https://thermaltrace.dev/about/adding-devices) · [Push ingest](https://doodersrage.github.io/thermaltrace/ingest/) · [Sketches](./sketches) · [Ingest & webhooks](https://thermaltrace.dev/about/ingest-and-webhooks)
 
-Related repos: [arduino JSON probe](https://github.com/doodersrage/arduino-network-json-temperature-sever) · [Python relay](https://github.com/doodersrage/fast-api-relay)
+Related repos: [arduino JSON probe](https://github.com/doodersrage/arduino-network-json-temperature-sever) · [Python relay](https://github.com/doodersrage/fast-api-relay) · [Home Assistant integration](https://github.com/doodersrage/thermaltrace-home-assistant)
 
 ## Contributing
 
