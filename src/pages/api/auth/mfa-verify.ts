@@ -12,6 +12,12 @@ import {
   clearMfaVerifyFailures,
   recordMfaVerifyFailure,
 } from "../../../lib/mfaVerifyLimits";
+import {
+  challengeWebAuthnFactor,
+  verifyWebAuthnFactor,
+  type WebAuthnCredentialResponse,
+} from "../../../lib/webauthnMfaApi";
+import { resolveWebAuthnRp } from "../../../lib/webauthnRp";
 
 function buildMfaErrorRedirect(code: string, next?: string | null): string {
   const params = new URLSearchParams({ error: code });
@@ -44,16 +50,34 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   let code = "";
   let next: string | undefined;
+  let action = "";
+  let factorId = "";
+  let challengeId = "";
+  let ceremonyType: "create" | "request" | "" = "";
+  let credentialResponse: WebAuthnCredentialResponse | null = null;
 
   if (asJson) {
-    let body: { code?: string; next?: string };
+    let body: {
+      action?: string;
+      code?: string;
+      next?: string;
+      factorId?: string;
+      challengeId?: string;
+      ceremonyType?: "create" | "request";
+      credentialResponse?: WebAuthnCredentialResponse;
+    };
     try {
       body = (await request.json()) as typeof body;
     } catch {
       return jsonResponse({ error: "Invalid JSON" }, 400);
     }
+    action = body.action?.trim() ?? "";
     code = body.code?.trim() ?? "";
     next = body.next;
+    factorId = body.factorId?.trim() ?? "";
+    challengeId = body.challengeId?.trim() ?? "";
+    ceremonyType = body.ceremonyType ?? "";
+    credentialResponse = body.credentialResponse ?? null;
   } else {
     const formData = await request.formData();
     code = formData.get("code")?.toString().trim() ?? "";
@@ -61,18 +85,6 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const safeNext = sanitizeNextPath(next) ?? "/dashboard";
-
-  const rateLimit = checkMfaVerifyRateLimit(user.id);
-  if (!rateLimit.ok) {
-    if (asJson) return jsonResponse({ error: "rate_limited" }, 429);
-    return redirect(buildMfaErrorRedirect("rate_limited", safeNext));
-  }
-
-  if (!/^\d{6}$/.test(code)) {
-    recordMfaVerifyFailure(user.id);
-    if (asJson) return jsonResponse({ error: "invalid_code" }, 400);
-    return redirect(buildMfaErrorRedirect("invalid_code", safeNext));
-  }
 
   const client = createAuthClient();
   const { error: sessionError } = await client.auth.setSession({
@@ -96,6 +108,97 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       });
     }
     return redirect(safeNext);
+  }
+
+  if (asJson && action === "webauthn_challenge") {
+    const { data: factors, error: factorsError } = await client.auth.mfa.listFactors();
+    if (factorsError) {
+      return jsonResponse({ error: "generic" }, 400);
+    }
+
+    const webauthnFactor =
+      (factorId
+        ? factors.webauthn.find((item) => item.id === factorId)
+        : null) ??
+      factors.webauthn.find((item) => item.status === "verified") ??
+      factors.webauthn[0] ??
+      null;
+
+    if (!webauthnFactor) {
+      return jsonResponse({ error: "no_factor" }, 400);
+    }
+
+    const rp = resolveWebAuthnRp(request);
+    const { challenge, error: challengeError } = await challengeWebAuthnFactor(
+      session.access_token,
+      webauthnFactor.id,
+      rp,
+    );
+    if (challengeError || !challenge) {
+      return jsonResponse({ error: challengeError ?? "generic" }, 400);
+    }
+
+    return jsonResponse({
+      ok: true,
+      factorId: challenge.factorId,
+      challengeId: challenge.challengeId,
+      ceremonyType: challenge.ceremonyType,
+      publicKey: challenge.publicKey,
+    });
+  }
+
+  if (asJson && action === "webauthn_verify") {
+    const rateLimit = checkMfaVerifyRateLimit(user.id);
+    if (!rateLimit.ok) {
+      return jsonResponse({ error: "rate_limited" }, 429);
+    }
+
+    if (
+      !factorId ||
+      !challengeId ||
+      (ceremonyType !== "create" && ceremonyType !== "request") ||
+      !credentialResponse
+    ) {
+      recordMfaVerifyFailure(user.id);
+      return jsonResponse({ error: "invalid_code" }, 400);
+    }
+
+    const rp = resolveWebAuthnRp(request);
+    const { result, error: verifyError } = await verifyWebAuthnFactor(
+      session.access_token,
+      factorId,
+      challengeId,
+      ceremonyType,
+      credentialResponse,
+      rp,
+    );
+
+    if (verifyError || !result) {
+      recordMfaVerifyFailure(user.id);
+      return jsonResponse({ error: "invalid_code" }, 400);
+    }
+
+    clearMfaVerifyFailures(user.id);
+    setAuthCookies(cookies, result.accessToken, result.refreshToken);
+    setMfaRequiredCookie(cookies, false);
+    return jsonResponse({
+      ok: true,
+      access_token: result.accessToken,
+      refresh_token: result.refreshToken,
+      aal: "aal2",
+    });
+  }
+
+  const rateLimit = checkMfaVerifyRateLimit(user.id);
+  if (!rateLimit.ok) {
+    if (asJson) return jsonResponse({ error: "rate_limited" }, 429);
+    return redirect(buildMfaErrorRedirect("rate_limited", safeNext));
+  }
+
+  if (!/^\d{6}$/.test(code)) {
+    recordMfaVerifyFailure(user.id);
+    if (asJson) return jsonResponse({ error: "invalid_code" }, 400);
+    return redirect(buildMfaErrorRedirect("invalid_code", safeNext));
   }
 
   const { data: factors, error: factorsError } = await client.auth.mfa.listFactors();

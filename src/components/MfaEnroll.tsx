@@ -1,5 +1,9 @@
 import { useEffect, useState } from "preact/hooks";
 import { trackProductEvent } from "../lib/productAnalytics";
+import {
+  browserSupportsWebAuthn,
+  performWebAuthnCreate,
+} from "../lib/webauthnMfaBrowser";
 
 type FactorRow = {
   id: string;
@@ -29,27 +33,38 @@ export default function MfaEnroll() {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [factorId, setFactorId] = useState<string | null>(null);
   const [factors, setFactors] = useState<FactorRow[]>([]);
+  const [webauthnFactors, setWebauthnFactors] = useState<FactorRow[]>([]);
   const [verifyCode, setVerifyCode] = useState("");
   const [busy, setBusy] = useState(false);
+  const webauthnSupported = browserSupportsWebAuthn();
 
   async function refreshFactorList() {
     const res = await mfaFetch({ method: "GET" });
     const payload = (await res.json().catch(() => ({}))) as {
       factors?: FactorRow[];
+      totp?: FactorRow[];
+      webauthn?: FactorRow[];
       error?: string;
     };
     if (!res.ok) {
       throw new Error(payload.error ?? "Could not load MFA status");
     }
-    const totp = payload.factors ?? [];
+    const totp = payload.totp ?? payload.factors ?? [];
+    const webauthn = payload.webauthn ?? [];
     setFactors(totp);
-    const verified = totp.filter((f) => f.status === "verified").length;
-    const pending = totp.length - verified;
-    if (totp.length === 0) {
+    setWebauthnFactors(webauthn);
+    const verifiedTotp = totp.filter((f) => f.status === "verified").length;
+    const pendingTotp = totp.length - verifiedTotp;
+    const verifiedKeys = webauthn.filter((f) => f.status === "verified").length;
+    const pendingKeys = webauthn.length - verifiedKeys;
+    const verified = verifiedTotp + verifiedKeys;
+    const pending = pendingTotp + pendingKeys;
+    const total = totp.length + webauthn.length;
+    if (total === 0) {
       setStatus("No MFA factors enrolled.");
     } else if (verified > 0 && pending === 0) {
       setStatus(
-        `${verified} authenticator factor${verified === 1 ? "" : "s"} enrolled.`,
+        `${verified} MFA factor${verified === 1 ? "" : "s"} enrolled (${verifiedTotp} app · ${verifiedKeys} key${verifiedKeys === 1 ? "" : "s"}).`,
       );
     } else if (verified > 0) {
       setStatus(
@@ -136,6 +151,75 @@ export default function MfaEnroll() {
     }
   }
 
+  async function enrollSecurityKey() {
+    if (!webauthnSupported) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const enrollRes = await mfaFetch({
+        method: "POST",
+        body: JSON.stringify({ action: "webauthn_enroll" }),
+      });
+      const enrolled = (await enrollRes.json().catch(() => ({}))) as {
+        factorId?: string;
+        error?: string;
+      };
+      if (!enrollRes.ok || !enrolled.factorId) {
+        throw new Error(enrolled.error ?? "Could not enroll security key");
+      }
+
+      const challengeRes = await mfaFetch({
+        method: "POST",
+        body: JSON.stringify({
+          action: "webauthn_challenge",
+          factorId: enrolled.factorId,
+        }),
+      });
+      const challenge = (await challengeRes.json().catch(() => ({}))) as {
+        factorId?: string;
+        challengeId?: string;
+        ceremonyType?: "create" | "request";
+        publicKey?: Record<string, unknown>;
+        error?: string;
+      };
+      if (!challengeRes.ok || !challenge.publicKey) {
+        throw new Error(challenge.error ?? "Could not start security key registration");
+      }
+
+      const credentialResponse = await performWebAuthnCreate(challenge.publicKey);
+
+      const verifyRes = await mfaFetch({
+        method: "POST",
+        body: JSON.stringify({
+          action: "webauthn_verify",
+          factorId: challenge.factorId ?? enrolled.factorId,
+          challengeId: challenge.challengeId,
+          ceremonyType: challenge.ceremonyType ?? "create",
+          credentialResponse,
+        }),
+      });
+      const verified = (await verifyRes.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+      };
+      if (!verifyRes.ok || !verified.ok) {
+        throw new Error(verified.error ?? "Security key verification failed");
+      }
+
+      setMessage(
+        "Security key enrolled successfully. Sign-in will ask for your key or authenticator code next time.",
+      );
+      trackProductEvent("mfa_enrolled");
+      await refreshFactorList();
+    } catch (err) {
+      setMessage(
+        err instanceof Error ? err.message : "Security key enrollment failed",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function unenroll(id: string) {
     setBusy(true);
     setMessage("");
@@ -209,6 +293,25 @@ export default function MfaEnroll() {
           ))}
         </ul>
       )}
+      {webauthnFactors.length > 0 && (
+        <ul class="mb-3 space-y-2 text-sm">
+          {webauthnFactors.map((factor) => (
+            <li class="flex flex-wrap items-center gap-2" key={factor.id}>
+              <span>
+                {factor.friendly_name || "Security key"} ({factor.status})
+              </span>
+              <button
+                type="button"
+                class="btn-ghost"
+                disabled={blocked}
+                onClick={() => void unenroll(factor.id)}
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
       <div class="flex flex-wrap gap-2 mb-3">
         <button
           type="button"
@@ -216,8 +319,18 @@ export default function MfaEnroll() {
           disabled={blocked || loadState === "error"}
           onClick={() => void enroll()}
         >
-          {loading ? "Loading…" : "Enroll authenticator"}
+          {loading ? "Loading…" : "Enroll authenticator app"}
         </button>
+        {webauthnSupported && (
+          <button
+            type="button"
+            class="btn-secondary"
+            disabled={blocked || loadState === "error"}
+            onClick={() => void enrollSecurityKey()}
+          >
+            {busy ? "Waiting for key…" : "Add security key"}
+          </button>
+        )}
       </div>
       {qrCode && (
         <img src={qrCode} alt="TOTP QR code" width={180} height={180} class="mb-3" />

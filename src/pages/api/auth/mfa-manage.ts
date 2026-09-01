@@ -5,6 +5,13 @@ import {
   getAalClaim,
   syncMfaRequiredCookieFromClient,
 } from "../../../lib/mfa";
+import {
+  challengeWebAuthnFactor,
+  enrollWebAuthnFactor,
+  verifyWebAuthnFactor,
+  type WebAuthnCredentialResponse,
+} from "../../../lib/webauthnMfaApi";
+import { resolveWebAuthnRp } from "../../../lib/webauthnRp";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -35,13 +42,20 @@ export const GET: APIRoute = async ({ cookies }) => {
     return json({ error: factorsError.message }, 400);
   }
 
-  const factors = (data?.totp ?? []).map((factor) => ({
+  const mapFactor = (factor: {
+    id: string;
+    friendly_name?: string | null;
+    status: string;
+  }) => ({
     id: factor.id,
     friendly_name: factor.friendly_name ?? null,
     status: factor.status,
-  }));
+  });
 
-  return json({ factors });
+  const totp = (data?.totp ?? []).map(mapFactor);
+  const webauthn = (data?.webauthn ?? []).map(mapFactor);
+
+  return json({ factors: totp, totp, webauthn });
 };
 
 type ManageBody = {
@@ -49,6 +63,9 @@ type ManageBody = {
   factorId?: string;
   code?: string;
   friendlyName?: string;
+  challengeId?: string;
+  ceremonyType?: "create" | "request";
+  credentialResponse?: WebAuthnCredentialResponse;
 };
 
 /**
@@ -120,6 +137,86 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     } else {
       await syncMfaRequiredCookieFromClient(cookies, client, data.access_token);
+    }
+
+    return json({ ok: true });
+  }
+
+  if (action === "webauthn_enroll") {
+    const friendlyName =
+      body.friendlyName?.trim() ||
+      `Security key ${new Date().toLocaleDateString()}`;
+    const { factorId, error: enrollError } = await enrollWebAuthnFactor(
+      auth.session.access_token,
+      friendlyName,
+    );
+    if (enrollError) return json({ error: enrollError }, 400);
+    return json({ factorId, friendlyName });
+  }
+
+  if (action === "webauthn_challenge") {
+    const factorId = body.factorId?.trim();
+    if (!factorId) return json({ error: "Missing factorId" }, 400);
+
+    const rp = resolveWebAuthnRp(request);
+    const { challenge, error: challengeError } = await challengeWebAuthnFactor(
+      auth.session.access_token,
+      factorId,
+      rp,
+    );
+    if (challengeError || !challenge) {
+      return json({ error: challengeError ?? "Challenge failed" }, 400);
+    }
+
+    return json({
+      ok: true,
+      factorId: challenge.factorId,
+      challengeId: challenge.challengeId,
+      ceremonyType: challenge.ceremonyType,
+      publicKey: challenge.publicKey,
+    });
+  }
+
+  if (action === "webauthn_verify") {
+    const factorId = body.factorId?.trim();
+    const challengeId = body.challengeId?.trim();
+    const ceremonyType = body.ceremonyType;
+    const credentialResponse = body.credentialResponse;
+
+    if (
+      !factorId ||
+      !challengeId ||
+      (ceremonyType !== "create" && ceremonyType !== "request") ||
+      !credentialResponse ||
+      typeof credentialResponse !== "object"
+    ) {
+      return json({ error: "Missing WebAuthn verification payload" }, 400);
+    }
+
+    const rp = resolveWebAuthnRp(request);
+    const { result, error: verifyError } = await verifyWebAuthnFactor(
+      auth.session.access_token,
+      factorId,
+      challengeId,
+      ceremonyType,
+      credentialResponse,
+      rp,
+    );
+    if (verifyError || !result) {
+      return json({ error: verifyError ?? "Verification failed" }, 400);
+    }
+
+    setAuthCookies(cookies, result.accessToken, result.refreshToken);
+    const refreshed = await createAuthClientFromSession(
+      result.accessToken,
+      result.refreshToken,
+    );
+    if (!refreshed.error) {
+      await syncMfaRequiredCookieFromClient(
+        cookies,
+        refreshed.client,
+        result.accessToken,
+      );
     }
 
     return json({ ok: true });
