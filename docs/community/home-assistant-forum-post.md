@@ -22,7 +22,7 @@ Hi all — we run [ThermalTrace](https://thermaltrace.dev), a hosted dashboard f
 ### Install
 
 1. HACS → Integrations → Custom repositories → add  
-   `https://github.com/doodersrage/thermatrace-HACS-component`
+   `https://github.com/doodersrage/thermaltrace-home-assistant`
 2. Install **ThermalTrace**, restart HA
 3. Create a **readings** share link at [thermaltrace.dev](https://thermaltrace.dev) (free account to start; share links on Pro)
 4. Settings → Devices & services → Add integration → ThermalTrace → paste token
@@ -48,7 +48,7 @@ automation:
 
 ### Links
 
-- HACS repo: https://github.com/doodersrage/thermatrace-HACS-component
+- HACS repo: https://github.com/doodersrage/thermaltrace-home-assistant
 - Product + docs: https://thermaltrace.dev/integrations/home-assistant
 - Developer MQTT bridge: https://doodersrage.github.io/thermaltrace/integrations/mqtt-bridge
 - OpenAPI: https://thermaltrace.dev/openapi.yaml

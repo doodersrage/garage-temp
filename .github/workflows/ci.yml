@@ -69,7 +69,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
-      # Vite may discover Actions mid-build and reload optimizeDeps; retry once if so.
+      # Catches broken Astro imports (unit tests alone do not run Vite rollup).
       - run: pnpm build || (rm -rf node_modules/.vite && pnpm build)
 
   e2e:

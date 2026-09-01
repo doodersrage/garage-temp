@@ -1,6 +1,9 @@
 # ThermalTrace → Home Assistant webhook blueprint
 # Import via Settings → Automations & Scenes → Blueprints → Import
-# Or copy into config/blueprints/automation/garage_temp_webhook.yaml
+# Or copy into config/blueprints/automation/thermaltrace_alert_webhook.yaml
+#
+# For share-link sensors and thermaltrace.snooze services, use the HACS integration:
+#   https://thermaltrace.dev/integrations/home-assistant
 #
 # Point ThermalTrace Pro outbound webhook at:
 #   https://<your-ha-host>/api/webhook/<webhook_id>

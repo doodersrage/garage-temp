@@ -1,10 +1,10 @@
 # Home Assistant
 
-ThermalTrace ships an **official [HACS custom integration](https://github.com/doodersrage/thermatrace-HACS-component)**. Product landing page: [thermaltrace.dev/integrations/home-assistant](https://thermaltrace.dev/integrations/home-assistant).
+ThermalTrace ships an **official [HACS custom integration](https://github.com/doodersrage/thermaltrace-home-assistant)**. Product landing page: [thermaltrace.dev/integrations/home-assistant](https://thermaltrace.dev/integrations/home-assistant).
 
 ## HACS (recommended)
 
-1. HACS → Integrations → Custom repositories → add `https://github.com/doodersrage/thermatrace-HACS-component`
+1. HACS → Integrations → Custom repositories → add `https://github.com/doodersrage/thermaltrace-home-assistant`
 2. Install **ThermalTrace** and restart Home Assistant
 3. Create a **readings** share link (Pro) under Dashboard → Share
 4. Add integration → paste share token from `/share/YOUR_TOKEN`
@@ -44,7 +44,7 @@ Keep Mosquitto on your LAN — mirror readings with [MQTT bridge](/integrations/
 
 ## Related
 
-- [HACS repo](https://github.com/doodersrage/thermatrace-HACS-component)
+- [HACS repo](https://github.com/doodersrage/thermaltrace-home-assistant)
 - [Ingest HA guide](/ingest/home-assistant)
 - [Alert webhooks](/integrations/webhooks)
 - [vs DIY MQTT](https://thermaltrace.dev/compare/diy-mqtt)

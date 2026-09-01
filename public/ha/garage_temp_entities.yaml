@@ -1,16 +1,36 @@
-# Home Assistant entity naming for ThermalTrace push devices
-# Copy sensor keys from Dashboard → Temperature → device sensors.
+# Home Assistant entity naming — ThermalTrace HACS integration
+#
+# Preferred: install the official HACS integration and paste a Pro share-link token.
+# Entities appear automatically under Devices → ThermalTrace (sensor.* / binary_sensor.*).
+#
+# Custom repository: https://github.com/doodersrage/thermaltrace-home-assistant
+# Product guide: https://thermaltrace.dev/integrations/home-assistant
+#
+# Example entity IDs (depend on your device + label names from the share link):
+#   sensor.garage_garage_avg_temperature
+#   sensor.garage_crawlspace_humidity
+#   binary_sensor.garage_door_door
 
-sensor:
-  - platform: rest
-    name: garage_temp_living
-    resource: http://YOUR_DEVICE_IP/status
-    # Or use MQTT / webhook ingest to ThermalTrace instead
+automation:
+  - alias: "Snooze ThermalTrace freeze alerts below 34°F"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.garage_garage_avg_temperature
+        below: 34
+    action:
+      - service: thermaltrace.snooze
+        data:
+          hours: 24
 
-# Recommended entity_id pattern when mirroring ingest keys:
-#   sensor.garage_<space>_<key>_temperature
-#   binary_sensor.garage_<space>_<key>_door
-#   sensor.garage_<space>_<key>_battery
+  - alias: "Snooze ThermalTrace while garage door open"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.garage_door_door
+        to: "on"
+    action:
+      - service: thermaltrace.snooze
+        data:
+          hours: 4
 
 template:
   - sensor:
@@ -19,26 +39,13 @@ template:
         device_class: temperature
         state: >
           {{ states('sensor.garage_garage_avg_temperature') | float(0) -
-             states('weather.home') | float(0) }}
+             state_attr('weather.home', 'temperature') | float(0) }}
 
-binary_sensor:
-  - name: "Garage Door Open Extended"
-    device_class: door
-    state: >
-      {{ is_state('binary_sensor.garage_door_door', 'on') }}
-
-automation:
-  - alias: "ThermalTrace freeze snooze via inbound webhook"
-    trigger:
-      - platform: numeric_state
-        entity_id: sensor.garage_garage_avg_temperature
-        below: 34
-    action:
-      - service: rest_command.garage_temp_inbound_snooze
-
-rest_command:
-  garage_temp_inbound_snooze:
-    url: "https://YOUR_SITE/api/inbound/YOUR_TOKEN"
-    method: POST
-    content_type: "application/json"
-    payload: '{"action":"snooze","hours":24}'
+# Legacy manual REST / rest_command recipes (without HACS):
+#
+# rest_command:
+#   garage_temp_inbound_snooze:
+#     url: "https://YOUR_SITE/api/inbound/YOUR_TOKEN"
+#     method: POST
+#     content_type: "application/json"
+#     payload: '{"action":"snooze","hours":24}'

@@ -130,6 +130,25 @@ const noticeIsError = Astro.url.searchParams.get("error") === "pro_required";
       </section>
     )}
 
+    {newHref && entitlements.canCreateShareLinks && (
+      <section class="card" id="ha-hacs-nudge">
+        <h2 class="card-title">Use this link in Home Assistant</h2>
+        <p class="card-subtitle mb-4">
+          Install the official
+          <a class="text-link" href="/integrations/home-assistant">HACS integration</a>,
+          then paste the token from your share URL (<code>/share/YOUR_TOKEN</code>) in
+          <strong>Settings → Devices &amp; services → ThermalTrace</strong>.
+          Optional: add an inbound webhook below for <code>thermaltrace.snooze</code> automations.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a class="btn-primary" href="/integrations/home-assistant">HACS install guide</a>
+          <a class="btn-secondary" href="https://github.com/doodersrage/thermaltrace-home-assistant" target="_blank" rel="noreferrer">
+            GitHub repo
+          </a>
+        </div>
+      </section>
+    )}
+
     {!entitlements.canCreateShareLinks ? (
       <UpgradeNudge feature="share_links" tier={entitlements.tier} />
     ) : canManage ? (

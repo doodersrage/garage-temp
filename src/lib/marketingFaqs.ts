@@ -83,7 +83,7 @@ export const marketingFaqs = {
     {
       question: "Can I keep Home Assistant or MQTT and still use ThermalTrace?",
       answer:
-        "Yes. Install the official HACS integration (github.com/doodersrage/thermatrace-HACS-component) for automatic entities from a share link, or keep MQTT on your LAN and mirror with POST /api/ingest/mqtt. Many people dual-run: HA locally, ThermalTrace for household freeze SMS and history. See thermaltrace.dev/integrations/home-assistant.",
+        "Yes. Install the official HACS integration (github.com/doodersrage/thermaltrace-home-assistant) for automatic entities from a share link, or keep MQTT on your LAN and mirror with POST /api/ingest/mqtt. Many people dual-run: HA locally, ThermalTrace for household freeze SMS and history. See thermaltrace.dev/integrations/home-assistant.",
     },
     {
       question: "Why does ThermalTrace require an account?",
@@ -141,7 +141,7 @@ export const marketingFaqs = {
     {
       question: "Is there an official Home Assistant integration?",
       answer:
-        "Yes — a HACS custom integration at github.com/doodersrage/thermatrace-HACS-component. It polls your Pro share link and creates sensors/binary sensors automatically. Install guide: thermaltrace.dev/integrations/home-assistant.",
+        "Yes — a HACS custom integration at github.com/doodersrage/thermaltrace-home-assistant. It polls your Pro share link and creates sensors/binary sensors automatically. Install guide: thermaltrace.dev/integrations/home-assistant.",
     },
     {
       question: "Do I need Pro for the HACS integration?",

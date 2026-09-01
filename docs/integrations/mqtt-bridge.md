@@ -24,7 +24,7 @@ The Worker unwraps `payload` / `message` and forwards into the same path as `POS
 
 ## Home Assistant (MQTT trigger → HTTP)
 
-For automatic entities without YAML, use the [official HACS integration](https://github.com/doodersrage/thermatrace-HACS-component) ([product guide](https://thermaltrace.dev/integrations/home-assistant)).
+For automatic entities without YAML, use the [official HACS integration](https://github.com/doodersrage/thermaltrace-home-assistant) ([product guide](https://thermaltrace.dev/integrations/home-assistant)).
 
 Manual MQTT → HTTP bridge:
 

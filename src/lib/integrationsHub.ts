@@ -84,3 +84,5 @@ export const HACS_BADGE_DEFAULT =
 export const HACS_BADGE_URL = HACS_BADGE_CUSTOM;
 
 export const HACS_DOCS_URL = HA_DEV_DOCS_INTEGRATIONS;
+
+export { HACS_REPO_URL } from "./homeAssistantIntegration";
