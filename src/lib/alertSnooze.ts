@@ -51,3 +51,16 @@ export function snoozeUntilFromHours(hours: number, now = Date.now()): string {
 export function vacationUntilFromDays(days: number, now = Date.now()): string {
   return new Date(now + days * 24 * 60 * 60 * 1000).toISOString();
 }
+
+/** Persist snooze on alert_settings for a user (used by ack playbook). */
+export async function snoozeAlertsForUser(
+  userId: string,
+  hours: number,
+): Promise<void> {
+  const { getAlertSettingsForUser, saveAlertSettingsForUser } = await import("./notify");
+  const settings = await getAlertSettingsForUser(userId, {});
+  await saveAlertSettingsForUser(userId, {
+    ...settings,
+    snoozeUntil: snoozeUntilFromHours(hours),
+  });
+}

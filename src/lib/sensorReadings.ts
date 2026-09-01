@@ -114,6 +114,26 @@ export async function getRecentNumericReadings(
     .filter((v): v is number => typeof v === "number");
 }
 
+export async function getRecentNumericReadingSamples(
+  sensorId: string,
+  sinceIso: string,
+): Promise<Array<{ at: string; tempF: number }>> {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from("sensor_readings")
+    .select("value_num, recorded_at")
+    .eq("sensor_id", sensorId)
+    .gte("recorded_at", sinceIso)
+    .order("recorded_at", { ascending: true });
+
+  return (data ?? [])
+    .filter((row) => typeof row.value_num === "number" && typeof row.recorded_at === "string")
+    .map((row) => ({
+      at: row.recorded_at as string,
+      tempF: row.value_num as number,
+    }));
+}
+
 export async function fetchRecentBoolReadings(
   sensorId: string,
   sinceIso: string,
@@ -135,19 +155,19 @@ export async function fetchRecentBoolReadings(
     }));
 }
 
+export type LatestSensorRow = {
+  sensor: DeviceSensor;
+  deviceName: string;
+  deviceSpace?: string | null;
+  value_num: number | null;
+  value_bool: boolean | null;
+  value_text: string | null;
+  recorded_at: string;
+};
+
 export async function fetchLatestSensorValues(
   householdId: string,
-): Promise<
-  Array<{
-    sensor: DeviceSensor;
-    deviceName: string;
-    deviceSpace?: string | null;
-    value_num: number | null;
-    value_bool: boolean | null;
-    value_text: string | null;
-    recorded_at: string;
-  }>
-> {
+): Promise<LatestSensorRow[]> {
   const supabase = createServerClient();
   const { data: devices } = await supabase
     .from("devices")

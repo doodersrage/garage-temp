@@ -153,6 +153,8 @@ export type AlertSettings = {
   playbookFired: Record<string, string>;
   portfolioAlertsEnabled: boolean;
   lastPortfolioAlertAt: string | null;
+  freezeDrillEnabled: boolean;
+  lastFreezeDrillAt: string | null;
 };
 
 export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
@@ -233,6 +235,8 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   playbookFired: {},
   portfolioAlertsEnabled: true,
   lastPortfolioAlertAt: null,
+  freezeDrillEnabled: true,
+  lastFreezeDrillAt: null,
 };
 
 /** Minimum time between threshold alert notifications for the same account. */
@@ -456,6 +460,9 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
       typeof row.last_portfolio_alert_at === "string"
         ? row.last_portfolio_alert_at
         : null,
+    freezeDrillEnabled: row.freeze_drill_enabled !== false,
+    lastFreezeDrillAt:
+      typeof row.last_freeze_drill_at === "string" ? row.last_freeze_drill_at : null,
   };
 }
 
@@ -691,6 +698,8 @@ export function serializeAlertSettings(settings: AlertSettings): Record<string, 
     playbook_fired: settings.playbookFired,
     portfolio_alerts_enabled: settings.portfolioAlertsEnabled,
     last_portfolio_alert_at: settings.lastPortfolioAlertAt,
+    freeze_drill_enabled: settings.freezeDrillEnabled,
+    last_freeze_drill_at: settings.lastFreezeDrillAt,
   };
 }
 

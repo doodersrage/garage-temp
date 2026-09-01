@@ -3,28 +3,46 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import DisplayPreferences from "../../components/DisplayPreferences.astro";
 import PwaInstallCard from "../../components/dashboard/PwaInstallCard.astro";
 import DashboardCard from "../../components/dashboard/DashboardCard.astro";
+import TenantRelayCard from "../../components/dashboard/TenantRelayCard.astro";
 import AccountSecurity from "../../components/AccountSecurity.astro";
 import AccountLifecycle from "../../components/AccountLifecycle.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getUserPreferences } from "../../lib/userPreferences";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { getAlertSettingsForUser } from "../../lib/notify";
+import {
+  canEditHousehold,
+  getOrCreateHouseholdForUser,
+  getUserHouseholdRole,
+} from "../../lib/households";
+import { getTenantNotifySettings } from "../../lib/tenantRelay";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
-const [preferences, entitlements, alertSettings] = await Promise.all([
+const household = await getOrCreateHouseholdForUser(user.id, user.email);
+const householdRole = household.householdId
+  ? await getUserHouseholdRole(user.id, household.householdId)
+  : null;
+const canEdit = canEditHousehold(householdRole);
+
+const [preferences, entitlements, alertSettings, tenantNotify] = await Promise.all([
   getUserPreferences(user),
   getUserEntitlements(user.id),
   getAlertSettingsForUser(user.id, user.user_metadata),
+  household.householdId
+    ? getTenantNotifySettings(household.householdId)
+    : Promise.resolve({ email: null, name: null }),
 ]);
 const prefsSaved = Astro.url.searchParams.get("prefs_saved");
 const prefsError = Astro.url.searchParams.get("prefs_error");
 const passwordUpdated = Astro.url.searchParams.get("password") === "updated";
 const deleteError = Astro.url.searchParams.get("delete_error");
 const retentionSaved = Astro.url.searchParams.get("retention_saved");
+const tenantSaved = Astro.url.searchParams.get("tenant_saved");
+const tenantError = Astro.url.searchParams.get("tenant_error");
 const onboardingDismissed =
   (user.user_metadata as Record<string, unknown> | undefined)?.onboarding_dismissed ===
   true;
@@ -66,6 +84,23 @@ const planLabel =
 
     {retentionSaved && (
       <p class="alert-success" role="status">Retention preference saved.</p>
+    )}
+
+    {tenantSaved && (
+      <p class="alert-success" role="status">Tenant contact saved.</p>
+    )}
+    {tenantError && (
+      <p class="alert-warning" role="alert">
+        {tenantError === "1" ? "Could not save tenant contact." : decodeURIComponent(tenantError)}
+      </p>
+    )}
+
+    {household.householdId && (
+      <TenantRelayCard
+        canEdit={canEdit}
+        settings={tenantNotify}
+        householdId={household.householdId}
+      />
     )}
 
     <PwaInstallCard />

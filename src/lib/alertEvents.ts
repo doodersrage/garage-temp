@@ -103,6 +103,22 @@ export async function acknowledgeLatestUnackedAlert(
   return { ok: true, eventId: data.id };
 }
 
+export async function getAlertEventForUser(
+  userId: string,
+  eventId: number,
+): Promise<AlertEventRow | null> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("alert_events")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("id", eventId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return data as AlertEventRow;
+}
+
 export async function listRecentAlertEvents(
   userId: string,
   limit = 20,

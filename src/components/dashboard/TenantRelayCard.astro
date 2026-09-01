@@ -1,0 +1,35 @@
+---
+import DashboardCard from "./DashboardCard.astro";
+import type { TenantNotifySettings } from "../../lib/tenantRelay";
+
+interface Props {
+  canEdit: boolean;
+  settings: TenantNotifySettings;
+  householdId: string;
+}
+
+const { canEdit, settings, householdId } = Astro.props;
+---
+{canEdit && (
+  <DashboardCard id="tenant-relay">
+    <h2 class="card-title">Tenant / on-site contact</h2>
+    <p class="card-subtitle mb-4">
+      Property managers can email an on-site tenant when a freeze alert needs action — without sharing dashboard login.
+    </p>
+    <form action="/api/household/tenant-notify" method="post" class="config-row-grid mb-0">
+      <input type="hidden" name="household_id" value={householdId} />
+      <input type="hidden" name="redirect" value="/dashboard/settings" />
+      <div class="form-field mb-0">
+        <label class="form-label" for="tenant-name">Name (optional)</label>
+        <input class="form-input" id="tenant-name" name="tenant_name" value={settings.name ?? ""} placeholder="On-site tenant" />
+      </div>
+      <div class="form-field mb-0">
+        <label class="form-label" for="tenant-email">Email</label>
+        <input class="form-input" id="tenant-email" name="tenant_email" type="email" value={settings.email ?? ""} placeholder="tenant@example.com" />
+      </div>
+      <div class="form-field mb-0 flex items-end">
+        <button class="btn-primary" type="submit">Save contact</button>
+      </div>
+    </form>
+  </DashboardCard>
+)}

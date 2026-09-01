@@ -19,6 +19,7 @@ import {
   canEditHousehold,
 } from "../../lib/households";
 import { listHouseholdDevices } from "../../lib/devices";
+import { getTenantNotifySettings } from "../../lib/tenantRelay";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -32,7 +33,7 @@ const householdRole = household.householdId
   : null;
 const canEdit = canEditHousehold(householdRole);
 
-const [alertSettings, entitlements, recentEvents, devicesResult] =
+const [alertSettings, entitlements, recentEvents, devicesResult, tenantNotify] =
   await Promise.all([
     getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
     getUserEntitlements(user.id),
@@ -40,7 +41,13 @@ const [alertSettings, entitlements, recentEvents, devicesResult] =
     household.householdId
       ? listHouseholdDevices(household.householdId)
       : Promise.resolve({ devices: [] as Awaited<ReturnType<typeof listHouseholdDevices>>["devices"], error: null }),
+    household.householdId
+      ? getTenantNotifySettings(household.householdId)
+      : Promise.resolve({ email: null, name: null }),
   ]);
+
+const hasTenantRelay = Boolean(tenantNotify.email);
+const hasOutboundWebhook = Boolean(alertSettings.outboundWebhookUrl?.trim());
 
 const deviceSpaces = [
   ...new Set(
@@ -277,10 +284,21 @@ const referralRewardDays = Number(
                       {event.acknowledged_at ? (
                         <span class="text-[var(--color-text-muted)]">Handled</span>
                       ) : event.channels_sent.length > 0 && canEdit ? (
-                        <form action="/api/user/alert-events/ack" method="post" class="inline">
+                        <form action="/api/user/alert-events/ack" method="post" class="flex flex-col gap-1">
                           <input type="hidden" name="event_id" value={event.id} />
                           <input type="hidden" name="redirect" value="/dashboard/alerts" />
-                          <button class="btn-ghost text-xs" type="submit">I'm on it</button>
+                          <select class="form-input text-xs py-1" name="action" aria-label="Acknowledge action">
+                            <option value="ack">I'm on it</option>
+                            <option value="snooze_4h">Handle & snooze 4h</option>
+                            <option value="snooze_24h">Handle & snooze 24h</option>
+                            {hasTenantRelay && (
+                              <option value="notify_tenant">Handle & email tenant</option>
+                            )}
+                            {hasOutboundWebhook && entitlements.canUseOutboundWebhook && (
+                              <option value="webhook_ping">Handle & ping webhook</option>
+                            )}
+                          </select>
+                          <button class="btn-ghost text-xs" type="submit">Apply</button>
                         </form>
                       ) : (
                         "—"

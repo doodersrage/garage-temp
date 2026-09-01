@@ -651,9 +651,13 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
           <input type="checkbox" name="quarterly_report_enabled" value="true" checked={settings.quarterlyReportEnabled} />
           <span>Quarterly seasonal report (Jan, Apr, Jul, Oct)</span>
         </label>
-        <label class="checkbox-row mb-0">
+        <label class="checkbox-row mb-3">
           <input type="checkbox" name="drip_emails_enabled" value="true" checked={settings.dripEmailsEnabled} />
           <span>Onboarding tips (days 1, 3, and 7 after signup)</span>
+        </label>
+        <label class="checkbox-row mb-0">
+          <input type="checkbox" name="freeze_drill_enabled" value="true" checked={settings.freezeDrillEnabled} />
+          <span>Pre-season freeze drill (Sep–Nov email with readiness score)</span>
         </label>
       </div>
     </details>

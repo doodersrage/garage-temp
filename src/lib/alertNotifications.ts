@@ -49,7 +49,7 @@ import { computeDoorOpenSessions } from "./doorDuration";
 import { persistDoorSessions } from "./doorEvents";
 import { createAdminClient } from "./supabase";
 import { getUserEntitlements } from "./entitlements";
-import { fetchThermostatAnnotationForHousehold } from "./thermostatCorrelation";
+import { buildFreezeAlertContext } from "./alertContext";
 
 export {
   buildAlertReadingsFromLatestSensors,
@@ -64,6 +64,10 @@ export async function sendThresholdAlertsIfNeeded(
   settings: AlertSettings,
   readings: AlertReading[],
   householdId?: string | null,
+  context?: {
+    weatherCityId?: string | null;
+    latestSensors?: import("./sensorReadings").LatestSensorRow[];
+  },
 ): Promise<void> {
   if (!settings.enabled || readings.length === 0) return;
 
@@ -107,10 +111,18 @@ export async function sendThresholdAlertsIfNeeded(
   // Belt-and-suspenders on top of that helper's own internal try/catch: even
   // a bug in the thermostat-lookup path must never be able to block this
   // alert from sending.
-  const annotation = await fetchThermostatAnnotationForHousehold(householdId).catch(
-    () => null,
-  );
-  const body = annotation ? `${messages.join("\n")}\n\n${annotation}` : messages.join("\n");
+  const coldest = readings.reduce((min, r) => (r.tempf < min.tempf ? r : min), readings[0]!);
+  const contextBlock = await buildFreezeAlertContext({
+    householdId,
+    settings,
+    weatherCityId: context?.weatherCityId ?? null,
+    coldestTempF: coldest.tempf,
+    coldestSensorId: coldest.sensorId ?? null,
+    latestSensors: context?.latestSensors,
+  }).catch(() => null);
+
+  const baseMessages = messages.join("\n");
+  const body = contextBlock ? `${baseMessages}\n\n${contextBlock}` : baseMessages;
   await notifyUser(userId, email, settings, {
     title: "Temperature alert",
     body,
@@ -280,7 +292,15 @@ export async function maybeSendThresholdAlerts(
   }
 
   const readings = mergeAlertReadings(feedReadings, sensorReadings);
-  await sendThresholdAlertsIfNeeded(userId, email, settings, readings, householdId);
+  const weatherCityId =
+    typeof userMetadata?.weather_city_id === "string"
+      ? userMetadata.weather_city_id.trim()
+      : null;
+  const latest = householdId ? await fetchLatestSensorValues(householdId) : [];
+  await sendThresholdAlertsIfNeeded(userId, email, settings, readings, householdId, {
+    weatherCityId,
+    latestSensors: latest,
+  });
   await sendFloodAlertsIfNeeded(userId, email, settings, floodReadings);
   await maybeSendForecastFreezeAlert(userId, email, settings);
   await maybeSendNwsFreezeAlert(userId, email, settings);

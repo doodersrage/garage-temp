@@ -27,6 +27,7 @@ import { runFeedUptimeForAllUsers } from "./lib/feedUptimeMonitor";
 import { archiveOldReadings } from "./lib/archiveHistory";
 import { runPlaybooksForAllUsers } from "./lib/alertPlaybookRunner";
 import { sendPortfolioAlertsForAllUsers } from "./lib/portfolioAlerts";
+import { sendFreezeDrillsForAllUsers } from "./lib/freezeDrillEmails";
 import { checkAndNotifyStatusSubscribers } from "./lib/statusNotify";
 import { isFullHourlyCronRun } from "./lib/cronSchedule";
 import {
@@ -382,6 +383,25 @@ async function runHourlyMaintenanceJobs(env: WorkerEnv): Promise<void> {
           );
         } catch (error) {
           await finishJobRun(portfolioJobId, "error", {
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+
+        const freezeDrillJobId = await startJobRun("freeze-drill");
+        try {
+          const freezeDrill = await sendFreezeDrillsForAllUsers();
+          await finishJobRun(
+            freezeDrillJobId,
+            freezeDrill.errors.length ? "error" : "success",
+            freezeDrill,
+          );
+          if (freezeDrill.sent > 0) {
+            console.info(
+              `Freeze drill finished: ${freezeDrill.sent} sent, ${freezeDrill.skipped} skipped`,
+            );
+          }
+        } catch (error) {
+          await finishJobRun(freezeDrillJobId, "error", {
             message: error instanceof Error ? error.message : "Unknown error",
           });
         }

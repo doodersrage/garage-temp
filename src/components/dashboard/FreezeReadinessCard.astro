@@ -1,0 +1,32 @@
+---
+import DashboardCard from "./DashboardCard.astro";
+import type { FreezeReadinessResult } from "../../lib/freezeReadiness";
+
+interface Props {
+  readiness: FreezeReadinessResult;
+}
+
+const { readiness } = Astro.props;
+const tone =
+  readiness.score >= 85 ? "text-[var(--color-success)]" : readiness.score >= 60 ? "text-[var(--color-warning)]" : "text-[var(--color-danger)]";
+---
+<DashboardCard id="freeze-readiness">
+  <h2 class="card-title">Freeze readiness</h2>
+  <p class="card-subtitle mb-3">
+    Pre-season score from alerts, probes, batteries, and weather setup.
+  </p>
+  <p class:list={["text-2xl font-bold mb-3", tone]}>{readiness.score}%</p>
+  <ul class="text-sm space-y-1 mb-4">
+    {readiness.checks.map((check) => (
+      <li class:list={[check.ok ? "text-[var(--color-text-muted)]" : ""]}>
+        {check.ok ? "✓" : "○"} {check.label}
+        {!check.ok && check.hint && (
+          <span class="block text-xs text-[var(--color-text-muted)] ml-4">{check.hint}</span>
+        )}
+      </li>
+    ))}
+  </ul>
+  {!readiness.ready && (
+    <a class="btn-secondary" href="/dashboard/alerts#send-test-alert">Send test alert</a>
+  )}
+</DashboardCard>

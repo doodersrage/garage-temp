@@ -356,6 +356,14 @@ const claimsErrorMessage =
       )}
     </section>
 
+    <section class="card" id="monitoring-certificate">
+      <h2 class="card-title">Monitoring certificate</h2>
+      <p class="card-subtitle mb-3">
+        One-page summary of your alert configuration and monitored devices — useful for insurers, landlords, or property managers. Print → Save as PDF.
+      </p>
+      <a class="btn-secondary" href="/api/monitoring/certificate">Download monitoring certificate</a>
+    </section>
+
     {insights.length > 0 && (
       <section class="card">
         <h2 class="card-title">Seasonal insights ({Math.min(30, historyDays)} days)</h2>

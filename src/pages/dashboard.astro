@@ -52,7 +52,9 @@ import HeatingInsightsCard from "../components/HeatingInsightsCard.astro";
 import ProductAnalyticsTracker from "../components/ProductAnalyticsTracker.astro";
 import UnackedAlertsBanner from "../components/UnackedAlertsBanner.astro";
 import ColdSnapChecklistCard from "../components/ColdSnapChecklistCard.astro";
+import FreezeReadinessCard from "../components/dashboard/FreezeReadinessCard.astro";
 import { shouldShowColdSnapChecklist } from "../lib/coldSnapChecklist";
+import { computeFreezeReadiness } from "../lib/freezeReadiness";
 import { countUnacknowledgedAlerts } from "../lib/alertEvents";
 import LowBatteryBanner from "../components/dashboard/LowBatteryBanner.astro";
 import DashboardMultiPropertyNudge from "../components/dashboard/DashboardMultiPropertyNudge.astro";
@@ -207,6 +209,16 @@ const showColdSnapChecklist = shouldShowColdSnapChecklist({
   hasNwsFreezeAlerts: Boolean(nwsAlerts && nwsAlerts.alerts.length > 0),
 });
 
+const freezeReadiness = computeFreezeReadiness({
+  alertSettings,
+  devices,
+  latest,
+  weatherCityId: preferences.weatherCityId,
+  canUseForecast: entitlements.canUseForecastAlerts,
+  canUseNws: entitlements.canUseNwsAlerts,
+  hasSentAnyAlert: Boolean(lastAlertAt),
+});
+
 const canEdit = canEditHousehold(householdRole);
 
 const exportToDate = new Date();
@@ -344,6 +356,8 @@ if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
     <DashboardMultiPropertyNudge show={showMultiPropertyNudge} />
 
     <ColdSnapChecklistCard show={showColdSnapChecklist} />
+
+    <FreezeReadinessCard readiness={freezeReadiness} />
 
     {!canEdit && (
       <p class="alert-warning mt-0 mb-0" role="status">
