@@ -11,11 +11,17 @@ import {
 } from "../../../lib/oauthCallbackErrors";
 import { createOAuthAuthClient } from "../../../lib/oauthAuthClient";
 import {
+  buildGitHubOAuthCallbackUrl,
   buildOAuthCallbackUrl,
+  GITHUB_OAUTH_STATE_COOKIE,
   OAUTH_NEXT_COOKIE,
   OAUTH_REF_COOKIE,
   sanitizeNextPath,
 } from "../../../lib/siteUrl";
+import {
+  buildGitHubAuthorizeUrl,
+  isGitHubOAuthConfigured,
+} from "../../../lib/githubOAuth";
 import { getTurnstileToken, verifyTurnstileToken } from "../../../lib/turnstile";
 import {
   checkSigninRateLimit,
@@ -71,6 +77,28 @@ export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress
       });
     } else {
       cookies.delete(OAUTH_REF_COOKIE, { path: "/" });
+    }
+
+    if (provider === "github" && isGitHubOAuthConfigured()) {
+      const state = crypto.randomUUID();
+      cookies.set(GITHUB_OAUTH_STATE_COOKIE, state, {
+        path: "/",
+        httpOnly: true,
+        secure,
+        sameSite: "lax",
+        maxAge: 60 * 10,
+      });
+
+      const authorizeUrl = buildGitHubAuthorizeUrl(
+        state,
+        buildGitHubOAuthCallbackUrl(request, site),
+      );
+      if (!authorizeUrl) {
+        console.error("GitHub OAuth sign-in start failed: missing client id");
+        return redirect(buildSignInRedirectUrl("oauth_failed"));
+      }
+
+      return redirect(authorizeUrl);
     }
 
     const oauthClient = createOAuthAuthClient(cookies);

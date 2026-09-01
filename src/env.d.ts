@@ -2,6 +2,9 @@ interface ImportMetaEnv {
   readonly SUPABASE_URL: string;
   readonly SUPABASE_ANON_KEY: string;
   readonly SUPABASE_SERVICE_ROLE_KEY?: string;
+  /** ThermalTrace GitHub OAuth app (direct sign-in, bypasses Supabase GitHub provider). */
+  readonly GITHUB_CLIENT_ID?: string;
+  readonly GITHUB_CLIENT_SECRET?: string;
   readonly GARAGE_TEMP_FEED_URL?: string;
   readonly NEXT_PUBLIC_OPENWEATHER_API_KEY?: string;
   readonly NEXT_PUBLIC_OPENWEATHER_CITY_ID?: string;

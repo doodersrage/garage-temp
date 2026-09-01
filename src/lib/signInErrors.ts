@@ -12,7 +12,7 @@ export const SIGNIN_ERROR_MESSAGES = {
   oauth_secret_mismatch:
     "Social sign-in credentials are out of date. Regenerate the client secret in the provider app (Discord, GitHub, or Google) and paste the new value into Supabase → Authentication → Providers.",
   oauth_github_profile:
-    "GitHub would not grant email access. Confirm Supabase → GitHub uses Client ID Iv23liHaziDDyWmsvtlv (ThermalTrace app), revoke both old and new apps under GitHub → Authorized OAuth Apps, then sign in again — the GitHub screen must say ThermalTrace and request email access.",
+    "GitHub sign-in could not read your profile or email. Revoke ThermalTrace under GitHub → Settings → Authorized OAuth Apps, then try again — the authorize screen must show ThermalTrace and request email access.",
   oauth_exchange_failed:
     "Something went wrong while completing social sign-in. Please try again.",
   turnstile_failed:

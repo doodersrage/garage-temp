@@ -21,14 +21,17 @@ async function checkProvider(provider) {
 
   const setCookies = res.headers.getSetCookie?.() ?? [];
   const hasPkce = setCookies.some((c) => c.startsWith("sb-oauth-pkce="));
+  const hasGitHubState = setCookies.some((c) => c.startsWith("github_oauth_state="));
   const location = res.headers.get("location") ?? "";
 
   return {
     provider,
     status: res.status,
     hasPkce,
+    hasGitHubState,
     hasChallenge: location.includes("code_challenge="),
     locationHost: location ? new URL(location).host : "",
+    isDirectGitHub: provider === "github" && location.includes("github.com/login/oauth/authorize"),
   };
 }
 
@@ -53,7 +56,11 @@ async function main() {
 
   for (const provider of ["google", "github", "discord"]) {
     const result = await checkProvider(provider);
-    const ok = result.status === 302 && result.hasPkce && result.hasChallenge;
+    const ok =
+      result.status === 302 &&
+      (provider === "github"
+        ? result.isDirectGitHub && result.hasGitHubState
+        : result.hasPkce && result.hasChallenge);
     console.log(
       ok ? "✓" : "✗",
       provider,
@@ -68,12 +75,13 @@ async function main() {
     ? `${supabaseUrl}/auth/v1/callback`
     : "https://pjulkiuwwomgyzknytfg.supabase.co/auth/v1/callback";
 
-  console.log("\nProvider console checklist (redirect/callback must be Supabase, NOT thermaltrace.dev):");
-  console.log(`  Supabase callback URL: ${supabaseCallback}`);
-  console.log("  Google Cloud → Authorized redirect URIs: (above)");
-  console.log("  GitHub OAuth app → Authorization callback URL: (above)");
-  console.log("  Discord app → OAuth2 Redirects: (above)");
-  console.log("  Supabase → Authentication → Providers: Client ID + Secret must match each app");
+  console.log("\nProvider console checklist:");
+  console.log(`  Supabase callback (Google/Discord): ${supabaseCallback}`);
+  console.log(`  GitHub OAuth app callback (direct): ${base}/api/auth/github/callback`);
+  console.log("  Google Cloud → Authorized redirect URIs: Supabase callback above");
+  console.log("  Discord app → OAuth2 Redirects: Supabase callback above");
+  console.log("  GitHub ThermalTrace app → Authorization callback URL: direct GitHub callback above");
+  console.log("  Supabase → Authentication → Providers: Google + Discord Client ID + Secret");
 }
 
 main().catch((err) => {

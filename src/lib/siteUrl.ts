@@ -24,6 +24,13 @@ export function buildOAuthCallbackUrl(request: Request, site?: URL | string | nu
   return `${buildSiteUrl(request, site)}/api/auth/callback`;
 }
 
+export function buildGitHubOAuthCallbackUrl(
+  request: Request,
+  site?: URL | string | null,
+): string {
+  return `${buildSiteUrl(request, site)}/api/auth/github/callback`;
+}
+
 /** Allow only same-origin relative paths (blocks protocol-relative //evil). */
 export function sanitizeNextPath(next: string | null | undefined): string | null {
   if (!next) return null;
@@ -52,6 +59,7 @@ export function formRedirectPath(
 
 export const OAUTH_NEXT_COOKIE = "oauth_next";
 export const OAUTH_REF_COOKIE = "oauth_ref";
+export const GITHUB_OAUTH_STATE_COOKIE = "github_oauth_state";
 
 /** CSRF state cookie for the thermostat-provider connect/callback round trip. */
 export const THERMOSTAT_OAUTH_STATE_COOKIE = "thermostat_oauth_state";
