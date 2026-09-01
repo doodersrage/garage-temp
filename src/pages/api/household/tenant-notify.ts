@@ -3,6 +3,7 @@ import { getAuthFromCookies } from "../../../lib/auth";
 import {
   redirectUnlessEditor,
   requireHouseholdEditor,
+  householdEditorCtx,
 } from "../../../lib/householdAuth";
 import { updateTenantNotifySettings } from "../../../lib/tenantRelay";
 import { formRedirectPath } from "../../../lib/siteUrl";
@@ -20,8 +21,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const editor = await requireHouseholdEditor(user.id);
   const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
   if (blocked) return blocked;
+  const { householdId: editorHouseholdId } = householdEditorCtx(editor);
 
-  if (!householdId || householdId !== editor.ctx.householdId) {
+  if (!householdId || householdId !== editorHouseholdId) {
     return redirect(`${redirectTo}?tenant_error=1`);
   }
 

@@ -107,6 +107,7 @@ export type Database = {
           feed_uptime_alerts_enabled: boolean
           forecast_freeze_enabled: boolean
           forecast_hours_ahead: number
+          freeze_drill_enabled: boolean
           freeze_threshold_f: number
           humidity_threshold: number
           last_alert_sent_at: string | null
@@ -117,6 +118,7 @@ export type Database = {
           last_feed_uptime_alert_at: string | null
           last_flood_alert_at: string | null
           last_forecast_alert_at: string | null
+          last_freeze_drill_at: string | null
           last_monthly_report_at: string | null
           last_nws_alert_at: string | null
           last_outage_alert_at: string | null
@@ -192,6 +194,7 @@ export type Database = {
           feed_uptime_alerts_enabled?: boolean
           forecast_freeze_enabled?: boolean
           forecast_hours_ahead?: number
+          freeze_drill_enabled?: boolean
           freeze_threshold_f?: number
           humidity_threshold?: number
           last_alert_sent_at?: string | null
@@ -202,6 +205,7 @@ export type Database = {
           last_feed_uptime_alert_at?: string | null
           last_flood_alert_at?: string | null
           last_forecast_alert_at?: string | null
+          last_freeze_drill_at?: string | null
           last_monthly_report_at?: string | null
           last_nws_alert_at?: string | null
           last_outage_alert_at?: string | null
@@ -277,6 +281,7 @@ export type Database = {
           feed_uptime_alerts_enabled?: boolean
           forecast_freeze_enabled?: boolean
           forecast_hours_ahead?: number
+          freeze_drill_enabled?: boolean
           freeze_threshold_f?: number
           humidity_threshold?: number
           last_alert_sent_at?: string | null
@@ -287,6 +292,7 @@ export type Database = {
           last_feed_uptime_alert_at?: string | null
           last_flood_alert_at?: string | null
           last_forecast_alert_at?: string | null
+          last_freeze_drill_at?: string | null
           last_monthly_report_at?: string | null
           last_nws_alert_at?: string | null
           last_outage_alert_at?: string | null
@@ -996,6 +1002,8 @@ export type Database = {
           freeze_map_opt_in: boolean
           id: string
           name: string
+          tenant_notify_email: string | null
+          tenant_notify_name: string | null
         }
         Insert: {
           created_at?: string
@@ -1006,6 +1014,8 @@ export type Database = {
           freeze_map_opt_in?: boolean
           id?: string
           name?: string
+          tenant_notify_email?: string | null
+          tenant_notify_name?: string | null
         }
         Update: {
           created_at?: string
@@ -1016,6 +1026,8 @@ export type Database = {
           freeze_map_opt_in?: boolean
           id?: string
           name?: string
+          tenant_notify_email?: string | null
+          tenant_notify_name?: string | null
         }
         Relationships: []
       }

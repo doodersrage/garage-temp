@@ -99,7 +99,7 @@ export async function sendFreezeDrillsForAllUsers(): Promise<{
         intro: `Before the first hard freeze, confirm alerts and probes are ready.\n\nReadiness: ${readiness.score}%\n\n${checklist}`,
         cta: { label: "Open dashboard", url: `${siteUrl}/dashboard` },
         secondaryCta: { label: "Send test alert", url: `${siteUrl}/dashboard/alerts#send-test-alert` },
-        tone: "default",
+        tone: "brand",
         footerNote: "Disable pre-season drills in Dashboard → Alerts.",
       });
 
