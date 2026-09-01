@@ -38,6 +38,36 @@ If you set a webhook secret in ThermalTrace, verify `X-Signature` (HMAC-SHA256 h
 
 Pro inbound tokens can snooze alerts, toggle vacation, or report status. The HACS integration wraps `POST /api/inbound/{token}` with signing. See also [HTTP API](/api/) and [ingest/home-assistant](/ingest/home-assistant).
 
+## Indoor temperature (Ecobee / any thermostat)
+
+Ecobee and some other brands do not offer new developer OAuth keys. You can still show **house vs garage** context on ThermalTrace:
+
+1. In Home Assistant, expose your thermostat's current temperature (e.g. `climate.living_room` attribute `current_temperature`).
+2. On a schedule (every 15 minutes), POST it to ThermalTrace ingest — HACS `thermaltrace.push` or a REST command — as a normal `temperature` sensor (e.g. key `house_indoor`, label `Hallway`).
+3. In ThermalTrace: **Dashboard → Devices → Indoor reference** — pick that sensor.
+
+Overview, heating insights, and history charts overlay the dashed **House** line. Pro users with **Nest OAuth** get the same UX automatically plus HVAC mode on the live card.
+
+Example automation (YAML):
+
+```yaml
+automation:
+  - alias: Push house temp to ThermalTrace
+    trigger:
+      - platform: time_pattern
+        minutes: "/15"
+    action:
+      - service: thermaltrace.push
+        data:
+          sensors:
+            - key: house_indoor
+              kind: temperature
+              value: "{{ state_attr('climate.living_room', 'current_temperature') }}"
+              unit: F
+```
+
+Product page: [thermaltrace.dev/integrations/home-assistant#indoor-temperature](https://thermaltrace.dev/integrations/home-assistant#indoor-temperature)
+
 ## MQTT bridge
 
 Keep Mosquitto on your LAN — mirror readings with [MQTT bridge](/integrations/mqtt-bridge).

@@ -11,6 +11,8 @@ interface Props {
   points: Point[];
   priorYearPoints?: Point[];
   priorYearLegend?: string | null;
+  housePoints?: Point[];
+  houseLegend?: string | null;
   title?: string;
   /** Freeze / low alert line from account settings (°F). */
   freezeThresholdF?: number | null;
@@ -21,6 +23,7 @@ interface Props {
 }
 
 const PROBE_COLORS = ["#60a5fa", "#34d399", "#f472b6", "#fbbf24", "#a78bfa", "#fb7185"];
+const HOUSE_COLOR = "#f59e0b";
 const COLOR_BELOW = "#38bdf8";
 const COLOR_ABOVE = "#fb923c";
 const STORAGE_HIGH = "tt-chart-high-f";
@@ -61,6 +64,8 @@ export default function HistoryChart({
   points,
   priorYearPoints = [],
   priorYearLegend = null,
+  housePoints = [],
+  houseLegend = "House",
   title = "Temperature trend (last 7 days)",
   freezeThresholdF = null,
   defaultHighTempF = null,
@@ -158,6 +163,7 @@ export default function HistoryChart({
     const allTemps = [
       ...points.map((p) => p.tempf),
       ...priorYearPoints.map((p) => p.tempf),
+      ...housePoints.map((p) => p.tempf),
       ...guideTemps,
     ];
     const min = Math.min(...allTemps) - 2;
@@ -251,6 +257,26 @@ export default function HistoryChart({
       g.stroke();
     }
 
+    function drawSeriesDashed(series: Point[], color: string) {
+      if (series.length < 2) return;
+      const ordered = [...series].sort(
+        (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+      );
+      g.save();
+      g.strokeStyle = color;
+      g.lineWidth = 2;
+      g.setLineDash([6, 4]);
+      g.beginPath();
+      ordered.forEach((point, i) => {
+        const x = xFor(Date.parse(point.timestamp));
+        const y = yFor(point.tempf);
+        if (i === 0) g.moveTo(x, y);
+        else g.lineTo(x, y);
+      });
+      g.stroke();
+      g.restore();
+    }
+
     if (priorYearPoints.length >= 2) {
       drawSeriesFlat(priorYearPoints, "rgba(148, 163, 184, 0.55)");
     }
@@ -267,6 +293,10 @@ export default function HistoryChart({
       drawSeriesColored(series, PROBE_COLORS[index % PROBE_COLORS.length]!);
     });
 
+    if (housePoints.length >= 2) {
+      drawSeriesDashed(housePoints, HOUSE_COLOR);
+    }
+
     g.fillStyle = "#94a3b8";
     g.font = "10px system-ui, sans-serif";
     g.textAlign = "left";
@@ -277,7 +307,7 @@ export default function HistoryChart({
       width - pad.right,
       height - 8,
     );
-  }, [points, priorYearPoints, freezeThresholdF, highTempF, targetAmbientF]);
+  }, [points, priorYearPoints, housePoints, freezeThresholdF, highTempF, targetAmbientF]);
 
   if (points.length < 2) {
     return (
@@ -316,6 +346,12 @@ export default function HistoryChart({
       {priorYearPoints.length >= 2 && (
         <p class="m-0 mb-2 text-xs text-[var(--color-text-muted)]">
           {priorYearLegend ?? "Gray = comparison overlay"}
+        </p>
+      )}
+      {housePoints.length >= 2 && (
+        <p class="m-0 mb-2 text-xs text-[var(--color-text-muted)]">
+          <span style={{ color: HOUSE_COLOR }}>{houseLegend ?? "House"}</span>
+          {" "}= dashed indoor reference
         </p>
       )}
       <p class="m-0 mb-2 text-xs text-[var(--color-text-muted)]">

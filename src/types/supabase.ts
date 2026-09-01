@@ -916,6 +916,53 @@ export type Database = {
           },
         ]
       }
+      thermostat_snapshots: {
+        Row: {
+          ambient_temp_f: number | null
+          cool_setpoint_f: number | null
+          external_device_id: string | null
+          heat_setpoint_f: number | null
+          household_id: string
+          hvac_mode: string | null
+          id: number
+          meta: Json
+          provider: string
+          recorded_at: string
+        }
+        Insert: {
+          ambient_temp_f?: number | null
+          cool_setpoint_f?: number | null
+          external_device_id?: string | null
+          heat_setpoint_f?: number | null
+          household_id: string
+          hvac_mode?: string | null
+          id?: number
+          meta?: Json
+          provider: string
+          recorded_at?: string
+        }
+        Update: {
+          ambient_temp_f?: number | null
+          cool_setpoint_f?: number | null
+          external_device_id?: string | null
+          heat_setpoint_f?: number | null
+          household_id?: string
+          hvac_mode?: string | null
+          id?: number
+          meta?: Json
+          provider?: string
+          recorded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thermostat_snapshots_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       household_invites: {
         Row: {
           accepted_at: string | null
@@ -1001,6 +1048,7 @@ export type Database = {
           freeze_map_lon: number | null
           freeze_map_opt_in: boolean
           id: string
+          indoor_reference_sensor_id: string | null
           name: string
           tenant_notify_email: string | null
           tenant_notify_name: string | null
@@ -1013,6 +1061,7 @@ export type Database = {
           freeze_map_lon?: number | null
           freeze_map_opt_in?: boolean
           id?: string
+          indoor_reference_sensor_id?: string | null
           name?: string
           tenant_notify_email?: string | null
           tenant_notify_name?: string | null
@@ -1025,6 +1074,7 @@ export type Database = {
           freeze_map_lon?: number | null
           freeze_map_opt_in?: boolean
           id?: string
+          indoor_reference_sensor_id?: string | null
           name?: string
           tenant_notify_email?: string | null
           tenant_notify_name?: string | null

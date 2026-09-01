@@ -54,9 +54,9 @@ import HeatingInsightsCard from "../components/HeatingInsightsCard.astro";
 import { listConnectionsForHousehold } from "../lib/thermostatConnections";
 import {
   fetchThermostatContextWithStatus,
-  formatThermostatMetricDetail,
-  formatThermostatMetricValue,
 } from "../lib/thermostatCorrelation";
+import { getIndoorReferenceSensorId } from "../lib/indoorReference";
+import { buildHouseContext, fetchHouseChartOverlay } from "../lib/houseContext";
 import ProductAnalyticsTracker from "../components/ProductAnalyticsTracker.astro";
 import UnackedAlertsBanner from "../components/UnackedAlertsBanner.astro";
 import ColdSnapChecklistCard from "../components/ColdSnapChecklistCard.astro";
@@ -140,15 +140,38 @@ const [
 
 const devices = householdDevicesResult.devices;
 
-const thermostatOverview =
+const thermostatConnections =
   entitlements.canUseThermostatIntegration && household.householdId
-    ? await (async () => {
-        const connections = await listConnectionsForHousehold(household.householdId!);
-        const connection = connections[0];
-        if (!connection) return null;
-        return fetchThermostatContextWithStatus(household.householdId!, connection.provider);
-      })()
+    ? await listConnectionsForHousehold(household.householdId)
+    : [];
+
+const thermostatOverview =
+  thermostatConnections[0] && household.householdId
+    ? await fetchThermostatContextWithStatus(
+        household.householdId,
+        thermostatConnections[0].provider,
+      )
     : null;
+
+const indoorReferenceSensorId = household.householdId
+  ? await getIndoorReferenceSensorId(household.householdId)
+  : null;
+
+const houseContext = buildHouseContext({
+  thermostatSnapshot: thermostatOverview?.snapshot ?? null,
+  referenceSensorId: indoorReferenceSensorId,
+  latest,
+  devices,
+});
+
+const houseChartOverlay = household.householdId
+  ? await fetchHouseChartOverlay({
+      householdId: household.householdId,
+      days: 7,
+      hasThermostatConnection: thermostatConnections.length > 0,
+      referenceSensorId: indoorReferenceSensorId,
+    })
+  : { points: [], source: null };
 
 const hasDevices =
   tempConfig.hasCustomConfig ||
@@ -254,7 +277,8 @@ const heatingInsights = buildHeatingInsights({
   indoorPoints: chartWeek.points,
   outdoorTempF: weatherSnapshot?.temp ?? null,
   freezeThresholdF: alertSettings.freezeThresholdF,
-  thermostatSnapshot: thermostatOverview?.snapshot ?? null,
+  houseTempF: houseContext?.ambientTempF ?? null,
+  thermostatSnapshot: houseContext?.thermostatSnapshot ?? null,
 });
 
 const sensorsValue =
@@ -496,12 +520,12 @@ const hasSecondaryBanners = secondaryBannerIds.size > 0;
           href="/dashboard/alerts"
           tone={alertSettings.enabled ? "success" : "neutral"}
         />
-        {thermostatOverview?.snapshot?.ambientTempF != null && (
+        {houseContext && (
           <MetricCard
             label="House"
-            value={formatThermostatMetricValue(thermostatOverview.snapshot)}
-            detail={formatThermostatMetricDetail(thermostatOverview.snapshot)}
-            href="/dashboard/temperature#thermostat-integration"
+            value={houseContext.metricValue}
+            detail={houseContext.metricDetail}
+            href="/dashboard/temperature#indoor-reference"
             tone="neutral"
           />
         )}
@@ -524,6 +548,14 @@ const hasSecondaryBanners = secondaryBannerIds.size > 0;
         <div class="dashboard-insights-primary">
           <DashboardWeekChart
             points={chartWeek.points}
+            housePoints={houseChartOverlay.points}
+            houseLegend={
+              houseChartOverlay.source === "thermostat"
+                ? "House (thermostat)"
+                : houseContext?.referenceLabel
+                  ? `House (${houseContext.referenceLabel})`
+                  : "House"
+            }
             freezeThresholdF={alertSettings.freezeThresholdF}
             canExport={canExportCsv}
             exportFrom={exportFrom}

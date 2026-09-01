@@ -23,6 +23,10 @@ import {
 import { getUserDevicesAsTempConfig } from "../../lib/devices";
 import { getUserPreferences } from "../../lib/userPreferences";
 import { fetchIndoorOutdoorDelta, buildIndoorOutdoorSeries } from "../../lib/indoorOutdoorDelta";
+import { getOrCreateHouseholdForUser } from "../../lib/households";
+import { getIndoorReferenceSensorId, findReferenceSensorLabel } from "../../lib/indoorReference";
+import { fetchHouseChartOverlay } from "../../lib/houseContext";
+import { listConnectionsForHousehold } from "../../lib/thermostatConnections";
 import { computeFreezeHours } from "../../lib/freezeHours";
 import { buildColdestDayOverlay, shiftSeriesOntoCurrentWindow } from "../../lib/historyOverlay";
 import IndoorOutdoorChart from "../../components/IndoorOutdoorChart.tsx";
@@ -169,6 +173,29 @@ const anomalies = detectTemperatureAnomalies(chartData.points);
 const probeCompare = compareProbeAverages(chartData.points);
 
 const deviceConfig = await getUserDevicesAsTempConfig(user.id, user.email);
+const household = await getOrCreateHouseholdForUser(user.id, user.email);
+const indoorReferenceSensorId = household.householdId
+  ? await getIndoorReferenceSensorId(household.householdId)
+  : null;
+const thermostatConnections =
+  household.householdId && entitlements.canUseThermostatIntegration
+    ? await listConnectionsForHousehold(household.householdId)
+    : [];
+const houseChartOverlay = household.householdId
+  ? await fetchHouseChartOverlay({
+      householdId: household.householdId,
+      days: chartWindowDays,
+      hasThermostatConnection: thermostatConnections.length > 0,
+      referenceSensorId: indoorReferenceSensorId,
+      filters: { from: chartFilters.from, to: chartFilters.to },
+    })
+  : { points: [], source: null };
+const houseChartLegend =
+  houseChartOverlay.source === "thermostat"
+    ? "House (thermostat)"
+    : houseChartOverlay.source === "reference"
+      ? `House (${findReferenceSensorLabel(deviceConfig.devices, indoorReferenceSensorId) ?? "reference"})`
+      : null;
 const probeToSpace = new Map<string, string>();
 for (const device of deviceConfig.devices) {
   if (!device.space) continue;
@@ -359,6 +386,8 @@ const historyUpgradeFeature =
           anomalies={anomalies}
           filterOptions={filterOptions}
           freezeThresholdF={alertSettings.freezeThresholdF}
+          housePoints={houseChartOverlay.points}
+          houseLegend={houseChartLegend}
           viewMode={historyTab === "chart" ? "chart" : "table"}
           hideTitle
         />

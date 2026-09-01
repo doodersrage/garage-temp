@@ -12,6 +12,7 @@ import {
   maybeSendThresholdAlerts,
 } from "./alertNotifications";
 import { getAlertSettingsForUser } from "./notify";
+import { collectThermostatSnapshotsForAllHouseholds } from "./thermostatSnapshots";
 
 export type FeedHealthStatus = {
   feedId: string;
@@ -186,6 +187,11 @@ export async function collectHistoryForAllUsers(): Promise<{
         `${ownerUserId}: ${e instanceof Error ? e.message : "Unknown error"}`,
       );
     }
+  }
+
+  const thermostatResult = await collectThermostatSnapshotsForAllHouseholds();
+  for (const message of thermostatResult.errors) {
+    errors.push(`thermostat: ${message}`);
   }
 
   return { usersProcessed, householdsProcessed, errors };

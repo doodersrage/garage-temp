@@ -122,6 +122,35 @@ const schema = [
       </ul>
     </section>
 
+    <section class="card" id="indoor-temperature">
+      <h2 class="card-title">Indoor temperature (Ecobee &amp; any thermostat)</h2>
+      <p class="card-subtitle mb-4">
+        Ecobee developer signups are often closed. You can still compare <strong>house vs garage</strong> on Overview and History by pushing indoor air from Home Assistant, then choosing that probe as your <strong>Indoor reference</strong> under Dashboard → Devices.
+      </p>
+      <ol class="text-sm space-y-2 pl-5 list-decimal mb-4">
+        <li>Expose your thermostat in HA (e.g. <code>climate.living_room</code>).</li>
+        <li>Every 15 minutes, call <code>thermaltrace.push</code> with a <code>temperature</code> sensor (key <code>house_indoor</code>).</li>
+        <li>In ThermalTrace: <a class="text-link" href="/dashboard/temperature#indoor-reference">Devices → Indoor reference</a> — pick that sensor.</li>
+      </ol>
+      <pre class="text-xs overflow-x-auto mb-4"><code>{`automation:
+  - alias: Push house temp to ThermalTrace
+    trigger:
+      - platform: time_pattern
+        minutes: "/15"
+    action:
+      - service: thermaltrace.push
+        data:
+          sensors:
+            - key: house_indoor
+              kind: temperature
+              value: "{{ state_attr('climate.living_room', 'current_temperature') }}"
+              unit: F`}</code></pre>
+      <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+        Pro users with <strong>Nest OAuth</strong> get live HVAC mode automatically; history stores thermostat snapshots on the same 15-minute cron.
+        <a class="text-link" href="https://doodersrage.github.io/thermaltrace/integrations/home-assistant#indoor-temperature-ecobee--any-thermostat">Developer docs</a>
+      </p>
+    </section>
+
     <section class="card">
       <h2 class="card-title">Dual-run with MQTT (usual pattern)</h2>
       <p class="card-subtitle mb-4">

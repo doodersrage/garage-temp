@@ -1,0 +1,65 @@
+---
+import DashboardCard from "./dashboard/DashboardCard.astro";
+import type { IndoorReferenceOption } from "../lib/indoorReference";
+
+interface Props {
+  canManage: boolean;
+  options: IndoorReferenceOption[];
+  selectedSensorId: string | null;
+  saved?: boolean;
+  error?: string | null;
+}
+
+const { canManage, options, selectedSensorId, saved, error } = Astro.props;
+---
+<DashboardCard id="indoor-reference">
+  <h2 class="card-title">Indoor reference</h2>
+  <p class="card-subtitle mb-4">
+  Pick a temperature probe to represent <strong>house</strong> indoor air when you do not have
+  Nest connected — for example a hallway ESP32 or a reading pushed from Home Assistant
+  (Ecobee, Honeywell, etc.). Overview and history charts use this for garage–house context.
+  </p>
+  {saved && (
+    <p class="alert-success text-sm mb-4" role="status">Indoor reference saved.</p>
+  )}
+  {error && (
+    <p class="alert-warning text-sm mb-4" role="alert">{error}</p>
+  )}
+  {canManage ? (
+    <form method="post" action="/api/household/indoor-reference" class="flex flex-wrap items-end gap-3">
+      <input type="hidden" name="redirect" value="/dashboard/temperature#indoor-reference" />
+      <div class="form-field mb-0 min-w-[14rem] flex-1">
+        <label class="form-label" for="indoor-reference-sensor">Reference sensor</label>
+        <select
+          class="form-input"
+          id="indoor-reference-sensor"
+          name="sensor_id"
+        >
+          <option value="">None — use thermostat only</option>
+          {options.map((option) => (
+            <option
+              value={option.sensorId}
+              selected={option.sensorId === selectedSensorId}
+            >
+              {option.label} ({option.deviceName})
+            </option>
+          ))}
+        </select>
+      </div>
+      <button type="submit" class="btn-secondary">Save</button>
+    </form>
+  ) : (
+    <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+      {selectedSensorId
+        ? "An indoor reference probe is configured for this household."
+        : "No indoor reference selected."}
+    </p>
+  )}
+  {options.length === 0 && canManage && (
+    <p class="mt-4 mb-0 text-sm text-[var(--color-text-muted)]">
+      Add a temperature sensor first — for example push from Home Assistant with
+      <code class="text-xs">thermaltrace.push</code> or an ESP in the hallway.
+      See <a class="text-link" href="/integrations/home-assistant#indoor-temperature">HA indoor temperature guide</a>.
+    </p>
+  )}
+</DashboardCard>

@@ -9,7 +9,7 @@ Tasks only **you** can complete — everything else in the HACS/integration pass
 
 ## Growth (copy/paste ready)
 
-- [ ] **Home Assistant forum** — [community post draft](./home-assistant-forum-post.md) → post in Share your Projects / Third party integrations
+- [x] **Home Assistant forum** — posted; awaiting moderator approval ([draft](./home-assistant-forum-post.md))
 - [ ] **Discord / social** — [announcement draft](./discord-hacs-announcement.md)
 
 ## Thermostat OAuth (Pro feature)
@@ -23,9 +23,10 @@ Check what's missing locally: `pnpm operator:check`
    **Enable [Smart Device Management API](https://console.cloud.google.com/apis/library/smartdevicemanagement.googleapis.com)** in the GCP project that owns your OAuth client (prefix of `NEST_CLIENT_ID` before the first `-`).  
    Secrets: `NEST_CLIENT_ID`, `NEST_CLIENT_SECRET`, `NEST_PROJECT_ID`
 
-2. **Ecobee** — [Developer portal](https://www.ecobee.com/en-us/developer/)  
+2. **Ecobee** — [Developer portal](https://www.ecobee.com/en-us/developer/) (signups often closed)  
    Redirect URI: `https://thermaltrace.dev/api/integrations/ecobee/callback`  
-   Secret: `ECOBEE_CLIENT_ID` (no client secret)
+   Secret: `ECOBEE_CLIENT_ID` (no client secret)  
+   **Workaround:** HA → ingest → **Indoor reference** on Dashboard → Devices (see [HA indoor temp guide](https://doodersrage.github.io/thermaltrace/integrations/home-assistant#indoor-temperature-indoor-temperature-ecobee--any-thermostat))
 
 3. Add values to `.env`, then: `pnpm secrets:push`
 

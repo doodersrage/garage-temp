@@ -31,6 +31,7 @@ Full guide: https://thermaltrace.dev/integrations/home-assistant
 
 ### Beyond HACS (optional)
 
+- **Indoor reference via HA** — push `climate.*` current temperature on a schedule, then select it under Dashboard → Devices → Indoor reference (works when Ecobee developer signups are closed)
 - **MQTT → HTTP bridge** — mirror Mosquitto to ThermalTrace without exposing your broker: [MQTT bridge docs](https://doodersrage.github.io/thermaltrace/integrations/mqtt-bridge) · import [Node-RED flow](https://thermaltrace.dev/nodered/mqtt-to-thermaltrace.json) (temp + garage door tabs)
 - **ESPHome / Shelly** — push ingest recipes if you do not want HA in the middle: https://thermaltrace.dev/about/esphome-shelly-recipes
 - **Garage door + cold alerts** — combined rule when a bay door is open while temps drop: https://thermaltrace.dev/about/garage-door-cold-playbook

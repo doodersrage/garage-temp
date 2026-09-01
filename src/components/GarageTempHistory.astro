@@ -27,6 +27,8 @@ interface Props {
     feeds: string[];
     probes: { key: string; label: string }[];
   };
+  housePoints?: ChartPoint[];
+  houseLegend?: string | null;
   freezeThresholdF?: number | null;
   maxHistoryDays?: number;
   canCompareYoy?: boolean;
@@ -51,6 +53,8 @@ const {
   days = 7,
   anomalies = [],
   filterOptions = { feeds: [], probes: [] },
+  housePoints = [],
+  houseLegend = null,
   freezeThresholdF = null,
   maxHistoryDays = 7,
   canCompareYoy = false,
@@ -201,6 +205,8 @@ const clearFiltersHref = basePath;
       points={chartPoints}
       priorYearPoints={priorYearPoints}
       priorYearLegend={overlayLegend}
+      housePoints={housePoints}
+      houseLegend={houseLegend}
       title={chartTitle}
       freezeThresholdF={freezeThresholdF}
     />

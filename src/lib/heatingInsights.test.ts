@@ -35,6 +35,18 @@ describe("heatingInsights", () => {
     expect(insights.some((i) => i.label === "Condensation risk")).toBe(true);
   });
 
+  it("adds garage–house gap insight when a reference probe is set", () => {
+    const insights = buildHeatingInsights({
+      indoorPoints: [
+        { timestamp: "2026-01-01T10:00:00Z", tempf: 38, humidity: 40, probeLabel: "garage" },
+      ],
+      outdoorTempF: 20,
+      freezeThresholdF: 34,
+      houseTempF: 72,
+    });
+    expect(insights.some((i) => i.label === "Garage–house gap")).toBe(true);
+  });
+
   it("adds garage–house gap insight when a thermostat is connected", () => {
     const insights = buildHeatingInsights({
       indoorPoints: [

@@ -6,6 +6,8 @@ import type { ChartPoint } from "../../lib/garageTempsHistory";
 
 interface Props {
   points: ChartPoint[];
+  housePoints?: ChartPoint[];
+  houseLegend?: string | null;
   title?: string;
   freezeThresholdF?: number | null;
   canExport?: boolean;
@@ -15,6 +17,8 @@ interface Props {
 
 const {
   points,
+  housePoints = [],
+  houseLegend = null,
   title = "Temperature trend (7 days)",
   freezeThresholdF = null,
   canExport = false,
@@ -65,6 +69,8 @@ const exportCsvHref = exportParams.toString()
       <HistoryChart
         client:visible
         points={points}
+        housePoints={housePoints}
+        houseLegend={houseLegend}
         title={title}
         freezeThresholdF={freezeThresholdF}
       >
