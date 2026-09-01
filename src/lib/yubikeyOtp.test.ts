@@ -4,6 +4,7 @@ import {
   buildYubiKeyMetadataUpdate,
   getYubiKeyPublicId,
   getYubiKeyPublicIdsFromUser,
+  isYubiKeyOtpConfigured,
   normalizeYubiKeyOtp,
   userHasYubiKeyOtpEnrolled,
 } from "./yubikeyOtp";
@@ -43,5 +44,19 @@ describe("yubikeyOtp helpers", () => {
     expect(buildYubiKeyMetadataRemove(["aaaa", "bbbb"], "aaaa")).toEqual({
       yubikey_otp_public_ids: ["bbbb"],
     });
+  });
+
+  it("detects YubiCloud config via runtime env", () => {
+    const env = import.meta.env as unknown as Record<string, string | undefined>;
+    const prevClient = env.YUBICO_CLIENT_ID;
+    const prevKey = env.YUBICO_API_KEY;
+    env.YUBICO_CLIENT_ID = "12345";
+    env.YUBICO_API_KEY = "dGVzdA==";
+    expect(isYubiKeyOtpConfigured()).toBe(true);
+    env.YUBICO_CLIENT_ID = "";
+    env.YUBICO_API_KEY = "";
+    expect(isYubiKeyOtpConfigured()).toBe(false);
+    env.YUBICO_CLIENT_ID = prevClient;
+    env.YUBICO_API_KEY = prevKey;
   });
 });

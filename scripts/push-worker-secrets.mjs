@@ -111,8 +111,23 @@ console.log(`Prepared ${Object.keys(secrets).length} secrets (${missing.length} 
 
 if (dryRun) {
   console.log("Dry run — would push:", Object.keys(secrets).join(", "));
+  console.log("Dry run — would write .dev.vars with the same keys.");
   process.exit(0);
 }
+
+const devVarsPath = resolve(".dev.vars");
+const devVarsBody = Object.entries(secrets)
+  .map(([key, value]) => {
+    const escaped =
+      value.includes("\n") || value.includes('"') || value.includes(" ")
+        ? `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`
+        : value;
+    return `${key}=${escaped}`;
+  })
+  .join("\n")
+  .concat("\n");
+writeFileSync(devVarsPath, devVarsBody);
+console.log(`Wrote ${Object.keys(secrets).length} keys to .dev.vars for local dev.`);
 
 const tmp = resolve(".wrangler-secrets.json");
 writeFileSync(tmp, JSON.stringify(secrets, null, 2));

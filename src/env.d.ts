@@ -52,6 +52,8 @@ interface ImportMetaEnv {
   readonly TWILIO_WHATSAPP_FROM?: string;
   readonly NEST_ACCESS_TOKEN?: string;
   readonly ECOBEE_ACCESS_TOKEN?: string;
+  readonly YUBICO_CLIENT_ID?: string;
+  readonly YUBICO_API_KEY?: string;
   readonly PROD: boolean;
 }
 

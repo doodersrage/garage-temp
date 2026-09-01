@@ -1,3 +1,5 @@
+import { getRuntimeEnv } from "./runtimeEnv";
+
 const MODHEX_CHAR = "[cbdefghijklnrtuv]";
 const OTP_PATTERN = new RegExp(`^${MODHEX_CHAR}{44}$`, "i");
 const PUBLIC_ID_PATTERN = new RegExp(`^${MODHEX_CHAR}{12}$`, "i");
@@ -26,8 +28,8 @@ export function isYubiKeyOtpConfigured(): boolean {
 }
 
 export function getYubiKeyOtpConfig(): YubiKeyOtpConfig | null {
-  const clientId = import.meta.env.YUBICO_CLIENT_ID?.trim();
-  const apiKeyBase64 = import.meta.env.YUBICO_API_KEY?.trim();
+  const clientId = getRuntimeEnv("YUBICO_CLIENT_ID");
+  const apiKeyBase64 = getRuntimeEnv("YUBICO_API_KEY");
   if (!clientId || !apiKeyBase64) return null;
   return { clientId, apiKeyBase64 };
 }

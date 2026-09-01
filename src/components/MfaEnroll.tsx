@@ -75,9 +75,14 @@ export default function MfaEnroll() {
     const pendingKeys = pendingWebauthn;
     const verified = verifiedTotp + verifiedKeys;
     const pending = pendingTotp + pendingKeys;
+    const yubiConfigured = payload.yubikeyOtpConfigured === true;
     const total = totp.length + webauthn.length + yubiCount;
     if (total === 0) {
-      setStatus("No MFA factors enrolled.");
+      setStatus(
+        yubiConfigured
+          ? "No MFA factors enrolled yet — add an authenticator or YubiKey below."
+          : "No MFA factors enrolled — add an authenticator below.",
+      );
     } else if (verified > 0 && pending === 0) {
       const keyPart =
         verifiedKeys > 0
