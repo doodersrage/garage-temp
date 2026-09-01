@@ -12,7 +12,7 @@ import {
   resolvePageUrl,
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
-import { BRAND_NAME, BRAND_NAME_TM } from "../lib/brand";
+import { BRAND_NAME, BRAND_NAME_TM, BRAND_TAGLINE } from "../lib/brand";
 import GoogleAnalytics from "../components/GoogleAnalytics.astro";
 import { shouldLoadGoogleAnalytics } from "../lib/analytics";
 import {
@@ -262,7 +262,7 @@ const registerServiceWorker =
 							<div>
 								<p class="site-footer-brand">{BRAND_NAME_TM}</p>
 								<p class="site-footer-copy">
-									Open-source garage and workshop sensors, freeze alerts, and history — track conditions before cold snaps do damage.
+									{BRAND_TAGLINE} Freeze alerts and history — track conditions before cold snaps do damage.
 								</p>
 							</div>
 							<div>

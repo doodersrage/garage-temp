@@ -1,6 +1,6 @@
 # ThermalTrace
 
-Open-source dashboard to **track, log, and analyze garage and workshop sensors** — **Astro 6**, **Cloudflare Workers**, **Supabase**, and **Stripe**.
+Open-source dashboard to **track, log, and analyze sensors in garages, workshops, attics, crawlspaces, and shops** — **Astro 6**, **Cloudflare Workers**, **Supabase**, and **Stripe**.
 
 Runs in production at [thermaltrace.dev](https://thermaltrace.dev) with 15-minute history polling, CI, Playwright smoke, and `pnpm ops:smoke`.
 

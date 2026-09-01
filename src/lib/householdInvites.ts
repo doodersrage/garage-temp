@@ -190,7 +190,7 @@ export async function sendInviteEmail(
     const who = invitedByEmail ?? "Someone";
     const parts = brandedEmailParts({
       eyebrow: "Household invite",
-      preheader: `${who} invited you to share garage sensors on ThermalTrace.`,
+      preheader: `${who} invited you to share probe sensors on ThermalTrace.`,
       title: `You're invited to ${householdName}`,
       intro: `${who} wants to share live probes and freeze alerts with you on ThermalTrace.`,
       paragraphs: [

@@ -221,7 +221,7 @@ export function buildMonthlyReportHtmlEmail(data: MonthlyReportData): string {
   const kindLabel = data.reportKind === "quarterly" ? "Quarterly report" : "Monthly report";
   return buildBrandedEmailHtml({
     eyebrow: kindLabel,
-    title: `Garage report — ${data.monthLabel}`,
+    title: `Probe report — ${data.monthLabel}`,
     intro: `${periodPhrase(data)} summary from your saved readings. A full HTML report is attached — open it in a browser or print to PDF.`,
     bullets: [
       `Readings: ${data.readingCount}`,
@@ -242,7 +242,7 @@ export function formatPeriodReportSubject(data: MonthlyReportData): string {
   const kind = data.reportKind === "quarterly" ? "Quarterly" : "Monthly";
   const coldest =
     data.minTempF != null ? ` · coldest ${data.minTempF.toFixed(1)}°F` : "";
-  return `${kind} garage report — ${data.monthLabel}${coldest}`;
+  return `${kind} probe report — ${data.monthLabel}${coldest}`;
 }
 
 export function encodeBase64Utf8(text: string): string {

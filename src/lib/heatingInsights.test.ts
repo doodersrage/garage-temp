@@ -44,7 +44,7 @@ describe("heatingInsights", () => {
       freezeThresholdF: 34,
       houseTempF: 72,
     });
-    expect(insights.some((i) => i.label === "Garage–house gap")).toBe(true);
+    expect(insights.some((i) => i.label === "House–probe gap")).toBe(true);
   });
 
   it("adds garage–house gap insight when a thermostat is connected", () => {
@@ -61,7 +61,7 @@ describe("heatingInsights", () => {
         hvacMode: "COOL",
       },
     });
-    expect(insights.some((i) => i.label === "Garage–house gap")).toBe(true);
+    expect(insights.some((i) => i.label === "House–probe gap")).toBe(true);
   });
 
   it("notes HVAC cooling when the probe runs hotter than the house", () => {

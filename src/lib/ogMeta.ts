@@ -49,10 +49,10 @@ export function resolveOgImageAlt(pathname: string): string {
     return `${BRAND_NAME} plans and pricing — Free, Member, Pro, and Portfolio freeze alert tiers`;
   }
   if (path.startsWith("/freeze-map") || path.startsWith("/freeze-season")) {
-    return `${BRAND_NAME} opt-in freeze-risk map of city-level garage temperatures`;
+    return `${BRAND_NAME} opt-in freeze-risk map of city-level probe temperatures`;
   }
   if (path.startsWith("/demo")) {
-    return `${BRAND_NAME} live garage temperature demo — no account required`;
+    return `${BRAND_NAME} live probe temperature demo — no account required`;
   }
   if (path.startsWith("/share-kit")) {
     return `${BRAND_NAME} share kit — freeze map embeds and community post copy`;
@@ -61,7 +61,7 @@ export function resolveOgImageAlt(pathname: string): string {
     return `${BRAND_NAME} guides for probes, firmware, freeze alerts, and ingest`;
   }
   if (path.startsWith("/stories")) {
-    return `${BRAND_NAME} customer story: freeze-risk alert before garage pipes freeze`;
+    return `${BRAND_NAME} customer story: freeze-risk alert before pipes freeze`;
   }
   if (path.startsWith("/docs")) {
     return `${BRAND_NAME} HTTP API — ingest, metrics, webhooks, and OpenAPI`;
@@ -70,7 +70,7 @@ export function resolveOgImageAlt(pathname: string): string {
     return `${BRAND_NAME} Android companion — early access on GitHub while Google Play review finishes`;
   }
 
-  return `${BRAND_NAME} garage sensor dashboard with live curves and freeze alerts`;
+  return `${BRAND_NAME} environmental sensor dashboard with live curves and freeze alerts`;
 }
 
 export function absoluteOgImageUrl(siteUrl: string, imagePathOrUrl: string): string {

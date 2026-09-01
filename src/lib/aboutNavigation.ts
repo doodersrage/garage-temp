@@ -26,7 +26,7 @@ export const featuredAboutSlugs = [
 export const aboutMegaGroups: AboutMegaGroup[] = [
   {
     id: "environment",
-    title: "Garage environment",
+    title: "Probe environments",
     description: "Probes, placement, and the physics that move readings.",
     coreSlugs: ["temperature-probes", "temperature-changes"],
   },

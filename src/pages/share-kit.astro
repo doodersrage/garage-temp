@@ -18,7 +18,7 @@ const schema = [
   ]),
 ];
 
-const reddit = `I built ThermalTrace for garage freeze alerts (ESP/Arduino → hosted charts + SMS/email) after one too many “hope the space heater is still on” winters.
+const reddit = `I built ThermalTrace for freeze alerts in garages, workshops, and crawlspaces (ESP/Arduino → hosted charts + SMS/email) after one too many “hope the space heater is still on” winters.
 
 Public freeze-risk map (opt-in city aggregates): ${siteUrl}/freeze-map
 Live demo (no account): ${siteUrl}/demo
@@ -27,7 +27,7 @@ Freeze season checklist: ${siteUrl}/freeze-season
 
 Happy to answer hardware / Home Assistant webhook questions.`;
 
-const homeAssistant = `**ThermalTrace** — hosted garage / crawlspace freeze monitoring for ESPHome & DIY probes.
+const homeAssistant = `**ThermalTrace** — hosted freeze monitoring for ESPHome & DIY probes (garage, crawlspace, attic, shop).
 
 - Official HACS integration: ${siteUrl}/integrations/home-assistant
 - HTTPS ingest (device key); optional MQTT→HTTP bridge if you already run Mosquitto/HA
@@ -38,19 +38,19 @@ const homeAssistant = `**ThermalTrace** — hosted garage / crawlspace freeze mo
 
 Live demo: ${siteUrl}/demo · Docs: ${siteUrl}/docs/api · Kit QR: ${siteUrl}/about/kit-qr-onboarding`;
 
-const bluesky = `Garage freezes are boring until they are not.
+const bluesky = `Unheated spaces freeze quietly until they do not.
 
 ThermalTrace: DIY probes → freeze alerts + a public opt-in freeze map.
 Demo (no account): ${siteUrl}/demo
 Map: ${siteUrl}/freeze-map
 Start free: ${siteUrl}/register?next=/dashboard/temperature`;
 
-const hackerNews = `ThermalTrace – hosted freeze alerts for ESP/Arduino garage probes (live demo, free plan)
+const hackerNews = `ThermalTrace – hosted freeze alerts for ESP/Arduino probes (live demo, free plan)
 
 ${siteUrl}/demo
 ${siteUrl}/`;
 
-const discord = `Built a hosted garage freeze dashboard for DIY probes (ESP/Arduino → HTTPS ingest).
+const discord = `Built a hosted freeze-alert dashboard for DIY probes (ESP/Arduino → HTTPS ingest).
 
 Live demo (no signup): ${siteUrl}/demo
 Free account → Devices: ${siteUrl}/register?next=/dashboard/temperature
@@ -67,7 +67,7 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
     <PageHeader
       kicker="Spread the word"
       title="Share kit"
-      lede="Ready-to-post blurbs and embeds. Tweak the voice, keep the links, ship it to the communities that actually care about cold garages."
+      lede="Ready-to-post blurbs and embeds. Tweak the voice, keep the links, ship it to the communities that care about freeze risk in unconditioned spaces."
     >
       <a slot="actions" class="btn-secondary" href="/freeze-map#embed">Freeze map embeds</a>
       <a slot="actions" class="btn-ghost" href="/stories">Customer stories</a>

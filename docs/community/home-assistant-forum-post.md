@@ -4,13 +4,13 @@ Copy/paste into a new topic on [community.home-assistant.io](https://community.h
 
 ---
 
-**Title:** ThermalTrace — garage/crawlspace freeze monitoring with official HACS integration
+**Title:** ThermalTrace — freeze monitoring for garages, workshops & crawlspaces (official HACS integration)
 
 **Tags:** `custom-component` `integration` `sensor` `freeze` `garage`
 
 ---
 
-Hi all — we run [ThermalTrace](https://thermaltrace.dev), a hosted dashboard for ESP/Arduino garage and workshop probes with freeze alerts, history, and household sharing. We shipped an **official HACS custom integration** and wanted to share it here.
+Hi all — we run [ThermalTrace](https://thermaltrace.dev), a hosted dashboard for ESP/Arduino probes in garages, workshops, attics, and crawlspaces — freeze alerts, history, and household sharing. We shipped an **official HACS custom integration** and wanted to share it here.
 
 ### What it does
 

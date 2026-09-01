@@ -17,7 +17,7 @@ const { canManage, options, selectedSensorId, saved, error } = Astro.props;
   <p class="card-subtitle mb-4">
   Pick a temperature probe to represent <strong>house</strong> indoor air when you do not have
   Nest connected — for example a hallway ESP32 or a reading pushed from Home Assistant
-  (Ecobee, Honeywell, etc.). Overview and history charts use this for garage–house context.
+  (Ecobee, Honeywell, etc.). Overview and history charts use this for house–probe context.
   </p>
   {saved && (
     <p class="alert-success text-sm mb-4" role="status">Indoor reference saved.</p>

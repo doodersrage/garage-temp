@@ -123,7 +123,7 @@ export function buildHeatingInsights(options: {
     if (delta >= 12) {
       const houseLabel = thermostat ? "House thermostat" : "Indoor reference";
       insights.push({
-        label: "Garage–house gap",
+        label: "House–probe gap",
         detail: `${houseLabel} ${houseTempF.toFixed(0)}°F vs probe ${latest.tempf.toFixed(1)}°F (${delta.toFixed(0)}°F warmer inside). Freeze alerts still apply to the unconditioned probe.`,
         severity: latest.tempf <= options.freezeThresholdF + 5 ? "warning" : "info",
       });
@@ -132,7 +132,7 @@ export function buildHeatingInsights(options: {
     if (latest.tempf <= options.freezeThresholdF && houseTempF > options.freezeThresholdF + 10) {
       insights.push({
         label: "Warm house, cold probe",
-        detail: `Probe is at or below ${options.freezeThresholdF}°F while the house reads ${houseTempF.toFixed(0)}°F — expected for an unheated garage or shop.`,
+        detail: `Probe is at or below ${options.freezeThresholdF}°F while the house reads ${houseTempF.toFixed(0)}°F — expected for an unheated shop, garage, or attic.`,
         severity: "info",
       });
     }
@@ -148,7 +148,7 @@ export function buildHeatingInsights(options: {
     if (thermostat && isThermostatCooling(thermostat.hvacMode) && latest.tempf > houseTempF + 10) {
       insights.push({
         label: "HVAC cooling",
-        detail: `AC is running (house ${houseTempF.toFixed(0)}°F). A hot garage or attic probe can still spike on sunny days.`,
+        detail: `AC is running (house ${houseTempF.toFixed(0)}°F). A hot attic, shop, or garage probe can still spike on sunny days.`,
         severity: "info",
       });
     }

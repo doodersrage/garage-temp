@@ -22,7 +22,7 @@ const propertyFaqs: AboutFaqItem[] = [
   {
     question: "How is Portfolio different from Pro?",
     answer:
-      "Portfolio includes everything on the Pro plan -- SMS/push alerts, official NWS cold-risk forecasts, the claims evidence pack, webhooks, share links -- plus a much higher ceiling on how many properties you can own (Pro already allows up to 50; Portfolio raises that to 500) and it's priced for that scale rather than for a single garage.",
+      "Portfolio includes everything on the Pro plan -- SMS/push alerts, official NWS cold-risk forecasts, the claims evidence pack, webhooks, share links -- plus a much higher ceiling on how many properties you can own (Pro already allows up to 50; Portfolio raises that to 500) and it's priced for that scale rather than for a single property.",
   },
   {
     question: "Do I need Portfolio if I only have 2-3 properties?",
@@ -64,7 +64,7 @@ const schema = [
     <PageHeader
       kicker="For portfolios"
       title="One dashboard for every property you're responsible for"
-      lede="A single garage and a ten-unit rental portfolio don't have the same monitoring problem. ThermalTrace's Portfolio tier rolls every property you own into one freeze-risk view, lets on-site managers handle devices and alerts without touching your billing, and is priced for that scale instead of a single-garage plan stretched thin."
+      lede="A single shop and a ten-unit rental portfolio don't have the same monitoring problem. ThermalTrace's Portfolio tier rolls every property you own into one freeze-risk view, lets on-site managers handle devices and alerts without touching your billing, and is priced for that scale instead of a single-property plan stretched thin."
     >
       <a slot="actions" class="btn-primary" href={user ? "/dashboard/portfolio" : "/register?next=/dashboard/temperature"}>
         {user ? "Open portfolio dashboard" : "Start free — add your first property"}
@@ -91,7 +91,7 @@ const schema = [
         Vacation-rental owners juggling a handful of cabins, small landlords with a
         few rental units, and property-management companies responsible for units
         they don't live in — anyone whose job is knowing which of many properties is
-        at risk right now, not just one garage.
+        at risk right now, not just one property.
       </p>
     </section>
 

@@ -1,4 +1,5 @@
 import type { AboutFaqItem } from "./aboutFaqs";
+import { BRAND_DESCRIPTION, BRAND_SPACES } from "./brand";
 import { getFaqPageSchema } from "./schemaMarkup";
 
 export type MarketingFaqItem = AboutFaqItem;
@@ -8,8 +9,7 @@ export const marketingFaqs = {
   home: [
     {
       question: "What is ThermalTrace?",
-      answer:
-        "ThermalTrace is an open-source web dashboard for garage and workshop sensors—temperature, humidity, CO₂, pressure, PM2.5, VOC, water level, energy, doors, power, flood, and motion—with live readings, freeze-aware alerts, and exportable history.",
+      answer: BRAND_DESCRIPTION,
     },
     {
       question: "How do I connect ESP32 or Arduino sensors?",
@@ -73,7 +73,7 @@ export const marketingFaqs = {
     {
       question: "How does ThermalTrace compare to Govee or SmartThings?",
       answer:
-        "Govee and SmartThings are general consumer/smart-home apps. ThermalTrace is purpose-built for garage and workshop sensors—ESP/Arduino or JSON ingest, freeze workflows, air quality, doors, leaks, energy, and CSV history—rather than a catch-all device dashboard.",
+        `Govee and SmartThings are general consumer/smart-home apps. ThermalTrace is purpose-built for ${BRAND_SPACES}—ESP/Arduino or JSON ingest, freeze workflows, air quality, doors, leaks, energy, and CSV history—rather than a catch-all device dashboard.`,
     },
     {
       question: "Do I need a public IP for my Arduino?",
@@ -93,14 +93,14 @@ export const marketingFaqs = {
     {
       question: "I already have Govee or a Tempest—do I still need this?",
       answer:
-        "Govee is a consumer room sensor; Tempest is outdoor weather. ThermalTrace watches garage and workshop probe curves on hardware you control. They can coexist—see the Govee and Tempest comparison pages for when each tool is the better fit.",
+        `Govee is a consumer room sensor; Tempest is outdoor weather. ThermalTrace watches probe curves in ${BRAND_SPACES} on hardware you control. They can coexist—see the Govee and Tempest comparison pages for when each tool is the better fit.`,
     },
   ],
   "freeze-map": [
     {
       question: "What is the ThermalTrace freeze map?",
       answer:
-        "An opt-in, city-level aggregate of anonymized garage temperature samples from contributing households—useful for seeing regional freeze risk, not a personal live feed.",
+        "An opt-in, city-level aggregate of anonymized probe temperature samples from contributing households—useful for seeing regional freeze risk, not a personal live feed.",
     },
     {
       question: "Is freeze-map data personally identifiable?",
@@ -161,7 +161,7 @@ export const marketingFaqs = {
   ],
   android: [
     {
-      question: "Does the Android app measure garage temperature?",
+      question: "Does the Android app measure probe temperature?",
       answer:
         "No. The phone is a companion client. ESP/Arduino sensors (or HTTPS JSON feeds) push readings to ThermalTrace; the app signs in and displays that account data.",
     },

@@ -90,7 +90,7 @@ function sparkPath(values: number[]): string {
 ---
 <Layout
   title="Freeze-risk map"
-  description="Opt-in city-level garage temperature aggregates from ThermalTrace households—anonymized freeze-risk context for your metro, not a personal live feed."
+  description="Opt-in city-level probe temperature aggregates from ThermalTrace households—anonymized freeze-risk context for your metro, not a personal live feed."
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
@@ -98,7 +98,7 @@ function sparkPath(values: number[]): string {
     <PageHeader
       kicker="Community"
       title="Freeze-risk map"
-      lede="Anonymized indoor garage temperatures by city from households that opt in. No addresses, device names, or household identifiers — only city-level averages."
+      lede="Anonymized indoor probe temperatures by city from households that opt in. No addresses, device names, or household identifiers — only city-level averages."
     >
       {user ? (
         <a slot="actions" class="btn-secondary" href="/dashboard/household">Opt in from Household</a>
@@ -117,7 +117,7 @@ function sparkPath(values: number[]): string {
       <section class="card" role="status">
         <h2 class="card-title">Sample preview</h2>
         <p class="card-subtitle mb-0">
-          These cities are illustrative late-winter garage aggregates so you can see how the map works.
+          These cities are illustrative late-winter probe aggregates so you can see how the map works.
           Live opt-in data will replace them once enough households contribute.
           {user ? (
             <>

@@ -37,14 +37,14 @@ export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
         updatedAt?: string;
       };
       if (!response.ok) {
-        throw new Error(payload.error ?? "Unable to load garage temperatures");
+        throw new Error(payload.error ?? "Unable to load probe temperatures");
       }
       setGroups(payload.groups ?? []);
       setUpdatedAt(payload.updatedAt ?? null);
       setError(null);
       setCountdown(intervalMs / 1000);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unable to load garage temperatures");
+      setError(e instanceof Error ? e.message : "Unable to load probe temperatures");
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
     return (
       <section class="card animate-slide-in-left">
         <div class="loading-state">
-          <p class="m-0">Loading garage temperatures…</p>
+          <p class="m-0">Loading probe temperatures…</p>
         </div>
       </section>
     );
@@ -80,7 +80,7 @@ export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
   return (
     <section class="card animate-slide-in-left">
       <h2 class="card-title">Live demo readings</h2>
-      <p class="card-subtitle">Public garage temperatures — free account (no card) to connect your own probes.</p>
+      <p class="card-subtitle">Public probe temperatures — free account (no card) to connect your own sensors.</p>
 
       {error && (
         <div class="alert-warning mb-4">

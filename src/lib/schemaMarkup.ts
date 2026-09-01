@@ -1,4 +1,4 @@
-import { BRAND_DESCRIPTION, BRAND_NAME, BRAND_TAGLINE } from "./brand";
+import { BRAND_DESCRIPTION, BRAND_NAME, BRAND_SPACES, BRAND_TAGLINE } from "./brand";
 import {
   resolveConfiguredSiteUrl as resolveSiteUrl,
   resolvePageUrl,
@@ -123,7 +123,7 @@ export function getWebPageSchema(options: {
     },
     about: {
       "@type": "Thing",
-      name: "Garage and workshop temperature monitoring",
+      name: "Environmental probe monitoring",
     },
   };
 
@@ -244,5 +244,5 @@ export function getSiteSchemas(options: {
 
 /** Short definition-style blurb for AEO (answer engines). */
 export function getBrandDefinition(): string {
-  return `${SITE_NAME}: ${BRAND_TAGLINE} Open-source live probe dashboards, freeze alerts, and history for garages and workshops.`;
+  return `${SITE_NAME}: ${BRAND_TAGLINE} Open-source live probe dashboards, freeze alerts, and history for ${BRAND_SPACES}.`;
 }

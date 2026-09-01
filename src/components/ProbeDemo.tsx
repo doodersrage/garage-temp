@@ -68,7 +68,7 @@ export default function ProbeDemo() {
   return (
     <div class="probe-demo">
       <section class="rounded-xl border border-border bg-card p-4 md:p-6 shadow-[var(--shadow-card)]">
-        <h2 class="card-title">Garage conditions</h2>
+        <h2 class="card-title">Probe conditions</h2>
         <p class="card-subtitle">
           Adjust the environment and watch three probe zones respond, just like the live JSON feed on the home page.
         </p>

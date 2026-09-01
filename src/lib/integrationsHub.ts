@@ -59,7 +59,7 @@ export const INTEGRATION_CARDS: IntegrationCard[] = [
     id: "thermostat",
     title: "Nest & Ecobee",
     summary:
-      "Optional thermostat OAuth on Pro — indoor setpoint context next to garage and crawlspace probes on the dashboard.",
+      "Optional thermostat OAuth on Pro — indoor setpoint context next to attic, crawlspace, and shop probes on the dashboard.",
     href: "/about/thermostat-oauth",
     tier: "Pro (when enabled)",
     cta: "Operator setup",

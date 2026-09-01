@@ -8,7 +8,7 @@ if (!token) {
 
 const readingsUrl = `/api/share/${token}/readings`;
 ---
-<Layout title="Shared live view" description="Read-only shared garage sensor readings." noindex>
+<Layout title="Shared live view" description="Read-only shared probe sensor readings." noindex>
   <div class="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
     <h1 class="text-3xl font-semibold mb-2" id="share-title">Shared sensors</h1>
     <p class="text-[var(--color-text-muted)] mb-2" id="share-subtitle">Live read-only view</p>
@@ -17,7 +17,7 @@ const readingsUrl = `/api/share/${token}/readings`;
       <p>Loading…</p>
     </div>
     <p class="mt-10 text-sm text-[var(--color-text-muted)]">
-      Want your own garage monitor?
+      Want your own probe monitor?
       <a class="text-link" href="/register?next=/dashboard/temperature">Create a free account</a>
     </p>
   </div>

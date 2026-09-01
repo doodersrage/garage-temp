@@ -51,7 +51,7 @@ export const DRIP_STAGES: DripStage[] = [
     subject: "Turn on freeze alerts before the next cold snap",
     content: (site) => ({
       eyebrow: "Freeze protection",
-      preheader: "Most garages start alerts around 34°F so you get warning before pipes freeze.",
+      preheader: "Most unconditioned spaces start alerts around 34°F so you get warning before pipes freeze.",
       title: "Don’t wait for the cold snap",
       intro:
         "ThermalTrace can reach you when temperatures drop toward freezing — email now, plus SMS and push on Pro.",

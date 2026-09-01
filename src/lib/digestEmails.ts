@@ -107,7 +107,7 @@ export function formatDigestFreezeLine(
 
 export function formatWeeklyDigestSubject(points: ChartPoint[]): string {
   const coldest = coldestPoint(points);
-  if (!coldest) return "Weekly garage temperature digest";
+  if (!coldest) return "Weekly probe temperature digest";
   const dayLabel = new Date(coldest.timestamp).toLocaleDateString("en-US", {
     weekday: "short",
     month: "short",
@@ -172,7 +172,7 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
       const parts = brandedEmailParts({
         eyebrow: "Weekly digest",
         preheader: freezeLine,
-        title: "This week in your garage",
+        title: "This week at your probes",
         intro: "Here’s a quick look at the last 7 days of probe readings.",
         bullets: [
           freezeLine,
