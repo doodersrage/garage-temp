@@ -4,6 +4,7 @@ import { getRuntimeEnv } from "./runtimeEnv";
 export type FcmPayload = {
   title: string;
   body: string;
+  eventId?: number | null;
 };
 
 export type FcmDeliveryResult = {
@@ -222,6 +223,9 @@ export async function sendFcmToUser(
               body: payload.body,
               deep_link: "alerts",
               click_action: "OPEN_ALERTS",
+              ...(payload.eventId != null
+                ? { event_id: String(payload.eventId) }
+                : {}),
             },
             android: {
               priority: "HIGH",

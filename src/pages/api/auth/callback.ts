@@ -16,6 +16,12 @@ import {
 } from "../../../lib/siteUrl";
 import { applyReferralForNewUser, isLikelyNewUser } from "../../../lib/referrals";
 import { REGISTER_NEXT_DEVICES } from "../../../lib/registerUrl";
+import {
+  consumeMobileOAuthCookie,
+  redirectMobileOAuthComplete,
+} from "../../../lib/mobileAuthRedirect";
+import { setAuthCookies } from "../../../lib/auth";
+import { setMfaRequiredCookie, needsMfaStepUp, getAssuranceLevels, createAuthClient } from "../../../lib/mfa";
 
 export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   const oauthError = url.searchParams.get("error");
@@ -66,6 +72,22 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
       ? REGISTER_NEXT_DEVICES
       : "/dashboard";
   const safeNext = sanitizeNextPath(nextCookie) ?? defaultNext;
+
+  if (consumeMobileOAuthCookie(cookies)) {
+    setAuthCookies(cookies, data.session.access_token, data.session.refresh_token);
+    const authClient = createAuthClient();
+    await authClient.auth.setSession({
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+    });
+    const levels = await getAssuranceLevels(authClient);
+    setMfaRequiredCookie(cookies, needsMfaStepUp(levels));
+    const mobileRedirect = await redirectMobileOAuthComplete(
+      data.session.access_token,
+      data.session.refresh_token,
+    );
+    if (mobileRedirect) return mobileRedirect;
+  }
 
   const { redirectTo } = await applySessionCookiesAfterAuth(
     cookies,

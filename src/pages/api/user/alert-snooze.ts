@@ -8,7 +8,6 @@ import {
   snoozeUntilFromHours,
   vacationUntilFromDays,
 } from "../../../lib/alertSnooze";
-
 import {
   redirectUnlessEditor,
   requireHouseholdEditor,
@@ -18,24 +17,58 @@ import { formRedirectPath } from "../../../lib/siteUrl";
 const SNOOZE_MAX_HOURS = 168;
 const VACATION_MAX_DAYS = 30;
 
+function wantsJson(request: Request): boolean {
+  const accept = request.headers.get("accept") ?? "";
+  const contentType = request.headers.get("content-type") ?? "";
+  return accept.includes("application/json") || contentType.includes("application/json");
+}
+
 function parsePositiveInt(raw: FormDataEntryValue | null): number | null {
   if (raw == null) return null;
   const n = Number.parseInt(String(raw), 10);
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
+function jsonResponse(body: Record<string, unknown>, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
+  const asJson = wantsJson(request);
+
   if (!session || !user) {
+    if (asJson) return jsonResponse({ error: "Unauthorized" }, 401);
     return redirect("/signin");
   }
 
-  const formData = await request.formData();
+  let formData: FormData;
+  if (asJson) {
+    let body: { action?: string; hours?: number; days?: number };
+    try {
+      body = (await request.json()) as typeof body;
+    } catch {
+      return jsonResponse({ error: "Invalid JSON" }, 400);
+    }
+    formData = new FormData();
+    if (body.action) formData.set("action", body.action);
+    if (body.hours != null) formData.set("hours", String(body.hours));
+    if (body.days != null) formData.set("days", String(body.days));
+  } else {
+    formData = await request.formData();
+  }
+
   const redirectTo = formRedirectPath(formData, "/dashboard/alerts");
 
   const editor = await requireHouseholdEditor(user.id);
   const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
-  if (blocked) return blocked;
+  if (blocked) {
+    if (asJson) return jsonResponse({ error: "Forbidden" }, 403);
+    return blocked;
+  }
 
   const action = formData.get("action")?.toString();
   const settings = await getAlertSettingsForUser(
@@ -52,6 +85,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       ...settings,
       snoozeUntil: snoozeUntilFromHours(hours),
     });
+    if (asJson) {
+      return jsonResponse({ ok: true, kind: "snooze", message: `Alerts snoozed for ${hours} hours.` });
+    }
     return redirect(`${redirectTo}?snooze=1`);
   }
 
@@ -64,18 +100,24 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       ...settings,
       vacationUntil: vacationUntilFromDays(days),
     });
+    if (asJson) {
+      return jsonResponse({ ok: true, kind: "vacation", message: `Vacation mode for ${days} days.` });
+    }
     return redirect(`${redirectTo}?vacation=1`);
   }
 
   if (action === "clear_snooze") {
     await saveAlertSettingsForUser(user.id, { ...settings, snoozeUntil: null });
+    if (asJson) return jsonResponse({ ok: true, kind: "clear_snooze", message: "Snooze cleared." });
     return redirect(`${redirectTo}?snooze_cleared=1`);
   }
 
   if (action === "clear_vacation") {
     await saveAlertSettingsForUser(user.id, { ...settings, vacationUntil: null });
+    if (asJson) return jsonResponse({ ok: true, kind: "clear_vacation", message: "Vacation cleared." });
     return redirect(`${redirectTo}?vacation_cleared=1`);
   }
 
+  if (asJson) return jsonResponse({ error: "Unknown action" }, 400);
   return redirect(redirectTo);
 };

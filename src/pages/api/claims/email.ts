@@ -8,15 +8,50 @@ import { createClaimsPackExport } from "../../../lib/claimsPackExports";
 import { sendEmail, isMailerRecipientNotAllowed } from "../../../lib/mailer";
 import { brandedEmailParts } from "../../../lib/emailLayout";
 
+function wantsJson(request: Request): boolean {
+  const accept = request.headers.get("accept") ?? "";
+  const contentType = request.headers.get("content-type") ?? "";
+  return accept.includes("application/json") || contentType.includes("application/json");
+}
+
+function jsonResponse(body: Record<string, unknown>, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
+  const asJson = wantsJson(request);
+
   if (!session || !user) {
+    if (asJson) return jsonResponse({ error: "Unauthorized" }, 401);
     return redirect("/signin");
   }
 
-  const formData = await request.formData();
-  const redirectTo = formRedirectPath(formData, "/dashboard/history");
-  const adjusterEmail = formData.get("adjuster_email")?.toString().trim() ?? "";
+  let adjusterEmail = "";
+  let fromDate: string | undefined;
+  let toDate: string | undefined;
+  let redirectTo = "/dashboard/history";
+
+  if (asJson) {
+    let body: { adjuster_email?: string; from?: string; to?: string };
+    try {
+      body = (await request.json()) as typeof body;
+    } catch {
+      return jsonResponse({ error: "Invalid JSON" }, 400);
+    }
+    adjusterEmail = body.adjuster_email?.trim() ?? "";
+    fromDate = body.from?.trim();
+    toDate = body.to?.trim();
+  } else {
+    const formData = await request.formData();
+    redirectTo = formRedirectPath(formData, "/dashboard/history");
+    adjusterEmail = formData.get("adjuster_email")?.toString().trim() ?? "";
+    fromDate = formData.get("from")?.toString();
+    toDate = formData.get("to")?.toString();
+  }
 
   // Same gate as the existing authenticated download route
   // (api/claims/pack.ts) -- that route has no extra household-role check
@@ -24,10 +59,12 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   // inconsistent gate for the same underlying report.
   const entitlements = await getUserEntitlements(user.id);
   if (!entitlements.canUseClaimsPack) {
+    if (asJson) return jsonResponse({ error: "pro_required" }, 403);
     return redirect(`${redirectTo}?claims_error=pro_required`);
   }
 
   if (!adjusterEmail || !adjusterEmail.includes("@")) {
+    if (asJson) return jsonResponse({ error: "invalid_email" }, 400);
     return redirect(`${redirectTo}?claims_error=invalid_email`);
   }
 
@@ -35,11 +72,12 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { pack, householdId } = await generateClaimsPackForUser(
     user,
     entitlements,
-    { from: formData.get("from")?.toString(), to: formData.get("to")?.toString() },
+    { from: fromDate, to: toDate },
     siteUrl,
   );
 
   if (!householdId) {
+    if (asJson) return jsonResponse({ error: "no_household" }, 400);
     return redirect(`${redirectTo}?claims_error=no_household`);
   }
 
@@ -50,6 +88,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   );
   if (!token) {
     console.error("Failed to persist claims pack export for email:", error);
+    if (asJson) return jsonResponse({ error: "send_failed" }, 500);
     return redirect(`${redirectTo}?claims_error=send_failed`);
   }
 
@@ -76,10 +115,20 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     });
   } catch (err) {
     if (isMailerRecipientNotAllowed(err)) {
+      if (asJson) return jsonResponse({ error: "recipient_not_allowed" }, 400);
       return redirect(`${redirectTo}?claims_error=recipient_not_allowed`);
     }
     console.error("Failed to send claims pack email:", err);
+    if (asJson) return jsonResponse({ error: "send_failed" }, 500);
     return redirect(`${redirectTo}?claims_error=send_failed`);
+  }
+
+  if (asJson) {
+    return jsonResponse({
+      ok: true,
+      verify_url: verifyUrl,
+      verification_code: contentHash,
+    });
   }
 
   return redirect(`${redirectTo}?claims_emailed=1`);

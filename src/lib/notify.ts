@@ -7,7 +7,7 @@ import {
   getAlertSettingsFromMetadata,
   rowToAlertSettings,
 } from "./alerts";
-import { recordAlertEvent } from "./alertEvents";
+import { recordAlertEvent, updateAlertEventChannels } from "./alertEvents";
 import { buildUserAckUrl } from "./alertAckTokens";
 import { buildSiteUrl } from "./siteUrl";
 import { applyAlertTemplates } from "./alertTemplates";
@@ -464,6 +464,16 @@ export async function notifyUser(
   let payloadResolved = applyAlertTemplates(payload, settings.alertTemplates);
   const sent: string[] = [];
   const skipped: string[] = [];
+
+  const eventId = await recordAlertEvent({
+    userId,
+    kind: payload.kind ?? "generic",
+    title: payload.title,
+    body: payload.body,
+    channelsSent: [],
+    channelsSkipped: [],
+  });
+
   const kind = payloadResolved.kind;
   const routedChannels = kind
     ? filterChannelsForSpace(
@@ -606,6 +616,7 @@ export async function notifyUser(
       const pushResult = await sendPushChannelToUser(userId, {
         title: payloadResolved.title,
         body: bodyWithSnooze,
+        eventId,
       });
       if (pushResult.delivered > 0) {
         sent.push("push");
@@ -635,14 +646,18 @@ export async function notifyUser(
     skipped.push("quiet_hours");
   }
 
-  await recordAlertEvent({
-    userId,
-    kind: payload.kind ?? "generic",
-    title: payload.title,
-    body: payload.body,
-    channelsSent: sent,
-    channelsSkipped: skipped,
-  });
+  if (eventId != null) {
+    await updateAlertEventChannels(eventId, userId, sent, skipped);
+  } else {
+    await recordAlertEvent({
+      userId,
+      kind: payload.kind ?? "generic",
+      title: payload.title,
+      body: payload.body,
+      channelsSent: sent,
+      channelsSkipped: skipped,
+    });
+  }
 
   return { sent, skipped };
 }

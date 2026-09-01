@@ -20,18 +20,47 @@ export async function recordAlertEvent(input: {
   body: string;
   channelsSent: string[];
   channelsSkipped: string[];
-}): Promise<void> {
+}): Promise<number | null> {
   const supabase = createServerClient();
-  const { error } = await supabase.from("alert_events").insert({
-    user_id: input.userId,
-    kind: input.kind,
-    title: input.title,
-    body: input.body,
-    channels_sent: input.channelsSent,
-    channels_skipped: input.channelsSkipped,
-  });
+  const { data, error } = await supabase
+    .from("alert_events")
+    .insert({
+      user_id: input.userId,
+      kind: input.kind,
+      title: input.title,
+      body: input.body,
+      channels_sent: input.channelsSent,
+      channels_skipped: input.channelsSkipped,
+    })
+    .select("id")
+    .single();
+
   if (error) {
     console.error("Failed to record alert event:", error.message);
+    return null;
+  }
+
+  return data?.id ?? null;
+}
+
+export async function updateAlertEventChannels(
+  eventId: number,
+  userId: string,
+  channelsSent: string[],
+  channelsSkipped: string[],
+): Promise<void> {
+  const supabase = createServerClient();
+  const { error } = await supabase
+    .from("alert_events")
+    .update({
+      channels_sent: channelsSent,
+      channels_skipped: channelsSkipped,
+    })
+    .eq("id", eventId)
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("Failed to update alert event channels:", error.message);
   }
 }
 

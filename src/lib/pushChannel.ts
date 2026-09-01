@@ -4,6 +4,7 @@ import { sendWebPushToUser, type WebPushDeliveryResult } from "./webPush";
 export type PushChannelPayload = {
   title: string;
   body: string;
+  eventId?: number | null;
 };
 
 export type CombinedPushResult = {

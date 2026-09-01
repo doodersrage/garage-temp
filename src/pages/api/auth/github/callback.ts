@@ -15,6 +15,17 @@ import {
   OAUTH_REF_COOKIE,
   sanitizeNextPath,
 } from "../../../../lib/siteUrl";
+import {
+  consumeMobileOAuthCookie,
+  redirectMobileOAuthComplete,
+} from "../../../../lib/mobileAuthRedirect";
+import { setAuthCookies } from "../../../../lib/auth";
+import {
+  createAuthClient,
+  getAssuranceLevels,
+  needsMfaStepUp,
+  setMfaRequiredCookie,
+} from "../../../../lib/mfa";
 
 export const GET: APIRoute = async ({ url, cookies, redirect, request, site }) => {
   const oauthError = url.searchParams.get("error");
@@ -52,6 +63,22 @@ export const GET: APIRoute = async ({ url, cookies, redirect, request, site }) =
       ? REGISTER_NEXT_DEVICES
       : "/dashboard";
     const safeNext = sanitizeNextPath(nextCookie) ?? defaultNext;
+
+    if (consumeMobileOAuthCookie(cookies)) {
+      setAuthCookies(cookies, session.access_token, session.refresh_token);
+      const authClient = createAuthClient();
+      await authClient.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+      });
+      const levels = await getAssuranceLevels(authClient);
+      setMfaRequiredCookie(cookies, needsMfaStepUp(levels));
+      const mobileRedirect = await redirectMobileOAuthComplete(
+        session.access_token,
+        session.refresh_token,
+      );
+      if (mobileRedirect) return mobileRedirect;
+    }
 
     const { redirectTo } = await applySessionCookiesAfterAuth(cookies, session, safeNext);
     return redirect(redirectTo);
