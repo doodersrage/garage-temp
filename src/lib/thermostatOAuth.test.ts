@@ -169,16 +169,16 @@ describe("resolveAccessTokenForHousehold", () => {
     expect(mockUpdateTokensAfterRefresh).not.toHaveBeenCalled();
   });
 
-  it("refreshes and persists when the access token is expired, and returns null if unconfigured", async () => {
+  it("returns the stale access token when refresh is unconfigured", async () => {
     mockGetConnectionForHousehold.mockResolvedValue({
       refreshToken: "rt-old",
       accessToken: "stale",
       accessTokenExpiresAt: new Date(Date.now() - 1000).toISOString(),
     });
     const { resolveAccessTokenForHousehold } = await import("./thermostatOAuth");
-    // ECOBEE_CLIENT_ID not stubbed -> refresh helper can't run -> null, no persist.
+    // ECOBEE_CLIENT_ID not stubbed -> refresh helper can't run -> fall back to stale token.
     const result = await resolveAccessTokenForHousehold("house-1", "ecobee");
-    expect(result).toBeNull();
+    expect(result).toBe("stale");
     expect(mockUpdateTokensAfterRefresh).not.toHaveBeenCalled();
   });
 

@@ -52,7 +52,8 @@ export const GET: APIRoute = async ({ cookies }) => {
       nws_alerts: nwsAlerts?.alerts?.map((alert) => ({
         event: alert.event,
         headline: alert.headline,
-        ends: alert.ends,
+        severity: alert.severity,
+        expires: alert.expires,
       })),
       outdoor_temp_f: weatherSnapshot?.temp ?? null,
       house,
