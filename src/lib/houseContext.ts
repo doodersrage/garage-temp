@@ -158,3 +158,45 @@ export async function fetchHouseChartOverlay(input: {
 
   return { points: [], source: null };
 }
+
+export async function fetchHouseContextForUser(
+  userId: string,
+): Promise<HouseContext | null> {
+  const { getUserHouseholdId } = await import("./households");
+  const { getUserEntitlements } = await import("./entitlements");
+  const { listConnectionsForHousehold } = await import("./thermostatConnections");
+  const { fetchThermostatContextWithStatus } = await import("./thermostatCorrelation");
+  const { getIndoorReferenceSensorId } = await import("./indoorReference");
+  const { fetchLatestSensorValues } = await import("./sensorReadings");
+  const { listHouseholdDevices } = await import("./devices");
+
+  const householdId = await getUserHouseholdId(userId);
+  if (!householdId) return null;
+
+  const entitlements = await getUserEntitlements(userId);
+  let thermostatSnapshot: ThermostatSnapshot | null = null;
+  if (entitlements.canUseThermostatIntegration) {
+    const connections = await listConnectionsForHousehold(householdId);
+    const connection = connections[0];
+    if (connection) {
+      const result = await fetchThermostatContextWithStatus(
+        householdId,
+        connection.provider,
+      );
+      thermostatSnapshot = result.snapshot;
+    }
+  }
+
+  const [referenceSensorId, latest, devicesResult] = await Promise.all([
+    getIndoorReferenceSensorId(householdId),
+    fetchLatestSensorValues(householdId),
+    listHouseholdDevices(householdId),
+  ]);
+
+  return buildHouseContext({
+    thermostatSnapshot,
+    referenceSensorId,
+    latest,
+    devices: devicesResult.devices,
+  });
+}

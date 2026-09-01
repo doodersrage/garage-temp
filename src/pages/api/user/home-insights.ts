@@ -8,6 +8,10 @@ import {
   getPersonalWeatherConfig,
 } from "../../../lib/weatherContext";
 import { getUserPreferences } from "../../../lib/userPreferences";
+import {
+  fetchMobileHousePayloadForUser,
+  fetchMobileRegionalBenchmarkForUser,
+} from "../../../lib/mobileHouseContext";
 
 export const GET: APIRoute = async ({ cookies }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -24,9 +28,11 @@ export const GET: APIRoute = async ({ cookies }) => {
   ]);
 
   const weatherConfig = getPersonalWeatherConfig(user);
-  const [nightsAtRisk, weatherSnapshot] = await Promise.all([
+  const [nightsAtRisk, weatherSnapshot, house, regionalBenchmark] = await Promise.all([
     fetchNightsAtRiskForConfig(weatherConfig, alertSettings.freezeThresholdF),
     fetchWeatherSnapshotForConfig(weatherConfig),
+    fetchMobileHousePayloadForUser(user.id),
+    fetchMobileRegionalBenchmarkForUser(user.id),
   ]);
 
   let nwsAlerts: Awaited<ReturnType<typeof fetchNwsAlerts>> | null = null;
@@ -49,6 +55,8 @@ export const GET: APIRoute = async ({ cookies }) => {
         ends: alert.ends,
       })),
       outdoor_temp_f: weatherSnapshot?.temp ?? null,
+      house,
+      regional_benchmark: regionalBenchmark,
     }),
     {
       status: 200,

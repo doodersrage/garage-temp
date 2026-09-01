@@ -5,6 +5,10 @@ import {
   fetchGarageTempHistory,
   fetchHistoryFilterOptions,
 } from "../../../lib/garageTempsHistory";
+import { getUserHouseholdId } from "../../../lib/households";
+import { getIndoorReferenceSensorId } from "../../../lib/indoorReference";
+import { fetchHouseChartOverlay } from "../../../lib/houseContext";
+import { listConnectionsForHousehold } from "../../../lib/thermostatConnections";
 
 export const GET: APIRoute = async ({ cookies, url }) => {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -43,7 +47,7 @@ export const GET: APIRoute = async ({ cookies, url }) => {
     to,
   };
 
-  const [chart, readings, filterOptions] = await Promise.all([
+  const [chart, readings, filterOptions, houseOverlay] = await Promise.all([
     include.has("chart")
       ? fetchGarageTempChartData(user.id, days, filters)
       : Promise.resolve(null),
@@ -53,6 +57,23 @@ export const GET: APIRoute = async ({ cookies, url }) => {
     include.has("filters")
       ? fetchHistoryFilterOptions(user.id)
       : Promise.resolve(null),
+    include.has("house_overlay")
+      ? (async () => {
+          const householdId = await getUserHouseholdId(user.id);
+          if (!householdId) return { points: [], source: null };
+          const [connections, referenceSensorId] = await Promise.all([
+            listConnectionsForHousehold(householdId),
+            getIndoorReferenceSensorId(householdId),
+          ]);
+          return fetchHouseChartOverlay({
+            householdId,
+            days,
+            hasThermostatConnection: connections.length > 0,
+            referenceSensorId,
+            filters: { from: filters.from, to: filters.to },
+          });
+        })()
+      : Promise.resolve(null),
   ]);
 
   return new Response(
@@ -60,6 +81,12 @@ export const GET: APIRoute = async ({ cookies, url }) => {
       days,
       chart: chart
         ? { points: chart.points, error: chart.error }
+        : undefined,
+      house_overlay: houseOverlay
+        ? {
+            source: houseOverlay.source,
+            points: houseOverlay.points,
+          }
         : undefined,
       readings: readings ?? undefined,
       filters: filterOptions

@@ -23,6 +23,8 @@ import {
 } from "../../../lib/householdInvites";
 import { buildSiteUrl } from "../../../lib/stripe";
 import { updateHouseholdFreezeMapSettings } from "../../../lib/freezeMap";
+import { getHouseholdFreezeMapSettings } from "../../../lib/freezeMap";
+import { getIndoorReferenceSensorId } from "../../../lib/indoorReference";
 import {
   redirectUnlessManager,
   requireHouseholdManager,
@@ -47,10 +49,13 @@ export const GET: APIRoute = async ({ cookies }) => {
     });
   }
 
-  const [members, households, invites] = await Promise.all([
+  const [members, households, invites, freezeMap, indoorReferenceSensorId] =
+    await Promise.all([
     listHouseholdMembers(household.householdId),
     listUserHouseholds(user.id),
     listPendingInvites(household.householdId),
+    getHouseholdFreezeMapSettings(household.householdId),
+    getIndoorReferenceSensorId(household.householdId),
   ]);
 
   return new Response(
@@ -59,6 +64,14 @@ export const GET: APIRoute = async ({ cookies }) => {
       members: members.members,
       households: households.households,
       invites: invites.invites,
+      indoor_reference_sensor_id: indoorReferenceSensorId,
+      freeze_map: {
+        opt_in: freezeMap.optIn,
+        city_id: freezeMap.cityId,
+        label: freezeMap.label,
+        lat: freezeMap.lat,
+        lon: freezeMap.lon,
+      },
     }),
     { status: 200, headers: { "Content-Type": "application/json" } },
   );
