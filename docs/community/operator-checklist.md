@@ -20,6 +20,7 @@ Check what's missing locally: `pnpm operator:check`
 
 1. **Nest** — [Device Access Console](https://console.nest.google.com/device-access) + Google Cloud OAuth web client  
    Redirect URI: `https://thermaltrace.dev/api/integrations/nest/callback`  
+   **Enable [Smart Device Management API](https://console.cloud.google.com/apis/library/smartdevicemanagement.googleapis.com)** in the GCP project that owns your OAuth client (prefix of `NEST_CLIENT_ID` before the first `-`).  
    Secrets: `NEST_CLIENT_ID`, `NEST_CLIENT_SECRET`, `NEST_PROJECT_ID`
 
 2. **Ecobee** — [Developer portal](https://www.ecobee.com/en-us/developer/)  

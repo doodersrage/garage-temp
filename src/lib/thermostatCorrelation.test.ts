@@ -85,6 +85,34 @@ describe("fetchNestSnapshot", () => {
     const { fetchNestSnapshot } = await import("./thermostatCorrelation");
     expect(await fetchNestSnapshot("token")).toBeNull();
   });
+
+  it("detects SDM API disabled errors", async () => {
+    vi.stubEnv("NEST_PROJECT_ID", "nest-project-uuid");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            error: {
+              code: 403,
+              message:
+                "Smart Device Management API has not been used in project 179390663229 before or it is disabled.",
+              status: "PERMISSION_DENIED",
+              details: [{ reason: "SERVICE_DISABLED" }],
+            },
+          }),
+          { status: 403 },
+        ),
+      ),
+    );
+    const { fetchNestSnapshotDetailed } = await import("./thermostatCorrelation");
+    const result = await fetchNestSnapshotDetailed("token");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errorCode).toBe("sdm_api_disabled");
+      expect(result.activationUrl).toContain("179390663229");
+    }
+  });
 });
 
 describe("fetchEcobeeSnapshot", () => {
@@ -157,6 +185,34 @@ describe("fetchThermostatContext", () => {
     const snapshot = await fetchThermostatContext("house-1", "nest");
     expect(forceRefresh).toHaveBeenCalledWith("house-1", "nest");
     expect(snapshot?.ambientTempF).toBeCloseTo(71.6, 0);
+  });
+
+  it("returns SDM API disabled hint when Nest returns SERVICE_DISABLED", async () => {
+    vi.stubEnv("NEST_PROJECT_ID", "nest-project-uuid");
+    vi.doMock("./thermostatOAuth", () => ({
+      resolveAccessTokenForHousehold: vi.fn().mockResolvedValue("token"),
+      forceRefreshAccessTokenForHousehold: vi.fn(),
+    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            error: {
+              message:
+                "Smart Device Management API has not been used in project 179390663229 before or it is disabled.",
+              details: [{ reason: "SERVICE_DISABLED" }],
+            },
+          }),
+          { status: 403 },
+        ),
+      ),
+    );
+    const { fetchThermostatContextWithStatus } = await import("./thermostatCorrelation");
+    const result = await fetchThermostatContextWithStatus("house-1", "nest");
+    expect(result.snapshot).toBeNull();
+    expect(result.fetchError).toBe("sdm_api_disabled");
+    expect(result.fetchHint).toContain("179390663229");
   });
 });
 

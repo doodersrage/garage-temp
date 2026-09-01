@@ -41,7 +41,83 @@ function pickNestThermostatDevice(devices: NestDevice[]): NestDevice | undefined
 
 export type NestSnapshotResult =
   | { ok: true; snapshot: ThermostatSnapshot }
-  | { ok: false; status: number | null; reason: "no_project" | "http_error" | "network" };
+  | {
+      ok: false;
+      status: number | null;
+      reason: "no_project" | "http_error" | "network";
+      errorCode?: "sdm_api_disabled" | "api_auth" | "api_error";
+      activationUrl?: string;
+    };
+
+export type ThermostatFetchError =
+  | "no_token"
+  | "no_project"
+  | "sdm_api_disabled"
+  | "api_auth"
+  | "api_error"
+  | "network";
+
+export type ThermostatContextResult = {
+  snapshot: ThermostatSnapshot | null;
+  fetchError?: ThermostatFetchError;
+  /** Short operator hint when fetchError is set (no secrets). */
+  fetchHint?: string;
+};
+
+function parseNestApiFailure(
+  status: number,
+  rawBody: string,
+): Pick<Extract<NestSnapshotResult, { ok: false }>, "errorCode" | "activationUrl"> {
+  if (status === 401 || status === 403) {
+    if (
+      rawBody.includes("SERVICE_DISABLED") ||
+      rawBody.includes("Smart Device Management API has not been used")
+    ) {
+      const projectMatch = rawBody.match(/project[=:\s]+([0-9]+)/);
+      const activationUrl = projectMatch
+        ? `https://console.developers.google.com/apis/api/smartdevicemanagement.googleapis.com/overview?project=${projectMatch[1]}`
+        : "https://console.cloud.google.com/apis/library/smartdevicemanagement.googleapis.com";
+      return { errorCode: "sdm_api_disabled", activationUrl };
+    }
+    return { errorCode: "api_auth" };
+  }
+  return { errorCode: "api_error" };
+}
+
+function nestFetchFailureMessage(
+  result: Extract<NestSnapshotResult, { ok: false }>,
+): { fetchError: ThermostatFetchError; fetchHint: string } {
+  if (result.reason === "no_project") {
+    return {
+      fetchError: "no_project",
+      fetchHint: "NEST_PROJECT_ID is missing on this deployment.",
+    };
+  }
+  if (result.reason === "network") {
+    return {
+      fetchError: "network",
+      fetchHint: "Could not reach Google Nest — try again in a minute.",
+    };
+  }
+  if (result.errorCode === "sdm_api_disabled") {
+    return {
+      fetchError: "sdm_api_disabled",
+      fetchHint: result.activationUrl
+        ? `Enable the Smart Device Management API in Google Cloud, then refresh: ${result.activationUrl}`
+        : "Enable the Smart Device Management API in the Google Cloud project that owns your Nest OAuth client.",
+    };
+  }
+  if (result.errorCode === "api_auth") {
+    return {
+      fetchError: "api_auth",
+      fetchHint: "Nest authorization may have expired — try Disconnect, then Connect again.",
+    };
+  }
+  return {
+    fetchError: "api_error",
+    fetchHint: "Nest returned an error — try again or reconnect.",
+  };
+}
 
 function nestDevicesUrl(projectId: string): string {
   return `https://smartdevicemanagement.googleapis.com/v1/enterprises/${encodeURIComponent(projectId)}/devices`;
@@ -72,8 +148,16 @@ export async function fetchNestSnapshotDetailed(
       headers: { Authorization: `Bearer ${accessToken}` },
       signal: AbortSignal.timeout(8000),
     });
-    if (!res.ok) return { ok: false, status: res.status, reason: "http_error" };
-    const data = (await res.json()) as { devices?: NestDevice[] };
+    if (!res.ok) {
+      const rawBody = await res.text();
+      return {
+        ok: false,
+        status: res.status,
+        reason: "http_error",
+        ...parseNestApiFailure(res.status, rawBody),
+      };
+    }
+    const data = JSON.parse(await res.text()) as { devices?: NestDevice[] };
     const device = pickNestThermostatDevice(data.devices ?? []);
     return { ok: true, snapshot: snapshotFromNestDevice(device) };
   } catch {
@@ -129,31 +213,53 @@ export async function fetchEcobeeSnapshot(
 }
 
 /** Live thermostat snapshot for a household, or null if not connected / unreachable. */
-export async function fetchThermostatContext(
+export async function fetchThermostatContextWithStatus(
   householdId: string,
   provider: "nest" | "ecobee",
-): Promise<ThermostatSnapshot | null> {
+): Promise<ThermostatContextResult> {
   const { resolveAccessTokenForHousehold, forceRefreshAccessTokenForHousehold } =
     await import("./thermostatOAuth");
   const accessToken = await resolveAccessTokenForHousehold(householdId, provider);
-  if (!accessToken) return null;
+  if (!accessToken) {
+    return {
+      snapshot: null,
+      fetchError: "no_token",
+      fetchHint: "Reconnect your thermostat to restore access.",
+    };
+  }
 
   if (provider === "ecobee") {
-    return fetchEcobeeSnapshot(accessToken);
+    const snapshot = await fetchEcobeeSnapshot(accessToken);
+    return snapshot
+      ? { snapshot }
+      : {
+          snapshot: null,
+          fetchError: "api_error",
+          fetchHint: "Could not reach Ecobee — try again or reconnect.",
+        };
   }
 
   let result = await fetchNestSnapshotDetailed(accessToken);
-  if (result.ok) return result.snapshot;
+  if (result.ok) return { snapshot: result.snapshot };
 
   if (result.status === 401 || result.status === 403) {
     const refreshed = await forceRefreshAccessTokenForHousehold(householdId, "nest");
     if (refreshed) {
       result = await fetchNestSnapshotDetailed(refreshed);
-      if (result.ok) return result.snapshot;
+      if (result.ok) return { snapshot: result.snapshot };
     }
   }
 
-  return null;
+  const { fetchError, fetchHint } = nestFetchFailureMessage(result);
+  return { snapshot: null, fetchError, fetchHint };
+}
+
+export async function fetchThermostatContext(
+  householdId: string,
+  provider: "nest" | "ecobee",
+): Promise<ThermostatSnapshot | null> {
+  const result = await fetchThermostatContextWithStatus(householdId, provider);
+  return result.snapshot;
 }
 
 const HEATING_MODES = new Set(["HEAT", "HEATCOOL", "heat", "auxHeatOnly"]);

@@ -8,6 +8,7 @@ import {
 import { getUserEntitlements } from "../../../../lib/entitlements";
 import { exchangeNestCode } from "../../../../lib/thermostatOAuth";
 import { getRuntimeEnv } from "../../../../lib/runtimeEnv";
+import { fetchNestSnapshotDetailed } from "../../../../lib/thermostatCorrelation";
 import { saveConnection } from "../../../../lib/thermostatConnections";
 import { buildSiteUrl, THERMOSTAT_OAUTH_STATE_COOKIE } from "../../../../lib/siteUrl";
 
@@ -61,6 +62,13 @@ export const GET: APIRoute = async ({ request, url, cookies, redirect }) => {
   });
   if (error) {
     return redirect("/dashboard/temperature?thermostat_error=save_failed");
+  }
+
+  const probe = await fetchNestSnapshotDetailed(tokens.accessToken);
+  if (!probe.ok && probe.errorCode === "sdm_api_disabled") {
+    return redirect(
+      "/dashboard/temperature?thermostat_connected=nest&thermostat_error=sdm_api_disabled",
+    );
   }
 
   return redirect("/dashboard/temperature?thermostat_connected=nest");

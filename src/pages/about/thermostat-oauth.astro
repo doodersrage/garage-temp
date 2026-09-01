@@ -37,7 +37,8 @@ const hero = getAboutPhoto("ethernet-cable");
   <pre class="text-xs mb-4 overflow-x-auto"><code>https://thermaltrace.dev/api/integrations/nest/callback</code></pre>
   <ol class="text-sm space-y-2 pl-5 list-decimal">
     <li>Create a project in the <a class="text-link" href="https://console.nest.google.com/device-access" target="_blank" rel="noreferrer">Device Access Console</a> (one-time fee).</li>
-    <li>Create a Google Cloud OAuth client (Web application).</li>
+    <li>Create a Google Cloud OAuth client (Web application) in the <strong>same</strong> GCP project linked to Device Access.</li>
+    <li>Enable the <a class="text-link" href="https://console.cloud.google.com/apis/library/smartdevicemanagement.googleapis.com" target="_blank" rel="noreferrer">Smart Device Management API</a> in that GCP project (OAuth can succeed without this, but live readings will 403 until it is on).</li>
     <li>Add the redirect URI above (self-hosted: <code>https://YOUR_SITE/api/integrations/nest/callback</code>).</li>
     <li>Set Worker secrets: <code>NEST_CLIENT_ID</code>, <code>NEST_CLIENT_SECRET</code>, <code>NEST_PROJECT_ID</code> (the UUID at the top of your Device Access project — not the Google Cloud project number).</li>
     <li>Add keys to <code>.env</code> and push: <code>pnpm secrets:push</code></li>

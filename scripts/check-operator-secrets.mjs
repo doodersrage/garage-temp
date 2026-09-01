@@ -75,6 +75,14 @@ for (const group of groups) {
   if (missing.length > 0) {
     console.log(`    Missing: ${missing.join(", ")}`);
   }
+  if (group.title === "Nest thermostat OAuth" && isSet("NEST_CLIENT_ID")) {
+    const gcpProject = values.get("NEST_CLIENT_ID")?.split("-")[0];
+    if (gcpProject) {
+      console.log(
+        `    Also enable SDM API: https://console.developers.google.com/apis/api/smartdevicemanagement.googleapis.com/overview?project=${gcpProject}`,
+      );
+    }
+  }
   console.log(`    Docs: ${group.doc}`);
   console.log(`    When ready: pnpm secrets:push`);
   console.log("");

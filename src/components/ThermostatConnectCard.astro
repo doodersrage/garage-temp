@@ -3,7 +3,7 @@ import DashboardCard from "./dashboard/DashboardCard.astro";
 import UpgradeNudge from "./UpgradeNudge.astro";
 import type { PlanTier } from "../lib/entitlements";
 import type { ThermostatProvider } from "../lib/thermostatConnections";
-import type { ThermostatSnapshot } from "../lib/thermostatCorrelation";
+import type { ThermostatSnapshot, ThermostatFetchError } from "../lib/thermostatCorrelation";
 
 interface Props {
   entitled: boolean;
@@ -11,7 +11,12 @@ interface Props {
   canManage: boolean;
   /** Providers with OAuth env vars set on this deployment. */
   availableProviders: ThermostatProvider[];
-  connections: Array<{ provider: ThermostatProvider; snapshot: ThermostatSnapshot | null }>;
+  connections: Array<{
+    provider: ThermostatProvider;
+    snapshot: ThermostatSnapshot | null;
+    fetchError?: ThermostatFetchError;
+    fetchHint?: string;
+  }>;
 }
 
 const { entitled, tier, canManage, availableProviders, connections } = Astro.props;
@@ -79,7 +84,20 @@ const showCard = entitled
           {thermostatError === "exchange_failed" &&
             "Couldn't complete the connection -- try again."}
           {thermostatError === "save_failed" && "Connected, but saving the connection failed -- try again."}
-          {!["state_mismatch", "denied", "not_configured", "exchange_failed", "save_failed"].includes(
+          {thermostatError === "sdm_api_disabled" && (
+            <>
+              Nest connected, but the <strong>Smart Device Management API</strong> is not enabled in
+              your Google Cloud project. Enable it in APIs &amp; Services, wait a minute, then refresh
+              this page.{" "}
+              <a
+                class="text-link"
+                href="https://console.cloud.google.com/apis/library/smartdevicemanagement.googleapis.com"
+                target="_blank"
+                rel="noreferrer"
+              >Enable SDM API</a>
+            </>
+          )}
+          {!["state_mismatch", "denied", "not_configured", "exchange_failed", "save_failed", "sdm_api_disabled"].includes(
             thermostatError,
           ) && "Something went wrong connecting your thermostat."}
         </p>
@@ -88,6 +106,7 @@ const showCard = entitled
         {visibleProviders.map((provider) => {
           const connection = connectionFor(provider);
           const snapshot = connection?.snapshot ?? null;
+          const fetchHint = connection?.fetchHint;
           const canConnect = availableProviders.includes(provider);
           return (
             <div class="flex items-center justify-between gap-4 rounded-lg border border-[var(--color-border)] p-3">
@@ -104,7 +123,7 @@ const showCard = entitled
                     </p>
                   ) : (
                     <p class="mb-0 text-sm text-[var(--color-text-muted)]">
-                      Connected -- couldn't fetch a live reading right now.
+                      {fetchHint ?? "Connected -- couldn't fetch a live reading right now."}
                     </p>
                   )
                 ) : (
