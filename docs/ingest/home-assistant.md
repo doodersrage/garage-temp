@@ -1,8 +1,19 @@
 # Home Assistant integration
 
-ThermalTrace works with Home Assistant without a custom HACS component today. Use **HTTPS push ingest** (recommended), the **MQTT-over-HTTP bridge**, or **inbound webhooks** for automations.
+Use the official **[HACS custom integration](https://github.com/doodersrage/thermatrace-HACS-component)** for automatic entity setup, or wire manually below.
 
-## REST sensor (pull your share link or metrics)
+ThermalTrace works with Home Assistant via **HTTPS push ingest** (recommended), the **MQTT-over-HTTP bridge**, **share-link polling**, or **inbound webhooks** for automations.
+
+## Official HACS integration
+
+1. Add custom repo in HACS: `https://github.com/doodersrage/thermatrace-HACS-component`
+2. Install **ThermalTrace**
+3. Create a **share link** (Pro, readings scope) under Dashboard → Share
+4. Add integration in HA and paste the share token
+
+Creates sensors and binary sensors automatically; optional inbound webhook + push ingest keys enable services.
+
+## REST sensor (manual)
 
 If you publish a [share link](https://thermaltrace.dev/dashboard/share) (Pro), expose readings as a REST sensor:
 
@@ -69,6 +80,7 @@ Pull feeds on ThermalTrace are polled every **15 minutes** (`:00`, `:15`, `:30`,
 
 ## More
 
+- [HACS integration](https://github.com/doodersrage/thermatrace-HACS-component)
 - [Adding devices](https://thermaltrace.dev/about/adding-devices)
 - [HTTP API overview](https://thermaltrace.dev/docs/api)
 - [vs DIY MQTT stack](https://thermaltrace.dev/compare/diy-mqtt)
