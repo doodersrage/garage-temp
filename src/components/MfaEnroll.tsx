@@ -6,6 +6,7 @@ import {
 } from "../lib/webauthnMfaBrowser";
 import {
   MFA_WEBAUTHN_UI_ENABLED,
+  YUBIKEY_OTP_ENROLL_HINT,
   YUBIKEY_TOTP_ENROLL_HINT,
 } from "../lib/mfaWebAuthnUi";
 
@@ -38,6 +39,9 @@ export default function MfaEnroll() {
   const [factorId, setFactorId] = useState<string | null>(null);
   const [factors, setFactors] = useState<FactorRow[]>([]);
   const [webauthnFactors, setWebauthnFactors] = useState<FactorRow[]>([]);
+  const [yubikeyPublicIds, setYubikeyPublicIds] = useState<string[]>([]);
+  const [yubikeyConfigured, setYubikeyConfigured] = useState(false);
+  const [yubikeyOtp, setYubikeyOtp] = useState("");
   const [verifyCode, setVerifyCode] = useState("");
   const [busy, setBusy] = useState(false);
   const webauthnSupported =
@@ -49,6 +53,8 @@ export default function MfaEnroll() {
       factors?: FactorRow[];
       totp?: FactorRow[];
       webauthn?: FactorRow[];
+      yubikeyPublicIds?: string[];
+      yubikeyOtpConfigured?: boolean;
       error?: string;
     };
     if (!res.ok) {
@@ -58,13 +64,18 @@ export default function MfaEnroll() {
     const webauthn = payload.webauthn ?? [];
     setFactors(totp);
     setWebauthnFactors(webauthn);
+    setYubikeyPublicIds(payload.yubikeyPublicIds ?? []);
+    setYubikeyConfigured(payload.yubikeyOtpConfigured === true);
     const verifiedTotp = totp.filter((f) => f.status === "verified").length;
     const pendingTotp = totp.length - verifiedTotp;
-    const verifiedKeys = webauthn.filter((f) => f.status === "verified").length;
-    const pendingKeys = webauthn.length - verifiedKeys;
+    const verifiedWebauthn = webauthn.filter((f) => f.status === "verified").length;
+    const pendingWebauthn = webauthn.length - verifiedWebauthn;
+    const yubiCount = (payload.yubikeyPublicIds ?? []).length;
+    const verifiedKeys = verifiedWebauthn + yubiCount;
+    const pendingKeys = pendingWebauthn;
     const verified = verifiedTotp + verifiedKeys;
     const pending = pendingTotp + pendingKeys;
-    const total = totp.length + webauthn.length;
+    const total = totp.length + webauthn.length + yubiCount;
     if (total === 0) {
       setStatus("No MFA factors enrolled.");
     } else if (verified > 0 && pending === 0) {
@@ -233,6 +244,63 @@ export default function MfaEnroll() {
     }
   }
 
+  async function enrollYubiKey() {
+    if (!yubikeyOtp.trim()) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const res = await mfaFetch({
+        method: "POST",
+        body: JSON.stringify({
+          action: "yubikey_enroll",
+          otp: yubikeyOtp.trim(),
+        }),
+      });
+      const payload = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        publicId?: string;
+        error?: string;
+      };
+      if (!res.ok) throw new Error(payload.error ?? "YubiKey enrollment failed");
+      setYubikeyOtp("");
+      setMessage(
+        "YubiKey enrolled. Sign-in will ask for a YubiKey tap or authenticator code next time.",
+      );
+      trackProductEvent("mfa_enrolled");
+      await refreshFactorList();
+    } catch (err) {
+      setMessage(
+        err instanceof Error ? err.message : "YubiKey enrollment failed",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function unenrollYubiKey(publicId: string) {
+    setBusy(true);
+    setMessage("");
+    try {
+      const res = await mfaFetch({
+        method: "POST",
+        body: JSON.stringify({
+          action: "yubikey_unenroll",
+          publicId,
+          otp: yubikeyOtp.trim() || undefined,
+        }),
+      });
+      const payload = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) throw new Error(payload.error ?? "Could not remove YubiKey");
+      setYubikeyOtp("");
+      setMessage("YubiKey removed.");
+      await refreshFactorList();
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Could not remove YubiKey");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function unenroll(id: string) {
     setBusy(true);
     setMessage("");
@@ -348,6 +416,51 @@ export default function MfaEnroll() {
           </button>
         )}
       </div>
+      {yubikeyConfigured && (
+        <div class="mb-3 pt-3 border-t border-[var(--color-border)]">
+          <p class="text-sm text-[var(--color-text-muted)] mb-3">
+            {YUBIKEY_OTP_ENROLL_HINT}
+          </p>
+          {yubikeyPublicIds.length > 0 && (
+            <ul class="mb-3 space-y-2 text-sm">
+              {yubikeyPublicIds.map((publicId) => (
+                <li class="flex flex-wrap items-center gap-2" key={publicId}>
+                  <span class="font-mono">YubiKey …{publicId.slice(-6)}</span>
+                  <button
+                    type="button"
+                    class="btn-ghost"
+                    disabled={blocked}
+                    onClick={() => void unenrollYubiKey(publicId)}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div class="form-field mb-3">
+            <label class="form-label" for="yubikey-enroll-otp">
+              YubiKey OTP
+            </label>
+            <input
+              class="form-input font-mono text-sm"
+              id="yubikey-enroll-otp"
+              type="text"
+              autoComplete="off"
+              value={yubikeyOtp}
+              onInput={(e) => setYubikeyOtp((e.target as HTMLInputElement).value.trim())}
+            />
+          </div>
+          <button
+            type="button"
+            class="btn-secondary"
+            disabled={blocked || yubikeyOtp.length < 44}
+            onClick={() => void enrollYubiKey()}
+          >
+            Add YubiKey (OTP)
+          </button>
+        </div>
+      )}
       {qrCode && (
         <img src={qrCode} alt="TOTP QR code" width={180} height={180} class="mb-3" />
       )}

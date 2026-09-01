@@ -1,8 +1,13 @@
-/** Re-enable when Supabase Cloud allows MFA WebAuthn enrollment. */
 export const MFA_WEBAUTHN_UI_ENABLED = false;
 
+export const YUBIKEY_OTP_ENROLL_HINT =
+  "Tap your YubiKey in the field below to register its one-time password (OTP slot). Requires YUBICO_CLIENT_ID and YUBICO_API_KEY on the server.";
+
+export const YUBIKEY_OTP_SIGNIN_HINT =
+  "Or tap your YubiKey in the OTP field below (long touch — not Yubico Authenticator codes).";
+
 export const YUBIKEY_TOTP_ENROLL_HINT =
-  "Using a YubiKey? Scan the QR code with Yubico Authenticator and save the account on your key. At sign-in, tap the key to generate a 6-digit code.";
+  "Prefer 6-digit codes? Enroll an authenticator app instead. YubiKey users can also scan the QR in Yubico Authenticator.";
 
 export const YUBIKEY_TOTP_SIGNIN_HINT =
-  "Using a YubiKey with Yubico Authenticator? Tap your key to generate a 6-digit code, then enter it above.";
+  "Using Yubico Authenticator on your YubiKey? Enter the 6-digit code above.";

@@ -1,8 +1,9 @@
-import type { Session, SupabaseClient } from "@supabase/supabase-js";
+import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
 import type { AstroCookies } from "astro";
 import type { Database } from "../types/supabase";
 import { sanitizeNextPath } from "./siteUrl";
 import { createAuthClient } from "./supabase";
+import { userHasYubiKeyOtpEnrolled } from "./yubikeyOtp";
 
 export const MFA_REQUIRED_COOKIE = "sb-mfa-required";
 
@@ -55,6 +56,7 @@ export function needsMfaStepUp(levels: AssuranceLevels | null | undefined): bool
 export async function sessionNeedsMfaStepUp(
   accessToken: string,
   refreshToken: string,
+  user?: User | null,
 ): Promise<boolean> {
   if (getAalClaim(accessToken) === "aal2") return false;
 
@@ -63,10 +65,13 @@ export async function sessionNeedsMfaStepUp(
     access_token: accessToken,
     refresh_token: refreshToken,
   });
-  if (error || !data.session) return false;
+  if (error || !data.session) {
+    return user ? userHasYubiKeyOtpEnrolled(user) : false;
+  }
 
   const levels = await getAssuranceLevels(client);
-  return needsMfaStepUp(levels);
+  if (needsMfaStepUp(levels)) return true;
+  return user ? userHasYubiKeyOtpEnrolled(user) : false;
 }
 
 export function setMfaRequiredCookie(
@@ -116,7 +121,11 @@ export async function applySessionCookiesAfterAuth(
     refresh_token: session.refresh_token,
   });
   const levels = await getAssuranceLevels(client);
-  const stepUp = needsMfaStepUp(levels);
+  const { data: userData } = await client.auth.getUser();
+  const stepUp =
+    needsMfaStepUp(levels) ||
+    (getAalClaim(session.access_token) !== "aal2" &&
+      userHasYubiKeyOtpEnrolled(userData.user));
   setMfaRequiredCookie(cookies, stepUp);
 
   const safeNext = sanitizeNextPath(nextPath ?? undefined) ?? "/dashboard";

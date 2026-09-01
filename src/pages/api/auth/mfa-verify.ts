@@ -3,6 +3,7 @@ import { getAuthFromCookies, setAuthCookies } from "../../../lib/auth";
 import {
   createAuthClient,
   getAssuranceLevels,
+  getAalClaim,
   needsMfaStepUp,
   setMfaRequiredCookie,
 } from "../../../lib/mfa";
@@ -18,6 +19,12 @@ import {
   type WebAuthnCredentialResponse,
 } from "../../../lib/webauthnMfaApi";
 import { resolveWebAuthnRp } from "../../../lib/webauthnRp";
+import {
+  getYubiKeyPublicIdsFromUser,
+  isYubiKeyOtpConfigured,
+  userHasYubiKeyOtpEnrolled,
+  verifyYubiKeyOtpWithYubiCloud,
+} from "../../../lib/yubikeyOtp";
 
 function buildMfaErrorRedirect(code: string, next?: string | null): string {
   const params = new URLSearchParams({ error: code });
@@ -49,6 +56,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   let code = "";
+  let yubikeyOtp = "";
   let next: string | undefined;
   let action = "";
   let factorId = "";
@@ -60,6 +68,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     let body: {
       action?: string;
       code?: string;
+      yubikey_otp?: string;
       next?: string;
       factorId?: string;
       challengeId?: string;
@@ -73,6 +82,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     }
     action = body.action?.trim() ?? "";
     code = body.code?.trim() ?? "";
+    yubikeyOtp = body.yubikey_otp?.trim() ?? "";
     next = body.next;
     factorId = body.factorId?.trim() ?? "";
     challengeId = body.challengeId?.trim() ?? "";
@@ -81,6 +91,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   } else {
     const formData = await request.formData();
     code = formData.get("code")?.toString().trim() ?? "";
+    yubikeyOtp = formData.get("yubikey_otp")?.toString().trim() ?? "";
     next = formData.get("next")?.toString();
   }
 
@@ -97,7 +108,12 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const levels = await getAssuranceLevels(client);
-  if (!needsMfaStepUp(levels)) {
+  const needsSupabaseStepUp = needsMfaStepUp(levels);
+  const needsYubiStepUp =
+    getAalClaim(session.access_token) !== "aal2" &&
+    userHasYubiKeyOtpEnrolled(user);
+
+  if (!needsSupabaseStepUp && !needsYubiStepUp) {
     setMfaRequiredCookie(cookies, false);
     if (asJson) {
       return jsonResponse({
@@ -189,6 +205,44 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     });
   }
 
+  if (yubikeyOtp) {
+    const rateLimit = checkMfaVerifyRateLimit(user.id);
+    if (!rateLimit.ok) {
+      if (asJson) return jsonResponse({ error: "rate_limited" }, 429);
+      return redirect(buildMfaErrorRedirect("rate_limited", safeNext));
+    }
+
+    if (!isYubiKeyOtpConfigured()) {
+      if (asJson) return jsonResponse({ error: "generic" }, 503);
+      return redirect(buildMfaErrorRedirect("generic", safeNext));
+    }
+
+    const enrolled = getYubiKeyPublicIdsFromUser(user);
+    if (enrolled.length === 0) {
+      if (asJson) return jsonResponse({ error: "no_factor" }, 400);
+      return redirect(buildMfaErrorRedirect("no_factor", safeNext));
+    }
+
+    const verified = await verifyYubiKeyOtpWithYubiCloud(yubikeyOtp);
+    if (!verified.ok || !enrolled.includes(verified.publicId)) {
+      recordMfaVerifyFailure(user.id);
+      if (asJson) return jsonResponse({ error: "invalid_code" }, 400);
+      return redirect(buildMfaErrorRedirect("invalid_code", safeNext));
+    }
+
+    clearMfaVerifyFailures(user.id);
+    setMfaRequiredCookie(cookies, false);
+    if (asJson) {
+      return jsonResponse({
+        ok: true,
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+        aal: getAalClaim(session.access_token) ?? "aal1",
+      });
+    }
+    return redirect(safeNext);
+  }
+
   const rateLimit = checkMfaVerifyRateLimit(user.id);
   if (!rateLimit.ok) {
     if (asJson) return jsonResponse({ error: "rate_limited" }, 429);
@@ -199,6 +253,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     recordMfaVerifyFailure(user.id);
     if (asJson) return jsonResponse({ error: "invalid_code" }, 400);
     return redirect(buildMfaErrorRedirect("invalid_code", safeNext));
+  }
+
+  if (!needsSupabaseStepUp) {
+    if (asJson) return jsonResponse({ error: "no_factor" }, 400);
+    return redirect(buildMfaErrorRedirect("no_factor", safeNext));
   }
 
   const { data: factors, error: factorsError } = await client.auth.mfa.listFactors();

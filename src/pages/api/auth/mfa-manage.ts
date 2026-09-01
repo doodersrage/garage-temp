@@ -12,6 +12,13 @@ import {
   type WebAuthnCredentialResponse,
 } from "../../../lib/webauthnMfaApi";
 import { resolveWebAuthnRp } from "../../../lib/webauthnRp";
+import {
+  buildYubiKeyMetadataRemove,
+  buildYubiKeyMetadataUpdate,
+  getYubiKeyPublicIdsFromUser,
+  isYubiKeyOtpConfigured,
+  verifyYubiKeyOtpWithYubiCloud,
+} from "../../../lib/yubikeyOtp";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -54,8 +61,15 @@ export const GET: APIRoute = async ({ cookies }) => {
 
   const totp = (data?.totp ?? []).map(mapFactor);
   const webauthn = (data?.webauthn ?? []).map(mapFactor);
+  const yubikeyPublicIds = getYubiKeyPublicIdsFromUser(auth.user);
 
-  return json({ factors: totp, totp, webauthn });
+  return json({
+    factors: totp,
+    totp,
+    webauthn,
+    yubikeyPublicIds,
+    yubikeyOtpConfigured: isYubiKeyOtpConfigured(),
+  });
 };
 
 type ManageBody = {
@@ -66,6 +80,8 @@ type ManageBody = {
   challengeId?: string;
   ceremonyType?: "create" | "request";
   credentialResponse?: WebAuthnCredentialResponse;
+  otp?: string;
+  publicId?: string;
 };
 
 /**
@@ -218,6 +234,64 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         result.accessToken,
       );
     }
+
+    return json({ ok: true });
+  }
+
+  if (action === "yubikey_enroll") {
+    if (!isYubiKeyOtpConfigured()) {
+      return json({ error: "YubiKey OTP is not configured on this site" }, 503);
+    }
+
+    const otp = body.otp?.trim() ?? "";
+    if (!otp) return json({ error: "Tap your YubiKey in the OTP field" }, 400);
+
+    const verified = await verifyYubiKeyOtpWithYubiCloud(otp);
+    if (!verified.ok) return json({ error: verified.error }, 400);
+
+    const existing = getYubiKeyPublicIdsFromUser(auth.user);
+    if (existing.includes(verified.publicId)) {
+      return json({ error: "This YubiKey is already enrolled" }, 400);
+    }
+    if (existing.length >= 5) {
+      return json({ error: "Maximum of 5 YubiKeys per account" }, 400);
+    }
+
+    const { error: updateError } = await client.auth.updateUser({
+      data: buildYubiKeyMetadataUpdate(existing, verified.publicId),
+    });
+    if (updateError) return json({ error: updateError.message }, 400);
+
+    return json({ ok: true, publicId: verified.publicId });
+  }
+
+  if (action === "yubikey_unenroll") {
+    const publicId = body.publicId?.trim().toLowerCase() ?? "";
+    const otp = body.otp?.trim() ?? "";
+    if (!publicId) return json({ error: "Missing publicId" }, 400);
+
+    const existing = getYubiKeyPublicIdsFromUser(auth.user);
+    if (!existing.includes(publicId)) {
+      return json({ error: "YubiKey not found on this account" }, 400);
+    }
+
+    if (getAalClaim(auth.session.access_token) !== "aal2") {
+      if (!isYubiKeyOtpConfigured()) {
+        return json({ error: "Verify MFA again before removing YubiKeys" }, 401);
+      }
+      if (!otp) {
+        return json({ error: "Tap the YubiKey you are removing to confirm" }, 400);
+      }
+      const verified = await verifyYubiKeyOtpWithYubiCloud(otp);
+      if (!verified.ok || verified.publicId !== publicId) {
+        return json({ error: "YubiKey confirmation failed" }, 400);
+      }
+    }
+
+    const { error: updateError } = await client.auth.updateUser({
+      data: buildYubiKeyMetadataRemove(existing, publicId),
+    });
+    if (updateError) return json({ error: updateError.message }, 400);
 
     return json({ ok: true });
   }

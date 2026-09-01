@@ -17,6 +17,7 @@ if (!session || !user) {
 const needsStepUp = await sessionNeedsMfaStepUp(
   session.access_token,
   session.refresh_token,
+  user,
 );
 
 if (!needsStepUp) {
@@ -43,8 +44,8 @@ const safeNext =
   sanitizeNextPath(Astro.url.searchParams.get("next")) ?? "/dashboard";
 ---
 <Layout
-  title="Authenticator code"
-  description="Enter the 6-digit code from your authenticator app to finish signing in."
+  title="Two-factor authentication"
+  description="Complete sign-in with an authenticator code or YubiKey OTP."
   noindex
 >
   <div class="auth-page">

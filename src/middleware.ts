@@ -74,6 +74,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
           needsMfa = await sessionNeedsMfaStepUp(
             session.access_token,
             session.refresh_token,
+            user,
           );
           setMfaRequiredCookie(context.cookies, needsMfa);
         }
