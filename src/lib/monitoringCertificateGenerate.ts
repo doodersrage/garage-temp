@@ -5,8 +5,12 @@ import { getAlertSettingsForUser } from "./notify";
 import { getUserHouseholdId } from "./households";
 import { listHouseholdDevices } from "./devices";
 import { createServerClient } from "./supabase";
+import { getUserEntitlements } from "./entitlements";
 import {
   buildMonitoringCertificateHtml,
+  formatCertificateDate,
+  formatPlanLabel,
+  resolveMonitoringRetentionLabel,
   type MonitoringCertificateData,
 } from "./monitoringCertificate";
 import type { ClaimsDeviceSummary } from "./claimsPack";
@@ -68,10 +72,11 @@ export async function generateMonitoringCertificateForUser(
     };
   }
 
-  const [alertSettings, devicesResult, householdRow] = await Promise.all([
+  const [alertSettings, devicesResult, householdRow, entitlements] = await Promise.all([
     getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
     listHouseholdDevices(householdId),
     createServerClient().from("households").select("name").eq("id", householdId).maybeSingle(),
+    getUserEntitlements(user.id),
   ]);
 
   const devices: ClaimsDeviceSummary[] = devicesResult.devices.map((d) => ({
@@ -90,15 +95,22 @@ export async function generateMonitoringCertificateForUser(
 
   const data: MonitoringCertificateData = {
     exportedAt,
+    exportedAtLabel: formatCertificateDate(exportedAt),
     householdLabel,
     accountEmail: user.email ?? null,
+    planLabel: formatPlanLabel(entitlements.tier),
     freezeThresholdF: alertSettings.freezeThresholdF,
     devices,
+    deviceCount: devices.length,
+    sensorCount: devices.reduce((sum, d) => sum + d.sensors.length, 0),
     alertChannels: listConfiguredAlertChannels(alertSettings),
     alertsEnabled: alertSettings.enabled,
     nwsEnabled: alertSettings.nwsFreezeAlertsEnabled,
     forecastEnabled: alertSettings.forecastFreezeEnabled,
-    dataRetentionDays: alertSettings.dataRetentionDays,
+    dataRetentionLabel: resolveMonitoringRetentionLabel(
+      alertSettings.dataRetentionDays,
+      entitlements.historyDays,
+    ),
     siteUrl,
   };
 
