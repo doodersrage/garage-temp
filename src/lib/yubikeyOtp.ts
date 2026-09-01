@@ -16,11 +16,11 @@ export {
 };
 
 export const YUBICO_VERIFY_ENDPOINTS = [
-  "https://api.yubico.com/ws/4/verify",
-  "https://api2.yubico.com/ws/4/verify",
-  "https://api3.yubico.com/ws/4/verify",
-  "https://api4.yubico.com/ws/4/verify",
-  "https://api5.yubico.com/ws/4/verify",
+  "https://api.yubico.com/wsapi/2.0/verify",
+  "https://api2.yubico.com/wsapi/2.0/verify",
+  "https://api3.yubico.com/wsapi/2.0/verify",
+  "https://api4.yubico.com/wsapi/2.0/verify",
+  "https://api5.yubico.com/wsapi/2.0/verify",
 ] as const;
 
 const MODHEX_CHAR = "[cbdefghijklnrtuv]";
@@ -92,9 +92,13 @@ function base64Encode(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
+function normalizeBase64(value: string): string {
+  return value.replace(/\s/g, "");
+}
+
 function parseYubiCloudBody(body: string): Map<string, string> {
   const map = new Map<string, string>();
-  for (const line of body.split("\n")) {
+  for (const line of body.split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed) continue;
     const eq = trimmed.indexOf("=");
@@ -137,7 +141,23 @@ async function verifyResponseSignature(
   const key = decodeApiKey(apiKeyBase64);
   const expected = await hmacSha1(key, buildSignString(params));
   const expectedB64 = base64Encode(expected);
-  return expectedB64 === signature;
+  return normalizeBase64(expectedB64) === normalizeBase64(signature);
+}
+
+/** @internal Test helper for YubiCloud HMAC request signing. */
+export async function signYubiCloudRequest(
+  params: Record<string, string>,
+  apiKeyBase64: string,
+): Promise<string> {
+  return signRequest(params, apiKeyBase64);
+}
+
+/** @internal Test helper for YubiCloud response signature verification. */
+export async function verifyYubiCloudResponseSignature(
+  body: string,
+  apiKeyBase64: string,
+): Promise<boolean> {
+  return verifyResponseSignature(parseYubiCloudBody(body), apiKeyBase64);
 }
 
 export async function verifyYubiKeyOtpWithYubiCloud(
