@@ -149,6 +149,17 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     anchor: "webhooks",
   },
   {
+    id: "hacs_integration",
+    category: "Integrations",
+    label: "Home Assistant (HACS)",
+    free: "—",
+    member: "—",
+    pro: "Share link + services",
+    portfolio: "Share link + services",
+    anchor: "share-links",
+    emphasis: true,
+  },
+  {
     id: "history_charts",
     category: "History",
     label: "Charts, YoY overlay, anomaly hints",

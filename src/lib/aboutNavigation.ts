@@ -61,6 +61,7 @@ export const aboutMegaGroups: AboutMegaGroup[] = [
       "accounts-and-dashboard",
       "adding-devices",
       "ingest-and-webhooks",
+      "thermostat-oauth",
       "install-pwa",
     ],
   },

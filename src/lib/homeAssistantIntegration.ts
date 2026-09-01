@@ -5,6 +5,8 @@ export const HACS_REPO_URL =
 
 export const HA_INTEGRATION_PAGE = "/integrations/home-assistant";
 
+export const INTEGRATIONS_HUB_PAGE = "/integrations";
+
 export const HA_DEV_DOCS_INGEST =
   "https://doodersrage.github.io/thermaltrace/ingest/home-assistant";
 

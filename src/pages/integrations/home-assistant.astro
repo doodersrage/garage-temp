@@ -16,7 +16,9 @@ import {
   HA_BLUEPRINT_URL,
   HA_DEV_DOCS_INGEST,
   HA_ENTITIES_YAML,
+  INTEGRATIONS_HUB_PAGE,
 } from "../../lib/homeAssistantIntegration";
+import { HACS_BADGE_URL } from "../../lib/integrationsHub";
 import { getAuthFromCookies } from "../../lib/auth";
 
 const { user } = await getAuthFromCookies(Astro.cookies);
@@ -49,8 +51,26 @@ const schema = [
       <a slot="actions" class="btn-secondary" href={user ? "/dashboard/share" : "/register?next=/dashboard/share"}>
         {user ? "Create a share link" : "Start free → share link"}
       </a>
+      <a slot="actions" class="btn-ghost" href={INTEGRATIONS_HUB_PAGE}>All integrations</a>
       <a slot="actions" class="btn-ghost" href="/compare/diy-mqtt">vs DIY MQTT</a>
     </PageHeader>
+
+    <section class="card">
+      <div class="flex flex-wrap items-center gap-4 mb-0">
+        <a href={HACS_REPO_URL} target="_blank" rel="noreferrer">
+          <img src={HACS_BADGE_URL} alt="HACS Custom" width="120" height="28" loading="lazy" />
+        </a>
+        <p class="text-sm text-[var(--color-text-muted)] mb-0">
+          Install as a HACS custom repository today — default store listing submitted separately.
+          <a
+            class="text-link"
+            href="https://github.com/doodersrage/thermaltrace/blob/main/docs/community/home-assistant-forum-post.md"
+            target="_blank"
+            rel="noreferrer"
+          >Community post draft</a>
+        </p>
+      </div>
+    </section>
 
     <section class="card">
       <h2 class="card-title">Install via HACS</h2>

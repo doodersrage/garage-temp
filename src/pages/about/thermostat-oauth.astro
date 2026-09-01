@@ -1,0 +1,61 @@
+---
+
+import AboutArticle from "../../components/AboutArticle.astro";
+import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutPhoto } from "../../lib/aboutPhotos";
+
+const page = getAboutPage("thermostat-oauth")!;
+const hero = getAboutPhoto("ethernet-cable");
+---
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={hero.image}
+  heroAlt={hero.alt}
+  heroCaption={hero.caption}
+  heroCredit={hero.credit}
+  heroCreditHref={hero.sourceUrl}
+>
+  <p>
+    Pro households can connect a <strong>Nest</strong> or <strong>Ecobee</strong> thermostat so indoor
+    temperature and setpoint appear next to garage and crawlspace probes on the dashboard, and freeze
+    alerts can include that context. End users connect from <strong>Dashboard → Temperature</strong>;
+    this page is for the site operator enabling OAuth on a self-hosted or production deployment.
+  </p>
+
+  <h2>When the connect button appears</h2>
+  <p>
+    The thermostat card is hidden until the deployment has the provider's client credentials in Worker
+    secrets. After secrets are pushed, Pro managers see <strong>Connect</strong> for each configured provider.
+  </p>
+
+  <h2>Nest (Google Device Access)</h2>
+  <ol class="text-sm space-y-2 pl-5 list-decimal">
+    <li>Create a project in the <a class="text-link" href="https://console.nest.google.com/device-access" target="_blank" rel="noreferrer">Device Access Console</a> (one-time fee).</li>
+    <li>Create a Google Cloud OAuth client (Web application).</li>
+    <li>Add authorized redirect URI: <code>https://YOUR_SITE/api/integrations/nest/callback</code></li>
+    <li>Set Worker secrets: <code>NEST_CLIENT_ID</code>, <code>NEST_CLIENT_SECRET</code>, <code>NEST_PROJECT_ID</code> (Device Access project id).</li>
+    <li>Push secrets: <code>pnpm secrets:push</code> from a <code>.env</code> that includes those keys.</li>
+  </ol>
+
+  <h2>Ecobee</h2>
+  <ol class="text-sm space-y-2 pl-5 list-decimal">
+    <li>Register at the <a class="text-link" href="https://www.ecobee.com/en-us/developer/" target="_blank" rel="noreferrer">Ecobee developer portal</a>.</li>
+    <li>Create an app with redirect URI: <code>https://YOUR_SITE/api/integrations/ecobee/callback</code></li>
+    <li>Set Worker secret: <code>ECOBEE_CLIENT_ID</code> (Ecobee does not use a client secret).</li>
+    <li>Push secrets via <code>pnpm secrets:push</code>.</li>
+  </ol>
+
+  <h2>User experience</h2>
+  <p>
+    Each household stores its own refresh token after OAuth — there is no shared global thermostat token.
+    Managers can disconnect from the dashboard; tokens are revoked in the database on disconnect.
+  </p>
+
+  <p class="mb-0">
+    See also: <a class="text-link" href="/integrations">Integrations hub</a>,
+    <a class="text-link" href="/compare/nest">ThermalTrace vs Nest</a>,
+    <a class="text-link" href="/compare/ecobee">vs Ecobee</a>.
+  </p>
+</AboutArticle>

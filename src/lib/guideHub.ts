@@ -69,6 +69,11 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
     description: "Home Assistant HACS, MQTT bridge, webhooks, and comparison guides.",
     links: [
       {
+        href: "/integrations",
+        label: "Integrations hub",
+        summary: "Home Assistant HACS, MQTT bridge, Grafana, webhooks, Nest/Ecobee, and Zapier.",
+      },
+      {
         href: "/integrations/home-assistant",
         label: "Home Assistant (HACS)",
         summary: "Official custom integration — share-link sensors, snooze/vacation services, optional push ingest.",

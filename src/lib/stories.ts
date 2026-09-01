@@ -101,7 +101,7 @@ export const stories: Story[] = [
     setup: [
       "Existing ESP32 already on ThermalTrace for the garage; second probe in the closet",
       "High-temp threshold 95°F plus freeze watch on the garage side",
-      "Pro webhook into Home Assistant to cut a smart plug if temps stayed high",
+      "Pro webhook into Home Assistant to cut a smart plug if temps stayed high (today: use the HACS integration or outbound webhook blueprint)",
     ],
     timeline: [
       { time: "Fri 6:05 p.m.", detail: "Closet hit 96°F after a fan failed; webhook tripped HA automation." },
@@ -119,7 +119,7 @@ export const stories: Story[] = [
       {
         question: "How did Home Assistant fit?",
         answer:
-          "Pro webhooks POST reading JSON on ingest. An automation switched a smart plug when closet temp stayed elevated.",
+          "Pro outbound webhooks POST alert JSON into Home Assistant. An automation switched a smart plug when closet temp stayed elevated. Today you can also use the official HACS integration for share-link sensors and snooze services — see thermaltrace.dev/integrations/home-assistant.",
       },
     ],
   },

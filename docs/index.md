@@ -29,8 +29,12 @@ features:
     linkText: Browse sketches
   - title: Home Assistant (HACS)
     details: Official custom integration — share-link sensors, snooze/vacation services, MQTT bridge recipes.
-    link: /integrations/home-assistant
+    link: https://thermaltrace.dev/integrations/home-assistant
     linkText: HACS integration
+  - title: Integrations hub
+    details: Home Assistant, MQTT bridge, Grafana, webhooks, Nest/Ecobee, and Zapier — all entry points on the product site.
+    link: https://thermaltrace.dev/integrations
+    linkText: All integrations
   - title: Alert webhooks
     details: Pro outbound webhooks with optional HMAC, plus Home Assistant blueprint and Zapier/Make hooks.
     link: /integrations/webhooks

@@ -114,6 +114,14 @@ export const coreAboutPages: AboutPage[] = [
       "Device API keys, typed sensor payloads, outbound HMAC webhooks, and Pro alert channels.",
   },
   {
+    slug: "thermostat-oauth",
+    title: "Nest & Ecobee thermostat OAuth (operators)",
+    description:
+      "Enable Nest and Ecobee OAuth on your ThermalTrace deployment so Pro households can connect thermostats for indoor context on freeze alerts.",
+    summary:
+      "Device Access Console, Ecobee developer app, redirect URIs, and Worker secrets for NEST_* and ECOBEE_CLIENT_ID.",
+  },
+  {
     slug: "adding-devices",
     title: "Adding push and pull devices",
     description:

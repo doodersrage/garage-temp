@@ -27,6 +27,7 @@ const STATIC_PUBLIC_PATHS = [
   "/system-status",
   "/docs/api",
   "/android",
+  "/integrations",
   "/integrations/home-assistant",
   "/stories",
   "/stories/garage-freeze-alert",
