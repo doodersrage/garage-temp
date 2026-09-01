@@ -3,7 +3,7 @@ import type { AstroCookies } from "astro";
 import type { Database } from "../types/supabase";
 import { sanitizeNextPath } from "./siteUrl";
 import { createAuthClient } from "./supabase";
-import { userHasYubiKeyOtpEnrolled } from "./yubikeyOtp";
+import { userHasYubiKeyOtpEnrolled } from "./yubikeyOtpMetadata";
 
 export const MFA_REQUIRED_COOKIE = "sb-mfa-required";
 
