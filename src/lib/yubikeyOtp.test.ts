@@ -10,6 +10,7 @@ import {
   userHasYubiKeyOtpEnrolled,
   verifyYubiCloudResponseSignature,
 } from "./yubikeyOtp";
+import { yubicoDocTestVectors } from "./yubikeyOtpTestVectors";
 
 describe("yubikeyOtp helpers", () => {
   const sampleOtp = "cccccccccccccccccccccccccccccccccccccccccccc";
@@ -63,26 +64,22 @@ describe("yubikeyOtp helpers", () => {
   });
 
   it("signs YubiCloud requests with the official test vector", async () => {
+    const vectors = yubicoDocTestVectors;
     const signature = await signYubiCloudRequest(
       {
-        id: "15618",
-        nonce: "0102030405060708090a0b0c0d0e0f",
-        otp: "ccccccbteuddjivcnlfefefrccdcjrfjfvgjnfkcklge",
+        id: vectors.clientId,
+        nonce: vectors.nonce,
+        otp: vectors.otp,
       },
-      "Eibja2kRFXXoW6hjZaiyBtWnCBA=",
+      vectors.apiKeyBase64(),
     );
-    expect(signature).toBe("Jt19GpDOAraTYRFBHSofYZFEwjE=");
+    expect(signature).toBe(vectors.requestSignatureBase64());
   });
 
   it("verifies CRLF YubiCloud response bodies", async () => {
-    const apiKey = "Eibja2kRFXXoW6hjZaiyBtWnCBA=";
-    const params = {
-      nonce: "0102030405060708090a0b0c0d0e0f",
-      otp: "ccccccbteuddjivcnlfefefrccdcjrfjfvgjnfkcklge",
-      sl: "100",
-      status: "OK",
-      t: "2020-01-06T02:52:13Z0998",
-    };
+    const vectors = yubicoDocTestVectors;
+    const apiKey = vectors.apiKeyBase64();
+    const params = vectors.responseParams;
     const signature = await signYubiCloudRequest(params, apiKey);
     const body = [
       `h=${signature}`,
