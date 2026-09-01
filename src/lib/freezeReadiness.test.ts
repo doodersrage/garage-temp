@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeFreezeReadiness } from "./freezeReadiness";
+import { computeFreezeReadiness, hasConfiguredAlertChannel } from "./freezeReadiness";
 import { DEFAULT_ALERT_SETTINGS } from "./alerts";
 
 describe("computeFreezeReadiness", () => {
@@ -15,6 +15,17 @@ describe("computeFreezeReadiness", () => {
     });
     expect(result.score).toBeLessThan(50);
     expect(result.ready).toBe(false);
+  });
+
+  it("detects configured alert channels", () => {
+    expect(
+      hasConfiguredAlertChannel({
+        ...DEFAULT_ALERT_SETTINGS,
+        channelEmail: true,
+        email: "a@example.com",
+      }),
+    ).toBe(true);
+    expect(hasConfiguredAlertChannel(DEFAULT_ALERT_SETTINGS)).toBe(false);
   });
 
   it("scores high when core checks pass", () => {

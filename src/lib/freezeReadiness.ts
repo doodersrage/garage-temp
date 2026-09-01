@@ -17,6 +17,24 @@ export type FreezeReadinessResult = {
   ready: boolean;
 };
 
+export function hasConfiguredAlertChannel(alertSettings: AlertSettings): boolean {
+  return (
+    (alertSettings.channelEmail && Boolean(alertSettings.email?.trim())) ||
+    (alertSettings.channelSms && Boolean(alertSettings.smsPhone?.trim())) ||
+    (alertSettings.channelDiscord && Boolean(alertSettings.discordWebhookUrl?.trim())) ||
+    alertSettings.channelPush ||
+    (alertSettings.channelWebhook && Boolean(alertSettings.outboundWebhookUrl?.trim())) ||
+    (alertSettings.channelTelegram &&
+      Boolean(alertSettings.telegramBotToken?.trim() && alertSettings.telegramChatId?.trim())) ||
+    (alertSettings.channelSlack && Boolean(alertSettings.slackWebhookUrl?.trim())) ||
+    (alertSettings.channelTeams && Boolean(alertSettings.teamsWebhookUrl?.trim())) ||
+    (alertSettings.channelNtfy && Boolean(alertSettings.ntfyTopic?.trim())) ||
+    (alertSettings.channelPushover &&
+      Boolean(alertSettings.pushoverUserKey?.trim() && alertSettings.pushoverAppToken?.trim())) ||
+    (alertSettings.channelWhatsapp && Boolean(alertSettings.whatsappPhone?.trim()))
+  );
+}
+
 export function computeFreezeReadiness(input: {
   alertSettings: AlertSettings;
   devices: DeviceWithSensors[];
@@ -39,21 +57,7 @@ export function computeFreezeReadiness(input: {
   const stale: StaleSensorSummary = summarizeStaleSensors(latest, devices);
   const lowBattery = listLowBatteryDevices(devices, alertSettings.batteryThresholdPct);
 
-  const channelOk =
-    alertSettings.enabled &&
-    ((alertSettings.channelEmail && Boolean(alertSettings.email?.trim())) ||
-      (alertSettings.channelSms && Boolean(alertSettings.smsPhone?.trim())) ||
-      (alertSettings.channelDiscord && Boolean(alertSettings.discordWebhookUrl?.trim())) ||
-      (alertSettings.channelPush) ||
-      (alertSettings.channelWebhook && Boolean(alertSettings.outboundWebhookUrl?.trim())) ||
-      (alertSettings.channelTelegram &&
-        Boolean(alertSettings.telegramBotToken?.trim() && alertSettings.telegramChatId?.trim())) ||
-      (alertSettings.channelSlack && Boolean(alertSettings.slackWebhookUrl?.trim())) ||
-      (alertSettings.channelTeams && Boolean(alertSettings.teamsWebhookUrl?.trim())) ||
-      (alertSettings.channelNtfy && Boolean(alertSettings.ntfyTopic?.trim())) ||
-      (alertSettings.channelPushover &&
-        Boolean(alertSettings.pushoverUserKey?.trim() && alertSettings.pushoverAppToken?.trim())) ||
-      (alertSettings.channelWhatsapp && Boolean(alertSettings.whatsappPhone?.trim())));
+  const channelOk = alertSettings.enabled && hasConfiguredAlertChannel(alertSettings);
 
   const checks: ReadinessCheck[] = [
     {

@@ -62,7 +62,13 @@ import UnackedAlertsBanner from "../components/UnackedAlertsBanner.astro";
 import ColdSnapChecklistCard from "../components/ColdSnapChecklistCard.astro";
 import FreezeReadinessCard from "../components/dashboard/FreezeReadinessCard.astro";
 import { shouldShowColdSnapChecklist } from "../lib/coldSnapChecklist";
-import { computeFreezeReadiness } from "../lib/freezeReadiness";
+import { computeFreezeReadiness, hasConfiguredAlertChannel } from "../lib/freezeReadiness";
+import { getHouseholdFreezeMapSettings } from "../lib/freezeMap";
+import { fetchRegionalBenchmark } from "../lib/regionalBenchmark";
+import TestAlertNudge from "../components/dashboard/TestAlertNudge.astro";
+import FreezeMapOptInNudge from "../components/dashboard/FreezeMapOptInNudge.astro";
+import RegionalBenchmarkCard from "../components/dashboard/RegionalBenchmarkCard.astro";
+import ClaimsPackPromptCard from "../components/dashboard/ClaimsPackPromptCard.astro";
 import { countUnacknowledgedAlerts } from "../lib/alertEvents";
 import LowBatteryBanner from "../components/dashboard/LowBatteryBanner.astro";
 import DashboardMultiPropertyNudge from "../components/dashboard/DashboardMultiPropertyNudge.astro";
@@ -261,6 +267,25 @@ const freezeReadiness = computeFreezeReadiness({
   hasSentAnyAlert: Boolean(lastAlertAt),
 });
 
+const freezeMapSettings = household.householdId
+  ? await getHouseholdFreezeMapSettings(household.householdId)
+  : { optIn: false, cityId: null, lat: null, lon: null, label: null };
+
+const coldestProbeTempF = (() => {
+  const temps = latest
+    .filter((row) => row.sensor.kind === "temperature" && row.value_num != null)
+    .map((row) => row.value_num as number);
+  return temps.length > 0 ? Math.min(...temps) : null;
+})();
+
+const regionalBenchmark =
+  household.householdId && freezeMapSettings.optIn && coldestProbeTempF != null
+    ? await fetchRegionalBenchmark({
+        householdId: household.householdId,
+        yourTempF: coldestProbeTempF,
+      })
+    : null;
+
 const canEdit = canEditHousehold(householdRole);
 
 const exportToDate = new Date();
@@ -307,6 +332,19 @@ const showYoureLive =
 const showSecondaryNudges = onboardingDismissed || essentialDone;
 const showAlertSetupNudge =
   showSecondaryNudges && canEdit && (!hasAlertsEnabled || !hasEmailAlerts);
+const showTestAlertNudge =
+  showSecondaryNudges &&
+  canEdit &&
+  hasAlertsEnabled &&
+  hasConfiguredAlertChannel(alertSettings) &&
+  !hasTestAlert;
+const showFreezeMapOptInNudge =
+  showSecondaryNudges &&
+  canEdit &&
+  latest.length > 0 &&
+  Boolean(household.householdId) &&
+  !freezeMapSettings.optIn;
+const showClaimsPackPrompt = showInsights && canEdit && hasHistory;
 const showStoryCard = showSecondaryNudges && canEdit && !showAlertSetupNudge;
 
 const analyticsEvents: Array<{
@@ -326,14 +364,16 @@ const showInsights = overviewMode === "insights";
 type OverviewBanner = { id: string; priority: number; show: boolean };
 const overviewBannerQueue: OverviewBanner[] = [
   { id: "lowBattery", priority: 2, show: Boolean(lowBatteryMessage) },
-  { id: "stale", priority: 3, show: staleSensorCount > 0 },
-  { id: "alertSetup", priority: 4, show: showAlertSetupNudge },
-  { id: "youreLive", priority: 5, show: showYoureLive },
-  { id: "story", priority: 6, show: showStoryCard },
-  { id: "multiProperty", priority: 7, show: showMultiPropertyNudge },
-  { id: "coldSnap", priority: 8, show: showColdSnapChecklist },
-  { id: "freezeReadiness", priority: 9, show: true },
-  { id: "upgrade", priority: 10, show: upgradeTarget === "member" || upgradeTarget === "pro" },
+  { id: "testAlert", priority: 3, show: showTestAlertNudge },
+  { id: "stale", priority: 4, show: staleSensorCount > 0 },
+  { id: "alertSetup", priority: 5, show: showAlertSetupNudge },
+  { id: "freezeMap", priority: 6, show: showFreezeMapOptInNudge },
+  { id: "youreLive", priority: 7, show: showYoureLive },
+  { id: "story", priority: 8, show: showStoryCard },
+  { id: "multiProperty", priority: 9, show: showMultiPropertyNudge },
+  { id: "coldSnap", priority: 10, show: showColdSnapChecklist },
+  { id: "freezeReadiness", priority: 11, show: true },
+  { id: "upgrade", priority: 12, show: upgradeTarget === "member" || upgradeTarget === "pro" },
 ];
 const activeOverviewBanners = overviewBannerQueue
   .filter((banner) => banner.show)
@@ -398,6 +438,17 @@ const hasSecondaryBanners = secondaryBannerIds.size > 0;
       show={primaryBannerIds.has("alertSetup")}
     />
 
+    <TestAlertNudge
+      canEdit={canEdit}
+      show={primaryBannerIds.has("testAlert")}
+    />
+
+    <FreezeMapOptInNudge
+      canEdit={canEdit}
+      show={primaryBannerIds.has("freezeMap")}
+      cityLabel={freezeMapSettings.label}
+    />
+
     <DashboardStoryCard show={primaryBannerIds.has("story")} />
 
     <HouseholdSwitcher
@@ -440,6 +491,15 @@ const hasSecondaryBanners = secondaryBannerIds.size > 0;
             hasEmailAlerts={hasEmailAlerts}
             canEdit={canEdit}
             show={secondaryBannerIds.has("alertSetup")}
+          />
+          <TestAlertNudge
+            canEdit={canEdit}
+            show={secondaryBannerIds.has("testAlert")}
+          />
+          <FreezeMapOptInNudge
+            canEdit={canEdit}
+            show={secondaryBannerIds.has("freezeMap")}
+            cityLabel={freezeMapSettings.label}
           />
           <DashboardStoryCard show={secondaryBannerIds.has("story")} />
           <DashboardMultiPropertyNudge show={secondaryBannerIds.has("multiProperty")} />
@@ -581,9 +641,17 @@ const hasSecondaryBanners = secondaryBannerIds.size > 0;
               useCelsius={useCelsius}
             />
             <WeekCompareCard compare={weekCompareResult.compare} useCelsius={useCelsius} />
+            {regionalBenchmark && (
+              <RegionalBenchmarkCard benchmark={regionalBenchmark} />
+            )}
             <HeatingInsightsCard insights={heatingInsights} />
             <DoorDurationCard devices={devices} />
             <DoorEventHistory householdId={household.householdId} />
+            <ClaimsPackPromptCard
+              canUseClaimsPack={entitlements.canUseClaimsPack}
+              tier={entitlements.tier}
+              show={showClaimsPackPrompt}
+            />
           </aside>
         )}
       </div>

@@ -55,6 +55,7 @@ interface ImportMetaEnv {
   readonly ECOBEE_ACCESS_TOKEN?: string;
   readonly YUBICO_CLIENT_ID?: string;
   readonly YUBICO_API_KEY?: string;
+  readonly PUBLIC_PLAY_STORE_URL?: string;
   readonly PROD: boolean;
 }
 

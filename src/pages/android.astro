@@ -29,21 +29,27 @@ const schema = [
     operatingSystem: "Android",
     applicationCategory: "UtilitiesApplication",
     url: pageUrl,
-    downloadUrl: "https://github.com/doodersrage/thermaltrace-android",
+    downloadUrl: playStoreLive ? playStoreUrl : ANDROID_REPO,
     offers: {
       "@type": "Offer",
       price: "0",
       priceCurrency: "USD",
-      availability: "https://schema.org/PreOrder",
-      url: pageUrl,
+      availability: playStoreLive
+        ? "https://schema.org/InStock"
+        : "https://schema.org/PreOrder",
+      url: playStoreLive ? playStoreUrl : pageUrl,
     },
   },
   getMarketingFaqSchema(pageUrl, "android"),
 ].filter(Boolean) as Record<string, unknown>[];
 
 const ANDROID_REPO = "https://github.com/doodersrage/thermaltrace-android";
+const playStoreUrl = String(import.meta.env.PUBLIC_PLAY_STORE_URL ?? "").trim();
+const playStoreLive = playStoreUrl.startsWith("https://play.google.com/");
 
-const description = `${BRAND_NAME} Android companion — early access via GitHub while Google Play review finishes. Live probes, freeze alerts, MFA, and household tools for your existing account. Phone is not a sensor.`;
+const description = playStoreLive
+  ? `${BRAND_NAME} Android companion on Google Play — live probes, freeze alerts, MFA, and household tools for your existing account. Phone is not a sensor.`
+  : `${BRAND_NAME} Android companion — early access via GitHub while Google Play review finishes. Live probes, freeze alerts, MFA, and household tools for your existing account. Phone is not a sensor.`;
 ---
 <Layout
   title="Android app"
@@ -54,15 +60,27 @@ const description = `${BRAND_NAME} Android companion — early access via GitHub
 >
   <div class="page-shell page-stack">
     <PageHeader
-      kicker="Early access · Google Play in review"
+      kicker={playStoreLive ? "Google Play" : "Early access · Google Play in review"}
       title="ThermalTrace for Android"
-      lede="Native companion for your ThermalTrace account—live readings, history, alerts, devices, MFA, and household tools. Build from source or sideload while the Play listing is pending."
+      lede={playStoreLive
+        ? "Native companion on Google Play — live readings, history, alerts, devices, MFA, and household tools for your ThermalTrace account."
+        : "Native companion for your ThermalTrace account—live readings, history, alerts, devices, MFA, and household tools. Build from source or sideload while the Play listing is pending."}
     >
-      <a slot="actions" class="btn-primary" href={ANDROID_REPO} target="_blank" rel="noreferrer">
-        GitHub · build or sideload
+      {playStoreLive ? (
+        <a slot="actions" class="btn-primary" href={playStoreUrl} target="_blank" rel="noreferrer">
+          Get it on Google Play
+        </a>
+      ) : (
+        <a slot="actions" class="btn-primary" href={ANDROID_REPO} target="_blank" rel="noreferrer">
+          GitHub · build or sideload
+        </a>
+      )}
+      {!playStoreLive && (
+        <a slot="actions" class="btn-secondary" href="/about/install-pwa">Install the PWA today</a>
+      )}
+      <a slot="actions" class="btn-ghost" href={playStoreLive ? ANDROID_REPO : "/contact?topic=android"}>
+        {playStoreLive ? "Source on GitHub" : "Request Play launch note"}
       </a>
-      <a slot="actions" class="btn-secondary" href="/about/install-pwa">Install the PWA today</a>
-      <a slot="actions" class="btn-ghost" href="/contact?topic=android">Request Play launch note</a>
     </PageHeader>
 
     <figure class="card overflow-hidden p-0 mb-0">
@@ -93,30 +111,44 @@ const description = `${BRAND_NAME} Android companion — early access via GitHub
       </ul>
     </section>
 
-    <section class="card">
-      <h2 class="card-title">Early access (GitHub)</h2>
-      <p class="card-subtitle mb-4">
-        The open-source app at
-        <a class="text-link" href={ANDROID_REPO} target="_blank" rel="noreferrer">thermaltrace-android</a>
-        matches production: sign-in (including MFA / YubiKey OTP), home readings, alerts, devices, history, and portfolio view.
-        Clone the repo, open in Android Studio, and run on your phone—or download a CI-built debug APK from GitHub Actions artifacts.
-      </p>
-      <ol class="text-sm space-y-2 pl-5 list-decimal mb-0">
-        <li>
-          <a class="text-link" href="/register?next=/dashboard/temperature">Create a free ThermalTrace account</a>
-          and connect at least one probe.
-        </li>
-        <li>
-          Build or sideload the Android app and sign in with the same credentials.
-        </li>
-        <li>
-          Enable Pro push alerts in
-          <a class="text-link" href="/dashboard/alerts">Alert settings</a>
-          for Firebase freeze notifications on the phone.
-        </li>
-      </ol>
-    </section>
+    {playStoreLive ? (
+      <section class="card">
+        <h2 class="card-title">Google Play</h2>
+        <p class="card-subtitle mb-4">
+          Install from the Play Store with the same ThermalTrace account you use on the web.
+          Pro push alerts use Firebase Cloud Messaging on Android.
+        </p>
+        <a class="btn-primary" href={playStoreUrl} target="_blank" rel="noreferrer">
+          Open in Google Play
+        </a>
+      </section>
+    ) : (
+      <section class="card">
+        <h2 class="card-title">Early access (GitHub)</h2>
+        <p class="card-subtitle mb-4">
+          The open-source app at
+          <a class="text-link" href={ANDROID_REPO} target="_blank" rel="noreferrer">thermaltrace-android</a>
+          matches production: sign-in (including MFA / YubiKey OTP), home readings, alerts, devices, history, and portfolio view.
+          Clone the repo, open in Android Studio, and run on your phone—or download a CI-built debug APK from GitHub Actions artifacts.
+        </p>
+        <ol class="text-sm space-y-2 pl-5 list-decimal mb-0">
+          <li>
+            <a class="text-link" href="/register?next=/dashboard/temperature">Create a free ThermalTrace account</a>
+            and connect at least one probe.
+          </li>
+          <li>
+            Build or sideload the Android app and sign in with the same credentials.
+          </li>
+          <li>
+            Enable Pro push alerts in
+            <a class="text-link" href="/dashboard/alerts">Alert settings</a>
+            for Firebase freeze notifications on the phone.
+          </li>
+        </ol>
+      </section>
+    )}
 
+    {!playStoreLive && (
     <section class="card">
       <h2 class="card-title">While Play review is pending</h2>
       <p class="card-subtitle mb-4">
@@ -147,6 +179,7 @@ const description = `${BRAND_NAME} Android companion — early access via GitHub
         Deep links stay aligned with the web app (<code>/dashboard</code>, alerts, household) so the native client and PWA feel familiar.
       </p>
     </section>
+    )}
 
     <section class="card">
       <h2 class="card-title">Open source</h2>

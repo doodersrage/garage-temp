@@ -1,0 +1,28 @@
+---
+interface Props {
+  show?: boolean;
+  canEdit?: boolean;
+}
+
+const { show = true, canEdit = true } = Astro.props;
+
+if (!show || !canEdit) {
+  return null;
+}
+---
+<aside class="card alert-setup-nudge" data-nudge-key="test_alert_nudge" role="note">
+  <div class="alert-setup-nudge-body">
+    <p class="alert-setup-nudge-title">Send a test alert before the next cold night</p>
+    <p class="alert-setup-nudge-text">
+      Alerts are configured but you have not confirmed delivery yet. A 30-second test now
+      avoids discovering a typo in your email or SMS number during a real freeze.
+    </p>
+  </div>
+  <div class="alert-setup-nudge-actions">
+    <a class="btn-primary" href="/dashboard/alerts#send-test-alert">Send test alert</a>
+    <a class="btn-secondary" href="/dashboard/alerts">Open alerts</a>
+    <button type="button" class="btn-ghost" data-dismiss="test_alert_nudge">
+      Dismiss
+    </button>
+  </div>
+</aside>

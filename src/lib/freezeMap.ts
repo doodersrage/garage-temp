@@ -53,6 +53,29 @@ export async function updateHouseholdFreezeMapSettings(
   return { error: error?.message ?? null };
 }
 
+export async function getHouseholdFreezeMapSettings(
+  householdId: string,
+): Promise<FreezeMapHouseholdSettings> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("households")
+    .select("freeze_map_opt_in, freeze_map_city_id, freeze_map_lat, freeze_map_lon, freeze_map_label")
+    .eq("id", householdId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return { optIn: false, cityId: null, lat: null, lon: null, label: null };
+  }
+
+  return {
+    optIn: data.freeze_map_opt_in === true,
+    cityId: data.freeze_map_city_id,
+    lat: data.freeze_map_lat,
+    lon: data.freeze_map_lon,
+    label: data.freeze_map_label,
+  };
+}
+
 export async function collectFreezeMapSnapshots(): Promise<{
   cities: number;
   error: string | null;

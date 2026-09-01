@@ -1,0 +1,28 @@
+---
+interface Props {
+  show?: boolean;
+  canEdit?: boolean;
+  cityLabel?: string | null;
+}
+
+const { show = true, canEdit = true, cityLabel = null } = Astro.props;
+
+if (!show || !canEdit) {
+  return null;
+}
+---
+<aside class="card" data-nudge-key="freeze_map_opt_in_nudge" role="note">
+  <h2 class="card-title">Compare your garage to the neighborhood</h2>
+  <p class="card-subtitle mb-4">
+    Opt in to the public freeze map to see how your coldest probe compares to other
+    ThermalTrace garages{cityLabel ? ` in ${cityLabel}` : " in your city"} — anonymized
+    averages only, no address or device names.
+  </p>
+  <div class="flex flex-wrap gap-2">
+    <a class="btn-primary" href="/dashboard/household#freeze-map">Opt in on household settings</a>
+    <a class="btn-secondary" href="/freeze-map">View the map</a>
+    <button type="button" class="btn-ghost" data-dismiss="freeze_map_opt_in_nudge">
+      Dismiss
+    </button>
+  </div>
+</aside>

@@ -154,7 +154,7 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
     )}
 
     {isOwner && (
-      <DashboardCard>
+      <DashboardCard id="freeze-map">
       <form method="POST" id="freeze-map-form" data-freeze-map-form>
         <input type="hidden" name="action" value="freeze_map" />
         <input type="hidden" name="redirect" value="/dashboard/household" />

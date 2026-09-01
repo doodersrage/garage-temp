@@ -10,7 +10,7 @@ Tasks only **you** can complete — everything else in the HACS/integration pass
 ## Growth (copy/paste ready)
 
 - [x] **Home Assistant forum** — posted; awaiting moderator approval ([draft](./home-assistant-forum-post.md))
-- [ ] **Discord / social** — [announcement draft](./discord-hacs-announcement.md)
+- [x] **Discord / social** — [announcement draft](./discord-hacs-announcement.md) posted
 
 ## Thermostat OAuth (Pro feature)
 
@@ -32,7 +32,8 @@ Check what's missing locally: `pnpm operator:check`
 
 ## Google Play
 
-- [ ] When review clears, update `/android` and marketing copy from GitHub early access → Play Store link
+- [ ] When review clears, set `PUBLIC_PLAY_STORE_URL` in `.env` / Worker secrets and redeploy — `/android` flips to Play CTA automatically
+- [ ] Update marketing copy if needed beyond the env flip
 
 ## WebAuthn MFA
 
