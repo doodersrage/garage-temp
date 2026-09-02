@@ -4,6 +4,7 @@ import { getOrCreateHouseholdForUser, getUserHouseholdId } from "./households";
 import {
   getDefaultTempFeeds,
   getDefaultTempProbes,
+  normalizePullFeedUrl,
   sanitizeJsonRoot,
   type TempFeedConfig,
   type TempProbeConfig,
@@ -517,68 +518,167 @@ export async function savePullDevicesForHousehold(
   probes: TempProbeConfig[],
 ): Promise<{ error: string | null }> {
   const supabase = createServerClient();
-
-  const { data: existing } = await supabase
-    .from("devices")
-    .select("id")
-    .eq("household_id", householdId)
-    .eq("source", "pull_url");
-
-  const existingIds = (existing ?? []).map((row) => row.id);
-  if (existingIds.length > 0) {
-    await supabase.from("device_sensors").delete().in("device_id", existingIds);
-    await supabase.from("devices").delete().in("id", existingIds);
+  const existing = await listHouseholdDevices(householdId);
+  if (existing.error) {
+    return { error: existing.error };
   }
 
+  const pullDevices = existing.devices.filter(
+    (d) => d.source === "pull_url" && d.pull_url,
+  );
+  const byUrl = new Map(
+    pullDevices.map((d) => [normalizePullFeedUrl(d.pull_url!), d]),
+  );
+  const keptDeviceIds = new Set<string>();
+  const feedIdToDeviceId = new Map<string, string>();
+
   for (const [index, feed] of feeds.entries()) {
-    const { data: device, error } = await supabase
-      .from("devices")
-      .insert({
+    if (!feed.url) continue;
+    const urlKey = normalizePullFeedUrl(feed.url);
+    let device = byUrl.get(urlKey) ?? null;
+
+    if (!device) {
+      const { data: inserted, error } = await supabase
+        .from("devices")
+        .insert({
+          household_id: householdId,
+          name: feed.name,
+          source: "pull_url",
+          pull_url: feed.url,
+          enabled: feed.enabled,
+          sort_order: index,
+          meta: {
+            pull_json_root: sanitizeJsonRoot(feed.jsonRoot),
+          },
+        })
+        .select("id")
+        .single();
+
+      if (error || !inserted) {
+        return { error: error?.message ?? "Failed to save device" };
+      }
+
+      device = {
+        id: inserted.id,
         household_id: householdId,
         name: feed.name,
         source: "pull_url",
         pull_url: feed.url,
         enabled: feed.enabled,
         sort_order: index,
-        meta: {
-          pull_json_root: sanitizeJsonRoot(feed.jsonRoot),
-        },
-      })
-      .select("id")
-      .single();
+        meta: { pull_json_root: sanitizeJsonRoot(feed.jsonRoot) },
+        space: null,
+        last_seen_at: null,
+        ingest_key_prefix: null,
+        sensors: [],
+      };
+      byUrl.set(urlKey, device);
+    } else {
+      const { error } = await supabase
+        .from("devices")
+        .update({
+          name: feed.name,
+          pull_url: feed.url,
+          enabled: feed.enabled,
+          sort_order: index,
+          meta: {
+            ...(device.meta && typeof device.meta === "object" && !Array.isArray(device.meta)
+              ? (device.meta as Record<string, unknown>)
+              : {}),
+            pull_json_root: sanitizeJsonRoot(feed.jsonRoot),
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", device.id);
 
-    if (error || !device) {
-      return { error: error?.message ?? "Failed to save device" };
-    }
-
-    const feedProbes = probes.filter((probe) => probe.feedId === feed.id);
-    const rows = feedProbes.flatMap((probe, probeIndex) => [
-      {
-        device_id: device.id,
-        key: probe.key,
-        label: probe.label,
-        kind: "temperature" as const,
-        unit: "F",
-        visible: probe.visible,
-        sort_order: probeIndex,
-      },
-      {
-        device_id: device.id,
-        key: probe.key,
-        label: `${probe.label} humidity`,
-        kind: "humidity" as const,
-        unit: "%",
-        visible: probe.visible,
-        sort_order: probeIndex,
-      },
-    ]);
-
-    if (rows.length > 0) {
-      const { error: sensorError } = await supabase.from("device_sensors").insert(rows);
-      if (sensorError) {
-        return { error: sensorError.message };
+      if (error) {
+        return { error: error.message };
       }
     }
+
+    keptDeviceIds.add(device.id);
+    feedIdToDeviceId.set(feed.id, device.id);
+
+    const feedProbes = probes.filter(
+      (probe) =>
+        probe.feedId === feed.id || feedIdToDeviceId.get(probe.feedId) === device!.id,
+    );
+    const desiredKeys = new Set(feedProbes.map((probe) => probe.key));
+    const existingSensors = device.sensors ?? [];
+
+    for (const sensor of existingSensors) {
+      if (
+        (sensor.kind === "temperature" || sensor.kind === "humidity") &&
+        !desiredKeys.has(sensor.key)
+      ) {
+        await supabase.from("device_sensors").delete().eq("id", sensor.id);
+      }
+    }
+
+    for (const [probeIndex, probe] of feedProbes.entries()) {
+      const tempExisting = existingSensors.find(
+        (s) => s.key === probe.key && s.kind === "temperature",
+      );
+      const humidityExisting = existingSensors.find(
+        (s) => s.key === probe.key && s.kind === "humidity",
+      );
+
+      if (tempExisting) {
+        await supabase
+          .from("device_sensors")
+          .update({
+            label: probe.label,
+            visible: probe.visible,
+            sort_order: probeIndex,
+          })
+          .eq("id", tempExisting.id);
+      } else {
+        const { error: insertError } = await supabase.from("device_sensors").insert({
+          device_id: device.id,
+          key: probe.key,
+          label: probe.label,
+          kind: "temperature",
+          unit: "F",
+          visible: probe.visible,
+          sort_order: probeIndex,
+        });
+        if (insertError && !/duplicate|conflict/i.test(insertError.message)) {
+          return { error: insertError.message };
+        }
+      }
+
+      const humidityLabel = `${probe.label} humidity`;
+      if (humidityExisting) {
+        await supabase
+          .from("device_sensors")
+          .update({
+            label: humidityLabel,
+            visible: probe.visible,
+            sort_order: probeIndex,
+          })
+          .eq("id", humidityExisting.id);
+      } else {
+        const { error: insertError } = await supabase.from("device_sensors").insert({
+          device_id: device.id,
+          key: probe.key,
+          label: humidityLabel,
+          kind: "humidity",
+          unit: "%",
+          visible: probe.visible,
+          sort_order: probeIndex,
+        });
+        if (insertError && !/duplicate|conflict/i.test(insertError.message)) {
+          return { error: insertError.message };
+        }
+      }
+    }
+  }
+
+  const removedDevices = pullDevices.filter((d) => !keptDeviceIds.has(d.id));
+  if (removedDevices.length > 0) {
+    const removedIds = removedDevices.map((d) => d.id);
+    await supabase.from("device_sensors").delete().in("device_id", removedIds);
+    await supabase.from("devices").delete().in("id", removedIds);
   }
 
   return { error: null };

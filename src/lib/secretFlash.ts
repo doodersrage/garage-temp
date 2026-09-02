@@ -6,15 +6,17 @@ import type { AstroCookies } from "astro";
  * (history, Referer, proxy logs).
  */
 
-const FLASH_MAX_AGE_SEC = 5 * 60;
+/** Ingest keys stay recoverable on refresh until dismissed or TTL expires. */
+export const FLASH_INGEST_TTL_SEC = 30 * 60;
+const FLASH_DEFAULT_TTL_SEC = 5 * 60;
 
-function flashOptions() {
+function flashOptions(maxAgeSec = FLASH_DEFAULT_TTL_SEC) {
   return {
     path: "/",
     httpOnly: true,
     secure: import.meta.env.PROD,
     sameSite: "lax" as const,
-    maxAge: FLASH_MAX_AGE_SEC,
+    maxAge: maxAgeSec,
   };
 }
 
@@ -29,8 +31,17 @@ export function setSecretFlash(
   cookies: AstroCookies,
   name: string,
   value: string,
+  maxAgeSec?: number,
 ): void {
-  cookies.set(name, value, flashOptions());
+  const ttl =
+    maxAgeSec ??
+    (name === FLASH_INGEST_KEY ? FLASH_INGEST_TTL_SEC : FLASH_DEFAULT_TTL_SEC);
+  cookies.set(name, value, flashOptions(ttl));
+}
+
+/** Read a flash cookie without clearing it (ingest key recovery on refresh). */
+export function peekSecretFlash(cookies: AstroCookies, name: string): string | null {
+  return cookies.get(name)?.value?.trim() || null;
 }
 
 /** Read and clear a one-time secret cookie. */
@@ -38,9 +49,13 @@ export function consumeSecretFlash(
   cookies: AstroCookies,
   name: string,
 ): string | null {
-  const value = cookies.get(name)?.value?.trim() || null;
+  const value = peekSecretFlash(cookies, name);
   if (value) {
     cookies.delete(name, { path: "/" });
   }
   return value;
+}
+
+export function clearSecretFlash(cookies: AstroCookies, name: string): void {
+  cookies.delete(name, { path: "/" });
 }

@@ -225,6 +225,29 @@ const { initialRules = [] } = Astro.props;
         }
         routingHidden.value = JSON.stringify(routing);
       }
+      const scopeHidden = document.getElementById("threshold_sensor_scope_json");
+      const scopeAll = document.getElementById("threshold_scope_all");
+      if (scopeHidden) {
+        const scope = { includedSensorIds: [], overrides: {} };
+        const allChecked = scopeAll instanceof HTMLInputElement && scopeAll.checked;
+        if (!allChecked) {
+          document.querySelectorAll(".threshold-sensor-checkbox").forEach((el) => {
+            if (!(el instanceof HTMLInputElement) || !el.checked) return;
+            const sensorId = el.getAttribute("data-sensor-id");
+            if (sensorId) scope.includedSensorIds.push(sensorId);
+          });
+        }
+        document.querySelectorAll(".threshold-sensor-override").forEach((el) => {
+          if (!(el instanceof HTMLInputElement)) return;
+          const sensorId = el.getAttribute("data-sensor-id");
+          const kind = el.getAttribute("data-override-kind");
+          const value = Number(el.value);
+          if (!sensorId || !kind || !Number.isFinite(value)) return;
+          if (!scope.overrides[sensorId]) scope.overrides[sensorId] = {};
+          scope.overrides[sensorId][kind] = value;
+        });
+        scopeHidden.value = JSON.stringify(scope);
+      }
     }
 
     window.syncAlertSettingsFormFields = syncAlertSettingsFormFields;

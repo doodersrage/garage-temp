@@ -5,17 +5,15 @@ import FeedTestButton from "./FeedTestButton";
 
 interface Props {
   feeds: TempFeedConfig[];
-  redirectTo?: string;
 }
 
-const { feeds, redirectTo = "/dashboard/temperature" } = Astro.props;
+const { feeds } = Astro.props;
 
 const existingFeeds = feeds.filter((feed) => Boolean(feed.url));
 const canAddMore = existingFeeds.length < MAX_TEMP_FEEDS;
 ---
 
-<form action="/api/user/temp-feeds" method="post" class="space-y-4">
-  <input type="hidden" name="redirect" value={redirectTo} />
+<div id="pull-feeds-form" class="space-y-4">
   <div>
     <h3 class="text-base font-semibold m-0">Feed URLs</h3>
     <p class="card-subtitle mb-0 mt-1">
@@ -82,17 +80,17 @@ const canAddMore = existingFeeds.length < MAX_TEMP_FEEDS;
               />
               <span>Enabled</span>
             </label>
-            <button
-              type="submit"
-              class="btn-ghost"
-              formaction="/api/user/temp-feeds/delete"
-              formmethod="post"
-              name="feed_id"
-              value={feed.id}
-              onclick="return confirm('Delete this feed?');"
-            >
-              Delete
-            </button>
+            <form action="/api/user/temp-feeds/delete" method="post">
+              <input type="hidden" name="feed_id" value={feed.id} />
+              <input type="hidden" name="redirect" value="/dashboard/temperature?tab=pull" />
+              <button
+                type="submit"
+                class="btn-ghost"
+                onclick="return confirm('Delete this feed?');"
+              >
+                Delete
+              </button>
+            </form>
           </div>
         </div>
       </div>
@@ -149,6 +147,4 @@ const canAddMore = existingFeeds.length < MAX_TEMP_FEEDS;
       </div>
     )}
   </div>
-
-  <button type="submit" class="btn-primary">Save feeds</button>
-</form>
+</div>

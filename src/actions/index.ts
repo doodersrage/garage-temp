@@ -41,7 +41,16 @@ import {
 } from "../lib/householdInvites";
 import { buildSiteUrl } from "../lib/stripe";
 import { updateHouseholdFreezeMapSettings } from "../lib/freezeMap";
-import { renamePushDevice, updateDeviceSpace } from "../lib/devices";
+import {
+  deleteDeviceSensor,
+  defaultUnitForKind,
+  isSensorKind,
+  listHouseholdDevices,
+  renamePushDevice,
+  updateDeviceSensor,
+  updateDeviceSpace,
+  upsertDeviceSensor,
+} from "../lib/devices";
 
 async function requireAuthed(cookies: Parameters<typeof getAuthFromCookies>[0]) {
   const { session, user } = await getAuthFromCookies(cookies);
@@ -497,6 +506,133 @@ export const server = {
         message: "Device space saved.",
         space: input.space?.trim() ?? "",
       };
+    },
+  }),
+
+  updateSensor: defineAction({
+    accept: "form",
+    input: z.object({
+      sensor_id: z.string().min(1),
+      device_id: z.string().min(1),
+      key: z.string().min(1),
+      label: z.string().min(1),
+      kind: z.string().optional(),
+      unit: z.string().optional(),
+      offset_num: z.string().optional(),
+    }),
+    handler: async (input, context) => {
+      const { user } = await requireAuthed(context.cookies);
+      const { householdId } = await requireEditor(user.id);
+      const owned = await listHouseholdDevices(householdId);
+      if (!owned.devices.some((d) => d.id === input.device_id)) {
+        throw new ActionError({ code: "FORBIDDEN", message: "Device not found." });
+      }
+      const kindRaw = input.kind ?? "generic";
+      const kind = isSensorKind(kindRaw) ? kindRaw : ("generic" as const);
+      const offsetNum = Number.parseFloat(input.offset_num ?? "0");
+      const result = await updateDeviceSensor(input.sensor_id, input.device_id, {
+        key: input.key.trim(),
+        label: input.label.trim(),
+        kind,
+        unit: input.unit?.trim() || defaultUnitForKind(kind),
+        offsetNum: Number.isFinite(offsetNum) ? offsetNum : 0,
+      });
+      if (result.error) {
+        throw new ActionError({ code: "BAD_REQUEST", message: result.error });
+      }
+      return { ok: true as const, message: "Sensor saved." };
+    },
+  }),
+
+  addSensor: defineAction({
+    accept: "form",
+    input: z.object({
+      device_id: z.string().min(1),
+      key: z.string().min(1),
+      label: z.string().min(1),
+      kind: z.string().optional(),
+      unit: z.string().optional(),
+    }),
+    handler: async (input, context) => {
+      const { user } = await requireAuthed(context.cookies);
+      const { householdId } = await requireEditor(user.id);
+      const owned = await listHouseholdDevices(householdId);
+      if (!owned.devices.some((d) => d.id === input.device_id)) {
+        throw new ActionError({ code: "FORBIDDEN", message: "Device not found." });
+      }
+      const kindRaw = input.kind ?? "generic";
+      const kind = isSensorKind(kindRaw) ? kindRaw : ("generic" as const);
+      const result = await upsertDeviceSensor(
+        input.device_id,
+        input.key.trim(),
+        input.label.trim(),
+        kind,
+        input.unit?.trim() || defaultUnitForKind(kind),
+      );
+      if (result.error) {
+        throw new ActionError({ code: "BAD_REQUEST", message: result.error });
+      }
+      return { ok: true as const, message: "Sensor added." };
+    },
+  }),
+
+  addSensorPair: defineAction({
+    accept: "form",
+    input: z.object({
+      device_id: z.string().min(1),
+      key: z.string().min(1),
+      label: z.string().optional(),
+    }),
+    handler: async (input, context) => {
+      const { user } = await requireAuthed(context.cookies);
+      const { householdId } = await requireEditor(user.id);
+      const owned = await listHouseholdDevices(householdId);
+      if (!owned.devices.some((d) => d.id === input.device_id)) {
+        throw new ActionError({ code: "FORBIDDEN", message: "Device not found." });
+      }
+      const label = input.label?.trim() || "Probe";
+      const temp = await upsertDeviceSensor(
+        input.device_id,
+        input.key.trim(),
+        label,
+        "temperature",
+        defaultUnitForKind("temperature"),
+      );
+      if (temp.error) {
+        throw new ActionError({ code: "BAD_REQUEST", message: temp.error });
+      }
+      const humidity = await upsertDeviceSensor(
+        input.device_id,
+        input.key.trim(),
+        `${label} humidity`,
+        "humidity",
+        defaultUnitForKind("humidity"),
+      );
+      if (humidity.error) {
+        throw new ActionError({ code: "BAD_REQUEST", message: humidity.error });
+      }
+      return { ok: true as const, message: "Sensor pair added." };
+    },
+  }),
+
+  deleteSensor: defineAction({
+    accept: "form",
+    input: z.object({
+      sensor_id: z.string().min(1),
+      device_id: z.string().min(1),
+    }),
+    handler: async (input, context) => {
+      const { user } = await requireAuthed(context.cookies);
+      const { householdId } = await requireEditor(user.id);
+      const owned = await listHouseholdDevices(householdId);
+      if (!owned.devices.some((d) => d.id === input.device_id)) {
+        throw new ActionError({ code: "FORBIDDEN", message: "Device not found." });
+      }
+      const result = await deleteDeviceSensor(input.sensor_id, input.device_id);
+      if (result.error) {
+        throw new ActionError({ code: "BAD_REQUEST", message: result.error });
+      }
+      return { ok: true as const, message: "Sensor deleted." };
     },
   }),
 };

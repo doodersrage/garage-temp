@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizePullFeedUrl } from "./userTempConfig";
+import { normalizePullFeedUrl } from "./tempFeedConfig";
 
 describe("normalizePullFeedUrl", () => {
   it("trims and strips trailing slashes", () => {

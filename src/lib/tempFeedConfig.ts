@@ -248,6 +248,11 @@ function sanitizeProbe(raw: unknown, index: number, feedIds: Set<string>): TempP
   };
 }
 
+/** Normalize pull URLs for idempotent device matching. */
+export function normalizePullFeedUrl(url: string): string {
+  return url.trim().replace(/\/+$/, "") || url.trim();
+}
+
 export function sanitizeTempFeeds(feeds: unknown): TempFeedConfig[] {
   if (!Array.isArray(feeds)) {
     return getDefaultTempFeeds();

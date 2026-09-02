@@ -181,17 +181,81 @@ export default function PullProbeMapper({
     setProbes((current) => current.filter((_, probeIndex) => probeIndex !== index));
   }
 
-  async function saveProbes(event: Event) {
+  function parseFeedsFromDom(): Array<{
+    id: string;
+    name: string;
+    url: string;
+    enabled: boolean;
+    jsonRoot: string;
+  }> {
+    const root = document.getElementById("pull-feeds-form");
+    if (!root) {
+      return feedsWithUrls.map((feed) => ({
+        ...feed,
+        enabled: feed.enabled ?? true,
+        jsonRoot: feed.jsonRoot || "temp",
+      }));
+    }
+
+    const parsed: Array<{
+      id: string;
+      name: string;
+      url: string;
+      enabled: boolean;
+      jsonRoot: string;
+    }> = [];
+
+    for (let index = 0; index < 12; index += 1) {
+      const urlInput = root.querySelector<HTMLInputElement>(`[name="feed_${index}_url"]`);
+      if (!urlInput) continue;
+      const url = urlInput.value.trim();
+      if (!url) continue;
+      const idInput = root.querySelector<HTMLInputElement>(`[name="feed_${index}_id"]`);
+      const nameInput = root.querySelector<HTMLInputElement>(`[name="feed_${index}_name"]`);
+      const rootInput = root.querySelector<HTMLInputElement>(`[name="feed_${index}_json_root"]`);
+      const enabledInput = root.querySelector<HTMLInputElement>(`[name="feed_${index}_enabled"]`);
+      parsed.push({
+        id: idInput?.value.trim() || `feed-${index}`,
+        name: nameInput?.value.trim() || `Feed ${index + 1}`,
+        url,
+        enabled: enabledInput?.checked ?? true,
+        jsonRoot: rootInput?.value.trim() || "temp",
+      });
+    }
+
+    return parsed.length > 0
+      ? parsed
+      : feedsWithUrls.map((feed) => ({
+          ...feed,
+          enabled: feed.enabled ?? true,
+          jsonRoot: feed.jsonRoot || "temp",
+        }));
+  }
+
+  function acceptSuggestedNames() {
+    setProbes((current) =>
+      current.map((probe) => ({
+        ...probe,
+        label: probe.label.match(/^Probe \d+$/) ? humanizeKey(probe.key) : probe.label,
+      })),
+    );
+    setStatus("Applied suggested names — edit below, then save.");
+  }
+
+  async function savePullSetup(event: Event) {
     event.preventDefault();
     setSaving(true);
     setStatus(null);
 
+    const feedsPayload = parseFeedsFromDom();
+
     try {
-      const response = await fetch("/api/user/temp-probes", {
+      const response = await fetch("/api/user/pull-setup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          redirect: redirectTo,
+          redirect: redirectTo.includes("tab=") ? redirectTo : `${redirectTo}?tab=pull`,
+          feeds: feedsPayload,
           probes: probes.map((probe) => ({
             id: probe.id,
             feedId: probe.feedId,
@@ -201,18 +265,24 @@ export default function PullProbeMapper({
           })),
         }),
       });
-      const data = (await response.json()) as { ok?: boolean; error?: string; redirect?: string };
+      const data = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        redirect?: string;
+        discoveredProbes?: number;
+      };
       if (!response.ok || !data.ok) {
-        setStatus(data.error ?? "Failed to save probe labels.");
+        setStatus(data.error ?? "Failed to save pull setup.");
         return;
       }
-      window.location.href = data.redirect ?? `${redirectTo}?probes_saved=1`;
+      window.location.href = data.redirect ?? `${redirectTo}?pull_saved=1&tab=pull`;
     } catch {
-      setStatus("Unable to save probe labels.");
+      setStatus("Unable to save pull setup.");
     } finally {
       setSaving(false);
     }
   }
+
 
   if (feedsWithUrls.length === 0) {
     return (
@@ -223,7 +293,7 @@ export default function PullProbeMapper({
   }
 
   return (
-    <form class="space-y-4" onSubmit={saveProbes}>
+    <form class="space-y-4" onSubmit={savePullSetup}>
       <div>
         <h3 class="text-base font-semibold m-0">Probe labels</h3>
         <p class="card-subtitle mb-0 mt-1">
@@ -320,13 +390,25 @@ export default function PullProbeMapper({
       )}
 
       <div class="flex flex-wrap items-center gap-3">
+        <button type="submit" class="btn-primary" disabled={saving}>
+          {saving ? "Saving…" : "Save pull setup"}
+        </button>
         {probes.length > 0 ? (
-          <button type="submit" class="btn-primary" disabled={saving}>
-            {saving ? "Saving…" : "Save probe labels"}
+          <button type="button" class="btn-secondary" onClick={acceptSuggestedNames}>
+            Accept suggested names
           </button>
         ) : null}
         {status ? <span class="text-sm text-[var(--color-text-muted)]">{status}</span> : null}
       </div>
     </form>
   );
+}
+
+function humanizeKey(key: string): string {
+  const trimmed = key.trim();
+  if (!trimmed) return "Probe";
+  if (/^\d+$/.test(trimmed)) return `Probe ${trimmed}`;
+  return trimmed
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }

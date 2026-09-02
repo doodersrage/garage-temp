@@ -57,6 +57,17 @@ const deviceSpaces = [
   ),
 ].sort((a, b) => a.localeCompare(b));
 
+const thresholdSensors = (devicesResult.devices ?? []).flatMap((device) =>
+  device.sensors
+    .filter((sensor) => sensor.kind === "temperature")
+    .map((sensor) => ({
+      id: sensor.id,
+      label: sensor.label,
+      deviceName: device.name,
+      space: device.space ?? null,
+    })),
+);
+
 const sentChannels = formatAlertChannelsCsv(Astro.url.searchParams.get("sent"));
 const skippedChannels = formatAlertChannelsCsv(Astro.url.searchParams.get("skipped"));
 const testReason = Astro.url.searchParams.get("test_reason");
@@ -225,6 +236,7 @@ const referralRewardDays = Number(
       redirectTo="/dashboard/alerts"
       canEdit={canEdit}
       deviceSpaces={deviceSpaces}
+      thresholdSensors={thresholdSensors}
     />
 
     <section class="card">

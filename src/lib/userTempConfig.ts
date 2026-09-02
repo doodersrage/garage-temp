@@ -5,21 +5,19 @@ import {
   getDefaultTempFeeds,
   getDefaultTempProbes,
   getLegacyTempProbes,
+  normalizePullFeedUrl,
   sanitizeJsonRoot,
   sanitizeTempFeeds,
   sanitizeTempProbes,
 } from "./tempFeedConfig";
 import { discoverAndMergeFeedProbes } from "./feedDiscovery";
 
+export { normalizePullFeedUrl };
+
 type TempConfigRow = {
   feeds: TempFeedConfig[];
   probes: TempProbeConfig[];
 };
-
-/** Normalize pull URLs for idempotent device matching. */
-export function normalizePullFeedUrl(url: string): string {
-  return url.trim().replace(/\/+$/, "") || url.trim();
-}
 
 export async function fetchUserTempConfig(userId: string): Promise<{
   feeds: TempFeedConfig[];
@@ -412,14 +410,23 @@ export async function saveUserTempFeeds(
   userId: string,
   feeds: TempFeedConfig[],
 ): Promise<{ error: Error | null; discoveredProbes?: number }> {
+  return saveUserPullSetup(userId, feeds, null);
+}
+
+/** Save pull feeds and probe labels in one step (feeds-only omits probe renames). */
+export async function saveUserPullSetup(
+  userId: string,
+  feeds: TempFeedConfig[],
+  probes: TempProbeConfig[] | null,
+): Promise<{ error: Error | null; discoveredProbes?: number }> {
   const current = await getCurrentTempConfig(userId);
   const sanitizedFeeds = sanitizeTempFeeds(feeds.length > 0 ? feeds : getDefaultTempFeeds());
-  const sanitizedProbes = sanitizeTempProbes(
+  const baseProbes =
+    probes ??
     current.probes.filter((probe) =>
       sanitizedFeeds.some((feed) => feed.id === probe.feedId),
-    ),
-    sanitizedFeeds,
-  );
+    );
+  const sanitizedProbes = sanitizeTempProbes(baseProbes, sanitizedFeeds);
 
   const { feeds: mergedFeeds, probes: mergedProbes, discovered } =
     await discoverAndMergeFeedProbes(sanitizedFeeds, sanitizedProbes);

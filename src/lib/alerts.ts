@@ -1,6 +1,13 @@
 import type { AlertRule } from "./alertRules";
 import { parseAlertPlaybooks, type AlertPlaybookStep } from "./alertPlaybooks";
 import { parseSpaceChannelRouting, type SpaceChannelRouting } from "./spaceChannelRouting";
+import {
+  parseThresholdSensorScope,
+  type ThresholdSensorScope,
+  freezeThresholdForReading,
+  humidityThresholdForReading,
+  readingIncludedInThresholdAlerts,
+} from "./thresholdSensorScope";
 
 export type AlertChannelName =
   | "email"
@@ -155,6 +162,7 @@ export type AlertSettings = {
   lastPortfolioAlertAt: string | null;
   freezeDrillEnabled: boolean;
   lastFreezeDrillAt: string | null;
+  thresholdSensorScope: ThresholdSensorScope;
 };
 
 export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
@@ -237,6 +245,7 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   lastPortfolioAlertAt: null,
   freezeDrillEnabled: true,
   lastFreezeDrillAt: null,
+  thresholdSensorScope: { includedSensorIds: [], overrides: {} },
 };
 
 /** Minimum time between threshold alert notifications for the same account. */
@@ -463,6 +472,7 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
     freezeDrillEnabled: row.freeze_drill_enabled !== false,
     lastFreezeDrillAt:
       typeof row.last_freeze_drill_at === "string" ? row.last_freeze_drill_at : null,
+    thresholdSensorScope: parseThresholdSensorScope(row.threshold_sensor_scope),
   };
 }
 
@@ -501,15 +511,21 @@ export function evaluateAlerts(
   const messages: string[] = [];
 
   for (const reading of readings) {
-    if (reading.tempf <= settings.freezeThresholdF) {
+    if (!readingIncludedInThresholdAlerts(settings.thresholdSensorScope, reading)) {
+      continue;
+    }
+
+    const freezeThreshold = freezeThresholdForReading(settings, reading);
+    if (reading.tempf <= freezeThreshold) {
       messages.push(
-        `${reading.label} is ${reading.tempf.toFixed(1)}°F (at or below freeze threshold ${settings.freezeThresholdF}°F).`,
+        `${reading.label} is ${reading.tempf.toFixed(1)}°F (at or below freeze threshold ${freezeThreshold}°F).`,
       );
     }
 
-    if (reading.humidity >= settings.humidityThreshold) {
+    const humidityThreshold = humidityThresholdForReading(settings, reading);
+    if (reading.humidity >= humidityThreshold) {
       messages.push(
-        `${reading.label} humidity is ${reading.humidity.toFixed(0)}% (above threshold ${settings.humidityThreshold}%).`,
+        `${reading.label} humidity is ${reading.humidity.toFixed(0)}% (above threshold ${humidityThreshold}%).`,
       );
     }
   }
@@ -700,6 +716,7 @@ export function serializeAlertSettings(settings: AlertSettings): Record<string, 
     last_portfolio_alert_at: settings.lastPortfolioAlertAt,
     freeze_drill_enabled: settings.freezeDrillEnabled,
     last_freeze_drill_at: settings.lastFreezeDrillAt,
+    threshold_sensor_scope: settings.thresholdSensorScope,
   };
 }
 

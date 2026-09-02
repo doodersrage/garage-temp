@@ -5,6 +5,7 @@ import {
 import { parseAlertRulesFromForm } from "./alertRules";
 import { parseAlertPlaybooksFromForm } from "./alertPlaybooks";
 import { parseSpaceChannelRouting } from "./spaceChannelRouting";
+import { parseThresholdSensorScope } from "./thresholdSensorScope";
 import { parseAlertTemplates } from "./alertTemplates";
 import type { Entitlements } from "./entitlements";
 import { isSafeHttpsUrl } from "./ssrfGuard";
@@ -267,6 +268,17 @@ export function buildAlertSettingsFromFormData(
     lastFeedUptimeAlertAt: existing.lastFeedUptimeAlertAt,
     lastPortfolioAlertAt: existing.lastPortfolioAlertAt,
     playbookFired: existing.playbookFired,
+    thresholdSensorScope: (() => {
+      if (!formData.has("threshold_sensor_scope_json")) {
+        return existing.thresholdSensorScope;
+      }
+      try {
+        const raw = formData.get("threshold_sensor_scope_json")?.toString();
+        return raw ? parseThresholdSensorScope(JSON.parse(raw)) : existing.thresholdSensorScope;
+      } catch {
+        return existing.thresholdSensorScope;
+      }
+    })(),
   };
 }
 

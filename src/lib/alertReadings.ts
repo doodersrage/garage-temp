@@ -58,7 +58,13 @@ export function buildAlertReadingsFromLatestSensors(
     value_num: number | null;
   }>,
 ): AlertReading[] {
-  type Acc = { label: string; tempf?: number; humidity?: number; space?: string | null };
+  type Acc = {
+    label: string;
+    tempf?: number;
+    humidity?: number;
+    space?: string | null;
+    sensorId?: string;
+  };
   const byKey = new Map<string, Acc>();
 
   for (const row of latest) {
@@ -76,6 +82,7 @@ export function buildAlertReadingsFromLatestSensors(
     if (row.sensor.kind === "temperature") {
       entry.tempf = row.value_num;
       entry.label = row.sensor.label.replace(/\s+humidity$/i, "") || row.sensor.label;
+      entry.sensorId = row.sensor.id;
     } else {
       entry.humidity = row.value_num;
     }
@@ -90,6 +97,7 @@ export function buildAlertReadingsFromLatestSensors(
       tempf: entry.tempf!,
       humidity: entry.humidity ?? 0,
       space: entry.space ?? null,
+      sensorId: entry.sensorId,
     }));
 }
 

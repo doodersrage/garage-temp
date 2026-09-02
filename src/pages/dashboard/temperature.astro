@@ -2,6 +2,9 @@
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import TempFeedsSettings from "../../components/TempFeedsSettings.astro";
 import PullProbeMapper from "../../components/PullProbeMapper";
+import PullFetchButton from "../../components/PullFetchButton";
+import SensorRenameBatch from "../../components/SensorRenameBatch";
+import DeviceIntegrationsStrip from "../../components/DeviceIntegrationsStrip.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getUserPreferences } from "../../lib/userPreferences";
 import { checkFeedHealth } from "../../lib/collectHistory";
@@ -26,7 +29,7 @@ import {
   buildWaitingIngestPayload,
 } from "../../lib/waitingIngest";
 import ProductAnalyticsTracker from "../../components/ProductAnalyticsTracker.astro";
-import { FLASH_INGEST_KEY, consumeSecretFlash } from "../../lib/secretFlash";
+import { FLASH_INGEST_KEY, peekSecretFlash } from "../../lib/secretFlash";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -96,7 +99,13 @@ const latest = household.householdId
   : [];
 
 const redirectTo = "/dashboard/temperature";
-const ingestKey = consumeSecretFlash(Astro.cookies, FLASH_INGEST_KEY);
+const activeTab =
+  Astro.url.searchParams.get("tab") === "pull"
+    ? "pull"
+    : Astro.url.searchParams.get("tab") === "push"
+      ? "push"
+      : "push";
+const ingestKey = peekSecretFlash(Astro.cookies, FLASH_INGEST_KEY);
 const focusDevice = Astro.url.searchParams.get("focus_device") ?? "";
 const atDeviceLimit =
   devices.filter((d) => d.source === "push").length >= entitlements.maxDevices;
@@ -113,12 +122,14 @@ const deviceNotice =
         ? "Sensor updated."
         : Astro.url.searchParams.get("sensor_deleted")
           ? "Sensor deleted."
-          : Astro.url.searchParams.get("feeds_saved")
+          : Astro.url.searchParams.get("feeds_saved") || Astro.url.searchParams.get("pull_saved")
             ? Astro.url.searchParams.get("probes_discovered")
-              ? `Feed saved — imported ${Astro.url.searchParams.get("probes_discovered")} probe key(s). Rename below if needed.`
-              : "Feed URLs saved."
+              ? `Pull setup saved — imported ${Astro.url.searchParams.get("probes_discovered")} probe key(s). Rename below if needed.`
+              : "Pull setup saved."
             : Astro.url.searchParams.get("probes_saved")
               ? "Probe labels saved."
+              : Astro.url.searchParams.get("sensors_renamed")
+                ? "Sensor names saved."
               : Astro.url.searchParams.get("feed_deleted")
                 ? "Feed deleted."
                 : Astro.url.searchParams.get("probe_deleted")
@@ -144,8 +155,7 @@ const noticeIsError =
 const keyCalloutTitle = Astro.url.searchParams.get("key_rotated")
   ? "Save your new ingest key"
   : "Save your ingest key";
-const showAddSensorNudge =
-  Boolean(Astro.url.searchParams.get("device_created")) && Boolean(focusDevice);
+const showAddSensorNudge = false;
 
 const pushDevices = devices.filter((d) => d.source === "push");
 const waitingPushDevices = pushDevices.filter(
@@ -232,11 +242,25 @@ const showDeviceWizard =
 const wizardStep =
   devices.length === 0
     ? 1
-    : pushDevices.some((d) => d.sensors.length === 0)
+    : pushDevices.some((d) => !d.last_seen_at)
       ? 2
-      : neverSeenWithSensors
-        ? 3
-        : 4;
+      : 2;
+const pullFeedIds = preferences.tempFeeds.filter((f) => f.url).map((f) => f.id);
+const renameSensorRows = devices.flatMap((device) =>
+  device.sensors
+    .filter((sensor) => sensor.kind === "temperature")
+    .map((sensor) => ({
+      id: sensor.id,
+      key: sensor.key,
+      label: sensor.label,
+      deviceName: device.name,
+      kind: sensor.kind,
+    })),
+);
+const showRenameBatch =
+  Boolean(Astro.url.searchParams.get("ingest_ok")) ||
+  Boolean(Astro.url.searchParams.get("rename_sensors")) ||
+  Number(Astro.url.searchParams.get("sensors_created") ?? "0") > 0;
 ---
 <DashboardLayout title="Devices">
   <ProductAnalyticsTracker events={analyticsEvents} />
@@ -260,26 +284,43 @@ const wizardStep =
       )}
     </section>
 
-    {(noticeParam === "device_limit" || atDeviceLimit) && (
-      <UpgradeNudge feature="device_limit" tier={entitlements.tier} />
+    <nav class="flex flex-wrap gap-2" aria-label="Device source">
+      <a
+        class:list={["btn-secondary", activeTab === "push" && "ring-2 ring-[var(--color-accent)]"]}
+        href="/dashboard/temperature?tab=push"
+      >
+        Push devices
+      </a>
+      <a
+        class:list={["btn-secondary", activeTab === "pull" && "ring-2 ring-[var(--color-accent)]"]}
+        href="/dashboard/temperature?tab=pull"
+      >
+        Pull feeds
+      </a>
+    </nav>
+
+    <DeviceIntegrationsStrip />
+
+    {showRenameBatch && renameSensorRows.length > 0 && canEdit && (
+      <section class="card" id="rename-sensors">
+        <h2 class="card-title">Rename sensors</h2>
+        <p class="card-subtitle mb-4">
+          Auto-imported keys get generic names first. Accept suggestions or type your own, then save once.
+        </p>
+        <SensorRenameBatch client:visible sensors={renameSensorRows} redirectTo={`${redirectTo}?tab=push`} />
+      </section>
     )}
 
-    {showAddSensorNudge && (
-      <section class="card alert-success" id="next-sensor-step">
-        <h2 class="card-title">Next: add a sensor</h2>
-        <p class="mb-4">
-          Your push device is ready. Add at least one sensor key so readings show up on Home.
-        </p>
-        <a class="btn-primary" href="#add-sensor">Add a sensor</a>
-      </section>
+    {(noticeParam === "device_limit" || atDeviceLimit) && (
+      <UpgradeNudge feature="device_limit" tier={entitlements.tier} />
     )}
 
     {ingestKey && (
       <section class="card ingest-key-callout" id="ingest-key-callout">
         <h2 class="card-title">{keyCalloutTitle}</h2>
         <p class="card-subtitle">
-          This key is shown once. Copy it into your ESP/Arduino firmware now — you will not see the full key again.
-          The QR below is generated on this page (no third-party QR service).
+          Copy this key into your ESP/Arduino firmware now. It stays available on this page for 30 minutes
+          and survives refresh until you dismiss it — the QR is generated locally (no third-party service).
         </p>
         <div class="flex flex-wrap gap-6 items-start mb-4">
           <div
@@ -441,20 +482,19 @@ const wizardStep =
       </section>
     )}
 
-    {showDeviceWizard && (
+    {showDeviceWizard && activeTab === "push" && (
       <section class="card" id="device-setup-wizard">
         <h2 class="card-title">Device setup</h2>
         <p class="card-subtitle mb-4">
-          Step {wizardStep} of 3 — create a push device, map sensor keys, then verify your first POST.
+          Step {wizardStep} of 2 — create a push device, POST JSON (sensors auto-import), then verify readings.
         </p>
         <ol class="waiting-ingest-checklist mb-4">
           <li class:list={[wizardStep > 1 && "waiting-ingest-done"]}>Create push device</li>
-          <li class:list={[wizardStep > 2 && "waiting-ingest-done", wizardStep === 2 && "waiting-ingest-pending"]}>
-            Map sensor keys
+          <li class:list={[wizardStep >= 2 && "waiting-ingest-pending"]}>
+            POST JSON — sensors auto-import; rename afterward if needed
           </li>
-          <li class:list={[wizardStep >= 3 && "waiting-ingest-pending"]}>Verify first ingest</li>
         </ol>
-        <a class="btn-ghost" href="/dashboard/temperature?view=all">Show all device settings</a>
+        <a class="btn-ghost" href="/dashboard/temperature?view=all&tab=push">Show all device settings</a>
       </section>
     )}
 
@@ -585,10 +625,11 @@ const wizardStep =
     </>
     )}
 
-    <section class="card" id="push-devices">
+    <section class:list={["card", activeTab !== "push" && "hidden"]} id="push-devices">
       <h2 class="card-title">Push from ESP / Arduino</h2>
       <p class="card-subtitle">
-        Your device POSTs readings to an ingest URL. Limit: {entitlements.maxDevices} devices per property ({entitlements.tier}).
+        Your device POSTs readings to an ingest URL. Keys auto-import on first POST — manual mapping is optional.
+        Limit: {entitlements.maxDevices} devices per property ({entitlements.tier}).
         See <a class="text-link" href="/about/ingest-and-webhooks">ingest docs</a>.
       </p>
 
@@ -636,7 +677,7 @@ const wizardStep =
                   {seen.label === "never seen" && (
                     <p class="m-0 mt-1 text-sm text-[var(--color-text-muted)]">
                       {device.sensors.length === 0
-                        ? "No POSTs yet — add a sensor mapping first."
+                        ? "No POSTs yet — first JSON POST auto-imports sensor keys."
                         : (
                           <>
                             Waiting for first POST with keys{" "}
@@ -723,13 +764,14 @@ const wizardStep =
 
               {device.sensors.length === 0 ? (
                 <p class="mt-3 mb-0 text-sm text-[var(--color-text-muted)]">
-                  No sensors yet. Add a temp + humidity pair or a single key below so readings appear on Home.
+                  No sensors yet — they appear automatically after your first POST. Use Advanced below only if you
+                  need to pre-map keys.
                 </p>
               ) : (
                 <ul class="mt-4 space-y-2">
                   {device.sensors.map((sensor) => (
                     <li class="sensor-map-row">
-                      <form action="/api/devices" method="post" class="sensor-map-form">
+                      <form action="/api/devices" method="post" class="sensor-map-form" data-sensor-update-form>
                         <input type="hidden" name="action" value="update_sensor" />
                         <input type="hidden" name="sensor_id" value={sensor.id} />
                         <input type="hidden" name="device_id" value={device.id} />
@@ -767,6 +809,8 @@ const wizardStep =
                           </div>
                           <div class="sensor-map-actions">
                             <button class="btn-secondary" type="submit">Save</button>
+                            <p class="m-0 text-sm text-[var(--color-success)] hidden" data-sensor-status></p>
+                            <p class="m-0 text-sm text-[var(--color-danger)] hidden" data-sensor-error></p>
                           </div>
                         </div>
                         <details class="sensor-map-advanced mt-2">
@@ -818,6 +862,7 @@ const wizardStep =
                         action="/api/devices"
                         method="post"
                         class="sensor-map-delete"
+                        data-sensor-delete-form
                         onsubmit="return confirm('Delete this sensor?');"
                       >
                         <input type="hidden" name="action" value="delete_sensor" />
@@ -837,15 +882,16 @@ const wizardStep =
       )}
 
       {pushDevices.length > 0 && (
-        <div class="mt-6 space-y-4 border-t border-[var(--color-border)] pt-4" id="add-sensor">
+        <details class="mt-6 space-y-4 border-t border-[var(--color-border)] pt-4" id="add-sensor">
+          <summary class="cursor-pointer text-base font-semibold">Advanced: map JSON keys manually</summary>
+          <div class="mt-4 space-y-4">
           <div>
-            <h3 class="text-base font-semibold m-0">Map a JSON key</h3>
             <p class="card-subtitle mb-0 mt-1">
-              Match a key from your firmware payload to a name and type. Units are filled in from the type unless you override under Advanced on each sensor.
+              Optional — skip this if you already POST JSON and let auto-import handle keys.
             </p>
           </div>
 
-          <form action="/api/devices" method="post" class="sensor-quick-pair rounded-lg border border-[var(--color-border)] p-4">
+          <form action="/api/devices" method="post" class="sensor-quick-pair rounded-lg border border-[var(--color-border)] p-4" data-sensor-pair-form>
             <input type="hidden" name="action" value="add_sensor_pair" />
             <input type="hidden" name="redirect" value={redirectTo} />
             <p class="m-0 mb-3 text-sm font-medium">Quick add: temperature + humidity pair</p>
@@ -875,7 +921,7 @@ const wizardStep =
             </div>
           </form>
 
-          <form action="/api/devices" method="post" class="space-y-3">
+          <form action="/api/devices" method="post" class="space-y-3" data-sensor-add-form>
             <p class="m-0 text-sm font-medium">Or add one sensor</p>
             <input type="hidden" name="action" value="add_sensor" />
             <input type="hidden" name="redirect" value={redirectTo} />
@@ -909,7 +955,8 @@ const wizardStep =
               </div>
             </div>
           </form>
-        </div>
+          </div>
+        </details>
       )}
     </section>
 
@@ -931,36 +978,29 @@ const wizardStep =
       connections={thermostatConnectionsWithSnapshots}
     />
 
-    <section class="card" id="pull-feeds">
-      <h2 class="card-title">Pull JSON feeds</h2>
-      <p class="card-subtitle mb-0">
-        Optional alternative to push ingest: we fetch HTTPS JSON on a schedule.
-        Prefer <a class="text-link" href="#push-devices">Devices</a> above for new ESP setups.
-      </p>
-    </section>
-
-    <ExampleFeedCard />
-
     {canEdit ? (
-      <details class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4">
-        <summary class="cursor-pointer">
-          <span class="card-title text-base">Edit pull feeds</span>
-          <p class="card-subtitle mb-0 mt-2">
-            URLs, JSON root key, and probe labels for HTTPS pull sources.
+      <section class:list={["card space-y-6", activeTab !== "pull" && "hidden"]} id="pull-feeds">
+        <div>
+          <h2 class="card-title">Pull JSON feeds</h2>
+          <p class="card-subtitle mb-0">
+            HTTPS JSON we fetch on a schedule. Probe keys auto-import when you save — rename below if needed.
           </p>
-        </summary>
-        <div class="mt-4 space-y-8">
-          <TempFeedsSettings feeds={preferences.tempFeeds} redirectTo={redirectTo} />
-          <PullProbeMapper
-            client:visible
-            feeds={preferences.tempFeeds}
-            probes={preferences.tempProbes}
-            redirectTo={redirectTo}
-          />
         </div>
-      </details>
+
+        <ExampleFeedCard />
+
+        <PullFetchButton client:visible feedIds={pullFeedIds} />
+
+        <TempFeedsSettings feeds={preferences.tempFeeds} />
+        <PullProbeMapper
+          client:visible
+          feeds={preferences.tempFeeds}
+          probes={preferences.tempProbes}
+          redirectTo={`${redirectTo}?tab=pull`}
+        />
+      </section>
     ) : (
-      <section class="card">
+      <section class:list={["card", activeTab !== "pull" && "hidden"]}>
         <p class="mb-0 text-sm text-[var(--color-text-muted)]">
           View-only access — feed and probe settings are hidden.
         </p>
@@ -983,6 +1023,11 @@ const wizardStep =
     (() => {
       const dismiss = document.getElementById("ingest-key-dismiss");
       dismiss?.addEventListener("click", () => {
+        void fetch("/api/devices/dismiss-ingest-key", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { Accept: "application/json" },
+        });
         const url = new URL(window.location.href);
         url.searchParams.delete("device_created");
         url.searchParams.delete("key_rotated");
@@ -1078,6 +1123,7 @@ const wizardStep =
             }
             const url = new URL(window.location.href);
             url.searchParams.set("ingest_ok", "1");
+            url.searchParams.set("rename_sensors", "1");
             url.searchParams.delete("sensor_added");
             window.location.replace(url.pathname + "?" + url.searchParams.toString());
             return;
@@ -1153,6 +1199,64 @@ const wizardStep =
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       void handleDeviceForm(form, (formData) => actions.updateDeviceSpaceAction(formData));
+    });
+  });
+
+  async function handleSensorForm(
+    form: HTMLFormElement,
+    run: (formData: FormData) => Promise<{ data?: { message?: string } | null; error?: { message?: string } | null }>,
+    reloadOnSuccess = false,
+  ) {
+    const statusEl = form.querySelector<HTMLElement>("[data-sensor-status]");
+    const errorEl = form.querySelector<HTMLElement>("[data-sensor-error]");
+    const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    statusEl?.classList.add("hidden");
+    errorEl?.classList.add("hidden");
+    if (submitBtn) submitBtn.disabled = true;
+    const { data, error } = await run(new FormData(form));
+    if (submitBtn) submitBtn.disabled = false;
+    if (error) {
+      if (errorEl) {
+        errorEl.textContent = error.message || "Could not save.";
+        errorEl.classList.remove("hidden");
+      }
+      return;
+    }
+    if (reloadOnSuccess) {
+      window.location.reload();
+      return;
+    }
+    if (statusEl) {
+      statusEl.textContent = data?.message ?? "Saved.";
+      statusEl.classList.remove("hidden");
+    }
+  }
+
+  document.querySelectorAll<HTMLFormElement>("[data-sensor-update-form]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      void handleSensorForm(form, (formData) => actions.updateSensor(formData));
+    });
+  });
+
+  document.querySelectorAll<HTMLFormElement>("[data-sensor-add-form]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      void handleSensorForm(form, (formData) => actions.addSensor(formData), true);
+    });
+  });
+
+  document.querySelectorAll<HTMLFormElement>("[data-sensor-pair-form]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      void handleSensorForm(form, (formData) => actions.addSensorPair(formData), true);
+    });
+  });
+
+  document.querySelectorAll<HTMLFormElement>("[data-sensor-delete-form]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      void handleSensorForm(form, (formData) => actions.deleteSensor(formData), true);
     });
   });
 </script>
