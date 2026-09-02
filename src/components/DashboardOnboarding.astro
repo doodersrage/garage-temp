@@ -60,16 +60,16 @@ const essentialSteps = [
 
 const kitSteps = [
   {
-    done: hasSensors,
-    href: "/dashboard/temperature#add-sensor",
-    title: "Map sensor keys",
-    detail: "Add a temp + humidity pair (or a single key) so ingest maps to readable names on Home.",
+    done: hasLiveSensors || hasSensors,
+    href: "/dashboard/temperature?tab=push",
+    title: "Verify first POST",
+    detail: "Create a push device, POST JSON once, and confirm sensors auto-import on the Devices page.",
   },
   {
     done: ingestVerified,
     href: "/dashboard/temperature#verify-ingest-step",
-    title: "Verify with a test POST",
-    detail: "curl the ingest URL or follow the Arduino wiring guides until Home shows a live reading.",
+    title: "Rename imported sensors",
+    detail: "Accept suggested names on the device card so Home and alerts read clearly.",
   },
   {
     done: hasSensors,

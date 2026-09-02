@@ -1,0 +1,31 @@
+---
+/** Post-first-ingest checklist on Devices. */
+interface Props {
+  show: boolean;
+  hasRenamed?: boolean;
+}
+
+const { show, hasRenamed = false } = Astro.props;
+---
+
+{show && (
+  <section class="card alert-success" id="post-setup-funnel">
+    <h2 class="card-title">You're receiving data — finish setup</h2>
+    <ol class="waiting-ingest-checklist mb-4">
+      <li class="waiting-ingest-done">First POST received</li>
+      <li class:list={[hasRenamed && "waiting-ingest-done", !hasRenamed && "waiting-ingest-pending"]}>
+        Rename sensors on the device card below
+      </li>
+      <li class="waiting-ingest-pending">
+        <a class="text-link" href="/dashboard/alerts#send-test-alert">Send a test freeze alert</a>
+      </li>
+      <li class="waiting-ingest-pending">
+        <a class="text-link" href="/">Open Home</a> and confirm readings look right
+      </li>
+    </ol>
+    <div class="flex flex-wrap gap-3">
+      <a class="btn-primary" href="/dashboard/alerts#send-test-alert">Send test alert</a>
+      <a class="btn-secondary" href="/dashboard/household">Invite household</a>
+    </div>
+  </section>
+)}

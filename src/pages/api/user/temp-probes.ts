@@ -1,3 +1,4 @@
+/** @deprecated Prefer POST /api/user/pull-setup */
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import type { TempProbeConfig } from "../../../lib/tempFeedConfig";
@@ -59,7 +60,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const editor = await requireHouseholdEditor(user.id);
 
   let tempProbes: TempProbeConfig[];
-  let redirectTo = "/dashboard/temperature";
+  let redirectTo = "/dashboard/temperature?tab=pull";
 
   if (isJson) {
     if (!editor.ok) {
@@ -95,15 +96,15 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         headers: { "Content-Type": "application/json" },
       });
     }
-    return redirect(`${redirectTo}?probes_error=1`);
+    return redirect(`${redirectTo.split("?")[0]}?probes_error=1&tab=pull`);
   }
 
   if (isJson) {
     return new Response(
-      JSON.stringify({ ok: true, redirect: `${redirectTo}?probes_saved=1` }),
+      JSON.stringify({ ok: true, redirect: `${redirectTo.split("?")[0]}?pull_saved=1&tab=pull` }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
   }
 
-  return redirect(`${redirectTo}?probes_saved=1`);
+  return redirect(`${redirectTo.split("?")[0]}?pull_saved=1&tab=pull`);
 };

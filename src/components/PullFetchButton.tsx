@@ -7,7 +7,7 @@ interface Props {
 type FetchResult = {
   ok?: boolean;
   error?: string;
-  feeds?: Array<{ name: string; ok: boolean; message: string }>;
+  feeds?: Array<{ feedId: string; name: string; ok: boolean; message: string }>;
 };
 
 export default function PullFetchButton({ feedIds = [] }: Props) {
@@ -16,9 +16,20 @@ export default function PullFetchButton({ feedIds = [] }: Props) {
 
   if (feedIds.length === 0) return null;
 
+  function setFeedStatus(feedId: string, message: string, ok: boolean) {
+    const el = document.querySelector<HTMLElement>(`[data-pull-fetch-status="${feedId}"]`);
+    if (!el) return;
+    el.textContent = message;
+    el.classList.toggle("text-[var(--color-success)]", ok);
+    el.classList.toggle("text-[var(--color-danger)]", !ok);
+  }
+
   async function fetchNow() {
     setLoading(true);
     setStatus(null);
+    for (const feedId of feedIds) {
+      setFeedStatus(feedId, "Fetching…", true);
+    }
     try {
       const response = await fetch("/api/devices/pull-fetch", {
         method: "POST",
@@ -27,17 +38,28 @@ export default function PullFetchButton({ feedIds = [] }: Props) {
       });
       const data = (await response.json()) as FetchResult;
       if (!response.ok || !data.ok) {
-        setStatus(data.error ?? "Fetch failed.");
+        const message = data.error ?? "Fetch failed.";
+        setStatus(message);
+        for (const feedId of feedIds) {
+          setFeedStatus(feedId, message, false);
+        }
         return;
       }
-      const parts =
-        data.feeds?.map((feed) => `${feed.name}: ${feed.ok ? feed.message : "error"}`) ?? [];
-      setStatus(parts.join(" · ") || "Fetched.");
-      window.setTimeout(() => {
-        window.location.reload();
-      }, 1200);
+      const byId = new Map((data.feeds ?? []).map((feed) => [feed.feedId, feed]));
+      for (const feedId of feedIds) {
+        const row = byId.get(feedId);
+        if (row) {
+          setFeedStatus(feedId, row.ok ? row.message : `Error: ${row.message}`, row.ok);
+        } else {
+          setFeedStatus(feedId, "Not fetched", false);
+        }
+      }
+      setStatus("Fetch complete — refresh Home to see new readings.");
     } catch {
       setStatus("Could not fetch feeds.");
+      for (const feedId of feedIds) {
+        setFeedStatus(feedId, "Fetch failed", false);
+      }
     } finally {
       setLoading(false);
     }

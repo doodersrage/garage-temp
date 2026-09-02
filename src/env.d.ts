@@ -56,6 +56,8 @@ interface ImportMetaEnv {
   readonly YUBICO_CLIENT_ID?: string;
   readonly YUBICO_API_KEY?: string;
   readonly PUBLIC_PLAY_STORE_URL?: string;
+  /** AES-GCM encryption secret for recoverable push ingest keys (32+ chars recommended). */
+  readonly INGEST_KEY_ENCRYPTION_SECRET?: string;
   readonly PROD: boolean;
 }
 

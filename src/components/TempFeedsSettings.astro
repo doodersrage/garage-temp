@@ -80,7 +80,12 @@ const canAddMore = existingFeeds.length < MAX_TEMP_FEEDS;
               />
               <span>Enabled</span>
             </label>
-            <form action="/api/user/temp-feeds/delete" method="post">
+            <span
+              class="text-sm text-[var(--color-text-muted)]"
+              data-pull-fetch-status={feed.id}
+              aria-live="polite"
+            />
+            <form action="/api/user/pull-setup/delete" method="post">
               <input type="hidden" name="feed_id" value={feed.id} />
               <input type="hidden" name="redirect" value="/dashboard/temperature?tab=pull" />
               <button

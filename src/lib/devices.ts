@@ -124,69 +124,11 @@ export async function ensureDefaultPullDevice(
     };
   }
 
-  const defaultFeeds = getDefaultTempFeeds();
-  const defaultProbes = getDefaultTempProbes();
-  const feed = defaultFeeds[0];
-
-  if (!feed) {
-    return { householdId: household.householdId, devices: [], error: null };
-  }
-
-  const supabase = createServerClient();
-  const { data: device, error: deviceError } = await supabase
-    .from("devices")
-    .insert({
-      household_id: household.householdId,
-      name: feed.name,
-      source: "pull_url",
-      pull_url: feed.url,
-      enabled: true,
-      sort_order: 0,
-      meta: {
-        pull_json_root: sanitizeJsonRoot(feed.jsonRoot),
-      },
-    })
-    .select(DEVICE_SELECT)
-    .single();
-
-  if (deviceError || !device) {
-    return {
-      householdId: household.householdId,
-      devices: [],
-      error: deviceError?.message ?? "Failed to create default device",
-    };
-  }
-
-  const sensorRows = defaultProbes.flatMap((probe, index) => [
-    {
-      device_id: device.id,
-      key: probe.key,
-      label: probe.label,
-      kind: "temperature" as const,
-      unit: "F",
-      visible: probe.visible,
-      sort_order: index,
-    },
-    {
-      device_id: device.id,
-      key: probe.key,
-      label: `${probe.label} humidity`,
-      kind: "humidity" as const,
-      unit: "%",
-      visible: probe.visible,
-      sort_order: index,
-    },
-  ]);
-
-  if (sensorRows.length > 0) {
-    await supabase.from("device_sensors").insert(sensorRows);
-  }
-
-  const refreshed = await listHouseholdDevices(household.householdId);
+  // Do not auto-seed demo pull feeds — users add push or pull devices explicitly.
   return {
     householdId: household.householdId,
-    devices: refreshed.devices,
-    error: refreshed.error,
+    devices: [],
+    error: null,
   };
 }
 
@@ -254,13 +196,11 @@ export async function getUserDevicesAsTempConfig(userId: string, email?: string 
   }
 
   const { feeds, probes } = devicesToTempConfig(ensured.devices);
-  const hasDevices = ensured.devices.length > 0;
   return {
     householdId: ensured.householdId,
     devices: ensured.devices,
-    // Push-only households must not fall back to the public demo feed.
-    feeds: feeds.length > 0 ? feeds : hasDevices ? [] : getDefaultTempFeeds(),
-    probes: probes.length > 0 ? probes : hasDevices ? [] : getDefaultTempProbes(),
+    feeds,
+    probes,
     error: null as string | null,
   };
 }
@@ -432,6 +372,7 @@ export async function updateDeviceSensor(
     kind: SensorKind;
     unit?: string | null;
     offsetNum?: number;
+    visible?: boolean;
   },
 ): Promise<{ error: string | null }> {
   const supabase = createServerClient();
@@ -443,6 +384,7 @@ export async function updateDeviceSensor(
       kind: patch.kind,
       unit: patch.unit ?? null,
       offset_num: clampSensorOffset(patch.offsetNum ?? 0, patch.kind),
+      ...(typeof patch.visible === "boolean" ? { visible: patch.visible } : {}),
     })
     .eq("id", sensorId)
     .eq("device_id", deviceId);

@@ -242,6 +242,15 @@ export default function PullProbeMapper({
     setStatus("Applied suggested names — edit below, then save.");
   }
 
+  function hideAverageProbes() {
+    setProbes((current) =>
+      current.map((probe) =>
+        probe.key === "avg" ? { ...probe, visible: false } : probe,
+      ),
+    );
+    setStatus('Hidden "avg" probes from Home — save pull setup to persist.');
+  }
+
   async function savePullSetup(event: Event) {
     event.preventDefault();
     setSaving(true);
@@ -396,6 +405,11 @@ export default function PullProbeMapper({
         {probes.length > 0 ? (
           <button type="button" class="btn-secondary" onClick={acceptSuggestedNames}>
             Accept suggested names
+          </button>
+        ) : null}
+        {probes.some((probe) => probe.key === "avg") ? (
+          <button type="button" class="btn-secondary" onClick={hideAverageProbes}>
+            Hide avg on Home
           </button>
         ) : null}
         {status ? <span class="text-sm text-[var(--color-text-muted)]">{status}</span> : null}

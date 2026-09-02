@@ -26,6 +26,7 @@ import {
 import { recordHouseholdActivity } from "../../../lib/householdActivity";
 import { formRedirectPath } from "../../../lib/siteUrl";
 import { FLASH_INGEST_KEY, setSecretFlash } from "../../../lib/secretFlash";
+import { persistEncryptedIngestKey } from "../../../lib/persistIngestKey";
 
 async function sha256Hex(value: string): Promise<string> {
   const digest = await crypto.subtle.digest(
@@ -152,6 +153,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     }
 
     setSecretFlash(cookies, FLASH_INGEST_KEY, rawKey);
+    await persistEncryptedIngestKey(deviceId, rawKey);
     return redirect(`${redirectTo}?key_rotated=1`);
   }
 
@@ -237,6 +239,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     const offsetNum = Number.parseFloat(
       formData.get("offset_num")?.toString() ?? "0",
     );
+    const visible = formData.has("visible");
 
     if (!sensorId || !deviceId || !key || !label) {
       return redirect(`${redirectTo}?error=1`);
@@ -253,6 +256,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       kind,
       unit,
       offsetNum: Number.isFinite(offsetNum) ? offsetNum : 0,
+      visible,
     });
 
     if (result.error) {
@@ -303,6 +307,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   setSecretFlash(cookies, FLASH_INGEST_KEY, rawKey);
+  await persistEncryptedIngestKey(device.id, rawKey);
   return redirect(
     `${redirectTo}?device_created=1&focus_device=${encodeURIComponent(device.id)}`,
   );

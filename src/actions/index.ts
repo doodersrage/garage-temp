@@ -519,6 +519,7 @@ export const server = {
       kind: z.string().optional(),
       unit: z.string().optional(),
       offset_num: z.string().optional(),
+      visible: z.string().optional(),
     }),
     handler: async (input, context) => {
       const { user } = await requireAuthed(context.cookies);
@@ -536,6 +537,7 @@ export const server = {
         kind,
         unit: input.unit?.trim() || defaultUnitForKind(kind),
         offsetNum: Number.isFinite(offsetNum) ? offsetNum : 0,
+        visible: input.visible === "true",
       });
       if (result.error) {
         throw new ActionError({ code: "BAD_REQUEST", message: result.error });

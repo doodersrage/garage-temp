@@ -232,6 +232,22 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
                       disabled={!canEdit}
                     />
                   </div>
+                  <div class="form-field mb-0">
+                    <label class="form-label" for={`sensor-humidity-${sensor.id}`}>
+                      Optional humidity override (%)
+                    </label>
+                    <input
+                      class="form-input threshold-sensor-override"
+                      type="number"
+                      step="1"
+                      id={`sensor-humidity-${sensor.id}`}
+                      data-sensor-id={sensor.id}
+                      data-override-kind="humidityThreshold"
+                      value={override?.humidityThreshold ?? ""}
+                      placeholder={`Default ${settings.humidityThreshold}`}
+                      disabled={!canEdit}
+                    />
+                  </div>
                 </div>
               );
             })}

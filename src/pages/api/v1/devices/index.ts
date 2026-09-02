@@ -4,6 +4,7 @@ import {
   createPushDevice,
   listHouseholdDevices,
 } from "../../../../lib/devices";
+import { persistEncryptedIngestKey } from "../../../../lib/persistIngestKey";
 
 async function sha256Hex(value: string): Promise<string> {
   const digest = await crypto.subtle.digest(
@@ -98,6 +99,8 @@ export const POST: APIRoute = async ({ request }) => {
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  await persistEncryptedIngestKey(result.device.id, rawKey);
 
   return new Response(
     JSON.stringify({

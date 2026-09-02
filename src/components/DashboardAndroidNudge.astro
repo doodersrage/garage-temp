@@ -1,0 +1,21 @@
+---
+interface Props {
+  show: boolean;
+}
+
+const { show } = Astro.props;
+const playStoreUrl = String(import.meta.env.PUBLIC_PLAY_STORE_URL ?? "").trim();
+const playStoreLive = playStoreUrl.startsWith("https://play.google.com/");
+---
+
+{show && playStoreLive && (
+  <section class="card">
+    <h2 class="card-title">Android companion</h2>
+    <p class="card-subtitle mb-4">
+      Live probes, alerts, and household tools on Google Play — your phone is not a sensor.
+    </p>
+    <a class="btn-secondary" href={playStoreUrl} target="_blank" rel="noreferrer">
+      Get it on Google Play
+    </a>
+  </section>
+)}

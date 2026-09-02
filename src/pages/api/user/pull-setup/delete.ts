@@ -1,13 +1,12 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../../lib/auth";
-import { deleteUserTempProbe } from "../../../../lib/userTempConfig";
+import { deleteUserTempFeed } from "../../../../lib/userTempConfig";
 import {
   redirectUnlessEditor,
   requireHouseholdEditor,
 } from "../../../../lib/householdAuth";
 import { formRedirectPath } from "../../../../lib/siteUrl";
 
-/** @deprecated Prefer editing probes via pull-setup save. */
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
 
@@ -22,15 +21,15 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
   if (blocked) return blocked;
 
-  const probeId = formData.get("probe_id")?.toString().trim() ?? "";
-  if (!probeId) {
-    return new Response("Probe id is required", { status: 400 });
+  const feedId = formData.get("feed_id")?.toString().trim() ?? "";
+  if (!feedId) {
+    return new Response("Feed id is required", { status: 400 });
   }
 
-  const { error } = await deleteUserTempProbe(user.id, probeId);
+  const { error } = await deleteUserTempFeed(user.id, feedId);
   if (error) {
-    return redirect(`${redirectTo.split("?")[0]}?probes_error=1&tab=pull`);
+    return redirect(`${redirectTo.split("?")[0]}?feeds_error=1&tab=pull`);
   }
 
-  return redirect(`${redirectTo.split("?")[0]}?probe_deleted=1&tab=pull`);
+  return redirect(`${redirectTo.split("?")[0]}?feed_deleted=1&tab=pull`);
 };

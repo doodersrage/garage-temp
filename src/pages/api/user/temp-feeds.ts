@@ -8,6 +8,7 @@ import {
 } from "../../../lib/householdAuth";
 import { formRedirectPath } from "../../../lib/siteUrl";
 
+/** @deprecated Prefer POST /api/user/pull-setup */
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
 
@@ -16,7 +17,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const formData = await request.formData();
-  const redirectTo = formRedirectPath(formData, "/dashboard/temperature");
+  const redirectTo = formRedirectPath(formData, "/dashboard/temperature?tab=pull");
 
   const editor = await requireHouseholdEditor(user.id);
   const blocked = redirectUnlessEditor(editor, redirectTo, redirect);
@@ -26,12 +27,12 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { error, discoveredProbes } = await saveUserTempFeeds(user.id, tempFeeds);
 
   if (error) {
-    return redirect(`${redirectTo}?feeds_error=1`);
+    return redirect(`${redirectTo.split("?")[0]}?feeds_error=1&tab=pull`);
   }
 
-  const query =
-    discoveredProbes && discoveredProbes > 0
-      ? `feeds_saved=1&probes_discovered=${discoveredProbes}`
-      : "feeds_saved=1";
-  return redirect(`${redirectTo}?${query}`);
+  const query = new URLSearchParams({ pull_saved: "1", tab: "pull" });
+  if (discoveredProbes && discoveredProbes > 0) {
+    query.set("probes_discovered", String(discoveredProbes));
+  }
+  return redirect(`${redirectTo.split("?")[0]}?${query.toString()}`);
 };

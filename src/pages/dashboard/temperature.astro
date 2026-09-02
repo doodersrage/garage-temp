@@ -3,7 +3,9 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import TempFeedsSettings from "../../components/TempFeedsSettings.astro";
 import PullProbeMapper from "../../components/PullProbeMapper";
 import PullFetchButton from "../../components/PullFetchButton";
-import SensorRenameBatch from "../../components/SensorRenameBatch";
+import PushInlineRename from "../../components/PushInlineRename";
+import RevealIngestKeyButton from "../../components/RevealIngestKeyButton";
+import DeviceSetupWizard from "../../components/DeviceSetupWizard.astro";
 import DeviceIntegrationsStrip from "../../components/DeviceIntegrationsStrip.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getUserPreferences } from "../../lib/userPreferences";
@@ -30,6 +32,7 @@ import {
 } from "../../lib/waitingIngest";
 import ProductAnalyticsTracker from "../../components/ProductAnalyticsTracker.astro";
 import { FLASH_INGEST_KEY, peekSecretFlash } from "../../lib/secretFlash";
+import { ingestKeyVaultConfigured } from "../../lib/ingestKeyVault";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 
@@ -245,22 +248,26 @@ const wizardStep =
     : pushDevices.some((d) => !d.last_seen_at)
       ? 2
       : 2;
+function deviceHasRecoverableKey(meta: unknown): boolean {
+  if (!meta || typeof meta !== "object" || Array.isArray(meta)) return false;
+  return typeof (meta as Record<string, unknown>).ingest_key_enc === "string";
+}
+
+function sensorNeedsRename(label: string): boolean {
+  return /^Probe \d+$/.test(label.trim());
+}
+
+const ingestKeyVaultLive = ingestKeyVaultConfigured();
 const pullFeedIds = preferences.tempFeeds.filter((f) => f.url).map((f) => f.id);
-const renameSensorRows = devices.flatMap((device) =>
-  device.sensors
-    .filter((sensor) => sensor.kind === "temperature")
-    .map((sensor) => ({
-      id: sensor.id,
-      key: sensor.key,
-      label: sensor.label,
-      deviceName: device.name,
-      kind: sensor.kind,
-    })),
-);
 const showRenameBatch =
   Boolean(Astro.url.searchParams.get("ingest_ok")) ||
   Boolean(Astro.url.searchParams.get("rename_sensors")) ||
   Number(Astro.url.searchParams.get("sensors_created") ?? "0") > 0;
+const sensorsNeedRename = devices.some((device) =>
+  device.sensors.some((sensor) => sensor.kind === "temperature" && sensorNeedsRename(sensor.label)),
+);
+const postSetupFunnel = ingestOk && canEdit;
+const postSetupHasRenamed = !sensorsNeedRename;
 ---
 <DashboardLayout title="Devices">
   <ProductAnalyticsTracker events={analyticsEvents} />
@@ -301,15 +308,7 @@ const showRenameBatch =
 
     <DeviceIntegrationsStrip />
 
-    {showRenameBatch && renameSensorRows.length > 0 && canEdit && (
-      <section class="card" id="rename-sensors">
-        <h2 class="card-title">Rename sensors</h2>
-        <p class="card-subtitle mb-4">
-          Auto-imported keys get generic names first. Accept suggestions or type your own, then save once.
-        </p>
-        <SensorRenameBatch client:visible sensors={renameSensorRows} redirectTo={`${redirectTo}?tab=push`} />
-      </section>
-    )}
+    <DeviceSetupWizard show={postSetupFunnel} hasRenamed={postSetupHasRenamed} />
 
     {(noticeParam === "device_limit" || atDeviceLimit) && (
       <UpgradeNudge feature="device_limit" tier={entitlements.tier} />
@@ -374,7 +373,7 @@ const showRenameBatch =
       </section>
     )}
 
-    {showReceivingData && (
+    {showReceivingData && !postSetupFunnel && (
       <section class="card alert-success" id="receiving-data">
         <h2 class="card-title">Receiving data</h2>
         <p class="mb-4">
@@ -660,6 +659,26 @@ const showRenameBatch =
         <ul class="mt-6 space-y-6">
           {pushDevices.map((device) => {
             const seen = formatRelativeAge(device.last_seen_at, "never seen");
+            const tempRenameSensors = device.sensors
+              .filter((sensor) => sensor.kind === "temperature")
+              .map((sensor) => ({
+                id: sensor.id,
+                key: sensor.key,
+                label: sensor.label,
+                kind: sensor.kind,
+              }));
+            const showInlineRename =
+              canEdit &&
+              tempRenameSensors.length > 0 &&
+              (showRenameBatch || tempRenameSensors.some((sensor) => sensorNeedsRename(sensor.label)));
+            const highlightRename =
+              focusDevice === device.id ||
+              (showRenameBatch && tempRenameSensors.some((sensor) => sensorNeedsRename(sensor.label)));
+            const showRevealKey =
+              canEdit &&
+              ingestKeyVaultLive &&
+              deviceHasRecoverableKey(device.meta) &&
+              !(ingestKey && focusDevice === device.id);
             return (
             <li class="rounded-xl border border-[var(--color-border)] p-4">
               <div class="flex flex-wrap items-start justify-between gap-3">
@@ -735,6 +754,9 @@ const showRenameBatch =
                     <input type="hidden" name="redirect" value={redirectTo} />
                     <button class="btn-secondary" type="submit">Rotate key</button>
                   </form>
+                  {showRevealKey && (
+                    <RevealIngestKeyButton client:visible deviceId={device.id} deviceName={device.name} />
+                  )}
                   {canEdit && transferTargets.length > 0 && (
                     <form action="/api/devices" method="post" class="flex flex-wrap gap-2 items-end">
                       <input type="hidden" name="action" value="transfer" />
@@ -761,6 +783,16 @@ const showRenameBatch =
                   )}
                 </div>
               </div>
+
+              {showInlineRename && (
+                <PushInlineRename
+                  client:visible
+                  deviceId={device.id}
+                  deviceName={device.name}
+                  sensors={tempRenameSensors}
+                  highlight={highlightRename}
+                />
+              )}
 
               {device.sensors.length === 0 ? (
                 <p class="mt-3 mb-0 text-sm text-[var(--color-text-muted)]">
@@ -808,6 +840,15 @@ const showRenameBatch =
                             </select>
                           </div>
                           <div class="sensor-map-actions">
+                            <label class="checkbox-row mb-0">
+                              <input
+                                type="checkbox"
+                                name="visible"
+                                value="true"
+                                checked={sensor.visible}
+                              />
+                              <span>Show on Home</span>
+                            </label>
                             <button class="btn-secondary" type="submit">Save</button>
                             <p class="m-0 text-sm text-[var(--color-success)] hidden" data-sensor-status></p>
                             <p class="m-0 text-sm text-[var(--color-danger)] hidden" data-sensor-error></p>

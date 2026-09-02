@@ -391,7 +391,7 @@ export async function saveUserTempConfig(
 async function getCurrentTempConfig(userId: string): Promise<TempConfigRow> {
   const { getUserDevicesAsTempConfig } = await import("./devices");
   const fromDevices = await getUserDevicesAsTempConfig(userId);
-  if (fromDevices.feeds.length > 0) {
+  if (fromDevices.householdId) {
     return { feeds: fromDevices.feeds, probes: fromDevices.probes };
   }
 
