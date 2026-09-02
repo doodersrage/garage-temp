@@ -5,8 +5,10 @@ import {
   aboutHubPhotoIds,
   aboutPhotos,
   compareHubPhotoIds,
+  compareHubPhotos,
   getAboutHeroPhoto,
   guidesHubPhotoIds,
+  guidesHubPhotos,
   storiesHubPhotoIds,
   type AboutPhotoId,
 } from "./aboutPhotos";
@@ -51,5 +53,23 @@ describe("aboutPhotos", () => {
     const guides = new Set(guidesHubPhotoIds);
     const overlap = compareHubPhotoIds.filter((id) => guides.has(id));
     expect(overlap).toEqual([]);
+  });
+
+  it("labels compare hub photos to alternatives", () => {
+    expect(compareHubPhotos).toHaveLength(4);
+    for (const item of compareHubPhotos) {
+      expect(item.label.length).toBeGreaterThan(3);
+      expect(item.href).toMatch(/^\/compare\//);
+      expect(aboutPhotos[item.id]).toBeTruthy();
+    }
+  });
+
+  it("labels guides hub photos to guide categories", () => {
+    expect(guidesHubPhotos).toHaveLength(4);
+    for (const item of guidesHubPhotos) {
+      expect(item.label.length).toBeGreaterThan(3);
+      expect(item.href).toMatch(/^\/guides#/);
+      expect(aboutPhotos[item.id]).toBeTruthy();
+    }
   });
 });

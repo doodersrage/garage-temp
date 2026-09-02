@@ -6,6 +6,7 @@ import {
   coldestProbeTempF,
   computeDemoProbes,
   defaultDemoControls,
+  doorDraftSpreadF,
   DEMO_PRESETS,
 } from "./probeDemo";
 
@@ -32,6 +33,34 @@ describe("probeDemo", () => {
     const closedDoor = closed.find((p) => p.key === "1")!.reading.f;
     const openDoor = open.find((p) => p.key === "1")!.reading.f;
     expect(openDoor).toBeLessThan(closedDoor);
+  });
+
+  it("widens door vs workbench gap when the door opens", () => {
+    const closed = computeDemoProbes({
+      ...defaultDemoControls,
+      outdoorF: 22,
+      sunIntensity: 15,
+      doorOpen: false,
+    });
+    const open = computeDemoProbes({
+      ...defaultDemoControls,
+      outdoorF: 22,
+      sunIntensity: 15,
+      doorOpen: true,
+    });
+    const closedSpread = doorDraftSpreadF(closed)!;
+    const openSpread = doorDraftSpreadF(open)!;
+    expect(openSpread).toBeGreaterThan(closedSpread + 3);
+    expect(openSpread).toBeGreaterThanOrEqual(10);
+  });
+
+  it("amplifies sun load in attics vs crawlspaces", () => {
+    const sunny = { outdoorF: 38, sunIntensity: 90, doorOpen: false, freezeThresholdF: 34 } as const;
+    const attic = computeDemoProbes({ ...sunny, space: "attic" });
+    const crawl = computeDemoProbes({ ...sunny, space: "crawlspace" });
+    const atticWarm = attic.find((p) => p.key === "2")!.reading.f;
+    const crawlWarm = crawl.find((p) => p.key === "2")!.reading.f;
+    expect(atticWarm).toBeGreaterThan(crawlWarm + 8);
   });
 
   it("builds pull and push JSON shapes", () => {

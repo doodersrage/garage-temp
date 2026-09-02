@@ -7,11 +7,14 @@ interface Props {
   class?: string;
   /** Compact side-rail figure for hero layouts. */
   variant?: "default" | "aside";
+  /** Override the stock photo caption when the page needs a tighter narrative tie-in. */
+  caption?: string;
 }
 
-const { photoId, class: className, variant = "default" } = Astro.props;
+const { photoId, class: className, variant = "default", caption } = Astro.props;
 const photo = getAboutPhoto(photoId);
 const isAside = variant === "aside";
+const captionText = caption ?? photo.caption;
 ---
 <figure class:list={["about-figure", isAside && "about-figure--aside", className]}>
   <Image
@@ -22,7 +25,7 @@ const isAside = variant === "aside";
     class={isAside ? "about-figure-aside-img" : "w-full h-auto"}
   />
   <figcaption>
-    {!isAside && <span class="about-figure-caption">{photo.caption}</span>}
+    {!isAside && <span class="about-figure-caption">{captionText}</span>}
     <a class="about-figure-credit" href={photo.sourceUrl} rel="noopener noreferrer" target="_blank">
       {photo.credit}
     </a>

@@ -70,14 +70,16 @@ const featuredStory = getStory("pipe-near-miss")!;
 							Monitor your garage, workshop, cabin, or other vulnerable spaces with sensors you build—and get alerted when temperatures become dangerous.
 						</p>
 						<div class="home-hero-actions">
-							<a class="btn-primary home-hero-cta-primary" href="/demo">See live demo</a>
+							<a class="btn-primary home-hero-cta-primary" href="/about/probe-demo">Try probe simulator</a>
 							<a class="btn-secondary" href="/register?next=/dashboard/temperature">Start free</a>
 						</div>
 						<p class="home-hero-nohw">
-							No hardware yet?
-							<a class="text-link" href="#home-live">See it work below</a>
+							No hardware yet? Cause a cold snap or door draft in the
+							<a class="text-link" href="/about/probe-demo?preset=coldSnap">interactive simulator</a>
 							<span aria-hidden="true"> · </span>
-							<a class="text-link" href="/about/probe-demo">Interactive probe simulator</a>
+							or
+							<a class="text-link" href="#home-live">watch live demo probes</a>
+							below.
 						</p>
 						<p class="home-hero-plans">
 							<a class="text-link" href="/pricing">
@@ -100,7 +102,9 @@ const featuredStory = getStory("pipe-near-miss")!;
 						<figcaption class="home-hero-visual-caption">
 							Real ThermalTrace dashboard — probe curves with your freeze threshold, not a mockup.
 							{" "}
-							<a class="text-link" href="/demo">See live readings</a>
+							<a class="text-link" href="/about/probe-demo">Try the interactive simulator</a>
+							{" · "}
+							<a class="text-link" href="/demo">Live readings</a>
 						</figcaption>
 					</figure>
 				</div>
@@ -111,20 +115,26 @@ const featuredStory = getStory("pipe-near-miss")!;
 
 				<section class="home-live-block" id="home-live" aria-labelledby="home-live-title">
 					<div class="home-live-intro">
-						<h2 class="home-live-title" id="home-live-title">No hardware yet? See it work.</h2>
+						<h2 class="home-live-title" id="home-live-title">Two ways to try it — no account</h2>
 						<p class="home-live-lede">
-							Live probe readings from a ThermalTrace demo feed—no account required. Prefer to tweak outdoor air, sun load, and freeze threshold yourself?
-							<a class="text-link" href="/about/probe-demo">Open the interactive probe simulator</a>.
+							<strong>Hands-on:</strong>
+							{" "}
+							<a class="text-link" href="/about/probe-demo">Interactive probe simulator</a>
+							— open the bay door, trigger a cold snap, watch multi-zone risk and push/pull JSON respond.
+							{" "}
+							<strong>Observational:</strong>
+							live demo probes below on the production ingest path. Full live page (weather + kit steps):
+							<a class="text-link" href="/demo">/demo</a>.
 						</p>
 					</div>
+					<p class="home-live-cta mb-4">
+						<a class="btn-primary" href="/about/probe-demo?preset=doorDraft">Open door-draft simulator</a>
+						<a class="btn-secondary" href="/demo">Full live demo feed</a>
+					</p>
 					<div class="home-live" aria-label="Live demo readings">
 						{showGarageTemps && <DemoTempsPanel client:visible />}
 						{showWeather && <WeatherPanel client:visible cityId={null} guest owmApiKey={owmApiKey || null} />}
 					</div>
-					<p class="home-live-cta mb-0">
-						<a class="btn-primary" href="/demo">Open the full live demo</a>
-						<a class="btn-secondary" href="/about/probe-demo">Try the probe simulator</a>
-					</p>
 				</section>
 
 				<section class="home-steps" aria-labelledby="home-steps-title">
@@ -186,6 +196,7 @@ const featuredStory = getStory("pipe-near-miss")!;
 						<li>HTTPS JSON</li>
 						<li>MQTT bridge</li>
 						<li><a class="text-link" href="/integrations/home-assistant">Home Assistant</a></li>
+						<li><a class="text-link" href="/about/thermostat-oauth">Nest / Ecobee</a></li>
 						<li><a class="text-link" href="/compare/diy-mqtt">vs DIY MQTT</a></li>
 					</ul>
 				</section>

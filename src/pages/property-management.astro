@@ -4,7 +4,13 @@ export const prerender = false;
 import Layout from "../layouts/Layout.astro";
 import PageHeader from "../components/PageHeader.astro";
 import FaqSection from "../components/FaqSection.astro";
+import ProductScreenshot from "../components/ProductScreenshot.astro";
 import { getAuthFromCookies } from "../lib/auth";
+import {
+  PORTFOLIO_MAX_OWNED_HOUSEHOLDS,
+  PRO_MAX_OWNED_HOUSEHOLDS,
+} from "../lib/entitlements";
+import { getPortfolioPriceDisplay } from "../lib/stripePricing";
 import {
   getBreadcrumbSchema,
   getFaqPageSchema,
@@ -17,22 +23,38 @@ const { user } = await getAuthFromCookies(Astro.cookies);
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/property-management");
+const portfolioPrices = getPortfolioPriceDisplay();
+const portfolioAnnual = portfolioPrices.annual;
+const portfolioMonthly = portfolioPrices.monthly;
+const portfolioConfigured = portfolioAnnual != null || portfolioMonthly != null;
+const priceInline = portfolioConfigured
+  ? portfolioAnnual
+    ? `${portfolioAnnual}/yr for up to ${PORTFOLIO_MAX_OWNED_HOUSEHOLDS} properties${
+        portfolioMonthly ? ` (${portfolioMonthly}/mo billed monthly)` : ""
+      }`
+    : `${portfolioMonthly}/mo for up to ${PORTFOLIO_MAX_OWNED_HOUSEHOLDS} properties`
+  : `Custom pricing for up to ${PORTFOLIO_MAX_OWNED_HOUSEHOLDS} properties`;
 
 const propertyFaqs: AboutFaqItem[] = [
   {
     question: "How is Portfolio different from Pro?",
     answer:
-      "Portfolio includes everything on the Pro plan -- SMS/push alerts, official NWS freeze and cold alerts, the claims evidence pack, webhooks, share links -- plus a much higher ceiling on how many properties you can own (Pro already allows up to 50; Portfolio raises that to 500) and it's priced for that scale rather than for a single property.",
+      `Portfolio includes everything on the Pro plan -- SMS/push alerts, official NWS freeze and cold alerts, the claims evidence pack, webhooks, share links -- plus a much higher ceiling on how many properties you can own (Pro already allows up to ${PRO_MAX_OWNED_HOUSEHOLDS}; Portfolio raises that to ${PORTFOLIO_MAX_OWNED_HOUSEHOLDS}) and it's priced for that scale rather than for a single property.`,
   },
   {
     question: "Do I need Portfolio if I only have 2-3 properties?",
     answer:
-      "Probably not -- Pro already covers a handful of properties (up to 50 owned households) with the same cross-property dashboard and alert digest. Portfolio is built for larger operations: a property-management company or a landlord running many units where a single flat individual price doesn't reflect the scale.",
+      `Probably not -- Pro already covers a handful of properties (up to ${PRO_MAX_OWNED_HOUSEHOLDS} owned households) with the same cross-property dashboard and alert digest. Portfolio is built for larger operations: a property-management company or a landlord running many units where a single flat individual price doesn't reflect the scale.`,
   },
   {
     question: "Can my property managers or on-site staff get their own login?",
     answer:
       "Yes. Invite them with the property-manager role and they can manage devices and alert settings for the property they're assigned to, without seeing your billing, other properties, or account settings.",
+  },
+  {
+    question: "What happens when a tenant or manager leaves?",
+    answer:
+      "Remove them from the household under Dashboard → Household. Their membership is deleted immediately — they lose access to that property's devices, alerts, and history, and they never had billing access to begin with. Pending invites can be revoked the same way before they're accepted.",
   },
   {
     question: "Do I need a separate ThermalTrace account per property?",
@@ -43,6 +65,11 @@ const propertyFaqs: AboutFaqItem[] = [
     question: "What does the portfolio dashboard actually show?",
     answer:
       "One table across every property you own: current risk status, minimum recent temperature against your freeze threshold, device count, and last reading time -- so you can see which properties need attention without opening each one individually.",
+  },
+  {
+    question: "Why does the claims pack matter for rentals?",
+    answer:
+      "After freeze or leak damage in a vacant or tenant-occupied unit, insurers and liability questions often turn on when you knew and what you were monitoring. The Pro/Portfolio claims pack turns probe history and alert timelines into a verifiable report you can download or email to an adjuster — documentation for claims, disputes, and carrier conversations.",
   },
 ];
 
@@ -56,7 +83,7 @@ const schema = [
 ---
 <Layout
   title="Freeze & leak monitoring for property portfolios"
-  description="Cross-property freeze-risk dashboard, portfolio-wide alert digest, and property-manager logins for landlords, vacation-rental owners, and property-management companies running multiple units on ThermalTrace."
+  description={`Cross-property freeze-risk dashboard, claims/insurance evidence, property-manager logins, and Portfolio pricing (${portfolioAnnual ?? portfolioMonthly ?? "custom"} for up to ${PORTFOLIO_MAX_OWNED_HOUSEHOLDS} properties) for landlords, vacation rentals, and property managers.`}
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede"]}
 >
@@ -64,13 +91,36 @@ const schema = [
     <PageHeader
       kicker="For portfolios"
       title="One dashboard for every property you're responsible for"
-      lede="A single shop and a ten-unit rental portfolio don't have the same monitoring problem. ThermalTrace's Portfolio tier rolls every property you own into one freeze-risk view, lets on-site managers handle devices and alerts without touching your billing, and is priced for that scale instead of a single-property plan stretched thin."
+      lede="A vacant rental and a ten-unit portfolio don't share the same monitoring problem. ThermalTrace rolls every property you own into one freeze-risk view, keeps insurance-ready history when something fails, lets on-site managers handle devices without seeing billing, and prices Portfolio for that scale."
     >
       <a slot="actions" class="btn-primary" href={user ? "/dashboard/portfolio" : "/register?next=/dashboard/temperature"}>
         {user ? "Open portfolio dashboard" : "Start free — add your first property"}
       </a>
-      <a slot="actions" class="btn-secondary" href="/pricing#portfolio">See Portfolio pricing</a>
+      <a slot="actions" class="btn-secondary" href="/pricing#portfolio">
+        {portfolioConfigured ? `Portfolio — ${portfolioAnnual ?? portfolioMonthly}` : "See Portfolio pricing"}
+      </a>
     </PageHeader>
+
+    <ProductScreenshot
+      shot="portfolio"
+      caption="Portfolio dashboard — at-risk properties, min temps, device counts, and property-manager roles in one table."
+    />
+
+    <section class="card">
+      <h2 class="card-title">Documented proof when a vacant unit fails</h2>
+      <p class="card-subtitle mb-4">
+        A burst pipe in an empty rental can sit unnoticed for days. Landlords and managers need alerts when it starts —
+        and a paper trail afterward for insurance, tenants, and liability questions.
+      </p>
+      <ul class="text-sm space-y-2 mb-4">
+        <li><strong>Claims / insurance evidence pack</strong> — freeze-exposure hours, probe tables, and alert timelines you can download or email to an adjuster. Built for rental claims and disputes, not just a homeowner near-miss.</li>
+        <li><strong>Per-property history</strong> — each unit keeps its own thresholds and readings so you can show what that space was doing before the loss.</li>
+        <li><strong>Portfolio alert digest</strong> — one rollup when any property needs attention, instead of checking units one by one.</li>
+      </ul>
+      <p class="mb-0">
+        <a class="btn-secondary" href="/claims-pack">See the claims pack</a>
+      </p>
+    </section>
 
     <section class="card">
       <h2 class="card-title">What's already built</h2>
@@ -81,30 +131,42 @@ const schema = [
         <li><strong>Cross-property risk dashboard</strong> — every property you own in one table: current risk, minimum recent temperature vs. your freeze threshold, device count, last reading.</li>
         <li><strong>Portfolio-wide alert digest</strong> — a rollup notification when any property in your portfolio needs attention, instead of watching each one separately.</li>
         <li><strong>Property-manager logins</strong> — invite on-site staff or contractors to manage devices and alert settings for one property, with no access to your billing or the rest of your portfolio.</li>
+        <li><strong>Claims / insurance evidence pack</strong> — verifiable monitoring history for adjusters, carriers, and liability conversations after freeze or leak damage.</li>
         <li><strong>Per-property everything else</strong> — each property gets its own device limit, alert thresholds, and history, exactly like a standalone ThermalTrace account would.</li>
       </ul>
     </section>
 
     <section class="card">
       <h2 class="card-title">Built for the people who actually run these</h2>
-      <p class="mb-0 text-sm">
-        Vacation-rental owners juggling a handful of cabins, small landlords with a
-        few rental units, and property-management companies responsible for units
-        they don't live in — anyone whose job is knowing which of many properties is
-        at risk right now, not just one property.
-      </p>
+      <ul class="text-sm space-y-3 mb-0">
+        <li>
+          <strong>Small landlords &amp; property managers</strong> — units you don't live in, staff turnover, and ROI that has to beat one unnoticed freeze claim.
+          Manager logins keep on-site access scoped; remove someone and their access ends immediately.
+        </li>
+        <li>
+          <strong>Vacation-rental owners</strong> — cabins and short-term stays sit empty between guests. Watch pipes and spaces during vacancy gaps without giving cleaners or co-hosts billing access.
+          Start on Pro for a handful of places; move to Portfolio when the property count outgrows a personal plan.
+        </li>
+      </ul>
     </section>
 
-    <section class="card">
+    <section class="card" id="portfolio-pricing">
       <h2 class="card-title">Pro vs. Portfolio</h2>
       <p class="mb-4 text-sm">
-        Pro already includes the portfolio dashboard and up to 50 owned properties —
+        Pro already includes the portfolio dashboard and up to {PRO_MAX_OWNED_HOUSEHOLDS} owned properties —
         plenty for a couple of rentals or a vacation home alongside your main house.
-        Portfolio is for real scale: a much higher property ceiling, and pricing that
-        reflects a business running many units rather than one person with one house.
+        Portfolio is for real scale: up to {PORTFOLIO_MAX_OWNED_HOUSEHOLDS} properties, property-manager logins,
+        and pricing that reflects a business running many units rather than one person with one house.
+      </p>
+      <p class="text-sm mb-4">
+        <strong>Portfolio:</strong> {priceInline}.
+        {" "}
+        <a class="text-link" href="/pricing#portfolio">Full plan comparison</a>
+        {" · "}
+        <a class="text-link" href="/pricing#pro">Pro pricing</a>
       </p>
       <p class="mt-4 mb-0">
-        <a class="btn-primary" href="/pricing#portfolio">Compare Pro and Portfolio pricing</a>
+        <a class="btn-primary" href="/pricing#portfolio">Compare Pro and Portfolio on pricing</a>
       </p>
     </section>
 

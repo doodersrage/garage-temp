@@ -4,6 +4,8 @@ export type GuideHubLink = {
   href: string;
   label: string;
   summary: string;
+  /** Other hub category ids — shown as intentional cross-refs, not duplicate listings. */
+  alsoIn?: string[];
 };
 
 export type GuideHubCategory = {
@@ -18,6 +20,7 @@ type GuideHubLinkDef = {
   slug?: string;
   label?: string;
   summary?: string;
+  alsoIn?: string[];
 };
 
 type GuideHubCategoryDef = {
@@ -31,9 +34,14 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
   {
     id: "hardware",
     title: "Hardware setup",
-    description: "Sensors, wiring, and firmware for ESP32, Arduino, and HTTPS JSON probes.",
+    description:
+      "Sensors, wiring, firmware, and creating push/pull devices on the dashboard.",
     links: [
-      { href: "/about/adding-devices", slug: "adding-devices" },
+      {
+        href: "/about/adding-devices",
+        slug: "adding-devices",
+        alsoIn: ["api"],
+      },
       { href: "/about/dht22-sensor-overview", slug: "dht22-sensor-overview" },
       { href: "/about/arduino-circuit-wiring", slug: "arduino-circuit-wiring" },
       { href: "/about/arduino-sketches", slug: "arduino-sketches" },
@@ -51,7 +59,11 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
       { href: "/about/garage-door-cold-playbook", slug: "garage-door-cold-playbook" },
       { href: "/about/personal-weather-stations", slug: "personal-weather-stations" },
       { href: "/about/alert-channel-cookbook", slug: "alert-channel-cookbook" },
-      { href: "/stories/garage-freeze-alert", label: "Freeze case study", summary: "How a probe curve caught a cold night before pipes froze." },
+      {
+        href: "/stories/garage-freeze-alert",
+        label: "Freeze case study",
+        summary: "How a probe curve caught a cold night before pipes froze.",
+      },
     ],
   },
   {
@@ -62,13 +74,18 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
       { href: "/about/household-sharing-walkthrough", slug: "household-sharing-walkthrough" },
       { href: "/about/accounts-and-dashboard", slug: "accounts-and-dashboard" },
       { href: "/about/install-pwa", slug: "install-pwa" },
-      { href: "/android", label: "Android app (early access)", summary: "GitHub build/sideload while Play review finishes; PWA works today." },
+      {
+        href: "/android",
+        label: "Android app (early access)",
+        summary: "GitHub build/sideload while Play review finishes; PWA works today.",
+      },
     ],
   },
   {
     id: "integrations",
     title: "Integrations",
-    description: "Home Assistant HACS, MQTT bridge, webhooks, and comparison guides.",
+    description:
+      "Home Assistant HACS, MQTT→HTTPS bridge, ESPHome/Shelly, and comparison guides. Payload schemas live under API.",
     links: [
       {
         href: "/integrations",
@@ -78,27 +95,43 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
       {
         href: "/integrations/home-assistant",
         label: "Home Assistant (HACS)",
-        summary: "Official custom integration — share-link sensors, snooze/vacation services, optional push ingest.",
+        summary:
+          "Official custom integration — share-link sensors, snooze/vacation services, optional push ingest.",
+        alsoIn: ["api"],
       },
-      { href: "/about/adding-devices", slug: "adding-devices", label: "MQTT bridge recipe", summary: "Keep Mosquitto local; mirror readings over HTTPS." },
+      {
+        href: "/about/mqtt-bridge",
+        slug: "mqtt-bridge",
+        alsoIn: ["api"],
+      },
       { href: "/about/esphome-shelly-recipes", slug: "esphome-shelly-recipes" },
-      { href: "/compare/diy-mqtt", label: "vs DIY MQTT", summary: "When hosted freeze alerts beat self-hosting Mosquitto and cron." },
-      { href: "/about/ingest-and-webhooks", slug: "ingest-and-webhooks" },
+      {
+        href: "/compare/diy-mqtt",
+        label: "vs DIY MQTT",
+        summary: "When hosted freeze alerts beat self-hosting Mosquitto and cron.",
+      },
     ],
   },
   {
     id: "api",
     title: "API",
-    description: "Ingest payloads, dashboard HTTP API, and automation recipes.",
+    description:
+      "Ingest payloads, outbound webhooks, OpenAPI, and Zapier/Make. Device creation is under Hardware; HACS and MQTT under Integrations.",
     links: [
-      { href: "/about/adding-devices", slug: "adding-devices" },
       { href: "/about/ingest-and-webhooks", slug: "ingest-and-webhooks" },
-      { href: "/docs/api", label: "HTTP API documentation", summary: "Ingest, metrics, webhooks, and the OpenAPI spec." },
-      { href: "/integrations/home-assistant", label: "Home Assistant (HACS)", summary: "Official custom integration for automatic HA entities." },
+      {
+        href: "/docs/api",
+        label: "HTTP API documentation",
+        summary: "Ingest, metrics, webhooks, and the OpenAPI spec.",
+      },
       { href: "/about/zapier-make-recipes", slug: "zapier-make-recipes" },
     ],
   },
 ];
+
+const CATEGORY_TITLE: Record<string, string> = Object.fromEntries(
+  GUIDE_HUB_DEFS.map((c) => [c.id, c.title]),
+);
 
 function resolveLink(def: GuideHubLinkDef): GuideHubLink {
   if (def.slug) {
@@ -107,12 +140,14 @@ function resolveLink(def: GuideHubLinkDef): GuideHubLink {
       href: def.href,
       label: def.label ?? page?.title ?? def.slug,
       summary: def.summary ?? page?.summary ?? "",
+      alsoIn: def.alsoIn,
     };
   }
   return {
     href: def.href,
     label: def.label ?? def.href,
     summary: def.summary ?? "",
+    alsoIn: def.alsoIn,
   };
 }
 
@@ -123,4 +158,8 @@ export function getGuideHubCategories(): GuideHubCategory[] {
     description: category.description,
     links: category.links.map(resolveLink),
   }));
+}
+
+export function guideHubCategoryTitle(id: string): string {
+  return CATEGORY_TITLE[id] ?? id;
 }

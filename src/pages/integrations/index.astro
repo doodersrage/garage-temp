@@ -9,6 +9,7 @@ import {
   resolveSiteUrl,
 } from "../../lib/schemaMarkup";
 import {
+  DEV_DOCS_BASE,
   HACS_BADGE_URL,
   HACS_REPO_URL,
   INTEGRATION_CARDS,
@@ -28,7 +29,7 @@ const schema = [
 ---
 <Layout
   title="Integrations"
-  description="Connect ThermalTrace to Home Assistant (HACS), MQTT, Grafana, Nest/Ecobee, webhooks, and Zapier — without giving up LAN-local MQTT."
+  description="Connect ThermalTrace to Home Assistant (HACS), MQTT, Grafana, Nest/Ecobee, webhooks, freeze-map embeds, and Zapier — without giving up LAN-local MQTT."
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede"]}
 >
@@ -36,7 +37,7 @@ const schema = [
     <PageHeader
       kicker="Integrations"
       title="Wire ThermalTrace into your stack"
-      lede="Hosted freeze alerts and history for ESP/Arduino probes — with optional Home Assistant sensors, Prometheus metrics, thermostat context, and webhook automations."
+      lede="Hosted freeze alerts and history for ESP/Arduino probes — with optional Home Assistant sensors, Prometheus metrics, thermostat context, and webhook automations. Guides below stay on thermaltrace.dev; deep payload/Grafana write-ups live on the developer docs site and are labeled when they leave."
     >
       <a slot="actions" class="btn-primary" href="/integrations/home-assistant">Home Assistant (HACS)</a>
       <a slot="actions" class="btn-secondary" href={user ? "/dashboard/share" : "/register?next=/dashboard/share"}>
@@ -54,6 +55,13 @@ const schema = [
           Official HACS custom integration — default store submission in progress.
         </p>
       </div>
+      <p class="text-sm text-[var(--color-text-muted)] mb-0">
+        Looking for OpenAPI schemas or Grafana dashboard JSON details?
+        {" "}
+        <a class="text-link" href={DEV_DOCS_BASE} target="_blank" rel="noreferrer">Developer docs (GitHub Pages)</a>
+        {" "}
+        open in a new tab.
+      </p>
     </section>
 
     <section class="grid gap-4 sm:grid-cols-2">
@@ -63,14 +71,37 @@ const schema = [
           {card.tier && (
             <p class="text-xs uppercase tracking-wide text-[var(--color-text-muted)] mb-2">{card.tier}</p>
           )}
-          <p class="text-sm flex-1 mb-4">{card.summary}</p>
-          <a
-            class="btn-secondary self-start"
-            href={card.href}
-            {...(card.external ? { target: "_blank", rel: "noreferrer" } : {})}
-          >
-            {card.cta ?? "Learn more"}
-          </a>
+          <p class="text-sm mb-3">{card.summary}</p>
+          {card.bullets && card.bullets.length > 0 && (
+            <ul class="text-sm space-y-1.5 mb-4 pl-4 list-disc text-[var(--color-text-muted)]">
+              {card.bullets.map((bullet) => (
+                <li>{bullet}</li>
+              ))}
+            </ul>
+          )}
+          <div class="mt-auto flex flex-wrap gap-2">
+            <a
+              class="btn-secondary"
+              href={card.href}
+              {...(card.external ? { target: "_blank", rel: "noreferrer" } : {})}
+            >
+              {card.cta ?? "Learn more"}
+              {card.external ? (
+                <span class="sr-only"> (opens developer docs)</span>
+              ) : null}
+              {card.external ? " ↗" : ""}
+            </a>
+            {card.secondaryHref && (
+              <a
+                class="btn-ghost"
+                href={card.secondaryHref}
+                {...(card.secondaryExternal ? { target: "_blank", rel: "noreferrer" } : {})}
+              >
+                {card.secondaryLabel ?? "More"}
+                {card.secondaryExternal ? " ↗" : ""}
+              </a>
+            )}
+          </div>
         </article>
       ))}
     </section>
@@ -86,6 +117,7 @@ const schema = [
       <div class="flex flex-wrap gap-3">
         <a class="btn-primary" href="/integrations/home-assistant">HACS install guide</a>
         <a class="btn-secondary" href="/about/ingest-and-webhooks">Ingest & webhooks</a>
+        <a class="btn-ghost" href="/freeze-map#embed">Freeze map embed</a>
       </div>
     </section>
   </div>

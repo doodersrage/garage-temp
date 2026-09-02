@@ -8,6 +8,10 @@ import historyChartImg from "../assets/marketing/thermaltrace-dashboard-history-
 import devicesImg from "../assets/marketing/thermaltrace-dashboard-devices.jpg";
 import overviewCardsImg from "../assets/marketing/thermaltrace-dashboard-overview-cards.jpg";
 import overviewStatusImg from "../assets/marketing/thermaltrace-dashboard-overview-status.jpg";
+import portfolioImg from "../assets/marketing/thermaltrace-dashboard-portfolio.jpg";
+import claimsPackImg from "../assets/marketing/thermaltrace-claims-pack-preview.jpg";
+import claimsVerifyImg from "../assets/marketing/thermaltrace-claims-pack-verification.jpg";
+import monitoringCertImg from "../assets/marketing/thermaltrace-monitoring-certificate-preview.jpg";
 
 interface Props {
   shot: ProductShotId;
@@ -51,6 +55,26 @@ const shots: Record<ProductShotId, ShotMeta> = {
     image: overviewStatusImg,
     alt: "ThermalTrace Overview Status strip with last reading, sensors, feeds, alerts, house, freeze hours, coldest margin, indoor−outdoor delta, probe spread, condensation, and feed health",
     defaultCaption: "Overview Status — freeze margin, ΔT, probe spread, condensation, and feed health.",
+  },
+  portfolio: {
+    image: portfolioImg,
+    alt: "ThermalTrace Portfolio dashboard listing multiple properties with freeze-risk banner, min temperatures, device counts, and property-manager roles",
+    defaultCaption: "Portfolio — every property’s freeze risk in one table.",
+  },
+  "claims-pack": {
+    image: claimsPackImg,
+    alt: "ThermalTrace claims pack PDF showing freeze-exposure stats, freeze threshold, critical alerts, and devices in scope",
+    defaultCaption: "Claims pack — freeze-exposure stats and devices for an adjuster.",
+  },
+  "claims-verification": {
+    image: claimsVerifyImg,
+    alt: "ThermalTrace claims pack verification section with SHA-256 code, permanent verify link, and legal disclaimer",
+    defaultCaption: "Verification — SHA-256 code and permanent re-view link.",
+  },
+  "monitoring-certificate": {
+    image: monitoringCertImg,
+    alt: "ThermalTrace monitoring certificate showing alerts enabled, freeze threshold, retention, and device coverage",
+    defaultCaption: "Monitoring certificate — configuration proof for insurers and landlords.",
   },
 };
 

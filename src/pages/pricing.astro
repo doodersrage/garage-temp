@@ -14,6 +14,8 @@ import {
   MEMBER_MAX_DEVICES,
   PRO_HISTORY_DAYS,
   PRO_MAX_DEVICES,
+  PRO_MAX_OWNED_HOUSEHOLDS,
+  PORTFOLIO_MAX_OWNED_HOUSEHOLDS,
   formatHistoryRetention,
 } from "../lib/entitlements";
 import { normalizeComparisonTier } from "../lib/planComparison";
@@ -22,7 +24,6 @@ import {
   getPortfolioPriceDisplay,
   getProPriceDisplay,
 } from "../lib/stripePricing";
-import { PORTFOLIO_MAX_OWNED_HOUSEHOLDS } from "../lib/entitlements";
 import { getUserSubscription } from "../lib/stripeSubscriptions";
 import { isActiveSubscriptionStatus } from "../lib/stripe";
 import {
@@ -143,7 +144,7 @@ const schema = [
     <PageHeader
       kicker="Pricing"
       title="Plans that grow with your probes"
-      lede="Start free to see if ThermalTrace fits. Upgrade to Member for a full cold season of history, or Pro when you want serious alerts and automation. Portfolio is for multi-property owners—details below."
+      lede="Start free to see if ThermalTrace fits. Upgrade to Member for a full cold season of history, or Pro when you want serious alerts, thermostat context, and automation. Need more than a handful of properties or on-site manager logins? Portfolio is below."
     >
       {user ? (
         <p class="page-header-meta">
@@ -177,7 +178,11 @@ const schema = [
         </li>
         <li>
           <strong>Pro</strong>
-          <span>Serious alerts and automation—NWS, SMS, push, webhooks, claims pack, 14-day trial.</span>
+          <span>Serious alerts and automation—NWS, SMS, push, Nest/Ecobee house context, claims pack, 14-day trial. Up to {PRO_MAX_OWNED_HOUSEHOLDS} properties.</span>
+        </li>
+        <li>
+          <strong>Portfolio</strong>
+          <span>Larger multi-property ops—up to {PORTFOLIO_MAX_OWNED_HOUSEHOLDS} owned properties, cross-property risk view, property-manager logins without billing access.</span>
         </li>
       </ul>
     </section>
@@ -236,11 +241,11 @@ const schema = [
           </div>
         </article>
 
-        <article class="plan-tier-card plan-tier-card-featured">
+        <article class="plan-tier-card plan-tier-card-featured" id="member" aria-labelledby="plan-member-name">
           <div class="plan-tier-badge-slot">
             <span class="plan-tier-badge">Most popular</span>
           </div>
-          <h2 class="plan-tier-name">Member</h2>
+          <h2 class="plan-tier-name" id="plan-member-name">Member</h2>
           <p class="plan-tier-price" aria-live="polite">
             <span
               class="plan-tier-amount"
@@ -328,16 +333,18 @@ const schema = [
                 : `${proMonthly.sub} · 14-day free trial`}
             </p>
           </div>
-          <p class="plan-tier-tagline">Official NWS alerts, <a class="text-link" href="/claims-pack">claims pack</a>, alerts anywhere</p>
+          <p class="plan-tier-tagline">Official NWS alerts, Nest/Ecobee house context, <a class="text-link" href="/claims-pack">claims pack</a></p>
           <ul class="plan-tier-list">
             <li>{PRO_MAX_DEVICES} push devices per property</li>
             <li>{formatHistoryRetention(PRO_HISTORY_DAYS)}+ of history</li>
             <li>Forecast freeze warnings + official NWS alerts</li>
+            <li><a class="text-link" href="/about/thermostat-oauth">Nest / Ecobee</a> thermostat connection (house vs probe)</li>
             <li><a class="text-link" href="/claims-pack">Claims / insurance evidence pack</a></li>
             <li>
               SMS, push, webhooks, Pro share scopes &amp;
               <a class="text-link" href="/docs/api">API keys</a>
             </li>
+            <li>Up to {PRO_MAX_OWNED_HOUSEHOLDS} owned properties (vacation home, rental, workshop)</li>
           </ul>
           <div class="plan-tier-footer">
             {user ? (
@@ -392,13 +399,19 @@ const schema = [
               {defaultInterval === "annual" ? portfolioAnnual.sub : portfolioMonthly.sub}
             </p>
           </div>
-          <p class="plan-tier-tagline">Multiple properties, one dashboard</p>
+          <p class="plan-tier-tagline">
+            For ops past Pro’s {PRO_MAX_OWNED_HOUSEHOLDS}-property ceiling—managers without billing access
+          </p>
           <ul class="plan-tier-list">
             <li>Everything in Pro, plus—</li>
-            <li>Up to {PORTFOLIO_MAX_OWNED_HOUSEHOLDS} owned properties</li>
+            <li>Up to {PORTFOLIO_MAX_OWNED_HOUSEHOLDS} owned properties (Pro already covers up to {PRO_MAX_OWNED_HOUSEHOLDS})</li>
             <li>Cross-property freeze-risk dashboard</li>
-            <li>Property-manager logins (devices &amp; alerts only, no billing access)</li>
+            <li>Property-manager logins (devices &amp; alerts only — no billing or other properties)</li>
           </ul>
+          <p class="text-sm text-[var(--color-text-muted)] mt-3 mb-0">
+            A few rentals or a vacation place usually stay on Pro. Portfolio is priced for larger landlords and property-management teams—see
+            <a class="text-link" href="/property-management">property management</a>.
+          </p>
           <div class="plan-tier-footer">
             {user ? (
               rawTier === "portfolio" || rawTier === "admin" ? (
@@ -438,11 +451,15 @@ const schema = [
           Free already includes one family live share link. Pro unlocks history/metrics scopes, never-expire links,
           inbound snooze webhooks, outbound alert hooks, and the
           <a class="text-link" href="/integrations/home-assistant">official Home Assistant HACS integration</a>
-          at full power. Keep MQTT on your LAN; use ThermalTrace for household freeze SMS, history, and off-site alerts.
+          at full power. Connect <a class="text-link" href="/about/thermostat-oauth">Nest or Ecobee</a> for house
+          ambient and setpoint beside your garage probes—or push any indoor climate sensor as an
+          <a class="text-link" href="/dashboard/temperature#indoor-reference">indoor reference</a>.
+          Keep MQTT on your LAN; use ThermalTrace for household freeze SMS, history, and off-site alerts.
         </p>
         <div class="flex flex-wrap gap-3">
           <a class="btn-primary" href="/integrations">All integrations</a>
           <a class="btn-secondary" href="/integrations/home-assistant">HACS install guide</a>
+          <a class="btn-secondary" href="/about/thermostat-oauth">Nest / Ecobee</a>
           <a class="btn-ghost" href="/docs/api">HTTP API</a>
         </div>
       </section>
@@ -451,11 +468,14 @@ const schema = [
     <section class="card" id="plan-matrix">
       <h2 class="card-title">Full feature comparison</h2>
       <p class="card-subtitle mb-4">
-        Device counts, retention, and which freeze alerts sit on each plan. Comparing against MQTT, Govee, or a weather station?
-        {" "}<a class="text-link" href="/compare">See alternatives</a>.
+        Canonical plan matrix for Free / Member / Pro / Portfolio — device counts, retention, freeze alerts, thermostat, and manager logins.
+        Comparing ThermalTrace against MQTT, Govee, or a weather station?
+        {" "}<a class="text-link" href="/compare">See alternatives</a>
+        {" "}(competitor guides, not a second copy of this table).
       </p>
       <p class="text-sm text-[var(--color-text-muted)] mb-4">
-        Portfolio includes everything below under Pro, plus a much higher owned-property ceiling — see the Portfolio card above.
+        Portfolio includes everything under Pro, then raises the owned-property ceiling (Pro already allows up to {PRO_MAX_OWNED_HOUSEHOLDS}; Portfolio up to {PORTFOLIO_MAX_OWNED_HOUSEHOLDS}) and adds property-manager logins — see the Portfolio card above and
+        <a class="text-link" href="/property-management">property management</a>.
       </p>
       <PlanComparisonTable highlightTier={currentTier} />
     </section>

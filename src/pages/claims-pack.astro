@@ -7,6 +7,12 @@ import FaqSection from "../components/FaqSection.astro";
 import { getAuthFromCookies } from "../lib/auth";
 import { CLAIMS_DISCLAIMER } from "../lib/claimsPack";
 import {
+  FREE_HISTORY_DAYS,
+  MEMBER_HISTORY_DAYS,
+  PRO_HISTORY_DAYS,
+  formatHistoryRetention,
+} from "../lib/entitlements";
+import {
   getBreadcrumbSchema,
   getFaqPageSchema,
   resolvePageUrl,
@@ -19,6 +25,9 @@ const { user } = await getAuthFromCookies(Astro.cookies);
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/claims-pack");
+const freeRetention = formatHistoryRetention(FREE_HISTORY_DAYS);
+const memberRetention = formatHistoryRetention(MEMBER_HISTORY_DAYS);
+const proRetention = formatHistoryRetention(PRO_HISTORY_DAYS);
 
 const claimsFaqs: AboutFaqItem[] = [
   {
@@ -28,7 +37,12 @@ const claimsFaqs: AboutFaqItem[] = [
   {
     question: "What plan is the claims pack on?",
     answer:
-      "The claims pack is a Pro feature. Free and Member plans can still see live readings and history, but generating and emailing a claims pack requires Pro.",
+      "The claims pack is a Pro (and Portfolio) feature. Free and Member plans can still see live readings and history, but generating and emailing a claims pack requires Pro.",
+  },
+  {
+    question: "If I’m on Free or Member and something just froze, can I upgrade and still build a pack?",
+    answer:
+      `Yes — as long as the readings are still inside your plan’s history window. Free keeps about ${freeRetention}; Member about ${memberRetention}; Pro about ${proRetention}+. Upgrading does not wipe stored readings: anything still within the longer Pro window becomes available for charts, CSV, and the claims pack. Upgrade promptly if you need a pack that reaches further back than your current plan shows.`,
   },
   {
     question: "Can I send this directly to my insurance adjuster?",
@@ -43,7 +57,7 @@ const claimsFaqs: AboutFaqItem[] = [
   {
     question: "Will using this get me a discount from my insurer?",
     answer:
-      "Some insurers offer discounts for homes with leak or freeze monitoring, but this varies by carrier and ThermalTrace doesn't have a formal partnership with any insurer today. Bring your claims pack to that conversation and ask — it's documentation of your monitoring setup, not a guarantee of a discount.",
+      "Maybe — it depends on the carrier and state. For example, State Farm lists homeowners discounts for eligible protective / home monitoring devices on its public discounts page, and some carriers (including Lemonade in certain markets) list water-leak or temperature-alert devices among safety measures that can lower a premium. ThermalTrace doesn't have a formal partnership with any insurer today. Bring your claims pack or monitoring certificate, ask whether monitoring like this qualifies on your policy, and let your carrier tell you what they actually offer.",
   },
 ];
 
@@ -59,7 +73,7 @@ const schema = [
   title="Claims & insurance evidence pack"
   description="Turn ThermalTrace's freeze and leak monitoring history into a verifiable claims pack — freeze-exposure stats, device tables, and an alert timeline you can download, email to an adjuster, or bring to your insurer."
   schema={schema}
-  speakableSelectors={[".page-header-title", ".page-header-lede"]}
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
   <div class="page-shell page-stack">
     <PageHeader
@@ -70,27 +84,54 @@ const schema = [
       <a slot="actions" class="btn-primary" href={user ? "/dashboard/history#claims-pack" : "/register?next=/dashboard/temperature"}>
         {user ? "Generate a claims pack" : "Start free — build your pack"}
       </a>
-      <a slot="actions" class="btn-secondary" href="/pricing">See Pro pricing</a>
+      <a slot="actions" class="btn-secondary" href="/samples/claims-pack-example.pdf">Download sample PDF</a>
+      <a slot="actions" class="btn-ghost" href="/pricing">See Pro pricing</a>
     </PageHeader>
 
-    <ProductScreenshot
-      shot="insights"
-      caption="Insights includes winter documentation — generate a claims pack from saved history when you need evidence."
-    />
+    <div class="product-shot-row">
+      <ProductScreenshot
+        shot="claims-pack"
+        caption="Real claims pack export — freeze-exposure stats, threshold, and devices in scope."
+      />
+      <ProductScreenshot
+        shot="claims-verification"
+        caption="Same export’s verification footer — SHA-256 code plus a permanent re-view link."
+        compact
+      />
+    </div>
 
     <section class="card">
       <h2 class="card-title">What's in the pack</h2>
       <p class="card-subtitle mb-4">
-        One printable HTML report, generated on demand from your own sensor history for any date range.
+        One printable HTML/PDF report, generated on demand from your own sensor history for any date range.
       </p>
       <ul class="text-sm space-y-2 mb-0">
         <li><strong>Freeze-exposure stats</strong> — hours spent at or below your alert threshold, and the coldest reading in the window.</li>
         <li><strong>Device and probe tables</strong> — every sensor that reported in the range, with the space it's assigned to.</li>
         <li><strong>Critical-alert timeline</strong> — every threshold-crossing alert that fired, with timestamps.</li>
         <li><strong>Linked CSVs</strong> — the underlying readings and alert-event exports, for an adjuster who wants the raw data.</li>
+        <li><strong>Monitoring certificate</strong> — a shorter configuration summary (threshold, channels, retention) useful for landlords and carriers who want proof you’re actively monitoring.</li>
       </ul>
       <p class="mt-4 mb-0 text-sm">
         Who it's for: documenting an active freeze or leak claim, backing up a dispute over when a failure started, or just having a record on hand — even if you never end up needing it.
+      </p>
+    </section>
+
+    <ProductScreenshot
+      shot="monitoring-certificate"
+      caption="Monitoring certificate — alerts enabled, freeze threshold, retention, and coverage at a glance."
+    />
+
+    <section class="card">
+      <h2 class="card-title">Near-miss, not just after-the-fact</h2>
+      <p class="mb-4 text-sm">
+        History is what makes an alert actionable — and what you’d show an adjuster later.
+        In our <a class="text-link" href="/stories/pipe-near-miss">Columbus pipe near-miss</a>,
+        the alert was the tip; CSV history showed the same cold corner every clear night until the door seal was fixed.
+        A claims pack is the same idea packaged for a third party: timestamps, probes, and alerts in one verifiable export.
+      </p>
+      <p class="mb-0">
+        <a class="btn-secondary" href="/stories/pipe-near-miss">Read the near-miss story</a>
       </p>
     </section>
 
@@ -111,11 +152,12 @@ const schema = [
     <section class="card">
       <h2 class="card-title">Ask your insurer about it</h2>
       <p class="mb-4 text-sm">
-        Some insurers offer premium discounts or credits for homes with active leak or freeze monitoring —
-        it reduces their claim risk. ThermalTrace doesn't have a formal partnership with any insurer today,
-        so treat this as a conversation starter rather than a promised discount: bring your claims pack, ask
-        whether monitoring like this qualifies for anything on your policy, and let your carrier tell you
-        what they actually offer.
+        Some carriers already discount homes with protective or monitoring devices — for example,
+        <a class="text-link" href="https://www.statefarm.com/insurance/homeowners/discounts" rel="noopener noreferrer" target="_blank">State Farm’s homeowners discounts page</a>
+        lists credits for eligible protective / home monitoring systems (availability varies by state), and
+        <a class="text-link" href="https://www.lemonade.com/homeowners/explained/homeowners-insurance-new-york/" rel="noopener noreferrer" target="_blank">Lemonade’s New York homeowners guide</a>
+        notes that a water leak sensor can help lower a rate.
+        ThermalTrace doesn't have a formal partnership with any insurer today, so treat this as a conversation starter rather than a promised discount: bring your claims pack or monitoring certificate, ask whether monitoring like this qualifies on your policy, and let your carrier tell you what they actually offer.
       </p>
       <p class="mb-0 text-sm text-[var(--color-text-muted)]">
         {CLAIMS_DISCLAIMER}
@@ -126,13 +168,19 @@ const schema = [
       <h2 class="card-title">How to generate one</h2>
       <ol class="text-sm space-y-2 mb-0">
         <li>Connect at least one probe and let ThermalTrace collect a bit of history (freeze alerts work from day one; the claims pack covers whatever range you've been monitoring).</li>
-        <li>Upgrade to Pro if you haven't already — the claims pack is a Pro feature.</li>
-        <li>From <a class="text-link" href="/dashboard/history#claims-pack">History</a>, pick a date range and download the pack, or send it straight to an adjuster's email.</li>
+        <li>
+          Upgrade to Pro if you haven't already — the claims pack is a Pro feature.
+          Already on Free or Member with a recent freeze? Readings still inside your
+          {` ${freeRetention} / ${memberRetention} `}
+          window stay stored; Pro unlocks the pack over that retained history (and extends how far back you can reach going forward).
+        </li>
+        <li>From <a class="text-link" href="/dashboard/history#claims-pack">History → claims pack</a>, pick a date range and download the pack, or send it straight to an adjuster's email.</li>
       </ol>
-      <p class="mt-4 mb-0">
+      <p class="mt-4 mb-0 flex flex-wrap gap-3">
         <a class="btn-primary" href={user ? "/dashboard/history#claims-pack" : "/register?next=/dashboard/temperature"}>
           {user ? "Generate a claims pack" : "Start free — build your pack"}
         </a>
+        <a class="btn-secondary" href="/samples/claims-pack-example.pdf">Sample PDF</a>
       </p>
     </section>
 

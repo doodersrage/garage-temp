@@ -16,6 +16,8 @@ export type AppStatus = {
   historyPollStale: boolean;
   recentJobErrors: number;
   ingestAbuseCount: number;
+  /** True when rate-limit events were seen in the last 24h (informational). */
+  ingestRateLimitElevated: boolean;
   checkedAt: string;
   recentJobRuns: JobRun[];
 };
@@ -48,6 +50,9 @@ export async function fetchAppStatus(): Promise<AppStatus> {
     latest.status === "success" &&
     !historyPollStale;
 
+  /** Informational rate-limit hits — does not flip the page to degraded by itself. */
+  const ingestRateLimitElevated = ingestAbuseCount > 0;
+
   return {
     healthy,
     lastCronAt: latest?.started_at ?? null,
@@ -57,6 +62,7 @@ export async function fetchAppStatus(): Promise<AppStatus> {
     historyPollStale,
     recentJobErrors,
     ingestAbuseCount,
+    ingestRateLimitElevated,
     checkedAt: new Date().toISOString(),
     recentJobRuns,
   };

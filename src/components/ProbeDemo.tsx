@@ -8,6 +8,7 @@ import {
   computeDemoProbes,
   coldestProbeTempF,
   defaultDemoControls,
+  doorDraftSpreadF,
   DEMO_PRESETS,
   DEMO_SPACES,
   type DemoControls,
@@ -26,13 +27,30 @@ function formatHistoryTime(date: Date): string {
 
 type JsonTab = "pull" | "push";
 
+function presetFromLocation(): DemoPresetId | null {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.search);
+  const raw = (params.get("preset") ?? "").trim();
+  if (raw && raw in DEMO_PRESETS) return raw as DemoPresetId;
+  const hash = window.location.hash.replace(/^#/, "");
+  if (hash === "cold-snap" || hash === "coldSnap") return "coldSnap";
+  if (hash === "door-draft" || hash === "doorDraft") return "doorDraft";
+  if (hash === "sun-load" || hash === "sunny") return "sunny";
+  if (hash === "mild") return "mild";
+  return null;
+}
+
 export default function ProbeDemo() {
-  const [controls, setControls] = useState<DemoControls>(defaultDemoControls);
+  const [controls, setControls] = useState<DemoControls>(() => {
+    const preset = presetFromLocation();
+    if (!preset) return defaultDemoControls;
+    return { ...defaultDemoControls, ...DEMO_PRESETS[preset].controls };
+  });
   const [probes, setProbes] = useState<DemoProbe[]>(() =>
-    computeDemoProbes(defaultDemoControls),
+    computeDemoProbes(controls),
   );
   const [average, setAverage] = useState(() =>
-    computeAverageReading(computeDemoProbes(defaultDemoControls)),
+    computeAverageReading(computeDemoProbes(controls)),
   );
   const [lastUpdated, setLastUpdated] = useState(() => new Date());
   const [jsonTab, setJsonTab] = useState<JsonTab>("push");
@@ -82,6 +100,7 @@ export default function ProbeDemo() {
   );
   const coldest = coldestProbeTempF(probes);
   const space = DEMO_SPACES[controls.space];
+  const draftSpread = doorDraftSpreadF(probes);
   const maxBarTemp = Math.max(
     ...probes.map((probe) => probe.reading.f),
     average.f,
@@ -127,7 +146,8 @@ export default function ProbeDemo() {
         <h2 class="card-title">Probe conditions</h2>
         <p class="card-subtitle">
           Pick a space, tweak weather, and watch zones respond the way Overview and Devices do with
-          live ingest.
+          live ingest. Try <strong>Door draft</strong> or <strong>Cold snap</strong> first — cause
+          the change, then read the bars.
         </p>
 
         <div class="probe-demo-presets" role="group" aria-label="Scenario presets">
@@ -161,6 +181,7 @@ export default function ProbeDemo() {
                 <option value={id}>{DEMO_SPACES[id].label}</option>
               ))}
             </select>
+            <span class="probe-demo-space-hint">{space.modelHint}</span>
           </label>
 
           <label class="probe-demo-control">
@@ -234,6 +255,14 @@ export default function ProbeDemo() {
           </label>
         </div>
 
+        {controls.doorOpen && draftSpread != null && draftSpread >= 3 && (
+          <p class="probe-demo-draft-callout" role="status">
+            Door/entry zone is about <strong>{draftSpread.toFixed(1)}°F</strong> colder than the
+            warmest other probe — same reason a single workbench sensor can miss freeze risk at the
+            door.
+          </p>
+        )}
+
         <div class="probe-demo-actions">
           <button class="btn-secondary" type="button" onClick={resetDemo}>
             Reset demo
@@ -276,14 +305,20 @@ export default function ProbeDemo() {
             const atRisk = probe.reading.f <= controls.freezeThresholdF;
             const near =
               !atRisk && probe.reading.f <= controls.freezeThresholdF + 5;
+            const isDoorZone = probe.key === "1";
             return (
               <article
-                class={`stat-item${atRisk ? " probe-demo-stat--risk" : near ? " probe-demo-stat--watch" : ""}`}
+                class={`stat-item${atRisk ? " probe-demo-stat--risk" : near ? " probe-demo-stat--watch" : ""}${
+                  controls.doorOpen && isDoorZone ? " probe-demo-stat--draft" : ""
+                }`}
                 key={probe.key}
               >
                 <span class="stat-label">
                   {probe.label}
                   <span class="probe-demo-key"> · {probe.ingestKey}</span>
+                  {controls.doorOpen && isDoorZone ? (
+                    <span class="probe-demo-draft-badge"> draft</span>
+                  ) : null}
                 </span>
                 <p class="stat-value m-0">{probe.reading.f.toFixed(1)} °F</p>
                 <p class="stat-detail m-0">
@@ -306,18 +341,27 @@ export default function ProbeDemo() {
       <section class="card">
         <h2 class="card-title">Probe comparison</h2>
         <p class="card-subtitle">
-          Relative temperature by zone — dashed line is your freeze threshold.
+          {controls.doorOpen
+            ? "Open-door mix should drop the door/entry bar vs the others — dashed line is your freeze threshold."
+            : "Relative temperature by zone — dashed line is your freeze threshold. Toggle the door open to widen the gap."}
         </p>
         <div class="probe-demo-bars" role="img" aria-label="Bar chart comparing probe temperatures">
           {probes.map((probe) => (
-            <div class="probe-demo-bar-row" key={probe.key}>
+            <div
+              class={`probe-demo-bar-row${
+                controls.doorOpen && probe.key === "1" ? " probe-demo-bar-row--draft" : ""
+              }`}
+              key={probe.key}
+            >
               <span class="probe-demo-bar-label">{probe.label}</span>
               <div class="probe-demo-bar-track">
                 <div
                   class={`probe-demo-bar-fill${
                     probe.reading.f <= controls.freezeThresholdF
                       ? " probe-demo-bar-fill--risk"
-                      : ""
+                      : controls.doorOpen && probe.key === "1"
+                        ? " probe-demo-bar-fill--draft"
+                        : ""
                   }`}
                   style={{ width: `${(probe.reading.f / maxBarTemp) * 100}%` }}
                 />
@@ -368,25 +412,32 @@ export default function ProbeDemo() {
         <pre class="probe-demo-json"><code>{activeJson}</code></pre>
       </section>
 
-      <section class="card">
-        <h2 class="card-title">Try this on real data</h2>
+      <section class="card probe-demo-convert" id="try-real">
+        <h2 class="card-title">Now try it with your own probe</h2>
         <p class="card-subtitle mb-4">
-          Same freeze essentials and ingest path as production — no need to finish the simulator first.
+          Same JSON shapes, same Overview space-status logic, same freeze essentials — create a free
+          account, POST once, and set a threshold before the next cold night.
         </p>
-        <div class="flex flex-wrap gap-3">
+        <div class="flex flex-wrap gap-3 mb-3">
           <a class="btn-primary" href="/register?next=/dashboard/temperature">
             Create free account
           </a>
-          <a class="btn-secondary" href="/dashboard">
-            Overview + demo feed
-          </a>
-          <a class="btn-ghost" href="/about/adding-devices">
+          <a class="btn-secondary" href="/about/adding-devices">
             Adding devices guide
           </a>
-          <a class="btn-ghost" href="/dashboard/alerts#alert-section-essentials">
-            Freeze + email essentials
+          <a class="btn-ghost" href="/demo">
+            Or watch the live demo feed
           </a>
         </div>
+        <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+          Already signed in?
+          {" "}
+          <a class="text-link" href="/dashboard">Overview + demo feed</a>
+          {" · "}
+          <a class="text-link" href="/dashboard/alerts#alert-section-essentials">
+            Freeze + email essentials
+          </a>
+        </p>
       </section>
     </div>
   );

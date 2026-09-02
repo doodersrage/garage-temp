@@ -76,6 +76,17 @@ export async function getHouseholdFreezeMapSettings(
   };
 }
 
+/** Count households currently opted into the public freeze map. */
+export async function countFreezeMapOptIns(): Promise<number> {
+  const supabase = createServerClient();
+  const { count, error } = await supabase
+    .from("households")
+    .select("id", { count: "exact", head: true })
+    .eq("freeze_map_opt_in", true);
+  if (error || count == null) return 0;
+  return count;
+}
+
 export async function collectFreezeMapSnapshots(): Promise<{
   cities: number;
   error: string | null;

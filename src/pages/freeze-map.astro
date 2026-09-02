@@ -4,6 +4,7 @@ import Layout from "../layouts/Layout.astro";
 import PageHeader from "../components/PageHeader.astro";
 import FaqSection from "../components/FaqSection.astro";
 import {
+  countFreezeMapOptIns,
   listFreezeMapSparklines,
   listLatestFreezeMapSnapshots,
 } from "../lib/freezeMap";
@@ -22,13 +23,16 @@ import { getMarketingFaqs, getMarketingFaqSchema } from "../lib/marketingFaqs";
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 const showSparse = Astro.url.searchParams.get("sparse") === "1";
-const resolved = resolveFreezeMapDisplay(
-  await listLatestFreezeMapSnapshots(),
-  await listFreezeMapSparklines(7),
-);
+const [liveSnapshots, liveSparklines, optInCount] = await Promise.all([
+  listLatestFreezeMapSnapshots(),
+  listFreezeMapSparklines(7),
+  countFreezeMapOptIns(),
+]);
+const resolved = resolveFreezeMapDisplay(liveSnapshots, liveSparklines);
 const snapshots = resolved.snapshots;
 const sparklines = resolved.sparklines;
 const isSeed = resolved.isSeed;
+const approaching = resolved.approaching.slice(0, 6);
 const visible = showSparse
   ? snapshots
   : snapshots.filter((row) => row.sample_count >= FREEZE_MAP_SAMPLE_FLOOR);
@@ -72,6 +76,11 @@ const schema = [
   getMarketingFaqSchema(pageUrl, "freeze-map"),
 ].filter(Boolean) as Record<string, unknown>[];
 
+const optInHref = user
+  ? "/dashboard/household#freeze-map"
+  : "/register?next=/dashboard/household";
+const optInLabel = user ? "Opt in from Household" : "Start free & opt in your city";
+
 function sparkPath(values: number[]): string {
   if (values.length < 2) return "";
   const min = Math.min(...values);
@@ -87,10 +96,17 @@ function sparkPath(values: number[]): string {
     })
     .join(" ");
 }
+
+function trendDeltaLabel(values: number[]): string {
+  if (values.length < 2) return "No history yet";
+  const delta = values[values.length - 1]! - values[0]!;
+  if (Math.abs(delta) < 0.3) return "Steady";
+  return delta < 0 ? `Cooling ${Math.abs(delta).toFixed(1)}°F` : `Warming ${delta.toFixed(1)}°F`;
+}
 ---
 <Layout
   title="Freeze-risk map"
-  description="Opt-in city-level probe temperature aggregates from ThermalTrace households—anonymized freeze-risk context for your metro, not a personal live feed."
+  description="See city-level freeze risk from ThermalTrace probe households—then track your own unheated space for free. Opt-in, anonymized community map."
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
@@ -98,51 +114,79 @@ function sparkPath(values: number[]): string {
     <PageHeader
       kicker="Community"
       title="Freeze-risk map"
-      lede="Anonymized indoor probe temperatures by city from households that opt in. No addresses, device names, or household identifiers — only city-level averages."
+      lede="See whether your metro’s indoor probes are running cold this week—then start tracking your own garage, crawlspace, or shop for free. City averages only; no addresses or device names."
     >
-      {user ? (
-        <a slot="actions" class="btn-secondary" href="/dashboard/household">Opt in from Household</a>
-      ) : (
-        <>
-          <a slot="actions" class="btn-primary" href="/register?next=/dashboard/household">Create account to opt in</a>
-          <a slot="actions" class="btn-secondary" href="/signin?next=/dashboard/household">Sign in</a>
-        </>
+      <a slot="actions" class="btn-primary" href={optInHref}>{optInLabel}</a>
+      {!user && (
+        <a slot="actions" class="btn-secondary" href="/signin?next=/dashboard/household">Sign in</a>
       )}
       <a slot="actions" class="btn-ghost" href="/embed/freeze-map">Embed</a>
       <a slot="actions" class="btn-ghost" href="/freeze-season">Freeze season</a>
       <a slot="actions" class="btn-ghost" href="/share-kit">Share kit</a>
     </PageHeader>
 
-    {isSeed && (
-      <section class="card" role="status">
-        <h2 class="card-title">Sample preview</h2>
-        <p class="card-subtitle mb-0">
-          These cities are illustrative late-winter probe aggregates so you can see how the map works.
-          Live opt-in data will replace them once enough households contribute.
-          {user ? (
-            <>
-              {" "}
-              <a class="text-link" href="/dashboard/household">Opt in from Household</a>.
-            </>
-          ) : (
-            <>
-              {" "}
-              <a class="text-link" href="/register?next=/dashboard/household">Create an account</a>
-              {" "}to contribute your city.
-            </>
-          )}
+    {isSeed ? (
+      <p class="alert-warning mt-0" role="status">
+        <strong>Showing sample data</strong> — live city readings appear once enough households opt in
+        ({FREEZE_MAP_SAMPLE_FLOOR}+ probes per city).
+        {" "}
+        {optInCount === 0
+          ? "No households have opted in yet — be the first in your metro."
+          : optInCount === 1
+            ? "1 household has opted in so far."
+            : `${optInCount} households have opted in so far.`}
+        {" "}
+        <a class="text-link" href={optInHref}>{user ? "Opt in" : "Create an account to contribute"}</a>.
+      </p>
+    ) : (
+      <p class="alert-info mt-0" role="status">
+        Live opt-in aggregates · {optInCount} household{optInCount === 1 ? "" : "s"} contributing · cities need {FREEZE_MAP_SAMPLE_FLOOR}+ samples to list by default
+        {capturedAt ? (
+          <>
+            {" · "}Last snapshot {captureAge.label}
+            {captureAge.absolute ? ` (${captureAge.absolute})` : ""}
+          </>
+        ) : null}
+        . Opt out anytime under Household.
+      </p>
+    )}
+
+    {(isSeed || approaching.length > 0) && (
+      <section class="card">
+        <h2 class="card-title">Momentum</h2>
+        <p class="card-subtitle mb-4">
+          {approaching.length > 0
+            ? `Cities closest to going live (${FREEZE_MAP_SAMPLE_FLOOR} households each). Your opt-in moves the count.`
+            : `Once a city reaches ${FREEZE_MAP_SAMPLE_FLOOR} opted-in households with a live probe, sample preview for that metro is replaced by real readings.`}
         </p>
+        {approaching.length > 0 ? (
+          <ul class="space-y-2 mb-4 text-sm">
+            {approaching.map((row) => {
+              const needed = FREEZE_MAP_SAMPLE_FLOOR - row.sample_count;
+              return (
+                <li>
+                  <strong>{row.city_label}</strong>
+                  {" — "}
+                  {row.sample_count}/{FREEZE_MAP_SAMPLE_FLOOR} households
+                  {needed > 0
+                    ? ` · ${needed} more to go live`
+                    : ""}
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p class="text-sm text-[var(--color-text-muted)] mb-4">
+            No sparse live cities yet — the next opted-in metros will show up here as they approach the floor.
+          </p>
+        )}
+        <a class="btn-secondary" href={optInHref}>{optInLabel}</a>
       </section>
     )}
 
     {coldest.length > 0 && (
       <section class="card">
-        <h2 class="card-title">{isSeed ? "Coldest sample cities" : "Coldest cities right now"}</h2>
-        <p class="card-subtitle mb-4">
-          {isSeed
-            ? "Illustrative mins from the sample snapshot — not live community readings."
-            : "Lowest min °F from the latest opt-in snapshot — share-worthy freeze risk at a glance."}
-        </p>
+        <h2 class="card-title">Coldest cities</h2>
         <ol class="space-y-2 mb-0 text-sm">
           {coldest.map((row, i) => (
             <li>
@@ -151,7 +195,7 @@ function sparkPath(values: number[]): string {
               min {row.min_temp_f?.toFixed(1)}°F
               {row.avg_temp_f != null ? ` · avg ${row.avg_temp_f.toFixed(1)}°F` : ""}
               {" · "}
-              {row.sample_count} sample{row.sample_count === 1 ? "" : "s"}
+              {row.sample_count} household{row.sample_count === 1 ? "" : "s"}
             </li>
           ))}
         </ol>
@@ -159,25 +203,12 @@ function sparkPath(values: number[]): string {
     )}
 
     <section class="card">
-      <p class="card-subtitle mb-3">
-        Updated hourly. Opt out anytime under Household settings.
-        {isSeed ? (
-          <> Showing sample cities until live opt-ins meet the floor.</>
-        ) : capturedAt ? (
-          <>
-            {" "}Last snapshot {captureAge.label}
-            {captureAge.absolute ? ` (${captureAge.absolute})` : ""}.
-          </>
-        ) : (
-          <> No snapshots yet.</>
-        )}
-      </p>
       <p class="mb-0 text-sm">
         {showSparse ? (
-          <a class="text-link" href="/freeze-map">Hide sparse samples (&lt;{FREEZE_MAP_SAMPLE_FLOOR})</a>
+          <a class="text-link" href="/freeze-map">Hide sparse cities (&lt;{FREEZE_MAP_SAMPLE_FLOOR} households)</a>
         ) : (
           <a class="text-link" href="/freeze-map?sparse=1">
-            Show sparse samples{sparseHidden > 0 ? ` (${sparseHidden} hidden)` : ""}
+            Show sparse cities{sparseHidden > 0 ? ` (${sparseHidden} hidden)` : ""}
           </a>
         )}
       </p>
@@ -247,7 +278,7 @@ function sparkPath(values: number[]): string {
                   fillOpacity: 0.55,
                 })
                   .bindPopup(
-                    `<strong>${pin.label}</strong><br/>Avg ${pin.avg?.toFixed(1) ?? "—"}°F<br/>Risk ${pin.riskPct}% · ${pin.samples} samples`,
+                    `<strong>${pin.label}</strong><br/>Avg ${pin.avg?.toFixed(1) ?? "—"}°F<br/>Risk ${pin.riskPct}% · ${pin.samples} households`,
                   )
                   .addTo(map);
                 L.circle([pin.lat, pin.lon], {
@@ -286,60 +317,85 @@ function sparkPath(values: number[]): string {
             : " Create an account and opt in from Household settings to contribute."}
         </p>
       ) : (
-        <div class="overflow-x-auto">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>City</th>
-                <th>Trend</th>
-                <th>Samples</th>
-                <th>Avg °F</th>
-                <th>Min °F</th>
-                <th>Freeze-risk share</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((row) => {
-                const riskPct =
-                  row.sample_count > 0
-                    ? Math.round((row.freeze_risk_count / row.sample_count) * 100)
-                    : 0;
-                const sparse = row.sample_count < FREEZE_MAP_SAMPLE_FLOOR;
-                const spark = sparklines.get(row.city_id) ?? [];
-                const path = sparkPath(spark);
-                return (
-                  <tr>
-                    <td>
-                      <strong>{row.city_label}</strong>
-                      {sparse && (
-                        <span class="block text-xs text-[var(--color-text-muted)]">
-                          Sparse sample
+        <>
+          <div class="overflow-x-auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>City</th>
+                  <th scope="col">Trend <span class="font-normal text-[var(--color-text-muted)]">(avg °F)</span></th>
+                  <th>Households</th>
+                  <th>Avg °F</th>
+                  <th>Min °F</th>
+                  <th>
+                    Freeze-risk share
+                    <span class="block font-normal text-xs text-[var(--color-text-muted)]">% of households ≤34°F</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((row) => {
+                  const riskPct =
+                    row.sample_count > 0
+                      ? Math.round((row.freeze_risk_count / row.sample_count) * 100)
+                      : 0;
+                  const sparse = row.sample_count < FREEZE_MAP_SAMPLE_FLOOR;
+                  const spark = sparklines.get(row.city_id) ?? [];
+                  const path = sparkPath(spark);
+                  const delta = trendDeltaLabel(spark);
+                  return (
+                    <tr>
+                      <td>
+                        <strong>{row.city_label}</strong>
+                        {sparse && (
+                          <span class="block text-xs text-[var(--color-text-muted)]">
+                            Sparse
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        {path ? (
+                          <span class="inline-flex items-center gap-2" title={delta}>
+                            <svg width="80" height="24" viewBox="0 0 80 24" aria-hidden="true">
+                              <path
+                                d={path}
+                                fill="none"
+                                stroke="var(--color-accent)"
+                                stroke-width="1.75"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              />
+                            </svg>
+                            <span class="text-xs text-[var(--color-text-muted)]">{delta}</span>
+                          </span>
+                        ) : (
+                          <span class="text-[var(--color-text-muted)]" title="Needs more snapshots">—</span>
+                        )}
+                      </td>
+                      <td>{row.sample_count}</td>
+                      <td>
+                        {row.avg_temp_f != null ? row.avg_temp_f.toFixed(1) : "—"}
+                      </td>
+                      <td>
+                        {row.min_temp_f != null ? row.min_temp_f.toFixed(1) : "—"}
+                      </td>
+                      <td>
+                        {riskPct}%
+                        <span class="text-[var(--color-text-muted)]">
+                          {" "}({row.freeze_risk_count} of {row.sample_count})
                         </span>
-                      )}
-                    </td>
-                    <td>
-                      {path ? (
-                        <svg width="80" height="24" aria-hidden="true">
-                          <path d={path} fill="none" stroke="currentColor" stroke-width="1.5" />
-                        </svg>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td>{row.sample_count}</td>
-                    <td>
-                      {row.avg_temp_f != null ? row.avg_temp_f.toFixed(1) : "—"}
-                    </td>
-                    <td>
-                      {row.min_temp_f != null ? row.min_temp_f.toFixed(1) : "—"}
-                    </td>
-                    <td>{riskPct}% ({row.freeze_risk_count})</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p class="text-xs text-[var(--color-text-muted)] mt-3 mb-0">
+            Households = opted-in homes in that city for this snapshot. Freeze-risk share = households whose coldest probe was ≤34°F at capture.
+            Trend is recent city average temperature across hourly snapshots.
+          </p>
+        </>
       )}
     </section>
 

@@ -60,6 +60,7 @@ export const aboutMegaGroups: AboutMegaGroup[] = [
     coreSlugs: [
       "accounts-and-dashboard",
       "adding-devices",
+      "mqtt-bridge",
       "ingest-and-webhooks",
       "thermostat-oauth",
       "install-pwa",

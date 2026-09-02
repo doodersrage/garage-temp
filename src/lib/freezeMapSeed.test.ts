@@ -48,6 +48,8 @@ describe("freezeMapSeed", () => {
     expect(resolved.isSeed).toBe(false);
     expect(resolved.snapshots).toBe(live);
     expect(resolved.sparklines).toBe(sparks);
+    expect(resolved.approaching).toHaveLength(1);
+    expect(resolved.approaching[0]?.city_id).toBe("4164138");
   });
 
   it("falls back to seed when nothing meets the floor", () => {
@@ -68,5 +70,7 @@ describe("freezeMapSeed", () => {
     expect(resolved.isSeed).toBe(true);
     expect(resolved.snapshots.every((row) => row.isSeed)).toBe(true);
     expect(resolved.snapshots.some((row) => row.sample_count >= 3)).toBe(true);
+    expect(resolved.approaching).toHaveLength(1);
+    expect(resolved.approaching[0]?.city_label).toBe("New York, NY");
   });
 });

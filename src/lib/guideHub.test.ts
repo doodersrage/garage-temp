@@ -27,4 +27,22 @@ describe("guideHub", () => {
     const dht = hardware?.links.find((link) => link.href.includes("dht22"));
     expect(dht?.label).toBe(getAboutPage("dht22-sensor-overview")?.title);
   });
+
+  it("lists each guide href in only one category (cross-refs use alsoIn)", () => {
+    const seen = new Map<string, string>();
+    for (const category of getGuideHubCategories()) {
+      for (const link of category.links) {
+        const key = link.href.split("#")[0]!;
+        expect(seen.has(key), `duplicate hub listing for ${key}`).toBe(false);
+        seen.set(key, category.id);
+      }
+    }
+  });
+
+  it("points MQTT bridge at its dedicated guide", () => {
+    const integrations = getGuideHubCategories().find((c) => c.id === "integrations");
+    const mqtt = integrations?.links.find((l) => l.href.includes("mqtt-bridge"));
+    expect(mqtt?.href).toBe("/about/mqtt-bridge");
+    expect(getAboutPage("mqtt-bridge")?.title).toMatch(/MQTT/i);
+  });
 });

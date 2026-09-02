@@ -232,6 +232,11 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
         "No — it simulates three zones so you can see how outdoor air, sun load, door state, and freeze threshold change readings and JSON, the same shapes Devices and Overview use.",
     },
     {
+      question: "Does switching Garage / Workshop / Attic / Crawlspace change the model?",
+      answer:
+        "Yes. Each space has its own baseline offset, sun sensitivity (attics amplify heat load; crawlspaces mute it), door-mix strength, and zone labels. It is not a label-only swap — try Sun load on Attic vs Crawlspace to feel the difference.",
+    },
+    {
       question: "What is the difference between push and pull JSON?",
       answer:
         "Push ingest is a flat object ESP/Arduino POSTs to /api/ingest/<key>. Pull feed nests the same named probes under temp (for example north_wall, door_zone, workbench, plus avg) for scheduled HTTPS JSON.",

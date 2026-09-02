@@ -1,5 +1,6 @@
 import type { AboutFaqItem } from "./aboutFaqs";
 import { BRAND_DESCRIPTION, BRAND_SPACES } from "./brand";
+import { FREEZE_MAP_SAMPLE_FLOOR } from "./freezeMapSeed";
 import { getFaqPageSchema } from "./schemaMarkup";
 
 export type MarketingFaqItem = AboutFaqItem;
@@ -30,7 +31,7 @@ export const marketingFaqs = {
     {
       question: "Why do I need an account?",
       answer:
-        "An account links your ingest keys, history, and alerts to your household—it is how we keep your probes private. Registration is free with no credit card. You can watch the live demo on the home page or /demo without signing up; create an account when you are ready to connect your own hardware.",
+        "An account links your ingest keys, history, and alerts to your household—it is how we keep your probes private. Registration is free with no credit card. You can try the interactive probe simulator or watch the live demo without signing up; create an account when you are ready to connect your own hardware.",
     },
     {
       question: "Is there a ThermalTrace Android app?",
@@ -43,6 +44,33 @@ export const marketingFaqs = {
         "On Cloudflare’s edge network (Workers), so the site and ingest APIs run close to visitors without you maintaining a VPS. Live job and ingest health is on thermaltrace.dev/system-status—we publish what we measure, not a marketing uptime percentage.",
     },
   ],
+  demo: [
+    {
+      question: "How is this different from the homepage demo?",
+      answer:
+        "The homepage points you at the interactive probe simulator first, with a short live-readings teaser. This page keeps both: a prominent simulator promo plus the full live feed (probes + outdoor weather), freeze-alert context, kit steps, and QR onboarding.",
+    },
+    {
+      question: "Live feed vs interactive simulator — which should I try?",
+      answer:
+        "Start with the interactive probe simulator (/about/probe-demo) when you want to cause a cold snap or door draft and watch multi-zone risk respond. Use the live feed on this page to see real demo probes on the same ingest path your ESP/Arduino will use — observational proof, not a sandbox.",
+    },
+    {
+      question: "What is kit QR onboarding?",
+      answer:
+        "After you create a push device, ThermalTrace shows a QR code for the full ingest URL (about 30 minutes). Scan it from a phone or print it on a kit label so firmware or Home Assistant can POST without typing the key. Walkthrough: thermaltrace.dev/about/kit-qr-onboarding.",
+    },
+    {
+      question: "Is the live demo fake data?",
+      answer:
+        "No. Readings come from the public ThermalTrace demo feed over the same HTTPS ingest/pull path production devices use. The interactive simulator is intentionally synthetic so you can manipulate outdoor air, sun, and door state — it reuses the real Overview space-status helper for freeze risk.",
+    },
+    {
+      question: "Do I need an account to try this?",
+      answer:
+        "No for this page or the probe simulator. You need a free account (no credit card) to create your own device key, keep history, and set freeze alerts. Plan details: thermaltrace.dev/pricing.",
+    },
+  ],
   pricing: [
     {
       question: "What is included on the Free plan?",
@@ -52,7 +80,12 @@ export const marketingFaqs = {
     {
       question: "When should I upgrade to Member or Pro?",
       answer:
-        "Choose Member for 90-day history, CSV export, more devices, and predictive forecast freeze warnings. Choose Pro for 1-year+ history, official NWS freeze and cold alerts, SMS/WhatsApp, browser push, unlimited share links (history, metrics, embeds, never-expire), a printable claims / insurance evidence pack, inbound/outbound webhooks, Prometheus metrics, and a 14-day trial. Free already includes one family live link. Annual billing is discounted versus paying monthly.",
+        "Choose Member for 90-day history, CSV export, more devices, and predictive forecast freeze warnings. Choose Pro for 1-year+ history, official NWS freeze and cold alerts, Nest/Ecobee (or indoor reference) house context, SMS/WhatsApp, browser push, unlimited share links (history, metrics, embeds, never-expire), a printable claims / insurance evidence pack, inbound/outbound webhooks, Prometheus metrics, up to 50 owned properties, and a 14-day trial. Free already includes one family live share link. Annual billing is discounted versus paying monthly.",
+    },
+    {
+      question: "When do I need Portfolio instead of Pro?",
+      answer:
+        "Pro already covers up to 50 owned properties—enough for a vacation home, a few rentals, or a workshop plus house. Portfolio raises that ceiling to 500 and adds property-manager logins so on-site staff can manage devices and alerts for assigned properties without seeing billing or other sites. See thermaltrace.dev/property-management.",
     },
     {
       question: "What is the claims / insurance evidence pack?",
@@ -116,12 +149,32 @@ export const marketingFaqs = {
     {
       question: "What is the ThermalTrace freeze map?",
       answer:
-        "An opt-in, city-level aggregate of anonymized probe temperature samples from contributing households—useful for seeing regional freeze risk, not a personal live feed.",
+        "An opt-in, city-level aggregate of anonymized probe temperature samples from contributing households—useful for seeing regional freeze risk, not a personal live feed. Embed it or use the Markdown badge once your metro is live.",
     },
     {
       question: "Is freeze-map data personally identifiable?",
       answer:
-        "No. Contributions are aggregated at city level for public display. Your account dashboard remains private to your household.",
+        "No. Contributions are aggregated at city level for public display. No addresses, device names, or household IDs appear on the map. Your account dashboard remains private to your household.",
+    },
+    {
+      question: "Can I remove my household’s contribution after opting in?",
+      answer:
+        "Yes. Turn off freeze-map opt-in under Dashboard → Household anytime. Your probes stop contributing to the next hourly snapshot; prior city aggregates stay anonymized (they never named you).",
+    },
+    {
+      question: "How many households does it take before my city shows real data?",
+      answer:
+        `A city appears on the default map once at least ${FREEZE_MAP_SAMPLE_FLOOR} opted-in households with a live temperature probe contribute in the same snapshot window. Sparse cities (below that floor) are hidden by default but can be shown with the sparse toggle. Until any city meets the floor, the page shows a clearly labeled sample preview.`,
+    },
+    {
+      question: "What if I only have one probe — does that count?",
+      answer:
+        "Yes. Each opted-in household contributes one sample for its city (the average of that household’s temperature probes, with freeze-risk based on the coldest). One probe is enough.",
+    },
+    {
+      question: "What does freeze-risk share mean?",
+      answer:
+        "For each city, Samples is the number of opted-in households in that snapshot. Freeze-risk share is the percent (and count) of those households whose coldest probe was at or below 34°F at capture time.",
     },
   ],
   contact: [
@@ -145,12 +198,27 @@ export const marketingFaqs = {
     {
       question: "Where is the ThermalTrace OpenAPI spec?",
       answer:
-        "Download openapi.yaml from /openapi.yaml on thermaltrace.dev, or from the GitHub Pages developer docs. The in-app page at /docs/api summarizes ingest, metrics, and webhooks.",
+        "Download openapi.yaml from /openapi.yaml on thermaltrace.dev (also mirrored on the GitHub Pages developer docs). The in-app page at /docs/api is the human quick reference with curl examples, rate limits, and error codes.",
     },
     {
       question: "How do I authenticate to the HTTP API?",
       answer:
-        "Device firmware uses a per-device ingest key in the URL. Pro integrations use a Bearer API key from Dashboard → Share. The browser dashboard uses session cookies.",
+        "Device firmware uses a per-device ingest key in the URL (or X-Ingest-Key for the MQTT bridge). Pro integrations use a Bearer API key from Dashboard → Share. The browser dashboard uses session cookies — not for third-party clients. Share and inbound routes use opaque tokens in the path.",
+    },
+    {
+      question: "What are the ingest rate limits?",
+      answer:
+        "Push ingest accepts about 64KB max body and about 60 requests per minute per device key (per Worker isolate). Oversized bodies return 413; rate limit returns 429. Keep firmware under those ceilings — typical garage probes POST every 1–5 minutes.",
+    },
+    {
+      question: "What does “encrypted vault” mean for reveal-ingest-key?",
+      answer:
+        "When the deployment sets INGEST_KEY_ENCRYPTION_SECRET, new push keys are stored encrypted so owners can Reveal ingest key later from Devices (rate-limited and audited). On thermaltrace.dev this is enabled. If the vault secret is missing, create/rotate a key and copy it from the 30-minute callout — there is nothing to decrypt later.",
+    },
+    {
+      question: "Where do I find full request/response schemas?",
+      answer:
+        "openapi.yaml is the source of truth. Longer walkthroughs live at doodersrage.github.io/thermaltrace (ingest, Grafana, webhooks). Product how-tos: thermaltrace.dev/about/ingest-and-webhooks and /about/adding-devices.",
     },
   ],
   homeAssistant: [
@@ -165,6 +233,16 @@ export const marketingFaqs = {
         "A live share link works for sensor polling — Free includes one family live link. Pro unlocks history/metrics scopes, never-expire links, and inbound webhook services (snooze, vacation, status) from Dashboard → Share. Push via thermaltrace.push uses any push device ingest key.",
     },
     {
+      question: "Will HACS polling delay freeze alerts?",
+      answer:
+        "HACS defaults to polling the share link every 5 minutes (configurable). ThermalTrace freeze SMS/email/push still fire from your probe’s push ingest path immediately. Use native ESP/Arduino push (or MQTT→HTTPS bridge) for time-critical thresholds; keep HACS for local entities and automations.",
+    },
+    {
+      question: "Does Nest or Ecobee OAuth work for indoor context?",
+      answer:
+        "On thermaltrace.dev, Pro households can connect Nest from Dashboard → Temperature when Nest OAuth is configured. Ecobee developer signups are often closed — use the HA Plan B (thermaltrace.push of climate current_temperature + Indoor reference) instead. Self-hosted operators: thermaltrace.dev/about/thermostat-oauth.",
+    },
+    {
       question: "Can I push HA REST sensor JSON without the HACS integration?",
       answer:
         "Yes — ThermalTrace auto-detects Home Assistant REST responses ({ state, attributes }) on POST /api/ingest/<key> and on pull feeds. Map probe key state on Devices. SenML JSON arrays are also supported. Samples: thermaltrace.dev/api/feeds/example?format=homeassistant",
@@ -172,12 +250,12 @@ export const marketingFaqs = {
     {
       question: "Can I use ThermalTrace with MQTT and Home Assistant together?",
       answer:
-        "Yes — the usual pattern keeps Mosquitto/ESPHome on your LAN and mirrors selected topics to ThermalTrace over HTTPS (POST /api/ingest/mqtt). ThermalTrace handles off-site freeze SMS/email and history; HA keeps local automations. Recipe: thermaltrace.dev/about/adding-devices#mqtt-bridge.",
+        "Yes — the usual pattern keeps Mosquitto/ESPHome on your LAN and mirrors selected topics to ThermalTrace over HTTPS (POST /api/ingest/mqtt). ThermalTrace handles off-site freeze SMS/email and history; HA keeps local automations. Recipe: thermaltrace.dev/about/mqtt-bridge.",
     },
     {
       question: "How do freeze alerts reach Home Assistant?",
       answer:
-        "Configure a Pro outbound webhook in ThermalTrace pointing at your HA webhook URL, or import the garage_temp_webhook.yaml blueprint from thermaltrace.dev/ha/garage_temp_webhook.yaml. Verify X-Signature when you set a webhook secret.",
+        "Configure a Pro outbound webhook in ThermalTrace pointing at your HA webhook URL, or import the garage_temp_webhook.yaml blueprint from thermaltrace.dev/ha/garage_temp_webhook.yaml. When you set a webhook signing secret, verify the X-Signature HMAC header before acting on the payload.",
     },
   ],
   android: [

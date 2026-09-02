@@ -42,7 +42,7 @@ export const compareGuides: CompareGuide[] = [
       { capability: "Broker / server upkeep", thermaltrace: "Hosted (no Mosquitto to patch)", other: "You patch Mosquitto/HA" },
       { capability: "Freeze alerts", thermaltrace: "Built-in channels", other: "Node-RED + Twilio/email" },
       { capability: "ESP ingest", thermaltrace: "HTTPS device key or MQTT bridge", other: "MQTT topic design" },
-      { capability: "History & CSV", thermaltrace: "Member+", other: "Influx/Postgres you manage" },
+      { capability: "History & CSV", thermaltrace: "On paid plans", other: "Influx/Postgres you manage" },
       { capability: "Share with family", thermaltrace: "Household invites", other: "VPN or reverse proxy" },
     ],
   },
@@ -52,12 +52,12 @@ export const compareGuides: CompareGuide[] = [
     title: "ThermalTrace vs Govee",
     headline: "ThermalTrace vs Govee sensors",
     description:
-      "Govee Bluetooth/Wi-Fi hygrometers vs ThermalTrace for freeze monitoring in unheated spaces—alerts, ESP ingest, multi-probe zones, and export.",
+      "Govee (and similar SmartThings-style consumer hubs) vs ThermalTrace for freeze monitoring in unheated spaces—alerts, ESP ingest, multi-probe zones, and export.",
     competitor: "Govee",
     summary:
-      "Govee is great for cheap room sensors and a polished phone app. ThermalTrace is built for freeze workflows in garages, workshops, attics, and shops: your own ESP probes, household alerts, and history you can export.",
+      "Govee—and consumer hubs like SmartThings—are great for cheap room sensors and a polished phone app. ThermalTrace is built for freeze workflows in garages, workshops, attics, and shops: your own ESP probes, household alerts, and history you can export.",
     lede:
-      "Govee hygrometers win on price and a friendly phone app for bedrooms and closets. They are weaker in a detached garage or shop: Bluetooth range, vendor lock-in, and alerts that mostly stay in-app. ThermalTrace assumes you bring an ESP32, then gives household freeze routing and a season of exportable history.",
+      "Govee hygrometers (and SmartThings-style hubs that absorb the same class of Bluetooth/Wi-Fi pods) win on price and a friendly phone app for bedrooms and closets. They are weaker in a detached garage or shop: Bluetooth range, vendor lock-in, and alerts that mostly stay in-app. ThermalTrace assumes you bring an ESP32, then gives household freeze routing and a season of exportable history.",
     photoId: "garage-workbench",
     whenThermalTrace: [
       "You want ESP/Arduino probes you control (not only vendor pods)",

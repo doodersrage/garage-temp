@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import Layout from "../../layouts/Layout.astro";
+import PageHeader from "../../components/PageHeader.astro";
 import FaqSection from "../../components/FaqSection.astro";
 import {
   getBreadcrumbSchema,
@@ -9,10 +10,16 @@ import {
   resolveSiteUrl,
 } from "../../lib/schemaMarkup";
 import { getMarketingFaqs, getMarketingFaqSchema } from "../../lib/marketingFaqs";
+import {
+  INGEST_MAX_BODY_BYTES,
+  INGEST_RATE_LIMIT_MAX,
+} from "../../lib/ingestLimits";
+import { DEV_DOCS_BASE } from "../../lib/integrationsHub";
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/docs/api");
 const docsFaqs = getMarketingFaqs("docsApi");
+const maxKb = Math.round(INGEST_MAX_BODY_BYTES / 1024);
 const schema = [
   getBreadcrumbSchema(siteUrl, [
     { name: "Home", path: "/" },
@@ -20,91 +27,220 @@ const schema = [
   ]),
   getMarketingFaqSchema(pageUrl, "docsApi"),
 ].filter(Boolean) as Record<string, unknown>[];
+
+const ingestCurl = `curl -X POST "${siteUrl}/api/ingest/YOUR_DEVICE_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"door1": true, "temp1": 42.5, "battery": 87, "rssi": -62}'`;
+
+const ingestOk = `{
+  "ok": true,
+  "readings": 2,
+  "sensors_created": 2
+}`;
+
+const metricsCurl = `curl -sS "${siteUrl}/api/v1/metrics" \\
+  -H "Authorization: Bearer YOUR_API_KEY" | head`;
+
+const inboundCurl = `curl -X POST "${siteUrl}/api/inbound/YOUR_INBOUND_TOKEN" \\
+  -H "Content-Type: application/json" \\
+  -d '{"action":"snooze","hours":4}'`;
+
+const shareCurl = `curl -sS "${siteUrl}/api/share/YOUR_SHARE_TOKEN/readings"`;
+
+const mqttCurl = `curl -X POST "${siteUrl}/api/ingest/mqtt" \\
+  -H "Content-Type: application/json" \\
+  -H "X-Ingest-Key: YOUR_DEVICE_KEY" \\
+  -d '{"topic":"home/garage/temp","message":{"temp1":42.5,"humidity":38}}'`;
 ---
 <Layout
   title="API documentation"
-  description="ThermalTrace HTTP API for ESP/Arduino ingest, Prometheus metrics, share-link JSON, and inbound Home Assistant webhooks—plus OpenAPI download."
+  description="ThermalTrace HTTP API quick reference: ingest curl examples, rate limits, error codes, Prometheus metrics, inbound webhooks, and OpenAPI download."
   schema={schema}
-  speakableSelectors={[".card-title", ".card-subtitle", ".faq-answer"]}
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
   <div class="page-shell page-stack">
-    <section class="card animate-slide-in-left">
-      <h1 class="card-title">API documentation</h1>
+    <PageHeader
+      kicker="HTTP API"
+      title="API documentation"
+      lede={`Practical quick reference for integrators — curl examples, auth, rate limits (~${maxKb}KB / ~${INGEST_RATE_LIMIT_MAX} req/min/device for ingest), and common errors. Download the OpenAPI spec for the full machine-readable contract; VitePress developer docs cover longer walkthroughs.`}
+    >
+      <a slot="actions" class="btn-primary" href="/openapi.yaml" download>Download openapi.yaml</a>
+      <a slot="actions" class="btn-secondary" href="/dashboard/share">Manage API keys</a>
+      <a slot="actions" class="btn-ghost" href={`${DEV_DOCS_BASE}/`} target="_blank" rel="noreferrer">Developer docs ↗</a>
+    </PageHeader>
+
+    <section class="card">
+      <h2 class="card-title">Authentication</h2>
+      <div class="overflow-x-auto">
+        <table class="data-table text-sm">
+          <thead>
+            <tr>
+              <th>Audience</th>
+              <th>Mechanism</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Device firmware</td>
+              <td>Device key in <code>/api/ingest/&lt;deviceKey&gt;</code> (or <code>X-Ingest-Key</code> for MQTT bridge)</td>
+            </tr>
+            <tr>
+              <td>Pro integrations</td>
+              <td>Bearer API key from <a class="text-link" href="/dashboard/share">Dashboard → Share</a></td>
+            </tr>
+            <tr>
+              <td>Browser dashboard</td>
+              <td>Session cookie (not for third-party clients)</td>
+            </tr>
+            <tr>
+              <td>Share / inbound</td>
+              <td>Opaque token in the URL path (+ optional HMAC on inbound)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="ingest">
+      <h2 class="card-title">POST /api/ingest/&lt;deviceKey&gt;</h2>
       <p class="card-subtitle mb-4">
-        OpenAPI spec for programmatic integrations. Pro plans include API keys for Prometheus metrics;
-        push ingest uses per-device keys from the dashboard.
+        Primary hardware path. Push JSON from ESP/Arduino or any HTTPS client. Sensor keys auto-import on first POST.
+        Optional top-level <code>battery</code> / <code>battery_pct</code> and <code>rssi</code> update device health.
+      </p>
+      <p class="text-sm mb-3">
+        <strong>Limits:</strong> max ~{maxKb}KB body; ~{INGEST_RATE_LIMIT_MAX} requests per minute per device key (per Worker isolate).
+        Exceeding size → <code>413</code>; exceeding rate → <code>429</code> with <code>Retry-After</code> when set.
+      </p>
+      <pre class="text-xs overflow-x-auto mb-3 p-4 rounded-lg bg-[var(--color-surface-muted)]"><code>{ingestCurl}</code></pre>
+      <p class="text-sm mb-2"><strong>200 OK</strong> example:</p>
+      <pre class="text-xs overflow-x-auto mb-3 p-4 rounded-lg bg-[var(--color-surface-muted)]"><code>{ingestOk}</code></pre>
+      <p class="text-sm mb-0 text-[var(--color-text-muted)]">
+        Kinds include temperature, humidity, CO₂, pressure, PM2.5, VOC, water level, energy, door, power, flood, and motion.
+        Sample sketches:
+        <a class="text-link" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches" target="_blank" rel="noreferrer">sketches/</a>
+        ·
+        <a class="text-link" href="/about/adding-devices">Adding devices</a>
+        ·
+        <a class="text-link" href="/about/ingest-and-webhooks">Ingest &amp; webhooks</a>
+        ·
+        <a class="text-link" href="/about/json-probe-output-schema">JSON probe schema</a>
+      </p>
+    </section>
+
+    <section class="card" id="mqtt">
+      <h2 class="card-title">POST /api/ingest/mqtt</h2>
+      <p class="card-subtitle mb-4">
+        MQTT→HTTPS bridge. Keep Mosquitto on the LAN; mirror topics with header <code>X-Ingest-Key</code>.
+      </p>
+      <pre class="text-xs overflow-x-auto mb-3 p-4 rounded-lg bg-[var(--color-surface-muted)]"><code>{mqttCurl}</code></pre>
+      <p class="mb-0 text-sm">
+        Full recipe:
+        <a class="text-link" href="/about/mqtt-bridge">MQTT bridge guide</a>
+      </p>
+    </section>
+
+    <section class="card" id="errors">
+      <h2 class="card-title">Common ingest errors</h2>
+      <div class="overflow-x-auto">
+        <table class="data-table text-sm">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>When</th>
+              <th>Body shape</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>400</code></td>
+              <td>Missing key, invalid JSON, empty body, unusable payload</td>
+              <td><code>{`{ "error": "…" }`}</code></td>
+            </tr>
+            <tr>
+              <td><code>401</code></td>
+              <td>Unknown / invalid device key</td>
+              <td><code>{`{ "error": "Invalid device key" }`}</code></td>
+            </tr>
+            <tr>
+              <td><code>413</code></td>
+              <td>Body larger than ~{maxKb}KB</td>
+              <td><code>{`{ "error": "Payload too large…" }`}</code></td>
+            </tr>
+            <tr>
+              <td><code>429</code></td>
+              <td>More than ~{INGEST_RATE_LIMIT_MAX} POSTs/min for that device key</td>
+              <td><code>{`{ "error": "Rate limit exceeded…" }`}</code></td>
+            </tr>
+            <tr>
+              <td><code>500</code></td>
+              <td>Server-side persistence failure</td>
+              <td><code>{`{ "error": "…" }`}</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="metrics">
+      <h2 class="card-title">GET /api/v1/metrics</h2>
+      <p class="card-subtitle mb-4">
+        Prometheus text exposition (Pro). Create an API key under Dashboard → Share.
+      </p>
+      <pre class="text-xs overflow-x-auto mb-3 p-4 rounded-lg bg-[var(--color-surface-muted)]"><code>{metricsCurl}</code></pre>
+      <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+        Related: <code>GET/POST /api/v1/devices</code> with the same Bearer key (list / create push devices).
+        Grafana notes:
+        <a class="text-link" href={`${DEV_DOCS_BASE}/integrations/grafana`} target="_blank" rel="noreferrer">developer docs ↗</a>
+      </p>
+    </section>
+
+    <section class="card" id="inbound">
+      <h2 class="card-title">POST /api/inbound/&lt;token&gt;</h2>
+      <p class="card-subtitle mb-4">
+        Pro inbound webhooks for Home Assistant / Zapier / Make — actions such as <code>snooze</code>, <code>vacation</code>, <code>status</code>.
+        Create the token under Dashboard → Share. Optional HMAC via signing secret (<code>X-GarageTemp-Signature</code>).
+      </p>
+      <pre class="text-xs overflow-x-auto mb-3 p-4 rounded-lg bg-[var(--color-surface-muted)]"><code>{inboundCurl}</code></pre>
+      <p class="mb-0 text-sm">
+        Invalid token → <code>401</code>; bad signature → <code>401</code> <code>{`{ "error": "Invalid signature" }`}</code>.
+        Guide:
+        <a class="text-link" href="/about/ingest-and-webhooks">Ingest &amp; webhooks</a>
+        ·
+        <a class="text-link" href="/integrations/home-assistant">HACS integration</a>
+      </p>
+    </section>
+
+    <section class="card" id="share">
+      <h2 class="card-title">GET /api/share/&lt;token&gt;/readings</h2>
+      <p class="card-subtitle mb-4">
+        Public JSON for share links. Free includes one family live link; Pro adds history/metrics scopes and never-expire options.
+      </p>
+      <pre class="text-xs overflow-x-auto mb-0 p-4 rounded-lg bg-[var(--color-surface-muted)]"><code>{shareCurl}</code></pre>
+    </section>
+
+    <section class="card" id="session">
+      <h2 class="card-title">Session cookie routes (dashboard)</h2>
+      <ul class="text-sm space-y-3 mb-0">
+        <li>
+          <strong>POST /api/user/pull-setup</strong> — save pull feeds and probe labels in one step (Devices → Pull feeds). Not for firmware; requires a signed-in browser session.
+        </li>
+        <li>
+          <strong>POST /api/devices/reveal-ingest-key</strong> — recover a push device’s ingest key when the deployment has
+          <code>INGEST_KEY_ENCRYPTION_SECRET</code> configured (encrypted vault). Keys are shown briefly at create time; if you dismiss that callout, Reveal can decrypt the stored vault copy for owners/managers.
+          Rate-limited (~10/hour/user) and written to household activity. Without the vault secret, rotate the key instead.
+        </li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">OpenAPI</h2>
+      <p class="card-subtitle mb-4">
+        Machine-readable contract for all paths above (plus MQTT bridge and devices CRUD). Prefer the downloaded YAML over any truncated preview.
       </p>
       <p class="mb-0">
-        <a class="btn-primary" href="/openapi.yaml" download>Download openapi.yaml</a>
+        <a class="btn-secondary" href="/openapi.yaml" download>Download openapi.yaml</a>
         {" "}
-        <a class="text-link" href="/dashboard/share">Manage API keys</a>
-      </p>
-    </section>
-
-    <section class="card">
-      <h2 class="card-title">Quick reference</h2>
-      <dl class="text-sm space-y-3 mb-0">
-        <div>
-          <dt class="font-semibold">POST /api/ingest/&lt;deviceKey&gt;</dt>
-          <dd class="text-[var(--color-text-muted)]">
-            Push JSON from ESP/Arduino or any HTTPS client. Kinds include temperature, humidity, CO₂, pressure, PM2.5, VOC, water level, energy, door, power, flood, and motion. Optional top-level <code>battery_pct</code> and <code>rssi</code>.
-            Sample sketches:
-            <a class="text-link" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches" target="_blank" rel="noreferrer">sketches/</a>.
-          </dd>
-        </div>
-        <div>
-          <dt class="font-semibold">POST /api/user/pull-setup</dt>
-          <dd class="text-[var(--color-text-muted)]">
-            Save pull feeds and probe labels in one step (session cookie). Used by Devices → Pull feeds tab.
-          </dd>
-        </div>
-        <div>
-          <dt class="font-semibold">POST /api/devices/reveal-ingest-key</dt>
-          <dd class="text-[var(--color-text-muted)]">
-            Recover a push device ingest key when encrypted vault is enabled (rate-limited; logged in household activity).
-          </dd>
-        </div>
-        <div>
-          <dt class="font-semibold">GET /api/v1/metrics</dt>
-          <dd class="text-[var(--color-text-muted)]">Prometheus scrape target. Header <code>Authorization: Bearer &lt;api-key&gt;</code> (Pro).</dd>
-        </div>
-        <div>
-          <dt class="font-semibold">POST /api/inbound/&lt;token&gt;</dt>
-          <dd class="text-[var(--color-text-muted)]">Home Assistant / Zapier actions: snooze, vacation, status. Optional HMAC signature.</dd>
-        </div>
-        <div>
-          <dt class="font-semibold">GET /api/share/&lt;token&gt;/readings</dt>
-          <dd class="text-[var(--color-text-muted)]">Public JSON for share links (Free family live link; Pro adds history/metrics scopes).</dd>
-        </div>
-      </dl>
-      <p class="mb-0 mt-4">
-        Home Assistant:
-        <a class="text-link" href="/integrations/home-assistant">HACS integration guide</a>
-        {" · "}
-        <a class="text-link" href="https://doodersrage.github.io/thermaltrace/ingest/home-assistant">Developer docs</a>
-        {" · "}
-        <a class="text-link" href="https://github.com/doodersrage/thermaltrace-home-assistant">GitHub repo</a>
-      </p>
-    </section>
-
-    <section class="card">
-      <h2 class="card-title">OpenAPI preview</h2>
-      <pre class="text-xs overflow-x-auto p-4 rounded-lg bg-[var(--color-surface-muted)]"><code>{`openapi: 3.1.0
-info:
-  title: ThermalTrace API
-  version: 1.0.0
-paths:
-  /api/ingest/{deviceKey}:
-    post:
-      summary: Push sensor readings
-  /api/v1/metrics:
-    get:
-      summary: Prometheus metrics (Bearer API key)
-  /api/inbound/{token}:
-    post:
-      summary: Inbound webhook actions`}</code></pre>
-      <p class="mb-0 text-sm">
-        Full spec: <a class="text-link" href="/openapi.yaml">/openapi.yaml</a>
+        <a class="text-link" href="/openapi.yaml">Open in browser</a>
       </p>
     </section>
 
@@ -120,21 +256,20 @@ paths:
           — stable keys for dashboard mapping
         </li>
         <li>
+          <a class="text-link" href="/integrations">Integrations hub</a>
+          — HACS, MQTT, Grafana, Zapier
+        </li>
+        <li>
           <a class="text-link" href="/pricing">Plans &amp; pricing</a>
           — Free ingest + family live share JSON; Pro for metrics API keys, expanded share scopes, and inbound webhooks
         </li>
         <li>
-          <a
-            class="text-link"
-            href="https://doodersrage.github.io/thermaltrace/"
-            target="_blank"
-            rel="noreferrer"
-          >Extended developer docs</a>
-          — VitePress guides on GitHub Pages
+          <a class="text-link" href={`${DEV_DOCS_BASE}/`} target="_blank" rel="noreferrer">Extended developer docs ↗</a>
+          — VitePress on GitHub Pages
         </li>
       </ul>
     </section>
 
-    <FaqSection faqs={docsFaqs} />
+    <FaqSection faqs={docsFaqs} lede="Auth, limits, and where the full OpenAPI lives." />
   </div>
 </Layout>

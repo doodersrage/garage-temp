@@ -4,4 +4,8 @@ export type ProductShotId =
   | "history-chart"
   | "devices"
   | "overview-cards"
-  | "overview-status";
+  | "overview-status"
+  | "portfolio"
+  | "claims-pack"
+  | "claims-verification"
+  | "monitoring-certificate";

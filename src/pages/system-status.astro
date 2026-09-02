@@ -14,6 +14,29 @@ const status = await fetchAppStatus();
 const cronAge = formatRelativeAge(status.lastCronAt, "never");
 const historyPollAge = formatRelativeAge(status.lastHistoryPollAt, "never");
 
+const bannerTone = !status.healthy
+  ? "danger"
+  : status.ingestRateLimitElevated
+    ? "warning"
+    : "success";
+const bannerTitle = !status.healthy
+  ? "Degraded — investigating"
+  : status.ingestRateLimitElevated
+    ? "Operational — elevated ingest rate limits"
+    : "All systems operational";
+const bannerDetail = !status.healthy
+  ? [
+      status.historyPollStale ? "History poll is overdue." : null,
+      status.recentJobErrors > 0
+        ? `${status.recentJobErrors} cron job error${status.recentJobErrors === 1 ? "" : "s"} in the last 24 hours.`
+        : null,
+      status.lastCronStatus === "error" ? "Latest cron run failed." : null,
+      !status.lastCronAt ? "No recent cron runs recorded." : null,
+    ]
+      .filter(Boolean)
+      .join(" ")
+  : "Healthy means the history poll is on schedule and no cron jobs failed in the last 24 hours. Ingest rate-limit events are shown separately and do not flip this banner to degraded by themselves.";
+
 const siteUrl = resolveSiteUrl(Astro.site);
 const schema = [
   getBreadcrumbSchema(siteUrl, [
@@ -50,10 +73,18 @@ const statusErrorMessage =
       lede="Public health for ThermalTrace jobs and ingest—what we measure ourselves. Updated on each page load."
     />
 
-    <section class="card">
-      <p class:list={["text-lg font-semibold mb-2", status.healthy ? "text-[var(--color-success-text)]" : "text-[var(--color-danger)]"]}>
-        {status.healthy ? "All systems operational" : "Degraded — investigating"}
+    <section class="card" aria-live="polite">
+      <p
+        class:list={[
+          "text-lg font-semibold mb-2",
+          bannerTone === "success" && "text-[var(--color-success-text)]",
+          bannerTone === "warning" && "text-[var(--color-warning-text)]",
+          bannerTone === "danger" && "text-[var(--color-danger)]",
+        ]}
+      >
+        {bannerTitle}
       </p>
+      <p class="text-sm text-[var(--color-text-muted)] mb-4">{bannerDetail}</p>
       <dl class="text-sm space-y-2 mb-0">
         <div class="flex flex-wrap gap-x-2">
           <dt class="text-[var(--color-text-muted)]">Last history poll</dt>
@@ -72,21 +103,53 @@ const statusErrorMessage =
         </div>
         <div class="flex flex-wrap gap-x-2">
           <dt class="text-[var(--color-text-muted)]">Last job status</dt>
-          <dd>{status.lastCronStatus ?? "—"}</dd>
+          <dd
+            class:list={[
+              status.lastCronStatus === "error" && "text-[var(--color-danger)]",
+              status.lastCronStatus === "success" && "text-[var(--color-success-text)]",
+            ]}
+          >
+            {status.lastCronStatus ?? "—"}
+          </dd>
         </div>
         <div class="flex flex-wrap gap-x-2">
           <dt class="text-[var(--color-text-muted)]">Job errors (24h)</dt>
-          <dd>{status.recentJobErrors}</dd>
+          <dd class:list={[status.recentJobErrors > 0 && "text-[var(--color-danger)]"]}>
+            {status.recentJobErrors}
+          </dd>
         </div>
         <div class="flex flex-wrap gap-x-2">
-          <dt class="text-[var(--color-text-muted)]">Ingest abuse flags (24h)</dt>
-          <dd>{status.ingestAbuseCount}</dd>
+          <dt class="text-[var(--color-text-muted)]">Ingest rate-limit events (24h)</dt>
+          <dd class:list={[status.ingestRateLimitElevated && "text-[var(--color-warning-text)]"]}>
+            {status.ingestAbuseCount}
+          </dd>
         </div>
         <div class="flex flex-wrap gap-x-2">
           <dt class="text-[var(--color-text-muted)]">Checked at</dt>
           <dd>{new Date(status.checkedAt).toLocaleString()}</dd>
         </div>
       </dl>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Incidents</h2>
+      <p class="card-subtitle mb-4">
+        Written notes for customer-visible outages or degradations. Cron errors above also drive the live banner and status-email subscribers.
+      </p>
+      {status.healthy ? (
+        <p class="mb-0 text-sm">
+          No incidents recorded yet. When we publish a resolved incident (date, impact, recovery), it will appear here —
+          until then, treat the live banner and recent cron table as the source of truth.
+        </p>
+      ) : (
+        <div class="alert-warning mt-0 mb-0" role="status">
+          <p class="m-0 font-semibold">Open — service degraded</p>
+          <p class="m-0 text-sm mt-1">{bannerDetail}</p>
+          <p class="m-0 text-sm mt-2 text-[var(--color-text-muted)]">
+            Started around this page load ({new Date(status.checkedAt).toLocaleString()}). Status subscribers are notified on degrade and recovery.
+          </p>
+        </div>
+      )}
     </section>
 
     <section class="card">
@@ -156,6 +219,7 @@ const statusErrorMessage =
       <h2 class="card-title">Get notified</h2>
       <p class="card-subtitle mb-4">
         Get a one-off email if this status changes (degraded or back to normal). No routine emails.
+        The form is protected by Cloudflare Turnstile.
       </p>
       {subscribed && (
         <div class="alert-success mt-0" role="status">
@@ -181,6 +245,7 @@ const statusErrorMessage =
       )}
       {!subscribed && !confirmed && (
         <form action="/api/status/subscribe" method="post" class="mt-4">
+          {/* Honeypot — visually hidden; bots that fill "company" are rejected server-side. */}
           <div class="sr-only" aria-hidden="true">
             <label for="status-subscribe-company">Company</label>
             <input type="text" id="status-subscribe-company" name="company" tabindex="-1" autocomplete="off" />

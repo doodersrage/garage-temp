@@ -9,12 +9,22 @@ export type IntegrationCard = {
   title: string;
   summary: string;
   href: string;
+  /** When true, primary CTA opens in a new tab (external developer docs). */
   external?: boolean;
   tier?: string;
   cta?: string;
+  /** Optional scan lines under the summary (e.g. inbound vs outbound). */
+  bullets?: string[];
+  /** Optional second link (often deep developer docs on GitHub Pages). */
+  secondaryHref?: string;
+  secondaryLabel?: string;
+  secondaryExternal?: boolean;
 };
 
 export const INTEGRATIONS_HUB_PATH = "/integrations";
+
+/** Extended developer docs (VitePress on GitHub Pages). Prefer in-app pages for hub CTAs. */
+export const DEV_DOCS_BASE = "https://doodersrage.github.io/thermaltrace";
 
 export const INTEGRATION_CARDS: IntegrationCard[] = [
   {
@@ -31,38 +41,49 @@ export const INTEGRATION_CARDS: IntegrationCard[] = [
     title: "MQTT bridge",
     summary:
       "Keep Mosquitto local; mirror readings over HTTPS JSON push or pull feeds for household freeze alerts and history.",
-    href: "https://doodersrage.github.io/thermaltrace/integrations/mqtt-bridge",
-    external: true,
-    cta: "Developer recipe",
+    href: "/about/mqtt-bridge",
+    cta: "Bridge recipe",
+    secondaryHref: `${DEV_DOCS_BASE}/integrations/mqtt-bridge`,
+    secondaryLabel: "Developer docs",
+    secondaryExternal: true,
   },
   {
     id: "webhooks",
     title: "Alert & reading webhooks",
-    summary:
-      "Outbound alert POSTs with optional HMAC, high-volume reading webhooks, and inbound snooze/status endpoints for HA or Zapier.",
-    href: "https://doodersrage.github.io/thermaltrace/integrations/webhooks",
-    external: true,
+    summary: "Pro webhooks go both ways — configure in Dashboard → Alerts / Share.",
+    href: "/about/ingest-and-webhooks",
     tier: "Pro",
-    cta: "Webhook payloads",
+    cta: "In-app guide",
+    bullets: [
+      "Outbound — alert POSTs (optional HMAC) and high-volume reading webhooks on ingest",
+      "Inbound — snooze / vacation / status endpoints for HA, Zapier, or Make",
+    ],
+    secondaryHref: `${DEV_DOCS_BASE}/integrations/webhooks`,
+    secondaryLabel: "Payload reference",
+    secondaryExternal: true,
   },
   {
     id: "grafana",
     title: "Grafana & Prometheus",
     summary:
-      "Scrape /api/v1/metrics with a dashboard API key; download bundled Grafana dashboard JSON from Dashboard → Share.",
-    href: "https://doodersrage.github.io/thermaltrace/integrations/grafana",
-    external: true,
+      "Scrape GET /api/v1/metrics with a dashboard API key; download bundled Grafana dashboard JSON from Dashboard → Share.",
+    href: "/docs/api",
     tier: "Pro API key",
-    cta: "Metrics guide",
+    cta: "HTTP API (metrics)",
+    secondaryHref: `${DEV_DOCS_BASE}/integrations/grafana`,
+    secondaryLabel: "Grafana dashboard docs",
+    secondaryExternal: true,
   },
   {
     id: "thermostat",
     title: "Nest & Ecobee",
     summary:
-      "Optional thermostat OAuth on Pro — indoor setpoint context next to attic, crawlspace, and shop probes on the dashboard.",
-    href: "/about/thermostat-oauth",
-    tier: "Pro (when enabled)",
-    cta: "Operator setup",
+      "On thermaltrace.dev, Pro households connect Nest or Ecobee from Dashboard → Temperature for house setpoint context next to attic, crawlspace, and shop probes. Self-hosted deployments need the operator to enable OAuth client secrets first.",
+    href: "/compare/nest",
+    tier: "Pro (enabled on thermaltrace.dev)",
+    cta: "vs Nest / Ecobee",
+    secondaryHref: "/about/thermostat-oauth",
+    secondaryLabel: "Operator OAuth setup",
   },
   {
     id: "esphome-shelly",
@@ -87,6 +108,15 @@ export const INTEGRATION_CARDS: IntegrationCard[] = [
       "Catch outbound alert hooks or POST inbound snooze actions from no-code automations.",
     href: "/about/zapier-make-recipes",
     cta: "Recipes",
+  },
+  {
+    id: "freeze-map-embed",
+    title: "Freeze map embed & badge",
+    summary:
+      "Drop the public opt-in freeze-risk map into a blog, Home Assistant dashboard, or README — iframe embed plus Markdown badge.",
+    href: "/freeze-map#embed",
+    tier: "Public (opt-in aggregates)",
+    cta: "Embed & badge",
   },
 ];
 

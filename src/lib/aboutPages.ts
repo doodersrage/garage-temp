@@ -130,6 +130,14 @@ export const coreAboutPages: AboutPage[] = [
       "Choose push vs pull, create the device or feed, POST or pull readings, and confirm Home shows live values.",
   },
   {
+    slug: "mqtt-bridge",
+    title: "MQTT bridge recipe",
+    description:
+      "Keep Mosquitto or Home Assistant MQTT on your LAN and mirror readings to ThermalTrace over HTTPS for household freeze alerts and history.",
+    summary:
+      "POST /api/ingest/mqtt, Home Assistant rest_command, and Node-RED flow — dual-run without exposing your broker.",
+  },
+  {
     slug: "install-pwa",
     title: "Install as an app (PWA)",
     description:

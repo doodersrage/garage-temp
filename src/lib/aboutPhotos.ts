@@ -280,6 +280,7 @@ export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
   "jumper-wire-standards": "arduino-dht11",
   "ingest-and-webhooks": "ethernet-cable",
   "adding-devices": "ethernet-cable",
+  "mqtt-bridge": "ethernet-cable",
   "kit-qr-onboarding": "ethernet-cable",
   "esp32-ota-firmware": "arduino-uno-board",
 
@@ -354,19 +355,32 @@ export const aboutHubPhotoIds: AboutPhotoId[] = [
   "snow-cabins",
 ];
 
-export const guidesHubPhotoIds: AboutPhotoId[] = [
-  "dht22-module",
-  "arduino-uno-board",
-  "attic-insulation",
-  "ethernet-cable",
+export const guidesHubPhotos: Array<{
+  id: AboutPhotoId;
+  label: string;
+  href: string;
+}> = [
+  { id: "dht22-module", label: "Hardware setup", href: "/guides#hardware" },
+  { id: "arduino-uno-board", label: "Arduino & firmware", href: "/guides#hardware" },
+  { id: "attic-insulation", label: "Alerts & freeze", href: "/guides#alerts" },
+  { id: "ethernet-cable", label: "Integrations & API", href: "/guides#integrations" },
 ];
 
-export const compareHubPhotoIds: AboutPhotoId[] = [
-  "home-workshop",
-  "frozen-thermometer",
-  "greenhouse",
-  "network-switch",
+export const guidesHubPhotoIds: AboutPhotoId[] = guidesHubPhotos.map((p) => p.id);
+
+/** Atmosphere strip on /compare — captions map each photo to an alternative. */
+export const compareHubPhotos: Array<{
+  id: AboutPhotoId;
+  label: string;
+  href: string;
+}> = [
+  { id: "network-switch", label: "vs DIY MQTT", href: "/compare/diy-mqtt" },
+  { id: "home-workshop", label: "vs Govee / SmartThings", href: "/compare/govee" },
+  { id: "frozen-thermometer", label: "vs Tempest", href: "/compare/tempest" },
+  { id: "crawlspace", label: "vs Nest / Ecobee", href: "/compare/nest" },
 ];
+
+export const compareHubPhotoIds: AboutPhotoId[] = compareHubPhotos.map((p) => p.id);
 
 export const storiesHubPhotoIds: AboutPhotoId[] = [
   "utility-pipes",

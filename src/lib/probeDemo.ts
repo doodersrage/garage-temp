@@ -29,7 +29,13 @@ export type DemoSpaceConfig = {
   label: string;
   /** How much warmer than outdoor the “interior” tends to sit when closed. */
   baseOffsetF: number;
+  /** Multiplier on sun/heat load (attics run hotter; crawlspaces barely move). */
+  sunScale: number;
+  /** How hard an open door/hatch mixes outdoor air into zone index 1 (0–1). */
+  doorMixStrength: number;
   doorLabel: string;
+  /** Short note shown under the space selector — thermal model differs by space. */
+  modelHint: string;
   probes: Array<{ key: string; label: string; ingestKey: string }>;
 };
 
@@ -38,7 +44,11 @@ export const DEMO_SPACES: Record<DemoSpaceKind, DemoSpaceConfig> = {
     id: "garage",
     label: "Garage",
     baseOffsetF: 6,
+    sunScale: 1,
+    doorMixStrength: 0.88,
     doorLabel: "Bay door open (mixes outside air into the door zone)",
+    modelHint:
+      "Balanced model: sun warms the workbench side; an open bay door pulls the door zone toward outdoor air while the far wall stays buffered.",
     probes: [
       { key: "0", label: "North wall", ingestKey: "north_wall" },
       { key: "1", label: "Door zone", ingestKey: "door_zone" },
@@ -49,7 +59,11 @@ export const DEMO_SPACES: Record<DemoSpaceKind, DemoSpaceConfig> = {
     id: "workshop",
     label: "Workshop",
     baseOffsetF: 8,
+    sunScale: 0.9,
+    doorMixStrength: 0.82,
     doorLabel: "Shop door open (mixes outside air into the entry zone)",
+    modelHint:
+      "Slightly warmer closed baseline than a garage (tools/people heat). Entry zone takes the draft; the tool bench stays the warm pocket.",
     probes: [
       { key: "0", label: "Exterior wall", ingestKey: "ext_wall" },
       { key: "1", label: "Entry zone", ingestKey: "entry" },
@@ -60,7 +74,11 @@ export const DEMO_SPACES: Record<DemoSpaceKind, DemoSpaceConfig> = {
     id: "attic",
     label: "Attic",
     baseOffsetF: 4,
+    sunScale: 1.55,
+    doorMixStrength: 0.7,
     doorLabel: "Hatch open (mixes conditioned air into the hatch zone)",
+    modelHint:
+      "Sun-sensitive: ridge and rafters swing hard with heat load. Hatch open mixes cooler house air into the hatch zone only.",
     probes: [
       { key: "0", label: "North rafter", ingestKey: "rafter_n" },
       { key: "1", label: "Hatch zone", ingestKey: "hatch" },
@@ -71,7 +89,11 @@ export const DEMO_SPACES: Record<DemoSpaceKind, DemoSpaceConfig> = {
     id: "crawlspace",
     label: "Crawlspace",
     baseOffsetF: 3,
+    sunScale: 0.22,
+    doorMixStrength: 0.9,
     doorLabel: "Access door open (mixes outside air near the entry)",
+    modelHint:
+      "Sun-muted and cooler baseline. Access open dumps outdoor air onto the entry probe; pipe runs stay closer to ground temperature.",
     probes: [
       { key: "0", label: "Foundation wall", ingestKey: "foundation" },
       { key: "1", label: "Access zone", ingestKey: "access" },
@@ -106,8 +128,8 @@ export const DEMO_PRESETS: Record<
   },
   doorDraft: {
     label: "Door draft",
-    hint: "Open door pulls outdoor air into one zone",
-    controls: { outdoorF: 28, sunIntensity: 10, doorOpen: true, freezeThresholdF: 34 },
+    hint: "Open door pulls outdoor air into one zone — watch the door/entry bar drop vs the others",
+    controls: { outdoorF: 22, sunIntensity: 15, doorOpen: true, freezeThresholdF: 34 },
   },
   sunny: {
     label: "Sun load",
@@ -137,20 +159,20 @@ function humidityForTemp(tempF: number, doorOpen: boolean, sunIntensity: number)
 export function computeDemoProbes(controls: DemoControls): DemoProbe[] {
   const space = DEMO_SPACES[controls.space] ?? DEMO_SPACES.garage;
   const interiorBase = controls.outdoorF + space.baseOffsetF;
-  const sunBoost = controls.sunIntensity * 0.18;
-  const doorMix = controls.doorOpen ? 0.55 : 0;
+  const sunBoost = controls.sunIntensity * 0.18 * space.sunScale;
+  // Strong mix so the door/entry zone visibly tracks outdoor while other zones stay buffered.
+  const doorMix = controls.doorOpen ? space.doorMixStrength : 0;
+  // Closed-space microclimate: wall slightly cool, workbench/ridge warmer pocket.
+  const wallBias = controls.space === "attic" ? 1 : controls.space === "crawlspace" ? -0.5 : 1.5;
+  const warmBias = controls.space === "attic" ? 3.5 : controls.space === "crawlspace" ? 1 : 4.5;
 
-  // Attics amplify sun; crawlspaces mute it.
-  const sunScale =
-    controls.space === "attic" ? 1.35 : controls.space === "crawlspace" ? 0.35 : 1;
+  const wallF = round1(interiorBase + wallBias + sunBoost * 0.22 - doorMix * 1.2);
+  const doorF = round1(
+    interiorBase * (1 - doorMix) + controls.outdoorF * doorMix + sunBoost * 0.04,
+  );
+  const warmF = round1(interiorBase + warmBias + sunBoost * 0.95 - doorMix * 0.6);
 
-  const zoneTemps = [
-    round1(interiorBase + sunBoost * 0.25 * sunScale - doorMix * 4),
-    round1(
-      interiorBase * (1 - doorMix) + controls.outdoorF * doorMix + sunBoost * 0.1 * sunScale,
-    ),
-    round1(interiorBase + sunBoost * 0.85 * sunScale - doorMix * 2),
-  ];
+  const zoneTemps = [wallF, doorF, warmF];
 
   return space.probes.map((meta, index) => {
     const f = zoneTemps[index] ?? zoneTemps[0]!;
@@ -165,6 +187,17 @@ export function computeDemoProbes(controls: DemoControls): DemoProbe[] {
       },
     };
   });
+}
+
+/** Door/entry vs warmest other zone — used for the “placement matters” callout. */
+export function doorDraftSpreadF(probes: DemoProbe[]): number | null {
+  if (probes.length < 2) return null;
+  const door = probes.find((p) => p.key === "1");
+  if (!door) return null;
+  const others = probes.filter((p) => p.key !== "1");
+  if (others.length === 0) return null;
+  const warmestOther = Math.max(...others.map((p) => p.reading.f));
+  return round1(warmestOther - door.reading.f);
 }
 
 export function computeAverageReading(probes: DemoProbe[]): DemoProbeReading {

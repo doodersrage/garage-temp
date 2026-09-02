@@ -151,6 +151,7 @@ export function buildFreezeMapSeedSparklines(): Map<string, number[]> {
 
 /**
  * Prefer live opt-in cities that meet the sample floor; otherwise show seed preview.
+ * Live snapshots below the floor are still returned via `approaching` for momentum UI.
  */
 export function resolveFreezeMapDisplay(
   snapshots: FreezeMapSnapshot[],
@@ -160,14 +161,24 @@ export function resolveFreezeMapDisplay(
   snapshots: FreezeMapSnapshot[];
   sparklines: Map<string, number[]>;
   isSeed: boolean;
+  approaching: FreezeMapSnapshot[];
 } {
+  const approaching = [...snapshots]
+    .filter((row) => row.sample_count > 0 && row.sample_count < sampleFloor)
+    .sort(
+      (a, b) =>
+        b.sample_count - a.sample_count ||
+        a.city_label.localeCompare(b.city_label),
+    );
+
   const qualifying = snapshots.filter((row) => row.sample_count >= sampleFloor);
   if (qualifying.length > 0) {
-    return { snapshots, sparklines, isSeed: false };
+    return { snapshots, sparklines, isSeed: false, approaching };
   }
   return {
     snapshots: buildFreezeMapSeedSnapshots(),
     sparklines: buildFreezeMapSeedSparklines(),
     isSeed: true,
+    approaching,
   };
 }

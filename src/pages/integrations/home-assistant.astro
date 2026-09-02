@@ -95,8 +95,8 @@ const schema = [
         </li>
       </ol>
       <p class="mb-0 text-sm text-[var(--color-text-muted)]">
-        Developer walkthrough:
-        <a class="text-link" href={HA_DEV_DOCS_INGEST}>Home Assistant guide</a>
+        Extended developer walkthrough (GitHub Pages):
+        <a class="text-link" href={HA_DEV_DOCS_INGEST} target="_blank" rel="noreferrer">Home Assistant guide ↗</a>
         · Manual YAML recipes still work if you prefer REST sensors over HACS.
       </p>
     </section>
@@ -111,7 +111,9 @@ const schema = [
           <strong>Binary sensors</strong> — door, flood/leak, motion, and power states
         </li>
         <li>
-          <strong>Polling</strong> — default every 5 minutes (60–3600 s configurable); push devices on ThermalTrace update immediately on ingest
+          <strong>Polling</strong> — HACS defaults to every 5 minutes (60–3600 s configurable). That is fine for dashboards; for
+          time-critical freeze thresholds prefer <strong>native push ingest</strong> (ESP/Arduino → ThermalTrace) so alerts fire on
+          the reading, not after the next HA poll. Dual-run is normal: push for freeze SMS, HACS for local entities.
         </li>
         <li>
           <strong>Services</strong> (optional inbound webhook + secret from Dashboard → Share):
@@ -154,9 +156,35 @@ const schema = [
     </section>
 
     <section class="card" id="indoor-temperature">
-      <h2 class="card-title">Indoor temperature (Ecobee &amp; any thermostat)</h2>
+      <h2 class="card-title">Indoor temperature via Home Assistant</h2>
       <p class="card-subtitle mb-4">
-        Ecobee developer signups are often closed. You can still compare <strong>house vs probe</strong> on Overview and History by pushing indoor air from Home Assistant, then choosing that probe as your <strong>Indoor reference</strong> under Dashboard → Devices.
+        Prefer house vs probe context on Overview and History. Two paths: Nest OAuth on Pro (when available), or push any HA climate entity as Plan B — useful when Ecobee developer signups are closed or you use another thermostat brand.
+      </p>
+
+      <h3 class="text-base font-semibold mt-2 mb-2">Nest OAuth (Pro, preferred when available)</h3>
+      <p class="text-sm mb-3">
+        On <strong>thermaltrace.dev</strong>, Pro households can connect Nest from
+        <a class="text-link" href="/dashboard/temperature">Dashboard → Temperature</a>
+        for live indoor temp, setpoint, and HVAC mode next to attic/crawlspace/shop probes — freeze alerts can include that context.
+        History stores thermostat snapshots on the same ~15-minute cron as other Pro collectors.
+      </p>
+      <ul class="text-sm space-y-2 mb-4">
+        <li>
+          End-user compare:
+          <a class="text-link" href="/compare/nest">ThermalTrace vs Nest</a>
+        </li>
+        <li>
+          Self-hosted operators enabling OAuth secrets:
+          <a class="text-link" href="/about/thermostat-oauth">Nest &amp; Ecobee operator setup</a>
+        </li>
+      </ul>
+
+      <h3 class="text-base font-semibold mt-2 mb-2">Plan B — push indoor air from Home Assistant</h3>
+      <p class="text-sm mb-3">
+        Ecobee’s developer program signups are often closed, so Ecobee OAuth may not be available even on Pro.
+        Any thermostat already in HA (Ecobee, Nest via HA, generic <code>climate.*</code>) can still feed ThermalTrace:
+        push indoor air with <code>thermaltrace.push</code>, then choose that probe as your
+        <strong>Indoor reference</strong> under Dashboard → Devices.
       </p>
       <ol class="text-sm space-y-2 pl-5 list-decimal mb-4">
         <li>Expose your thermostat in HA (e.g. <code>climate.living_room</code>).</li>
@@ -177,8 +205,10 @@ const schema = [
               value: "{{ state_attr('climate.living_room', 'current_temperature') }}"
               unit: F`}</code></pre>
       <p class="mb-0 text-sm text-[var(--color-text-muted)]">
-        Pro users with <strong>Nest OAuth</strong> get live HVAC mode automatically; history stores thermostat snapshots on the same 15-minute cron.
-        <a class="text-link" href="https://doodersrage.github.io/thermaltrace/integrations/home-assistant#indoor-temperature-ecobee--any-thermostat">Developer docs</a>
+        Also useful for Ecobee via HA when OAuth is unavailable — see
+        <a class="text-link" href="/compare/ecobee">ThermalTrace vs Ecobee</a>.
+        Extended payload notes (GitHub Pages):
+        <a class="text-link" href="https://doodersrage.github.io/thermaltrace/integrations/home-assistant#indoor-temperature-ecobee--any-thermostat" target="_blank" rel="noreferrer">developer docs ↗</a>
       </p>
     </section>
 
@@ -189,7 +219,7 @@ const schema = [
       </p>
       <ul class="text-sm space-y-2 mb-0">
         <li>
-          <a class="text-link" href="/about/adding-devices#mqtt-bridge">MQTT → HTTPS bridge recipe</a>
+          <a class="text-link" href="/about/mqtt-bridge">MQTT → HTTPS bridge recipe</a>
           — <code>POST /api/ingest/mqtt</code> with your device key
         </li>
         <li>
@@ -206,7 +236,7 @@ const schema = [
       <p class="card-subtitle mb-4">
         Pro outbound webhooks fire when ThermalTrace sends a freeze, leak, or custom-rule alert. Point the URL at your HA webhook endpoint or import the blueprint.
       </p>
-      <ul class="text-sm space-y-2 mb-0">
+      <ul class="text-sm space-y-2 mb-4">
         <li>
           <a class="text-link" href={HA_BLUEPRINT_URL} download>Download webhook blueprint YAML</a>
         </li>
@@ -215,13 +245,19 @@ const schema = [
         </li>
         <li>
           Product guide:
-          <a class="text-link" href="/about/ingest-and-webhooks">Ingest & webhooks</a>
+          <a class="text-link" href="/about/ingest-and-webhooks">Ingest &amp; webhooks</a>
         </li>
         <li>
           Configure outbound + inbound tokens under
           <a class="text-link" href="/dashboard/share">Dashboard → Share</a>
         </li>
       </ul>
+      <p class="text-sm mb-0">
+        <strong>Verify <code>X-Signature</code></strong> when you set a webhook signing secret in ThermalTrace —
+        HA (or any receiver) should reject POSTs that fail the HMAC check. The blueprint documents the header; details in the
+        <a class="text-link" href="/about/ingest-and-webhooks">ingest &amp; webhooks guide</a>
+        and FAQ below.
+      </p>
     </section>
 
     <section class="card">

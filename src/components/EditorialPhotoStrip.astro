@@ -5,11 +5,19 @@ import "../styles/about.css";
 
 interface Props {
   photoIds: AboutPhotoId[];
+  /** Optional short labels (e.g. which comparison each photo represents). */
+  labels?: string[];
+  /** Optional hrefs paired with labels. */
+  hrefs?: string[];
   class?: string;
 }
 
-const { photoIds, class: className } = Astro.props;
-const photos = photoIds.map((id) => getAboutPhoto(id));
+const { photoIds, labels = [], hrefs = [], class: className } = Astro.props;
+const photos = photoIds.map((id, index) => ({
+  ...getAboutPhoto(id),
+  label: labels[index],
+  href: hrefs[index],
+}));
 ---
 
 <section class:list={["editorial-photo-strip", className]} aria-label="Editorial photos">
@@ -25,6 +33,13 @@ const photos = photoIds.map((id) => getAboutPhoto(id));
             class="editorial-photo-strip-img"
           />
           <figcaption>
+            {photo.label ? (
+              photo.href ? (
+                <a class="editorial-photo-strip-label" href={photo.href}>{photo.label}</a>
+              ) : (
+                <span class="editorial-photo-strip-label">{photo.label}</span>
+              )
+            ) : null}
             <a
               class="about-figure-credit"
               href={photo.sourceUrl}
@@ -75,7 +90,23 @@ const photos = photoIds.map((id) => getAboutPhoto(id));
   }
 
   .editorial-photo-strip-item figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
     padding: 0.4rem 0.6rem 0.55rem;
+  }
+
+  .editorial-photo-strip-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  a.editorial-photo-strip-label:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
   }
 
   .editorial-photo-strip-item .about-figure-credit {
