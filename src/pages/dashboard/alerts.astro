@@ -118,9 +118,19 @@ const lastAlertAt =
   lastAlertCandidates.sort((a, b) => Date.parse(b) - Date.parse(a))[0] ?? null;
 const lastAlertAge = formatRelativeAge(lastAlertAt);
 
-const analyticsEvents = Astro.url.searchParams.get("test_sent")
-  ? [{ name: "first_alert_test" as const }]
-  : [];
+const analyticsEvents = (() => {
+  const events: Array<{
+    name: import("../../lib/productAnalytics").ProductEvent;
+    props?: Record<string, string | number | boolean>;
+  }> = [];
+  if (Astro.url.searchParams.get("test_sent")) {
+    events.push({ name: "first_alert_test" });
+  }
+  if (Astro.url.searchParams.get("alert_saved")) {
+    events.push({ name: "alert_essentials_saved" });
+  }
+  return events;
+})();
 
 const testSent = Boolean(Astro.url.searchParams.get("test_sent"));
 

@@ -23,7 +23,7 @@ export const INTEGRATION_CARDS: IntegrationCard[] = [
     summary:
       "Official custom integration — share-link sensors, snooze/vacation services, optional push ingest. Dual-run with MQTT on your LAN.",
     href: HA_INTEGRATION_PAGE,
-    tier: "Pro share link + optional inbound webhook",
+    tier: "Family live link (Free) · Pro for history/metrics + inbound",
     cta: "Install guide",
   },
   {

@@ -29,7 +29,7 @@ ThermalTrace ships in multiple repos. When onboarding UX changes in **this** rep
 
 ## This repo (source of truth)
 
-User-facing onboarding: [src/pages/about/adding-devices.astro](../../src/pages/about/adding-devices.astro)
+User-facing onboarding: [Adding devices](https://thermaltrace.dev/about/adding-devices) (source: `src/pages/about/adding-devices.astro`)
 
 Developer ingest: [docs/ingest/index.md](../ingest/index.md) · [docs/ingest/pull-feeds.md](../ingest/pull-feeds.md)
 

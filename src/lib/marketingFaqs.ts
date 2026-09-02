@@ -24,7 +24,7 @@ export const marketingFaqs = {
     {
       question: "Is ThermalTrace free?",
       answer:
-        "Yes—there is a free plan with live curves, 7-day history, and threshold freeze and leak alerts. Member adds 90-day history, CSV export, more devices, and forecast freeze warnings; Pro adds 1-year+ history, NWS cold-risk alerts, SMS, push, share links (including guest expiry), a printable claims evidence pack, webhooks, and a trial. Annual Member and Pro billing is discounted versus monthly.",
+        "Yes—there is a free plan with live curves, 7-day history, threshold freeze and leak alerts, and one family live share link (7-day expiry). Member adds 90-day history, CSV export, more devices, and forecast freeze warnings; Pro adds 1-year+ history, NWS cold-risk alerts, SMS, push, unlimited share scopes (history, metrics, never-expire), a printable claims evidence pack, webhooks, and a trial. Annual Member and Pro billing is discounted versus monthly.",
     },
     {
       question: "Why do I need an account?",
@@ -46,7 +46,7 @@ export const marketingFaqs = {
     {
       question: "When should I upgrade to Member or Pro?",
       answer:
-        "Choose Member for 90-day history, CSV export, more devices, and predictive forecast freeze (cold-risk) alerts. Choose Pro for 1-year+ history, official NWS freeze/cold alerts, SMS/WhatsApp, browser push, public share links with guest expiry, a printable claims / insurance evidence pack, inbound/outbound webhooks, Prometheus metrics, and a 14-day trial. Annual billing is discounted versus paying monthly.",
+        "Choose Member for 90-day history, CSV export, more devices, and predictive forecast freeze (cold-risk) alerts. Choose Pro for 1-year+ history, official NWS freeze/cold alerts, SMS/WhatsApp, browser push, unlimited share links (history, metrics, embeds, never-expire), a printable claims / insurance evidence pack, inbound/outbound webhooks, Prometheus metrics, and a 14-day trial. Free already includes one family live link. Annual billing is discounted versus paying monthly.",
     },
     {
       question: "What is the claims / insurance evidence pack?",
@@ -141,12 +141,12 @@ export const marketingFaqs = {
     {
       question: "Is there an official Home Assistant integration?",
       answer:
-        "Yes — a HACS custom integration at github.com/doodersrage/thermaltrace-home-assistant. It polls your Pro share link and creates sensors/binary sensors automatically. Install guide: thermaltrace.dev/integrations/home-assistant.",
+        "Yes — a HACS custom integration at github.com/doodersrage/thermaltrace-home-assistant. It polls a share link and creates sensors/binary sensors automatically. Free includes one family live link; Pro adds history/metrics scopes and inbound snooze webhooks. Install guide: thermaltrace.dev/integrations/home-assistant.",
     },
     {
       question: "Do I need Pro for the HACS integration?",
       answer:
-        "You need a Pro share link with readings scope to poll sensor data into Home Assistant. Inbound webhook services (snooze, vacation, status) also require a Pro inbound token from Dashboard → Share. Push via thermaltrace.push uses any push device ingest key.",
+        "A live share link works for sensor polling — Free includes one family live link. Pro unlocks history/metrics scopes, never-expire links, and inbound webhook services (snooze, vacation, status) from Dashboard → Share. Push via thermaltrace.push uses any push device ingest key.",
     },
     {
       question: "Can I push HA REST sensor JSON without the HACS integration?",

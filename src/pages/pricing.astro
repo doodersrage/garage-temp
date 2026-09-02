@@ -142,7 +142,7 @@ const schema = [
     <PageHeader
       kicker="Pricing"
       title="Plans that grow with your probes"
-      lede="Start free with live curves, threshold freeze alerts, and automatic leak alerts. Every plan ingests temperature, humidity, air quality, doors, leaks, power, energy, and motion. Member adds 90-day history, more devices, and predictive forecast warnings. Pro unlocks official NWS cold-risk alerts, SMS, push, guest share links, a claims evidence pack, webhooks, and a 14-day trial. Managing more than a couple of properties? Portfolio adds a cross-property risk dashboard and room for up to 500 owned properties — see below."
+      lede="Start free with live curves, threshold freeze alerts, automatic leak alerts, and one family live share link. Every plan ingests temperature, humidity, air quality, doors, leaks, power, energy, and motion. Member adds 90-day history, more devices, and predictive forecast warnings. Pro unlocks official NWS cold-risk alerts, SMS, push, unlimited share scopes (history, metrics, never-expire), a claims evidence pack, webhooks, and a 14-day trial. Managing more than a couple of properties? Portfolio adds a cross-property risk dashboard and room for up to 500 owned properties — see below."
     >
       {user ? (
         <p class="page-header-meta">
@@ -317,7 +317,7 @@ const schema = [
             <li>Forecast + official NWS cold-risk alerts</li>
             <li><a class="text-link" href="/claims-pack">Claims / insurance evidence pack</a></li>
             <li>
-              SMS, push, webhooks, guest share links &amp;
+              SMS, push, webhooks, Pro share scopes &amp;
               <a class="text-link" href="/docs/api">API keys</a>
             </li>
           </ul>
@@ -412,9 +412,10 @@ const schema = [
     <section class="card" id="integrations">
       <h2 class="card-title">Integrations on Pro</h2>
       <p class="card-subtitle mb-4">
-        Pro unlocks share links, inbound snooze webhooks, outbound alert hooks, and the
-        <a class="text-link" href="/integrations/home-assistant">official Home Assistant HACS integration</a>.
-        Keep MQTT on your LAN; use ThermalTrace for household freeze SMS, history, and off-site alerts.
+        Free already includes one family live share link. Pro unlocks history/metrics scopes, never-expire links,
+        inbound snooze webhooks, outbound alert hooks, and the
+        <a class="text-link" href="/integrations/home-assistant">official Home Assistant HACS integration</a>
+        at full power. Keep MQTT on your LAN; use ThermalTrace for household freeze SMS, history, and off-site alerts.
       </p>
       <div class="flex flex-wrap gap-3">
         <a class="btn-primary" href="/integrations">All integrations</a>

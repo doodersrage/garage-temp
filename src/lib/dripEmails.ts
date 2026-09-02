@@ -71,19 +71,20 @@ export const DRIP_STAGES: DripStage[] = [
   {
     id: "day7",
     day: 7,
-    subject: "Try Pro free — SMS, push, and share links",
+    subject: "Try Pro free — SMS, push, and more share scopes",
     content: (site) => ({
       eyebrow: "Pro trial",
-      preheader: "SMS, browser push, share links, and webhooks — 14-day free trial.",
+      preheader:
+        "SMS, browser push, Pro share scopes, and webhooks — 14-day free trial.",
       title: "Level up with a free Pro trial",
       intro:
-        "You’ve had a week to explore ThermalTrace. Pro adds the channels and sharing tools that matter at 2 a.m.",
+        "You’ve had a week to explore ThermalTrace. Pro adds the channels and sharing tools that matter at 2 a.m. (Free already includes one family live link.)",
       paragraphs: [
         "Start a 14-day trial from Pricing — cancel anytime from the dashboard billing portal.",
       ],
       bullets: [
         "SMS and browser push freeze alerts",
-        "Public share links and embed widgets",
+        "History, metrics, and never-expire share links plus embeds",
         `Outbound webhooks plus up to ${PRO_MAX_DEVICES} devices per property`,
       ],
       cta: { label: "Compare plans & start trial", url: `${site}/pricing` },

@@ -2,6 +2,7 @@
 import DashboardLayout from "../../../layouts/DashboardLayout.astro";
 import ShareNav from "../../../components/dashboard/ShareNav.astro";
 import UpgradeNudge from "../../../components/UpgradeNudge.astro";
+import ProductAnalyticsTracker from "../../../components/ProductAnalyticsTracker.astro";
 import { loadShareDashboardContext } from "../../../lib/shareDashboardContext";
 
 const ctx = await loadShareDashboardContext(Astro.cookies, Astro.request, Astro.url);
@@ -21,8 +22,12 @@ const {
 } = ctx;
 
 const redirectTo = "/dashboard/share/links";
+const analyticsEvents = Astro.url.searchParams.get("created")
+  ? [{ name: "family_share_created" as const }]
+  : [];
 ---
 <DashboardLayout title="Share — Links">
+  <ProductAnalyticsTracker events={analyticsEvents} />
   <ShareNav active="links">
     <div class="space-y-6">
       <section class="card">

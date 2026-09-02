@@ -20,6 +20,7 @@ test.describe("public smoke", () => {
     await expect(page.getByRole("heading", { name: /Plans that grow/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Full feature comparison/i })).toBeVisible();
     await expect(page.getByText("Threshold freeze and leak alerts", { exact: true })).toBeVisible();
+    await expect(page.getByText("1 family live link").first()).toBeVisible();
     const wrap = page.locator("#plan-matrix .plan-comparison-wrap");
     const { scrollHeight, clientHeight } = await wrap.evaluate((el) => ({
       scrollHeight: el.scrollHeight,

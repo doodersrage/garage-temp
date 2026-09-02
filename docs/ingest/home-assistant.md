@@ -10,14 +10,14 @@ ThermalTrace works with Home Assistant via **HTTPS push ingest** (recommended), 
 
 1. Add custom repo in HACS: `https://github.com/doodersrage/thermaltrace-home-assistant`
 2. Install **ThermalTrace**
-3. Create a **share link** (Pro, readings scope) under Dashboard → Share
+3. Create a **live share link** under Dashboard → Share (Free includes one family live link; Pro adds history/metrics scopes)
 4. Add integration in HA and paste the share token
 
-Creates sensors and binary sensors automatically; optional inbound webhook + push ingest keys enable services.
+Creates sensors and binary sensors automatically; optional inbound webhook + push ingest keys enable services (Pro).
 
 ## REST sensor (manual)
 
-If you publish a [share link](https://thermaltrace.dev/dashboard/share) (Pro), expose readings as a REST sensor:
+If you publish a [share link](https://thermaltrace.dev/dashboard/share/links), expose readings as a REST sensor:
 
 ```yaml
 sensor:

@@ -2,9 +2,20 @@
 
 Tasks only **you** can complete — everything else in the HACS/integration pass is shipped.
 
+## Google Play
+
+- [ ] When review clears, set `PUBLIC_PLAY_STORE_URL` in `.env` / Worker secrets and redeploy — `/android` flips to Play CTA automatically
+- [ ] Update marketing copy if needed beyond the env flip
+- **Blocked externally** — no listing URL yet; do not invent a placeholder
+
+## Nest / Ecobee (status)
+
+- [x] **Nest OAuth** — secrets in `.env`; Connect UI live when Worker has `NEST_*` (already marked production-ready below)
+- [ ] **Ecobee** — developer signup still closed; keep HA → ingest → Indoor reference workaround
+
 ## Waiting on HACS maintainers
 
-- [ ] **[hacs/default#10550](https://github.com/hacs/default/pull/10550)** — default store listing (all automated checks green; in FIFO review queue)
+- [ ] **[hacs/default#10550](https://github.com/hacs/default/pull/10550)** — still **open** (not merged as of 2026-09-02); default store listing in FIFO review queue
 - After merge: flip `HACS_BADGE_URL` in `src/lib/integrationsHub.ts` from Custom → Default badge
 
 ## Growth (copy/paste ready)
@@ -29,11 +40,6 @@ Check what's missing locally: `pnpm operator:check`
    **Workaround:** HA → ingest → **Indoor reference** on Dashboard → Devices (see [HA indoor temp guide](https://doodersrage.github.io/thermaltrace/integrations/home-assistant#indoor-temperature-indoor-temperature-ecobee--any-thermostat))
 
 3. Add values to `.env`, then: `pnpm secrets:push`
-
-## Google Play
-
-- [ ] When review clears, set `PUBLIC_PLAY_STORE_URL` in `.env` / Worker secrets and redeploy — `/android` flips to Play CTA automatically
-- [ ] Update marketing copy if needed beyond the env flip
 
 ## WebAuthn MFA
 

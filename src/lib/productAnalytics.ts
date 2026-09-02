@@ -14,6 +14,8 @@ export type ProductEvent =
   | "onboarding_step_complete"
   | "first_ingest"
   | "first_alert_test"
+  | "alert_essentials_saved"
+  | "family_share_created"
   | "device_created"
   | "pull_setup_saved"
   | "sensors_renamed"
