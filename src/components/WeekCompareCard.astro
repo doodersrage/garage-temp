@@ -9,36 +9,73 @@ interface Props {
 }
 
 const { compare, useCelsius = false } = Astro.props;
+
+function formatEarliest(iso: string | null): string | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+const earliestLabel = formatEarliest(compare.earliestLocalReadingAt);
+const priorYearIsOutdoor = compare.priorYearSource === "outdoor_estimate";
+const priorYearLabel = priorYearIsOutdoor
+  ? `Outdoor last year${compare.priorYearOutdoorLabel ? ` (${compare.priorYearOutdoorLabel})` : ""}`
+  : "Same week last year";
 ---
 <DashboardCard>
   <h2 class="card-title">This week vs last year</h2>
-  <p class="card-subtitle mb-4">7-day average indoor temperature compared to the same window one year ago.</p>
+  <p class="card-subtitle mb-4">
+    7-day average temperature compared to the same window one year ago.
+    {priorYearIsOutdoor && (
+      <>
+        {" "}
+        Prior-year line uses estimated outdoor temps (Open-Meteo) — not your probe readings.
+      </>
+    )}
+  </p>
   {compare.thisWeekAvgF == null ? (
     <p class="mb-0 text-sm text-muted-foreground">Not enough readings this week yet.</p>
   ) : (
-    <div class="stat-grid">
-      <article class="stat-item">
-        <span class="stat-label">This week</span>
-        <p class="stat-value">{formatTemperature(compare.thisWeekAvgF, useCelsius, 1)}</p>
-        <p class="stat-detail">{compare.sampleCount} samples</p>
-      </article>
-      <article class="stat-item">
-        <span class="stat-label">Same week last year</span>
-        <p class="stat-value">
-          {compare.priorYearAvgF != null
-            ? formatTemperature(compare.priorYearAvgF, useCelsius, 1)
-            : "—"}
+    <>
+      <div class="stat-grid">
+        <article class="stat-item">
+          <span class="stat-label">This week</span>
+          <p class="stat-value">{formatTemperature(compare.thisWeekAvgF, useCelsius, 1)}</p>
+          <p class="stat-detail">{compare.sampleCount} samples</p>
+        </article>
+        <article class="stat-item">
+          <span class="stat-label">{priorYearLabel}</span>
+          <p class="stat-value">
+            {compare.priorYearAvgF != null
+              ? formatTemperature(compare.priorYearAvgF, useCelsius, 1)
+              : "—"}
+          </p>
+          {compare.priorYearAvgF == null && earliestLabel && (
+            <p class="stat-detail">Local history starts {earliestLabel}</p>
+          )}
+        </article>
+        <article class="stat-item">
+          <span class="stat-label">Change</span>
+          <p class="stat-value">
+            {compare.deltaF != null ? formatDeltaF(compare.deltaF, useCelsius) : "—"}
+          </p>
+          <p class="stat-detail">
+            {compare.deltaF != null && compare.deltaF < 0
+              ? priorYearIsOutdoor
+                ? "Cooler than outdoor baseline"
+                : "Colder than last year"
+              : "Warmer or similar"}
+          </p>
+        </article>
+      </div>
+      {compare.priorYearAvgF == null && !priorYearIsOutdoor && (
+        <p class="mb-0 mt-3 text-sm text-[var(--color-text-muted)]">
+          {earliestLabel
+            ? `No probe data from this week last year. History here starts ${earliestLabel}.`
+            : "No probe data from this week last year yet."}
         </p>
-      </article>
-      <article class="stat-item">
-        <span class="stat-label">Change</span>
-        <p class="stat-value">
-          {compare.deltaF != null ? formatDeltaF(compare.deltaF, useCelsius) : "—"}
-        </p>
-        <p class="stat-detail">
-          {compare.deltaF != null && compare.deltaF < 0 ? "Colder than last year" : "Warmer or similar"}
-        </p>
-      </article>
-    </div>
+      )}
+    </>
   )}
 </DashboardCard>

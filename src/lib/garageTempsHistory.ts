@@ -730,6 +730,23 @@ export async function fetchGarageTempChartDataPriorYear(
   return { points, error: null };
 }
 
+/** Earliest stored sensor reading for empty-state copy on YoY comparisons. */
+export async function fetchEarliestSensorReadingAt(
+  householdId: string,
+): Promise<string | null> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("sensor_readings")
+    .select("recorded_at")
+    .eq("household_id", householdId)
+    .order("recorded_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data?.recorded_at) return null;
+  return data.recorded_at;
+}
+
 export async function fetchHistoryFilterOptions(userId: string): Promise<{
   feeds: string[];
   probes: { key: string; label: string }[];

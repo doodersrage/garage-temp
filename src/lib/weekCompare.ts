@@ -1,10 +1,16 @@
 import type { ChartPoint } from "./garageTempsHistory";
 
-export type WeekCompareResult = {
+export type WeekCompareCore = {
   thisWeekAvgF: number | null;
   priorYearAvgF: number | null;
   deltaF: number | null;
   sampleCount: number;
+};
+
+export type WeekCompareResult = WeekCompareCore & {
+  priorYearSource: "local" | "outdoor_estimate" | "none";
+  priorYearOutdoorLabel: string | null;
+  earliestLocalReadingAt: string | null;
 };
 
 export function averageTempF(points: ChartPoint[]): number | null {
@@ -16,7 +22,7 @@ export function averageTempF(points: ChartPoint[]): number | null {
 export function compareWeekAverages(
   thisWeek: ChartPoint[],
   priorYearWeek: ChartPoint[],
-): WeekCompareResult {
+): WeekCompareCore {
   const thisWeekAvgF = averageTempF(thisWeek);
   const priorYearAvgF = averageTempF(priorYearWeek);
   const deltaF =

@@ -1,3 +1,4 @@
+import type { User } from "@supabase/supabase-js";
 import type { ChartPoint } from "./garageTempsHistory";
 
 export type SeasonalInsight = {
@@ -106,16 +107,24 @@ export function compareYearOverYear(
 export async function computeSeasonalInsights(
   userId: string,
   days = 30,
+  user?: User | null,
 ): Promise<SeasonalInsight[]> {
-  const { fetchGarageTempChartData, fetchGarageTempChartDataPriorYear } =
-    await import("./garageTempsHistory");
+  const { fetchGarageTempChartData } = await import("./garageTempsHistory");
+  const { fetchPriorYearCompareBundle } = await import("./priorYearCompare");
   const chart = await fetchGarageTempChartData(userId, days);
   if (chart.error || chart.points.length === 0) {
     return [];
   }
   const insights = summarizeSeasonal(chart.points, days);
-  const prior = await fetchGarageTempChartDataPriorYear(userId, days);
+  const prior = await fetchPriorYearCompareBundle(userId, days, {}, user);
   const yoy = compareYearOverYear(chart.points, prior.points);
-  if (yoy) insights.push(yoy);
+  if (yoy) {
+    if (prior.source === "outdoor_estimate") {
+      yoy.detail = `${yoy.detail.replace(/\.$/, "")} (outdoor estimate${
+        prior.outdoorLocationLabel ? ` at ${prior.outdoorLocationLabel}` : ""
+      }).`;
+    }
+    insights.push(yoy);
+  }
   return insights;
 }

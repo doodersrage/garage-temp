@@ -11,5 +11,6 @@ describe("week compare", () => {
       [{ timestamp: "c", tempf: 38, humidity: 50, probeLabel: "Garage" }],
     );
     expect(result.deltaF).toBe(3);
+    expect(result.sampleCount).toBe(2);
   });
 });

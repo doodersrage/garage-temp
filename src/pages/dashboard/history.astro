@@ -9,10 +9,10 @@ import { getAuthFromCookies } from "../../lib/auth";
 import { canDownloadHistoryCsv } from "../../lib/adminAccess";
 import {
   fetchGarageTempChartData,
-  fetchGarageTempChartDataPriorYear,
   fetchGarageTempHistory,
   fetchHistoryFilterOptions,
 } from "../../lib/garageTempsHistory";
+import { fetchPriorYearCompareBundle } from "../../lib/priorYearCompare";
 import { detectTemperatureAnomalies } from "../../lib/anomalyDetection";
 import { getUserSubscription } from "../../lib/stripeSubscriptions";
 import {
@@ -109,7 +109,7 @@ const chartWindowDays =
 const [
   history,
   chartData,
-  priorYearData,
+  priorYearBundle,
   filterOptions,
   canDownloadCsv,
   subscription,
@@ -119,18 +119,26 @@ const [
   fetchGarageTempHistory(user.id, pageParam, undefined, filters),
   fetchGarageTempChartData(user.id, chartWindowDays, chartFilters),
   needPriorYear
-    ? fetchGarageTempChartDataPriorYear(
+    ? fetchPriorYearCompareBundle(
         user.id,
         overlayColdest ? Math.max(chartWindowDays, 30) : chartWindowDays,
         chartFilters,
+        user,
       )
-    : Promise.resolve({ points: [], error: null }),
+    : Promise.resolve({
+        points: [],
+        source: "none" as const,
+        outdoorLocationLabel: null,
+        earliestLocalReadingAt: null,
+      }),
   fetchHistoryFilterOptions(user.id),
   canDownloadHistoryCsv(user.id),
   getUserSubscription(user.id),
-  computeSeasonalInsights(user.id, Math.min(30, historyDays)),
+  computeSeasonalInsights(user.id, Math.min(30, historyDays), user),
   getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
 ]);
+
+const priorYearData = { points: priorYearBundle.points, error: null };
 
 const outdoorDelta = await fetchIndoorOutdoorDelta(
   chartData.points,
@@ -154,14 +162,20 @@ const overlayPoints = overlayColdest
 
 const overlayLegend = overlayColdest
   ? coldestOverlay.coldestDay
-    ? `Gray = coldest day last year (${coldestOverlay.coldestDay}${
+    ? priorYearBundle.source === "outdoor_estimate"
+      ? `Gray = coldest outdoor day last year (${coldestOverlay.coldestDay}, estimated)`
+      : `Gray = coldest day last year (${coldestOverlay.coldestDay}${
         coldestOverlay.minTempF != null
           ? `, low ${coldestOverlay.minTempF.toFixed(1)}°F`
           : ""
       })`
-    : "Gray = coldest day last year (no prior-year data)"
+    : priorYearBundle.earliestLocalReadingAt
+      ? `Gray = no prior-year probe data (history starts ${new Date(priorYearBundle.earliestLocalReadingAt).toLocaleDateString()})`
+      : "Gray = coldest day last year (no prior-year data)"
   : compareYoy
-    ? "Gray = same window last year (time-aligned)"
+    ? priorYearBundle.source === "outdoor_estimate"
+      ? `Gray = outdoor estimate last year${priorYearBundle.outdoorLocationLabel ? ` (${priorYearBundle.outdoorLocationLabel})` : ""}`
+      : "Gray = same window last year (time-aligned)"
     : null;
 
 if (history.totalPages > 0 && pageParam > history.totalPages) {

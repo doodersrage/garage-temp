@@ -1,26 +1,52 @@
+import type { User } from "@supabase/supabase-js";
 import {
   fetchGarageTempChartData,
-  fetchGarageTempChartDataPriorYear,
   type ChartPoint,
 } from "./garageTempsHistory";
 import { compareWeekAverages, type WeekCompareResult } from "./weekCompare";
 import { estimateTimeToFreeze, type TempSample } from "./timeToFreeze";
+import { fetchPriorYearCompareBundle } from "./priorYearCompare";
+
+const EMPTY_COMPARE: WeekCompareResult = {
+  thisWeekAvgF: null,
+  priorYearAvgF: null,
+  deltaF: null,
+  sampleCount: 0,
+  priorYearSource: "none",
+  priorYearOutdoorLabel: null,
+  earliestLocalReadingAt: null,
+};
 
 export async function fetchWeekCompare(
   userId: string,
+  user?: User | null,
 ): Promise<{ compare: WeekCompareResult; error: string | null }> {
-  const [thisWeekResult, priorYearResult] = await Promise.all([
+  const [thisWeekResult, priorYearBundle] = await Promise.all([
     fetchGarageTempChartData(userId, 7),
-    fetchGarageTempChartDataPriorYear(userId, 7),
+    fetchPriorYearCompareBundle(userId, 7, {}, user),
   ]);
 
   if (thisWeekResult.error) {
-    return { compare: compareWeekAverages([], []), error: thisWeekResult.error };
+    return { compare: { ...EMPTY_COMPARE }, error: thisWeekResult.error };
   }
 
+  const base = compareWeekAverages(thisWeekResult.points, priorYearBundle.points);
+  const priorYearAvgF = base.priorYearAvgF;
+  const deltaF =
+    base.thisWeekAvgF != null && priorYearAvgF != null
+      ? base.thisWeekAvgF - priorYearAvgF
+      : null;
+
   return {
-    compare: compareWeekAverages(thisWeekResult.points, priorYearResult.points),
-    error: priorYearResult.error,
+    compare: {
+      ...base,
+      priorYearAvgF,
+      deltaF,
+      priorYearSource: priorYearBundle.source,
+      priorYearOutdoorLabel: priorYearBundle.outdoorLocationLabel,
+      earliestLocalReadingAt: priorYearBundle.earliestLocalReadingAt,
+    },
+    error: null,
   };
 }
 
