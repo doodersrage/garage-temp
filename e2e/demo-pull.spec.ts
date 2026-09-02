@@ -3,14 +3,22 @@ import { getE2ECredentials, signIn } from "./helpers/auth";
 
 const EXAMPLE_FEED_PATH = "/api/feeds/example";
 
+/** Server-side probe discovery requires an HTTPS URL reachable from the preview worker. */
+function exampleFeedUrlForE2E(pageOrigin: string): string {
+  const site = process.env.SITE_URL?.replace(/\/+$/, "");
+  if (site?.startsWith("https://")) {
+    return `${site}${EXAMPLE_FEED_PATH}`;
+  }
+  return `${pageOrigin}${EXAMPLE_FEED_PATH}`;
+}
+
 test.describe("demo pull feed", () => {
   test("save example feed, discover probes, fetch readings, then clean up", async ({ page }) => {
     test.skip(!getE2ECredentials(), "Set E2E_TEST_EMAIL and E2E_TEST_PASSWORD");
 
     await signIn(page, "/dashboard/temperature?tab=pull");
 
-    const origin = new URL(page.url()).origin;
-    const exampleFeedUrl = `${origin}${EXAMPLE_FEED_PATH}`;
+    const exampleFeedUrl = exampleFeedUrlForE2E(new URL(page.url()).origin);
     const feedId = `e2e-demo-${Date.now()}`;
 
     const saveRes = await page.request.post("/api/user/pull-setup", {
