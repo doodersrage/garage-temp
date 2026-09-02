@@ -635,6 +635,18 @@
     font-weight: 650;
   }
 
+  .home-hero-promise {
+    margin: 0 0 0.65rem;
+    max-width: 28rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.8vw, 1.55rem);
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    color: var(--color-text);
+    animation: home-rise 520ms var(--motion-ease) 40ms both;
+  }
+
   .home-hero-lead {
     margin: 0 0 1.6rem;
     max-width: 32rem;
@@ -769,12 +781,214 @@
   @media (prefers-reduced-motion: reduce) {
     .home-hero-brand,
     .home-hero-audience,
+    .home-hero-promise,
     .home-hero-lead,
     .home-hero-actions,
     .home-hero-plans,
     .home-hero-visual {
       animation: none;
     }
+  }
+
+  .home-live-block {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .home-live-intro {
+    max-width: 36rem;
+  }
+
+  .home-live-title {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  .home-live-lede {
+    margin: 0;
+    font-size: 0.975rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+  }
+
+  .home-live-cta {
+    font-size: 0.9375rem;
+  }
+
+  .home-maker {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1.5rem 1.35rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background:
+      linear-gradient(145deg, rgb(59 130 246 / 0.08), transparent 55%),
+      var(--color-surface);
+  }
+
+  .home-maker-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    color: var(--color-text);
+    max-width: 28rem;
+  }
+
+  .home-maker-lede {
+    margin: 0;
+    max-width: 40rem;
+    font-size: 0.975rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+  }
+
+  .home-maker-tagline {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .home-story {
+    display: grid;
+    gap: 0.55rem;
+    max-width: 40rem;
+  }
+
+  .home-story-kicker {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .home-story-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.5vw, 1.55rem);
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    color: var(--color-text);
+  }
+
+  .home-story-copy {
+    margin: 0;
+    font-size: 0.975rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+  }
+
+  .home-story-cta {
+    font-size: 0.9375rem;
+  }
+
+  .home-pricing-ladder {
+    display: grid;
+    gap: 0.85rem;
+    padding: 1.5rem 1.35rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .home-pricing-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  .home-pricing-lede {
+    margin: 0;
+    font-size: 0.975rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+  }
+
+  .home-pricing-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .home-pricing-list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+  }
+
+  .home-pricing-list li {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .home-pricing-list strong {
+    font-size: 1rem;
+    color: var(--color-text);
+  }
+
+  .home-pricing-list span {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--color-text-muted);
+  }
+
+  .home-pricing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .pricing-ladder {
+    margin: 0 0 0.25rem;
+  }
+
+  .pricing-ladder-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  @media (min-width: 768px) {
+    .pricing-ladder-list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.15rem;
+    }
+  }
+
+  .pricing-ladder-list li {
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .pricing-ladder-list strong {
+    font-size: 1.05rem;
+    color: var(--color-text);
+  }
+
+  .pricing-ladder-list span {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
   }
 
   .home-features {

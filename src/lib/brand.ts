@@ -6,7 +6,9 @@ export const BRAND_NAME_TM = "ThermalTrace™";
 /** Short list of spaces we monitor — use in marketing copy, not internal IDs. */
 export const BRAND_SPACES =
   "garages, workshops, attics, crawlspaces, and shops";
+/** Clarifies the product category (not thermal imaging) next to the brand name. */
+export const BRAND_POSITIONING = "Garage & workshop sensor monitoring";
 export const BRAND_TAGLINE = `Track, log, and analyze sensors in ${BRAND_SPACES}.`;
 /** Definition-first for SEO/AEO meta defaults. */
 export const BRAND_DESCRIPTION =
-  `ThermalTrace is an open-source dashboard for ${BRAND_SPACES}—temperature, humidity, air quality, doors, leaks, power, and energy—with freeze-aware alerts, ESP/Arduino or JSON ingest, and exportable history.`;
+  `ThermalTrace is open-source garage and workshop monitoring for ${BRAND_SPACES}—freeze-aware alerts, ESP/Arduino or JSON ingest, live curves, and exportable history before pipes and storage take damage.`;

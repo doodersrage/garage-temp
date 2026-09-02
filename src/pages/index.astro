@@ -7,7 +7,7 @@ import LiveTempsPanel from '../components/LiveTempsPanel';
 import FaqSection from '../components/FaqSection.astro';
 import HomeStatusChip from '../components/HomeStatusChip.astro';
 import HomePwaCard from '../components/HomePwaCard.astro';
-import { BRAND_DESCRIPTION, BRAND_NAME_TM, BRAND_SPACES } from '../lib/brand';
+import { BRAND_DESCRIPTION, BRAND_NAME_TM, BRAND_POSITIONING } from '../lib/brand';
 import { getAuthFromCookies } from '../lib/auth';
 import { getUserPreferences } from '../lib/userPreferences';
 import {
@@ -18,6 +18,7 @@ import {
 import { getMarketingFaqs, getMarketingFaqSchema } from '../lib/marketingFaqs';
 import { getMemberPriceDisplay, getProPriceDisplay } from '../lib/stripePricing';
 import { fetchAppStatusSummary } from '../lib/appStatus';
+import { getStory } from '../lib/stories';
 import garageInstallLifestyle from '../assets/thermaltrace-garage-install-lifestyle.jpg';
 
 const { user } = await getAuthFromCookies(Astro.cookies);
@@ -43,37 +44,30 @@ const appStatus = !isAuthenticated ? await fetchAppStatusSummary() : null;
 const owmApiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "")
   .replace(/\r/g, "")
   .trim();
+const featuredStory = getStory("pipe-near-miss")!;
 ---
 
 <Layout
-  title="Environmental sensor dashboard & freeze alerts"
+  title="Garage & workshop monitoring & freeze alerts"
   description={homeDescription}
   schema={schema}
   softwareApplication
-  speakableSelectors={[".home-hero-brand", ".home-hero-audience", ".home-hero-lead", ".faq-answer"]}
+  speakableSelectors={[".home-hero-brand", ".home-hero-promise", ".home-hero-lead", ".faq-answer"]}
 >
 	{!isAuthenticated ? (
 		<div class="home-marketing">
 			<section class="home-hero home-hero--bleed">
 				<div class="home-hero-inner home-hero-grid">
 					<div class="home-hero-copy">
-						<p class="home-hero-audience">
-							Built for homeowners, hobbyists, and makers with ESP32, Arduino, or any HTTPS JSON probe.
-						</p>
+						<p class="home-hero-audience">{BRAND_POSITIONING}</p>
 						<h1 class="home-hero-brand">{BRAND_NAME_TM}</h1>
+						<p class="home-hero-promise">Know before your pipes freeze.</p>
 						<p class="home-hero-lead">
-							Open-source monitoring for {BRAND_SPACES} —
-							live curves, freeze-aware alerts, and history before pipes and storage take damage.
+							Monitor your garage, workshop, cabin, or other vulnerable spaces with sensors you build—and get alerted when temperatures become dangerous.
 						</p>
 						<div class="home-hero-actions">
-							<a class="btn-primary" href="/demo">Try live demo</a>
-							<a class="btn-secondary" href="/register?next=/dashboard/temperature">Create free account</a>
-							<a
-								class="btn-secondary"
-								href="https://github.com/doodersrage/thermaltrace"
-								target="_blank"
-								rel="noreferrer"
-							>View source</a>
+							<a class="btn-primary" href="/demo">See live demo</a>
+							<a class="btn-secondary" href="/register?next=/dashboard/temperature">Start free</a>
 						</div>
 						<p class="home-hero-plans">
 							<a class="text-link" href="/pricing">
@@ -100,112 +94,152 @@ const owmApiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "")
 			<div class="page-shell page-stack">
 				<HomeStatusChip status={appStatus} />
 
-				<div class="home-live" aria-label="Live demo readings">
-					{showGarageTemps && <DemoTempsPanel client:visible />}
-					{showWeather && <WeatherPanel client:visible cityId={null} guest owmApiKey={owmApiKey || null} />}
-				</div>
+				<section class="home-live-block" aria-labelledby="home-live-title">
+					<div class="home-live-intro">
+						<h2 class="home-live-title" id="home-live-title">See it working</h2>
+						<p class="home-live-lede">
+							Live probe readings from a real ThermalTrace demo—no account required.
+						</p>
+					</div>
+					<div class="home-live" aria-label="Live demo readings">
+						{showGarageTemps && <DemoTempsPanel client:visible />}
+						{showWeather && <WeatherPanel client:visible cityId={null} guest owmApiKey={owmApiKey || null} />}
+					</div>
+					<p class="home-live-cta mb-0">
+						<a class="text-link" href="/demo">Open the full live demo</a>
+					</p>
+				</section>
 
 				<section class="home-steps" aria-labelledby="home-steps-title">
 					<div class="home-steps-intro">
-						<h2 class="home-steps-title" id="home-steps-title">3 steps to first reading</h2>
+						<h2 class="home-steps-title" id="home-steps-title">How it works</h2>
 						<p class="home-steps-lede">
-							Free account, no credit card — from blank dashboard to a live curve in one sitting.
+							No special hardware lock-in. No home server to keep online.
 						</p>
 					</div>
 					<ol class="home-steps-list">
 						<li class="home-step">
 							<span class="home-step-num" aria-hidden="true">1</span>
 							<div>
-								<h3 class="home-step-title">Create a push device</h3>
+								<h3 class="home-step-title">Build</h3>
 								<p class="home-step-copy">
-									Sign up and open Devices, or try <strong>Try without hardware</strong> on Overview to save the demo pull feed. Copy the ingest URL or QR from the 30-minute callout.
+									Wire an ESP32 or Arduino with a temperature probe—or use almost any device that can send JSON.
 								</p>
 							</div>
 						</li>
 						<li class="home-step">
 							<span class="home-step-num" aria-hidden="true">2</span>
 							<div>
-								<h3 class="home-step-title">POST JSON</h3>
+								<h3 class="home-step-title">Connect</h3>
 								<p class="home-step-copy">
-									POST to <code>/api/ingest/&lt;key&gt;</code>. Sensor keys auto-import on first POST — rename afterward on Devices. Use <strong>Reveal ingest key</strong> if you lose the key later.
+									Push readings to ThermalTrace (or pull from an HTTPS JSON feed). Sensors appear on first contact.
 								</p>
 							</div>
 						</li>
 						<li class="home-step">
 							<span class="home-step-num" aria-hidden="true">3</span>
 							<div>
-								<h3 class="home-step-title">Watch Home &amp; set alerts</h3>
+								<h3 class="home-step-title">Get alerted</h3>
 								<p class="home-step-copy">
-									Confirm live values, set a freeze threshold, and send a test alert before the next cold night.
+									Set a freeze threshold. Email, chat, or SMS when a cold snap becomes a plumbing problem.
 								</p>
 							</div>
 						</li>
 					</ol>
 					<div class="home-steps-actions">
-						<a class="btn-primary" href="/register?next=/dashboard/temperature">Start free — open Devices</a>
+						<a class="btn-primary" href="/register?next=/dashboard/temperature">Start free</a>
 						<a class="btn-secondary" href="/about/adding-devices">Adding devices guide</a>
 					</div>
 				</section>
 
-				<section class="home-compat" aria-label="Works with">
-					<p class="home-compat-label">Works with</p>
+				<section class="home-maker" aria-labelledby="home-maker-title">
+					<h2 class="home-maker-title" id="home-maker-title">Love DIY? You don’t have to DIY everything.</h2>
+					<p class="home-maker-lede">
+						Keep your ESP32, Arduino, MQTT, or Home Assistant setup. ThermalTrace adds hosted history and household freeze alerts—without another server to babysit.
+					</p>
+					<p class="home-maker-tagline">Your sensor. Your data. Your alerts.</p>
 					<ul class="home-compat-list">
 						<li>ESP32</li>
 						<li>Arduino</li>
-						<li>HTTPS JSON push</li>
-						<li>HTTPS JSON pull</li>
+						<li>HTTPS JSON</li>
 						<li>MQTT bridge</li>
-						<li><a class="text-link" href="/integrations">Integrations hub</a></li>
-						<li><a class="text-link" href="/integrations/home-assistant">Home Assistant (HACS)</a></li>
-						<li>Discord · Telegram · Slack</li>
+						<li><a class="text-link" href="/integrations/home-assistant">Home Assistant</a></li>
+						<li><a class="text-link" href="/compare/diy-mqtt">vs DIY MQTT</a></li>
 					</ul>
-					<p class="home-compat-note">
-						Keep MQTT on your LAN; mirror to ThermalTrace over HTTPS for household freeze alerts and history.
-						<a class="text-link" href="/integrations/home-assistant">HACS integration</a>
-						·
-						<a class="text-link" href="/about/adding-devices#mqtt-bridge">MQTT bridge recipe</a>
-						·
-						<a class="text-link" href="/compare/diy-mqtt">vs DIY MQTT</a>
+				</section>
+
+				<section class="home-story" aria-labelledby="home-story-title">
+					<p class="home-story-kicker">Real-world</p>
+					<h2 class="home-story-title" id="home-story-title">34°F. That’s when the alert mattered.</h2>
+					<p class="home-story-copy">
+						{featuredStory.location}: a cold garage corner dipped night after night before supply lines iced.
+						History showed the pattern; the alert made someone fix the door seal.
+					</p>
+					<p class="home-story-cta mb-0">
+						<a class="text-link" href={featuredStory.path}>Read the near-miss story</a>
+						<span aria-hidden="true"> · </span>
+						<a class="text-link" href="/stories">More stories</a>
 					</p>
 				</section>
 
-				<HomePwaCard />
-
 				<section class="home-features" aria-label="Product highlights">
 					<article class="home-feature">
-						<h2 class="home-feature-title">Freeze-aware alerts</h2>
+						<h2 class="home-feature-title">Protect vulnerable spaces</h2>
 						<p class="home-feature-copy">
-							Threshold freeze alerts on every plan, plus automatic leak alerts when a flood sensor is wet. Member adds forecast cold-risk and Pro adds official NWS freeze alerts—across email, SMS, push, and webhooks.
+							Freeze and leak alerts on every plan. Member adds forecast cold-risk; Pro adds NWS alerts, SMS, and push—before pipes and storage take damage.
 							<a class="text-link" href="/about/cold-snap-playbook">Cold-snap playbook</a>
-							·
-							<a class="text-link" href="/about/alert-channel-cookbook">Channel cookbook</a>
 						</p>
 					</article>
 					<article class="home-feature">
-						<h2 class="home-feature-title">Your sensors</h2>
+						<h2 class="home-feature-title">Your sensors, your stack</h2>
 						<p class="home-feature-copy">
-							ESP/Arduino push ingest or HTTPS JSON feeds — probes, doors, leaks, air quality, power, energy, and motion.
+							Temperature, humidity, air quality, doors, leaks, power, and motion—on hardware you control.
 							<a class="text-link" href="/about/ingest-and-webhooks">Ingest guide</a>
 							·
 							<a class="text-link" href="/docs/api">HTTP API</a>
-							·
-							<a class="text-link" href="/about/dht22-sensor-overview">DHT22 overview</a>
 						</p>
 					</article>
 					<article class="home-feature">
 						<h2 class="home-feature-title">Household ready</h2>
 						<p class="home-feature-copy">
-							Invite household members and share one free family live link without handing out a login password. Pro expands share scopes and adds a printable <a class="text-link" href="/claims-pack">claims evidence pack</a> when you need a paper trail.
-							<a class="text-link" href="/about/household-sharing-walkthrough">Sharing walkthrough</a>
+							Invite family and share one free live link without handing out a password. Pro expands share scopes and adds a
+							<a class="text-link" href="/claims-pack">claims evidence pack</a>.
 						</p>
 					</article>
 				</section>
+
+				<section class="home-pricing-ladder" aria-labelledby="home-pricing-title">
+					<h2 class="home-pricing-title" id="home-pricing-title">Free to start</h2>
+					<p class="home-pricing-lede">
+						Pick a rung by job—not by feature checklist. Full limits live on pricing.
+					</p>
+					<ul class="home-pricing-list">
+						<li>
+							<strong>Free</strong>
+							<span>See if ThermalTrace works for you</span>
+						</li>
+						<li>
+							<strong>Member</strong>
+							<span>Track a whole cold season{memberPrice ? ` · ${memberPrice}/mo` : ""}</span>
+						</li>
+						<li>
+							<strong>Pro</strong>
+							<span>Serious alerts and automation{proPrice ? ` · ${proPrice}/mo` : ""}</span>
+						</li>
+					</ul>
+					<div class="home-pricing-actions">
+						<a class="btn-primary" href="/pricing">Compare plans</a>
+						<a class="btn-secondary" href="/register?next=/dashboard/temperature">Start free</a>
+					</div>
+				</section>
+
+				<HomePwaCard />
 
 				<section class="card home-guides">
 					<div class="home-guides-copy">
 						<h2 class="card-title">Guides by job</h2>
 						<p class="card-subtitle mb-0">
-							Hardware setup, freeze alerts, sharing, and the API — then the full About library if you want every article.
+							Hardware setup, freeze alerts, sharing, and the API—then the full About library if you want every article.
 						</p>
 					</div>
 					<div class="home-guides-actions">
@@ -216,7 +250,7 @@ const owmApiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "")
 				</section>
 
 				<p class="home-oss mb-0">
-					The dashboard and sample sensor sketches are public.
+					Open-source dashboard and sample sensor sketches.
 					<a class="text-link" href="https://github.com/doodersrage/thermaltrace" target="_blank" rel="noreferrer">View source on GitHub</a>.
 				</p>
 

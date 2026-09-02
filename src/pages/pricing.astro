@@ -142,7 +142,7 @@ const schema = [
     <PageHeader
       kicker="Pricing"
       title="Plans that grow with your probes"
-      lede="Start free with live curves, threshold freeze alerts, automatic leak alerts, and one family live share link. Every plan ingests temperature, humidity, air quality, doors, leaks, power, energy, and motion. Member adds 90-day history, more devices, and predictive forecast warnings. Pro unlocks official NWS cold-risk alerts, SMS, push, unlimited share scopes (history, metrics, never-expire), a claims evidence pack, webhooks, and a 14-day trial. Managing more than a couple of properties? Portfolio adds a cross-property risk dashboard and room for up to 500 owned properties — see below."
+      lede="Start free to see if ThermalTrace fits. Upgrade to Member for a full cold season of history, or Pro when you want serious alerts and automation. Portfolio is for multi-property owners—details below."
     >
       {user ? (
         <p class="page-header-meta">
@@ -163,6 +163,23 @@ const schema = [
         </>
       )}
     </PageHeader>
+
+    <section class="pricing-ladder" aria-label="Plan ladder">
+      <ul class="pricing-ladder-list">
+        <li>
+          <strong>Free</strong>
+          <span>See if ThermalTrace works for you—live curves, freeze and leak alerts, one family live share.</span>
+        </li>
+        <li>
+          <strong>Member</strong>
+          <span>Track a whole cold season—90-day history, CSV, more devices, forecast cold-risk.</span>
+        </li>
+        <li>
+          <strong>Pro</strong>
+          <span>Serious alerts and automation—NWS, SMS, push, webhooks, claims pack, 14-day trial.</span>
+        </li>
+      </ul>
+    </section>
 
     <section class="plan-tier-section">
       <div class="billing-interval-toggle" role="group" aria-label="Billing interval">

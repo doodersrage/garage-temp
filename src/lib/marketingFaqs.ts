@@ -9,7 +9,8 @@ export const marketingFaqs = {
   home: [
     {
       question: "What is ThermalTrace?",
-      answer: BRAND_DESCRIPTION,
+      answer:
+        `${BRAND_DESCRIPTION} Build with ESP32 or Arduino; ThermalTrace handles the hosted dashboard, history, and household alerts.`,
     },
     {
       question: "How do I connect ESP32 or Arduino sensors?",
