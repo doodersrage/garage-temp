@@ -54,6 +54,27 @@ type SensorRow = {
   } | null;
 };
 
+const SENSOR_READING_SELECT = `
+  recorded_at,
+  value_num,
+  meta,
+  device_sensors!inner (
+    key,
+    label,
+    kind,
+    offset_num,
+    devices!inner (
+      name
+    )
+  )
+`;
+
+/** PostgREST default page size — fetch in batches to avoid silent truncation. */
+const POSTGREST_PAGE_SIZE = 1000;
+
+/** Max chart points after full-window fetch; applied per-probe so lines stay balanced. */
+export const CHART_DISPLAY_CAP = 500;
+
 export function formatReadingTimestamp(timestamp: string): string {
   return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
@@ -69,7 +90,7 @@ export function getReadingProbeLabel(reading: GarageTempReading): string {
   return reading.probe_label?.trim() || "Average";
 }
 
-function pairTempHumidityRows(
+export function pairTempHumidityRows(
   rows: SensorRow[],
   userId: string,
 ): GarageTempReading[] {
@@ -170,6 +191,210 @@ function matchesFilters(
   return true;
 }
 
+function applyHistoryFiltersToQuery<T extends { eq: Function; gte: Function; lte: Function }>(
+  query: T,
+  filters: HistoryFilters,
+  options: { kind?: "temperature" | "humidity" } = {},
+): T {
+  let next = query;
+  if (filters.from) {
+    next = next.gte("recorded_at", filters.from) as T;
+  }
+  if (filters.to) {
+    next = next.lte("recorded_at", filters.to) as T;
+  }
+  if (options.kind) {
+    next = next.eq("device_sensors.kind", options.kind) as T;
+  }
+  if (filters.probeKey) {
+    next = next.eq("device_sensors.key", filters.probeKey) as T;
+  }
+  if (filters.feedName) {
+    next = next.eq("device_sensors.devices.name", filters.feedName) as T;
+  }
+  return next;
+}
+
+async function fetchAllRawSensorRows(
+  householdId: string,
+  filters: HistoryFilters,
+  options: {
+    kinds?: Array<"temperature" | "humidity">;
+    ascending?: boolean;
+  } = {},
+): Promise<{ rows: SensorRow[]; error: string | null }> {
+  const supabase = createServerClient();
+  const kinds = options.kinds ?? ["temperature", "humidity"];
+  const rows: SensorRow[] = [];
+
+  for (let offset = 0; ; offset += POSTGREST_PAGE_SIZE) {
+    let query = supabase
+      .from("sensor_readings")
+      .select(SENSOR_READING_SELECT)
+      .eq("household_id", householdId);
+
+    query = applyHistoryFiltersToQuery(query, filters);
+    query = query
+      .order("recorded_at", { ascending: options.ascending === true })
+      .order("id", { ascending: options.ascending === true })
+      .range(offset, offset + POSTGREST_PAGE_SIZE - 1);
+
+    const { data, error } = await query;
+    if (error) {
+      return { rows: [], error: error.message };
+    }
+
+    const batch = ((data ?? []) as SensorRow[]).filter((row) => {
+      const kind = row.device_sensors?.kind;
+      return kind === "temperature" || kind === "humidity";
+    }).filter((row) => kinds.includes(row.device_sensors!.kind as "temperature" | "humidity"));
+
+    rows.push(...batch);
+    if ((data?.length ?? 0) < POSTGREST_PAGE_SIZE) {
+      break;
+    }
+  }
+
+  return { rows, error: null };
+}
+
+async function countTemperatureHistoryRows(
+  householdId: string,
+  filters: HistoryFilters,
+): Promise<{ count: number; error: string | null }> {
+  const supabase = createServerClient();
+  let query = supabase
+    .from("sensor_readings")
+    .select("id, device_sensors!inner(kind, key, devices!inner(name))", {
+      count: "exact",
+      head: true,
+    })
+    .eq("household_id", householdId);
+
+  query = applyHistoryFiltersToQuery(query, filters, { kind: "temperature" });
+
+  const { count, error } = await query;
+  if (error) {
+    return { count: 0, error: error.message };
+  }
+  return { count: count ?? 0, error: null };
+}
+
+async function fetchTemperatureHistoryPage(
+  householdId: string,
+  filters: HistoryFilters,
+  page: number,
+  pageSize: number,
+): Promise<{ rows: SensorRow[]; error: string | null }> {
+  const supabase = createServerClient();
+  const offset = (page - 1) * pageSize;
+
+  let query = supabase
+    .from("sensor_readings")
+    .select(SENSOR_READING_SELECT)
+    .eq("household_id", householdId);
+
+  query = applyHistoryFiltersToQuery(query, filters, { kind: "temperature" });
+  query = query
+    .order("recorded_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range(offset, offset + pageSize - 1);
+
+  const { data, error } = await query;
+  if (error) {
+    return { rows: [], error: error.message };
+  }
+
+  return { rows: (data ?? []) as SensorRow[], error: null };
+}
+
+async function fetchHumidityRowsForTemps(
+  householdId: string,
+  tempRows: SensorRow[],
+): Promise<{ rows: SensorRow[]; error: string | null }> {
+  if (tempRows.length === 0) {
+    return { rows: [], error: null };
+  }
+
+  const wantedKeys = new Set<string>();
+  const timestamps = new Set<string>();
+  for (const row of tempRows) {
+    const sensor = row.device_sensors;
+    if (!sensor) continue;
+    const deviceName = sensor.devices?.name ?? "Device";
+    wantedKeys.add(`${deviceName}::${sensor.key}`);
+    timestamps.add(row.recorded_at);
+  }
+
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("sensor_readings")
+    .select(SENSOR_READING_SELECT)
+    .eq("household_id", householdId)
+    .eq("device_sensors.kind", "humidity")
+    .in("recorded_at", [...timestamps]);
+
+  if (error) {
+    return { rows: [], error: error.message };
+  }
+
+  const rows = ((data ?? []) as SensorRow[]).filter((row) => {
+    const sensor = row.device_sensors;
+    if (!sensor) return false;
+    const deviceName = sensor.devices?.name ?? "Device";
+    return wantedKeys.has(`${deviceName}::${sensor.key}`);
+  });
+
+  return { rows, error: null };
+}
+
+/** Downsample chart/history points evenly per probe so one zone does not dominate. */
+export function limitPairedReadingsFairly(
+  readings: GarageTempReading[],
+  limit: number,
+  ascending: boolean,
+): GarageTempReading[] {
+  if (readings.length <= limit) {
+    return readings;
+  }
+
+  const groups = new Map<string, GarageTempReading[]>();
+  for (const reading of readings) {
+    const groupKey = `${getReadingFeedName(reading)}::${reading.probe_key ?? ""}`;
+    const bucket = groups.get(groupKey) ?? [];
+    bucket.push(reading);
+    groups.set(groupKey, bucket);
+  }
+
+  const perProbe = Math.max(1, Math.floor(limit / groups.size));
+  const picked: GarageTempReading[] = [];
+
+  for (const group of groups.values()) {
+    const sorted = [...group].sort(
+      (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+    );
+    if (sorted.length <= perProbe) {
+      picked.push(...sorted);
+      continue;
+    }
+    const stride = sorted.length / perProbe;
+    for (let index = 0; index < perProbe; index += 1) {
+      const sampleIndex = Math.min(
+        sorted.length - 1,
+        Math.floor(index * stride + stride / 2),
+      );
+      picked.push(sorted[sampleIndex]!);
+    }
+  }
+
+  picked.sort((a, b) => {
+    const diff = Date.parse(a.timestamp) - Date.parse(b.timestamp);
+    return ascending ? diff : -diff;
+  });
+
+  return picked.slice(0, limit);
+}
+
 async function fetchPairedFromSensorReadings(
   userId: string,
   filters: HistoryFilters = {},
@@ -180,57 +405,21 @@ async function fetchPairedFromSensorReadings(
     return { readings: [], error: null };
   }
 
-  const supabase = createServerClient();
-  let query = supabase
-    .from("sensor_readings")
-    .select(
-      `
-      recorded_at,
-      value_num,
-      meta,
-      device_sensors!inner (
-        key,
-        label,
-        kind,
-        offset_num,
-        devices!inner (
-          name
-        )
-      )
-    `,
-    )
-    .eq("household_id", householdId);
-
-  if (filters.from) {
-    query = query.gte("recorded_at", filters.from);
-  }
-  if (filters.to) {
-    query = query.lte("recorded_at", filters.to);
-  }
-
-  query = query.order("recorded_at", {
-    ascending: options.ascending === true,
+  const { rows, error } = await fetchAllRawSensorRows(householdId, filters, {
+    ascending: options.ascending,
   });
-
-  if (options.limit) {
-    query = query.limit(Math.max(options.limit * 4, 200));
-  }
-
-  const { data, error } = await query;
-
   if (error) {
-    return { readings: [], error: error.message };
+    return { readings: [], error };
   }
 
-  const filteredKinds = ((data ?? []) as SensorRow[]).filter((row) => {
-    const kind = row.device_sensors?.kind;
-    return kind === "temperature" || kind === "humidity";
-  });
-
-  let readings = pairTempHumidityRows(filteredKinds, userId);
+  let readings = pairTempHumidityRows(rows, userId);
   readings = readings.filter((reading) => matchesFilters(reading, filters));
-  if (options.limit) {
-    readings = readings.slice(0, options.limit);
+  if (options.limit && readings.length > options.limit) {
+    readings = limitPairedReadingsFairly(
+      readings,
+      options.limit,
+      options.ascending === true,
+    );
   }
   return { readings, error: null };
 }
@@ -242,29 +431,56 @@ export async function fetchGarageTempHistory(
   filters: HistoryFilters = {},
 ): Promise<PaginatedGarageTemps> {
   const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
-
-  const fromSensor = await fetchPairedFromSensorReadings(userId, filters, {
-    ascending: false,
-  });
-
-  if (fromSensor.error) {
+  const householdId = await getUserHouseholdId(userId);
+  if (!householdId) {
     return {
       readings: [],
       page: safePage,
       pageSize,
       totalCount: 0,
       totalPages: 0,
-      error: fromSensor.error,
+      error: null,
     };
   }
 
-  const all = fromSensor.readings;
-  const totalCount = all.length;
+  const [{ count, error: countError }, tempPage] = await Promise.all([
+    countTemperatureHistoryRows(householdId, filters),
+    fetchTemperatureHistoryPage(householdId, filters, safePage, pageSize),
+  ]);
+
+  if (countError || tempPage.error) {
+    return {
+      readings: [],
+      page: safePage,
+      pageSize,
+      totalCount: 0,
+      totalPages: 0,
+      error: countError ?? tempPage.error,
+    };
+  }
+
+  const humidityPage = await fetchHumidityRowsForTemps(householdId, tempPage.rows);
+  if (humidityPage.error) {
+    return {
+      readings: [],
+      page: safePage,
+      pageSize,
+      totalCount: 0,
+      totalPages: 0,
+      error: humidityPage.error,
+    };
+  }
+
+  const readings = pairTempHumidityRows(
+    [...tempPage.rows, ...humidityPage.rows],
+    userId,
+  ).filter((reading) => matchesFilters(reading, filters));
+
+  const totalCount = count;
   const totalPages = totalCount === 0 ? 0 : Math.ceil(totalCount / pageSize);
-  const start = (safePage - 1) * pageSize;
 
   return {
-    readings: all.slice(start, start + pageSize),
+    readings,
     page: safePage,
     pageSize,
     totalCount,
@@ -273,8 +489,6 @@ export async function fetchGarageTempHistory(
   };
 }
 
-const EXPORT_BATCH_SIZE = 5000;
-
 export async function fetchAllGarageTempReadings(
   userId: string,
   filters: HistoryFilters = {},
@@ -282,10 +496,22 @@ export async function fetchAllGarageTempReadings(
   readings: GarageTempReading[];
   error: string | null;
 }> {
-  return fetchPairedFromSensorReadings(userId, filters, {
+  const householdId = await getUserHouseholdId(userId);
+  if (!householdId) {
+    return { readings: [], error: null };
+  }
+
+  const { rows, error } = await fetchAllRawSensorRows(householdId, filters, {
     ascending: false,
-    limit: EXPORT_BATCH_SIZE,
   });
+  if (error) {
+    return { readings: [], error };
+  }
+
+  const readings = pairTempHumidityRows(rows, userId).filter((reading) =>
+    matchesFilters(reading, filters),
+  );
+  return { readings, error: null };
 }
 
 export async function fetchGarageTempChartData(
@@ -300,7 +526,7 @@ export async function fetchGarageTempChartData(
 
   const fromSensor = await fetchPairedFromSensorReadings(userId, chartFilters, {
     ascending: true,
-    limit: 500,
+    limit: CHART_DISPLAY_CAP,
   });
 
   if (fromSensor.error) {
@@ -410,34 +636,16 @@ export async function fetchHouseholdChartData(
   since.setDate(since.getDate() - days);
   const sinceIso = since.toISOString();
 
-  const supabase = createServerClient();
-  const { data, error } = await supabase
-    .from("sensor_readings")
-    .select(
-      `
-      recorded_at,
-      value_num,
-      meta,
-      device_sensors!inner (
-        key,
-        label,
-        kind,
-        offset_num,
-        devices!inner ( name )
-      )
-    `,
-    )
-    .eq("household_id", householdId)
-    .gte("recorded_at", sinceIso)
-    .order("recorded_at", { ascending: true })
-    .limit(2000);
+  const { rows, error } = await fetchAllRawSensorRows(householdId, { from: sinceIso }, {
+    ascending: true,
+  });
 
   if (error) {
-    return { points: [], error: error.message };
+    return { points: [], error };
   }
 
   const readings = pairTempHumidityRows(
-    ((data ?? []) as SensorRow[]).filter((row) => {
+    rows.filter((row) => {
       const kind = row.device_sensors?.kind;
       return kind === "temperature" || kind === "humidity";
     }),
@@ -486,7 +694,7 @@ export async function fetchGarageTempChartDataPriorYear(
 
   const fromSensor = await fetchPairedFromSensorReadings(userId, priorFilters, {
     ascending: true,
-    limit: 500,
+    limit: CHART_DISPLAY_CAP,
   });
   if (fromSensor.error) {
     return { points: [], error: fromSensor.error };
@@ -527,23 +735,38 @@ export async function fetchHistoryFilterOptions(userId: string): Promise<{
   probes: { key: string; label: string }[];
   error: string | null;
 }> {
-  const fromSensor = await fetchPairedFromSensorReadings(userId, {}, {
-    ascending: false,
-    limit: 500,
-  });
-
-  if (fromSensor.error) {
-    return { feeds: [], probes: [], error: fromSensor.error };
+  const householdId = await getUserHouseholdId(userId);
+  if (!householdId) {
+    return { feeds: [], probes: [], error: null };
   }
 
-  const rows = fromSensor.readings;
-  const feeds = [...new Set(rows.map((row) => getReadingFeedName(row)))];
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("devices")
+    .select("name, device_sensors(key, label, kind)")
+    .eq("household_id", householdId)
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    return { feeds: [], probes: [], error: error.message };
+  }
+
+  const feeds = [
+    ...new Set(
+      (data ?? [])
+        .map((device) => device.name?.trim())
+        .filter((name): name is string => Boolean(name)),
+    ),
+  ];
   const probeMap = new Map<string, string>();
 
-  for (const row of rows) {
-    const key = row.probe_key?.trim();
-    if (!key || probeMap.has(key)) continue;
-    probeMap.set(key, row.probe_label?.trim() || key);
+  for (const device of data ?? []) {
+    for (const sensor of device.device_sensors ?? []) {
+      if (sensor.kind !== "temperature") continue;
+      const key = sensor.key?.trim();
+      if (!key || probeMap.has(key)) continue;
+      probeMap.set(key, sensor.label.replace(/ humidity$/i, "").trim() || key);
+    }
   }
 
   return {
