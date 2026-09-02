@@ -121,7 +121,7 @@ export default function ProbeDemo() {
                 )
               }
             />
-            <span>Garage door open (mixes outside air into the door zone)</span>
+            <span>Bay door open (mixes outside air into the door zone)</span>
           </label>
         </div>
 

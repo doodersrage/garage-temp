@@ -94,7 +94,7 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
   "history-dashboard-browsing": [
       { type: "p", html: "Live readings answer “what is it now?” History answers “how bad was last week?” The signed-in dashboard charts stored Supabase rows so you can zoom from recent hours to multi-month trends without re-querying the probe on every page load." },
       { type: "h2", text: "What gets stored" },
-      { type: "p", html: "Each snapshot captures probe keys, temperature, humidity, and timestamps when the site polls your configured feeds. Inserts are described in <a class=\"text-link\" href=\"/about/supabase-history-inserts\">Supabase history inserts</a>. Not every page view hits your garage—polling runs on a schedule server-side." },
+      { type: "p", html: "Each snapshot captures probe keys, temperature, humidity, and timestamps when the site polls your configured feeds. Inserts are described in <a class=\"text-link\" href=\"/about/supabase-history-inserts\">Supabase history inserts</a>. Not every page view hits your probes—polling runs on a schedule server-side." },
       { type: "h2", text: "Reading the charts" },
       { type: "ul", items: ["**Compare zones** to see whether one corner always runs coldest.","**Look at nights** for freeze risk rather than daytime peaks.","**Spot gaps** that may indicate feed outages—see <a class=\"text-link\" href=\"/about/debugging-stale-readings\">debugging stale readings</a>."] },
       { type: "h2", text: "Export for deeper analysis" },
@@ -122,7 +122,7 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
   ],
 
   "arduino-ide-setup": [
-      { type: "p", html: "Firmware development starts on the bench with USB power and serial logging. The Arduino IDE (or PlatformIO) compiles C++ sketches, flashes the Uno, and opens a serial monitor for the first sanity checks before the board moves to the garage." },
+      { type: "p", html: "Firmware development starts on the bench with USB power and serial logging. The Arduino IDE (or PlatformIO) compiles C++ sketches, flashes the Uno, and opens a serial monitor for the first sanity checks before the board moves to the monitored space." },
       { type: "h2", text: "Board and libraries" },
       { type: "ul", items: ["**Board:** Arduino Uno (or compatible) with sufficient flash for Ethernet + LCD stacks.","**Libraries:** DHT sensor library, LiquidCrystal, Ethernet/W5100 stack as used in the repo sketch.","**Port:** Select the correct USB serial port after plugging in the programming cable."] },
       { type: "h2", text: "First flash checklist" },
@@ -363,7 +363,7 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
   ],
 
   "debugging-stale-readings": [
-      { type: "p", html: "Stale readings mean the website shows an old temperature while the garage has moved on—or shows nothing while the LCD still updates. Work from the sensor outward: hardware, JSON, cache, SSR fetch, then history." },
+      { type: "p", html: "Stale readings mean the website shows an old temperature while the space has moved on—or shows nothing while the LCD still updates. Work from the sensor outward: hardware, JSON, cache, SSR fetch, then history." },
       { type: "h2", text: "Checklist" },
       { type: "ol", items: ["**curl the feed URL** from outside your LAN—is JSON fresh?","Compare **LCD vs JSON**—if LCD wins, fix relay or <a class=\"text-link\" href=\"/about/redis-cache-for-feeds\">Redis TTL</a>.","Verify **probe keys** in dashboard match schema—<a class=\"text-link\" href=\"/about/probe-mapping-labels\">probe mapping</a>.","Inspect **Cloudflare / SSR logs** for timeout patterns."] },
       { type: "h2", text: "Hardware-side causes" },
@@ -512,13 +512,13 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
       { type: "h2", text: "Core libraries" },
       { type: "ul", items: ["**DHT sensor library** — single-wire reads with timing guards.","**LiquidCrystal** — parallel 4-bit LCD mode used locally.","**Ethernet** — W5100-compatible stack for HTTP serving."] },
       { type: "h2", text: "Install workflow" },
-      { type: "ol", items: ["Use **Library Manager** or vendor ZIP with pinned version notes in your repo README.","Compile a **known example** for each library before merging into the garage sketch.","After updates, re-verify <a class=\"text-link\" href=\"/about/lcd-local-display-format\">LCD layout</a> and <a class=\"text-link\" href=\"/about/json-probe-output-schema\">JSON schema</a>."] },
+      { type: "ol", items: ["Use **Library Manager** or vendor ZIP with pinned version notes in your repo README.","Compile a **known example** for each library before merging into the probe sketch.","After updates, re-verify <a class=\"text-link\" href=\"/about/lcd-local-display-format\">LCD layout</a> and <a class=\"text-link\" href=\"/about/json-probe-output-schema\">JSON schema</a>."] },
       { type: "h2", text: "PlatformIO alternative" },
       { type: "p", html: "PlatformIO locks versions in <code>platformio.ini</code>—excellent for reproducibility. Either path starts from <a class=\"text-link\" href=\"/about/arduino-ide-setup\">Arduino IDE setup</a>. Sensor behavior details: <a class=\"text-link\" href=\"/about/dht22-sensor-overview\">DHT22 overview</a>." }
   ],
 
   "static-ip-vs-dhcp": [
-      { type: "p", html: "The Ethernet shield can request DHCP from the garage router or use a fixed LAN address. DHCP is easier on first boot; static or DHCP reservation prevents the Arduino from jumping addresses after power outages—breaking hard-coded upstream URLs in <a class=\"text-link\" href=\"/about/fastapi-relay-setup\">FastAPI relays</a> until someone notices stale home page readings." },
+      { type: "p", html: "The Ethernet shield can request DHCP from the LAN router or use a fixed LAN address. DHCP is easier on first boot; static or DHCP reservation prevents the Arduino from jumping addresses after power outages—breaking hard-coded upstream URLs in <a class=\"text-link\" href=\"/about/fastapi-relay-setup\">FastAPI relays</a> until someone notices stale home page readings." },
       { type: "figure", illustration: "static-ip-vs-dhcp.svg", alt: "Router diagram comparing DHCP lease churn versus reserved static IP for the Arduino", caption: "Reserved DHCP or static IP keeps the probe URL stable for relays and firewall rules." },
       { type: "h2", text: "DHCP with reservation" },
       { type: "p", html: "Many routers map **MAC address → fixed IP** while still using DHCP under the hood. This gives plug-and-play first install plus stability—preferred for most garage builds. Note the Uno MAC from serial boot logs during <a class=\"text-link\" href=\"/about/serial-debugging-tips\">serial debug</a>." },
@@ -551,7 +551,7 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
   ],
 
   "backlight-pwm-options": [
-      { type: "p", html: "The parallel LCD interface uses RS, E, and D4–D7 for text—documented in <a class=\"text-link\" href=\"/about/liquid-crystal-gpio-map\">LCD GPIO map</a>. The LED backlight is a power circuit, often switched through a transistor because Arduino pins cannot supply backlight current directly. PWM or timed dimming keeps the garage readable at night without a always-on glow heating the enclosure." },
+      { type: "p", html: "The parallel LCD interface uses RS, E, and D4–D7 for text—documented in <a class=\"text-link\" href=\"/about/liquid-crystal-gpio-map\">LCD GPIO map</a>. The LED backlight is a power circuit, often switched through a transistor because Arduino pins cannot supply backlight current directly. PWM or timed dimming keeps the display readable at night without an always-on glow heating the enclosure." },
       { type: "figure", illustration: "backlight-pwm-options.svg", alt: "Circuit sketch of NPN transistor switching LCD backlight with optional PWM pin", caption: "A GPIO drives a transistor to PWM or gate the backlight LED circuit independently of data lines." },
       { type: "h2", text: "Wiring patterns" },
       { type: "ol", items: ["**Direct digital pin** — on/off only; simplest for bench tests.","**PWM pin** — smooth dimming via <code>analogWrite</code> on supported pins.","**Timer-based off** — firmware turns backlight off after idle minutes."] },
@@ -567,7 +567,7 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
       { type: "h2", text: "Color conventions" },
       { type: "ul", items: ["**Red** — 5 V distribution.","**Black or green** — ground.","**Yellow/blue/green** — data lines per probe—document in <a class=\"text-link\" href=\"/about/dht22-data-line-wiring\">DHT22 wiring</a>.","**Contrast pot** — separate pair; do not share with sensor data colors."] },
       { type: "h2", text: "Mechanical reliability" },
-      { type: "p", html: "Strain-relief tie points before cables exit the board; avoid tension on DHT22 sockets. Long runs transition to twisted pair per <a class=\"text-link\" href=\"/about/probe-cable-length-limits\">cable length guide</a>. Re-seat connections after transport to the garage." },
+      { type: "p", html: "Strain-relief tie points before cables exit the board; avoid tension on DHT22 sockets. Long runs transition to twisted pair per <a class=\"text-link\" href=\"/about/probe-cable-length-limits\">cable length guide</a>. Re-seat connections after transport to the monitored space." },
       { type: "h2", text: "When to stop using breadboards" },
       { type: "p", html: "Permanently mounted installs eventually deserve a protoboard or PCB—see <a class=\"text-link\" href=\"/about/arduino-circuit-wiring\">circuit wiring overview</a>. Until then, <a class=\"text-link\" href=\"/about/circuit-wiring-troubleshooting\">systematic troubleshooting</a> beats random jumper swaps." }
   ],
@@ -595,7 +595,7 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
   ],
 
   "docker-relay-deployment": [
-      { type: "p", html: "Bare-metal systemd works, but Docker Compose bundles the <a class=\"text-link\" href=\"/about/fastapi-relay-setup\">FastAPI relay</a>, <a class=\"text-link\" href=\"/about/redis-cache-for-feeds\">Redis cache</a>, and reverse-proxy sidecars with one <code>docker compose up</code>. Images rebuild from locked requirements; volumes preserve Redis data across restarts—useful when the garage router reboots and upstream Arduino needs a minute to return." },
+      { type: "p", html: "Bare-metal systemd works, but Docker Compose bundles the <a class=\"text-link\" href=\"/about/fastapi-relay-setup\">FastAPI relay</a>, <a class=\"text-link\" href=\"/about/redis-cache-for-feeds\">Redis cache</a>, and reverse-proxy sidecars with one <code>docker compose up</code>. Images rebuild from locked requirements; volumes preserve Redis data across restarts—useful when the LAN router reboots and upstream Arduino needs a minute to return." },
       { type: "figure", illustration: "docker-relay-deployment.svg", alt: "Docker Compose stack with relay, Redis, and reverse proxy containers", caption: "Compose services for FastAPI, Redis, and TLS proxy deploy as one reproducible stack." },
       { type: "h2", text: "Typical compose services" },
       { type: "ul", items: ["**relay** — uvicorn app polling LAN JSON.","**redis** — cache with persistent volume optional.","**caddy/nginx** — TLS termination per <a class=\"text-link\" href=\"/about/relay-security-and-access\">relay security</a>."] },

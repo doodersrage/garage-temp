@@ -48,7 +48,7 @@ export function getDefaultTempFeeds(): TempFeedConfig[] {
   return [
     {
       id: "garage",
-      name: "Garage",
+      name: "Workshop",
       url: getDefaultFeedUrl(),
       enabled: true,
       jsonRoot: "temp",

@@ -61,7 +61,7 @@ export const aboutPhotos: Record<AboutPhotoId, AboutPhoto> = {
     id: "cold-weather-road",
     image: coldWeatherRoad,
     alt: "Person in extreme cold holding an outdoor thermometer reading far below zero",
-    caption: "Regional cold snaps can outpace what outdoor weather apps imply for an attached garage.",
+    caption: "Regional cold snaps can outpace what outdoor weather apps imply for an attached garage, shop, or crawlspace.",
     credit: "Photo: Bureau of Land Management — public domain",
     license: "Public domain",
     sourceUrl:
@@ -71,7 +71,7 @@ export const aboutPhotos: Record<AboutPhotoId, AboutPhoto> = {
     id: "dht22-module",
     image: dht22Module,
     alt: "Aosong AM2302 DHT22 temperature and humidity sensor module on a black breakout board",
-    caption: "The DHT22 (AM2302) is the digital humidity–temperature sensor used in many garage builds.",
+    caption: "The DHT22 (AM2302) is the digital humidity–temperature sensor used in many DIY space builds.",
     credit: "Photo: Suyash Dwivedi — CC BY-SA 4.0",
     license: "CC BY-SA 4.0",
     sourceUrl:
@@ -118,7 +118,7 @@ export const aboutPhotos: Record<AboutPhotoId, AboutPhoto> = {
     id: "ethernet-cable",
     image: ethernetCable,
     alt: "Close-up of white Cat-5e Ethernet cables with RJ45 connectors",
-    caption: "Probe JSON usually leaves the garage over Ethernet or a nearby relay—not the public internet directly.",
+    caption: "Probe JSON usually leaves the LAN over Ethernet or a nearby relay—not the public internet directly.",
     credit: "Photo: DiscDepotDundee.co.uk — CC BY-SA 4.0",
     license: "CC BY-SA 4.0",
     sourceUrl:

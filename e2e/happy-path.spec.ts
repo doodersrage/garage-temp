@@ -11,7 +11,8 @@ test.describe("happy path essentials", () => {
 
     await signIn(page, "/dashboard");
     await expect(page.locator("#garage-risk")).toBeVisible();
-    await expect(page.getByText(/Garage status/i).first()).toBeVisible();
+    await expect(page.locator("#garage-risk-heading")).toBeVisible();
+    await expect(page.getByText(/Space status|Garage status/i).first()).toBeVisible();
     await expect(page.locator("#status")).toBeVisible();
   });
 

@@ -21,11 +21,11 @@ const hero = getAboutPhoto("dht22-module");
   heroCreditHref={hero.sourceUrl}
 >
   <p>
-    Temperature probes are the sensing layer of any environmental monitor. In a garage or workshop,
-    they translate physical heat and moisture into numbers the rest of the system can store, graph,
-    and alert on. This project uses digital humidity–temperature sensors wired to an Arduino, with
-    multiple probe channels so you can compare zones instead of trusting a single reading. For the
-    full build story, read the
+    Temperature probes are the sensing layer of any environmental monitor. In a garage, workshop,
+    attic, crawlspace, or shop, they translate physical heat and moisture into numbers the rest of
+    the system can store, graph, and alert on. This project uses digital humidity–temperature sensors
+    wired to an Arduino, with multiple probe channels so you can compare zones instead of trusting a
+    single reading. For the full build story, read the
     <a class="text-link" href="/about/temperature-probe-case-study">temperature probe case study</a>.
   </p>
 
@@ -42,7 +42,7 @@ const hero = getAboutPhoto("dht22-module");
     structure maps cleanly to dashboard labels such as “North wall” or “Workbench area.”
   </p>
 
-  <h2>Common probe uses in garages</h2>
+  <h2>Common probe uses in unheated spaces</h2>
   <ul>
     <li><strong>Freeze protection:</strong> Track overnight lows near exterior walls before plumbing is at risk.</li>
     <li><strong>Seasonal comparison:</strong> Compare attic-adjacent zones with the floor level during summer heat.</li>
@@ -53,7 +53,7 @@ const hero = getAboutPhoto("dht22-module");
 
   <h2>Placement matters more than sensor cost</h2>
   <p>
-    A probe near an uninsulated garage door will swing wildly every time the door opens. One on a
+    A probe near an uninsulated bay door will swing wildly every time the door opens. One on a
     north-facing wall may lag outdoor temperature by hours. For stable trends, mount probes away from
     direct sun patches, moving air from fans, and heat sources such as freezers or water heaters.
     Shoulder height (4–5 feet) usually represents the air volume people and stored items experience.
@@ -63,7 +63,7 @@ const hero = getAboutPhoto("dht22-module");
 
   <h2>Why multiple probes beat one</h2>
   <p>
-    Garages are not uniform boxes. A single sensor might read 45 °F near the floor while the ceiling
+    Garages, workshops, and attics are not uniform boxes. A single sensor might read 45 °F near the floor while the ceiling
     bay is 58 °F on a sunny winter afternoon. Multiple probes reveal gradients, bad insulation spots,
     and which area represents the risk you care about. The firmware averages active probes so the
     history page still has one summary snapshot per load while preserving per-probe detail on the home page.

@@ -12,7 +12,7 @@ import "../../styles/about.css";
 
 const title = "Interactive temperature probe demo";
 const description =
-  "Simulate garage probe readings by changing outdoor temperature, sun load, and door state. See live JSON output like the real monitoring feed.";
+  "Simulate probe readings in an unheated bay by changing outdoor temperature, sun load, and door state. See live JSON output like the real monitoring feed.";
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/about/probe-demo");
@@ -53,7 +53,7 @@ const schema = [
       <p class="card-subtitle">{description}</p>
       <div class="about-prose">
         <p>
-          Move the sliders to mimic weather and garage use, then compare how three probe zones and
+          Move the sliders to mimic weather and space use, then compare how three probe zones and
           their average respond. Readings refresh every two seconds with small random noise—similar
           to how real sensors jitter in a live feed.
         </p>

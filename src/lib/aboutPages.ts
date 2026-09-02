@@ -13,17 +13,17 @@ export const coreAboutPages: AboutPage[] = [
     slug: "temperature-probes",
     title: "Temperature probes and their uses",
     description:
-      "How garage temperature probes work, where they are placed, and why multiple sensors improve reliability.",
+      "How temperature probes work in garages, workshops, attics, crawlspaces, and shops—where they are placed, and why multiple sensors improve reliability.",
     summary:
-      "Probe types, placement strategies, and why averaging multiple sensors matters in garages and workshops.",
+      "Probe types, placement strategies, and why averaging multiple sensors matters in unheated spaces.",
   },
   {
     slug: "temperature-changes",
     title: "Temperature changes and what causes them",
     description:
-      "Understand daily swings, seasonal shifts, and sudden garage temperature changes driven by weather and building physics.",
+      "Understand daily swings, seasonal shifts, and sudden temperature changes in unheated spaces driven by weather and building physics.",
     summary:
-      "Sun load, infiltration, doors, HVAC, and stored heat explain most garage temperature movement.",
+      "Sun load, infiltration, doors, HVAC, and stored heat explain most temperature movement in garages, attics, and shops.",
   },
   {
     slug: "historical-data",
@@ -39,7 +39,7 @@ export const coreAboutPages: AboutPage[] = [
     description:
       "Firmware architecture for network-connected temperature probes using Arduino boards and humidity sensors.",
     summary:
-      "Sketches read probes, format JSON, and publish readings over HTTPS from the garage to the web.",
+      "Sketches read probes, format JSON, and publish readings over HTTPS from the monitored space to the web.",
   },
   {
     slug: "arduino-circuit-wiring",
@@ -85,7 +85,7 @@ export const coreAboutPages: AboutPage[] = [
     slug: "nextjs-node-applications",
     title: "Next.js and Node applications",
     description:
-      "Compare Node and Next.js monitoring dashboards with ThermalTrace’s Astro-on-Cloudflare stack and when each fits garage sensor projects.",
+      "Compare Node and Next.js monitoring dashboards with ThermalTrace’s Astro-on-Cloudflare stack and when each fits DIY space-sensor projects.",
     summary:
       "Node runtimes excel at APIs and SSR; this project achieves the same goals with Astro on Cloudflare.",
   },

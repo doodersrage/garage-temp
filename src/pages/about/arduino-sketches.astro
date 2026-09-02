@@ -27,7 +27,7 @@ const wiringGuides = [
   heroCreditHref={hero.sourceUrl}
 >
   <p>
-    The garage probe hardware runs on Arduino-compatible microcontrollers. Firmware—commonly called a
+    The probe hardware runs on Arduino-compatible microcontrollers. Firmware—commonly called a
     sketch—reads sensors on a timer, formats the results as JSON, and serves them over the network
     so the website and other clients can fetch live data without serial cables.
   </p>
@@ -107,14 +107,14 @@ const wiringGuides = [
   <h2>Development workflow</h2>
   <p>
     Sketches are edited in the Arduino IDE or PlatformIO, flashed over USB, then verified with serial
-    logging before the board is mounted in the garage. Confirm JSON shape with curl before adding the
+    logging before the board is mounted in the monitored space. Confirm JSON shape with curl before adding the
     feed URL to the website dashboard.
   </p>
   <p>
     Ready-to-adapt samples for DS18B20, MAX31855, and MAX6675 (Arduino + MicroPython) live in this
     repo under
     <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches">sketches/</a>.
-    Full Ethernet + DHT garage firmware:
+    Full Ethernet + DHT probe firmware:
     <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/arduino-network-json-temperature-sever">arduino-network-json-temperature-sever</a>.
   </p>
 

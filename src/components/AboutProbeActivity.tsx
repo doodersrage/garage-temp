@@ -251,7 +251,7 @@ export default function AboutProbeActivity() {
       ctx!.fillStyle = COLORS.textMuted;
       ctx!.font = "600 13px system-ui, sans-serif";
       ctx!.textAlign = "left";
-      ctx!.fillText("Garage interior", gx + 16, gy + 24);
+      ctx!.fillText("Bay interior", gx + 16, gy + 24);
 
       const doorLift = doorAmount * doorH * 0.82;
       const doorX = gx + 16;
@@ -566,7 +566,7 @@ export default function AboutProbeActivity() {
         ref={canvasRef}
         class="about-probe-activity-canvas"
         role="img"
-        aria-label="Animated garage cross-section showing three temperature probes reporting live readings, a garage door opening and closing, sun load changing, and data pulses traveling to the website dashboard."
+        aria-label="Animated bay cross-section showing three temperature probes reporting live readings, a door opening and closing, sun load changing, and data pulses traveling to the website dashboard."
       />
       <p class="about-probe-activity-caption">
         North wall, door zone, and workbench probes refresh every few seconds—the same rhythm as the live dashboard feed.

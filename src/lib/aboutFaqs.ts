@@ -14,14 +14,14 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
         "Any sensor that can publish temperature (and optional humidity) as JSON—commonly DHT22, DS18B20, or similar on Arduino/ESP32. Map probe indexes in the dashboard after ingest.",
     },
     {
-      question: "How many probes do I need in a garage?",
+      question: "How many probes do I need in a garage, workshop, or similar space?",
       answer:
         "One probe is a start; two or three zones (door bay, north wall, workbench) catch freeze risk that a single average misses.",
     },
   ],
   "temperature-changes": [
     {
-      question: "Why does garage temperature swing so fast?",
+      question: "Why does temperature in an unheated space swing so fast?",
       answer:
         "Door openings, sun load on walls, wind infiltration, and vehicle heat move indoor air quickly. Chart history overnight to separate weather from sensor noise.",
     },
@@ -61,7 +61,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
   ],
   "dht22-sensor-overview": [
     {
-      question: "How accurate is a DHT22 in a garage?",
+      question: "How accurate is a DHT22 in a garage or workshop?",
       answer:
         "Roughly ±0.5 °C and a few percent RH in stable air. Drafts and door openings create real spikes—not always sensor error. Compare zones before replacing hardware.",
     },
@@ -71,7 +71,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
         "Respect at least a two-second gap between reads. Overlapping requests return stale or error values; sketches use timers and retries for that reason.",
     },
     {
-      question: "Can one DHT22 cover a whole garage?",
+      question: "Can one DHT22 cover a whole garage, attic, or shop?",
       answer:
         "One sensor hides gradients. Door bays, north walls, and workbenches often differ by several degrees—use multiple probes when freeze risk or tools matter.",
     },
@@ -87,7 +87,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "What freeze threshold should I start with?",
       answer:
-        "Many garages start near 35–38 °F so you get warning before pipes are at hard freeze. Tune after you see overnight lows in your coldest zone.",
+        "Many unheated spaces (garages, shops, crawlspaces) start near 35–38 °F so you get warning before pipes are at hard freeze. Tune after you see overnight lows in your coldest zone.",
     },
     {
       question: "Should I alert on outdoor forecast or indoor probes?",
@@ -199,7 +199,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
   ],
   "debugging-stale-readings": [
     {
-      question: "Why are my garage readings stale?",
+      question: "Why are my probe readings stale?",
       answer:
         "Check device power and Wi‑Fi, verify the ingest key, confirm cron/history jobs on System status, and look for gaps in History before replacing sensors.",
     },
@@ -262,7 +262,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Can I alert on door open alone?",
       answer:
-        "Yes with a door-open rule, but pairing door + temperature below threshold reduces false alarms when you are working in a warm garage.",
+        "Yes with a door-open rule, but pairing door + temperature below threshold reduces false alarms when you are working in a warm bay or shop.",
     },
     {
       question: "Where do I create the combined rule?",

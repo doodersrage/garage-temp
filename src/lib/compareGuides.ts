@@ -19,7 +19,7 @@ export const compareGuides: CompareGuide[] = [
     title: "ThermalTrace vs DIY MQTT",
     headline: "ThermalTrace vs DIY MQTT + Node-RED",
     description:
-      "Compare ThermalTrace garage freeze alerts to a self-hosted MQTT, Node-RED, and cron stack—ops burden, SMS, history, and household sharing.",
+      "Compare ThermalTrace freeze alerts to a self-hosted MQTT, Node-RED, and cron stack—ops burden, SMS, history, and household sharing.",
     competitor: "DIY MQTT / Node-RED",
     summary:
       "DIY MQTT is powerful if you enjoy running brokers, dashboards, and alert scripts. ThermalTrace is the same outcome—live probes, freeze alerts, history—without babysitting the stack at 2 a.m.",
@@ -49,12 +49,12 @@ export const compareGuides: CompareGuide[] = [
     title: "ThermalTrace vs Govee",
     headline: "ThermalTrace vs Govee sensors",
     description:
-      "Govee Bluetooth/Wi-Fi hygrometers vs ThermalTrace for garage freeze monitoring—alerts, ESP ingest, multi-probe spaces, and export.",
+      "Govee Bluetooth/Wi-Fi hygrometers vs ThermalTrace for freeze monitoring in unheated spaces—alerts, ESP ingest, multi-probe zones, and export.",
     competitor: "Govee",
     summary:
-      "Govee is great for cheap room sensors and a polished phone app. ThermalTrace is built for garage/workshop freeze workflows: your own ESP probes, household alerts, and history you can export.",
+      "Govee is great for cheap room sensors and a polished phone app. ThermalTrace is built for freeze workflows in garages, workshops, attics, and shops: your own ESP probes, household alerts, and history you can export.",
     lede:
-      "Govee hygrometers win on price and a friendly phone app for bedrooms and closets. They are weaker in a detached garage: Bluetooth range, vendor lock-in, and alerts that mostly stay in-app. ThermalTrace assumes you bring an ESP32, then gives household freeze routing and a season of exportable history.",
+      "Govee hygrometers win on price and a friendly phone app for bedrooms and closets. They are weaker in a detached garage or shop: Bluetooth range, vendor lock-in, and alerts that mostly stay in-app. ThermalTrace assumes you bring an ESP32, then gives household freeze routing and a season of exportable history.",
     whenThermalTrace: [
       "You want ESP/Arduino probes you control (not only vendor pods)",
       "Freeze alerts need SMS, webhooks, or household routing",
@@ -79,14 +79,14 @@ export const compareGuides: CompareGuide[] = [
     title: "ThermalTrace vs Tempest",
     headline: "ThermalTrace vs WeatherFlow Tempest",
     description:
-      "Outdoor weather stations like Tempest vs ThermalTrace indoor garage probes—when you need pipe freeze alerts where the water actually is.",
+      "Outdoor weather stations like Tempest vs ThermalTrace indoor probes—when you need pipe freeze alerts where the water actually is.",
     competitor: "WeatherFlow Tempest",
     summary:
       "Tempest shines at yard weather—wind, rain, outdoor temp. Pipe freeze risk lives indoors. ThermalTrace watches the garage, crawlspace, or shop where the plumbing is.",
     lede:
       "A Tempest on the roof tells you outdoor air, wind, and rain with excellent fidelity. Pipes freeze where the water is—usually a garage, crawlspace, or shop the station never sees. Use Tempest for yard weather and ThermalTrace for the indoor probe that sits by the plumbing.",
     whenThermalTrace: [
-      "You need indoor / garage probe temps for pipe risk",
+      "You need indoor / unheated-space probe temps for pipe risk",
       "Alerts should fire on space temperature, not only outdoor air",
       "You already have or want DIY sensors on Wi-Fi",
     ],
@@ -107,7 +107,7 @@ export const compareGuides: CompareGuide[] = [
     slug: "nest",
     path: "/compare/nest",
     title: "ThermalTrace vs Nest Thermostat",
-    headline: "ThermalTrace vs a Nest Thermostat for garage freeze protection",
+    headline: "ThermalTrace vs a Nest Thermostat for freeze protection in unheated spaces",
     description:
       "A Nest thermostat runs your home's conditioned living space -- it has no signal from an unheated garage. Compare that to a dedicated ThermalTrace probe, which can now show your Nest's reading alongside every freeze alert.",
     competitor: "Nest Thermostat",
@@ -138,7 +138,7 @@ export const compareGuides: CompareGuide[] = [
     slug: "ecobee",
     path: "/compare/ecobee",
     title: "ThermalTrace vs Ecobee Thermostat",
-    headline: "ThermalTrace vs an Ecobee Thermostat for garage freeze protection",
+    headline: "ThermalTrace vs an Ecobee Thermostat for freeze protection in unheated spaces",
     description:
       "An Ecobee thermostat runs your home's conditioned living space -- it has no signal from an unheated garage. Compare that to a dedicated ThermalTrace probe, which can now show your Ecobee's reading alongside every freeze alert.",
     competitor: "Ecobee Thermostat",

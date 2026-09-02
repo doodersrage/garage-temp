@@ -41,7 +41,7 @@ export const marketingFaqs = {
     {
       question: "What is included on the Free plan?",
       answer:
-        "Live readings for temperature, humidity, air quality, doors, leaks, energy, and motion; 7 days of history; threshold freeze and leak alerts on email and chat-style channels; a limited number of devices; and household sharing so family can watch the same sensors.",
+        `Live readings for temperature, humidity, air quality, doors, leaks, energy, and motion across ${BRAND_SPACES}; 7 days of history; threshold freeze and leak alerts on email and chat-style channels; a limited number of devices; one family live share link; and household sharing so family can watch the same sensors.`,
     },
     {
       question: "When should I upgrade to Member or Pro?",

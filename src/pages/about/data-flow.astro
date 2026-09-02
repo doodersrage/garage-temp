@@ -25,7 +25,7 @@ const hero = getAboutPhoto("ethernet-cable");
     when debugging stale readings, missing probes, or history gaps.
   </p>
 
-  <h2>Step 1 — Sensing in the garage</h2>
+  <h2>Step 1 — Sensing in the space</h2>
   <p>
     Probes measure temperature and humidity. The Arduino sketch polls them every few seconds, discards
     obvious outliers, and prepares an in-memory JSON structure. Details:
@@ -50,7 +50,7 @@ const hero = getAboutPhoto("ethernet-cable");
       sizes="(max-width: 768px) 100vw, 640px"
       class="w-full h-auto rounded-lg"
     />
-    <figcaption>Live feed payload shape consumed by the website after leaving the garage network.</figcaption>
+    <figcaption>Live feed payload shape consumed by the website after leaving the local network.</figcaption>
   </figure>
 
   <h2>Step 3 — Website fetch and display</h2>

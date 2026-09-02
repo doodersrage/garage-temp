@@ -656,7 +656,7 @@ const postSetupHasRenamed = !sensorsNeedRename;
           <input type="hidden" name="redirect" value={redirectTo} />
           <div class="form-field">
             <label class="form-label" for="device-name">Device name</label>
-            <input class="form-input" id="device-name" name="name" placeholder="Garage ESP32" />
+            <input class="form-input" id="device-name" name="name" placeholder="Workshop ESP32" />
           </div>
           <button class="btn-primary" type="submit">Create push device</button>
         </form>
@@ -751,7 +751,7 @@ const postSetupHasRenamed = !sensorsNeedRename;
                         id={`space-${device.id}`}
                         name="space"
                         value={device.space ?? ""}
-                        placeholder="garage, attic…"
+                        placeholder="garage, attic, crawlspace…"
                         list="space-suggestions"
                       />
                     </div>
@@ -839,7 +839,7 @@ const postSetupHasRenamed = !sensorsNeedRename;
                               name="label"
                               value={sensor.label}
                               required
-                              placeholder="Garage"
+                              placeholder="Workshop"
                             />
                           </div>
                           <div class="form-field mb-0">
@@ -965,7 +965,7 @@ const postSetupHasRenamed = !sensorsNeedRename;
               </div>
               <div class="form-field mb-0">
                 <label class="form-label" for="pair-label">Name on Home</label>
-                <input class="form-input" id="pair-label" name="label" placeholder="Garage" value="Garage" />
+                <input class="form-input" id="pair-label" name="label" placeholder="Workshop" value="Workshop" />
               </div>
               <div class="sensor-map-actions">
                 <button class="btn-primary" type="submit">Add pair</button>
@@ -992,7 +992,7 @@ const postSetupHasRenamed = !sensorsNeedRename;
               </div>
               <div class="form-field mb-0">
                 <label class="form-label" for="sensor-label">Name on Home</label>
-                <input class="form-input" id="sensor-label" name="label" required placeholder="Garage door" />
+                <input class="form-input" id="sensor-label" name="label" required placeholder="Shop door" />
               </div>
               <div class="form-field mb-0">
                 <label class="form-label" for="sensor-kind">Type</label>
@@ -1081,8 +1081,10 @@ const postSetupHasRenamed = !sensorsNeedRename;
   <datalist id="space-suggestions">
     <option value="garage" />
     <option value="attic" />
+    <option value="crawlspace" />
     <option value="greenhouse" />
     <option value="workshop" />
+    <option value="shop" />
     <option value="basement" />
   </datalist>
 </DashboardLayout>
