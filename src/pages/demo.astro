@@ -17,7 +17,7 @@ import {
   resolvePageUrl,
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
-import alertsEssentials from "../assets/marketing/thermaltrace-dashboard-alerts-essentials.jpg";
+import historyChart from "../assets/marketing/thermaltrace-dashboard-history-chart.jpg";
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/demo");
@@ -94,8 +94,8 @@ const schema = [
       </div>
       <figure class="demo-freeze-visual">
         <Image
-          src={alertsEssentials}
-          alt="ThermalTrace Alerts Essentials with freeze threshold set to 34°F"
+          src={historyChart}
+          alt="ThermalTrace temperature trend with freeze threshold at 34°F"
           widths={[480, 720, 960]}
           sizes="(max-width: 767px) 100vw, 42vw"
           class="demo-freeze-img"

@@ -3,6 +3,5 @@ export type ProductShotId =
   | "history"
   | "history-chart"
   | "devices"
-  | "alerts"
   | "overview-cards"
   | "overview-status";
