@@ -7,7 +7,7 @@ POST https://thermaltrace.dev/api/ingest/<device-key>
 Content-Type: application/json
 ```
 
-Create a push device under **Dashboard → Devices**, copy the one-time key, and set it in the sketch (`INGEST_KEY` / `INGEST_URL`).
+Create a push device under **Dashboard → Devices**, copy the key from the callout (30 minutes, survives refresh), and set it in the sketch (`INGEST_KEY` / `INGEST_URL`). Use **Reveal ingest key** on the device card if you lose it later (when key recovery is enabled on the server).
 
 Payload examples match `/about/ingest-and-webhooks` and `/docs/api`.
 

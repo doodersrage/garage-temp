@@ -14,7 +14,7 @@ export const marketingFaqs = {
     {
       question: "How do I connect ESP32 or Arduino sensors?",
       answer:
-        "Create a push device under Dashboard → Devices, copy the one-time ingest key, map sensor keys (or a temp + humidity pair), and POST JSON to /api/ingest/<key>. Step-by-step: thermaltrace.dev/about/adding-devices. Sample Arduino and MicroPython sketches ship in the GitHub repo.",
+        "Create a push device under Dashboard → Devices, copy the ingest key from the callout (or use Reveal ingest key later), POST JSON to /api/ingest/<key>, and sensors auto-import on first POST. Step-by-step: thermaltrace.dev/about/adding-devices. No hardware? Try the demo pull quick start on Overview.",
     },
     {
       question: "Does ThermalTrace send freeze alerts?",

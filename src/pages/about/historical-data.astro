@@ -19,8 +19,8 @@ const hero = getAboutPhoto("desk-workspace");
 >
   <p>
     Live readings answer “what is happening now?” Historical data answers “what usually happens here?”
-    ThermalTrace saves snapshots when signed-in users load the home page, building a
-    personal timeline of average and per-probe values you can browse or export.
+    ThermalTrace stores sensor readings from push ingest and pull feeds, collected on a
+    <strong>15-minute</strong> schedule (and whenever you refresh Home while signed in).
   </p>
 
   <h2>Why keep history at all</h2>
@@ -63,12 +63,18 @@ const hero = getAboutPhoto("desk-workspace");
     scripts you write today still work after you rename display labels in the dashboard.
   </p>
 
+  <h2>Year-over-year comparisons</h2>
+  <p>
+    <strong>Overview</strong> shows <em>This week vs last year</em> when you have probe data from the same window one year ago.
+    On <strong>History</strong> (Pro, 365+ days retention), enable <strong>Compare to last year</strong> for a gray overlay on the chart.
+    When you do not yet have local probe data from last year, ThermalTrace can show an
+    <strong>outdoor estimate</strong> from Open-Meteo at your weather or freeze-map location — clearly labeled, not a substitute for garage probe history.
+  </p>
+
   <h2>Limits and good practices</h2>
   <p>
-    History reflects how often you visit the home page while signed in—it is not a high-frequency
-    data logger unless you automate visits. For minute-by-minute forensic work, add a dedicated logger
-    or increase fetch frequency in your own tooling. Treat this store as an convenient, account-backed
-    journal rather than a laboratory instrument.
+    History depth depends on your plan (Free vs Member vs Pro). For minute-by-minute forensic work, add a dedicated logger
+    locally. Treat this store as a convenient, account-backed journal rather than a laboratory instrument.
   </p>
 
   <p>

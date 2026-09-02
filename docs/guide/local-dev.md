@@ -25,7 +25,8 @@ pnpm docs:build
 Authenticated alert-settings E2E: set `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD` in `.env`, then:
 
 ```bash
-pnpm e2e:reset-password   # optional: recreate/reset the E2E user via Supabase admin
+pnpm setup:e2e-github-secrets   # sync .env → GitHub Actions secrets for CI e2e job
+pnpm e2e:reset-password         # optional: recreate/reset the E2E user via Supabase admin
 pnpm test:e2e:auth
 # against production: PLAYWRIGHT_BASE_URL=https://thermaltrace.dev pnpm test:e2e:auth
 ```
@@ -55,6 +56,8 @@ Configure in `.env` (local) and Cloudflare Worker secrets / vars (production). F
 | `FCM_*` | Pro Android FCM (HTTP v1 service account) |
 | `SITE_URL` / `ORIGIN` | OAuth, password reset, Stripe redirects |
 | `CRON_SECRET` | Bearer for manual history cron (`/api/cron/collect-history`) |
+| `INGEST_KEY_ENCRYPTION_SECRET` | Encrypt recoverable push ingest keys for Reveal ingest key |
+| `AMBIENT_APPLICATION_KEY` | Operator key for Ambient Weather personal stations |
 | `OPS_DISCORD_WEBHOOK_URL` | Optional Discord when jobs / pages fail |
 
 ## Database

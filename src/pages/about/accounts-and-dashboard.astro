@@ -42,8 +42,8 @@ const hero = getAboutPhoto("desk-workspace");
     Under <a class="text-link" href="/dashboard/temperature">Devices</a> you can:
   </p>
   <ul>
-    <li><strong>Push devices</strong> — ESP/Arduino POSTs JSON to a unique ingest URL. Save the one-time key, add a temp/humidity pair or single sensors that match your payload, rename devices without rotating keys, and rotate keys when needed.</li>
-    <li><strong>Pull feeds</strong> — HTTPS JSON URLs we fetch on a schedule, with a configurable JSON root key (default <code>temp</code>), probe labels, and feed health tests. SenML and Home Assistant REST JSON auto-detect when the root is missing.</li>
+    <li><strong>Push devices</strong> — ESP/Arduino POSTs JSON to a unique ingest URL. Copy the key from the 30-minute callout; use <strong>Reveal ingest key</strong> or <strong>Rotate key</strong> later. Sensors auto-import on first POST; rename labels on Devices afterward.</li>
+    <li><strong>Pull feeds</strong> — <strong>Pull feeds</strong> tab: HTTPS JSON URLs we fetch every 15 minutes. <strong>Save pull setup</strong> auto-imports probe keys; SenML and Home Assistant REST JSON auto-detect when the root is missing.</li>
   </ul>
   <p>
     Step-by-step: <a class="text-link" href="/about/adding-devices">Adding push and pull devices</a>.
@@ -62,8 +62,15 @@ const hero = getAboutPhoto("desk-workspace");
   <p>
     Paginated history lists temperature/humidity snapshots for your household. Filter by feed, probe, and
     date range; clear filters if a query returns no rows. Browsing is included for all signed-in users;
-    CSV download requires Member/Pro (or admin). Background collection runs hourly; refreshing Home while
-    signed in can also record snapshots.
+    CSV download requires Member/Pro (or admin). Background collection runs every **15 minutes** on cron (plus successful push ingests). Refreshing Home while signed in can also refresh live cards.
+  </p>
+
+  <h2>Household activity</h2>
+  <p>
+    Owners and managers see a <strong>Recent activity</strong> log on
+    <a class="text-link" href="/dashboard/household">Household</a> and
+    <a class="text-link" href="/dashboard/share/integrations">Share → Integrations</a>
+    — share links, alert saves, device transfers, and <strong>ingest key reveals</strong> (audited when someone uses Reveal ingest key).
   </p>
 
   <h2>Alerts</h2>

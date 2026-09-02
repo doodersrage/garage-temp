@@ -8,9 +8,15 @@
 
 ## Device online but Home is empty
 
-1. Devices → confirm **sensor keys** match JSON (`temp1` vs `temp.0`)  
+1. Devices → confirm the device has received at least one POST (sensors auto-import; rename labels afterward if needed)  
 2. Hard-refresh Home while signed into the same household  
 3. Check Ops / system status if you admin the project  
+
+## Lost ingest key
+
+- Copy from the 30-minute callout right after device creation  
+- **Reveal ingest key** on the device card (requires operator `INGEST_KEY_ENCRYPTION_SECRET`)  
+- **Rotate key** to issue a new one (update firmware with the new URL)
 
 ## Alerts not arriving
 

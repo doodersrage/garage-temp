@@ -21,6 +21,8 @@ Machine-readable contract:
 |--------|------|------|---------|
 | `POST` | `/api/ingest/{deviceKey}` | Path key | Push sensor readings |
 | `POST` | `/api/ingest/mqtt` | `X-Ingest-Key` | MQTT→HTTP bridge |
+| `POST` | `/api/user/pull-setup` | Session cookie | Save pull feeds + probe labels (JSON body) |
+| `POST` | `/api/devices/reveal-ingest-key` | Session cookie | Recover encrypted push ingest key (rate-limited; audited) |
 | `GET` | `/api/v1/metrics` | Bearer API key | Prometheus text exposition |
 | `GET` | `/api/v1/devices` | Bearer API key | List household devices |
 | `POST` | `/api/v1/devices` | Bearer API key | Create push device |
@@ -48,3 +50,5 @@ curl -sS "https://thermaltrace.dev/api/v1/devices" \
 ## Spec versioning
 
 `openapi.yaml` in the repo (`public/openapi.yaml`) is the source of truth. The docs build copies it into this site on every Pages deploy.
+
+Legacy per-feed routes (`/api/user/temp-feeds`, `/api/user/temp-probes`) are retired — use **`POST /api/user/pull-setup`** instead.

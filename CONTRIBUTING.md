@@ -21,7 +21,7 @@ pnpm test
 pnpm typecheck
 ```
 
-CI on `main` and pull requests also runs `pnpm build` and Playwright smoke (`pnpm test:e2e`). UI changes should stay consistent across pages that share the same state.
+CI on `main` and pull requests runs `pnpm test`, `pnpm build`, Playwright E2E (`pnpm test:e2e`), and Lighthouse. Sync E2E secrets to GitHub with `pnpm setup:e2e-github-secrets` after setting `E2E_TEST_*` and Supabase keys in `.env`. UI changes should stay consistent across pages that share the same state.
 
 The **import-guard** suite (`src/lib/astroImportGuard.test.ts`) fails if an Astro page renders a component it never imports.
 

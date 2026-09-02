@@ -9,7 +9,7 @@ const page = getAboutPage("kit-qr-onboarding")!;
   <h2>What to encode</h2>
   <p>
     After creating or rotating a push key on <a class="text-link" href="/dashboard/temperature">Dashboard → Devices</a>,
-    the one-time key callout shows a QR for the full ingest URL:
+    the key callout shows a QR for the full ingest URL (visible for 30 minutes, survives refresh):
   </p>
   <pre><code>{`https://your-domain/api/ingest/YOUR_DEVICE_KEY`}</code></pre>
   <p>
@@ -27,10 +27,10 @@ const page = getAboutPage("kit-qr-onboarding")!;
   <h2>Onboarding checklist</h2>
   <p>
     Prefer to see readings before flashing firmware?
-    Try the public <a class="text-link" href="/demo">live demo</a> (no account), then create a device key and scan the QR.
+    Use <strong>Try without hardware</strong> on Overview for the demo pull feed, browse the public <a class="text-link" href="/demo">live demo</a>, then create a push device and scan the QR.
   </p>
   <p>
-    The dashboard getting-started card tracks device creation, sensor keys, test POST, and alerts.
-    Pair the QR with sensor labels that match firmware keys (<code>temp1</code>, <code>door1</code>, …).
+    The dashboard getting-started card tracks device creation, first POST, and alerts.
+    Sensor keys auto-import when firmware POSTs JSON — pair the QR with payload keys like <code>temp1</code>, <code>door1</code>, then rename labels on Devices if needed.
   </p>
 </AboutArticle>

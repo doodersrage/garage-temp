@@ -53,6 +53,18 @@ const schema = [
           </dd>
         </div>
         <div>
+          <dt class="font-semibold">POST /api/user/pull-setup</dt>
+          <dd class="text-[var(--color-text-muted)]">
+            Save pull feeds and probe labels in one step (session cookie). Used by Devices → Pull feeds tab.
+          </dd>
+        </div>
+        <div>
+          <dt class="font-semibold">POST /api/devices/reveal-ingest-key</dt>
+          <dd class="text-[var(--color-text-muted)]">
+            Recover a push device ingest key when encrypted vault is enabled (rate-limited; logged in household activity).
+          </dd>
+        </div>
+        <div>
           <dt class="font-semibold">GET /api/v1/metrics</dt>
           <dd class="text-[var(--color-text-muted)]">Prometheus scrape target. Header <code>Authorization: Bearer &lt;api-key&gt;</code> (Pro).</dd>
         </div>

@@ -4,13 +4,15 @@ If your probe already serves HTTPS JSON (Arduino Ethernet server, FastAPI relay,
 
 Product walkthrough (UI steps): [Adding push and pull devices](https://thermaltrace.dev/about/adding-devices).
 
+**No hardware?** On **Overview**, use **Try without hardware** to save the public [example feed](https://thermaltrace.dev/api/feeds/example) in one click.
+
 ## Setup
 
-1. Open **[Dashboard → Devices](https://thermaltrace.dev/dashboard/temperature#pull-feeds)** → **Edit pull feeds**
+1. Open **[Dashboard → Devices → Pull feeds](https://thermaltrace.dev/dashboard/temperature?tab=pull)**
 2. Add an HTTPS URL and set **JSON root key** (default `temp`)
-3. Click **Test feed URL**, then **Save feeds**
-4. Under **Probe labels**, map keys inside that root (`0`, `1`, `avg`, …) to Home names → **Save probes**
-5. ThermalTrace fetches every 15 minutes on cron and when you refresh live readings while signed in
+3. Click **Test feed URL**, then **Save pull setup** — probe keys auto-import from the live feed
+4. Rename labels on the same page, or click **Accept suggested names**
+5. Click **Fetch now** for an immediate pull, or wait for the **15-minute** cron and refresh Home while signed in
 
 ## Expected shape
 

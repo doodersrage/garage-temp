@@ -1,6 +1,6 @@
 # Push ingest
 
-Create a **push** device under **[Dashboard → Devices](https://thermaltrace.dev/dashboard/temperature)** on the live app. You receive a **one-time** device key — store it in firmware; you will not see the full key again.
+Create a **push** device under **[Dashboard → Devices](https://thermaltrace.dev/dashboard/temperature)** on the live app. You receive a per-device ingest key in a **30-minute callout** (survives refresh until dismissed). **Lost it later?** Use **Reveal ingest key** on the device card when key recovery is enabled on the server, or **Rotate key** for a new one.
 
 Full UI walkthrough (push **and** pull): [Adding push and pull devices](https://thermaltrace.dev/about/adding-devices).
 
@@ -16,15 +16,13 @@ Optional top-level health fields (any payload style):
 | `battery` / `battery_pct` | Battery percent (0–100) |
 | `rssi` | Wi-Fi / radio RSSI (dBm) |
 
-## Map sensors on Devices
+## Sensors auto-import on first POST
 
-Before readings appear as labeled cards on Home:
+Sensor keys import automatically from your JSON (flat keys, classic `temp` object, typed `sensors[]`, SenML, or Home Assistant REST). Rename labels on the Devices page afterward. Manual mapping under **Advanced** is optional if you want to pre-map keys before the first POST.
 
-1. Prefer **Quick add: temperature + humidity pair** for DHT-style probes (same JSON key for temp and humidity)
-2. Or **Add one sensor** for doors, floods, air quality, etc.
-3. Keys must match the JSON you POST; calibration offset is under **Advanced** on each sensor
+After the first successful POST, open **[Home](https://thermaltrace.dev/)** while signed in to confirm live values. History collects from the **15-minute** background poll and successful ingests.
 
-After the first successful POST, open **[Home](https://thermaltrace.dev/)** while signed in to confirm live values. History snapshots collect from Home refreshes and the **15-minute** background poll.
+**No hardware yet?** On **Overview**, use **Try without hardware** to save the public example pull feed in one click.
 
 ## Home Assistant
 
@@ -40,13 +38,13 @@ curl -X POST "https://thermaltrace.dev/api/ingest/YOUR_DEVICE_KEY" \
   -d '{"temp1": 42.5, "door1": false, "battery": 87, "rssi": -62}'
 ```
 
-Expect HTTP `200` when the key is valid. Map `temp1` / `door1` as sensor keys on the Devices page so labels show correctly (see **Map sensors on Devices** above).
+Expect HTTP `200` when the key is valid. Keys `temp1` / `door1` appear as sensors after the first POST; rename labels on Devices if needed.
 
 ## Payload styles
 
 ### Flat keys
 
-Simplest for ESP sketches. Keys must match what you configure under the device’s sensors.
+Simplest for ESP sketches. Keys become sensor IDs on first POST.
 
 ```json
 {
@@ -141,9 +139,10 @@ Recipes (Home Assistant + Node-RED import): [MQTT bridge](/integrations/mqtt-bri
 | Symptom | Check |
 |---------|--------|
 | `401` | Wrong or rotated device key |
-| Readings missing on Home | Sensor **keys** on Devices don’t match JSON keys |
-| No history | Need successful ingest **and** signed-in Home / 15-minute poll |
+| Readings missing on Home | First POST not received yet, or device disabled |
+| No history | Need successful ingest **and** 15-minute poll / signed-in Home |
 | TLS failures on MCU | Use a local HTTPS relay ([python feeds](https://thermaltrace.dev/about/python-feeds)) |
+| Can't recover key | Operator must set `INGEST_KEY_ENCRYPTION_SECRET`; older devices need one **Rotate key** |
 
 ## Related
 

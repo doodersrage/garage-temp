@@ -159,7 +159,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Why don’t readings show on Home after ingest succeeds?",
       answer:
-        "Map sensor keys on Dashboard → Devices so they match your JSON. For DHT-style probes, use Quick add temperature + humidity pair with the same key. Pull feeds need the correct JSON root key (default temp) unless the URL returns SenML or Home Assistant REST JSON, which auto-detect without a root.",
+        "POST JSON first — sensor keys auto-import on Devices. If Home is still empty, confirm the device received a POST and check Devices → Device health. Pull feeds: correct JSON root (default temp) unless the URL returns SenML or Home Assistant REST JSON, which auto-detect.",
     },
   ],
   "json-probe-output-schema": [

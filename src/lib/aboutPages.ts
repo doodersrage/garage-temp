@@ -127,7 +127,7 @@ export const coreAboutPages: AboutPage[] = [
     description:
       "Step-by-step: create a push ingest device or HTTPS pull feed, map JSON keys to Home labels, and verify live readings.",
     summary:
-      "Choose push vs pull, create the device or feed, map sensors, and confirm Home shows live values.",
+      "Choose push vs pull, create the device or feed, POST or pull readings, and confirm Home shows live values.",
   },
   {
     slug: "install-pwa",

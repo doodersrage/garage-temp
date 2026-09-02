@@ -35,7 +35,7 @@ ThermalTrace connects probes in a garage, workshop, attic, or similar space, com
 
 - **Live readings** — temperature, humidity, air quality, doors, leaks, power, energy, motion
 - **Alerts** — freeze and leak alerts on every plan; custom rules for doors, power, air quality, and more; email and chat-style channels (SMS, push, webhooks on Pro)
-- **History** — charts, YoY overlay, Member/Pro CSV export
+- **History** — charts, YoY overlay (local probe data, or outdoor Open-Meteo estimate when prior-year probes are missing), Member/Pro CSV export
 - **Hardware** — push ingest or pull JSON; sketches in [`sketches/`](./sketches)
 - **Households** — invites, viewers, multi-property; Pro share links and status pages
 
@@ -79,13 +79,13 @@ docs/               VitePress developer docs (GitHub Pages)
 ## Connecting hardware
 
 1. **[Create a free account](https://thermaltrace.dev/register?next=/dashboard/temperature)** (no credit card)  
-2. **Dashboard → Devices** → create a push device and copy the ingest key  
-3. Map sensors (quick temp + humidity pair, or one key at a time) so labels match your JSON  
-4. `POST` to `/api/ingest/<key>`  
+2. **Dashboard → Devices** → create a push device and copy the ingest key from the callout  
+3. `POST` to `/api/ingest/<key>` — sensor keys **auto-import** on first POST; rename on Devices afterward  
+4. **Overview → Try without hardware** saves the demo pull feed if you have no ESP yet  
 
 Step-by-step: [Adding devices](https://thermaltrace.dev/about/adding-devices) · sample sketches in [`sketches/`](./sketches)
 
-Pull feeds (HTTPS JSON we fetch): Devices → **Edit pull feeds** — set URL, JSON root key (default `temp`), and probe labels.
+Pull feeds (HTTPS JSON we fetch): **Devices → Pull feeds** tab — add URL, **Save pull setup**, probes auto-import from the live feed.
 
 **Integrations:** [Home Assistant (HACS)](https://thermaltrace.dev/integrations/home-assistant) · [HACS repo](https://github.com/doodersrage/thermaltrace-home-assistant) · [Developer docs](https://doodersrage.github.io/thermaltrace/)
 

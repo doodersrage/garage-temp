@@ -118,17 +118,16 @@ const owmApiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "")
 							<div>
 								<h3 class="home-step-title">Create a push device</h3>
 								<p class="home-step-copy">
-									Sign up and open Devices. Copy the one-time ingest URL (or QR) for your ESP/Arduino.
+									Sign up and open Devices, or try <strong>Try without hardware</strong> on Overview to save the demo pull feed. Copy the ingest URL or QR from the 30-minute callout.
 								</p>
 							</div>
 						</li>
 						<li class="home-step">
 							<span class="home-step-num" aria-hidden="true">2</span>
 							<div>
-								<h3 class="home-step-title">Map sensors &amp; POST JSON</h3>
+								<h3 class="home-step-title">POST JSON</h3>
 								<p class="home-step-copy">
-									Add a temp + humidity pair (or a single key), then POST to
-									<code>/api/ingest/&lt;key&gt;</code>. The page waits for the first reading.
+									POST to <code>/api/ingest/&lt;key&gt;</code>. Sensor keys auto-import on first POST — rename afterward on Devices. Use <strong>Reveal ingest key</strong> if you lose the key later.
 								</p>
 							</div>
 						</li>

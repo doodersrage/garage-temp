@@ -27,12 +27,12 @@ export const DRIP_STAGES: DripStage[] = [
     subject: "Add your first probe to ThermalTrace",
     content: (site) => ({
       eyebrow: "Getting started",
-      preheader: "Create a device key, map sensors, and POST JSON — about 10 minutes.",
+      preheader: "Create a device key, POST JSON, sensors auto-import — about 10 minutes.",
       title: "Connect your first probe",
       intro:
         "Welcome to ThermalTrace. Your free account is ready — next step is a live reading on Home.",
       paragraphs: [
-        "Open Devices, create a push device, copy the one-time ingest URL, then map a temperature + humidity pair (or a single sensor). Point your ESP/Arduino sketch at that URL and you should see values within a few minutes.",
+        "Open Devices, create a push device, and copy the ingest URL from the callout. POST JSON from your ESP/Arduino sketch — sensor keys auto-import on first POST. Lost the key? Use Reveal ingest key on the device card when enabled.",
       ],
       bullets: [
         "Devices → Create push device → copy ingest URL / QR",

@@ -254,7 +254,7 @@ export function formatExampleFeedResponse(
     },
     usage: {
       pull:
-        "Dashboard → Devices → Edit pull feeds → paste feed_url, JSON root temp (or use SenML/HA JSON directly). Map probe keys 0/1/2/avg.",
+        "Dashboard → Devices → Pull feeds tab → paste feed URL, JSON root temp (or use SenML/HA JSON directly). Save pull setup — probe keys auto-import.",
       push:
         "POST native ingest, SenML array, or HA state JSON to /api/ingest/<your-device-key>.",
     },

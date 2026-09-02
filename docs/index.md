@@ -20,9 +20,13 @@ hero:
       link: https://thermaltrace.dev
 features:
   - title: Push ingest
-    details: POST JSON from ESP32, Arduino, or MicroPython to a per-device URL. Flat keys, classic temp objects, or typed sensors[].
+    details: POST JSON from ESP32, Arduino, or MicroPython. Sensors auto-import on first POST; Reveal ingest key when the operator vault is enabled.
     link: /ingest/
     linkText: Ingest reference
+  - title: Pull feeds
+    details: HTTPS JSON we fetch on a schedule — Devices Pull tab, Save pull setup, probe auto-discovery.
+    link: /ingest/pull-feeds
+    linkText: Pull setup
   - title: Sensor sketches
     details: Drop-in samples for DS18B20, MAX31855, and MAX6675 — Arduino and MicroPython — already in this repo.
     link: /sketches/
