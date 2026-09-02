@@ -82,11 +82,12 @@ export async function signIn(page: Page, next = "/dashboard/alerts"): Promise<vo
   ]);
 
   await page.goto(next, { waitUntil: "domcontentloaded" });
+  const nextPath = next.split("?")[0] ?? next;
   // Allow auth middleware redirects (e.g. MFA step-up) before asserting destination.
   await page.waitForURL(
     (url) => {
       const path = url.pathname;
-      return path === next || path.startsWith(`${next}/`) || path.startsWith("/signin");
+      return path === nextPath || path.startsWith(`${nextPath}/`) || path.startsWith("/signin");
     },
     { timeout: 20_000 },
   );

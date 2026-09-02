@@ -13,6 +13,7 @@
     "secrets:push:dry": "node scripts/push-worker-secrets.mjs --dry-run",
     "operator:check": "node scripts/check-operator-secrets.mjs",
     "setup:github-secrets": "node scripts/setup-github-secrets.mjs",
+    "setup:e2e-github-secrets": "node scripts/setup-e2e-github-secrets.mjs",
     "smoke:public": "node scripts/smoke-public.mjs",
     "ops:check": "node scripts/ops-check.mjs",
     "ops:smoke": "node scripts/ops-smoke-remote.mjs",

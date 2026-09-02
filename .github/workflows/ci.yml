@@ -82,6 +82,7 @@ jobs:
     #   1. In the target Supabase project, create a dedicated low-privilege test
     #      user (Member or Pro tier, not an admin) and add its email/password as
     #      the SUPABASE_E2E_TEST_EMAIL / SUPABASE_E2E_TEST_PASSWORD repo secrets.
+    #      From .env: pnpm setup:e2e-github-secrets
     #   2. Add SUPABASE_URL / SUPABASE_ANON_KEY repo secrets for that project (the
     #      anon key is safe for CI — it's the same key already shipped to the
     #      browser — but do NOT use the service-role key here).

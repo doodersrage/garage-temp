@@ -3,6 +3,7 @@ import { getAuthFromCookies } from "../../../lib/auth";
 import { decryptStoredIngestKey, ingestKeyVaultConfigured } from "../../../lib/ingestKeyVault";
 import { checkRevealIngestKeyRateLimit } from "../../../lib/revealIngestKeyLimits";
 import { listHouseholdDevices } from "../../../lib/devices";
+import { recordHouseholdActivity } from "../../../lib/householdActivity";
 import { requireHouseholdEditor, householdEditorCtx } from "../../../lib/householdAuth";
 
 export const POST: APIRoute = async ({ request, cookies }) => {
@@ -86,6 +87,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  await recordHouseholdActivity({
+    householdId: householdEditorCtx(editor).householdId,
+    userId: user.id,
+    action: "ingest_key_revealed",
+    detail: `${device.name} (${deviceId})`,
+  });
 
   return new Response(
     JSON.stringify({ ok: true, ingest_key: ingestKey }),

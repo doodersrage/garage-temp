@@ -46,3 +46,5 @@ Check what's missing locally: `pnpm operator:check`
 - Dashboard share-link → HACS nudge
 - Deploy + `pnpm build` in CI
 - 15-minute cron polling, stale/battery UX, ops cron-gap alerts
+- CI E2E wiring: `pnpm setup:e2e-github-secrets` (syncs test user + Supabase anon key to GitHub)
+- GA4 funnel guide: [docs/analytics-funnel.md](../analytics-funnel.md)

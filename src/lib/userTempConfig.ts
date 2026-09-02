@@ -406,13 +406,6 @@ async function getCurrentTempConfig(userId: string): Promise<TempConfigRow> {
   };
 }
 
-export async function saveUserTempFeeds(
-  userId: string,
-  feeds: TempFeedConfig[],
-): Promise<{ error: Error | null; discoveredProbes?: number }> {
-  return saveUserPullSetup(userId, feeds, null);
-}
-
 /** Save pull feeds and probe labels in one step (feeds-only omits probe renames). */
 export async function saveUserPullSetup(
   userId: string,
@@ -438,16 +431,6 @@ export async function saveUserPullSetup(
   return { error: null, discoveredProbes: discovered };
 }
 
-export async function saveUserTempProbes(
-  userId: string,
-  probes: TempProbeConfig[],
-): Promise<{ error: Error | null }> {
-  const current = await getCurrentTempConfig(userId);
-  const sanitizedProbes = sanitizeTempProbes(probes, current.feeds);
-
-  return saveUserTempConfig(userId, current.feeds, sanitizedProbes);
-}
-
 export async function deleteUserTempFeed(
   userId: string,
   feedId: string,
@@ -461,28 +444,6 @@ export async function deleteUserTempFeed(
   }
 
   return saveUserTempConfig(userId, feeds, probes);
-}
-
-export async function deleteUserTempProbe(
-  userId: string,
-  probeId: string,
-): Promise<{ error: Error | null }> {
-  const current = await getCurrentTempConfig(userId);
-  const probes = current.probes.filter((probe) => probe.id !== probeId);
-
-  if (probes.length === 0) {
-    const fallbackProbes = getDefaultTempProbes().filter((probe) =>
-      current.feeds.some((feed) => feed.id === probe.feedId),
-    );
-
-    return saveUserTempConfig(
-      userId,
-      current.feeds,
-      fallbackProbes.length > 0 ? fallbackProbes : probes,
-    );
-  }
-
-  return saveUserTempConfig(userId, current.feeds, probes);
 }
 
 export async function migrateLegacyTempConfigFromMetadata(
