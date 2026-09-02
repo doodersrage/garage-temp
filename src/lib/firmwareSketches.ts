@@ -1,6 +1,7 @@
 /**
- * Personalized ESP32 firmware helpers for the Devices ingest callout.
- * WiFi stays as placeholders; INGEST_URL is filled from the user’s device key.
+ * Personalized firmware helpers for the Devices ingest callout.
+ * ESP32: WiFi stays as placeholders; INGEST_URL is filled from the user’s device key.
+ * Uno Ethernet: INGEST_PATH is filled; INGEST_HOST is a LAN HTTP→HTTPS relay.
  */
 
 import {
@@ -55,6 +56,18 @@ client.println(strlen("${body}"));
 client.println();
 client.print("${body}");
 // Full URL: ${ingestUrl}`;
+}
+
+/** Uno + W5100 cannot TLS — host is a LAN HTTP→HTTPS relay; path is the real ingest path. */
+export function buildArduinoEthernetDefinesSnippet(ingestUrl: string): string {
+  const { path } = parseIngestUrlParts(ingestUrl);
+  return `// Uno + W5100 cannot TLS. Run sketches/relay/push_https_forward.py
+// on a LAN host, then set:
+#define INGEST_HOST "192.168.1.50"
+#define INGEST_PORT 8080
+#define INGEST_PATH "${cEscape(path)}"
+// Sketch: sketches/arduino/ethernet_dht22_ingest/
+// Full HTTPS URL (relay forwards this path): ${ingestUrl}`;
 }
 
 /** Full DS18B20 Arduino / ESP32 sketch with INGEST_URL pre-filled. */

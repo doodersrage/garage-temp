@@ -81,4 +81,26 @@ cache.set("garage:latest", response.text)`}</code></pre>
     Configure the public relay URL in your
     <a class="text-link" href="/dashboard/temperature">temperature feed settings</a> after signing in.
   </p>
+
+  <h2>Uno Ethernet: HTTP→HTTPS for push ingest</h2>
+  <p>
+    A W5100 shield cannot POST to <code>https://thermaltrace.dev</code>. The stdlib relay
+    <a
+      class="text-link"
+      target="_blank"
+      rel="noreferrer"
+      href="https://github.com/doodersrage/thermaltrace/blob/main/sketches/relay/push_https_forward.py"
+    ><code>sketches/relay/push_https_forward.py</code></a>
+    listens for HTTP from the Arduino and forwards the same path and body over HTTPS.
+    Pair it with
+    <a
+      class="text-link"
+      target="_blank"
+      rel="noreferrer"
+      href="https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ethernet_dht22_ingest"
+    ><code>ethernet_dht22_ingest</code></a>
+    (DHT22 on A4/A5, classic <code>temp</code> JSON).
+  </p>
+  <pre><code>{`python3 sketches/relay/push_https_forward.py --listen 0.0.0.0:8080 \\
+  --upstream https://thermaltrace.dev`}</code></pre>
 </AboutArticle>

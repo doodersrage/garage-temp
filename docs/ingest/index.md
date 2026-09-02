@@ -57,7 +57,9 @@ Simplest for ESP sketches. Keys become sensor IDs on first POST.
 
 ### Classic Arduino `temp` object
 
-Matches the Ethernet garage firmware JSON shape:
+Matches the Ethernet garage firmware JSON shape. Sample sketch:
+[`ethernet_dht22_ingest`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ethernet_dht22_ingest)
+(Uno + W5100; HTTP only — use [`push_https_forward.py`](https://github.com/doodersrage/thermaltrace/blob/main/sketches/relay/push_https_forward.py) on a LAN host for TLS).
 
 ```json
 {
@@ -141,7 +143,7 @@ Recipes (Home Assistant + Node-RED import): [MQTT bridge](/integrations/mqtt-bri
 | `401` | Wrong or rotated device key |
 | Readings missing on Home | First POST not received yet, or device disabled |
 | No history | Need successful ingest **and** 15-minute poll / signed-in Home |
-| TLS failures on MCU | Use a local HTTPS relay ([python feeds](https://thermaltrace.dev/about/python-feeds)) |
+| TLS failures on MCU | Use a local HTTPS relay ([python feeds](https://thermaltrace.dev/about/python-feeds)). Uno + W5100: [`ethernet_dht22_ingest`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ethernet_dht22_ingest) + [`push_https_forward.py`](https://github.com/doodersrage/thermaltrace/blob/main/sketches/relay/push_https_forward.py) |
 | Can't recover key | Operator must set `INGEST_KEY_ENCRYPTION_SECRET`; older devices need one **Rotate key** |
 
 ## Related

@@ -46,7 +46,7 @@ const hero = getAboutPhoto("ethernet-cable");
         </tr>
         <tr>
           <td>Network</td>
-          <td>Device needs outbound HTTPS</td>
+          <td>Device needs outbound HTTPS (Uno Ethernet: HTTP to a LAN TLS relay)</td>
           <td>Feed URL must be publicly reachable</td>
         </tr>
         <tr>
@@ -61,7 +61,7 @@ const hero = getAboutPhoto("ethernet-cable");
         </tr>
         <tr>
           <td>Best for</td>
-          <td>ESP32, Arduino, MicroPython nodes</td>
+          <td>ESP32, Arduino (Uno + Ethernet via a LAN HTTPS relay)</td>
           <td>Ethernet servers, FastAPI relays</td>
         </tr>
       </tbody>
@@ -94,8 +94,11 @@ const hero = getAboutPhoto("ethernet-cable");
       Manual mapping under <strong>Advanced</strong> is optional for pre-mapping keys.
     </li>
     <li>
-      More samples (MAX31855, MAX6675, etc.):
+      More samples (Uno Ethernet + DHT22, MAX31855, MAX6675, etc.):
       <a class="text-link" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches" target="_blank" rel="noreferrer">sketches/</a>.
+      W5100 cannot TLS — POST HTTP to a LAN relay
+      (<a class="text-link" href="/about/python-feeds">Python feeds</a> /
+      <a class="text-link" href="https://github.com/doodersrage/thermaltrace/blob/main/sketches/relay/push_https_forward.py" target="_blank" rel="noreferrer"><code>push_https_forward.py</code></a>).
     </li>
     <li>
       Smoke-test with curl, then open <a class="text-link" href="/">Home</a> while signed in. Within about 30 minutes without a post, Home warns that a probe may be offline.
@@ -156,8 +159,11 @@ const hero = getAboutPhoto("ethernet-cable");
   <p>
     Pull feeds expect nested probe objects under the configured root by default (not flat push-style keys).
     <strong>SenML JSON arrays</strong> and <strong>Home Assistant REST</strong> responses are auto-detected when that root is missing — paste the URL as-is and map the probe keys SenML or HA expose (e.g. <code>0</code>, <code>state</code>).
-    If the MCU cannot do TLS, use a local HTTPS relay (see
-    <a class="text-link" href="/about/python-feeds">Python feeds</a>).
+    If the MCU cannot do TLS (Uno + W5100 Ethernet shield), use a local HTTPS relay (see
+    <a class="text-link" href="/about/python-feeds">Python feeds</a>
+    or the stdlib
+    <a class="text-link" href="https://github.com/doodersrage/thermaltrace/blob/main/sketches/relay/push_https_forward.py" target="_blank" rel="noreferrer">HTTP→HTTPS forwarder</a>
+    for push ingest).
   </p>
 
   <h2 id="mqtt-bridge">Already on MQTT?</h2>

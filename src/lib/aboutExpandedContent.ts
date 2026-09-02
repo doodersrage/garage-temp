@@ -180,7 +180,7 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
       { type: "h2", text: "SPI sharing" },
       { type: "p", html: "Only one SPI device should drive the bus at a time; the W5100 owns SPI during network I/O. GPIO for DHT22 and parallel LCD are separate—details in <a class=\"text-link\" href=\"/about/spi-pins-ethernet-reserved\">SPI pins and reserved lines</a>." },
       { type: "h2", text: "Network path" },
-      { type: "p", html: "DHCP on a garage router assigns the board an IP; JSON is served over HTTP on the LAN. For HTTPS at the edge, terminate TLS on <a class=\"text-link\" href=\"/about/fastapi-relay-setup\">FastAPI relay</a> instead of the MCU." }
+      { type: "p", html: "DHCP on a garage router assigns the board an IP; JSON is served over HTTP on the LAN. For HTTPS at the edge, terminate TLS on <a class=\"text-link\" href=\"/about/fastapi-relay-setup\">FastAPI relay</a> instead of the MCU. For <strong>push ingest</strong> from the same shield, use <code>ethernet_dht22_ingest</code> plus the LAN HTTP→HTTPS forwarder in <code>sketches/relay/</code> — see <a class=\"text-link\" href=\"/about/arduino-sketches\">Arduino sketches</a>." }
   ],
 
   "circuit-wiring-troubleshooting": [
@@ -255,7 +255,7 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
   ],
 
   "fastapi-relay-setup": [
-      { type: "p", html: "A small FastAPI service on a home server or VPS can poll the Arduino over HTTP on the LAN, then expose a stable HTTPS URL to the internet. That keeps TLS and authentication off the microcontroller while preserving the JSON your dashboard already understands." },
+      { type: "p", html: "A small FastAPI service on a home server or VPS can poll the Arduino over HTTP on the LAN, then expose a stable HTTPS URL to the internet. That keeps TLS and authentication off the microcontroller while preserving the JSON your dashboard already understands. If the Uno should <strong>push</strong> instead of waiting for a pull, run <code>sketches/relay/push_https_forward.py</code> and the <code>ethernet_dht22_ingest</code> sample — see <a class=\"text-link\" href=\"/about/python-feeds\">Python feeds</a>." },
       { type: "h2", text: "Minimal architecture" },
       { type: "ol", items: ["**Scheduler or on-demand fetch** hits <code>http://arduino.local/...</code> on the LAN.","**FastAPI route** returns the latest cached body with correct <code>Content-Type</code>.","**Reverse proxy** (Caddy, nginx) terminates TLS on a public hostname."] },
       { type: "h2", text: "Configuration tips" },

@@ -42,7 +42,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Where are sample Arduino sketches?",
       answer:
-        "In the thermaltrace GitHub repo under sketches/, plus the Arduino guides in About. Copy the ingest URL with your device key into the sketch constants.",
+        "In the thermaltrace GitHub repo under sketches/, plus the Arduino guides in About. ESP32 samples POST HTTPS directly. Uno + W5100 Ethernet uses ethernet_dht22_ingest (classic temp JSON on A4/A5) plus a LAN HTTP→HTTPS relay — the shield cannot TLS to thermaltrace.dev.",
     },
   ],
   "arduino-pin-wiring": [

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildArduinoEthernetDefinesSnippet,
   buildArduinoHttpClientSnippet,
   buildPersonalizedDs18b20Ino,
   buildPersonalizedDs18b20Micropython,
@@ -46,6 +47,13 @@ describe("firmwareSketches", () => {
     const yaml = buildPersonalizedEspHomeYaml(url);
     expect(yaml).toContain(`url: ${url}`);
     expect(yaml).toContain("http_request.post");
+  });
+
+  it("builds Uno Ethernet defines with the real ingest path", () => {
+    const snippet = buildArduinoEthernetDefinesSnippet(url);
+    expect(snippet).toContain('#define INGEST_PATH "/api/ingest/abc123key"');
+    expect(snippet).toContain("ethernet_dht22_ingest");
+    expect(snippet).toContain("192.168.1.50");
   });
 
   it("builds a data URL for downloads", () => {

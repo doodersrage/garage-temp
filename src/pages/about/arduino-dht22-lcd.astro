@@ -72,8 +72,16 @@ const sectionParent = {
     The W5100 Ethernet shield stacks on the Uno and uses SPI, leaving digital and analog pins free for the
     LCD and DHT22 wiring described in the
     <a class="text-link" href="/about/arduino-pin-wiring">pin-level guide</a>.
-    The shield mostly “rides along” on the stack: once configured, the sketch serves JSON over HTTP while
-    continuing to refresh the LCD each loop.
+    The shield mostly “rides along” on the stack: once configured, the sketch can serve JSON over HTTP
+    and POST the same payload for
+    <a class="text-link" href="/about/ingest-and-webhooks">push ingest</a>
+    (see
+    <a
+      class="text-link"
+      href="https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ethernet_dht22_ingest"
+      target="_blank"
+      rel="noreferrer"
+    ><code>ethernet_dht22_ingest</code></a>).
   </p>
 
   <h2>From LCD numbers to website JSON</h2>

@@ -6,6 +6,7 @@ import {
   type WaitingSensorHint,
 } from "../../lib/waitingIngest";
 import {
+  buildArduinoEthernetDefinesSnippet,
   buildArduinoHttpClientSnippet,
   buildPersonalizedDs18b20Ino,
   buildPersonalizedDs18b20Micropython,
@@ -31,6 +32,7 @@ const {
 } = Astro.props;
 
 const arduinoSnippet = buildArduinoHttpClientSnippet(ingestUrl, sensors);
+const ethernetSnippet = buildArduinoEthernetDefinesSnippet(ingestUrl);
 const esphomeSnippet = buildEspHomeHttpRequestSnippet(ingestUrl, sensors);
 const esphomeYaml = buildPersonalizedEspHomeYaml(ingestUrl, sensors);
 const curlExample = buildWaitingIngestCurl(origin, sensors, ingestKey);
@@ -109,6 +111,15 @@ const esphomeHref = firmwareDownloadHref(esphomeYaml);
         </div>
         <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{arduinoSnippet}</code></pre>
       </div>
+      <div>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+          <p class="form-label mb-0">Uno + Ethernet shield (HTTP relay)</p>
+          <button type="button" class="btn-ghost text-xs" data-copy={ethernetSnippet} data-copy-label="Copy">
+            Copy
+          </button>
+        </div>
+        <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{ethernetSnippet}</code></pre>
+      </div>
     </div>
   </details>
 
@@ -123,6 +134,13 @@ const esphomeHref = firmwareDownloadHref(esphomeYaml);
     <a class="text-link" href="/docs/api#ingest">API ingest</a>
     {" · "}
     <a class="text-link" href="/about/esp32-ota-firmware">OTA notes</a>
+    {" · "}
+    <a
+      class="text-link"
+      href="https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ethernet_dht22_ingest"
+      target="_blank"
+      rel="noreferrer"
+    >Uno Ethernet sketch</a>
   </p>
 </section>
 

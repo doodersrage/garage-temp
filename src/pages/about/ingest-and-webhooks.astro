@@ -62,8 +62,12 @@ Content-Type: application/json</code></pre>
     <code>energy</code>, <code>door</code>, <code>power</code>, <code>flood</code>,
     <code>motion</code>, <code>generic</code>.
     Optional top-level <code>battery</code> / <code>battery_pct</code> and <code>rssi</code> update device health metadata.
-    Sample MicroPython and Arduino sketches for DS18B20 / MAX31855 / MAX6675:
+    Sample MicroPython and Arduino sketches for DS18B20 / MAX31855 / MAX6675, plus Uno + W5100
+    (<code>ethernet_dht22_ingest</code>, classic <code>temp</code> JSON):
     <a class="text-link" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches" target="_blank" rel="noreferrer">sketches/</a>.
+    The Ethernet shield cannot TLS — pair it with
+    <a class="text-link" href="https://github.com/doodersrage/thermaltrace/blob/main/sketches/relay/push_https_forward.py" target="_blank" rel="noreferrer"><code>push_https_forward.py</code></a>
+    on a LAN host.
   </p>
 
   <h3>SenML (RFC 8428)</h3>

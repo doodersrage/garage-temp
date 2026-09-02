@@ -58,8 +58,7 @@ const wiringGuides = [
     For <a class="text-link" href="/about/ingest-and-webhooks">push ingest</a>, the same probe object can be
     posted to <code>/api/ingest/&lt;key&gt;</code>. Optional top-level <code>battery</code> (or
     <code>battery_pct</code>) and <code>rssi</code> fields update device health on the Devices page without
-    requiring extra sensor keys. Drop-in ESP sketches:
-    <a class="text-link" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches" target="_blank" rel="noreferrer">sketches/</a>.
+    requiring extra sensor keys.
   </p>
   <pre><code>{`{
   "temp": {
@@ -68,6 +67,29 @@ const wiringGuides = [
   "battery": 87,
   "rssi": -62
 }`}</code></pre>
+
+  <h2>Push ingest from the Ethernet shield</h2>
+  <p>
+    The W5100 stack on an Uno cannot TLS, so it cannot POST directly to
+    <code>https://thermaltrace.dev</code>. Use
+    <a
+      class="text-link"
+      target="_blank"
+      rel="noreferrer"
+      href="https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ethernet_dht22_ingest"
+    ><code>ethernet_dht22_ingest</code></a>
+    to POST the classic <code>temp</code> JSON over HTTP (DHT22 on A4/A5, optional JSON on port 80 for
+    LAN pull). Run
+    <a
+      class="text-link"
+      target="_blank"
+      rel="noreferrer"
+      href="https://github.com/doodersrage/thermaltrace/blob/main/sketches/relay/push_https_forward.py"
+    ><code>push_https_forward.py</code></a>
+    on a Pi, NAS, or laptop so those POSTs reach ThermalTrace over HTTPS. ESP32 Wi‑Fi samples that speak
+    TLS live in
+    <a class="text-link" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches" target="_blank" rel="noreferrer">sketches/</a>.
+  </p>
 
   <h2>Hardware wiring guides</h2>
   <p>
@@ -89,6 +111,13 @@ const wiringGuides = [
     serving while the LCD continues to show live probe values. When TLS is too heavy for the MCU, a
     Python relay can terminate HTTPS—see
     <a class="text-link" href="/about/python-feeds">Python scripts and feeds</a>.
+    For push ingest from the same shield, see
+    <a
+      class="text-link"
+      href="https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ethernet_dht22_ingest"
+      target="_blank"
+      rel="noreferrer"
+    ><code>ethernet_dht22_ingest</code></a>.
   </p>
 
   <AboutCcFigure photoId="arduino-dht11" />
@@ -111,10 +140,10 @@ const wiringGuides = [
     feed URL to the website dashboard.
   </p>
   <p>
-    Ready-to-adapt samples for DS18B20, MAX31855, and MAX6675 (Arduino + MicroPython) live in this
+    Ready-to-adapt samples for DS18B20, MAX31855, MAX6675, and Uno + Ethernet live in this
     repo under
     <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches">sketches/</a>.
-    Full Ethernet + DHT probe firmware:
+    Full Ethernet + DHT + LCD firmware:
     <a class="text-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/arduino-network-json-temperature-sever">arduino-network-json-temperature-sever</a>.
   </p>
 
