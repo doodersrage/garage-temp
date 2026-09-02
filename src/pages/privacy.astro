@@ -23,7 +23,7 @@ const schema = [
     <h1 class="card-title">Privacy</h1>
     <p class="card-subtitle">
       How ThermalTrace handles your data (web and Android), retention, and account deletion.
-      Last updated August 29, 2026.
+      Last updated September 2, 2026.
     </p>
 
     <h2 class="text-lg font-semibold mt-6 mb-2">What we store</h2>
@@ -67,10 +67,13 @@ const schema = [
       disable push, sign out of push on that device, or delete your account. We do not sell push tokens.
     </p>
 
-    <h2 class="text-lg font-semibold mt-6 mb-2">Analytics</h2>
-    <p class="text-sm">
-      Public marketing pages may load Google Analytics (see cookie banner). Dashboard routes are excluded.
-      Product funnel events are anonymized and never include live temperature readings.
+    <h2 class="text-lg font-semibold mt-6 mb-2" id="analytics">Analytics</h2>
+    <p class="text-sm mb-0">
+      On public marketing pages (production), we load Google Analytics (GA4) and Ahrefs Web Analytics to
+      understand traffic and referrals. Those scripts are not loaded on <code>/dashboard</code> or
+      <code>/api</code> routes (except a few conversion thank-you paths). Product funnel events sent to GA
+      are anonymized and never include live temperature readings. A short on-page notice appears the first
+      time you visit a marketing page; dismissing it only hides the notice in this browser.
     </p>
 
     <h2 class="text-lg font-semibold mt-6 mb-2">Contact</h2>

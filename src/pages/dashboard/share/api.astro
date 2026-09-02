@@ -38,6 +38,19 @@ const showWebhookNudge =
         )}
       </section>
 
+      <section class="card">
+        <h2 class="card-title">First success path</h2>
+        <p class="card-subtitle mb-4">
+          Most integrators start with device ingest (not Prometheus). Create a push device, then POST JSON
+          with the per-device key — curl example lives on the HTTP API docs.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a class="btn-primary" href="/dashboard/temperature">Create push device</a>
+          <a class="btn-secondary" href="/docs/api#ingest">API docs — ingest curl</a>
+          <a class="btn-ghost" href="/about/probe-demo">Copy sample JSON from simulator</a>
+        </div>
+      </section>
+
       {showWebhookNudge && (
         <UpgradeNudge feature="webhooks" tier={entitlements.tier} />
       )}

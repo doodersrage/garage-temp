@@ -24,12 +24,17 @@ export default function RevealIngestKeyButton({ deviceId, deviceName }: Props) {
       });
       const data = (await response.json()) as { ok?: boolean; ingest_key?: string; error?: string };
       if (!response.ok || !data.ok || !data.ingest_key) {
-        setError(data.error ?? "Could not reveal key.");
+      setError(
+        data.error ??
+          "Could not reveal key. If recovery is disabled on this server, use Rotate key on the device card.",
+      );
         return;
       }
       setKey(data.ingest_key);
     } catch {
-      setError("Could not reveal key.");
+      setError(
+        "Could not reveal key. If recovery is disabled, Rotate key on the device card for a new ingest URL.",
+      );
     } finally {
       setLoading(false);
     }

@@ -15,6 +15,8 @@ import {
 import { BRAND_NAME, BRAND_TAGLINE } from "../lib/brand";
 import BrandMark from "../components/BrandMark.astro";
 import GoogleAnalytics from "../components/GoogleAnalytics.astro";
+import AhrefsAnalytics from "../components/AhrefsAnalytics.astro";
+import AnalyticsDisclosure from "../components/AnalyticsDisclosure.astro";
 import { shouldLoadGoogleAnalytics } from "../lib/analytics";
 import {
   absoluteOgImageUrl,
@@ -185,11 +187,14 @@ const registerServiceWorker =
 		<Font cssVariable="--font-display" preload />
 		<SchemaMarkup schemas={schemas} />
 		{loadAnalytics && (
-			<GoogleAnalytics
-				pageTitle={pageTitle}
-				pageUrl={pageUrl}
-				hostname={Astro.url.hostname}
-			/>
+			<>
+				<GoogleAnalytics
+					pageTitle={pageTitle}
+					pageUrl={pageUrl}
+					hostname={Astro.url.hostname}
+				/>
+				<AhrefsAnalytics />
+			</>
 		)}
 	</head>
 	<body class:list={[isDashboard && "is-dashboard"]}>
@@ -352,6 +357,7 @@ const registerServiceWorker =
 		{loadTurnstile && (
 			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline />
 		)}
+		<AnalyticsDisclosure show={loadAnalytics} />
 		<script src="/nudge-dismiss.js" defer is:inline />
 		<script is:inline define:vars={{ registerServiceWorker }}>
 			(() => {

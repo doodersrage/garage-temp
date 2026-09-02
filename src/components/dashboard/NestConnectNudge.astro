@@ -1,0 +1,28 @@
+---
+interface Props {
+  show: boolean;
+  nestEntitled: boolean;
+}
+
+const { show, nestEntitled } = Astro.props;
+---
+{show && (
+  <section class="card" id="nest-connect-nudge" aria-labelledby="nest-connect-nudge-title">
+    <h2 class="card-title" id="nest-connect-nudge-title">Nest or Ecobee?</h2>
+    <p class="card-subtitle mb-4">
+      {nestEntitled
+        ? "Connect Nest/Ecobee under Devices → Pull feeds for indoor house context alongside your probes."
+        : "Thermostat OAuth for Nest/Ecobee is on Pro. Free/Member can still push climate temperature from Home Assistant as an Indoor reference."}
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a class="btn-secondary" href="/dashboard/temperature?tab=pull#thermostat-connect">
+        Open Pull feeds & thermostats
+      </a>
+      {nestEntitled ? (
+        <a class="btn-ghost" href="/about/thermostat-oauth">Thermostat OAuth guide</a>
+      ) : (
+        <a class="btn-ghost" href="/dashboard/plans">View Pro</a>
+      )}
+    </div>
+  </section>
+)}

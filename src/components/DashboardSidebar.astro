@@ -144,21 +144,24 @@ const groups = [
       <a href="/dashboard" class="dashboard-sidebar-brand">
         <Image src={logo} height={32} width={190} alt="ThermalTrace" class="dashboard-sidebar-logo" />
       </a>
-      <div class="dashboard-sidebar-identity">
-        {email && <p class="dashboard-sidebar-email" title={email}>{email}</p>}
+      <div class="dashboard-sidebar-top-meta">
         {planLabel && <span class="plan-badge plan-badge--sidebar">{planLabel}</span>}
+        <button
+          type="button"
+          class="dashboard-nav-toggle btn-secondary lg:hidden"
+          id="dashboard-nav-toggle"
+          aria-expanded="false"
+          aria-controls="dashboard-nav-panel"
+        >
+          <span class="dashboard-nav-toggle-label">Menu</span>
+          <span class="dashboard-nav-toggle-page">{activeLabel}</span>
+        </button>
       </div>
-      <button
-        type="button"
-        class="dashboard-nav-toggle btn-ghost lg:hidden"
-        id="dashboard-nav-toggle"
-        aria-expanded="false"
-        aria-controls="dashboard-nav-panel"
-      >
-        {activeLabel}
-      </button>
     </div>
     <div id="dashboard-nav-panel" class="dashboard-nav-panel">
+      {email && (
+        <p class="dashboard-sidebar-email" title={email}>{email}</p>
+      )}
       {groups.map((group) => (
         <div class="dashboard-nav-group">
           <p class="dashboard-nav-group-label">{group.label}</p>

@@ -1,0 +1,98 @@
+---
+/**
+ * Honest, dismissible disclosure for marketing analytics (GA + Ahrefs).
+ * Not a consent gate — documents what we load; see /privacy.
+ */
+interface Props {
+  show: boolean;
+}
+
+const { show } = Astro.props;
+---
+{show && (
+  <div
+    class="analytics-disclosure"
+    id="analytics-disclosure"
+    role="region"
+    aria-label="Analytics notice"
+    hidden
+  >
+    <p class="analytics-disclosure-text">
+      Marketing pages use Google Analytics and Ahrefs to understand traffic.
+      Dashboard routes do not. Details in
+      <a class="text-link" href="/privacy#analytics">Privacy</a>.
+    </p>
+    <button type="button" class="btn-ghost analytics-disclosure-dismiss" id="analytics-disclosure-dismiss">
+      Got it
+    </button>
+  </div>
+)}
+
+<script is:inline>
+  (() => {
+    const root = document.getElementById("analytics-disclosure");
+    const dismiss = document.getElementById("analytics-disclosure-dismiss");
+    if (!root) return;
+    const key = "tt-analytics-disclosure-v1";
+    try {
+      if (localStorage.getItem(key) === "1") return;
+    } catch {
+      /* ignore */
+    }
+    root.hidden = false;
+    dismiss?.addEventListener("click", () => {
+      root.hidden = true;
+      try {
+        localStorage.setItem(key, "1");
+      } catch {
+        /* ignore */
+      }
+    });
+  })();
+</script>
+
+<style>
+  .analytics-disclosure {
+    position: fixed;
+    z-index: 40;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    max-width: 40rem;
+    margin-inline: auto;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  .analytics-disclosure[hidden] {
+    display: none !important;
+  }
+
+  .analytics-disclosure-text {
+    margin: 0;
+    flex: 1 1 14rem;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+  }
+
+  .analytics-disclosure-dismiss {
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 640px) {
+    .analytics-disclosure {
+      left: 1.5rem;
+      right: auto;
+      bottom: 1.5rem;
+    }
+  }
+</style>

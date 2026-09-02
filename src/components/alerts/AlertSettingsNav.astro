@@ -1,14 +1,26 @@
 ---
-const links = [
-  { id: "alert-section-essentials", label: "Essentials" },
-  { id: "alert-section-channels", label: "More channels" },
-  { id: "alert-section-quiet", label: "Quiet hours" },
-  { id: "alert-section-automation", label: "Automation" },
-  { id: "alert-section-advanced", label: "Advanced" },
-];
+interface Props {
+  essentialsFirst?: boolean;
+}
+
+const { essentialsFirst = false } = Astro.props;
+
+const links = essentialsFirst
+  ? [
+      { id: "alert-section-essentials", label: "Essentials" },
+      { id: "send-test-alert", label: "Test alert" },
+      { id: "alert-section-channels", label: "More channels" },
+    ]
+  : [
+      { id: "alert-section-essentials", label: "Essentials" },
+      { id: "alert-section-channels", label: "More channels" },
+      { id: "alert-section-quiet", label: "Quiet hours" },
+      { id: "alert-section-automation", label: "Automation" },
+      { id: "alert-section-advanced", label: "Advanced" },
+    ];
 ---
 <nav class="alert-settings-nav card" aria-label="Alert settings sections">
-  <p class="alert-settings-nav-label">Jump to</p>
+  <p class="alert-settings-nav-label">{essentialsFirst ? "Start here" : "Jump to"}</p>
   <ul class="alert-settings-nav-list">
     {links.map((link) => (
       <li>

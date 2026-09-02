@@ -3,6 +3,16 @@ import { isDashboardConversionPath } from "./productAnalytics";
 /** Default GA4 measurement ID — override with GA_MEASUREMENT_ID in env. */
 export const DEFAULT_GA_MEASUREMENT_ID = "G-1TLGYJZEQ9";
 
+/**
+ * Third-party script hosts used by marketing analytics.
+ * Include these in script-src if you add a Content-Security-Policy later.
+ */
+export const ANALYTICS_CSP_SCRIPT_HOSTS = [
+  "https://www.googletagmanager.com",
+  "https://www.google-analytics.com",
+  "https://analytics.ahrefs.com",
+] as const;
+
 const ANALYTICS_EXCLUDED_PREFIXES = ["/dashboard", "/api/"];
 
 export function resolveGaMeasurementId(

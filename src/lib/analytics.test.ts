@@ -1,10 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
+  ANALYTICS_CSP_SCRIPT_HOSTS,
   DEFAULT_GA_MEASUREMENT_ID,
   resolveGaCookieDomain,
   resolveGaMeasurementId,
   shouldLoadGoogleAnalytics,
 } from "./analytics";
+
+describe("ANALYTICS_CSP_SCRIPT_HOSTS", () => {
+  it("includes Ahrefs and Google hosts for future CSP", () => {
+    expect(ANALYTICS_CSP_SCRIPT_HOSTS).toContain("https://analytics.ahrefs.com");
+    expect(ANALYTICS_CSP_SCRIPT_HOSTS).toContain("https://www.googletagmanager.com");
+  });
+});
 
 describe("resolveGaMeasurementId", () => {
   it("returns default when env is unset", () => {

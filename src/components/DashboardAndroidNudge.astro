@@ -8,14 +8,21 @@ const playStoreUrl = String(import.meta.env.PUBLIC_PLAY_STORE_URL ?? "").trim();
 const playStoreLive = playStoreUrl.startsWith("https://play.google.com/");
 ---
 
-{show && playStoreLive && (
-  <section class="card">
-    <h2 class="card-title">Android companion</h2>
+{show && (
+  <section class="card" id="android-companion-nudge" aria-labelledby="android-companion-nudge-title">
+    <h2 class="card-title" id="android-companion-nudge-title">Android companion</h2>
     <p class="card-subtitle mb-4">
-      Live probes, alerts, and household tools on Google Play — your phone is not a sensor.
+      Live probes, alerts, and household tools on your phone — the phone is not a sensor.
     </p>
-    <a class="btn-secondary" href={playStoreUrl} target="_blank" rel="noreferrer">
-      Get it on Google Play
-    </a>
+    <div class="flex flex-wrap gap-3">
+      {playStoreLive ? (
+        <a class="btn-secondary" href={playStoreUrl} target="_blank" rel="noreferrer">
+          Get it on Google Play
+        </a>
+      ) : (
+        <a class="btn-secondary" href="/android">Android early access</a>
+      )}
+      <a class="btn-ghost" href="/about/install-pwa">Or install the PWA</a>
+    </div>
   </section>
 )}

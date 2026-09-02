@@ -245,6 +245,11 @@ const referralRewardDays = Number(
       twilioConfigured={isTwilioConfigured()}
       redirectTo="/dashboard/alerts"
       canEdit={canEdit}
+      essentialsFirst={!Boolean(
+        alertSettings.lastAlertSentAt ||
+          alertSettings.lastOutageAlertAt ||
+          alertSettings.lastRateAlertAt,
+      )}
       deviceSpaces={deviceSpaces}
       thresholdSensors={thresholdSensors}
     />

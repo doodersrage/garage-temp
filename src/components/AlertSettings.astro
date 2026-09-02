@@ -17,6 +17,8 @@ interface Props {
   twilioConfigured?: boolean;
   redirectTo?: string;
   canEdit?: boolean;
+  /** Collapse advanced sections until a test alert has been sent. */
+  essentialsFirst?: boolean;
   deviceSpaces?: string[];
   thresholdSensors?: Array<{
     id: string;
@@ -34,6 +36,7 @@ const {
   twilioConfigured = true,
   redirectTo = "/dashboard/alerts",
   canEdit = true,
+  essentialsFirst = false,
   deviceSpaces = [],
   thresholdSensors = [],
 } = Astro.props;
@@ -112,7 +115,14 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
   <input type="hidden" name="alert_playbooks_json" id="alert_playbooks_json" value={JSON.stringify(settings.alertPlaybooks ?? [])} />
   <input type="hidden" name="alert_templates_json" id="alert_templates_json" value={JSON.stringify(settings.alertTemplates ?? {})} />
 
-  <AlertSettingsNav />
+  <AlertSettingsNav essentialsFirst={essentialsFirst} />
+
+  {essentialsFirst && (
+    <p class="alert-success mt-0 mb-4" role="status">
+      Start with <strong>Essentials</strong> (freeze °F + email), save, then send a test alert.
+      More channels and automation unlock in the sections below after that — or expand them anytime.
+    </p>
+  )}
 
   <AlertSettingsPanel
     id="alert-section-essentials"

@@ -3,6 +3,9 @@ import DashboardLayout from "../layouts/DashboardLayout.astro";
 import DashboardOnboarding from "../components/DashboardOnboarding.astro";
 import DashboardAndroidNudge from "../components/DashboardAndroidNudge.astro";
 import DemoPullNudge from "../components/DemoPullNudge.astro";
+import ProbeSimulatorNudge from "../components/dashboard/ProbeSimulatorNudge.astro";
+import NestConnectNudge from "../components/dashboard/NestConnectNudge.astro";
+import OverviewPwaNudge from "../components/dashboard/OverviewPwaNudge.astro";
 import DashboardYoureLive from "../components/DashboardYoureLive.astro";
 import AlertSetupNudge from "../components/dashboard/AlertSetupNudge.astro";
 import DashboardStoryCard from "../components/dashboard/DashboardStoryCard.astro";
@@ -443,6 +446,26 @@ const upgradeTarget = nextUpgradeTier(entitlements.tier);
 const essentialDone =
   hasDevices && hasAlertsEnabled && hasEmailAlerts && Boolean(lastAlertAt);
 const hasTestAlert = Boolean(lastAlertAt);
+
+const showProbeSimulatorNudge =
+  canEdit &&
+  latest.length === 0 &&
+  !onboardingDismissed;
+
+const showNestConnectNudge =
+  canEdit &&
+  thermostatConnections.length === 0 &&
+  (latest.length === 0 || !onboardingDismissed) &&
+  !showDemoPullNudge;
+
+const showOverviewPwaNudge =
+  canEdit &&
+  latest.length > 0 &&
+  (onboardingDismissed || essentialDone);
+
+const showAndroidNudge =
+  canEdit && (latest.length > 0 || hasDevices);
+
 const showYoureLive =
   canEdit &&
   latest.length > 0 &&
@@ -467,6 +490,9 @@ const showFreezeMapOptInNudge =
 const showClaimsPackPrompt = showInsights && canEdit && hasHistory;
 const showStoryCard = showSecondaryNudges && canEdit && !showAlertSetupNudge;
 
+/** When there is no live reading yet, don't promote freeze-readiness / upgrade as primary noise. */
+const prioritizeEmptyOverview = latest.length === 0;
+
 const analyticsEvents: Array<{
   name: import("../lib/productAnalytics").ProductEvent;
   props?: Record<string, string | number | boolean>;
@@ -485,14 +511,18 @@ type OverviewBanner = { id: string; priority: number; show: boolean };
 const overviewBannerQueue: OverviewBanner[] = [
   { id: "lowBattery", priority: 2, show: Boolean(lowBatteryMessage) },
   { id: "stale", priority: 3, show: staleSensorCount > 0 },
-  { id: "coldSnap", priority: 4, show: showColdSnapChecklist },
+  { id: "coldSnap", priority: 4, show: showColdSnapChecklist && !prioritizeEmptyOverview },
   { id: "testAlert", priority: 5, show: showTestAlertNudge },
   { id: "alertSetup", priority: 6, show: showAlertSetupNudge },
   { id: "youreLive", priority: 7, show: showYoureLive },
   { id: "freezeMap", priority: 8, show: showFreezeMapOptInNudge },
-  { id: "story", priority: 9, show: showStoryCard },
+  { id: "story", priority: 9, show: showStoryCard && !prioritizeEmptyOverview },
   { id: "multiProperty", priority: 10, show: showMultiPropertyNudge },
-  { id: "freezeReadiness", priority: 11, show: true },
+  {
+    id: "freezeReadiness",
+    priority: prioritizeEmptyOverview ? 18 : 11,
+    show: !prioritizeEmptyOverview,
+  },
   // Upgrade CTAs stay in "More recommendations" only — never primary.
   { id: "upgrade", priority: 20, show: upgradeTarget === "member" || upgradeTarget === "pro" },
 ];
@@ -561,6 +591,11 @@ const garageRisk = computeGarageRiskStatus({
     <GarageRiskStatusCard status={garageRisk} />
 
     <DemoPullNudge show={showDemoPullNudge} />
+    <ProbeSimulatorNudge show={showProbeSimulatorNudge} />
+    <NestConnectNudge
+      show={showNestConnectNudge}
+      nestEntitled={entitlements.canUseThermostatIntegration}
+    />
 
     <HouseholdSwitcher
       households={userHouseholds.households}
@@ -630,7 +665,8 @@ const garageRisk = computeGarageRiskStatus({
           More recommendations ({secondaryBannerIds.size})
         </summary>
         <div class="dashboard-recommendations-body space-y-4">
-          <DashboardAndroidNudge show={hasDevices && latest.length > 0} />
+          <OverviewPwaNudge show={showOverviewPwaNudge} />
+          <DashboardAndroidNudge show={showAndroidNudge} />
           <DashboardYoureLive
             show={secondaryBannerIds.has("youreLive")}
             hasAlertsEnabled={hasAlertsEnabled}
@@ -679,6 +715,25 @@ const garageRisk = computeGarageRiskStatus({
           <LowBatteryBanner message={secondaryBannerIds.has("lowBattery") ? lowBatteryMessage : null} />
         </div>
       </details>
+    )}
+
+    {prioritizeEmptyOverview && canEdit && (
+      <section class="card" aria-labelledby="empty-overview-cta-title">
+        <h2 class="card-title" id="empty-overview-cta-title">Get a reading on this Overview</h2>
+        <p class="card-subtitle mb-4">
+          {hasDevices
+            ? "You have a device — POST JSON once (or fetch a pull feed) so sensors appear here, then set freeze + email."
+            : "Create a push device for ESP/Arduino, or try the demo feed — then set freeze + email under Alerts."}
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a class="btn-primary" href="/dashboard/temperature">Open Devices</a>
+          {showDemoPullNudge && (
+            <a class="btn-secondary" href="#demo-pull-nudge">Try demo feed</a>
+          )}
+          <a class="btn-ghost" href="/about/probe-demo">Probe simulator</a>
+          <a class="btn-ghost" href="/dashboard/alerts#alert-section-essentials">Alert essentials</a>
+        </div>
+      </section>
     )}
 
     {!canEdit && (
