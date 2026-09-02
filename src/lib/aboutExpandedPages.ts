@@ -527,6 +527,15 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
       "Keep ESP32 firmware current on your LAN while telemetry posts to the ingest API.",
   },
   {
+    slug: "esp32-web-flash",
+    parentSlug: "adding-devices",
+    title: "ESP32 flashing options",
+    description:
+      "Flash ThermalTrace ESP32 probes with Arduino IDE, PlatformIO, MicroPython, or Espressif’s web esptool — after downloading a pre-filled sketch from Devices.",
+    summary:
+      "No hosted one-click binary flasher: download a personalized sketch, then flash with IDE, PlatformIO, or esptool-js.",
+  },
+  {
     slug: "zapier-make-recipes",
     parentSlug: "ingest-and-webhooks",
     title: "Zapier and Make.com recipes",

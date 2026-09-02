@@ -7,8 +7,9 @@ import PullFeedSaveBar from "../../components/PullFeedSaveBar";
 import PushInlineRename from "../../components/PushInlineRename";
 import RevealIngestKeyButton from "../../components/RevealIngestKeyButton";
 import DeviceSetupWizard from "../../components/DeviceSetupWizard.astro";
-import DeviceIntegrationsStrip from "../../components/DeviceIntegrationsStrip.astro";
+import IngestFirmwarePanel from "../../components/dashboard/IngestFirmwarePanel.astro";
 import DevicesFirstRunCard from "../../components/dashboard/DevicesFirstRunCard.astro";
+import DeviceIntegrationsStrip from "../../components/DeviceIntegrationsStrip.astro";
 import FirstAlertSetupCard from "../../components/FirstAlertSetupCard.astro";
 import DemoPullNudge from "../../components/DemoPullNudge.astro";
 import { getAuthFromCookies } from "../../lib/auth";
@@ -31,8 +32,6 @@ import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import { batterySparklinePath, parseBatteryHistory } from "../../lib/batterySparkline";
 import { renderIngestQrSvg } from "../../lib/qrSvg";
 import {
-  buildArduinoHttpClientSnippet,
-  buildEspHomeHttpRequestSnippet,
   buildWaitingIngestCurl,
   buildWaitingIngestPayload,
 } from "../../lib/waitingIngest";
@@ -295,12 +294,6 @@ const firmwareSensors =
   waitingSensors.length > 0
     ? waitingSensors.map((s) => ({ key: s.key, kind: s.kind }))
     : [{ key: "temp1", kind: "temperature" }];
-const esphomeSnippet = ingestUrl
-  ? buildEspHomeHttpRequestSnippet(ingestUrl, firmwareSensors)
-  : "";
-const arduinoSnippet = ingestUrl
-  ? buildArduinoHttpClientSnippet(ingestUrl, firmwareSensors)
-  : "";
 ---
 <DashboardLayout title="Devices">
   <ProductAnalyticsTracker events={analyticsEvents} />
@@ -377,7 +370,8 @@ const arduinoSnippet = ingestUrl
       <section class="card ingest-key-callout" id="ingest-key-callout">
         <h2 class="card-title">{keyCalloutTitle}</h2>
         <p class="card-subtitle">
-          Scan the QR or copy the URL into firmware. This key stays available for 30 minutes and survives refresh until you dismiss it.
+          Scan the QR, download a pre-filled ESP32 sketch, or copy the URL. This key stays available for
+          30 minutes and survives refresh until you dismiss it.
         </p>
         <div class="flex flex-wrap gap-6 items-start mb-4">
           <div
@@ -427,23 +421,13 @@ const arduinoSnippet = ingestUrl
             I've saved this
           </button>
         </div>
-        <details class="rounded-lg border border-[var(--color-border)] p-3 mb-2">
-          <summary class="cursor-pointer font-medium text-sm">Firmware presets</summary>
-          <div class="mt-3 space-y-3">
-            <div>
-              <p class="form-label mb-1">ESPHome</p>
-              <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{esphomeSnippet}</code></pre>
-            </div>
-            <div>
-              <p class="form-label mb-1">curl</p>
-              <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{ingestCurlExample}</code></pre>
-            </div>
-            <div>
-              <p class="form-label mb-1">Arduino (HTTPS client)</p>
-              <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{arduinoSnippet}</code></pre>
-            </div>
-          </div>
-        </details>
+        <IngestFirmwarePanel
+          ingestUrl={ingestUrl}
+          ingestKey={ingestKey}
+          origin={Astro.url.origin}
+          sensors={firmwareSensors}
+          presetsOpen
+        />
       </section>
     )}
 
@@ -526,16 +510,20 @@ const arduinoSnippet = ingestUrl
             ) : (
               <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{ingestCurlExample || waitingCurl}</code></pre>
             )}
-            {esphomeSnippet && (
-              <>
-                <p class="form-label mb-1">ESPHome</p>
-                <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{esphomeSnippet}</code></pre>
-              </>
-            )}
           </div>
         </details>
 
-        <div class="flex flex-wrap gap-3 items-center">
+        {ingestUrl && ingestKey && (
+          <IngestFirmwarePanel
+            ingestUrl={ingestUrl}
+            ingestKey={ingestKey}
+            origin={Astro.url.origin}
+            sensors={firmwareSensors}
+            presetsOpen={false}
+          />
+        )}
+
+        <div class="flex flex-wrap gap-3 items-center mt-4">
           <a class="btn-secondary" href="/about/kit-qr-onboarding">Hardware kit QR guide</a>
           <button type="button" class="btn-ghost" data-waiting-refresh>
             Check now

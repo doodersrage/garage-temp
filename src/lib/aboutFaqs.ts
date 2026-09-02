@@ -180,7 +180,19 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Can ESP32 devices update firmware while posting to ThermalTrace?",
       answer:
-        "Yes—run OTA on your LAN for firmware, and keep push ingest posting readings to the cloud API. Battery and RSSI fields are optional in the payload.",
+        "Yes—run OTA on your LAN for firmware, and keep push ingest posting readings to the cloud API. Battery and RSSI fields are optional in the payload. Download a pre-filled sketch from Dashboard → Devices for the first USB flash.",
+    },
+    {
+      question: "Do I need to recompile when my Wi‑Fi password changes?",
+      answer:
+        "Not if you use the WiFiManager sample (captive portal). Otherwise edit WIFI_SSID / WIFI_PASS and flash again. Ingest URL still comes from Devices.",
+    },
+  ],
+  "esp32-web-flash": [
+    {
+      question: "Is there a browser flasher built into ThermalTrace?",
+      answer:
+        "No hosted one-click .bin flasher — your ingest URL is per device. Download a pre-filled .ino/.py from Devices, then flash with Arduino IDE, PlatformIO, Thonny, or Espressif’s esptool-js if you already built a binary. Guide: thermaltrace.dev/about/esp32-web-flash.",
     },
   ],
   "install-pwa": [

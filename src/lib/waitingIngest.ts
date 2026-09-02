@@ -70,19 +70,3 @@ export function buildEspHomeHttpRequestSnippet(
   body: '${body}'`;
 }
 
-export function buildArduinoHttpClientSnippet(
-  ingestUrl: string,
-  sensors: WaitingSensorHint[] = [{ key: "temp1", kind: "temperature" }],
-): string {
-  const payload = buildWaitingIngestPayload(sensors);
-  const body = JSON.stringify(payload).replace(/"/g, '\\"');
-  return `// After WiFiClientSecure client is connected:
-client.println("POST /api/ingest/YOUR_KEY HTTP/1.1");
-client.println("Host: thermaltrace.dev");
-client.println("Content-Type: application/json");
-client.print("Content-Length: ");
-client.println(strlen("${body}"));
-client.println();
-client.print("${body}");
-// Prefer the full URL: ${ingestUrl}`;
-}

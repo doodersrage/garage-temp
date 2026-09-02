@@ -46,6 +46,7 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
       { href: "/about/arduino-circuit-wiring", slug: "arduino-circuit-wiring" },
       { href: "/about/arduino-sketches", slug: "arduino-sketches" },
       { href: "/about/esp32-ota-firmware", slug: "esp32-ota-firmware" },
+      { href: "/about/esp32-web-flash", slug: "esp32-web-flash" },
       { href: "/about/probe-demo", slug: "probe-demo" },
     ],
   },

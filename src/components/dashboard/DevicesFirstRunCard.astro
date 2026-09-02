@@ -21,7 +21,7 @@ const { canEdit, atDeviceLimit, redirectTo, nestEntitled } = Astro.props;
     <div class="devices-intent" role="listitem">
       <h3 class="devices-intent-title">ESP / Arduino</h3>
       <p class="devices-intent-copy">
-        Create a push device, copy the ingest URL, POST JSON once — sensors auto-import.
+        Create a push device, download a pre-filled ESP32 sketch, set Wi‑Fi, and POST once — sensors auto-import.
       </p>
       {canEdit && !atDeviceLimit ? (
         <form action="/api/devices" method="post">

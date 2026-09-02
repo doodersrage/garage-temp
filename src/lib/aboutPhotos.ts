@@ -283,6 +283,7 @@ export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
   "mqtt-bridge": "ethernet-cable",
   "kit-qr-onboarding": "ethernet-cable",
   "esp32-ota-firmware": "arduino-uno-board",
+  "esp32-web-flash": "arduino-uno-board",
 
   // Relay / network / data path
   "debugging-stale-readings": "ethernet-cable",

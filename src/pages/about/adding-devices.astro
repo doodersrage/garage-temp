@@ -77,19 +77,24 @@ const hero = getAboutPhoto("ethernet-cable");
       Under <strong>Push devices</strong>, click <strong>Create push device</strong> (named Workshop probe by default — rename anytime).
     </li>
     <li>
-      Copy the ingest URL / key from the callout (QR on the same card). The key stays on the page for 30 minutes and survives refresh until you dismiss it.
+      On the ingest callout: scan the QR, or use <strong>Download Arduino .ino</strong> /
+      <strong>MicroPython .py</strong> / <strong>ESPHome snippet</strong> (ingest URL pre-filled — set Wi‑Fi only).
+      The key stays on the page for 30 minutes and survives refresh until you dismiss it.
     </li>
     <li>
       <strong>Lost the key later?</strong> On the device card use <strong>Reveal ingest key</strong> (when key recovery is enabled on the server) or <strong>Rotate key</strong> to issue a new one.
       Devices created before key recovery was enabled need one rotate to store a recoverable encrypted copy.
     </li>
     <li>
-      Point firmware at <code>POST /api/ingest/&lt;key&gt;</code> and POST JSON. Sensor keys import automatically
+      Flash an ESP32 (see
+      <a class="text-link" href="/about/esp32-web-flash">flashing options</a>:
+      Arduino IDE, PlatformIO, MicroPython, or Espressif web esptool).
+      Serial at <strong>115200</strong> should show <code>POST 200</code>. Sensor keys import automatically
       (flat keys, <code>temp</code> object, SenML, or Home Assistant REST). Rename sensors on the Devices page afterward.
       Manual mapping under <strong>Advanced</strong> is optional for pre-mapping keys.
     </li>
     <li>
-      Sample sketches:
+      More samples (MAX31855, MAX6675, etc.):
       <a class="text-link" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches" target="_blank" rel="noreferrer">sketches/</a>.
     </li>
     <li>

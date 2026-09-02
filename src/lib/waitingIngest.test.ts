@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { buildArduinoHttpClientSnippet } from "./firmwareSketches";
 import {
-  buildArduinoHttpClientSnippet,
   buildEspHomeHttpRequestSnippet,
   buildWaitingIngestCurl,
   buildWaitingIngestPayload,
@@ -35,6 +35,10 @@ describe("waitingIngest", () => {
     expect(buildEspHomeHttpRequestSnippet(url, sensors)).toContain(
       "url: https://thermaltrace.dev/api/ingest/abc123",
     );
-    expect(buildArduinoHttpClientSnippet(url, sensors)).toContain(url);
+    const arduino = buildArduinoHttpClientSnippet(url, sensors);
+    expect(arduino).toContain(url);
+    expect(arduino).toContain("POST /api/ingest/abc123 HTTP/1.1");
+    expect(arduino).toContain("Host: thermaltrace.dev");
+    expect(arduino).not.toContain("YOUR_KEY");
   });
 });

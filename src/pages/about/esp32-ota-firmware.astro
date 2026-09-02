@@ -1,5 +1,4 @@
 ---
-
 import AboutArticle from "../../components/AboutArticle.astro";
 import { getAboutPage } from "../../lib/aboutPages";
 import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
@@ -17,21 +16,53 @@ const hero = getAboutHeroPhoto(page.slug);
   heroCredit={hero?.credit}
   heroCreditHref={hero?.sourceUrl}
 >
-  <h2>OTA updates</h2>
   <p>
-    Use the Arduino OTA or ESP-IDF HTTPS OTA libraries on your LAN, then POST readings to ThermalTrace
-    over HTTPS. OTA and ingest are independent — firmware updates locally while telemetry uses
-    <code>/api/ingest/&lt;key&gt;</code>.
+    ThermalTrace cares about <strong>readings over HTTPS</strong>, not how you update the MCU.
+    Keep OTA on your LAN; keep ingest pointed at
+    <code>/api/ingest/&lt;key&gt;</code>. Download a pre-filled sketch from
+    <a class="text-link" href="/dashboard/temperature">Devices</a> after you create a push device.
+  </p>
+
+  <h2>First flash vs OTA</h2>
+  <ul>
+    <li>
+      <strong>USB first flash</strong> — use the Devices callout checklist (ESP32 board package, libraries,
+      Serial 115200). See
+      <a class="text-link" href="/about/esp32-web-flash">flashing options</a> for Arduino IDE, PlatformIO,
+      MicroPython, and Espressif’s web esptool.
+    </li>
+    <li>
+      <strong>LAN OTA later</strong> — once Wi‑Fi works, <code>ArduinoOTA</code> (or ESP-IDF HTTPS OTA) lets you
+      push new firmware without climbing back to the probe with a cable.
+    </li>
+  </ul>
+
+  <h2>ArduinoOTA (LAN)</h2>
+  <p>
+    After <code>WiFi.begin</code> succeeds, start OTA and call <code>handle()</code> in <code>loop</code>.
+    Use a password in production shops. PlatformIO / Arduino IDE “network port” then shows the board.
   </p>
   <pre><code>{`#include <ArduinoOTA.h>
-// After WiFi.connect():
-ArduinoOTA.begin();
-// in loop():
-ArduinoOTA.handle();`}</code></pre>
 
-  <h2>Battery and RSSI in ingest</h2>
+void setup() {
+  // … WiFi connected …
+  ArduinoOTA.setHostname("garage-probe");
+  ArduinoOTA.setPassword("change-me");
+  ArduinoOTA.begin();
+}
+
+void loop() {
+  ArduinoOTA.handle();
+  // … your ingest POST on an interval …
+}`}</code></pre>
+  <p class="text-sm text-[var(--color-text-muted)]">
+    OTA and ingest are independent: a failed cloud POST does not block OTA, and an OTA update does not
+    change your ThermalTrace device key.
+  </p>
+
+  <h2>Ingest payload with battery and RSSI</h2>
   <p>
-    Include optional top-level fields so the Devices page and health alerts stay accurate:
+    Optional top-level fields keep Devices health and low-battery / weak-signal alerts accurate:
   </p>
   <pre><code>{`{
   "temp1": 42.5,
@@ -40,6 +71,30 @@ ArduinoOTA.handle();`}</code></pre>
   "rssi": -62
 }`}</code></pre>
   <p>
-    Enable low-battery and weak-signal alerts under Dashboard → Alerts → Device health.
+    The DS18B20 samples already send <code>rssi</code>. Add <code>battery</code> or
+    <code>battery_pct</code> when you have a voltage divider or fuel gauge. Enable health alerts under
+    <a class="text-link" href="/dashboard/alerts">Dashboard → Alerts</a>.
   </p>
+
+  <h2>Wi‑Fi without recompiling</h2>
+  <p>
+    Hardcoded <code>WIFI_SSID</code> / <code>WIFI_PASS</code> is fine for a fixed garage AP. If the network
+    changes often, use the
+    <a
+      class="text-link"
+      href="https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ds18b20_wifimanager"
+      target="_blank"
+      rel="noreferrer"
+    >WiFiManager sketch</a>
+    — captive portal on first boot; ingest URL still comes from the Devices download or a
+    <code>#define</code>.
+  </p>
+
+  <h2>Related</h2>
+  <ul>
+    <li><a class="text-link" href="/about/adding-devices">Adding devices</a></li>
+    <li><a class="text-link" href="/about/esp32-web-flash">ESP32 flashing options</a></li>
+    <li><a class="text-link" href="/about/kit-qr-onboarding">Kit QR onboarding</a></li>
+    <li><a class="text-link" href="/docs/api#ingest">HTTP API — ingest</a></li>
+  </ul>
 </AboutArticle>

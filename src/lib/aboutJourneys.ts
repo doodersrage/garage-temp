@@ -55,6 +55,7 @@ export const aboutJourneys: AboutJourney[] = [
       { slug: "adding-devices", label: "Add push or pull" },
       { slug: "ingest-and-webhooks", label: "Ingest API" },
       { slug: "kit-qr-onboarding", label: "Kit QR" },
+      { slug: "esp32-web-flash", label: "Flash ESP32" },
       { slug: "esp32-ota-firmware", label: "ESP32 OTA" },
     ],
   },

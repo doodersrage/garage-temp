@@ -4,13 +4,14 @@ Firmware samples live in the repo:
 
 **[`sketches/`](https://github.com/doodersrage/thermaltrace/tree/main/sketches)**
 
-Each sketch POSTs to your push-device ingest URL. Set Wi-Fi credentials and `INGEST_URL` (full URL including the device key) before flashing.
+Each sketch POSTs to your push-device ingest URL. On **Dashboard → Devices**, create a push device and use **Download Arduino .ino** / **MicroPython .py** (URL pre-filled). Or copy a sketch from this folder and set `INGEST_URL` yourself. Always set Wi-Fi credentials before flashing.
 
 ## Matrix
 
 | Path | Sensor | Stack |
 |------|--------|-------|
-| [`arduino/ds18b20_ingest`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ds18b20_ingest) | DS18B20 (1-Wire) | Arduino / ESP32 core |
+| [`arduino/ds18b20_ingest`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ds18b20_ingest) | DS18B20 (1-Wire) | Arduino / ESP32 (+ PlatformIO) |
+| [`arduino/ds18b20_wifimanager`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ds18b20_wifimanager) | DS18B20 + WiFiManager | Arduino / ESP32 |
 | [`arduino/max31855_ingest`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/max31855_ingest) | MAX31855 thermocouple | Arduino / ESP32 |
 | [`arduino/max6675_ingest`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/max6675_ingest) | MAX6675 thermocouple | Arduino / ESP32 |
 | [`micropython/ds18b20_ingest.py`](https://github.com/doodersrage/thermaltrace/blob/main/sketches/micropython/ds18b20_ingest.py) | DS18B20 | MicroPython ESP32 |
@@ -39,11 +40,11 @@ Add matching sensor keys on **Dashboard → Devices** after the first POST.
 
 ## Checklist
 
-1. Create push device; save key  
-2. Edit `WIFI_*` + `INGEST_URL`  
-3. Flash; watch serial for `POST 200`  
-4. Open Home on thermaltrace.dev  
-5. Set freeze alerts under Dashboard → Alerts  
+1. Create push device on Devices; download pre-filled sketch (or paste `INGEST_URL`)
+2. Edit `WIFI_*` only
+3. Flash ESP32; watch serial (115200) for `POST 200`
+4. Open Home on thermaltrace.dev
+5. Set freeze alerts under Dashboard → Alerts
 
 ## Full garage stack
 
