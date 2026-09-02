@@ -16,6 +16,11 @@ import garageInstallLifestyle from "../assets/thermaltrace-garage-install-lifest
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/android");
 const androidFaqs = getMarketingFaqs("android");
+
+const ANDROID_REPO = "https://github.com/doodersrage/thermaltrace-android";
+const playStoreUrl = String(import.meta.env.PUBLIC_PLAY_STORE_URL ?? "").trim();
+const playStoreLive = playStoreUrl.startsWith("https://play.google.com/");
+
 const software = getSoftwareApplicationSchema(siteUrl);
 const schema = [
   getBreadcrumbSchema(siteUrl, [
@@ -42,10 +47,6 @@ const schema = [
   },
   getMarketingFaqSchema(pageUrl, "android"),
 ].filter(Boolean) as Record<string, unknown>[];
-
-const ANDROID_REPO = "https://github.com/doodersrage/thermaltrace-android";
-const playStoreUrl = String(import.meta.env.PUBLIC_PLAY_STORE_URL ?? "").trim();
-const playStoreLive = playStoreUrl.startsWith("https://play.google.com/");
 
 const description = playStoreLive
   ? `${BRAND_NAME} Android companion on Google Play — live probes, freeze alerts, MFA, and household tools for your existing account. Phone is not a sensor.`
