@@ -114,7 +114,9 @@ const deviceNotice =
         : Astro.url.searchParams.get("sensor_deleted")
           ? "Sensor deleted."
           : Astro.url.searchParams.get("feeds_saved")
-            ? "Feed URLs saved."
+            ? Astro.url.searchParams.get("probes_discovered")
+              ? `Feed saved — imported ${Astro.url.searchParams.get("probes_discovered")} probe key(s). Rename below if needed.`
+              : "Feed URLs saved."
             : Astro.url.searchParams.get("probes_saved")
               ? "Probe labels saved."
               : Astro.url.searchParams.get("feed_deleted")
@@ -149,9 +151,14 @@ const pushDevices = devices.filter((d) => d.source === "push");
 const waitingPushDevices = pushDevices.filter(
   (d) => !d.last_seen_at && d.sensors.length > 0,
 );
+const waitingPushNoSensors = pushDevices.filter(
+  (d) => !d.last_seen_at && d.sensors.length === 0,
+);
 const neverSeenWithSensors = waitingPushDevices.length > 0;
 const showVerifyIngest =
-  Boolean(Astro.url.searchParams.get("sensor_added")) || neverSeenWithSensors;
+  Boolean(Astro.url.searchParams.get("sensor_added")) ||
+  neverSeenWithSensors ||
+  waitingPushNoSensors.length > 0;
 const showReceivingData =
   !showAddSensorNudge &&
   pushDevices.some((d) => Boolean(d.last_seen_at)) &&
@@ -347,20 +354,34 @@ const wizardStep =
         class="card ingest-waiting-callout"
         id="verify-ingest-step"
         data-waiting-ingest
-        data-waiting={neverSeenWithSensors ? "1" : "0"}
+        data-waiting={neverSeenWithSensors || waitingPushNoSensors.length > 0 ? "1" : "0"}
       >
         <h2 class="card-title">
-          {neverSeenWithSensors ? "Waiting for first POST" : "Next: verify ingest"}
+          {neverSeenWithSensors
+            ? "Waiting for first POST"
+            : waitingPushNoSensors.length > 0
+              ? "Waiting for first POST (auto-map sensors)"
+              : "Next: verify ingest"}
         </h2>
         <p class="card-subtitle mb-4">
-          Sensors are mapped. Point firmware at your ingest URL and POST JSON that includes the keys below.
-          This page checks for the first reading automatically.
+          {waitingPushNoSensors.length > 0 ? (
+            <>
+              No sensor keys mapped yet — that is OK. POST JSON to your ingest URL and ThermalTrace
+              will import keys automatically (SenML names, HA <code>friendly_name</code>, or flat keys
+              like <code>temp1</code>). Rename sensors afterward on the device card.
+            </>
+          ) : (
+            <>
+              Sensors are mapped. Point firmware at your ingest URL and POST JSON that includes the
+              keys below. This page checks for the first reading automatically.
+            </>
+          )}
         </p>
 
         <ol class="waiting-ingest-checklist mb-4">
           <li class="waiting-ingest-done">Push device created</li>
-          <li class="waiting-ingest-done">
-            Sensors mapped
+          <li class:list={[neverSeenWithSensors && "waiting-ingest-done", waitingPushNoSensors.length > 0 && "waiting-ingest-pending"]}>
+            {waitingPushNoSensors.length > 0 ? "Sensors auto-import on first POST" : "Sensors mapped"}
             {waitingKeyList.length > 0 && (
               <>
                 {" "}
@@ -376,7 +397,9 @@ const wizardStep =
           >
             First ingest POST
             <span class="waiting-ingest-status" data-waiting-status>
-              {neverSeenWithSensors ? " — listening…" : " — send a test POST"}
+              {neverSeenWithSensors || waitingPushNoSensors.length > 0
+                ? " — listening…"
+                : " — send a test POST"}
             </span>
           </li>
         </ol>
@@ -411,7 +434,7 @@ const wizardStep =
           </button>
         </div>
         <p class="mt-3 mb-0 text-sm text-[var(--color-text-muted)]" data-waiting-meta>
-          {neverSeenWithSensors
+          {neverSeenWithSensors || waitingPushNoSensors.length > 0
             ? "Auto-checking every 5 seconds while this page is open."
             : "Send a POST, then click Check now or refresh."}
         </p>
@@ -1005,7 +1028,7 @@ const wizardStep =
   </script>
 )}
 
-{!ingestKey && (Astro.url.searchParams.get("sensor_added") || neverSeenWithSensors) && (
+{!ingestKey && (Astro.url.searchParams.get("sensor_added") || neverSeenWithSensors || waitingPushNoSensors.length > 0) && (
   <script is:inline>
     (() => {
       document.getElementById("verify-ingest-step")?.scrollIntoView({
@@ -1016,7 +1039,7 @@ const wizardStep =
   </script>
 )}
 
-{neverSeenWithSensors && (
+{(neverSeenWithSensors || waitingPushNoSensors.length > 0) && (
   <script is:inline>
     (() => {
       const root = document.querySelector("[data-waiting-ingest]");

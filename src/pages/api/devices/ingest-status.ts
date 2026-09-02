@@ -29,11 +29,12 @@ export const GET: APIRoute = async ({ cookies }) => {
 
   const push = devices.filter((d) => d.source === "push");
   const waitingDevices = push
-    .filter((d) => !d.last_seen_at && d.sensors.length > 0)
+    .filter((d) => !d.last_seen_at)
     .map((d) => ({
       id: d.id,
       name: d.name,
       sensorKeys: d.sensors.map((s) => s.key),
+      autoMap: d.sensors.length === 0,
       lastSeenAt: d.last_seen_at,
     }));
 

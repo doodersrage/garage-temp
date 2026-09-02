@@ -13,6 +13,35 @@ export type TypedSensorValue = {
   unit?: string;
 };
 
+const FLAT_INGEST_SKIP = new Set([
+  "temp",
+  "sensors",
+  "battery",
+  "battery_pct",
+  "rssi",
+  "meta",
+  "e",
+  "records",
+]);
+
+function appendFlatIngestKeys(
+  body: Record<string, unknown>,
+  typed: TypedSensorValue[],
+): void {
+  if (body.temp || Array.isArray(body.sensors)) return;
+
+  for (const [key, value] of Object.entries(body)) {
+    if (FLAT_INGEST_SKIP.has(key)) continue;
+    if (typeof value === "number" && Number.isFinite(value)) {
+      typed.push({ key, value, kind: inferSensorKind(key, { key, value }) });
+      continue;
+    }
+    if (typeof value === "boolean") {
+      typed.push({ key, bool: value, kind: inferSensorKind(key, { key, bool: value }) });
+    }
+  }
+}
+
 export function parseIngestPayload(payload: unknown): {
   tempProbes: Record<string, TempReading>;
   typed: TypedSensorValue[];
@@ -61,6 +90,8 @@ export function parseIngestPayload(payload: unknown): {
       return { tempProbes: standard.tempProbes, typed: standard.typed };
     }
   }
+
+  appendFlatIngestKeys(body, typed);
 
   return { tempProbes, typed };
 }

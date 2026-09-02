@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   discoverFeedProbes,
+  discoverIngestPayload,
   mergeDiscoveredProbes,
 } from "./feedDiscovery";
 
@@ -33,6 +34,27 @@ describe("discoverFeedProbes", () => {
     expect(result.format).toBe("homeassistant");
     expect(result.probes[0]?.key).toBe("state");
     expect(result.probes[0]?.suggestedLabel).toBe("Garage north wall");
+  });
+
+  it("uses friendly_name per entity in multi-entity HA payloads", () => {
+    const result = discoverFeedProbes({
+      "sensor.garage_temp": {
+        state: "65.3",
+        attributes: { unit_of_measurement: "°F", friendly_name: "Garage temp" },
+      },
+      "sensor.garage_humidity": {
+        state: "42",
+        attributes: { unit_of_measurement: "%", friendly_name: "Garage humidity" },
+      },
+    });
+
+    expect(result.format).toBe("homeassistant");
+    expect(result.probes.find((probe) => probe.key === "garage_temp")?.suggestedLabel).toBe(
+      "Garage temp",
+    );
+    expect(result.probes.find((probe) => probe.key === "garage_humidity")?.suggestedLabel).toBe(
+      "Garage humidity",
+    );
   });
 
   it("discovers SenML probe keys", () => {
@@ -83,5 +105,55 @@ describe("mergeDiscoveredProbes", () => {
 
     expect(merged.find((probe) => probe.key === "0")?.label).toBe("North wall");
     expect(merged.find((probe) => probe.key === "1")?.label).toBe("Probe 1");
+  });
+});
+
+describe("discoverIngestPayload", () => {
+  it("discovers classic temp probes with humidity siblings", () => {
+    const discovered = discoverIngestPayload({
+      temp: {
+        "0": { f: 65, c: 18.3, h: 40 },
+      },
+    });
+
+    expect(discovered).toEqual([
+      expect.objectContaining({
+        key: "0",
+        label: "Probe 0",
+        kind: "temperature",
+        withHumiditySibling: true,
+      }),
+    ]);
+  });
+
+  it("discovers flat numeric ingest keys", () => {
+    const discovered = discoverIngestPayload({
+      temp1: 65.2,
+      door1: true,
+    });
+
+    expect(discovered).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: "temp1", kind: "temperature", label: "Temp1" }),
+        expect.objectContaining({ key: "door1", kind: "door" }),
+      ]),
+    );
+  });
+
+  it("uses HA friendly_name labels for push ingest", () => {
+    const discovered = discoverIngestPayload({
+      "sensor.garage_temp": {
+        state: "65.3",
+        attributes: { unit_of_measurement: "°F", friendly_name: "Garage wall" },
+      },
+    });
+
+    expect(discovered).toEqual([
+      expect.objectContaining({
+        key: "garage_temp",
+        label: "Garage wall",
+        kind: "temperature",
+      }),
+    ]);
   });
 });

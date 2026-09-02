@@ -11,6 +11,11 @@ import {
   parseIngestPayload,
 } from "../../../lib/ingestPayload";
 import { parseTempFeedPayload } from "../../../lib/tempFeedConfig";
+import { discoverIngestPayload } from "../../../lib/feedDiscovery";
+import {
+  ensureDiscoveredPushSensors,
+  labelForPushSensorKey,
+} from "../../../lib/pushSensorDiscovery";
 import {
   checkIngestRateLimit,
   readJsonBodyWithLimit,
@@ -84,6 +89,16 @@ export const POST: APIRoute = async ({ params, request }) => {
   }
 
   const payload = body.payload;
+  const discovered = discoverIngestPayload(payload);
+  const sensorSync = await ensureDiscoveredPushSensors(
+    device.id,
+    discovered,
+    device.sensors,
+  );
+  if (sensorSync.error) {
+    console.error("Push sensor discovery failed:", sensorSync.error);
+  }
+
   const { tempProbes, typed } = parseIngestPayload(payload);
   const recordedAt = new Date().toISOString();
   const rows = [];
@@ -101,17 +116,21 @@ export const POST: APIRoute = async ({ params, request }) => {
         })();
 
   for (const [key, reading] of Object.entries(classic)) {
+    const tempLabel =
+      labelForPushSensorKey(discovered, key, "temperature") ?? `Probe ${key}`;
+    const humidityLabel =
+      labelForPushSensorKey(discovered, key, "humidity") ?? `Probe ${key} humidity`;
     const temp = await upsertDeviceSensor(
       device.id,
       key,
-      `Probe ${key}`,
+      tempLabel,
       "temperature",
       "F",
     );
     const humidity = await upsertDeviceSensor(
       device.id,
       key,
-      `Probe ${key} humidity`,
+      humidityLabel,
       "humidity",
       "%",
     );
@@ -138,10 +157,12 @@ export const POST: APIRoute = async ({ params, request }) => {
 
   for (const item of typed) {
     const kind = inferSensorKind(item.key, item);
+    const label =
+      item.label ?? labelForPushSensorKey(discovered, item.key, kind) ?? item.key;
     const sensor = await upsertDeviceSensor(
       device.id,
       item.key,
-      item.label ?? item.key,
+      label,
       kind,
       item.unit ?? null,
     );
@@ -288,7 +309,11 @@ export const POST: APIRoute = async ({ params, request }) => {
 
   return finish(
     new Response(
-      JSON.stringify({ ok: true, readings: rows.length }),
+      JSON.stringify({
+        ok: true,
+        readings: rows.length,
+        sensors_created: sensorSync.created,
+      }),
       {
         status: 200,
         headers: { "Content-Type": "application/json" },

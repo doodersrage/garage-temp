@@ -23,11 +23,15 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   if (blocked) return blocked;
   const tempFeeds = parseTempFeedsFromFormData(formData);
 
-  const { error } = await saveUserTempFeeds(user.id, tempFeeds);
+  const { error, discoveredProbes } = await saveUserTempFeeds(user.id, tempFeeds);
 
   if (error) {
     return redirect(`${redirectTo}?feeds_error=1`);
   }
 
-  return redirect(`${redirectTo}?feeds_saved=1`);
+  const query =
+    discoveredProbes && discoveredProbes > 0
+      ? `feeds_saved=1&probes_discovered=${discoveredProbes}`
+      : "feeds_saved=1";
+  return redirect(`${redirectTo}?${query}`);
 };

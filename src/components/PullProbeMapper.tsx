@@ -1,4 +1,4 @@
-import { useMemo, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import type { TempFeedConfig, TempProbeConfig } from "../lib/tempFeedConfig";
 import { mergeDiscoveredProbes, type DiscoveredProbe } from "../lib/feedDiscovery";
 
@@ -45,6 +45,7 @@ export default function PullProbeMapper({
     () => feeds.filter((feed) => Boolean(feed.url)),
     [feeds],
   );
+  const autoDiscoverStarted = useRef(false);
 
   function readFeedFormValues(
     feed: TempFeedConfig,
@@ -65,6 +66,56 @@ export default function PullProbeMapper({
     }
     return { url: feed.url, jsonRoot: feed.jsonRoot || "temp", rootInput: null };
   }
+
+  useEffect(() => {
+    if (autoDiscoverStarted.current || feedsWithUrls.length === 0) return;
+    autoDiscoverStarted.current = true;
+
+    const params = new URLSearchParams(window.location.search);
+    const justSavedFeeds = params.get("feeds_saved") === "1";
+    const serverDiscovered = Number(params.get("probes_discovered") ?? "0") > 0;
+    if (serverDiscovered) return;
+
+    const needsDiscovery = feedsWithUrls.filter(
+      (feed) => justSavedFeeds || !initialProbes.some((probe) => probe.feedId === feed.id),
+    );
+
+    if (needsDiscovery.length === 0) return;
+
+    void (async () => {
+      let merged = initialProbes.filter((probe) => Boolean(probe.key));
+      for (const feed of needsDiscovery) {
+        const { url, jsonRoot, rootInput } = readFeedFormValues(feed);
+        if (!url) continue;
+        setLoadingFeedId(feed.id);
+        try {
+          const response = await fetch("/api/feeds/test", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url, jsonRoot }),
+          });
+          const data = (await response.json()) as DiscoverResponse;
+          if (!data.ok || !data.probes?.length) continue;
+          if (rootInput && data.jsonRoot && data.jsonRoot !== jsonRoot) {
+            rootInput.value = data.jsonRoot;
+          }
+          merged = mergeDiscoveredProbes(
+            merged,
+            feed.id,
+            data.probes as DiscoveredProbe[],
+          );
+        } catch {
+          // Ignore unreachable feeds during auto-setup.
+        } finally {
+          setLoadingFeedId(null);
+        }
+      }
+      if (merged.length > initialProbes.length) {
+        setProbes(merged);
+        setStatus("Imported probe keys from your feed — rename below, then save.");
+      }
+    })();
+  }, [feedsWithUrls, initialProbes]);
 
   async function discoverFeed(feed: TempFeedConfig) {
     const { url, jsonRoot, rootInput } = readFeedFormValues(feed);
@@ -262,7 +313,9 @@ export default function PullProbeMapper({
         </div>
       ) : (
         <p class="mb-0 text-sm text-[var(--color-text-muted)]">
-          Click <strong>Discover from feed</strong> to import probe keys with live readings.
+          {loadingFeedId
+            ? "Reading feed and importing probe keys…"
+            : "Save a feed URL to auto-import keys, or click Discover from feed."}
         </p>
       )}
 

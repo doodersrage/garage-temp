@@ -5,8 +5,11 @@ import {
   parseSenMLPayload,
   senmlNameToProbeKey,
 } from "./feedFormats";
+import { inferSensorKind, parseIngestPayload } from "./ingestPayload";
+import type { SensorKind } from "./sensorKinds";
 import type { TempProbeConfig } from "./tempFeedConfig";
-import { parseTempFeedPayload, sanitizeJsonRoot } from "./tempFeedConfig";
+import { parseTempFeedPayload, sanitizeJsonRoot, type TempFeedConfig } from "./tempFeedConfig";
+import type { DiscoveredPushSensor } from "./pushSensorDiscovery";
 
 export type DiscoveredProbe = {
   key: string;
@@ -90,7 +93,13 @@ function extractHomeAssistantLabelHints(payload: unknown): Map<string, string> {
       entity.attributes && typeof entity.attributes === "object"
         ? (entity.attributes as Record<string, unknown>)
         : {};
-    if (typeof attributes.friendly_name !== "string") continue;
+    if (typeof attributes.friendly_name !== "string") {
+      const probeKey = entityKey.includes(".")
+        ? entityKey.split(".").slice(1).join("_")
+        : entityKey;
+      hints.set(probeKey, humanizeProbeKey(probeKey));
+      continue;
+    }
     const probeKey = entityKey.includes(".")
       ? entityKey.split(".").slice(1).join("_")
       : entityKey;
@@ -211,4 +220,97 @@ export function formatProbeReading(probe: DiscoveredProbe): string {
     parts.push(`${probe.humidity.toFixed(0)}% RH`);
   }
   return parts.length > 0 ? parts.join(" · ") : "—";
+}
+
+function ingestLabelHints(payload: unknown): Map<string, string> {
+  return new Map([
+    ...extractSenMLLabelHints(payload),
+    ...extractHomeAssistantLabelHints(payload),
+  ]);
+}
+
+/** Discover push-ingest sensors with suggested labels (temp pairs, typed, flat keys). */
+export function discoverIngestPayload(payload: unknown): DiscoveredPushSensor[] {
+  const { tempProbes, typed } = parseIngestPayload(payload);
+  const hints = ingestLabelHints(payload);
+  const discovered: DiscoveredPushSensor[] = [];
+  const seen = new Set<string>();
+
+  for (const [key, reading] of Object.entries(tempProbes)) {
+    const label = hints.get(key) ?? humanizeProbeKey(key);
+    discovered.push({
+      key,
+      label,
+      kind: "temperature",
+      visible: defaultVisibleForKey(key),
+      withHumiditySibling: key !== "avg",
+    });
+    seen.add(`${key}::temperature`);
+  }
+
+  for (const item of typed) {
+    const kind = inferSensorKind(item.key, item);
+    const dedupeKey = `${item.key}::${kind}`;
+    if (seen.has(dedupeKey)) continue;
+    if (kind === "humidity" && seen.has(`${item.key}::temperature`)) continue;
+
+    discovered.push({
+      key: item.key,
+      label: item.label ?? hints.get(item.key) ?? humanizeProbeKey(item.key),
+      kind,
+      unit: item.unit ?? null,
+      visible: true,
+    });
+    seen.add(dedupeKey);
+  }
+
+  return discovered;
+}
+
+/** Fetch a pull feed URL and return discovered probe keys + labels. */
+export async function discoverProbesFromFeedUrl(
+  url: string,
+  jsonRoot?: string,
+): Promise<FeedDiscoveryResult> {
+  const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!response.ok) {
+    throw new Error(`Feed request failed (${response.status})`);
+  }
+  const payload = await response.json();
+  return discoverFeedProbes(payload, jsonRoot);
+}
+
+/** Merge live feed probes into saved config; updates JSON root when auto-detected. */
+export async function discoverAndMergeFeedProbes(
+  feeds: TempFeedConfig[],
+  probes: TempProbeConfig[],
+): Promise<{ feeds: TempFeedConfig[]; probes: TempProbeConfig[]; discovered: number }> {
+  let nextFeeds = feeds;
+  let nextProbes = probes;
+  let discovered = 0;
+
+  for (let index = 0; index < nextFeeds.length; index += 1) {
+    const feed = nextFeeds[index]!;
+    if (!feed.url || !feed.enabled) continue;
+
+    try {
+      const result = await discoverProbesFromFeedUrl(feed.url, feed.jsonRoot);
+      if (result.probes.length === 0) continue;
+
+      const before = nextProbes.filter((probe) => probe.feedId === feed.id).length;
+      nextProbes = mergeDiscoveredProbes(nextProbes, feed.id, result.probes);
+      const after = nextProbes.filter((probe) => probe.feedId === feed.id).length;
+      discovered += Math.max(0, after - before);
+
+      if (result.jsonRoot && result.jsonRoot !== sanitizeJsonRoot(feed.jsonRoot)) {
+        nextFeeds = nextFeeds.map((row, rowIndex) =>
+          rowIndex === index ? { ...row, jsonRoot: result.jsonRoot } : row,
+        );
+      }
+    } catch {
+      // Keep manual setup when the feed is unreachable during save.
+    }
+  }
+
+  return { feeds: nextFeeds, probes: nextProbes, discovered };
 }

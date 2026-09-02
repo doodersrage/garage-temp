@@ -9,6 +9,7 @@ import {
   sanitizeTempFeeds,
   sanitizeTempProbes,
 } from "./tempFeedConfig";
+import { discoverAndMergeFeedProbes } from "./feedDiscovery";
 
 type TempConfigRow = {
   feeds: TempFeedConfig[];
@@ -410,7 +411,7 @@ async function getCurrentTempConfig(userId: string): Promise<TempConfigRow> {
 export async function saveUserTempFeeds(
   userId: string,
   feeds: TempFeedConfig[],
-): Promise<{ error: Error | null }> {
+): Promise<{ error: Error | null; discoveredProbes?: number }> {
   const current = await getCurrentTempConfig(userId);
   const sanitizedFeeds = sanitizeTempFeeds(feeds.length > 0 ? feeds : getDefaultTempFeeds());
   const sanitizedProbes = sanitizeTempProbes(
@@ -420,7 +421,14 @@ export async function saveUserTempFeeds(
     sanitizedFeeds,
   );
 
-  return saveUserTempConfig(userId, sanitizedFeeds, sanitizedProbes);
+  const { feeds: mergedFeeds, probes: mergedProbes, discovered } =
+    await discoverAndMergeFeedProbes(sanitizedFeeds, sanitizedProbes);
+
+  const result = await saveUserTempConfig(userId, mergedFeeds, mergedProbes);
+  if (result.error) {
+    return result;
+  }
+  return { error: null, discoveredProbes: discovered };
 }
 
 export async function saveUserTempProbes(
