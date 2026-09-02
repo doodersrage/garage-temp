@@ -4,12 +4,11 @@ test.describe("public smoke", () => {
   test("home page loads", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(/ThermalTrace/i);
-    await expect(
-      page.getByText(/Built for homeowners, hobbyists, and makers with ESP32, Arduino, or any HTTPS JSON probe/i),
-    ).toBeVisible();
+    await expect(page.getByText(/Garage & workshop sensor monitoring/i)).toBeVisible();
+    await expect(page.getByText(/Know before your pipes freeze/i)).toBeVisible();
     await expect(page.getByRole("link", { name: /Free forever/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Install the web app/i })).toBeVisible();
-    await expect(page.getByText(/automatic leak alerts when a flood sensor is wet/i)).toBeVisible();
+    await expect(page.getByText(/Freeze and leak alerts on every plan/i)).toBeVisible();
     await expect(page.getByRole("link", { name: /Open the guides hub/i })).toBeVisible();
     const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
     expect(jsonLd.some((block) => block.includes('"FAQPage"'))).toBe(true);

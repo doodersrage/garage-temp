@@ -16,6 +16,8 @@ interface Props {
   class?: string;
   /** Tighter framing for side-by-side layouts. */
   compact?: boolean;
+  /** Short crop so pages don’t bury CTAs under a full screenshot. */
+  peek?: boolean;
 }
 
 type ShotMeta = { image: ImageMetadata; alt: string; defaultCaption: string };
@@ -58,16 +60,16 @@ const shots: Record<ProductShotId, ShotMeta> = {
   },
 };
 
-const { shot, caption, class: className, compact = false } = Astro.props;
+const { shot, caption, class: className, compact = false, peek = false } = Astro.props;
 const item = shots[shot];
 const captionText = caption ?? item.defaultCaption;
 ---
-<figure class:list={["product-shot", compact && "product-shot--compact", className]}>
+<figure class:list={["product-shot", compact && "product-shot--compact", peek && "product-shot--peek", className]}>
   <Image
     src={item.image}
     alt={item.alt}
-    widths={compact ? [400, 640, 800] : [480, 768, 1024, 1200]}
-    sizes={compact ? "(max-width: 767px) 100vw, 360px" : "(max-width: 767px) 100vw, 720px"}
+    widths={compact || peek ? [400, 640, 800] : [480, 768, 1024, 1200]}
+    sizes={compact || peek ? "(max-width: 767px) 100vw, 420px" : "(max-width: 767px) 100vw, 720px"}
     class="product-shot-img"
   />
   <figcaption class="product-shot-caption">{captionText}</figcaption>

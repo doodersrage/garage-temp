@@ -1104,6 +1104,22 @@
     height: auto;
   }
 
+  .product-shot--peek {
+    max-width: 36rem;
+  }
+
+  .product-shot--peek .product-shot-img {
+    max-height: 11.5rem;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  @media (min-width: 768px) {
+    .product-shot--peek .product-shot-img {
+      max-height: 13rem;
+    }
+  }
+
   .product-shot-caption {
     margin: 0;
     padding: 0.65rem 0.85rem 0.8rem;
