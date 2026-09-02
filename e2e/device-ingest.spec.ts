@@ -47,9 +47,12 @@ test.describe("device ingest", () => {
       // Always remove the device this test created, even if an assertion above failed.
       page.once("dialog", (dialog) => dialog.accept());
       const deleteButton = page
-        .locator("form", { has: page.locator(`input[name="device_id"][value="${deviceId}"]`) })
-        .filter({ has: page.getByRole("button", { name: "Delete" }) })
-        .getByRole("button", { name: "Delete" });
+        .locator('form[action="/api/devices"]', {
+          has: page.locator(`input[name="device_id"][value="${deviceId}"]`),
+        })
+        .filter({ has: page.locator('input[name="action"][value="delete"]') })
+        .getByRole("button", { name: "Delete" })
+        .first();
       if (await deleteButton.count()) {
         await deleteButton.click();
         await page.waitForLoadState("networkidle").catch(() => {});
