@@ -748,13 +748,13 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
   "cold-snap-playbook": [
       { type: "p", html: "A freeze alert only helps if someone knows what to do next. This playbook covers the night before a cold snap, the moment an alert fires, and the morning after—so ThermalTrace becomes a response loop, not just a chart." },
       { type: "h2", text: "Before the cold snap" },
-      { type: "ol", items: ["Confirm the <a class=\"text-link\" href=\"/about/freeze-protection-thresholds\">freeze threshold</a> matches your coldest zone (often a few degrees above hard freeze).","Enable email (and Pro SMS/push if you have them) in the <a class=\"text-link\" href=\"/about/alert-channel-cookbook\">channel cookbook</a>.","Turn on forecast / NWS freeze inputs so you get warning before indoor air drops.","Send a <strong>test alert</strong> from Dashboard → Alerts while you are awake."] },
+      { type: "ol", items: ["Confirm the <a class=\"text-link\" href=\"/about/freeze-protection-thresholds\">freeze threshold</a> matches your coldest zone (often a few degrees above hard freeze).","Enable email under <a class=\"text-link\" href=\"/dashboard/alerts#alert-section-essentials\">Alerts → Essentials</a> (and Pro SMS/push if you have them) — see the <a class=\"text-link\" href=\"/about/alert-channel-cookbook\">channel cookbook</a>.","Turn on forecast / NWS freeze inputs so you get warning before indoor air drops.","Send a <strong>test alert</strong> from Essentials or Devices while you are awake."] },
       { type: "h2", text: "When an alert fires" },
       { type: "ul", items: ["**Acknowledge** it (“I’m on it”) so escalations pause if you use playbooks.","Check the coldest probe and whether a door has been open.","If you cannot respond, escalate to SMS/household members.","Keep quiet-hours bypass on for freeze/forecast so overnight alerts still arrive."] },
       { type: "h2", text: "After the snap" },
       { type: "p", html: "Review history for overnight lows, adjust the threshold if you were warned too late or too often, and read the <a class=\"text-link\" href=\"/about/temperature-probe-case-study\">probe case study</a> for placement lessons. Invite family with the <a class=\"text-link\" href=\"/about/household-sharing-walkthrough\">household sharing walkthrough</a> so one person is not the only responder." },
       { type: "h2", text: "Product checklist" },
-      { type: "ul", items: ["Dashboard → Alerts → Triggers + Channels","Dashboard → Alerts → Send a test now","Optional: playbook steps if unacked after N minutes","Optional: household invites for shared coverage"] }
+      { type: "ul", items: ["Dashboard → Alerts → Essentials (freeze °F + email)","Dashboard → Alerts → Send a test now","Optional: playbook steps if unacked after N minutes","Optional: household invites + free family live share link"] }
   ],
 
   "alert-channel-cookbook": [
@@ -762,7 +762,7 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
       { type: "h2", text: "Free vs Pro channels" },
       { type: "ul", items: ["**Free:** email, Discord, Telegram, Slack, Teams, ntfy, Pushover.","**Pro:** SMS, WhatsApp, browser push, outbound webhooks, timed playbooks."] },
       { type: "h2", text: "Setup pattern" },
-      { type: "ol", items: ["Check the channel under Dashboard → Alerts → Channels.","Fill its destination (email, phone, webhook URL, chat id).","Save alert settings.","Click <strong>Send test now</strong> and confirm delivery.","Add a second channel for escalation if the first is ignored."] },
+      { type: "ol", items: ["Start with <strong>Alerts → Essentials</strong> — freeze °F + email — then open advanced channels if you need chat apps.","Fill each destination (email, phone, webhook URL, chat id).","Save alert settings.","Click <strong>Send test now</strong> and confirm delivery.","Add a second channel for escalation if the first is ignored."] },
       { type: "h2", text: "Skipped channels" },
       { type: "p", html: "A checked channel with an empty destination is skipped when alerts fire. The save flow warns when destinations are incomplete—fix them before trusting overnight coverage. For automation into Zapier or Make, see <a class=\"text-link\" href=\"/about/zapier-make-recipes\">Zapier and Make recipes</a>." },
       { type: "h2", text: "Suggested starter stack" },
@@ -770,21 +770,23 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
   ],
 
   "household-sharing-walkthrough": [
-      { type: "p", html: "Freeze risk is a household problem. ThermalTrace lets you invite people by email so everyone sees the same probes and alerts without sharing a single login password." },
+      { type: "p", html: "Freeze risk is a household problem. ThermalTrace lets you invite people by email so everyone sees the same probes and alerts without sharing a single login password — and Free includes one family live share link for people who do not want an account." },
       { type: "h2", text: "Invite flow" },
       { type: "ol", items: ["Open Dashboard → Household.","Enter the invitee email and send the invite.","They create or sign into an account with that email and accept.","Confirm they appear under Members with the intended role."] },
+      { type: "h2", text: "Family live share link" },
+      { type: "ol", items: ["Open <a class=\"text-link\" href=\"/dashboard/share/links\">Dashboard → Share → Links</a>.","Create a <strong>family live</strong> link (included on Free).","Send the URL to anyone who should watch live temps without signing in.","Pro unlocks broader scopes (history/metrics) and guest expiries."] },
       { type: "h2", text: "Roles" },
       { type: "ul", items: ["**Owner / editor:** change devices, alerts, and sharing.","**View-only:** watch live data and history without changing settings."] },
       { type: "h2", text: "Tips" },
       { type: "p", html: "Keep alert destinations on channels the household actually checks. Pair sharing with the <a class=\"text-link\" href=\"/about/cold-snap-playbook\">cold-snap playbook</a> so the first person awake knows what to do. Groups and plan gating are covered in <a class=\"text-link\" href=\"/about/group-membership-model\">group membership model</a>." },
       { type: "h2", text: "Multiple properties" },
-      { type: "p", html: "Pro portfolios can watch more than one property. Start with a single household garage, prove alerts, then expand—see <a class=\"text-link\" href=\"/pricing\">pricing</a> for portfolio limits." }
+      { type: "p", html: "Pro portfolios can watch more than one property. Start with a single household space, prove alerts, then expand—see <a class=\"text-link\" href=\"/pricing\">pricing</a> for portfolio limits." }
   ],
 
   "esphome-shelly-recipes": [
       { type: "p", html: "Many garages already run <strong>ESPHome</strong> or <strong>Shelly</strong> modules for lights, doors, and climate. You do not need a custom Arduino sketch to feed ThermalTrace — POST the same typed <code>sensors[]</code> JSON the ingest API accepts from any HTTPS client on your LAN." },
       { type: "h2", text: "Before you wire YAML" },
-      { type: "ol", items: ["Create a <strong>push device</strong> under <a class=\"text-link\" href=\"/dashboard/temperature\">Dashboard → Devices</a> and copy the ingest URL.","Send one test POST (curl or firmware) and map keys when readings appear.","Keep Mosquitto local if you want — see <a class=\"text-link\" href=\"/about/adding-devices\">MQTT bridge</a> or the <a class=\"text-link\" href=\"/integrations/home-assistant\">HACS integration</a> for dual-run."] },
+      { type: "ol", items: ["Create a <strong>push device</strong> under <a class=\"text-link\" href=\"/dashboard/temperature\">Dashboard → Devices</a> (one click) and copy the ingest URL.","Send one test POST (curl or firmware) — keys auto-import; rename later if you want.","Keep Mosquitto local if you want — see <a class=\"text-link\" href=\"/about/adding-devices\">MQTT bridge</a> or the <a class=\"text-link\" href=\"/integrations/home-assistant\">HACS integration</a> for dual-run."] },
       { type: "h2", text: "ESPHome pattern" },
       { type: "p", html: "Enable the <code>http_request</code> component, poll your DHT/BME probe on an interval, and POST a JSON body with <code>temperature</code> and <code>humidity</code> kinds. Store the ingest URL in <code>secrets.yaml</code> — never commit the device key." },
       { type: "pre", code: "# secrets.yaml\nthermaltrace_ingest_url: https://thermaltrace.dev/api/ingest/YOUR_DEVICE_KEY\n\n# interval action (simplified)\n# POST {\"sensors\":[\n#   {\"key\":\"garage_temp\",\"kind\":\"temperature\",\"value\":42.1,\"unit\":\"F\"},\n#   {\"key\":\"garage_rh\",\"kind\":\"humidity\",\"value\":38,\"unit\":\"%\"}\n# ]}" },

@@ -184,14 +184,14 @@ export function coldestProbeTempF(probes: DemoProbe[]): number | null {
   return Math.min(...probes.map((probe) => probe.reading.f));
 }
 
-/** Pull-feed shape used by the example weather JSON and Devices → pull. */
+/** Pull-feed shape: nested under `temp`, keyed by the same names shown on the probe cards. */
 export function buildDemoFeedJson(probes: DemoProbe[], average: DemoProbeReading): string {
   const temp: Record<string, DemoProbeReading> = {
     avg: average,
   };
 
   for (const probe of probes) {
-    temp[probe.key] = probe.reading;
+    temp[probe.ingestKey] = probe.reading;
   }
 
   return JSON.stringify({ temp }, null, 2);

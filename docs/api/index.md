@@ -27,7 +27,7 @@ Machine-readable contract:
 | `GET` | `/api/v1/devices` | Bearer API key | List household devices |
 | `POST` | `/api/v1/devices` | Bearer API key | Create push device |
 | `POST` | `/api/inbound/{token}` | Token (+ optional HMAC) | Snooze / vacation / status actions |
-| `GET` | `/api/share/{token}/readings` | Share token | Public JSON readings |
+| `GET` | `/api/share/{token}/readings` | Share token | Public JSON readings (Free family live; Pro expands scopes) |
 
 ## Create an API key (Pro)
 

@@ -5,21 +5,24 @@ import { getAboutPhoto, type AboutPhotoId } from "../lib/aboutPhotos";
 interface Props {
   photoId: AboutPhotoId;
   class?: string;
+  /** Compact side-rail figure for hero layouts. */
+  variant?: "default" | "aside";
 }
 
-const { photoId, class: className } = Astro.props;
+const { photoId, class: className, variant = "default" } = Astro.props;
 const photo = getAboutPhoto(photoId);
+const isAside = variant === "aside";
 ---
-<figure class:list={["about-figure", className]}>
+<figure class:list={["about-figure", isAside && "about-figure--aside", className]}>
   <Image
     src={photo.image}
     alt={photo.alt}
-    widths={[480, 768, 1024]}
-    sizes="(max-width: 768px) 100vw, 640px"
-    class="w-full h-auto"
+    widths={isAside ? [320, 480, 640] : [480, 768, 1024]}
+    sizes={isAside ? "(max-width: 900px) 100vw, 280px" : "(max-width: 768px) 100vw, 640px"}
+    class={isAside ? "about-figure-aside-img" : "w-full h-auto"}
   />
   <figcaption>
-    <span class="about-figure-caption">{photo.caption}</span>
+    {!isAside && <span class="about-figure-caption">{photo.caption}</span>}
     <a class="about-figure-credit" href={photo.sourceUrl} rel="noopener noreferrer" target="_blank">
       {photo.credit}
     </a>

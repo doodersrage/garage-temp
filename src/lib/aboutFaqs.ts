@@ -135,7 +135,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "What should I configure after creating an account?",
       answer:
-        "Add a device, map probes, set freeze thresholds, pick alert channels, invite household members, and optionally start a Pro trial for SMS or share links.",
+        "Create a push device (Workshop probe by default), POST so sensors auto-import, set freeze °F + email under Alerts → Essentials (or inline on Devices after first ingest), invite household members, and optionally share a free family live link. Start a Pro trial when you need SMS, push, or expanded share scopes.",
     },
   ],
   "ingest-and-webhooks": [
@@ -234,7 +234,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "What is the difference between push and pull JSON?",
       answer:
-        "Push ingest is a flat object ESP/Arduino POSTs to /api/ingest/<key>. Pull feed nests readings under temp (keys 0, 1, 2, avg) for scheduled HTTPS JSON — including the one-click demo feed.",
+        "Push ingest is a flat object ESP/Arduino POSTs to /api/ingest/<key>. Pull feed nests the same named probes under temp (for example north_wall, door_zone, workbench, plus avg) for scheduled HTTPS JSON.",
     },
     {
       question: "Does space status match the dashboard?",

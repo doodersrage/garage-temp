@@ -48,7 +48,7 @@ const schema = [
 ---
 <Layout
   title="Freeze season probe watch"
-  description="Set freeze alerts before the cold snap. Live community freeze map, ESP probe ingest, and SMS/email when indoor temps drop toward 32°F."
+  description="Set freeze alerts before the cold snap. Live community freeze map, ESP probe ingest, and email (SMS on Pro) when indoor temps drop toward 32°F."
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede"]}
 >
@@ -58,8 +58,8 @@ const schema = [
       title={seasonLabel}
       lede="Pipe freezes happen in spaces you do not walk through every hour. Put a probe where the water is, set a threshold a few degrees above 32°F, and get alerted before damage."
     >
-      <a slot="actions" class="btn-primary" href={user ? "/dashboard/alerts" : "/register?next=/dashboard/alerts"}>
-        {user ? "Open alert settings" : "Start free — set alerts"}
+      <a slot="actions" class="btn-primary" href={user ? "/dashboard/alerts#alert-section-essentials" : "/register?next=/dashboard/temperature"}>
+        {user ? "Open alert essentials" : "Start free — connect a probe"}
       </a>
       <a slot="actions" class="btn-secondary" href="/freeze-map">Community freeze map</a>
     </PageHeader>

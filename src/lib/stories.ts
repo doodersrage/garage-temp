@@ -59,7 +59,7 @@ export const stories: Story[] = [
     headline: "Cabin winter watch case study",
     title: "Weekend cabin, weekday peace of mind",
     description:
-      "How a Vermont cabin owner used ThermalTrace email and push alerts to catch a furnace outage mid-week before pipes froze in an empty house.",
+      "How a Vermont cabin owner used ThermalTrace email and Pro push alerts to catch a furnace outage mid-week before pipes froze in an empty house.",
     quote: "The cabin texted us from three hours away",
     location: "Stowe, VT",
     datePublished: "2025-12-12",
@@ -67,7 +67,7 @@ export const stories: Story[] = [
     photoId: "snow-cabins",
     setup: [
       "Wi-Fi ESP8266 near the mechanical room, two probes (indoor + crawlspace)",
-      "Member plan with email + PWA push; freeze threshold 36°F",
+      "Pro plan with email + browser push; freeze threshold 36°F",
       "Household invite for a local friend as backup responder",
     ],
     timeline: [
@@ -81,7 +81,7 @@ export const stories: Story[] = [
       {
         question: "Do you need SMS for a cabin?",
         answer:
-          "Email and push were enough here because someone could respond within two hours. SMS helps when you’re offline hiking.",
+          "Email and Pro browser push were enough here because someone could respond within two hours. SMS helps when you’re offline hiking.",
       },
       {
         question: "How many probes?",

@@ -328,8 +328,8 @@ export default function ProbeDemo() {
       <section class="card">
         <h2 class="card-title">JSON feed preview</h2>
         <p class="card-subtitle mb-3">
-          Push ingest is what ESP/Arduino POST to Devices. Pull is the HTTPS JSON shape used by the
-          demo feed and scheduled pulls.
+          Push ingest is what ESP/Arduino POST to Devices. Pull nests the same named probes under
+          <code>temp</code> for scheduled HTTPS JSON.
         </p>
         <div class="probe-demo-json-tabs" role="tablist" aria-label="JSON format">
           <button

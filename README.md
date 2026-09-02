@@ -29,7 +29,7 @@ Runs in production at [thermaltrace.dev](https://thermaltrace.dev) with 15-minut
 
 ThermalTrace connects probes in a garage, workshop, attic, or similar space, compares them with outdoor weather, keeps history you can chart and export, and alerts you when something goes wrong — freeze risk, a wet leak sensor, humidity spikes, silent feeds, or a custom rule you define.
 
-**Pull** HTTPS JSON from a local probe server, or **push** from ESP/Arduino to a per-device ingest URL. Households share devices, invite family (including read-only viewers), and on Pro publish share links, metrics, and automation webhooks.
+**Pull** HTTPS JSON from a local probe server, or **push** from ESP/Arduino to a per-device ingest URL. Households share devices, invite family (including read-only viewers), and publish a free family live share link — Pro adds expanded share scopes, metrics API keys, and automation webhooks.
 
 ## Features
 
@@ -37,7 +37,7 @@ ThermalTrace connects probes in a garage, workshop, attic, or similar space, com
 - **Alerts** — freeze and leak alerts on every plan; custom rules for doors, power, air quality, and more; email and chat-style channels (SMS, push, webhooks on Pro)
 - **History** — charts, YoY overlay (local probe data, or outdoor Open-Meteo estimate when prior-year probes are missing), Member/Pro CSV export
 - **Hardware** — push ingest or pull JSON; sketches in [`sketches/`](./sketches)
-- **Households** — invites, viewers, multi-property; Pro share links and status pages
+- **Households** — invites, viewers, multi-property; free family live share link; Pro expands share scopes and status pages
 
 Plans and limits: [thermaltrace.dev/pricing](https://thermaltrace.dev/pricing) · comparison: [thermaltrace.dev/compare](https://thermaltrace.dev/compare)
 

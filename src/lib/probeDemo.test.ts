@@ -43,7 +43,10 @@ describe("probeDemo", () => {
     };
     const pull = JSON.parse(buildDemoFeedJson(probes, avg));
     expect(pull.temp.avg.f).toBe(40);
-    expect(pull.temp["0"]).toBeTruthy();
+    expect(pull.temp.north_wall).toBeTruthy();
+    expect(pull.temp.door_zone).toBeTruthy();
+    expect(pull.temp.workbench).toBeTruthy();
+    expect(pull.temp["0"]).toBeUndefined();
 
     const push = buildDemoIngestPayload(probes, avg);
     expect(push.avg).toBe(40);

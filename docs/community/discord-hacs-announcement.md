@@ -11,7 +11,7 @@ We shipped an official Home Assistant integration — install via HACS custom re
 `https://github.com/doodersrage/thermaltrace-home-assistant`
 
 **What you get**
-- Share-link sensors (temp, humidity, doors, leaks, …) from a Pro share token
+- Share-link sensors (temp, humidity, doors, leaks, …) from a Free family live token (Pro expands scopes)
 - Services: `thermaltrace.snooze`, `thermaltrace.vacation`, optional push ingest
 - Dual-run with MQTT on your LAN; ThermalTrace handles off-site SMS + history
 
@@ -30,4 +30,4 @@ Questions → this channel or GitHub issues on the integration repo.
 
 **One-liner (Bluesky):**
 
-Official ThermalTrace HACS integration — share-link sensors, snooze services, MQTT/ESPHome recipes for garage freeze monitoring. https://thermaltrace.dev/integrations/home-assistant
+Official ThermalTrace HACS integration — share-link sensors, snooze services, MQTT/ESPHome recipes for freeze monitoring in garages, workshops & crawlspaces. https://thermaltrace.dev/integrations/home-assistant

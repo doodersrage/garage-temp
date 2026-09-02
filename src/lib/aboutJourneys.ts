@@ -48,7 +48,7 @@ export const aboutJourneys: AboutJourney[] = [
     id: "esp-ingest",
     title: "Push from ESP / Arduino",
     description:
-      "Create a device, map keys, send ingest payloads, and optional OTA / QR stickers.",
+      "Create a push device, POST so sensors auto-import, and optional OTA / QR stickers.",
     ctaHref: "/about/adding-devices",
     ctaLabel: "Add a device",
     steps: [

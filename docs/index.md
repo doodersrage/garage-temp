@@ -4,7 +4,7 @@ title: ThermalTrace Docs
 hero:
   name: ThermalTrace
   text: Developer documentation
-  tagline: Push ingest, HTTP API, sensor sketches, deploy notes, and integrations for the open-source garage dashboard.
+  tagline: Push ingest, HTTP API, sensor sketches, deploy notes, and integrations for the open-source environmental monitoring dashboard.
   image:
     src: https://thermaltrace.dev/og-dashboard.jpg
     alt: ThermalTrace dashboard

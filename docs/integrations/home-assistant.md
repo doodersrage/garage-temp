@@ -6,7 +6,7 @@ ThermalTrace ships an **official [HACS custom integration](https://github.com/do
 
 1. HACS → Integrations → Custom repositories → add `https://github.com/doodersrage/thermaltrace-home-assistant`
 2. Install **ThermalTrace** and restart Home Assistant
-3. Create a **readings** share link (Pro) under Dashboard → Share
+3. Create a **family live** share link under Dashboard → Share (Free includes one; Pro adds history/metrics scopes)
 4. Add integration → paste share token from `/share/YOUR_TOKEN`
 
 Creates sensors and binary sensors automatically. Optional inbound webhook token + secret enable `thermaltrace.snooze`, `vacation`, `status`, etc. Optional ingest key enables `thermaltrace.push`.

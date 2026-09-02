@@ -53,31 +53,31 @@ const schema = [
   speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
   <div class="page-shell page-stack">
-    <PageHeader
-      kicker="About · Simulator"
-      title={title}
-      lede={description}
-    >
-      <a slot="actions" class="btn-primary" href="/register?next=/dashboard/temperature">
-        Start free
-      </a>
-      <a slot="actions" class="btn-secondary" href="/demo">
-        Live demo feed
-      </a>
-    </PageHeader>
-
-    <AboutCcFigure photoId="garage-workbench" />
-
-    <section class="card about-prose">
-      <p class="mb-0">
-        Readings refresh every two seconds with small sensor-like noise. Use
-        <strong>Cold snap</strong> to see Overview-style freeze risk, then flip to
-        <strong>Push ingest</strong> JSON — the same flat keys an ESP would POST after you create a
-        device. For placement theory, see
-        <a class="text-link" href="/about/temperature-probes">temperature probes</a>
-        and
-        <a class="text-link" href="/about/temperature-changes">what drives swings</a>.
-      </p>
+    <section class="probe-demo-hero">
+      <div class="probe-demo-hero-copy">
+        <PageHeader
+          kicker="About · Simulator"
+          title={title}
+          lede={description}
+        >
+          <a slot="actions" class="btn-primary" href="/register?next=/dashboard/temperature">
+            Start free
+          </a>
+          <a slot="actions" class="btn-secondary" href="/demo">
+            Live demo feed
+          </a>
+        </PageHeader>
+        <p class="probe-demo-hero-note">
+          Readings refresh every two seconds with small sensor-like noise. Use
+          <strong>Cold snap</strong> to see Overview-style freeze risk, then flip to
+          <strong>Push ingest</strong> JSON — the same flat keys an ESP would POST after you create a
+          device. For placement theory, see
+          <a class="text-link" href="/about/temperature-probes">temperature probes</a>
+          and
+          <a class="text-link" href="/about/temperature-changes">what drives swings</a>.
+        </p>
+      </div>
+      <AboutCcFigure photoId="garage-workbench" variant="aside" class="probe-demo-hero-media" />
     </section>
 
     <ProbeDemo client:visible />

@@ -14,7 +14,7 @@ Hi all — we run [ThermalTrace](https://thermaltrace.dev), a hosted dashboard f
 
 ### What it does
 
-- Polls a **Pro share link** (`GET /api/share/{token}/readings`) and creates temperature, humidity, door, leak, and other entities automatically
+- Polls a **share link** (`GET /api/share/{token}/readings`) — Free includes one family live link; Pro adds history/metrics scopes — and creates temperature, humidity, door, leak, and other entities automatically
 - Optional **inbound webhook** services: `thermaltrace.snooze`, `thermaltrace.vacation`, `thermaltrace.clear_snooze`, `thermaltrace.clear_vacation`, `thermaltrace.status`
 - Optional **push** service to POST readings from HA automations
 - Designed to **dual-run with MQTT** — keep Mosquitto on your LAN; use ThermalTrace for off-site SMS/history
@@ -24,7 +24,7 @@ Hi all — we run [ThermalTrace](https://thermaltrace.dev), a hosted dashboard f
 1. HACS → Integrations → Custom repositories → add  
    `https://github.com/doodersrage/thermaltrace-home-assistant`
 2. Install **ThermalTrace**, restart HA
-3. Create a **readings** share link at [thermaltrace.dev](https://thermaltrace.dev) (free account to start; share links on Pro)
+3. Create a **family live** share link at [thermaltrace.dev](https://thermaltrace.dev) (Free includes one; Pro adds broader scopes)
 4. Settings → Devices & services → Add integration → ThermalTrace → paste token
 
 Full guide: https://thermaltrace.dev/integrations/home-assistant

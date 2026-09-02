@@ -883,6 +883,72 @@
   height: auto;
 }
 
+.about-figure--aside {
+  max-width: 18rem;
+  width: 100%;
+  justify-self: end;
+}
+
+.about-figure-aside-img {
+  display: block;
+  width: 100%;
+  height: 11rem;
+  object-fit: cover;
+}
+
+.about-figure--aside figcaption {
+  padding: 0.4rem 0.65rem 0.55rem;
+}
+
+.about-figure--aside .about-figure-credit {
+  font-size: 0.65rem;
+  line-height: 1.3;
+}
+
+.probe-demo-hero {
+  display: grid;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.probe-demo-hero-copy .page-header {
+  margin-bottom: 0;
+}
+
+.probe-demo-hero-note {
+  margin: 0.75rem 0 0;
+  max-width: 42rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 900px) {
+  .probe-demo-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 18rem);
+    gap: 1.75rem;
+  }
+
+  .probe-demo-hero-media {
+    margin-top: 0.35rem;
+  }
+
+  .about-figure-aside-img {
+    height: 13rem;
+  }
+}
+
+@media (max-width: 899px) {
+  .about-figure--aside {
+    max-width: none;
+    justify-self: stretch;
+  }
+
+  .about-figure-aside-img {
+    height: 9rem;
+  }
+}
+
 .about-figure figcaption {
   padding: 1rem 1.5rem;
   font-size: 0.875rem;
