@@ -1105,7 +1105,7 @@
   }
 
   .product-shot--peek {
-    max-width: min(100%, 28rem);
+    max-width: min(100%, 32rem);
   }
 
   .product-shot--peek .product-shot-img {
