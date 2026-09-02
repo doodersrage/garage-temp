@@ -15,7 +15,7 @@ import { fetchWeatherSnapshot } from "./FetchWeather";
 
 describe("weatherSimulatedFeed", () => {
   it("derives sun intensity from cloud cover and time of day", () => {
-    const noon = new Date("2026-01-15T17:00:00.000Z"); // ~noon US Eastern in winter UTC
+    const noon = new Date(2026, 0, 15, 12, 0, 0);
     expect(deriveSunIntensity({ cloudCover: 0 }, noon)).toBeGreaterThan(50);
     expect(deriveSunIntensity({ cloudCover: 100 }, noon)).toBe(0);
   });

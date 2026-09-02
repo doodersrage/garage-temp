@@ -15,6 +15,8 @@ import { getHouseholdErrorMessage } from "../../lib/householdErrors";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { createAdminClient, createServerClient } from "../../lib/supabase";
 import { buildSiteUrl } from "../../lib/stripe";
+import { listHouseholdActivity } from "../../lib/householdActivity";
+import { formatHouseholdActivityAction } from "../../lib/householdActivityLabels";
 import { uniqueWeatherCityPresets } from "../../lib/weatherCities";
 import DashboardCard from "../../components/dashboard/DashboardCard.astro";
 import UpgradeNudge from "../../components/UpgradeNudge.astro";
@@ -90,6 +92,10 @@ const activeMembership = householdsResult.households.find(
 const canLeaveActive =
   Boolean(active.householdId) && activeMembership?.role === "member";
 const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
+const householdActivity =
+  manageId && canManage
+    ? await listHouseholdActivity(manageId, { limit: 15 })
+    : [];
 ---
 <DashboardLayout title="Household">
   <div class="space-y-6">
@@ -442,6 +448,31 @@ const siteOrigin = buildSiteUrl(Astro.request, "/").replace(/\/$/, "");
         </form>
       )}
     </DashboardCard>
+
+    {canManage && (
+      <DashboardCard>
+        <h2 class="card-title">Recent activity</h2>
+        <p class="card-subtitle mb-4">
+          Invites, alert changes, device transfers, and ingest key reveals for this household.
+        </p>
+        {householdActivity.length === 0 ? (
+          <p class="text-sm text-[var(--color-text-muted)]">No activity yet.</p>
+        ) : (
+          <ul class="space-y-2 text-sm">
+            {householdActivity.map((row) => (
+              <li>
+                <strong>{formatHouseholdActivityAction(row.action)}</strong>
+                {row.detail ? `: ${row.detail}` : ""}
+                <span class="text-[var(--color-text-muted)]">
+                  {" "}
+                  · {new Date(row.created_at).toLocaleString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </DashboardCard>
+    )}
   </div>
 </DashboardLayout>
 

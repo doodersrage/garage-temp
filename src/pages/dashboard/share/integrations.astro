@@ -1,6 +1,7 @@
 ---
 import DashboardLayout from "../../../layouts/DashboardLayout.astro";
 import ShareNav from "../../../components/dashboard/ShareNav.astro";
+import { formatHouseholdActivityAction } from "../../../lib/householdActivityLabels";
 import GrafanaWizard from "../../../components/GrafanaWizard.astro";
 import WebhookDeliveryLog from "../../../components/WebhookDeliveryLog.astro";
 import HaSetupCard from "../../../components/HaSetupCard.astro";
@@ -72,13 +73,13 @@ const {
         <h2 class="card-title">Recent activity</h2>
         {activity.length === 0 ? (
           <p class="mb-0 text-sm text-[var(--color-text-muted)]">
-            Household actions (share links, alert saves, device transfers) will appear here.
+            Household actions (share links, alert saves, device transfers, ingest key reveals) will appear here.
           </p>
         ) : (
           <ul class="space-y-2 mb-0 text-sm">
             {activity.map((row) => (
               <li>
-                <strong>{row.action}</strong>
+                <strong>{formatHouseholdActivityAction(row.action)}</strong>
                 {row.detail ? `: ${row.detail}` : ""}
                 <span class="text-[var(--color-text-muted)]">
                   {" · "}

@@ -1,5 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const { runtimeEnvStore } = vi.hoisted(() => ({
+  runtimeEnvStore: new Map<string, string>(),
+}));
+
+vi.mock("./runtimeEnv", () => ({
+  getRuntimeEnv: (key: string) => runtimeEnvStore.get(key),
+}));
+
 const mockGetConnectionForHousehold = vi.fn();
 const mockUpdateTokensAfterRefresh = vi.fn();
 vi.mock("./thermostatConnections", () => ({
@@ -10,6 +18,7 @@ vi.mock("./thermostatConnections", () => ({
 }));
 
 beforeEach(() => {
+  runtimeEnvStore.clear();
   mockGetConnectionForHousehold.mockReset();
   mockUpdateTokensAfterRefresh.mockReset().mockResolvedValue({ error: null });
   vi.unstubAllEnvs();
@@ -102,9 +111,9 @@ describe("buildNestAuthorizeUrl / buildEcobeeAuthorizeUrl", () => {
   });
 
   it("builds a valid authorize URL once configured", async () => {
-    vi.stubEnv("NEST_CLIENT_ID", "nest-cid");
-    vi.stubEnv("NEST_PROJECT_ID", "proj-1");
-    vi.stubEnv("ECOBEE_CLIENT_ID", "ecobee-cid");
+    runtimeEnvStore.set("NEST_CLIENT_ID", "nest-cid");
+    runtimeEnvStore.set("NEST_PROJECT_ID", "proj-1");
+    runtimeEnvStore.set("ECOBEE_CLIENT_ID", "ecobee-cid");
     const { buildNestAuthorizeUrl, buildEcobeeAuthorizeUrl } = await import(
       "./thermostatOAuth"
     );
@@ -131,17 +140,17 @@ describe("listConfiguredThermostatProviders", () => {
   });
 
   it("lists only providers with complete credentials", async () => {
-    vi.stubEnv("ECOBEE_CLIENT_ID", "ecobee-cid");
-    vi.stubEnv("NEST_CLIENT_ID", "nest-cid");
+    runtimeEnvStore.set("ECOBEE_CLIENT_ID", "ecobee-cid");
+    runtimeEnvStore.set("NEST_CLIENT_ID", "nest-cid");
     // Nest secret / project missing -> Nest stays hidden
     const { listConfiguredThermostatProviders } = await import("./thermostatOAuth");
     expect(listConfiguredThermostatProviders()).toEqual(["ecobee"]);
   });
 
   it("lists Nest once client id, secret, and project id are set", async () => {
-    vi.stubEnv("NEST_CLIENT_ID", "nest-cid");
-    vi.stubEnv("NEST_CLIENT_SECRET", "nest-secret");
-    vi.stubEnv("NEST_PROJECT_ID", "proj-1");
+    runtimeEnvStore.set("NEST_CLIENT_ID", "nest-cid");
+    runtimeEnvStore.set("NEST_CLIENT_SECRET", "nest-secret");
+    runtimeEnvStore.set("NEST_PROJECT_ID", "proj-1");
     const { isNestOAuthConfigured, listConfiguredThermostatProviders } = await import(
       "./thermostatOAuth"
     );
@@ -188,7 +197,7 @@ describe("resolveAccessTokenForHousehold", () => {
       accessToken: null,
       accessTokenExpiresAt: null,
     });
-    vi.stubEnv("ECOBEE_CLIENT_ID", "ecobee-cid");
+    runtimeEnvStore.set("ECOBEE_CLIENT_ID", "ecobee-cid");
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
