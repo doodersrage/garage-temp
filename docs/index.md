@@ -7,7 +7,7 @@ hero:
   tagline: Push ingest, HTTP API, sensor sketches, deploy notes, and integrations for the open-source environmental monitoring dashboard.
   image:
     src: https://thermaltrace.dev/og-dashboard.jpg
-    alt: ThermalTrace dashboard
+    alt: ThermalTrace live telemetry graph with humidity and dew point
   actions:
     - theme: brand
       text: Push ingest
@@ -48,13 +48,13 @@ features:
     link: /integrations/grafana
     linkText: Grafana setup
   - title: Architecture
-    details: Astro SSR on Cloudflare Workers, Supabase, households, and cron-driven alerts.
+    details: Astro SSR on Cloudflare Workers, Supabase, households, cron alerts, and Overview Insights metrics.
     link: /guide/architecture
     linkText: How it fits together
   - title: Product guides
-    details: Long-form wiring, freeze playbooks, and journeys live on the app site About hub.
-    link: https://thermaltrace.dev/about
-    linkText: thermaltrace.dev/about
+    details: Long-form wiring, freeze playbooks, and journeys live on the app site Guides hub (and all articles).
+    link: https://thermaltrace.dev/guides
+    linkText: thermaltrace.dev/guides
 ---
 
 ## Where to go

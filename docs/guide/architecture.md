@@ -18,6 +18,7 @@ Sensors / relays ──push or pull──► Cloudflare Worker (Astro)
 - SSR by default; dashboard uses `DashboardLayout` (sidebar + topbar + main)
 - Prefer Astro components; hydrate Preact only where needed (`client:visible` / `client:load`)
 - Shared chrome under `src/components/dashboard/`
+- **Overview** (`src/pages/dashboard.astro`) loads Simple or Insights mode (`dashboardOverviewMode`). Status metrics and Insights cards are derived in `src/lib/overviewExtras.ts`, `freezeHours.ts`, and `heatingInsights.ts`. Week/history charts (`HistoryChart.tsx`) optionally overlay humidity and dew point from `ChartPoint.humidity`.
 
 ## Mutations
 

@@ -6,7 +6,7 @@ ThermalTrace ships in multiple repos. When onboarding UX changes in **this** rep
 
 **Repo:** [github.com/doodersrage/thermaltrace-home-assistant](https://github.com/doodersrage/thermaltrace-home-assistant)
 
-**Status (2026-03):** README aligns with share-link + optional `thermaltrace.push` ingest service. No code change required for recent dashboard UX (pull tab, reveal key, demo pull) — HA users typically use share links or push via service.
+**Status (2026-09):** README aligns with share-link + optional `thermaltrace.push` ingest service. No code change required for Overview Insights metrics (ΔT, probe spread, humidity overlay, air/RSSI cards) — those are web-dashboard SSR only. HA users typically use share links or push via service.
 
 **Re-sync when:**
 
@@ -20,16 +20,17 @@ ThermalTrace ships in multiple repos. When onboarding UX changes in **this** rep
 
 **Repo:** [github.com/doodersrage/thermaltrace-android](https://github.com/doodersrage/thermaltrace-android) (sibling checkout)
 
-**Status:** Consumes live API (`/api/devices/ingest-status`, dashboard extras). No user-facing “one-time key” copy in app strings — device setup stays on the web dashboard.
+**Status (2026-09):** Consumes live API (`/api/home/readings`, history, alerts, claims). Home already mirrors heating/condensation insights. Full Overview Status strip (freeze hours, probe spread, feed health, power/motion/air/RSSI Insights cards) remains on the **web dashboard** — mention that in Play/README if listing “dashboard parity.”
 
 **Re-sync when:**
 
-- New dashboard API surfaces users expect in mobile (e.g. pull tab management, reveal key)
+- New dashboard API surfaces users expect in mobile (e.g. pull tab management, reveal key, Overview metric endpoints)
 - Play Store listing copy after `PUBLIC_PLAY_STORE_URL` is set
+- Web Overview Insights grow into dedicated mobile screens
 
 ## This repo (source of truth)
 
-User-facing onboarding: [Adding devices](https://thermaltrace.dev/about/adding-devices) (source: `src/pages/about/adding-devices.astro`)
+User-facing onboarding: [Adding devices](https://thermaltrace.dev/about/adding-devices) (source: `src/pages/about/adding-devices.astro`) · [Accounts & dashboard](https://thermaltrace.dev/about/accounts-and-dashboard)
 
 Developer ingest: [docs/ingest/index.md](../ingest/index.md) · [docs/ingest/pull-feeds.md](../ingest/pull-feeds.md)
 
