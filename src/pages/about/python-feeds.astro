@@ -42,7 +42,8 @@ const hero = getAboutPhoto("ethernet-cable");
 
   <h2>Example consumer fetch</h2>
   <p>
-    The Astro site’s fetch layer requests your configured HTTPS URL, parses the <code>temp</code> object,
+    The Astro site’s fetch layer requests your configured HTTPS URL, parses the <code>temp</code> object
+    (or auto-detects SenML / Home Assistant REST JSON when that root is missing),
     and maps keys to dashboard probes. The same URL can power Node scripts, Grafana JSON plugins, or
     Home Assistant REST sensors.
   </p>

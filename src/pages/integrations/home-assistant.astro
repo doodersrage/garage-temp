@@ -122,6 +122,36 @@ const schema = [
       </ul>
     </section>
 
+    <section class="card">
+      <h2 class="card-title">Native JSON formats (push &amp; pull)</h2>
+      <p class="card-subtitle mb-4">
+        Beyond the HACS share-link path, ThermalTrace auto-detects JSON your HA stack may already emit — no custom wrapper required.
+      </p>
+      <ul class="text-sm space-y-2 mb-4">
+        <li>
+          <strong>Home Assistant REST sensor</strong> — POST or pull <code>{`{ "state": "65.3", "attributes": { "unit_of_measurement": "°F" } }`}</code>;
+          map probe key <code>state</code> on Devices
+        </li>
+        <li>
+          <strong>SenML (RFC 8428)</strong> — JSON array with <code>Cel</code> / <code>%RH</code> units; common on IoT gateways
+        </li>
+        <li>
+          <strong>thermaltrace.push</strong> — native <code>sensors[]</code> from automations (see indoor temperature below)
+        </li>
+        <li>
+          <strong>MQTT bridge</strong> — unwrap LAN MQTT payloads via <code>POST /api/ingest/mqtt</code>
+        </li>
+      </ul>
+      <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+        Live samples:
+        <a class="text-link" href="/api/feeds/example?format=homeassistant">HA REST</a>
+        ·
+        <a class="text-link" href="/api/feeds/example?format=senml">SenML</a>
+        ·
+        <a class="text-link" href="/about/ingest-and-webhooks">Ingest formats guide</a>
+      </p>
+    </section>
+
     <section class="card" id="indoor-temperature">
       <h2 class="card-title">Indoor temperature (Ecobee &amp; any thermostat)</h2>
       <p class="card-subtitle mb-4">

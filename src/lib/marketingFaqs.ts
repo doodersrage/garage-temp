@@ -149,6 +149,11 @@ export const marketingFaqs = {
         "You need a Pro share link with readings scope to poll sensor data into Home Assistant. Inbound webhook services (snooze, vacation, status) also require a Pro inbound token from Dashboard → Share. Push via thermaltrace.push uses any push device ingest key.",
     },
     {
+      question: "Can I push HA REST sensor JSON without the HACS integration?",
+      answer:
+        "Yes — ThermalTrace auto-detects Home Assistant REST responses ({ state, attributes }) on POST /api/ingest/<key> and on pull feeds. Map probe key state on Devices. SenML JSON arrays are also supported. Samples: thermaltrace.dev/api/feeds/example?format=homeassistant",
+    },
+    {
       question: "Can I use ThermalTrace with MQTT and Home Assistant together?",
       answer:
         "Yes — the usual pattern keeps Mosquitto/ESPHome on your LAN and mirrors selected topics to ThermalTrace over HTTPS (POST /api/ingest/mqtt). ThermalTrace handles off-site freeze SMS/email and history; HA keeps local automations. Recipe: thermaltrace.dev/about/adding-devices#mqtt-bridge.",

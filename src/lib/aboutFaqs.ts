@@ -147,7 +147,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "What belongs in an ingest payload?",
       answer:
-        "Temperature (and humidity) keyed by probe index, plus optional door/power fields, battery, and RSSI. Keep keys stable so dashboard mappings stay valid.",
+        "Temperature (and humidity) keyed by probe index, plus optional door/power fields, battery, and RSSI. Native shapes are flat keys, a temp object, or sensors[]. SenML (RFC 8428) arrays and Home Assistant REST state JSON are also auto-detected. Keep keys stable so dashboard mappings stay valid.",
     },
   ],
   "adding-devices": [
@@ -159,14 +159,14 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Why don’t readings show on Home after ingest succeeds?",
       answer:
-        "Map sensor keys on Dashboard → Devices so they match your JSON. For DHT-style probes, use Quick add temperature + humidity pair with the same key. Pull feeds also need the correct JSON root key (default temp).",
+        "Map sensor keys on Dashboard → Devices so they match your JSON. For DHT-style probes, use Quick add temperature + humidity pair with the same key. Pull feeds need the correct JSON root key (default temp) unless the URL returns SenML or Home Assistant REST JSON, which auto-detect without a root.",
     },
   ],
   "json-probe-output-schema": [
     {
       question: "What JSON shape does ThermalTrace expect?",
       answer:
-        "Stable probe keys with numeric temperatures (and optional humidity). Optional battery_pct and rssi help diagnose weak devices. Match the OpenAPI ingest examples.",
+        "Default pull shape is a temp object with probe keys (f, c, h). Push also accepts flat keys, sensors[], SenML JSON arrays, and Home Assistant REST state objects. Optional battery_pct and rssi help diagnose weak devices. See /about/ingest-and-webhooks or the example feed at /api/feeds/example?format=document.",
     },
   ],
   "kit-qr-onboarding": [

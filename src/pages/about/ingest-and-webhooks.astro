@@ -66,6 +66,42 @@ Content-Type: application/json</code></pre>
     <a class="text-link" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches" target="_blank" rel="noreferrer">sketches/</a>.
   </p>
 
+  <h3>SenML (RFC 8428)</h3>
+  <p>
+    If your firmware or gateway already publishes SenML JSON, POST the array directly — no wrapper object required.
+    ThermalTrace auto-detects SenML when native <code>temp</code> / <code>sensors[]</code> shapes are absent.
+    Temperature uses unit <code>Cel</code> or <code>degF</code>; humidity uses <code>%RH</code>. Probe keys come from the SenML name (last path segment).
+  </p>
+  <pre><code>{`[
+  { "bn": "thermaltrace/garage/", "n": "0", "u": "Cel", "v": 18.5 },
+  { "n": "0", "u": "%RH", "v": 42 },
+  { "n": "door", "vb": true }
+]`}</code></pre>
+  <p>
+    Live sample:
+    <a class="text-link" href="/api/feeds/example?format=senml">example SenML feed</a>.
+    Pull feeds accept the same array when the configured JSON root is missing.
+  </p>
+
+  <h3>Home Assistant REST sensor JSON</h3>
+  <p>
+    A single REST sensor response — <code>state</code> plus <code>attributes.unit_of_measurement</code> — is also auto-detected on push ingest and pull feeds.
+    Map probe key <code>state</code> (or the entity suffix for multi-entity payloads) on Devices.
+  </p>
+  <pre><code>{`{
+  "state": "65.3",
+  "attributes": {
+    "unit_of_measurement": "°F",
+    "friendly_name": "Garage temperature"
+  }
+}`}</code></pre>
+  <p>
+    Live sample:
+    <a class="text-link" href="/api/feeds/example?format=homeassistant">example HA REST feed</a>.
+    For full HA setup (HACS, MQTT bridge, indoor reference), see
+    <a class="text-link" href="/integrations/home-assistant">Home Assistant integration</a>.
+  </p>
+
   <h2>Outbound alert webhooks</h2>
   <p>
     Pro accounts can enable an outbound webhook in alert settings. Each alert POSTs JSON:

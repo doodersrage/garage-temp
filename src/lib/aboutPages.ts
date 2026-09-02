@@ -109,9 +109,9 @@ export const coreAboutPages: AboutPage[] = [
     slug: "ingest-and-webhooks",
     title: "Ingest API and alert webhooks",
     description:
-      "Push sensor readings into ThermalTrace with the ingest API, and send alerts to Discord, IFTTT, or Home Assistant.",
+      "Push sensor readings into ThermalTrace with the ingest API — native JSON, SenML, or Home Assistant REST — and send alerts to Discord, IFTTT, or Home Assistant.",
     summary:
-      "Device API keys, typed sensor payloads, outbound HMAC webhooks, and Pro alert channels.",
+      "Device API keys, typed sensor payloads, SenML and HA REST auto-detect, outbound HMAC webhooks, and Pro alert channels.",
   },
   {
     slug: "thermostat-oauth",
