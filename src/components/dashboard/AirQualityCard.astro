@@ -1,0 +1,35 @@
+---
+import DashboardCard from "./DashboardCard.astro";
+import type { AirQualityOverview } from "../../lib/overviewExtras";
+
+interface Props {
+  overview: AirQualityOverview;
+}
+
+const { overview } = Astro.props;
+---
+{overview.rows.length > 0 && (
+  <DashboardCard>
+    <h2 class="card-title">Air quality</h2>
+    <p class="card-subtitle mb-4">Latest CO₂, particles, VOC, and pressure readings.</p>
+    <ul class="space-y-2 mb-0">
+      {overview.rows.map((row) => (
+        <li class="text-sm flex flex-wrap justify-between gap-2">
+          <span>
+            <strong>{row.label}</strong>
+            {" · "}
+            {row.kindLabel}
+          </span>
+          <span class:list={[row.watch && "text-[var(--color-warning-text)]"]}>
+            {row.display}
+          </span>
+        </li>
+      ))}
+    </ul>
+    {overview.watchCount > 0 && (
+      <p class="alert-warning mt-3 mb-0 text-sm">
+        {overview.watchCount} reading{overview.watchCount === 1 ? "" : "s"} above typical workshop comfort bands.
+      </p>
+    )}
+  </DashboardCard>
+)}

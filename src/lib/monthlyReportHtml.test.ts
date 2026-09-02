@@ -21,6 +21,7 @@ const sampleData = {
   ],
   freezeHours: {
     hoursBelow34: 12.5,
+    degreeHoursBelow: 40,
     readingsBelow34: 8,
     totalReadings: 42,
     coldestF: 28.5,

@@ -62,13 +62,13 @@ describe("planComparison", () => {
     expect(kinds?.portfolio).toBe(kinds?.free);
   });
 
-  it("uses complete cold-risk phrases instead of badge fragments", () => {
+  it("uses complete freeze/cold alert phrases instead of badge fragments", () => {
     const coldRisk = PLAN_FEATURE_ROWS.find((row) => row.id === "cold_risk");
-    expect(coldRisk?.label).toBe("Cold-risk alerts");
-    expect(coldRisk?.free).toBe("Threshold only");
-    expect(coldRisk?.member).toBe("Forecast-based cold-risk");
-    expect(coldRisk?.pro).toBe("Forecast + official NWS");
-    expect(coldRisk?.portfolio).toBe("Forecast + official NWS");
+    expect(coldRisk?.label).toBe("Freeze and cold alerts");
+    expect(coldRisk?.free).toBe("Threshold freeze alerts");
+    expect(coldRisk?.member).toBe("Threshold + forecast freeze warnings");
+    expect(coldRisk?.pro).toBe("Threshold + forecast + official NWS");
+    expect(coldRisk?.portfolio).toBe("Threshold + forecast + official NWS");
     expect(coldRisk?.cellBadge).toBeUndefined();
   });
 

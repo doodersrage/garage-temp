@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import {
   applyProbeNoise,
   buildDemoFeedJson,
@@ -37,6 +37,7 @@ export default function ProbeDemo() {
   const [lastUpdated, setLastUpdated] = useState(() => new Date());
   const [jsonTab, setJsonTab] = useState<JsonTab>("push");
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const copyTimersRef = useRef<number[]>([]);
 
   useEffect(() => {
     const baseProbes = computeDemoProbes(controls);
@@ -47,6 +48,7 @@ export default function ProbeDemo() {
 
   useEffect(() => {
     const interval = window.setInterval(() => {
+      if (document.visibilityState === "hidden") return;
       const baseProbes = computeDemoProbes(controls);
       const { probes: nextProbes, average: nextAverage } =
         applyProbeNoise(baseProbes);
@@ -57,6 +59,13 @@ export default function ProbeDemo() {
 
     return () => window.clearInterval(interval);
   }, [controls]);
+
+  useEffect(() => {
+    return () => {
+      for (const id of copyTimersRef.current) window.clearTimeout(id);
+      copyTimersRef.current = [];
+    };
+  }, []);
 
   const pullJson = useMemo(
     () => buildDemoFeedJson(probes, average),
@@ -103,10 +112,12 @@ export default function ProbeDemo() {
     try {
       await navigator.clipboard.writeText(activeJson);
       setCopyStatus("Copied");
-      window.setTimeout(() => setCopyStatus(null), 1500);
+      const id = window.setTimeout(() => setCopyStatus(null), 1500);
+      copyTimersRef.current.push(id);
     } catch {
       setCopyStatus("Copy failed");
-      window.setTimeout(() => setCopyStatus(null), 2000);
+      const id = window.setTimeout(() => setCopyStatus(null), 2000);
+      copyTimersRef.current.push(id);
     }
   }
 

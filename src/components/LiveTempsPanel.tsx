@@ -174,15 +174,17 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [offlineStale, setOfflineStale] = useState(false);
 
-  const loadReadings = useCallback(async () => {
+  const loadReadings = useCallback(async (signal?: AbortSignal) => {
     try {
       const qs = spaceFilter
         ? `?space=${encodeURIComponent(spaceFilter)}`
         : "";
       const response = await fetch(`/api/home/readings${qs}`, {
         credentials: "same-origin",
+        signal,
       });
 
+      if (signal?.aborted) return;
       if (!response.ok) {
         throw new Error("Unable to refresh readings");
       }
@@ -194,6 +196,7 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
         updatedAt: string;
       };
 
+      if (signal?.aborted) return;
       setGroups(payload.groups ?? []);
       setSensors(payload.sensors ?? []);
       if (payload.spaces) setSpaces(payload.spaces);
@@ -202,14 +205,19 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
       setError(null);
       setCountdown(intervalMs / 1000);
     } catch (e) {
+      if (signal?.aborted || (e instanceof DOMException && e.name === "AbortError")) {
+        return;
+      }
       setError(e instanceof Error ? e.message : "Refresh failed");
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   }, [intervalMs, spaceFilter]);
 
   useEffect(() => {
-    void loadReadings();
+    const ac = new AbortController();
+    void loadReadings(ac.signal);
+    return () => ac.abort();
   }, [loadReadings]);
 
   useEffect(() => {
@@ -221,8 +229,11 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
           const data = JSON.parse(event.data);
           if (data.type === "readings") void loadReadings();
         } catch {
-          /* ignore */
+          /* ignore malformed SSE payloads */
         }
+      };
+      es.onerror = () => {
+        /* Browser reconnects; polling remains as backup. Avoid noisy logs. */
       };
     } catch {
       /* SSE unavailable — polling fallback remains */
@@ -232,6 +243,7 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
 
   useEffect(() => {
     const tick = window.setInterval(() => {
+      if (document.visibilityState === "hidden") return;
       setCountdown((current) => {
         if (current <= 1) {
           void loadReadings();

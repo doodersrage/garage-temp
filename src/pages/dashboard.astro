@@ -81,17 +81,30 @@ import DashboardOverviewToggle from "../components/dashboard/DashboardOverviewTo
 import { getDashboardOverviewMode } from "../lib/dashboardOverviewMode";
 import { computeFreezeHours } from "../lib/freezeHours";
 import {
+  buildAirQualityOverview,
   buildBatteryOverview,
   buildDoorTempSummary,
+  buildMotionSummary,
+  buildPowerTempSummary,
+  buildRssiOverview,
+  computeCondensationHours,
+  computeFeedUptimePct,
+  computeIndoorOutdoorDelta,
+  computeProbeSpreadF,
   doorOpenMinutesFromSessions,
   loadDoorSessions24h,
   loadEnergyOverview,
   loadFloodLevelOverview,
+  loadMotionSessions24h,
+  loadPowerOffSessions24h,
 } from "../lib/overviewExtras";
 import BatteryDeclineCard from "../components/dashboard/BatteryDeclineCard.astro";
 import DoorTempInsightCard from "../components/dashboard/DoorTempInsightCard.astro";
 import EnergyOverviewCard from "../components/dashboard/EnergyOverviewCard.astro";
 import FloodLevelCard from "../components/dashboard/FloodLevelCard.astro";
+import AirQualityCard from "../components/dashboard/AirQualityCard.astro";
+import InsightCalloutCard from "../components/dashboard/InsightCalloutCard.astro";
+import RssiOverviewCard from "../components/dashboard/RssiOverviewCard.astro";
 
 import DashboardMetricGrid from "../components/dashboard/DashboardMetricGrid.astro";
 import MetricCard from "../components/dashboard/MetricCard.astro";
@@ -182,6 +195,8 @@ const [
   doorSessions,
   floodLevelOverview,
   energyOverview,
+  powerOffSessions,
+  motionSessions,
 ] = await Promise.all([
   entitlements.canUseThermostatIntegration && household.householdId
     ? listConnectionsForHousehold(household.householdId)
@@ -220,6 +235,8 @@ const [
     ? loadFloodLevelOverview(devices)
     : Promise.resolve({ floodOpen: [], recentFlood: [], levels: [] }),
   showInsights ? loadEnergyOverview(devices) : Promise.resolve(null),
+  showInsights ? loadPowerOffSessions24h(devices) : Promise.resolve([]),
+  showInsights ? loadMotionSessions24h(devices) : Promise.resolve([]),
 ]);
 
 const [thermostatOverview, houseChartOverlay] = await Promise.all([
@@ -338,6 +355,18 @@ const freezeHours = computeFreezeHours(
   chartWeek.points,
   alertSettings.freezeThresholdF,
 );
+const probeSpread = computeProbeSpreadF(latest);
+const indoorOutdoorDeltaF = computeIndoorOutdoorDelta(
+  coldestProbeTempF ?? houseContext?.ambientTempF ?? null,
+  weatherSnapshot?.temp ?? null,
+);
+const condensation = computeCondensationHours(chartWeek.points);
+const feedUptime = computeFeedUptimePct(feedHealth.statuses);
+const airQualityOverview = buildAirQualityOverview(latest);
+const rssiOverview = buildRssiOverview(
+  devices,
+  alertSettings.rssiThreshold ?? -80,
+);
 
 const regionalBenchmark =
   showInsights &&
@@ -368,6 +397,14 @@ const doorTempSummary = showInsights
       weatherSnapshot?.temp ?? null,
     )
   : null;
+const powerTempSummary = showInsights
+  ? buildPowerTempSummary(
+      powerOffSessions,
+      chartWeek.points,
+      weatherSnapshot?.temp ?? null,
+    )
+  : null;
+const motionSummary = showInsights ? buildMotionSummary(motionSessions) : null;
 const batteryOverview = showInsights ? buildBatteryOverview(devices) : [];
 const coolingRateFPerHour = estimateHeatingLossRate(
   chartWeek.points,
@@ -698,9 +735,11 @@ const garageRisk = computeGarageRiskStatus({
               : `${freezeHours.hoursBelow34.toFixed(1)} h`
           }
           detail={
-            freezeHours.coldestF != null
-              ? `Coldest ${freezeHours.coldestF.toFixed(1)}°F`
-              : `≤ ${alertSettings.freezeThresholdF}°F`
+            freezeHours.degreeHoursBelow > 0
+              ? `${freezeHours.degreeHoursBelow.toFixed(0)} °F·h below ${alertSettings.freezeThresholdF}°F`
+              : freezeHours.coldestF != null
+                ? `Coldest ${freezeHours.coldestF.toFixed(1)}°F`
+                : `≤ ${alertSettings.freezeThresholdF}°F`
           }
           href="/dashboard/history"
           tone={freezeHours.hoursBelow34 > 0 ? "warning" : "neutral"}
@@ -728,6 +767,75 @@ const garageRisk = computeGarageRiskStatus({
                   : "success"
           }
         />
+        <MetricCard
+          label="Indoor − outdoor"
+          value={
+            indoorOutdoorDeltaF == null
+              ? "—"
+              : `${indoorOutdoorDeltaF >= 0 ? "+" : ""}${indoorOutdoorDeltaF.toFixed(1)}°F`
+          }
+          detail={
+            indoorOutdoorDeltaF == null
+              ? "Need live probe + weather"
+              : weatherSnapshot?.temp != null && coldestProbeTempF != null
+                ? `${coldestProbeTempF.toFixed(0)}°F indoor vs ${weatherSnapshot.temp.toFixed(0)}°F out`
+                : "ΔT using coldest probe"
+          }
+          href="/"
+          tone={
+            indoorOutdoorDeltaF == null
+              ? "neutral"
+              : indoorOutdoorDeltaF < 5
+                ? "warning"
+                : "neutral"
+          }
+        />
+        <MetricCard
+          label="Probe spread"
+          value={probeSpread ? `${probeSpread.spreadF.toFixed(1)}°F` : "—"}
+          detail={
+            probeSpread
+              ? `${probeSpread.coldestF.toFixed(1)}–${probeSpread.warmestF.toFixed(1)}°F · ${probeSpread.probeCount} probes`
+              : "Need 2+ live temps"
+          }
+          href="/"
+          tone={
+            probeSpread == null
+              ? "neutral"
+              : probeSpread.spreadF >= 8
+                ? "warning"
+                : "neutral"
+          }
+        />
+        <MetricCard
+          label="Condensation (7d)"
+          value={
+            chartWeek.points.length < 2
+              ? "—"
+              : `${condensation.hours.toFixed(1)} h`
+          }
+          detail={
+            condensation.latestMarginF != null
+              ? `Now ${condensation.latestMarginF.toFixed(1)}°F above dew point`
+              : "Hours near dew point"
+          }
+          href="/dashboard/history"
+          tone={
+            condensation.hours >= 6 ||
+            (condensation.latestMarginF != null && condensation.latestMarginF <= 2)
+              ? "warning"
+              : "neutral"
+          }
+        />
+        {feedUptime && (
+          <MetricCard
+            label="Feed health"
+            value={`${feedUptime.pct.toFixed(0)}%`}
+            detail={`${feedUptime.ok}/${feedUptime.total} feeds reachable now`}
+            href="/dashboard/temperature#pull-feeds"
+            tone={feedUptime.pct < 100 ? "warning" : "success"}
+          />
+        )}
       </DashboardMetricGrid>
     </section>
 
@@ -791,9 +899,31 @@ const garageRisk = computeGarageRiskStatus({
                 tone={doorTempSummary.tone}
               />
             )}
+            {powerTempSummary && (
+              <InsightCalloutCard
+                title="Power vs temperature"
+                subtitle="Circuit Off time correlated with cooling rate."
+                headline={powerTempSummary.title}
+                detail={powerTempSummary.detail}
+                tone={powerTempSummary.tone}
+                href="/dashboard/temperature"
+                hrefLabel="Open Devices"
+              />
+            )}
+            {motionSummary && (
+              <InsightCalloutCard
+                title="Motion"
+                subtitle="Activity in the last 24 hours."
+                headline={motionSummary.title}
+                detail={motionSummary.detail}
+                tone={motionSummary.tone}
+              />
+            )}
             <DoorDurationCard devices={devices} sessions={doorSessions} />
             <DoorEventHistory householdId={household.householdId} />
             <BatteryDeclineCard rows={batteryOverview} />
+            <RssiOverviewCard rows={rssiOverview} />
+            <AirQualityCard overview={airQualityOverview} />
             {energyOverview && (
               <EnergyOverviewCard
                 energy={energyOverview}

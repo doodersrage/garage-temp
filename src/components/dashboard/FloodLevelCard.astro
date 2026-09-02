@@ -47,6 +47,13 @@ const hasContent =
                 <strong>{row.label}</strong>
                 {" · "}
                 {row.value.toFixed(1)}
+                {row.risingPerHour != null && Math.abs(row.risingPerHour) >= 0.5 && (
+                  <span class="text-[var(--color-text-muted)]">
+                    {" "}
+                    ({row.risingPerHour > 0 ? "+" : ""}
+                    {row.risingPerHour.toFixed(1)}/h)
+                  </span>
+                )}
               </span>
               <span class="text-[var(--color-text-muted)]">{age.label}</span>
             </li>

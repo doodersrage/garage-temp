@@ -26,16 +26,18 @@ export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
   const [countdown, setCountdown] = useState(intervalMs / 1000);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal?: AbortSignal) => {
     try {
       const response = await fetch("/api/home/demo-temps", {
         credentials: "same-origin",
+        signal,
       });
       const payload = (await response.json()) as {
         error?: string;
         groups?: FeedGroup[];
         updatedAt?: string;
       };
+      if (signal?.aborted) return;
       if (!response.ok) {
         throw new Error(payload.error ?? "Unable to load probe temperatures");
       }
@@ -44,18 +46,24 @@ export default function DemoTempsPanel({ intervalMs = 90000 }: Props) {
       setError(null);
       setCountdown(intervalMs / 1000);
     } catch (e) {
+      if (signal?.aborted || (e instanceof DOMException && e.name === "AbortError")) {
+        return;
+      }
       setError(e instanceof Error ? e.message : "Unable to load probe temperatures");
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   }, [intervalMs]);
 
   useEffect(() => {
-    void load();
+    const ac = new AbortController();
+    void load(ac.signal);
+    return () => ac.abort();
   }, [load]);
 
   useEffect(() => {
     const tick = window.setInterval(() => {
+      if (document.visibilityState === "hidden") return;
       setCountdown((current) => {
         if (current <= 1) {
           void load();

@@ -18,7 +18,7 @@ const age = formatRelativeAge(energy.at);
   </p>
   <p class="stat-value m-0">{energy.latestW.toFixed(0)} W</p>
   <p class="m-0 mt-1 text-sm text-[var(--color-text-muted)]">
-    Avg {energy.avgW.toFixed(0)} W over {energy.sampleCount} samples · {age.label}
+    Avg {energy.avgW.toFixed(0)} W · ~{energy.estimatedKWh.toFixed(1)} kWh over samples · {age.label}
   </p>
   {coolingRateFPerHour != null && coolingRateFPerHour < -0.5 && energy.latestW < 50 && (
     <p class="alert-warning mt-3 mb-0 text-sm">

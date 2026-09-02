@@ -21,36 +21,44 @@ export default function WeatherPanel({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal?: AbortSignal) => {
     try {
       const params = new URLSearchParams();
       if (cityId) params.set("cityId", cityId);
       const query = params.toString();
       const response = await fetch(`/api/home/weather${query ? `?${query}` : ""}`, {
         credentials: "same-origin",
+        signal,
       });
       const payload = (await response.json()) as {
         error?: string;
         weather?: WeatherSnapshot;
       };
+      if (signal?.aborted) return;
       if (!response.ok) {
         throw new Error(payload.error ?? "Unable to load weather");
       }
       setWeather(payload.weather ?? null);
       setError(null);
     } catch (e) {
+      if (signal?.aborted || (e instanceof DOMException && e.name === "AbortError")) {
+        return;
+      }
       setError(e instanceof Error ? e.message : "Unable to load weather");
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   }, [cityId]);
 
   useEffect(() => {
-    void load();
+    const ac = new AbortController();
+    void load(ac.signal);
+    return () => ac.abort();
   }, [load]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
+      if (document.visibilityState === "hidden") return;
       void load();
     }, intervalMs);
     return () => window.clearInterval(timer);

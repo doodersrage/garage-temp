@@ -52,7 +52,7 @@ export function resolveOgImageAlt(pathname: string): string {
     return `${BRAND_NAME} opt-in freeze-risk map of city-level probe temperatures`;
   }
   if (path.startsWith("/demo")) {
-    return `${BRAND_NAME} live probe temperature demo — no account required`;
+    return `${BRAND_NAME} live probe temperature curves — no account required`;
   }
   if (path.startsWith("/share-kit")) {
     return `${BRAND_NAME} share kit — freeze map embeds and community post copy`;
@@ -68,6 +68,9 @@ export function resolveOgImageAlt(pathname: string): string {
   }
   if (path.startsWith("/android")) {
     return `${BRAND_NAME} Android companion — early access on GitHub while Google Play review finishes`;
+  }
+  if (path === "/" || path === "") {
+    return `${BRAND_NAME} live telemetry graph — probe curves with humidity, dew point, and freeze alerts`;
   }
 
   return `${BRAND_NAME} environmental sensor dashboard with live curves and freeze alerts`;

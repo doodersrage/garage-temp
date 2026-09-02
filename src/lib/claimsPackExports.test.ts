@@ -19,6 +19,7 @@ const basePack: ClaimsPackData = {
   freezeHours: {
     coldestF: 30,
     hoursBelow34: 4.5,
+    degreeHoursBelow: 9,
     readingsBelow34: 12,
     totalReadings: 500,
   },

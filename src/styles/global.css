@@ -991,6 +991,68 @@
     font-size: 0.9375rem;
   }
 
+  .home-audiences {
+    margin: 2.75rem 0 0;
+    padding: 1.85rem 0 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .home-audiences-intro {
+    margin-bottom: 1.25rem;
+    max-width: 40rem;
+  }
+
+  .home-audiences-title {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.45rem, 3vw, 1.85rem);
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+  }
+
+  .home-audiences-lede {
+    margin: 0;
+    color: var(--color-text-muted);
+    line-height: 1.55;
+  }
+
+  .home-audiences-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .home-audiences-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+  }
+
+  .home-audience {
+    padding: 1.15rem 1.2rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-raised);
+  }
+
+  .home-audience-title {
+    margin: 0 0 0.45rem;
+    font-size: 1.05rem;
+    font-weight: 650;
+  }
+
+  .home-audience-copy {
+    margin: 0 0 0.75rem;
+    color: var(--color-text-muted);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  .home-audience-cta {
+    font-size: 0.9375rem;
+  }
+
   .home-pricing-ladder {
     display: grid;
     gap: 0.85rem;
@@ -3328,6 +3390,38 @@
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
     background-color: var(--color-surface-raised);
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .history-chart-canvas {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: clamp(168px, 48vw, 220px);
+  }
+
+  .history-chart-host {
+    min-height: 260px;
+  }
+
+  @media (max-width: 640px) {
+    .history-chart-wrap {
+      padding: 0.85rem;
+    }
+
+    .history-chart-host {
+      min-height: 220px;
+    }
+
+    .chart-threshold-controls {
+      gap: 0.65rem;
+    }
+
+    .chart-threshold-field {
+      min-width: calc(50% - 0.4rem);
+      flex: 1 1 8rem;
+    }
   }
 
   .history-chart-title {

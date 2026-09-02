@@ -51,6 +51,8 @@ const schema = [
   description="See live ThermalTrace probe readings with no account required. Then register to connect your own ESP32 or Arduino and set freeze alerts."
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede"]}
+  ogImage="/og-dashboard.jpg"
+  ogImageAlt="ThermalTrace live probe temperature curves — no account required"
 >
   <div class="page-shell page-stack">
     <PageHeader
@@ -95,7 +97,7 @@ const schema = [
       <figure class="demo-freeze-visual">
         <Image
           src={historyChart}
-          alt="ThermalTrace temperature trend with freeze threshold at 34°F"
+          alt="ThermalTrace temperature trend with humidity, dew point, and freeze threshold at 34°F"
           widths={[480, 720, 960]}
           sizes="(max-width: 767px) 100vw, 42vw"
           class="demo-freeze-img"

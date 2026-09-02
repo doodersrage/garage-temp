@@ -111,6 +111,11 @@ const navItems = [
     match: (path: string) => path.startsWith("/freeze-map"),
   },
   {
+    href: "/property-management",
+    label: "Landlords",
+    match: (path: string) => path.startsWith("/property-management"),
+  },
+  {
     href: "/guides",
     label: "Guides",
     match: (path: string) =>
@@ -276,14 +281,14 @@ const registerServiceWorker =
 								<ul class="site-footer-links">
 									<li><a href="/pricing">Pricing</a></li>
 									<li><a href="/compare">Compare</a></li>
+									<li><a href="/demo">Live demo</a></li>
+									<li><a href="/claims-pack">Claims pack</a></li>
+									<li><a href="/property-management">Property management</a></li>
+									<li><a href="/freeze-map">Freeze map</a></li>
+									<li><a href="/freeze-season">Freeze season</a></li>
 									<li><a href="/android">Android app</a></li>
 									<li><a href="/integrations">Integrations</a></li>
 									<li><a href="/integrations/home-assistant">Home Assistant</a></li>
-									<li><a href="/freeze-map">Freeze map</a></li>
-									<li><a href="/freeze-season">Freeze season</a></li>
-									<li><a href="/claims-pack">Claims pack</a></li>
-									<li><a href="/property-management">Property management</a></li>
-									<li><a href="/demo">Live demo</a></li>
 									<li><a href="/system-status">System status</a></li>
 								</ul>
 							</div>
@@ -291,7 +296,7 @@ const registerServiceWorker =
 								<p class="site-footer-heading">Learn</p>
 								<ul class="site-footer-links">
 									<li><a href="/guides">Guides</a></li>
-									<li><a href="/about">About library</a></li>
+									<li><a href="/about">All articles</a></li>
 									<li><a href="/docs/api">HTTP API</a></li>
 									<li><a href="/stories">Customer stories</a></li>
 									<li><a href="/about/probe-demo">Probe demo</a></li>

@@ -164,16 +164,18 @@ export default function HistoryChart({
   }, [points, freezeThresholdF]);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || points.length < 2) return;
+    const canvasEl = canvasRef.current;
+    if (!canvasEl || points.length < 2) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvasEl.getContext("2d");
     if (!ctx) return;
     const g = ctx;
+    const canvas = canvasEl;
 
+    function draw() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
+    const width = Math.max(1, canvas.clientWidth);
+    const height = Math.max(1, canvas.clientHeight);
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -400,6 +402,14 @@ export default function HistoryChart({
       width - pad.right,
       height - 8,
     );
+    }
+
+    draw();
+    const ro = new ResizeObserver(() => {
+      draw();
+    });
+    ro.observe(canvas);
+    return () => ro.disconnect();
   }, [
     points,
     priorYearPoints,
@@ -469,8 +479,7 @@ export default function HistoryChart({
       </p>
       <canvas
         ref={canvasRef}
-        class="w-full"
-        style={{ height: "220px" }}
+        class="w-full history-chart-canvas"
         role="img"
         aria-label={`Line chart of ${title}`}
         aria-describedby="history-chart-summary"

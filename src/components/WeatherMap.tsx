@@ -100,6 +100,12 @@ export default function WeatherMap({
 
         mapRef.current?.remove();
         mapRef.current = null;
+        // Leaflet leaves a private id on reused DOM nodes; clear it to avoid
+        // "Map container is already initialized" console errors on remount.
+        const leafletEl = el as HTMLElement & { _leaflet_id?: number };
+        if (leafletEl._leaflet_id != null) {
+          delete leafletEl._leaflet_id;
+        }
         el.replaceChildren();
 
         const map = L.map(el).setView([lat, lon], zoom);

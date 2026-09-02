@@ -25,7 +25,7 @@ export const marketingFaqs = {
     {
       question: "Is ThermalTrace free?",
       answer:
-        "Yes—there is a free plan with live curves, 7-day history, threshold freeze and leak alerts, and one family live share link (7-day expiry). Member adds 90-day history, CSV export, more devices, and forecast freeze warnings; Pro adds 1-year+ history, NWS cold-risk alerts, SMS, push, unlimited share scopes (history, metrics, never-expire), a printable claims evidence pack, webhooks, and a trial. Annual Member and Pro billing is discounted versus monthly.",
+        "Yes—there is a free plan with live curves, 7-day history, threshold freeze and leak alerts, and one family live share link (7-day expiry). Member adds 90-day history, CSV export, more devices, and forecast freeze warnings; Pro adds 1-year+ history, official NWS freeze and cold alerts, SMS, push, unlimited share scopes (history, metrics, never-expire), a printable claims evidence pack, webhooks, and a trial. Annual Member and Pro billing is discounted versus monthly.",
     },
     {
       question: "Why do I need an account?",
@@ -52,7 +52,7 @@ export const marketingFaqs = {
     {
       question: "When should I upgrade to Member or Pro?",
       answer:
-        "Choose Member for 90-day history, CSV export, more devices, and predictive forecast freeze (cold-risk) alerts. Choose Pro for 1-year+ history, official NWS freeze/cold alerts, SMS/WhatsApp, browser push, unlimited share links (history, metrics, embeds, never-expire), a printable claims / insurance evidence pack, inbound/outbound webhooks, Prometheus metrics, and a 14-day trial. Free already includes one family live link. Annual billing is discounted versus paying monthly.",
+        "Choose Member for 90-day history, CSV export, more devices, and predictive forecast freeze warnings. Choose Pro for 1-year+ history, official NWS freeze and cold alerts, SMS/WhatsApp, browser push, unlimited share links (history, metrics, embeds, never-expire), a printable claims / insurance evidence pack, inbound/outbound webhooks, Prometheus metrics, and a 14-day trial. Free already includes one family live link. Annual billing is discounted versus paying monthly.",
     },
     {
       question: "What is the claims / insurance evidence pack?",
@@ -128,7 +128,7 @@ export const marketingFaqs = {
     {
       question: "What should I ask about before contacting support?",
       answer:
-        "Probe wiring, ingest payloads, freeze alerts, and dashboard setup are covered in the guides hub and About library. Use this form for account, billing, Android launch notes, or questions the docs do not answer.",
+        "Probe wiring, ingest payloads, freeze alerts, and dashboard setup are covered in the guides hub and all articles library. Use this form for account, billing, Android launch notes, or questions the docs do not answer.",
     },
     {
       question: "Should I use the form or GitHub?",

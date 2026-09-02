@@ -32,7 +32,8 @@ describe("ogMeta", () => {
 
   it("returns descriptive alts", () => {
     expect(resolveOgImageAlt("/freeze-map")).toMatch(/freeze-risk map/i);
-    expect(resolveOgImageAlt("/")).toMatch(/dashboard/i);
+    expect(resolveOgImageAlt("/")).toMatch(/humidity/i);
+    expect(resolveOgImageAlt("/demo")).toMatch(/probe temperature curves/i);
     expect(resolveOgImageAlt("/guides")).toMatch(/guides for probes/i);
   });
 });
