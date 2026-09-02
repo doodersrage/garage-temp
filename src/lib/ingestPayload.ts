@@ -1,6 +1,7 @@
 import type { SensorKind } from "./sensorKinds";
 import { isSensorKind } from "./sensorKinds";
 import type { TempReading } from "./tempFeedConfig";
+import { parseStandardFeedPayload } from "./feedFormats";
 
 export type TypedSensorValue = {
   key: string;
@@ -51,6 +52,13 @@ export function parseIngestPayload(payload: unknown): {
         label: typeof row.label === "string" ? row.label : undefined,
         unit: typeof row.unit === "string" ? row.unit : undefined,
       });
+    }
+  }
+
+  if (Object.keys(tempProbes).length === 0 && typed.length === 0) {
+    const standard = parseStandardFeedPayload(payload);
+    if (standard.format) {
+      return { tempProbes: standard.tempProbes, typed: standard.typed };
     }
   }
 

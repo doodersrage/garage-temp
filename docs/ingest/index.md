@@ -92,6 +92,36 @@ Matches the Ethernet garage firmware JSON shape:
 
 Supported `kind` values: `temperature`, `humidity`, `co2`, `pressure`, `pm25`, `voc`, `level`, `energy`, `door`, `power`, `flood`, `motion`, `generic`.
 
+### SenML (RFC 8428)
+
+SenML JSON arrays are auto-detected when native shapes are absent. Temperature uses unit `Cel` or `degF`; humidity uses `%RH`. Probe keys come from the SenML name (last path segment).
+
+```json
+[
+  { "bn": "thermaltrace/garage/", "n": "0", "u": "Cel", "v": 18.5 },
+  { "n": "0", "u": "%RH", "v": 42 },
+  { "n": "door", "vb": true }
+]
+```
+
+Example feed: `https://thermaltrace.dev/api/feeds/example?format=senml`
+
+### Home Assistant REST sensor
+
+Single-entity REST responses (`state` + `attributes.unit_of_measurement`) are also auto-detected:
+
+```json
+{
+  "state": "65.3",
+  "attributes": {
+    "unit_of_measurement": "°F",
+    "friendly_name": "Garage temperature"
+  }
+}
+```
+
+Example feed: `https://thermaltrace.dev/api/feeds/example?format=homeassistant`
+
 ## MQTT-over-HTTP bridge
 
 Cloudflare Workers are not an MQTT broker. Keep Mosquitto / Home Assistant MQTT on your LAN and mirror readings with:

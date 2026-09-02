@@ -28,13 +28,17 @@ const docUrl = getExampleFeedDocumentUrl(Astro.site);
       <a class="btn-ghost" href={`${feedUrl}?format=ingest`} target="_blank" rel="noreferrer">
         Push sample JSON
       </a>
+      <a class="btn-ghost" href={`${feedUrl}?format=senml`} target="_blank" rel="noreferrer">
+        SenML JSON
+      </a>
       <a class="btn-ghost" href={docUrl} target="_blank" rel="noreferrer">
         Setup document
       </a>
     </div>
     <p class="mb-0 text-sm text-[var(--color-text-muted)]">
       Map probe keys <code>0</code>, <code>1</code>, <code>2</code>, and <code>avg</code> under JSON root
-      <code>temp</code>. Optional query params: <code>cityId</code>, <code>door=1</code>, <code>sun=80</code>.
+      <code>temp</code>, or use <code>?format=senml</code> / <code>?format=homeassistant</code> for industry-style JSON.
+      Optional query params: <code>cityId</code>, <code>door=1</code>, <code>sun=80</code>.
     </p>
   </div>
 </aside>

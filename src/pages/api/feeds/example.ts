@@ -10,6 +10,9 @@ import { resolveSiteUrl } from "../../../lib/schemaMarkup";
 
 function parseFormat(raw: string | null): ExampleFeedFormat {
   if (raw === "ingest" || raw === "document") return raw;
+  if (raw === "senml" || raw === "homeassistant" || raw === "ha") {
+    return raw === "ha" ? "homeassistant" : raw;
+  }
   return "pull";
 }
 

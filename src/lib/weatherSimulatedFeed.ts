@@ -8,8 +8,9 @@ import {
   type DemoControls,
 } from "./probeDemo";
 import type { TempReading } from "./tempFeedConfig";
+import { buildHomeAssistantStatePayload, buildSenMLPack } from "./feedFormats";
 
-export type ExampleFeedFormat = "pull" | "ingest" | "document";
+export type ExampleFeedFormat = "pull" | "ingest" | "document" | "senml" | "homeassistant";
 
 export type WeatherSimulatedFeedOptions = {
   cityId?: string | null;
@@ -228,19 +229,34 @@ export function formatExampleFeedResponse(
   if (format === "ingest") {
     return payload.ingest as unknown as Record<string, unknown>;
   }
+  if (format === "senml") {
+    return buildSenMLPack(payload.pull.temp) as unknown as Record<string, unknown>;
+  }
+  if (format === "homeassistant") {
+    return buildHomeAssistantStatePayload(payload.pull.temp, "0");
+  }
   return {
     feed_url: feedUrl,
     pull_url: feedUrl,
     ingest_sample_url: `${feedUrl}?format=ingest`,
+    senml_url: `${feedUrl}?format=senml`,
+    homeassistant_url: `${feedUrl}?format=homeassistant`,
     pull: payload.pull,
     ingest: payload.ingest,
+    senml: buildSenMLPack(payload.pull.temp),
+    homeassistant: buildHomeAssistantStatePayload(payload.pull.temp, "0"),
     meta: payload.meta,
     probe_labels: payload.probeLabels,
+    formats: {
+      native: "Nested temp object (default pull + classic push)",
+      senml: "RFC 8428 SenML JSON array — auto-detected on ingest and pull",
+      homeassistant: "Home Assistant REST sensor { state, attributes } — auto-detected",
+    },
     usage: {
       pull:
-        "Dashboard → Devices → Edit pull feeds → paste feed_url, JSON root temp, map probe keys 0/1/2/avg.",
+        "Dashboard → Devices → Edit pull feeds → paste feed_url, JSON root temp (or use SenML/HA JSON directly). Map probe keys 0/1/2/avg.",
       push:
-        "POST the ingest object to /api/ingest/<your-device-key> (classic temp object works; sensors[] is optional).",
+        "POST native ingest, SenML array, or HA state JSON to /api/ingest/<your-device-key>.",
     },
   };
 }

@@ -1,5 +1,6 @@
 import { isSafeHttpsUrl } from "./ssrfGuard";
 import { getDefaultPublicFeedUrl } from "./exampleFeed";
+import { parseStandardFeedPayload } from "./feedFormats";
 
 export type TempReading = {
   c: number;
@@ -109,30 +110,33 @@ export function parseTempFeedPayload(
 
   const rootKey = sanitizeJsonRoot(jsonRoot);
   const tempRoot = (payload as Record<string, unknown>)[rootKey];
-  if (!tempRoot || typeof tempRoot !== "object" || Array.isArray(tempRoot)) {
-    throw new Error(`Temperature feed is missing a "${rootKey}" object`);
-  }
+  if (tempRoot && typeof tempRoot === "object" && !Array.isArray(tempRoot)) {
+    const probes: Record<string, TempReading> = {};
 
-  const probes: Record<string, TempReading> = {};
+    for (const [key, value] of Object.entries(tempRoot as Record<string, unknown>)) {
+      if (!value || typeof value !== "object") {
+        continue;
+      }
 
-  for (const [key, value] of Object.entries(tempRoot as Record<string, unknown>)) {
-    if (!value || typeof value !== "object") {
-      continue;
+      const reading = value as Record<string, unknown>;
+      probes[key] = normalizeReading({
+        c: coerceNumber(reading.c) ?? undefined,
+        f: coerceNumber(reading.f) ?? undefined,
+        h: coerceNumber(reading.h) ?? undefined,
+      });
     }
 
-    const reading = value as Record<string, unknown>;
-    probes[key] = normalizeReading({
-      c: coerceNumber(reading.c) ?? undefined,
-      f: coerceNumber(reading.f) ?? undefined,
-      h: coerceNumber(reading.h) ?? undefined,
-    });
+    if (Object.keys(probes).length > 0) {
+      return ensureAverageProbe(probes);
+    }
   }
 
-  if (Object.keys(probes).length === 0) {
-    throw new Error("Temperature feed did not contain any probes");
+  const standard = parseStandardFeedPayload(payload);
+  if (standard.format && Object.keys(standard.tempProbes).length > 0) {
+    return ensureAverageProbe(standard.tempProbes);
   }
 
-  return ensureAverageProbe(probes);
+  throw new Error(`Temperature feed is missing a "${rootKey}" object`);
 }
 
 export function parseFeedDeviceMeta(payload: unknown): Record<string, unknown> {

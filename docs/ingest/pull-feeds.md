@@ -30,6 +30,15 @@ Pull feeds expect nested probe objects under the configured root—not flat push
 
 If probes live under another top-level key (for example `readings`), set **JSON root key** to that name. Optional top-level `battery_pct` / `rssi` (or nested `meta`) update device health.
 
+## Alternate JSON shapes (auto-detected)
+
+If the configured root is missing, ThermalTrace also accepts:
+
+- **SenML JSON** (RFC 8428 array) — probe keys from SenML names; `Cel` / `degF` for temperature, `%RH` for humidity
+- **Home Assistant REST** — `{ "state": "65.3", "attributes": { "unit_of_measurement": "°F" } }`
+
+Try the public example: `https://thermaltrace.dev/api/feeds/example?format=senml` or `?format=homeassistant`.
+
 ## Relay pattern
 
 When the MCU cannot do TLS:
@@ -47,7 +56,7 @@ See [python feeds](https://thermaltrace.dev/about/python-feeds) and the [fast-ap
 | Who initiates | Your device | ThermalTrace |
 | Firewall | Device needs outbound HTTPS | Feed URL must be publicly reachable |
 | Auth | Per-device key in path | HTTPS URL |
-| JSON shape | Flat keys, `temp` object, or `sensors[]` | Nested probes under configurable root (default `temp`) |
+| JSON shape | Flat keys, `temp` object, or `sensors[]` | Nested probes under configurable root (default `temp`); SenML or HA REST auto-detected |
 | Best for | ESP32 / battery nodes | Always-on LAN servers with a public tunnel or relay |
 
 ## Related
