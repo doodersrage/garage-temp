@@ -1,0 +1,40 @@
+---
+import { getExampleFeedDocumentUrl, getExampleFeedUrl } from "../lib/exampleFeed";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+const feedUrl = getExampleFeedUrl(Astro.site);
+const docUrl = getExampleFeedDocumentUrl(Astro.site);
+---
+<aside class:list={["card", className]} id="example-feed">
+  <h2 class="card-title">Example weather-based feed</h2>
+  <p class="card-subtitle mb-4">
+    Public HTTPS JSON driven by live outdoor weather — three simulated shop probes plus
+    <code>avg</code>. Use it to test pull feeds before your hardware is online, or copy the
+    push payload for curl smoke tests.
+  </p>
+  <div class="flex flex-col gap-3">
+    <div>
+      <p class="form-label mb-1">Pull feed URL</p>
+      <code class="text-xs break-all">{feedUrl}</code>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a class="btn-secondary" href={feedUrl} target="_blank" rel="noreferrer">
+        Open pull JSON
+      </a>
+      <a class="btn-ghost" href={`${feedUrl}?format=ingest`} target="_blank" rel="noreferrer">
+        Push sample JSON
+      </a>
+      <a class="btn-ghost" href={docUrl} target="_blank" rel="noreferrer">
+        Setup document
+      </a>
+    </div>
+    <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+      Map probe keys <code>0</code>, <code>1</code>, <code>2</code>, and <code>avg</code> under JSON root
+      <code>temp</code>. Optional query params: <code>cityId</code>, <code>door=1</code>, <code>sun=80</code>.
+    </p>
+  </div>
+</aside>

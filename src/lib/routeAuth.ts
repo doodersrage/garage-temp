@@ -30,6 +30,7 @@ const publicApiExactPaths = new Set([
   "/api/stripe/webhook",
   "/api/home/demo-temps",
   "/api/home/weather",
+  "/api/feeds/example",
 ]);
 
 /** Public API path prefixes (e.g. token-based inbound webhooks). */

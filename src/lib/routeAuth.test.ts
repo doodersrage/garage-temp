@@ -6,6 +6,7 @@ describe("pathRequiresAuth", () => {
     expect(pathRequiresAuth("/api/stripe/webhook")).toBe(false);
     expect(pathRequiresAuth("/api/home/demo-temps")).toBe(false);
     expect(pathRequiresAuth("/api/home/weather")).toBe(false);
+    expect(pathRequiresAuth("/api/feeds/example")).toBe(false);
     expect(pathRequiresAuth("/")).toBe(false);
     expect(pathRequiresAuth("/signin")).toBe(false);
   });

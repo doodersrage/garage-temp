@@ -1,5 +1,6 @@
 ---
 import AboutArticle from "../../components/AboutArticle.astro";
+import ExampleFeedCard from "../../components/ExampleFeedCard.astro";
 import { getAboutPage } from "../../lib/aboutPages";
 import { getAboutPhoto } from "../../lib/aboutPhotos";
 
@@ -93,7 +94,12 @@ const hero = getAboutPhoto("ethernet-cable");
     </li>
   </ol>
 
-  <h3>Example curl</h3>
+  <h3>Example curl (push)</h3>
+  <p class="text-sm text-[var(--color-text-muted)]">
+    Fetch a live sample body from the
+    <a class="text-link" href="/api/feeds/example?format=ingest">example ingest feed</a>
+    (weather-driven), then POST it to your device key.
+  </p>
   <pre><code>{`curl -X POST "https://thermaltrace.dev/api/ingest/YOUR_DEVICE_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"temp1": 42.5, "door1": false, "battery": 87, "rssi": -62}'`}</code></pre>
@@ -105,6 +111,7 @@ const hero = getAboutPhoto("ethernet-cable");
   </p>
 
   <h2>Pull feed</h2>
+  <ExampleFeedCard class="mb-6" />
   <ol>
     <li>
       Confirm your feed returns HTTPS JSON. Classic shape (default root key <code>temp</code>):

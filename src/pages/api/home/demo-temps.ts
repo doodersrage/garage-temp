@@ -1,14 +1,16 @@
 import type { APIRoute } from "astro";
-import { fetchTemps } from "../../../lib/FetchTemps";
-import {
-  buildFeedDisplayGroups,
-  getDefaultTempFeeds,
-  getDefaultTempProbes,
-} from "../../../lib/tempFeedConfig";
 import { checkDemoTempsRateLimit } from "../../../lib/demoTempsLimits";
+import { fetchWeatherSimulatedFeed } from "../../../lib/weatherSimulatedFeed";
 
-/** Public demo garage temperatures for signed-out Home visitors. */
-export const GET: APIRoute = async ({ clientAddress }) => {
+const PROBE_LABELS: Record<string, string> = {
+  "0": "North wall",
+  "1": "Door zone",
+  "2": "Workbench",
+  avg: "Average",
+};
+
+/** Public demo probe temperatures for signed-out Home visitors. */
+export const GET: APIRoute = async ({ clientAddress, url }) => {
   const rate = checkDemoTempsRateLimit(clientAddress || "unknown");
   if (!rate.ok) {
     return new Response(JSON.stringify({ error: "Too many requests" }), {
@@ -20,32 +22,27 @@ export const GET: APIRoute = async ({ clientAddress }) => {
     });
   }
 
-  const feeds = getDefaultTempFeeds();
-  const probes = getDefaultTempProbes();
+  const cityId = url.searchParams.get("cityId")?.trim() || undefined;
+  const { pull, meta } = await fetchWeatherSimulatedFeed({ cityId });
 
-  const results = await fetchTemps({
-    feeds,
-    probes,
-    saveToDatabase: false,
-  });
-
-  const groups = buildFeedDisplayGroups(feeds, probes, results).map((group) => ({
-    feedId: group.feedId,
-    feedName: group.feedName,
-    enabled: group.enabled,
-    error: group.error,
-    probes: group.probes.map((probe) => ({
-      key: probe.key,
-      label: probe.label,
-      data: probe.data
-        ? { f: probe.data.f, c: probe.data.c, h: probe.data.h }
-        : null,
-    })),
-  }));
+  const groups = [
+    {
+      feedId: "example",
+      feedName: "Example shop (weather simulated)",
+      enabled: true,
+      error: undefined as string | undefined,
+      probes: Object.entries(pull.temp).map(([key, data]) => ({
+        key,
+        label: PROBE_LABELS[key] ?? key,
+        data: { f: data.f, c: data.c, h: data.h },
+      })),
+    },
+  ];
 
   return new Response(
     JSON.stringify({
-      updatedAt: new Date().toISOString(),
+      updatedAt: meta.generated_at,
+      outdoorTempF: meta.outdoor_temp_f,
       groups,
     }),
     {

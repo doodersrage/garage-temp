@@ -49,7 +49,7 @@ const canAddMore = existingFeeds.length < MAX_TEMP_FEEDS;
               id={`feed_${index}_url`}
               name={`feed_${index}_url`}
               value={feed.url}
-              placeholder="https://example.com/temperature.json"
+              placeholder="https://thermaltrace.dev/api/feeds/example"
               required
             />
             <FeedTestButton
@@ -120,7 +120,7 @@ const canAddMore = existingFeeds.length < MAX_TEMP_FEEDS;
               type="url"
               id={`feed_${existingFeeds.length}_url`}
               name={`feed_${existingFeeds.length}_url`}
-              placeholder="https://example.com/temperature.json"
+              placeholder="https://thermaltrace.dev/api/feeds/example"
             />
           </div>
           <div class="form-field mb-0">
