@@ -1,0 +1,79 @@
+---
+/** Inline freeze + email setup on Devices after first ingest. */
+interface Props {
+  show: boolean;
+  freezeThresholdF?: number;
+  email?: string | null;
+  alertSaved?: boolean;
+  testSent?: boolean;
+  testError?: boolean;
+}
+
+const {
+  show,
+  freezeThresholdF = 34,
+  email = "",
+  alertSaved = false,
+  testSent = false,
+  testError = false,
+} = Astro.props;
+
+const redirectTo = "/dashboard/temperature";
+---
+
+{show && (
+  <section class="card" id="first-alert-setup">
+    <h2 class="card-title">Set your first freeze alert</h2>
+    <p class="card-subtitle mb-4">
+      One threshold and an email — no need to leave Devices. You can add Telegram, Discord, and more later.
+    </p>
+    {alertSaved && !testError && (
+      <p class="alert-success mt-0 mb-4">
+        {testSent
+          ? "Freeze alert saved and test sent — check your inbox."
+          : "Freeze alert saved."}
+      </p>
+    )}
+    {testError && (
+      <p class="alert-warning mt-0 mb-4">
+        Settings saved, but the test could not be delivered. Confirm the email address or try again from Alerts.
+      </p>
+    )}
+    <form action="/api/user/alert-essentials" method="post" class="space-y-3">
+      <input type="hidden" name="redirect" value={redirectTo} />
+      <div class="flex flex-wrap gap-4">
+        <div class="form-field mb-0">
+          <label class="form-label" for="first-alert-freeze">Freeze threshold (°F)</label>
+          <input
+            class="form-input"
+            type="number"
+            step="0.5"
+            id="first-alert-freeze"
+            name="freeze_threshold_f"
+            value={freezeThresholdF}
+            required
+          />
+        </div>
+        <div class="form-field mb-0 min-w-[16rem] flex-1">
+          <label class="form-label" for="first-alert-email">Alert email</label>
+          <input
+            class="form-input"
+            type="email"
+            id="first-alert-email"
+            name="alert_email"
+            value={email ?? ""}
+            placeholder="you@example.com"
+            required
+          />
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <button class="btn-primary" type="submit" name="also_test" value="1">
+          Save + send test
+        </button>
+        <button class="btn-secondary" type="submit">Save only</button>
+        <a class="btn-ghost" href="/dashboard/alerts#alert-section-essentials">Full alert settings</a>
+      </div>
+    </form>
+  </section>
+)}

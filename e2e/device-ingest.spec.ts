@@ -14,8 +14,6 @@ test.describe("device ingest", () => {
 
     await signIn(page, "/dashboard/temperature?tab=push");
 
-    const deviceName = `E2E ingest ${Date.now()}`;
-    await page.locator("#device-name").fill(deviceName);
     await page.getByRole("button", { name: /Create push device/i }).click();
 
     // Device creation stores the key in a flash cookie — not the URL.

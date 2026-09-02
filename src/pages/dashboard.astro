@@ -370,6 +370,9 @@ if (hasHistory) analyticsEvents.push({ name: "onboarding_step_complete", props: 
 if (hasEmailAlerts) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "alerts" } });
 if (hasTestAlert) analyticsEvents.push({ name: "onboarding_step_complete", props: { step: "alert_test" } });
 if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
+if (Astro.url.searchParams.get("demo_pull") === "1") {
+  analyticsEvents.push({ name: "demo_pull_started" });
+}
 
 type OverviewBanner = { id: string; priority: number; show: boolean };
 const overviewBannerQueue: OverviewBanner[] = [

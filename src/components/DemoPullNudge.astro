@@ -4,9 +4,10 @@ import { getExampleFeedUrl } from "../lib/exampleFeed";
 
 interface Props {
   show: boolean;
+  redirectTo?: string;
 }
 
-const { show } = Astro.props;
+const { show, redirectTo = "/dashboard" } = Astro.props;
 const exampleFeedUrl = getExampleFeedUrl(Astro.site);
 ---
 
@@ -14,12 +15,13 @@ const exampleFeedUrl = getExampleFeedUrl(Astro.site);
   <section class="card" id="demo-pull-nudge">
     <h2 class="card-title">Try without hardware</h2>
     <p class="card-subtitle mb-4">
-      Not ready for ESP wiring? Add our public example HTTPS feed — probe keys auto-import and Home shows
-      simulated shop temperatures in one click.
+      One click adds our public example HTTPS feed — Overview shows live temperatures with no ESP required.
     </p>
-    <DemoPullQuickStart client:visible exampleFeedUrl={exampleFeedUrl} />
-    <p class="mt-3 mb-0 text-sm text-[var(--color-text-muted)]">
-      Or open <a class="text-link" href="/dashboard/temperature?tab=pull#example-feed">Pull feeds</a> to paste the URL yourself.
-    </p>
+    <DemoPullQuickStart
+      client:visible
+      exampleFeedUrl={exampleFeedUrl}
+      redirectTo={redirectTo}
+      buttonLabel="Try demo feed"
+    />
   </section>
 )}

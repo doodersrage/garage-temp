@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildArduinoHttpClientSnippet,
+  buildEspHomeHttpRequestSnippet,
   buildWaitingIngestCurl,
   buildWaitingIngestPayload,
 } from "./waitingIngest";
@@ -25,5 +27,14 @@ describe("waitingIngest", () => {
     ]);
     expect(curl).toContain("/api/ingest/YOUR_KEY");
     expect(curl).toContain('"temp1":42.5');
+  });
+
+  it("builds ESPHome and Arduino firmware presets", () => {
+    const url = "https://thermaltrace.dev/api/ingest/abc123";
+    const sensors = [{ key: "temp1", kind: "temperature" as const }];
+    expect(buildEspHomeHttpRequestSnippet(url, sensors)).toContain(
+      "url: https://thermaltrace.dev/api/ingest/abc123",
+    );
+    expect(buildArduinoHttpClientSnippet(url, sensors)).toContain(url);
   });
 });

@@ -56,3 +56,33 @@ export function buildWaitingIngestCurl(
   const base = origin.replace(/\/+$/, "");
   return `curl -X POST "${base}/api/ingest/${keyPlaceholder}" \\\n  -H "Content-Type: application/json" \\\n  -d '${body}'`;
 }
+
+export function buildEspHomeHttpRequestSnippet(
+  ingestUrl: string,
+  sensors: WaitingSensorHint[] = [{ key: "temp1", kind: "temperature" }],
+): string {
+  const payload = buildWaitingIngestPayload(sensors);
+  const body = JSON.stringify(payload);
+  return `http_request.post:
+  url: ${ingestUrl}
+  headers:
+    Content-Type: application/json
+  body: '${body}'`;
+}
+
+export function buildArduinoHttpClientSnippet(
+  ingestUrl: string,
+  sensors: WaitingSensorHint[] = [{ key: "temp1", kind: "temperature" }],
+): string {
+  const payload = buildWaitingIngestPayload(sensors);
+  const body = JSON.stringify(payload).replace(/"/g, '\\"');
+  return `// After WiFiClientSecure client is connected:
+client.println("POST /api/ingest/YOUR_KEY HTTP/1.1");
+client.println("Host: thermaltrace.dev");
+client.println("Content-Type: application/json");
+client.print("Content-Length: ");
+client.println(strlen("${body}"));
+client.println();
+client.print("${body}");
+// Prefer the full URL: ${ingestUrl}`;
+}

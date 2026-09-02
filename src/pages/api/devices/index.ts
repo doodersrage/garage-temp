@@ -290,7 +290,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?error=device_limit`);
   }
 
-  const name = formData.get("name")?.toString().trim() || "Push device";
+  const name = formData.get("name")?.toString().trim() || "Workshop probe";
   const rawKey = randomKey();
   const hash = await sha256Hex(rawKey);
   const prefix = rawKey.slice(0, 8);

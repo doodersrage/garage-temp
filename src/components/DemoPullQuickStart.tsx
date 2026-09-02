@@ -3,11 +3,13 @@ import { useState } from "preact/hooks";
 interface Props {
   exampleFeedUrl: string;
   redirectTo?: string;
+  buttonLabel?: string;
 }
 
 export default function DemoPullQuickStart({
   exampleFeedUrl,
-  redirectTo = "/dashboard/temperature?tab=pull",
+  redirectTo = "/dashboard",
+  buttonLabel = "Try demo feed",
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -42,7 +44,18 @@ export default function DemoPullQuickStart({
         setStatus(data.error ?? "Could not save example feed.");
         return;
       }
-      window.location.href = data.redirect ?? `${redirectTo}&pull_saved=1&demo_pull=1`;
+      try {
+        await fetch("/api/devices/pull-fetch", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { Accept: "application/json" },
+        });
+      } catch {
+        // Still land on Overview; scheduled poll will catch up.
+      }
+      const next = data.redirect ?? redirectTo;
+      const joiner = next.includes("?") ? "&" : "?";
+      window.location.href = `${next}${joiner}pull_saved=1&demo_pull=1`;
     } catch {
       setStatus("Could not save example feed.");
     } finally {
@@ -53,10 +66,10 @@ export default function DemoPullQuickStart({
   return (
     <div class="flex flex-wrap items-center gap-3">
       <button type="button" class="btn-primary" disabled={loading} onClick={() => void startExampleFeed()}>
-        {loading ? "Setting up…" : "Try example pull feed"}
+        {loading ? "Setting up…" : buttonLabel}
       </button>
       <span class="text-sm text-[var(--color-text-muted)]">
-        Live weather JSON — no hardware required. Saves, discovers probes, then fetch readings.
+        Live weather JSON — no hardware required.
       </span>
       {status ? <span class="text-sm text-[var(--color-danger)]">{status}</span> : null}
     </div>
