@@ -1105,19 +1105,14 @@
   }
 
   .product-shot--peek {
-    max-width: 36rem;
+    max-width: min(100%, 28rem);
   }
 
   .product-shot--peek .product-shot-img {
-    max-height: 11.5rem;
-    object-fit: cover;
-    object-position: center top;
-  }
-
-  @media (min-width: 768px) {
-    .product-shot--peek .product-shot-img {
-      max-height: 13rem;
-    }
+    /* Scale the whole frame — do not crop; readability over height savings. */
+    height: auto;
+    max-height: none;
+    object-fit: contain;
   }
 
   .product-shot-caption {
