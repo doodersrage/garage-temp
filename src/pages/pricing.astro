@@ -427,26 +427,26 @@ const schema = [
       )}
     </section>
 
-    <ProductScreenshot
-      shot="history-chart"
-      peek
-      caption="Member and Pro keep longer curves — Free still shows live readings and threshold freeze alerts."
-    />
-
-    <section class="card" id="integrations">
-      <h2 class="card-title">Integrations on Pro</h2>
-      <p class="card-subtitle mb-4">
-        Free already includes one family live share link. Pro unlocks history/metrics scopes, never-expire links,
-        inbound snooze webhooks, outbound alert hooks, and the
-        <a class="text-link" href="/integrations/home-assistant">official Home Assistant HACS integration</a>
-        at full power. Keep MQTT on your LAN; use ThermalTrace for household freeze SMS, history, and off-site alerts.
-      </p>
-      <div class="flex flex-wrap gap-3">
-        <a class="btn-primary" href="/integrations">All integrations</a>
-        <a class="btn-secondary" href="/integrations/home-assistant">HACS install guide</a>
-        <a class="btn-ghost" href="/docs/api">HTTP API</a>
-      </div>
-    </section>
+    <div class="product-shot-row">
+      <ProductScreenshot
+        shot="history-chart"
+        caption="Member and Pro keep longer curves — Free still shows live readings and threshold freeze alerts."
+      />
+      <section class="card" id="integrations">
+        <h2 class="card-title">Integrations on Pro</h2>
+        <p class="card-subtitle mb-4">
+          Free already includes one family live share link. Pro unlocks history/metrics scopes, never-expire links,
+          inbound snooze webhooks, outbound alert hooks, and the
+          <a class="text-link" href="/integrations/home-assistant">official Home Assistant HACS integration</a>
+          at full power. Keep MQTT on your LAN; use ThermalTrace for household freeze SMS, history, and off-site alerts.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a class="btn-primary" href="/integrations">All integrations</a>
+          <a class="btn-secondary" href="/integrations/home-assistant">HACS install guide</a>
+          <a class="btn-ghost" href="/docs/api">HTTP API</a>
+        </div>
+      </section>
+    </div>
 
     <section class="card" id="plan-matrix">
       <h2 class="card-title">Full feature comparison</h2>
