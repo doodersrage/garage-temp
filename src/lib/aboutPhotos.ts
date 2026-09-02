@@ -1,6 +1,7 @@
 import type { ImageMetadata } from "astro";
 import arduinoDht11 from "../assets/about-photos/arduino-dht11.jpg";
 import arduinoUnoBoard from "../assets/about-photos/arduino-uno-board.jpg";
+import atticInsulation from "../assets/about-photos/attic-insulation.jpg";
 import basementPexPipes from "../assets/about-photos/basement-pex-pipes.jpg";
 import coldWeatherRoad from "../assets/about-photos/cold-weather-road.jpg";
 import crawlspace from "../assets/about-photos/crawlspace.jpg";
@@ -8,8 +9,11 @@ import deskWorkspace from "../assets/about-photos/desk-workspace.jpg";
 import dht22Module from "../assets/about-photos/dht22-module.jpg";
 import ethernetCable from "../assets/about-photos/ethernet-cable.jpg";
 import frostWindow from "../assets/about-photos/frost-window.jpg";
+import frozenThermometer from "../assets/about-photos/frozen-thermometer.jpg";
 import garageWorkbench from "../assets/about-photos/garage-workbench.jpg";
+import greenhouse from "../assets/about-photos/greenhouse.jpg";
 import homeWorkshop from "../assets/about-photos/home-workshop.jpg";
+import networkSwitch from "../assets/about-photos/network-switch.jpg";
 import serverRack from "../assets/about-photos/server-rack.jpg";
 import snowCabins from "../assets/about-photos/snow-cabins.jpg";
 import utilityPipes from "../assets/about-photos/utility-pipes.jpg";
@@ -17,6 +21,7 @@ import utilityPipes from "../assets/about-photos/utility-pipes.jpg";
 export type AboutPhotoId =
   | "arduino-dht11"
   | "arduino-uno-board"
+  | "attic-insulation"
   | "basement-pex-pipes"
   | "cold-weather-road"
   | "crawlspace"
@@ -24,8 +29,11 @@ export type AboutPhotoId =
   | "dht22-module"
   | "ethernet-cable"
   | "frost-window"
+  | "frozen-thermometer"
   | "garage-workbench"
+  | "greenhouse"
   | "home-workshop"
+  | "network-switch"
   | "server-rack"
   | "snow-cabins"
   | "utility-pipes";
@@ -84,6 +92,44 @@ export const aboutPhotos: Record<AboutPhotoId, AboutPhoto> = {
     credit: "Photo: Boatbuilder — CC BY-SA 3.0",
     license: "CC BY-SA 3.0",
     sourceUrl: "https://commons.wikimedia.org/wiki/File:Crawle_space1.jpg",
+  },
+  "attic-insulation": {
+    id: "attic-insulation",
+    image: atticInsulation,
+    alt: "Installer placing fiberglass batt insulation between attic roof rafters",
+    caption: "Attics and roofs swing hard—insulation and probe placement decide what you actually measure.",
+    credit: "Photo: The EnergySmart Academy — CC0",
+    license: "CC0",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:Installing_installation_in_an_attic_(9337).jpg",
+  },
+  "greenhouse": {
+    id: "greenhouse",
+    image: greenhouse,
+    alt: "Small backyard greenhouse with grapevines growing out through the roof vents",
+    caption: "Greenhouses and shops need humidity and heat watch—not just freeze thresholds.",
+    credit: "Photo: W.carter — CC0",
+    license: "CC0",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:Small_greenhouse_with_grapevines_escaping.jpg",
+  },
+  "frozen-thermometer": {
+    id: "frozen-thermometer",
+    image: frozenThermometer,
+    alt: "Outdoor thermometer iced over with frost on the dial and housing",
+    caption: "Outdoor air can look fine while a cold corner of the garage is already below threshold.",
+    credit: "Photo: August Geyler — CC BY-SA 4.0",
+    license: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Eingefrorenes_Au%C3%9Fenthermometer.jpg",
+  },
+  "network-switch": {
+    id: "network-switch",
+    image: networkSwitch,
+    alt: "Stack of network switches with ethernet cables plugged into front ports",
+    caption: "Pull feeds, MQTT bridges, and LAN relays often land on a switch before they leave the site.",
+    credit: "Photo: ShakataGaNai — CC BY-SA 3.0",
+    license: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Network_switches.jpg",
   },
   "cold-weather-road": {
     id: "cold-weather-road",
@@ -205,9 +251,9 @@ export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
   "sun-load-garage-walls": "home-workshop",
   "infiltration-wind-drafts": "crawlspace",
   "thermal-mass-concrete-slab": "crawlspace",
-  "hvac-duct-influence": "home-workshop",
+  "hvac-duct-influence": "attic-insulation",
   "stored-vehicle-heat": "garage-workbench",
-  "enclosure-ventilation": "garage-workbench",
+  "enclosure-ventilation": "greenhouse",
   "sensor-warm-up-time": "dht22-module",
   "dual-probe-averaging": "dht22-module",
 
@@ -239,12 +285,12 @@ export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
 
   // Relay / network / data path
   "debugging-stale-readings": "ethernet-cable",
-  "static-ip-vs-dhcp": "ethernet-cable",
-  "docker-relay-deployment": "ethernet-cable",
+  "static-ip-vs-dhcp": "network-switch",
+  "docker-relay-deployment": "network-switch",
   "fastapi-relay-setup": "ethernet-cable",
-  "redis-cache-for-feeds": "ethernet-cable",
+  "redis-cache-for-feeds": "network-switch",
   "relay-security-and-access": "ethernet-cable",
-  "health-check-endpoints": "ethernet-cable",
+  "health-check-endpoints": "network-switch",
   "environment-variables-relay": "ethernet-cable",
   "caching-feed-responses": "ethernet-cable",
   "home-page-probe-fetch": "ethernet-cable",
@@ -272,7 +318,7 @@ export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
   "zapier-make-recipes": "desk-workspace",
   "esphome-shelly-recipes": "ethernet-cable",
   "garage-door-cold-playbook": "garage-workbench",
-  "personal-weather-stations": "cold-weather-road",
+  "personal-weather-stations": "frozen-thermometer",
   "accounts-and-dashboard": "desk-workspace",
   "install-pwa": "desk-workspace",
   "thermostat-oauth": "ethernet-cable",
@@ -300,10 +346,31 @@ export function getAboutHeroPhoto(slug: string): AboutPhoto | undefined {
   return id ? aboutPhotos[id] : undefined;
 }
 
-/** Editorial strip picks for hubs (About / Guides / Compare / Stories). */
-export const editorialHubPhotoIds: AboutPhotoId[] = [
+/** Distinct editorial strips so hubs do not reuse the same four photos. */
+export const aboutHubPhotoIds: AboutPhotoId[] = [
   "garage-workbench",
   "basement-pex-pipes",
   "crawlspace",
   "snow-cabins",
+];
+
+export const guidesHubPhotoIds: AboutPhotoId[] = [
+  "dht22-module",
+  "arduino-uno-board",
+  "attic-insulation",
+  "ethernet-cable",
+];
+
+export const compareHubPhotoIds: AboutPhotoId[] = [
+  "home-workshop",
+  "frozen-thermometer",
+  "greenhouse",
+  "network-switch",
+];
+
+export const storiesHubPhotoIds: AboutPhotoId[] = [
+  "utility-pipes",
+  "frost-window",
+  "server-rack",
+  "cold-weather-road",
 ];

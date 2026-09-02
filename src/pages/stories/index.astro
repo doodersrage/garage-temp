@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import PageHeader from "../../components/PageHeader.astro";
 import { stories } from "../../lib/stories";
 import EditorialPhotoStrip from "../../components/EditorialPhotoStrip.astro";
+import { storiesHubPhotoIds } from "../../lib/aboutPhotos";
 import {
   getBreadcrumbSchema,
   resolvePageUrl,
@@ -21,12 +22,6 @@ const schema = [
     { name: "Customer stories", path: "/stories" },
   ]),
 ].filter(Boolean) as Record<string, unknown>[];
-const storyStripIds = [
-  "basement-pex-pipes",
-  "snow-cabins",
-  "server-rack",
-  "frost-window",
-] as const;
 ---
 <Layout
   title={title}
@@ -44,7 +39,7 @@ const storyStripIds = [
       <a slot="actions" class="btn-secondary" href="/pricing">See plans</a>
     </PageHeader>
 
-    <EditorialPhotoStrip photoIds={[...storyStripIds]} />
+    <EditorialPhotoStrip photoIds={storiesHubPhotoIds} />
 
     <div class="page-grid">
       {

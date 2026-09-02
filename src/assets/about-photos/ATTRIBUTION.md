@@ -19,6 +19,10 @@ All are Creative Commons or public domain and used with attribution in figcaptio
 | `basement-pex-pipes.jpg` | CC0 | Tomwsulcer | https://commons.wikimedia.org/wiki/File:PEX_pipes_and_valves_in_basement_ceiling_for_exterior_water_spigot.jpg |
 | `server-rack.jpg` | CC BY 2.0 | Carl Lender / Flickr | https://commons.wikimedia.org/wiki/File:Server_Room_(22397102849).jpg |
 | `snow-cabins.jpg` | CC BY-SA 4.0 | Tahoe Signature Properties | https://commons.wikimedia.org/wiki/File:Snowy_Mountain_Cabins.jpg |
+| `attic-insulation.jpg` | CC0 | The EnergySmart Academy | https://commons.wikimedia.org/wiki/File:Installing_installation_in_an_attic_(9337).jpg |
+| `greenhouse.jpg` | CC0 | W.carter | https://commons.wikimedia.org/wiki/File:Small_greenhouse_with_grapevines_escaping.jpg |
+| `network-switch.jpg` | CC BY-SA 3.0 | ShakataGaNai | https://commons.wikimedia.org/wiki/File:Network_switches.jpg |
+| `frozen-thermometer.jpg` | CC BY-SA 4.0 | August Geyler | https://commons.wikimedia.org/wiki/File:Eingefrorenes_Außenthermometer.jpg |
 
 Project-owned photos (`temp-probe-v1.jpg`, `temp-probe-v2.jpg`, `json-temp.jpg`) remain for case study / feed docs.
 Lifestyle composites on marketing pages (`thermaltrace-*-lifestyle.jpg`) are project-owned, not Commons.

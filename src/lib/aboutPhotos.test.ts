@@ -2,15 +2,19 @@ import { describe, expect, it } from "vitest";
 import { aboutPages } from "./aboutPages";
 import {
   aboutHeroPhotoBySlug,
+  aboutHubPhotoIds,
   aboutPhotos,
+  compareHubPhotoIds,
   getAboutHeroPhoto,
+  guidesHubPhotoIds,
+  storiesHubPhotoIds,
   type AboutPhotoId,
 } from "./aboutPhotos";
 
 describe("aboutPhotos", () => {
   it("registers every curated photo with credit metadata", () => {
     const ids = Object.keys(aboutPhotos) as AboutPhotoId[];
-    expect(ids.length).toBeGreaterThanOrEqual(12);
+    expect(ids.length).toBeGreaterThanOrEqual(16);
     for (const id of ids) {
       const photo = aboutPhotos[id];
       expect(photo.id).toBe(id);
@@ -35,5 +39,17 @@ describe("aboutPhotos", () => {
   it("covers most about pages with a hero photo", () => {
     const covered = aboutPages.filter((page) => aboutHeroPhotoBySlug[page.slug]).length;
     expect(covered / aboutPages.length).toBeGreaterThan(0.85);
+  });
+
+  it("keeps hub photo strips disjoint", () => {
+    const sets = [aboutHubPhotoIds, guidesHubPhotoIds, compareHubPhotoIds, storiesHubPhotoIds];
+    for (const ids of sets) {
+      expect(new Set(ids).size).toBe(ids.length);
+      for (const id of ids) expect(aboutPhotos[id]).toBeTruthy();
+    }
+    // Guides and Compare should not share any photos (the original complaint).
+    const guides = new Set(guidesHubPhotoIds);
+    const overlap = compareHubPhotoIds.filter((id) => guides.has(id));
+    expect(overlap).toEqual([]);
   });
 });

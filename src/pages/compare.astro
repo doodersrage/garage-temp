@@ -10,7 +10,7 @@ import {
 import { getMarketingFaqs, getMarketingFaqSchema } from "../lib/marketingFaqs";
 import { compareGuides } from "../lib/compareGuides";
 import EditorialPhotoStrip from "../components/EditorialPhotoStrip.astro";
-import { editorialHubPhotoIds } from "../lib/aboutPhotos";
+import { compareHubPhotoIds } from "../lib/aboutPhotos";
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/compare");
@@ -39,7 +39,7 @@ const schema = [
       <a slot="actions" class="btn-secondary" href="/register?next=/dashboard/temperature">Start free</a>
     </PageHeader>
 
-    <EditorialPhotoStrip photoIds={editorialHubPhotoIds} />
+    <EditorialPhotoStrip photoIds={compareHubPhotoIds} />
 
     <section class="card">
       <h2 class="card-title">Detailed comparisons</h2>

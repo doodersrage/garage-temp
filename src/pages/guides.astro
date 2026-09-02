@@ -3,7 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import PageHeader from "../components/PageHeader.astro";
 import EditorialPhotoStrip from "../components/EditorialPhotoStrip.astro";
 import { getGuideHubCategories } from "../lib/guideHub";
-import { editorialHubPhotoIds } from "../lib/aboutPhotos";
+import { guidesHubPhotoIds } from "../lib/aboutPhotos";
 import {
   getBreadcrumbSchema,
   resolvePageUrl,
@@ -36,7 +36,7 @@ const schema = [
       <a slot="actions" class="btn-secondary" href="/about">All About articles</a>
     </PageHeader>
 
-    <EditorialPhotoStrip photoIds={editorialHubPhotoIds} />
+    <EditorialPhotoStrip photoIds={guidesHubPhotoIds} />
 
     <div class="guide-hub-grid">
       {categories.map((category) => (
