@@ -20,14 +20,31 @@ interface Props {
   defaultHighTempF?: number | null;
   /** Optional default ambient target (°F). */
   defaultTargetAmbientF?: number | null;
+  /** Plot humidity % and dew point on a secondary axis when data exists. */
+  showHumidity?: boolean;
 }
 
 const PROBE_COLORS = ["#60a5fa", "#34d399", "#f472b6", "#fbbf24", "#a78bfa", "#fb7185"];
 const HOUSE_COLOR = "#f59e0b";
 const COLOR_BELOW = "#38bdf8";
 const COLOR_ABOVE = "#fb923c";
+const HUMIDITY_COLOR = "#a78bfa";
+const DEW_COLOR = "#2dd4bf";
 const STORAGE_HIGH = "tt-chart-high-f";
 const STORAGE_TARGET = "tt-chart-target-f";
+
+function dewPointF(tempF: number, rhPct: number): number | null {
+  if (!Number.isFinite(tempF) || !Number.isFinite(rhPct) || rhPct <= 0 || rhPct > 100) {
+    return null;
+  }
+  const tC = (tempF - 32) * (5 / 9);
+  const a = 17.62;
+  const b = 243.12;
+  const gamma = Math.log(rhPct / 100) + (a * tC) / (b + tC);
+  const tdC = (b * gamma) / (a - gamma);
+  if (!Number.isFinite(tdC)) return null;
+  return tdC * (9 / 5) + 32;
+}
 
 function readStoredNumber(key: string): number | null {
   try {
@@ -70,6 +87,7 @@ export default function HistoryChart({
   freezeThresholdF = null,
   defaultHighTempF = null,
   defaultTargetAmbientF = null,
+  showHumidity = false,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const probeLabels = useMemo(
@@ -81,7 +99,24 @@ export default function HistoryChart({
   const [targetAmbientF, setTargetAmbientF] = useState<number | null>(
     defaultTargetAmbientF,
   );
+  const [humidityOn, setHumidityOn] = useState(showHumidity);
   const [hydrated, setHydrated] = useState(false);
+
+  const humidityPoints = useMemo(() => {
+    if (!showHumidity) return [] as Point[];
+    const labeled = probeLabels.find((label) =>
+      points.some(
+        (p) =>
+          (p.probeLabel || "Probe") === label &&
+          Number.isFinite(p.humidity) &&
+          p.humidity > 0,
+      ),
+    );
+    const source = labeled
+      ? points.filter((p) => (p.probeLabel || "Probe") === labeled)
+      : points;
+    return source.filter((p) => Number.isFinite(p.humidity) && p.humidity > 0);
+  }, [points, probeLabels, showHumidity]);
 
   useEffect(() => {
     const storedHigh = readStoredNumber(STORAGE_HIGH);
@@ -143,7 +178,19 @@ export default function HistoryChart({
     canvas.height = height * dpr;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const pad = { top: 16, right: 16, bottom: 28, left: 44 };
+    const plotHumidity = humidityOn && humidityPoints.length >= 2;
+    const dewTemps = plotHumidity
+      ? humidityPoints
+          .map((p) => dewPointF(p.tempf, p.humidity))
+          .filter((v): v is number => v != null)
+      : [];
+
+    const pad = {
+      top: 16,
+      right: plotHumidity ? 40 : 16,
+      bottom: 28,
+      left: 44,
+    };
     const innerW = width - pad.left - pad.right;
     const innerH = height - pad.top - pad.bottom;
 
@@ -164,6 +211,7 @@ export default function HistoryChart({
       ...points.map((p) => p.tempf),
       ...priorYearPoints.map((p) => p.tempf),
       ...housePoints.map((p) => p.tempf),
+      ...dewTemps,
       ...guideTemps,
     ];
     const min = Math.min(...allTemps) - 2;
@@ -172,6 +220,8 @@ export default function HistoryChart({
 
     const yFor = (tempf: number) =>
       pad.top + innerH - ((tempf - min) / range) * innerH;
+    const yForRh = (rh: number) =>
+      pad.top + innerH - (Math.min(100, Math.max(0, rh)) / 100) * innerH;
     const xFor = (ts: number) =>
       pad.left + ((ts - minTs) / tsRange) * innerW;
 
@@ -192,6 +242,12 @@ export default function HistoryChart({
       g.font = "10px system-ui, sans-serif";
       g.textAlign = "right";
       g.fillText(`${val.toFixed(0)}°F`, pad.left - 6, y + 3);
+      if (plotHumidity) {
+        const rh = 100 - (100 / 4) * i;
+        g.textAlign = "left";
+        g.fillStyle = HUMIDITY_COLOR;
+        g.fillText(`${rh.toFixed(0)}%`, width - pad.right + 6, y + 3);
+      }
     }
 
     function drawGuide(
@@ -297,6 +353,43 @@ export default function HistoryChart({
       drawSeriesDashed(housePoints, HOUSE_COLOR);
     }
 
+    if (plotHumidity) {
+      const orderedHum = [...humidityPoints].sort(
+        (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+      );
+      g.save();
+      g.strokeStyle = HUMIDITY_COLOR;
+      g.lineWidth = 1.5;
+      g.globalAlpha = 0.9;
+      g.beginPath();
+      orderedHum.forEach((point, i) => {
+        const x = xFor(Date.parse(point.timestamp));
+        const y = yForRh(point.humidity);
+        if (i === 0) g.moveTo(x, y);
+        else g.lineTo(x, y);
+      });
+      g.stroke();
+
+      g.strokeStyle = DEW_COLOR;
+      g.setLineDash([4, 3]);
+      g.beginPath();
+      let dewStarted = false;
+      for (const point of orderedHum) {
+        const dew = dewPointF(point.tempf, point.humidity);
+        if (dew == null) continue;
+        const x = xFor(Date.parse(point.timestamp));
+        const y = yFor(dew);
+        if (!dewStarted) {
+          g.moveTo(x, y);
+          dewStarted = true;
+        } else {
+          g.lineTo(x, y);
+        }
+      }
+      g.stroke();
+      g.restore();
+    }
+
     g.fillStyle = "#94a3b8";
     g.font = "10px system-ui, sans-serif";
     g.textAlign = "left";
@@ -307,7 +400,16 @@ export default function HistoryChart({
       width - pad.right,
       height - 8,
     );
-  }, [points, priorYearPoints, housePoints, freezeThresholdF, highTempF, targetAmbientF]);
+  }, [
+    points,
+    priorYearPoints,
+    housePoints,
+    freezeThresholdF,
+    highTempF,
+    targetAmbientF,
+    humidityOn,
+    humidityPoints,
+  ]);
 
   if (points.length < 2) {
     return (
@@ -352,6 +454,13 @@ export default function HistoryChart({
         <p class="m-0 mb-2 text-xs text-[var(--color-text-muted)]">
           <span style={{ color: HOUSE_COLOR }}>{houseLegend ?? "House"}</span>
           {" "}= dashed indoor reference
+        </p>
+      )}
+      {humidityOn && humidityPoints.length >= 2 && (
+        <p class="m-0 mb-2 text-xs text-[var(--color-text-muted)]">
+          <span style={{ color: HUMIDITY_COLOR }}>Humidity %</span>
+          {" · "}
+          <span style={{ color: DEW_COLOR }}>dew point °F</span> (dashed)
         </p>
       )}
       <p class="m-0 mb-2 text-xs text-[var(--color-text-muted)]">
@@ -399,6 +508,18 @@ export default function HistoryChart({
             }}
           />
         </label>
+        {showHumidity && humidityPoints.length >= 2 && (
+          <label class="chart-threshold-field chart-threshold-check">
+            <span>Humidity + dew</span>
+            <input
+              type="checkbox"
+              checked={humidityOn}
+              onChange={(e) =>
+                setHumidityOn((e.target as HTMLInputElement).checked)
+              }
+            />
+          </label>
+        )}
         {freezeThresholdF != null && (
           <p class="chart-threshold-note mb-0">
             Freeze line from alerts: {freezeThresholdF}°F

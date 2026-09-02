@@ -1,0 +1,19 @@
+---
+import DashboardCard from "./DashboardCard.astro";
+
+interface Props {
+  title: string;
+  detail: string;
+  tone?: "warning" | "info";
+}
+
+const { title, detail, tone = "info" } = Astro.props;
+---
+<DashboardCard>
+  <h2 class="card-title">Door vs temperature</h2>
+  <p class="card-subtitle mb-3">Open time correlated with recent cooling rate.</p>
+  <div class:list={[tone === "warning" ? "alert-warning" : "alert-info", "mb-0"]}>
+    <p class="m-0 mb-1"><strong>{title}</strong></p>
+    <p class="m-0 text-sm">{detail}</p>
+  </div>
+</DashboardCard>

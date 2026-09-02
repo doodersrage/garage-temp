@@ -1,33 +1,18 @@
 ---
-import { computeDoorOpenSessions, formatDurationMs } from "../lib/doorDuration";
-import { fetchRecentBoolReadings } from "../lib/sensorReadings";
+import { formatDurationMs, type DoorOpenSession } from "../lib/doorDuration";
+import { loadDoorSessions24h } from "../lib/overviewExtras";
 import type { DeviceWithSensors } from "../lib/devices";
 import DashboardCard from "./dashboard/DashboardCard.astro";
 
 interface Props {
   devices: DeviceWithSensors[];
+  /** Preloaded sessions (avoids a second door fetch on Overview). */
+  sessions?: DoorOpenSession[];
 }
 
-const { devices } = Astro.props;
-const doorSince = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-const sessions = [];
-
-for (const device of devices) {
-  for (const sensor of device.sensors) {
-    if (sensor.kind !== "door") continue;
-    const readings = await fetchRecentBoolReadings(sensor.id, doorSince);
-    sessions.push(
-      ...computeDoorOpenSessions(
-        readings.map((r) => ({
-          label: sensor.label,
-          kind: "door",
-          value: r.value,
-          recordedAt: r.recordedAt,
-        })),
-      ),
-    );
-  }
-}
+const { devices, sessions: sessionsProp } = Astro.props;
+const sessions =
+  sessionsProp ?? (await loadDoorSessions24h(devices));
 
 const openNow = sessions.filter((s) => s.stillOpen);
 const recentClosed = sessions

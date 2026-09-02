@@ -16,7 +16,7 @@ export type BoolReading = {
 /** Compute door-open sessions from chronological bool readings (door kind). */
 export function computeDoorOpenSessions(readings: BoolReading[]): DoorOpenSession[] {
   const doorReadings = readings
-    .filter((r) => r.kind === "door")
+    .filter((r) => r.kind === "door" || r.kind === "flood")
     .sort((a, b) => Date.parse(a.recordedAt) - Date.parse(b.recordedAt));
 
   const sessions: DoorOpenSession[] = [];

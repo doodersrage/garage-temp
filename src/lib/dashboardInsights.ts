@@ -20,11 +20,14 @@ const EMPTY_COMPARE: WeekCompareResult = {
 export async function fetchWeekCompare(
   userId: string,
   user?: User | null,
+  thisWeekPoints?: ChartPoint[],
 ): Promise<{ compare: WeekCompareResult; error: string | null }> {
-  const [thisWeekResult, priorYearBundle] = await Promise.all([
-    fetchGarageTempChartData(userId, 7),
-    fetchPriorYearCompareBundle(userId, 7, {}, user),
-  ]);
+  const thisWeekResult =
+    thisWeekPoints != null
+      ? { points: thisWeekPoints, error: null as string | null }
+      : await fetchGarageTempChartData(userId, 7);
+
+  const priorYearBundle = await fetchPriorYearCompareBundle(userId, 7, {}, user);
 
   if (thisWeekResult.error) {
     return { compare: { ...EMPTY_COMPARE }, error: thisWeekResult.error };

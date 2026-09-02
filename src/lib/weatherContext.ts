@@ -85,8 +85,13 @@ export async function fetchForecastMinTempForConfig(
 export async function fetchNightsAtRiskForConfig(
   config: PersonalWeatherConfig,
   freezeThresholdF: number,
+  /** Pass an already-fetched snapshot to avoid a duplicate weather API call. */
+  existingSnapshot?: WeatherSnapshot | null,
 ): Promise<NightRisk[]> {
-  const snapshot = await fetchWeatherSnapshotForConfig(config);
+  const snapshot =
+    existingSnapshot !== undefined
+      ? existingSnapshot
+      : await fetchWeatherSnapshotForConfig(config);
   if (snapshot?.lat != null && snapshot.lon != null) {
     return fetchNightsAtRisk({
       lat: snapshot.lat,

@@ -1,0 +1,58 @@
+---
+import DashboardCard from "./DashboardCard.astro";
+import type { FloodLevelOverview } from "../../lib/overviewExtras";
+import { formatRelativeAge } from "../../lib/relativeTime";
+
+interface Props {
+  overview: FloodLevelOverview;
+}
+
+const { overview } = Astro.props;
+const hasContent =
+  overview.floodOpen.length > 0 ||
+  overview.recentFlood.length > 0 ||
+  overview.levels.length > 0;
+---
+{hasContent && (
+  <DashboardCard>
+    <h2 class="card-title">Flood &amp; level</h2>
+    <p class="card-subtitle mb-4">Wet contacts and tank/sump levels (48h).</p>
+    {overview.floodOpen.length > 0 && (
+      <div class="alert-warning mb-3">
+        {overview.floodOpen.map((row) => (
+          <p class="m-0 mb-1">
+            <strong>{row.label}</strong> wet since{" "}
+            {new Date(row.since).toLocaleString()}
+          </p>
+        ))}
+      </div>
+    )}
+    {overview.recentFlood.length > 0 && (
+      <ul class="space-y-2 mb-3">
+        {overview.recentFlood.map((row) => (
+          <li class="text-sm">
+            <strong>{row.label}</strong> wet event ·{" "}
+            {new Date(row.at).toLocaleString()}
+          </li>
+        ))}
+      </ul>
+    )}
+    {overview.levels.length > 0 && (
+      <ul class="space-y-2 mb-0">
+        {overview.levels.map((row) => {
+          const age = formatRelativeAge(row.at);
+          return (
+            <li class="text-sm flex flex-wrap justify-between gap-2">
+              <span>
+                <strong>{row.label}</strong>
+                {" · "}
+                {row.value.toFixed(1)}
+              </span>
+              <span class="text-[var(--color-text-muted)]">{age.label}</span>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </DashboardCard>
+)}

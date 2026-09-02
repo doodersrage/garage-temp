@@ -10,10 +10,8 @@ import GarageRiskStatusCard from "../components/dashboard/GarageRiskStatusCard.a
 import { computeGarageRiskStatus } from "../lib/garageRiskStatus";
 import { getAuthFromCookies } from "../lib/auth";
 import { getUserPreferences } from "../lib/userPreferences";
-import { fetchGarageTempHistory } from "../lib/garageTempsHistory";
 import { fetchUserTempConfig } from "../lib/userTempConfig";
 import { getUserEntitlements } from "../lib/entitlements";
-import { canDownloadHistoryCsv } from "../lib/adminAccess";
 import { getUserDevicesAsTempConfig, listHouseholdDevices } from "../lib/devices";
 import { getAlertSettingsForUser } from "../lib/notify";
 import {
@@ -53,7 +51,10 @@ import {
 import { isWeatherLocationConfigured } from "../lib/personalWeatherStations";
 import { personalWeatherConfigFromPreferences } from "../lib/userPreferences";
 import { fetchNwsAlerts } from "../lib/nwsAlerts";
-import { buildHeatingInsights } from "../lib/heatingInsights";
+import {
+  buildHeatingInsights,
+  estimateHeatingLossRate,
+} from "../lib/heatingInsights";
 import HeatingInsightsCard from "../components/HeatingInsightsCard.astro";
 import { listConnectionsForHousehold } from "../lib/thermostatConnections";
 import {
@@ -78,6 +79,19 @@ import LowBatteryBanner from "../components/dashboard/LowBatteryBanner.astro";
 import DashboardMultiPropertyNudge from "../components/dashboard/DashboardMultiPropertyNudge.astro";
 import DashboardOverviewToggle from "../components/dashboard/DashboardOverviewToggle.astro";
 import { getDashboardOverviewMode } from "../lib/dashboardOverviewMode";
+import { computeFreezeHours } from "../lib/freezeHours";
+import {
+  buildBatteryOverview,
+  buildDoorTempSummary,
+  doorOpenMinutesFromSessions,
+  loadDoorSessions24h,
+  loadEnergyOverview,
+  loadFloodLevelOverview,
+} from "../lib/overviewExtras";
+import BatteryDeclineCard from "../components/dashboard/BatteryDeclineCard.astro";
+import DoorTempInsightCard from "../components/dashboard/DoorTempInsightCard.astro";
+import EnergyOverviewCard from "../components/dashboard/EnergyOverviewCard.astro";
+import FloodLevelCard from "../components/dashboard/FloodLevelCard.astro";
 
 import DashboardMetricGrid from "../components/dashboard/DashboardMetricGrid.astro";
 import MetricCard from "../components/dashboard/MetricCard.astro";
@@ -90,10 +104,12 @@ if (!session || !user) {
   return Astro.redirect("/signin");
 }
 
+const overviewMode = getDashboardOverviewMode(user);
+const showInsights = overviewMode === "insights";
+
 const [
   preferences,
   tempConfig,
-  history,
   entitlements,
   deviceConfig,
   alertSettings,
@@ -105,7 +121,6 @@ const [
 ] = await Promise.all([
   getUserPreferences(user),
   fetchUserTempConfig(user.id),
-  fetchGarageTempHistory(user.id, 1, 1),
   getUserEntitlements(user.id),
   getUserDevicesAsTempConfig(user.id, user.email),
   getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
@@ -117,17 +132,15 @@ const [
 ]);
 
 const weatherConfig = personalWeatherConfigFromPreferences(preferences);
+const weatherSnapshot = await fetchWeatherSnapshotForConfig(weatherConfig);
 
 const [
   members,
   householdDevicesResult,
   latest,
   nightsAtRisk,
-  weatherSnapshot,
   householdRole,
-  weekCompareResult,
   chartWeek,
-  canExportCsv,
 ] = await Promise.all([
   household.householdId
     ? listHouseholdMembers(household.householdId)
@@ -138,34 +151,93 @@ const [
   household.householdId
     ? fetchLatestSensorValues(household.householdId)
     : Promise.resolve([]),
-  fetchNightsAtRiskForConfig(weatherConfig, alertSettings.freezeThresholdF),
-  fetchWeatherSnapshotForConfig(weatherConfig),
+  fetchNightsAtRiskForConfig(
+    weatherConfig,
+    alertSettings.freezeThresholdF,
+    weatherSnapshot,
+  ),
   activeHouseholdId
     ? getUserHouseholdRole(user.id, activeHouseholdId)
     : Promise.resolve(null),
-  fetchWeekCompare(user.id, user),
   fetchGarageTempChartData(user.id, 7),
-  canDownloadHistoryCsv(user.id),
 ]);
 
 const devices = householdDevicesResult.devices;
+const canEdit = canEditHousehold(householdRole);
+const canExportCsv = entitlements.canDownloadCsv;
+const hasHistory = chartWeek.points.length > 0;
 
-const thermostatConnections =
+const weatherHasCoords =
+  weatherSnapshot?.lat != null &&
+  weatherSnapshot?.lon != null &&
+  Number.isFinite(weatherSnapshot.lat) &&
+  Number.isFinite(weatherSnapshot.lon);
+
+const [
+  thermostatConnections,
+  indoorReferenceSensorId,
+  freezeMapSettings,
+  nwsAlerts,
+  weekCompareResult,
+  doorSessions,
+  floodLevelOverview,
+  energyOverview,
+] = await Promise.all([
   entitlements.canUseThermostatIntegration && household.householdId
-    ? await listConnectionsForHousehold(household.householdId)
-    : [];
+    ? listConnectionsForHousehold(household.householdId)
+    : Promise.resolve([] as Awaited<ReturnType<typeof listConnectionsForHousehold>>),
+  household.householdId
+    ? getIndoorReferenceSensorId(household.householdId)
+    : Promise.resolve(null),
+  household.householdId
+    ? getHouseholdFreezeMapSettings(household.householdId)
+    : Promise.resolve({
+        optIn: false,
+        cityId: null,
+        lat: null,
+        lon: null,
+        label: null,
+      }),
+  weatherHasCoords && weatherSnapshot
+    ? fetchNwsAlerts(weatherSnapshot.lat!, weatherSnapshot.lon!).catch(() => null)
+    : Promise.resolve(null),
+  showInsights
+    ? fetchWeekCompare(user.id, user, chartWeek.points)
+    : Promise.resolve({
+        compare: {
+          thisWeekAvgF: null,
+          priorYearAvgF: null,
+          deltaF: null,
+          sampleCount: 0,
+          priorYearSource: "none" as const,
+          priorYearOutdoorLabel: null,
+          earliestLocalReadingAt: null,
+        },
+        error: null,
+      }),
+  showInsights ? loadDoorSessions24h(devices) : Promise.resolve([]),
+  showInsights
+    ? loadFloodLevelOverview(devices)
+    : Promise.resolve({ floodOpen: [], recentFlood: [], levels: [] }),
+  showInsights ? loadEnergyOverview(devices) : Promise.resolve(null),
+]);
 
-const thermostatOverview =
+const [thermostatOverview, houseChartOverlay] = await Promise.all([
   thermostatConnections[0] && household.householdId
-    ? await fetchThermostatContextWithStatus(
+    ? fetchThermostatContextWithStatus(
         household.householdId,
         thermostatConnections[0].provider,
       )
-    : null;
-
-const indoorReferenceSensorId = household.householdId
-  ? await getIndoorReferenceSensorId(household.householdId)
-  : null;
+    : Promise.resolve(null),
+  household.householdId
+    ? fetchHouseChartOverlay({
+        householdId: household.householdId,
+        days: 7,
+        hasThermostatConnection: thermostatConnections.length > 0,
+        referenceSensorId: indoorReferenceSensorId,
+      })
+    : Promise.resolve({ points: [], source: null as "thermostat" | "reference" | null }),
+]);
 
 const houseContext = buildHouseContext({
   thermostatSnapshot: thermostatOverview?.snapshot ?? null,
@@ -173,15 +245,6 @@ const houseContext = buildHouseContext({
   latest,
   devices,
 });
-
-const houseChartOverlay = household.householdId
-  ? await fetchHouseChartOverlay({
-      householdId: household.householdId,
-      days: 7,
-      hasThermostatConnection: thermostatConnections.length > 0,
-      referenceSensorId: indoorReferenceSensorId,
-    })
-  : { points: [], source: null };
 
 const hasDevices =
   tempConfig.hasCustomConfig ||
@@ -197,7 +260,6 @@ const hasEmailAlerts =
   alertSettings.channelEmail &&
   Boolean(alertSettings.email?.trim());
 const hasHouseholdMembers = members.members.length > 1;
-const hasHistory = history.totalCount > 0;
 const onboardingDismissed =
   (user.user_metadata as Record<string, unknown> | undefined)?.onboarding_dismissed ===
   true;
@@ -240,20 +302,9 @@ const lastAlertAge = formatRelativeAge(lastAlertAt);
 
 const nightsRiskCount = nightsAtRisk.filter((n) => n.atRisk).length;
 
-const weatherHasCoords =
-  weatherSnapshot?.lat != null &&
-  weatherSnapshot?.lon != null &&
-  Number.isFinite(weatherSnapshot.lat) &&
-  Number.isFinite(weatherSnapshot.lon);
 const owmApiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "")
   .replace(/\r/g, "")
   .trim();
-const nwsAlerts =
-  weatherHasCoords && weatherSnapshot
-    ? await fetchNwsAlerts(weatherSnapshot.lat!, weatherSnapshot.lon!).catch(
-        () => null,
-      )
-    : null;
 
 const showColdSnapChecklist = shouldShowColdSnapChecklist({
   nightsRiskCount,
@@ -271,10 +322,6 @@ const freezeReadiness = computeFreezeReadiness({
   hasSentAnyAlert: Boolean(lastAlertAt),
 });
 
-const freezeMapSettings = household.householdId
-  ? await getHouseholdFreezeMapSettings(household.householdId)
-  : { optIn: false, cityId: null, lat: null, lon: null, label: null };
-
 const coldestProbeTempF = (() => {
   const temps = latest
     .filter((row) => row.sensor.kind === "temperature" && row.value_num != null)
@@ -282,15 +329,26 @@ const coldestProbeTempF = (() => {
   return temps.length > 0 ? Math.min(...temps) : null;
 })();
 
+const coldestProbeMarginF =
+  coldestProbeTempF != null
+    ? coldestProbeTempF - alertSettings.freezeThresholdF
+    : null;
+
+const freezeHours = computeFreezeHours(
+  chartWeek.points,
+  alertSettings.freezeThresholdF,
+);
+
 const regionalBenchmark =
-  household.householdId && freezeMapSettings.optIn && coldestProbeTempF != null
+  showInsights &&
+  household.householdId &&
+  freezeMapSettings.optIn &&
+  coldestProbeTempF != null
     ? await fetchRegionalBenchmark({
         householdId: household.householdId,
         yourTempF: coldestProbeTempF,
       })
     : null;
-
-const canEdit = canEditHousehold(householdRole);
 
 const exportToDate = new Date();
 const exportFromDate = new Date(exportToDate.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -302,10 +360,24 @@ const timeToFreeze = buildTimeToFreezeFromPoints(
   chartWeek.points,
   alertSettings.freezeThresholdF,
 );
+const doorOpenMinutes = doorOpenMinutesFromSessions(doorSessions);
+const doorTempSummary = showInsights
+  ? buildDoorTempSummary(
+      doorSessions,
+      chartWeek.points,
+      weatherSnapshot?.temp ?? null,
+    )
+  : null;
+const batteryOverview = showInsights ? buildBatteryOverview(devices) : [];
+const coolingRateFPerHour = estimateHeatingLossRate(
+  chartWeek.points,
+  weatherSnapshot?.temp ?? null,
+);
 const heatingInsights = buildHeatingInsights({
   indoorPoints: chartWeek.points,
   outdoorTempF: weatherSnapshot?.temp ?? null,
   freezeThresholdF: alertSettings.freezeThresholdF,
+  doorOpenMinutes,
   houseTempF: houseContext?.ambientTempF ?? null,
   thermostatSnapshot: houseContext?.thermostatSnapshot ?? null,
 });
@@ -355,8 +427,6 @@ const showFreezeMapOptInNudge =
   Boolean(household.householdId) &&
   !freezeMapSettings.optIn;
 
-const overviewMode = getDashboardOverviewMode(user);
-const showInsights = overviewMode === "insights";
 const showClaimsPackPrompt = showInsights && canEdit && hasHistory;
 const showStoryCard = showSecondaryNudges && canEdit && !showAlertSetupNudge;
 
@@ -620,6 +690,44 @@ const garageRisk = computeGarageRiskStatus({
             tone="neutral"
           />
         )}
+        <MetricCard
+          label="Freeze hours (7d)"
+          value={
+            chartWeek.points.length < 2
+              ? "—"
+              : `${freezeHours.hoursBelow34.toFixed(1)} h`
+          }
+          detail={
+            freezeHours.coldestF != null
+              ? `Coldest ${freezeHours.coldestF.toFixed(1)}°F`
+              : `≤ ${alertSettings.freezeThresholdF}°F`
+          }
+          href="/dashboard/history"
+          tone={freezeHours.hoursBelow34 > 0 ? "warning" : "neutral"}
+        />
+        <MetricCard
+          label="Coldest margin"
+          value={
+            coldestProbeMarginF == null
+              ? "—"
+              : `${coldestProbeMarginF >= 0 ? "+" : ""}${coldestProbeMarginF.toFixed(1)}°F`
+          }
+          detail={
+            coldestProbeTempF != null
+              ? `${coldestProbeTempF.toFixed(1)}°F vs ${alertSettings.freezeThresholdF}°F alert`
+              : "No live probe"
+          }
+          href="/"
+          tone={
+            coldestProbeMarginF == null
+              ? "neutral"
+              : coldestProbeMarginF <= 0
+                ? "danger"
+                : coldestProbeMarginF <= 5
+                  ? "warning"
+                  : "success"
+          }
+        />
       </DashboardMetricGrid>
     </section>
 
@@ -676,8 +784,23 @@ const garageRisk = computeGarageRiskStatus({
               <RegionalBenchmarkCard benchmark={regionalBenchmark} />
             )}
             <HeatingInsightsCard insights={heatingInsights} />
-            <DoorDurationCard devices={devices} />
+            {doorTempSummary && (
+              <DoorTempInsightCard
+                title={doorTempSummary.title}
+                detail={doorTempSummary.detail}
+                tone={doorTempSummary.tone}
+              />
+            )}
+            <DoorDurationCard devices={devices} sessions={doorSessions} />
             <DoorEventHistory householdId={household.householdId} />
+            <BatteryDeclineCard rows={batteryOverview} />
+            {energyOverview && (
+              <EnergyOverviewCard
+                energy={energyOverview}
+                coolingRateFPerHour={coolingRateFPerHour}
+              />
+            )}
+            <FloodLevelCard overview={floodLevelOverview} />
             <ClaimsPackPromptCard
               canUseClaimsPack={entitlements.canUseClaimsPack}
               tier={entitlements.tier}
