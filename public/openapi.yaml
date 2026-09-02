@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: ThermalTrace API
-  version: 1.1.0
+  version: 1.2.0
   description: |
     HTTP endpoints for device ingest, share links, metrics, devices CRUD, MQTT bridge, and inbound automations.
     Authenticated dashboard routes use Supabase session cookies; programmatic access uses API keys (Pro).
@@ -78,6 +78,79 @@ paths:
       responses:
         "201":
           description: Device created with one-time ingest_key
+  /api/v1/devices/sensors-batch:
+    post:
+      summary: Batch-update sensor labels and visibility (Pro API key)
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sensors]
+              properties:
+                sensors:
+                  type: array
+                  items:
+                    type: object
+                    required: [id]
+                    properties:
+                      id:
+                        type: string
+                      label:
+                        type: string
+                      visible:
+                        type: boolean
+      responses:
+        "200":
+          description: Sensors updated
+  /api/v1/pull-setup:
+    post:
+      summary: Save pull feeds and probe labels (Pro API key)
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [feeds]
+              properties:
+                feeds:
+                  type: array
+                  items:
+                    type: object
+                    required: [url]
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      url:
+                        type: string
+                      enabled:
+                        type: boolean
+                      jsonRoot:
+                        type: string
+                probes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      feedId:
+                        type: string
+                      key:
+                        type: string
+                      label:
+                        type: string
+                      visible:
+                        type: boolean
+      responses:
+        "200":
+          description: Pull setup saved
   /api/v1/metrics:
     get:
       summary: Prometheus metrics (Pro API key)

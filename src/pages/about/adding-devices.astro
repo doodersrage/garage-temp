@@ -77,7 +77,11 @@ const hero = getAboutPhoto("ethernet-cable");
       Under <strong>Push devices</strong>, enter a name and click <strong>Create push device</strong>.
     </li>
     <li>
-      Copy the ingest URL / key from the callout (QR on the same card). The key stays on the page for 30 minutes and survives refresh until you dismiss it — rotate only if you lose it entirely.
+      Copy the ingest URL / key from the callout (QR on the same card). The key stays on the page for 30 minutes and survives refresh until you dismiss it.
+    </li>
+    <li>
+      <strong>Lost the key later?</strong> On the device card use <strong>Reveal ingest key</strong> (when key recovery is enabled on the server) or <strong>Rotate key</strong> to issue a new one.
+      Devices created before key recovery was enabled need one rotate to store a recoverable encrypted copy.
     </li>
     <li>
       Point firmware at <code>POST /api/ingest/&lt;key&gt;</code> and POST JSON. Sensor keys import automatically

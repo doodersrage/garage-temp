@@ -14,6 +14,10 @@ export type ProductEvent =
   | "onboarding_step_complete"
   | "first_ingest"
   | "first_alert_test"
+  | "device_created"
+  | "pull_setup_saved"
+  | "sensors_renamed"
+  | "demo_pull_started"
   | "mfa_enrolled"
   | "account_deleted"
   | "portfolio_view";

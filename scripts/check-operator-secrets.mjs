@@ -43,6 +43,11 @@ function isSet(key) {
 
 const groups = [
   {
+    title: "Push ingest key recovery (Reveal key on Devices)",
+    keys: ["INGEST_KEY_ENCRYPTION_SECRET"],
+    doc: "https://thermaltrace.dev/dashboard/temperature",
+  },
+  {
     title: "YubiKey OTP (YubiCloud)",
     keys: ["YUBICO_CLIENT_ID", "YUBICO_API_KEY"],
     doc: "https://upgrade.yubico.com/getapikey/",

@@ -1,4 +1,5 @@
 import { useState } from "preact/hooks";
+import { trackProductEvent } from "../lib/productAnalytics";
 
 export type InlineSensorRow = {
   id: string;
@@ -53,6 +54,7 @@ export default function PushInlineRename({
         setStatus(data.error ?? "Could not save.");
         return;
       }
+      trackProductEvent("sensors_renamed", { count: sensors.length });
       setStatus("Saved.");
     } catch {
       setStatus("Could not save.");

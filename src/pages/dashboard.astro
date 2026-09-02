@@ -2,6 +2,7 @@
 import DashboardLayout from "../layouts/DashboardLayout.astro";
 import DashboardOnboarding from "../components/DashboardOnboarding.astro";
 import DashboardAndroidNudge from "../components/DashboardAndroidNudge.astro";
+import DemoPullNudge from "../components/DemoPullNudge.astro";
 import DashboardYoureLive from "../components/DashboardYoureLive.astro";
 import AlertSetupNudge from "../components/dashboard/AlertSetupNudge.astro";
 import DashboardStoryCard from "../components/dashboard/DashboardStoryCard.astro";
@@ -320,6 +321,12 @@ const feedsValue =
       ? `${feedIssueCount} issue${feedIssueCount === 1 ? "" : "s"}`
       : `${feedHealth.statuses.length} online`;
 
+const showDemoPullNudge =
+  canEdit &&
+  latest.length === 0 &&
+  deviceConfig.devices.length === 0 &&
+  !onboardingDismissed;
+
 const upgradeTarget = nextUpgradeTier(entitlements.tier);
 
 const essentialDone =
@@ -424,6 +431,8 @@ const hasSecondaryBanners = secondaryBannerIds.size > 0;
       hasHousehold={Boolean(household.householdId)}
       dismissed={onboardingDismissed}
     />
+
+    <DemoPullNudge show={showDemoPullNudge} />
 
     <DashboardAndroidNudge show={hasDevices && latest.length > 0} />
 

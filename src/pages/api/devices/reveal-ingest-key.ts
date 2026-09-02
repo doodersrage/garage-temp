@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
 import { decryptStoredIngestKey, ingestKeyVaultConfigured } from "../../../lib/ingestKeyVault";
+import { checkRevealIngestKeyRateLimit } from "../../../lib/revealIngestKeyLimits";
 import { listHouseholdDevices } from "../../../lib/devices";
 import { requireHouseholdEditor, householdEditorCtx } from "../../../lib/householdAuth";
 
@@ -11,6 +12,23 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       status: 401,
       headers: { "Content-Type": "application/json" },
     });
+  }
+
+  const rate = checkRevealIngestKeyRateLimit(user.id);
+  if (!rate.ok) {
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        error: `Too many reveal attempts — try again in ${rate.retryAfterSec ?? 60} seconds.`,
+      }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          "Retry-After": String(rate.retryAfterSec ?? 60),
+        },
+      },
+    );
   }
 
   if (!ingestKeyVaultConfigured()) {

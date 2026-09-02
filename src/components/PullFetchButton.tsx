@@ -1,7 +1,8 @@
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 
 interface Props {
   feedIds?: string[];
+  autoFetch?: boolean;
 }
 
 type FetchResult = {
@@ -10,7 +11,7 @@ type FetchResult = {
   feeds?: Array<{ feedId: string; name: string; ok: boolean; message: string }>;
 };
 
-export default function PullFetchButton({ feedIds = [] }: Props) {
+export default function PullFetchButton({ feedIds = [], autoFetch = false }: Props) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
@@ -64,6 +65,11 @@ export default function PullFetchButton({ feedIds = [] }: Props) {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (!autoFetch) return;
+    void fetchNow();
+  }, [autoFetch]);
 
   return (
     <div class="flex flex-wrap items-center gap-3">

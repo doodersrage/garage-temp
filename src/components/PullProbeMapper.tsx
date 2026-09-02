@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import type { TempFeedConfig, TempProbeConfig } from "../lib/tempFeedConfig";
 import { mergeDiscoveredProbes, type DiscoveredProbe } from "../lib/feedDiscovery";
+import { trackProductEvent } from "../lib/productAnalytics";
 
 type DiscoveredProbeRow = {
   key: string;
@@ -40,6 +41,8 @@ export default function PullProbeMapper({
   const [status, setStatus] = useState<string | null>(null);
   const [loadingFeedId, setLoadingFeedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const probesRef = useRef(probes);
+  probesRef.current = probes;
 
   const feedsWithUrls = useMemo(
     () => feeds.filter((feed) => Boolean(feed.url)),
@@ -251,8 +254,7 @@ export default function PullProbeMapper({
     setStatus('Hidden "avg" probes from Home — save pull setup to persist.');
   }
 
-  async function savePullSetup(event: Event) {
-    event.preventDefault();
+  async function savePullSetupInternal() {
     setSaving(true);
     setStatus(null);
 
@@ -265,7 +267,7 @@ export default function PullProbeMapper({
         body: JSON.stringify({
           redirect: redirectTo.includes("tab=") ? redirectTo : `${redirectTo}?tab=pull`,
           feeds: feedsPayload,
-          probes: probes.map((probe) => ({
+          probes: probesRef.current.map((probe) => ({
             id: probe.id,
             feedId: probe.feedId,
             key: probe.key,
@@ -282,15 +284,39 @@ export default function PullProbeMapper({
       };
       if (!response.ok || !data.ok) {
         setStatus(data.error ?? "Failed to save pull setup.");
+        window.dispatchEvent(
+          new CustomEvent("pull-setup:save-error", {
+            detail: data.error ?? "Failed to save pull setup.",
+          }),
+        );
         return;
       }
+      trackProductEvent("pull_setup_saved", {
+        discovered_probes: data.discoveredProbes ?? 0,
+      });
       window.location.href = data.redirect ?? `${redirectTo}?pull_saved=1&tab=pull`;
     } catch {
       setStatus("Unable to save pull setup.");
+      window.dispatchEvent(
+        new CustomEvent("pull-setup:save-error", { detail: "Unable to save pull setup." }),
+      );
     } finally {
       setSaving(false);
     }
   }
+
+  async function savePullSetup(event: Event) {
+    event.preventDefault();
+    await savePullSetupInternal();
+  }
+
+  useEffect(() => {
+    const handler = () => {
+      void savePullSetupInternal();
+    };
+    window.addEventListener("pull-setup:save", handler);
+    return () => window.removeEventListener("pull-setup:save", handler);
+  });
 
 
   if (feedsWithUrls.length === 0) {
@@ -399,7 +425,7 @@ export default function PullProbeMapper({
       )}
 
       <div class="flex flex-wrap items-center gap-3">
-        <button type="submit" class="btn-primary" disabled={saving}>
+        <button type="submit" class="btn-primary" id="pull-setup-save-btn" disabled={saving}>
           {saving ? "Saving…" : "Save pull setup"}
         </button>
         {probes.length > 0 ? (

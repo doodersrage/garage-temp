@@ -3,6 +3,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import TempFeedsSettings from "../../components/TempFeedsSettings.astro";
 import PullProbeMapper from "../../components/PullProbeMapper";
 import PullFetchButton from "../../components/PullFetchButton";
+import PullFeedSaveBar from "../../components/PullFeedSaveBar";
 import PushInlineRename from "../../components/PushInlineRename";
 import RevealIngestKeyButton from "../../components/RevealIngestKeyButton";
 import DeviceSetupWizard from "../../components/DeviceSetupWizard.astro";
@@ -190,8 +191,14 @@ const waitingCurl = buildWaitingIngestCurl(
 );
 const waitingKeyList = [...new Set(waitingSensors.map((s) => s.key))];
 const ingestOk = Astro.url.searchParams.get("ingest_ok") === "1";
+const deviceCreated = Astro.url.searchParams.get("device_created") === "1";
+const pullSaved = Astro.url.searchParams.get("pull_saved") === "1";
+const demoPullStarted = Astro.url.searchParams.get("demo_pull") === "1";
 const analyticsEvents = [
   ...(ingestOk ? [{ name: "first_ingest" as const }] : []),
+  ...(deviceCreated ? [{ name: "device_created" as const }] : []),
+  ...(pullSaved ? [{ name: "pull_setup_saved" as const }] : []),
+  ...(demoPullStarted ? [{ name: "demo_pull_started" as const }] : []),
 ];
 
 function formatLatestValue(row: (typeof latest)[number]): string {
@@ -1030,9 +1037,10 @@ const postSetupHasRenamed = !sensorsNeedRename;
 
         <ExampleFeedCard />
 
-        <PullFetchButton client:visible feedIds={pullFeedIds} />
+        <PullFetchButton client:visible feedIds={pullFeedIds} autoFetch={demoPullStarted && pullSaved} />
 
         <TempFeedsSettings feeds={preferences.tempFeeds} />
+        <PullFeedSaveBar client:visible hasFeeds={pullFeedIds.length > 0} />
         <PullProbeMapper
           client:visible
           feeds={preferences.tempFeeds}
