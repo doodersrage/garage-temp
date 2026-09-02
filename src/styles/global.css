@@ -660,14 +660,39 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
+    align-items: center;
     animation: home-rise 520ms var(--motion-ease) 140ms both;
   }
 
+  .home-hero-cta-primary {
+    padding: 0.8rem 1.35rem;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .home-hero-nohw {
+    margin: 0.9rem 0 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    animation: home-rise 520ms var(--motion-ease) 160ms both;
+  }
+
   .home-hero-plans {
-    margin: 1.15rem 0 0;
+    margin: 0.85rem 0 0;
     font-size: 0.9375rem;
     color: var(--color-text-muted);
     animation: home-rise 520ms var(--motion-ease) 180ms both;
+  }
+
+  .home-hero-visual-caption {
+    margin: 0;
+    padding: 0.7rem 0.85rem 0.85rem;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--color-text-muted);
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
   }
 
   .home-status {
@@ -784,6 +809,7 @@
     .home-hero-promise,
     .home-hero-lead,
     .home-hero-actions,
+    .home-hero-nohw,
     .home-hero-plans,
     .home-hero-visual {
       animation: none;
@@ -817,7 +843,10 @@
   }
 
   .home-live-cta {
-    font-size: 0.9375rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
   }
 
   .home-maker {
