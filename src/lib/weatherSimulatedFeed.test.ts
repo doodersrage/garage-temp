@@ -5,6 +5,7 @@ import {
   deriveSunIntensity,
   fetchWeatherSimulatedFeed,
 } from "./weatherSimulatedFeed";
+import { defaultDemoControls } from "./probeDemo";
 
 vi.mock("./FetchWeather", () => ({
   fetchWeatherSnapshot: vi.fn(),
@@ -23,7 +24,7 @@ describe("weatherSimulatedFeed", () => {
   it("builds pull and ingest payloads with three probes plus avg", () => {
     const { pull, ingest } = buildWeatherSimulatedFeed({
       weather: { temp: 30, description: "clear", cloudCover: 10 },
-      controls: { outdoorF: 30, sunIntensity: 40, doorOpen: false },
+      controls: { ...defaultDemoControls, outdoorF: 30, sunIntensity: 40, doorOpen: false },
       noisy: false,
     });
 

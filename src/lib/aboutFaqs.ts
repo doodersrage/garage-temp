@@ -229,7 +229,17 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Is the probe demo real hardware?",
       answer:
-        "No—it simulates three zones so you can see how outdoor air, sun load, and door state change JSON output like a live feed.",
+        "No — it simulates three zones so you can see how outdoor air, sun load, door state, and freeze threshold change readings and JSON, the same shapes Devices and Overview use.",
+    },
+    {
+      question: "What is the difference between push and pull JSON?",
+      answer:
+        "Push ingest is a flat object ESP/Arduino POSTs to /api/ingest/<key>. Pull feed nests readings under temp (keys 0, 1, 2, avg) for scheduled HTTPS JSON — including the one-click demo feed.",
+    },
+    {
+      question: "Does space status match the dashboard?",
+      answer:
+        "Yes for freeze risk and near-threshold watch. The simulator reuses the same Overview space-status helper with your chosen freeze °F and the coldest simulated probe.",
     },
   ],
   "zapier-make-recipes": [

@@ -565,11 +565,11 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
   {
     slug: "probe-demo",
     parentSlug: "temperature-probes",
-    title: "Interactive temperature probe demo",
+    title: "Interactive probe demo",
     description:
-      "Simulate probe readings in an unheated bay by changing outdoor temperature, sun load, and door state.",
+      "Simulate multi-zone temperatures with freeze threshold, space status, and push/pull JSON like production Devices and Overview.",
     summary:
-      "See live JSON output like the real monitoring feed with three probe zones.",
+      "Garage, workshop, attic, or crawlspace — watch freeze risk and ingest JSON update live.",
   },
   {
     slug: "esphome-shelly-recipes",

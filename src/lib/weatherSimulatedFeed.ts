@@ -185,6 +185,7 @@ export async function fetchWeatherSimulatedFeed(
   const doorOpen = deriveDoorOpen(now, options.doorOpen);
 
   const controls: DemoControls = {
+    ...defaultDemoControls,
     outdoorF: round1(outdoorF),
     sunIntensity: clamp(sunIntensity, 0, 100),
     doorOpen,

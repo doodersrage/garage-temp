@@ -2,6 +2,7 @@ import { useEffect, useRef } from "preact/hooks";
 import {
   applyProbeNoise,
   computeDemoProbes,
+  defaultDemoControls,
   type DemoControls,
   type DemoProbe,
 } from "../lib/probeDemo";
@@ -84,6 +85,7 @@ export default function AboutProbeActivity() {
     let start = performance.now();
 
     let controls: DemoControls = {
+      ...defaultDemoControls,
       outdoorF: 42,
       sunIntensity: 35,
       doorOpen: false,
@@ -129,7 +131,7 @@ export default function AboutProbeActivity() {
 
     function getSceneControls(elapsed: number): DemoControls {
       if (reducedMotionRef.current) {
-        return { outdoorF: 44, sunIntensity: 40, doorOpen: false };
+        return { ...defaultDemoControls, outdoorF: 44, sunIntensity: 40, doorOpen: false };
       }
 
       const cycle = elapsed % 28000;
@@ -143,6 +145,7 @@ export default function AboutProbeActivity() {
       doorProgress = doorAnim;
 
       return {
+        ...defaultDemoControls,
         outdoorF: 38 + Math.sin(elapsed / 22000) * 6,
         sunIntensity: 22 + (0.5 + 0.5 * Math.sin(elapsed / 9000)) * 48,
         doorOpen: doorAnim > 0.5,
