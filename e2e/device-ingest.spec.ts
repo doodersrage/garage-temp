@@ -12,7 +12,7 @@ test.describe("device ingest", () => {
   test("create device, POST a reading, see it land, then clean up", async ({ page }) => {
     test.skip(!getE2ECredentials(), "Set E2E_TEST_EMAIL and E2E_TEST_PASSWORD");
 
-    await signIn(page, "/dashboard/temperature");
+    await signIn(page, "/dashboard/temperature?tab=push");
 
     const deviceName = `E2E ingest ${Date.now()}`;
     await page.locator("#device-name").fill(deviceName);

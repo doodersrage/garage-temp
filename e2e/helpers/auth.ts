@@ -83,12 +83,24 @@ export async function signIn(page: Page, next = "/dashboard/alerts"): Promise<vo
 
   await page.goto(next, { waitUntil: "domcontentloaded" });
   const nextPath = next.split("?")[0] ?? next;
-  // Allow auth middleware redirects (e.g. MFA step-up) before asserting destination.
   await page.waitForURL(
     (url) => {
       const path = url.pathname;
-      return path === nextPath || path.startsWith(`${nextPath}/`) || path.startsWith("/signin");
+      if (path.startsWith("/signin/mfa")) return true;
+      return path === nextPath || path.startsWith(`${nextPath}/`);
     },
     { timeout: 20_000 },
   );
+
+  const landed = new URL(page.url()).pathname;
+  if (landed.startsWith("/signin/mfa")) {
+    throw new Error(
+      "E2E user requires MFA — use a test account without MFA enrolled, or complete step-up manually",
+    );
+  }
+  if (landed.startsWith("/signin")) {
+    throw new Error(
+      "Sign-in cookies were rejected by the preview server — check SUPABASE_* secrets match the E2E user project",
+    );
+  }
 }
