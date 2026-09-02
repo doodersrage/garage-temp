@@ -1,0 +1,16 @@
+---
+interface Props {
+  /** Element tag for the wordmark wrapper. */
+  as?: "span" | "h1" | "p" | "div";
+  class?: string;
+  /** Append a ™ after Trace (visual only). */
+  mark?: boolean;
+}
+
+const { as: Tag = "span", class: className, mark = false } = Astro.props;
+---
+<Tag class:list={["brand-mark", className]}>
+  <span class="brand-mark-thermal">Thermal</span><span class="brand-mark-trace">Trace</span>{
+    mark ? <span class="brand-mark-tm" aria-hidden="true">™</span> : null
+  }
+</Tag>

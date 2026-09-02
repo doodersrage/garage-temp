@@ -31,6 +31,7 @@ import {
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
 import { getMarketingFaqs, getMarketingFaqSchema } from "../lib/marketingFaqs";
+import ProductScreenshot from "../components/ProductScreenshot.astro";
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 const entitlements = user ? await getUserEntitlements(user.id) : null;
@@ -180,6 +181,11 @@ const schema = [
         </li>
       </ul>
     </section>
+
+    <ProductScreenshot
+      shot="history-chart"
+      caption="Member and Pro keep longer curves — Free still shows live readings and threshold freeze alerts."
+    />
 
     <section class="plan-tier-section">
       <div class="billing-interval-toggle" role="group" aria-label="Billing interval">

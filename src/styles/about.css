@@ -92,12 +92,14 @@
 }
 
 .about-prose .about-subguide-grid,
-.about-prose .about-figure {
+.about-prose .about-figure,
+.about-prose .product-shot {
   margin-top: 1.5rem;
 }
 
 .about-prose > * + .about-subguide-grid,
-.about-prose > * + .about-figure {
+.about-prose > * + .about-figure,
+.about-prose > * + .product-shot {
   margin-top: 2rem;
 }
 

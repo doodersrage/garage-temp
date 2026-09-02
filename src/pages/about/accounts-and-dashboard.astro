@@ -1,6 +1,7 @@
 ---
 
 import AboutArticle from "../../components/AboutArticle.astro";
+import ProductScreenshot from "../../components/ProductScreenshot.astro";
 import { getAboutPage } from "../../lib/aboutPages";
 import { getAboutPhoto } from "../../lib/aboutPhotos";
 
@@ -22,6 +23,11 @@ const hero = getAboutPhoto("desk-workspace");
     The dashboard groups tools so you can watch live sensors, manage hardware, invite household members,
     and—when permitted—administer users or contact submissions.
   </p>
+
+  <ProductScreenshot
+    shot="overview-cards"
+    caption="Overview nudges you from device connect through freeze setup and live data."
+  />
 
   <h2>Account creation</h2>
   <p>
@@ -45,6 +51,10 @@ const hero = getAboutPhoto("desk-workspace");
     <li><strong>Push devices</strong> — ESP/Arduino POSTs JSON to a unique ingest URL. Copy the key from the 30-minute callout; use <strong>Reveal ingest key</strong> or <strong>Rotate key</strong> later. Sensors auto-import on first POST; rename labels on Devices afterward.</li>
     <li><strong>Pull feeds</strong> — <strong>Pull feeds</strong> tab: HTTPS JSON URLs we fetch every 15 minutes. <strong>Save pull setup</strong> auto-imports probe keys; SenML and Home Assistant REST JSON auto-detect when the root is missing.</li>
   </ul>
+  <ProductScreenshot
+    shot="devices"
+    caption="Devices hub — push ingest, pull feeds, Home Assistant, MQTT, and device health."
+  />
   <p>
     Step-by-step: <a class="text-link" href="/about/adding-devices">Adding push and pull devices</a>.
     After sensors are mapped, verify ingest (or wait for the next pull), then open
@@ -81,6 +91,10 @@ const hero = getAboutPhoto("desk-workspace");
     Enable a channel only when its destination is filled in—incomplete channels are skipped. Use
     <strong>Send test now</strong> to see which channels actually fired.
   </p>
+  <ProductScreenshot
+    shot="alerts"
+    caption="Essentials — freeze threshold and email before you dig into every channel."
+  />
 
   <h2>Households &amp; share links</h2>
   <p>

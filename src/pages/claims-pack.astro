@@ -13,6 +13,7 @@ import {
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
 import type { AboutFaqItem } from "../lib/aboutFaqs";
+import ProductScreenshot from "../components/ProductScreenshot.astro";
 
 const { user } = await getAuthFromCookies(Astro.cookies);
 
@@ -71,6 +72,11 @@ const schema = [
       </a>
       <a slot="actions" class="btn-secondary" href="/pricing">See Pro pricing</a>
     </PageHeader>
+
+    <ProductScreenshot
+      shot="insights"
+      caption="Insights includes winter documentation — generate a claims pack from saved history when you need evidence."
+    />
 
     <section class="card">
       <h2 class="card-title">What's in the pack</h2>

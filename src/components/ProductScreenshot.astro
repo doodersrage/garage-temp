@@ -1,0 +1,83 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import insights from "../assets/marketing/thermaltrace-dashboard-insights.jpg";
+import history from "../assets/marketing/thermaltrace-dashboard-history.jpg";
+import historyChart from "../assets/marketing/thermaltrace-dashboard-history-chart.jpg";
+import devices from "../assets/marketing/thermaltrace-dashboard-devices.jpg";
+import alerts from "../assets/marketing/thermaltrace-dashboard-alerts-essentials.jpg";
+import overviewCards from "../assets/marketing/thermaltrace-dashboard-overview-cards.jpg";
+import overviewStatus from "../assets/marketing/thermaltrace-dashboard-overview-status.jpg";
+
+export type ProductShotId =
+  | "insights"
+  | "history"
+  | "history-chart"
+  | "devices"
+  | "alerts"
+  | "overview-cards"
+  | "overview-status";
+
+interface Props {
+  shot: ProductShotId;
+  caption?: string;
+  class?: string;
+  /** Tighter framing for side-by-side layouts. */
+  compact?: boolean;
+}
+
+const shots: Record<
+  ProductShotId,
+  { image: ImageMetadata; alt: string; defaultCaption: string }
+> = {
+  insights: {
+    image: insights,
+    alt: "ThermalTrace Insights with seven-day probe curves, freeze threshold line, and nights-at-risk forecast",
+    defaultCaption: "Insights — probe curves with your freeze threshold.",
+  },
+  history: {
+    image: history,
+    alt: "ThermalTrace Reading History chart with probe traces and 34°F freeze line",
+    defaultCaption: "History — week of probe traces against the freeze line.",
+  },
+  "history-chart": {
+    image: historyChart,
+    alt: "ThermalTrace temperature trend chart with freeze threshold at 34°F",
+    defaultCaption: "Temperature trend with freeze guide line.",
+  },
+  devices: {
+    image: devices,
+    alt: "ThermalTrace Devices page showing Garage pull device health and connection options",
+    defaultCaption: "Devices — ESP push, pull feeds, MQTT, and Home Assistant.",
+  },
+  alerts: {
+    image: alerts,
+    alt: "ThermalTrace Alerts Essentials with freeze threshold and alert toggle",
+    defaultCaption: "Alerts Essentials — freeze threshold and email in one place.",
+  },
+  "overview-cards": {
+    image: overviewCards,
+    alt: "ThermalTrace Overview cards for freeze setup, connecting a device, and receiving live data",
+    defaultCaption: "Overview — from first device to live readings.",
+  },
+  "overview-status": {
+    image: overviewStatus,
+    alt: "ThermalTrace Overview status strip showing last reading, sensors, feeds, and alerts",
+    defaultCaption: "Overview status — last reading, sensors, feeds, alerts.",
+  },
+};
+
+const { shot, caption, class: className, compact = false } = Astro.props;
+const item = shots[shot];
+const captionText = caption ?? item.defaultCaption;
+---
+<figure class:list={["product-shot", compact && "product-shot--compact", className]}>
+  <Image
+    src={item.image}
+    alt={item.alt}
+    widths={compact ? [400, 640, 800] : [480, 768, 1024, 1200]}
+    sizes={compact ? "(max-width: 767px) 100vw, 360px" : "(max-width: 767px) 100vw, 720px"}
+    class="product-shot-img"
+  />
+  <figcaption class="product-shot-caption">{captionText}</figcaption>
+</figure>
