@@ -17,7 +17,9 @@ import { aboutPages, getAboutStats } from "../../lib/aboutPages";
 import { buildAboutSearchIndex } from "../../lib/aboutSearchIndex";
 import { getFeaturedAboutPages } from "../../lib/aboutNavigation";
 import FaqSection from "../../components/FaqSection.astro";
+import EditorialPhotoStrip from "../../components/EditorialPhotoStrip.astro";
 import "../../styles/about.css";
+import { editorialHubPhotoIds } from "../../lib/aboutPhotos";
 
 const title = "About ThermalTrace";
 const description =
@@ -73,6 +75,8 @@ const featuredSearchIndex = buildAboutSearchIndex(featuredPages);
     </PageHeader>
 
     <AboutJourneys />
+
+    <EditorialPhotoStrip photoIds={editorialHubPhotoIds} />
 
     <AboutQuickStart />
 

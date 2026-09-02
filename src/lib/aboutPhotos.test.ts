@@ -10,7 +10,7 @@ import {
 describe("aboutPhotos", () => {
   it("registers every curated photo with credit metadata", () => {
     const ids = Object.keys(aboutPhotos) as AboutPhotoId[];
-    expect(ids.length).toBeGreaterThanOrEqual(8);
+    expect(ids.length).toBeGreaterThanOrEqual(12);
     for (const id of ids) {
       const photo = aboutPhotos[id];
       expect(photo.id).toBe(id);
@@ -30,5 +30,10 @@ describe("aboutPhotos", () => {
       expect(aboutPhotos[photoId as AboutPhotoId]).toBeTruthy();
       expect(getAboutHeroPhoto(slug)?.id).toBe(photoId);
     }
+  });
+
+  it("covers most about pages with a hero photo", () => {
+    const covered = aboutPages.filter((page) => aboutHeroPhotoBySlug[page.slug]).length;
+    expect(covered / aboutPages.length).toBeGreaterThan(0.85);
   });
 });

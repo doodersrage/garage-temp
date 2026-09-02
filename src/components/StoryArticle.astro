@@ -3,6 +3,7 @@ import { Image, type ImageMetadata } from "astro:assets";
 import Layout from "../layouts/Layout.astro";
 import FaqSection from "./FaqSection.astro";
 import type { Story } from "../lib/stories";
+import { getAboutPhoto } from "../lib/aboutPhotos";
 import {
   getArticleSchema,
   getBreadcrumbSchema,
@@ -10,14 +11,23 @@ import {
   resolvePageUrl,
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
+import "../styles/about.css";
 
 interface Props {
   story: Story;
   heroImage?: ImageMetadata;
   heroCaption?: string;
+  heroCredit?: string;
+  heroCreditHref?: string;
 }
 
-const { story, heroImage, heroCaption } = Astro.props;
+const { story, heroImage, heroCaption, heroCredit, heroCreditHref } = Astro.props;
+const ccHero = !heroImage && story.photoId ? getAboutPhoto(story.photoId) : undefined;
+const resolvedImage = heroImage ?? ccHero?.image;
+const resolvedCaption = heroCaption ?? ccHero?.caption;
+const resolvedCredit = heroCredit ?? ccHero?.credit;
+const resolvedCreditHref = heroCreditHref ?? ccHero?.sourceUrl;
+const resolvedAlt = ccHero?.alt ?? `Illustration for ${story.headline}`;
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, story.path);
@@ -59,18 +69,25 @@ const schema = [
     </section>
 
     {
-      heroImage && (
+      resolvedImage && (
         <figure class="card overflow-hidden p-0 mb-0">
           <Image
-            src={heroImage}
-            alt={`Illustration: freeze-risk alert on a phone beside garage plumbing with frost forming on copper pipes`}
+            src={resolvedImage}
+            alt={resolvedAlt}
             widths={[640, 960, 1280]}
             sizes="(max-width: 960px) 100vw, 900px"
             class="w-full h-auto block"
           />
-          {heroCaption && (
-            <figcaption class="px-4 py-3 text-sm text-[var(--color-text-muted)]">
-              {heroCaption}
+          {(resolvedCaption || resolvedCredit) && (
+            <figcaption class="px-4 py-3 text-sm text-[var(--color-text-muted)] flex flex-col gap-1">
+              {resolvedCaption && <span>{resolvedCaption}</span>}
+              {resolvedCredit && resolvedCreditHref ? (
+                <a class="about-figure-credit" href={resolvedCreditHref} rel="noopener noreferrer" target="_blank">
+                  {resolvedCredit}
+                </a>
+              ) : resolvedCredit ? (
+                <span class="about-figure-credit">{resolvedCredit}</span>
+              ) : null}
             </figcaption>
           )}
         </figure>

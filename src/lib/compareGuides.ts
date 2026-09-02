@@ -7,6 +7,8 @@ export type CompareGuide = {
   competitor: string;
   summary: string;
   lede: string;
+  /** Optional Creative Commons atmosphere photo. */
+  photoId?: import("./aboutPhotos").AboutPhotoId;
   whenThermalTrace: string[];
   whenOther: string[];
   rows: Array<{ capability: string; thermaltrace: string; other: string }>;
@@ -25,6 +27,7 @@ export const compareGuides: CompareGuide[] = [
       "DIY MQTT is powerful if you enjoy running brokers, dashboards, and alert scripts. ThermalTrace is the same outcome—live probes, freeze alerts, history—without babysitting the stack at 2 a.m.",
     lede:
       "A Mosquitto broker, Node-RED flows, and a cron job can freeze-alert a garage. The cost is patching, TLS, Twilio, and a Pi that has to stay up. ThermalTrace is the hosted alerts and history layer: keep MQTT on the LAN if you want, bridge readings over HTTPS, and let household freeze channels live in the cloud.",
+    photoId: "ethernet-cable",
     whenThermalTrace: [
       "You want freeze SMS/email/push without wiring Twilio yourself",
       "Household members need access without VPN to your Pi",
@@ -55,6 +58,7 @@ export const compareGuides: CompareGuide[] = [
       "Govee is great for cheap room sensors and a polished phone app. ThermalTrace is built for freeze workflows in garages, workshops, attics, and shops: your own ESP probes, household alerts, and history you can export.",
     lede:
       "Govee hygrometers win on price and a friendly phone app for bedrooms and closets. They are weaker in a detached garage or shop: Bluetooth range, vendor lock-in, and alerts that mostly stay in-app. ThermalTrace assumes you bring an ESP32, then gives household freeze routing and a season of exportable history.",
+    photoId: "garage-workbench",
     whenThermalTrace: [
       "You want ESP/Arduino probes you control (not only vendor pods)",
       "Freeze alerts need SMS, webhooks, or household routing",
@@ -85,6 +89,7 @@ export const compareGuides: CompareGuide[] = [
       "Tempest shines at yard weather—wind, rain, outdoor temp. Pipe freeze risk lives indoors. ThermalTrace watches the garage, crawlspace, or shop where the plumbing is.",
     lede:
       "A Tempest on the roof tells you outdoor air, wind, and rain with excellent fidelity. Pipes freeze where the water is—usually a garage, crawlspace, or shop the station never sees. Use Tempest for yard weather and ThermalTrace for the indoor probe that sits by the plumbing.",
+    photoId: "cold-weather-road",
     whenThermalTrace: [
       "You need indoor / unheated-space probe temps for pipe risk",
       "Alerts should fire on space temperature, not only outdoor air",
@@ -115,6 +120,7 @@ export const compareGuides: CompareGuide[] = [
       "Nest is excellent at running your HVAC and reporting the temperature where it (or a Nest Temperature Sensor) is installed -- almost never the garage, crawlspace, or shop where pipes actually freeze. ThermalTrace watches that space directly, and if you connect your Nest account, pulls its reading and heating status into every freeze alert for context.",
     lede:
       "Nest does one job very well: run the furnace and track the temperature of the room it's in. An unheated garage, crawlspace, or workshop is unconditioned by design, so Nest has no reading from it at all -- there's nothing to alert on. ThermalTrace puts a dedicated probe in that space, and if you connect your Nest account (Pro), every freeze alert shows your house's indoor temperature and whether it's actively heating, so you can tell at a glance whether the cold is expected (garage is unconditioned, house is fine) or something's actually wrong.",
+    photoId: "crawlspace",
     whenThermalTrace: [
       "You have a garage, crawlspace, basement, or shop that isn't on Nest's heating loop",
       "You want an alert from the specific unconditioned space, not an inference from the thermostat",
@@ -146,6 +152,7 @@ export const compareGuides: CompareGuide[] = [
       "Ecobee is excellent at running your HVAC and reporting the temperature where it (or an Ecobee SmartSensor) is installed -- almost never the garage, crawlspace, or shop where pipes actually freeze. ThermalTrace watches that space directly, and if you connect your Ecobee account, pulls its reading and heating status into every freeze alert for context.",
     lede:
       "Ecobee does one job very well: run the furnace and track the temperature of the room it's in. An unheated garage, crawlspace, or workshop is unconditioned by design, so Ecobee has no reading from it at all -- there's nothing to alert on. ThermalTrace puts a dedicated probe in that space, and if you connect your Ecobee account (Pro), every freeze alert shows your house's indoor temperature and whether it's actively heating, so you can tell at a glance whether the cold is expected (garage is unconditioned, house is fine) or something's actually wrong.",
+    photoId: "basement-pex-pipes",
     whenThermalTrace: [
       "You have a garage, crawlspace, basement, or shop that isn't on Ecobee's heating loop",
       "You want an alert from the specific unconditioned space, not an inference from the thermostat",

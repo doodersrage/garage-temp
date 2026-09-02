@@ -8,6 +8,8 @@ export type Story = {
   location: string;
   datePublished: string;
   ogImage: string;
+  /** Optional Creative Commons hero from aboutPhotos (not used on dashboard). */
+  photoId?: import("./aboutPhotos").AboutPhotoId;
   setup: string[];
   timeline: Array<{ time: string; detail: string }>;
   outcome: string;
@@ -62,6 +64,7 @@ export const stories: Story[] = [
     location: "Stowe, VT",
     datePublished: "2025-12-12",
     ogImage: "/og-story-freeze.jpg",
+    photoId: "snow-cabins",
     setup: [
       "Wi-Fi ESP8266 near the mechanical room, two probes (indoor + crawlspace)",
       "Member plan with email + PWA push; freeze threshold 36°F",
@@ -98,6 +101,7 @@ export const stories: Story[] = [
     location: "Denver, CO",
     datePublished: "2026-01-18",
     ogImage: "/og-dashboard.jpg",
+    photoId: "server-rack",
     setup: [
       "Existing ESP32 already on ThermalTrace for the garage; second probe in the closet",
       "High-temp threshold 95°F plus freeze watch on the garage side",
@@ -134,6 +138,7 @@ export const stories: Story[] = [
     location: "Columbus, OH",
     datePublished: "2026-02-04",
     ogImage: "/og-story-freeze.jpg",
+    photoId: "basement-pex-pipes",
     setup: [
       "Arduino + DHT22 on a shelf above the water heater in the attached garage",
       "Free plan email alerts at 34°F while evaluating; upgraded to Member for CSV",

@@ -2,6 +2,7 @@
 
 import AboutArticle from "../../components/AboutArticle.astro";
 import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
 
 const page = getAboutPage("install-pwa") ?? {
   slug: "install-pwa",
@@ -9,11 +10,17 @@ const page = getAboutPage("install-pwa") ?? {
   description:
     "Add ThermalTrace to your home screen for faster access and optional push alerts.",
 };
+const hero = getAboutHeroPhoto(page.slug);
 ---
 <AboutArticle
   slug={page.slug}
   title={page.title}
   description={page.description}
+  heroImage={hero?.image}
+  heroAlt={hero?.alt}
+  heroCaption={hero?.caption}
+  heroCredit={hero?.credit}
+  heroCreditHref={hero?.sourceUrl}
 >
   <p>
     ThermalTrace includes a Progressive Web App manifest and service worker.

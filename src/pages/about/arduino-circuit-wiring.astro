@@ -4,8 +4,10 @@ import AboutArticle from "../../components/AboutArticle.astro";
 import { Image } from "astro:assets";
 import arduinoWiring from "../../assets/dht22_arduino_lcd_wiring.svg";
 import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
 
 const page = getAboutPage("arduino-circuit-wiring")!;
+const hero = getAboutHeroPhoto(page.slug);
 const sectionParent = {
   slug: "arduino-sketches",
   title: "Arduino and Arduino sketches",
@@ -16,6 +18,11 @@ const sectionParent = {
   title={page.title}
   description={page.description}
   sectionParent={sectionParent}
+  heroImage={hero?.image}
+  heroAlt={hero?.alt}
+  heroCaption={hero?.caption}
+  heroCredit={hero?.credit}
+  heroCreditHref={hero?.sourceUrl}
 >
   <p>
     This build centers on an Arduino Uno with a W5100 Ethernet shield stacked on top, a solderless

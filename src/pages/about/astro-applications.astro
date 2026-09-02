@@ -2,10 +2,21 @@
 
 import AboutArticle from "../../components/AboutArticle.astro";
 import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
 
 const page = getAboutPage("astro-applications")!;
+const hero = getAboutHeroPhoto(page.slug);
 ---
-<AboutArticle slug={page.slug} title={page.title} description={page.description}>
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={hero?.image}
+  heroAlt={hero?.alt}
+  heroCaption={hero?.caption}
+  heroCredit={hero?.credit}
+  heroCreditHref={hero?.sourceUrl}
+>
   <p>
     This website is an Astro application deployed to Cloudflare Workers. Astro combines mostly static
     HTML with selective server rendering, which fits a monitoring dashboard: fast public pages, authenticated

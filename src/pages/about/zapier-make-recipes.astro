@@ -2,10 +2,21 @@
 
 import AboutArticle from "../../components/AboutArticle.astro";
 import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
 
 const page = getAboutPage("zapier-make-recipes")!;
+const hero = getAboutHeroPhoto(page.slug);
 ---
-<AboutArticle slug={page.slug} title={page.title} description={page.description}>
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={hero?.image}
+  heroAlt={hero?.alt}
+  heroCaption={hero?.caption}
+  heroCredit={hero?.credit}
+  heroCreditHref={hero?.sourceUrl}
+>
   <h2>Outbound: alert → Zapier</h2>
   <ol>
     <li>Create a Zap with trigger <strong>Webhooks by Zapier → Catch Hook</strong>.</li>

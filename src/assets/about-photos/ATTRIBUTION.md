@@ -15,5 +15,10 @@ All are Creative Commons or public domain and used with attribution in figcaptio
 | `home-workshop.jpg` | CC BY 2.0 | danielmee33 / Flickr | https://www.flickr.com/photos/8432632@N04/28260557796 |
 | `ethernet-cable.jpg` | CC BY-SA 4.0 | DiscDepotDundee.co.uk | https://commons.wikimedia.org/wiki/File:Cat-5e_Ethernet_network_cable_RJ45_end_connectors.jpg |
 | `desk-workspace.jpg` | CC BY 2.0 | David Wellbeloved / Flickr | https://www.flickr.com/photos/35339157@N00/5378333486 |
+| `crawlspace.jpg` | CC BY-SA 3.0 | Boatbuilder | https://commons.wikimedia.org/wiki/File:Crawle_space1.jpg |
+| `basement-pex-pipes.jpg` | CC0 | Tomwsulcer | https://commons.wikimedia.org/wiki/File:PEX_pipes_and_valves_in_basement_ceiling_for_exterior_water_spigot.jpg |
+| `server-rack.jpg` | CC BY 2.0 | Carl Lender / Flickr | https://commons.wikimedia.org/wiki/File:Server_Room_(22397102849).jpg |
+| `snow-cabins.jpg` | CC BY-SA 4.0 | Tahoe Signature Properties | https://commons.wikimedia.org/wiki/File:Snowy_Mountain_Cabins.jpg |
 
 Project-owned photos (`temp-probe-v1.jpg`, `temp-probe-v2.jpg`, `json-temp.jpg`) remain for case study / feed docs.
+Lifestyle composites on marketing pages (`thermaltrace-*-lifestyle.jpg`) are project-owned, not Commons.

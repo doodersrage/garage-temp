@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import PageHeader from "../../components/PageHeader.astro";
 import { stories } from "../../lib/stories";
+import EditorialPhotoStrip from "../../components/EditorialPhotoStrip.astro";
 import {
   getBreadcrumbSchema,
   resolvePageUrl,
@@ -20,6 +21,12 @@ const schema = [
     { name: "Customer stories", path: "/stories" },
   ]),
 ].filter(Boolean) as Record<string, unknown>[];
+const storyStripIds = [
+  "basement-pex-pipes",
+  "snow-cabins",
+  "server-rack",
+  "frost-window",
+] as const;
 ---
 <Layout
   title={title}
@@ -36,6 +43,8 @@ const schema = [
       <a slot="actions" class="btn-primary" href="/register?next=/dashboard/temperature">Start free</a>
       <a slot="actions" class="btn-secondary" href="/pricing">See plans</a>
     </PageHeader>
+
+    <EditorialPhotoStrip photoIds={[...storyStripIds]} />
 
     <div class="page-grid">
       {

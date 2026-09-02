@@ -1,0 +1,85 @@
+---
+import { Image } from "astro:assets";
+import { getAboutPhoto, type AboutPhotoId } from "../lib/aboutPhotos";
+import "../styles/about.css";
+
+interface Props {
+  photoIds: AboutPhotoId[];
+  class?: string;
+}
+
+const { photoIds, class: className } = Astro.props;
+const photos = photoIds.map((id) => getAboutPhoto(id));
+---
+
+<section class:list={["editorial-photo-strip", className]} aria-label="Editorial photos">
+  <div class="editorial-photo-strip-grid">
+    {
+      photos.map((photo) => (
+        <figure class="editorial-photo-strip-item">
+          <Image
+            src={photo.image}
+            alt={photo.alt}
+            widths={[320, 480, 640]}
+            sizes="(max-width: 768px) 50vw, 25vw"
+            class="editorial-photo-strip-img"
+          />
+          <figcaption>
+            <a
+              class="about-figure-credit"
+              href={photo.sourceUrl}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {photo.credit}
+            </a>
+          </figcaption>
+        </figure>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .editorial-photo-strip-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .editorial-photo-strip-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .editorial-photo-strip-item {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .editorial-photo-strip-img {
+    display: block;
+    width: 100%;
+    height: 7.5rem;
+    object-fit: cover;
+  }
+
+  @media (min-width: 768px) {
+    .editorial-photo-strip-img {
+      height: 9rem;
+    }
+  }
+
+  .editorial-photo-strip-item figcaption {
+    padding: 0.4rem 0.6rem 0.55rem;
+  }
+
+  .editorial-photo-strip-item .about-figure-credit {
+    font-size: 0.65rem;
+    line-height: 1.3;
+  }
+</style>

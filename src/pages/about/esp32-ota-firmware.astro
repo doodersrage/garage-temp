@@ -2,10 +2,21 @@
 
 import AboutArticle from "../../components/AboutArticle.astro";
 import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
 
 const page = getAboutPage("esp32-ota-firmware")!;
+const hero = getAboutHeroPhoto(page.slug);
 ---
-<AboutArticle slug={page.slug} title={page.title} description={page.description}>
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={hero?.image}
+  heroAlt={hero?.alt}
+  heroCaption={hero?.caption}
+  heroCredit={hero?.credit}
+  heroCreditHref={hero?.sourceUrl}
+>
   <h2>OTA updates</h2>
   <p>
     Use the Arduino OTA or ESP-IDF HTTPS OTA libraries on your LAN, then POST readings to ThermalTrace

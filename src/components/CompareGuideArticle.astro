@@ -1,11 +1,13 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import PageHeader from "./PageHeader.astro";
+import AboutCcFigure from "./AboutCcFigure.astro";
 import {
   getBreadcrumbSchema,
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
 import type { CompareGuide } from "../lib/compareGuides";
+import "../styles/about.css";
 
 interface Props {
   guide: CompareGuide;
@@ -36,6 +38,8 @@ const schema = [
       <a slot="actions" class="btn-primary" href="/pricing">See plans &amp; pricing</a>
       <a slot="actions" class="btn-secondary" href="/register?next=/dashboard/temperature">Start free</a>
     </PageHeader>
+
+    {guide.photoId && <AboutCcFigure photoId={guide.photoId} />}
 
     <section class="card">
       <h2 class="card-title">ThermalTrace vs {guide.competitor}</h2>

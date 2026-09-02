@@ -1,25 +1,33 @@
 import type { ImageMetadata } from "astro";
 import arduinoDht11 from "../assets/about-photos/arduino-dht11.jpg";
 import arduinoUnoBoard from "../assets/about-photos/arduino-uno-board.jpg";
+import basementPexPipes from "../assets/about-photos/basement-pex-pipes.jpg";
 import coldWeatherRoad from "../assets/about-photos/cold-weather-road.jpg";
+import crawlspace from "../assets/about-photos/crawlspace.jpg";
 import deskWorkspace from "../assets/about-photos/desk-workspace.jpg";
 import dht22Module from "../assets/about-photos/dht22-module.jpg";
 import ethernetCable from "../assets/about-photos/ethernet-cable.jpg";
 import frostWindow from "../assets/about-photos/frost-window.jpg";
 import garageWorkbench from "../assets/about-photos/garage-workbench.jpg";
 import homeWorkshop from "../assets/about-photos/home-workshop.jpg";
+import serverRack from "../assets/about-photos/server-rack.jpg";
+import snowCabins from "../assets/about-photos/snow-cabins.jpg";
 import utilityPipes from "../assets/about-photos/utility-pipes.jpg";
 
 export type AboutPhotoId =
   | "arduino-dht11"
   | "arduino-uno-board"
+  | "basement-pex-pipes"
   | "cold-weather-road"
+  | "crawlspace"
   | "desk-workspace"
   | "dht22-module"
   | "ethernet-cable"
   | "frost-window"
   | "garage-workbench"
   | "home-workshop"
+  | "server-rack"
+  | "snow-cabins"
   | "utility-pipes";
 
 export type AboutPhoto = {
@@ -35,8 +43,9 @@ export type AboutPhoto = {
 };
 
 /**
- * Curated Creative Commons / public-domain photos for About guides.
+ * Curated Creative Commons / public-domain photos for About guides, stories, and compare pages.
  * Prefer topical photos over reusing project bench shots on unrelated pages.
+ * Do not use these in signed-in dashboard UI.
  */
 export const aboutPhotos: Record<AboutPhotoId, AboutPhoto> = {
   "frost-window": {
@@ -57,6 +66,25 @@ export const aboutPhotos: Record<AboutPhotoId, AboutPhoto> = {
     license: "CC BY 2.0",
     sourceUrl: "https://www.flickr.com/photos/23311795@N04/3793183731",
   },
+  "basement-pex-pipes": {
+    id: "basement-pex-pipes",
+    image: basementPexPipes,
+    alt: "Blue PEX and copper water lines with valves in a basement ceiling",
+    caption: "Supply lines in basements and crawlspaces are the freeze risk that history charts prove.",
+    credit: "Photo: Tomwsulcer — CC0",
+    license: "CC0",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:PEX_pipes_and_valves_in_basement_ceiling_for_exterior_water_spigot.jpg",
+  },
+  "crawlspace": {
+    id: "crawlspace",
+    image: crawlspace,
+    alt: "Low crawlspace under a house with soil floor and foundation walls",
+    caption: "Crawlspaces and underfloor bays swing colder than living space—probe placement matters.",
+    credit: "Photo: Boatbuilder — CC BY-SA 3.0",
+    license: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Crawle_space1.jpg",
+  },
   "cold-weather-road": {
     id: "cold-weather-road",
     image: coldWeatherRoad,
@@ -66,6 +94,24 @@ export const aboutPhotos: Record<AboutPhotoId, AboutPhoto> = {
     license: "Public domain",
     sourceUrl:
       "https://commons.wikimedia.org/wiki/File:Cold_weather_on_the_Dalton_Highway_(49494853936).jpg",
+  },
+  "snow-cabins": {
+    id: "snow-cabins",
+    image: snowCabins,
+    alt: "Snow-covered mountain cabins with deep drifts against timber walls",
+    caption: "Empty cabins fail silently mid-week—alerts matter when nobody is on site.",
+    credit: "Photo: Tahoe Signature Properties — CC BY-SA 4.0",
+    license: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Snowy_Mountain_Cabins.jpg",
+  },
+  "server-rack": {
+    id: "server-rack",
+    image: serverRack,
+    alt: "Rows of lit server racks in a dense data-center aisle",
+    caption: "Closets and homelab racks need high-temp watch as much as garages need freeze alerts.",
+    credit: "Photo: Carl Lender / Flickr — CC BY 2.0",
+    license: "CC BY 2.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Server_Room_(22397102849).jpg",
   },
   "dht22-module": {
     id: "dht22-module",
@@ -137,15 +183,17 @@ export const aboutPhotos: Record<AboutPhotoId, AboutPhoto> = {
 
 /** Hero photo overrides for guides that benefit from atmosphere or topical hardware. */
 export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
-  // Freeze / alerts / weather
+  // Freeze / alerts / weather / spaces
   "cold-snap-playbook": "frost-window",
-  "freeze-protection-thresholds": "utility-pipes",
+  "freeze-protection-thresholds": "basement-pex-pipes",
   "alert-channel-cookbook": "cold-weather-road",
   "seasonal-garage-patterns": "frost-window",
   "weather-api-parallel-path": "cold-weather-road",
   "humidity-condensation-basics": "frost-window",
+  "temperature-changes": "home-workshop",
+  "temperature-probes": "dht22-module",
 
-  // Probes / garage context
+  // Probes / garage / crawlspace context
   "dht22-sensor-overview": "dht22-module",
   "dht22-data-line-wiring": "arduino-dht11",
   "dht22-read-errors-retries": "dht22-module",
@@ -155,8 +203,8 @@ export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
   "multi-zone-garage-layout": "home-workshop",
   "garage-door-temperature-swings": "garage-workbench",
   "sun-load-garage-walls": "home-workshop",
-  "infiltration-wind-drafts": "garage-workbench",
-  "thermal-mass-concrete-slab": "home-workshop",
+  "infiltration-wind-drafts": "crawlspace",
+  "thermal-mass-concrete-slab": "crawlspace",
   "hvac-duct-influence": "home-workshop",
   "stored-vehicle-heat": "garage-workbench",
   "enclosure-ventilation": "garage-workbench",
@@ -165,6 +213,10 @@ export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
 
   // Arduino / firmware / wiring
   "arduino-ide-setup": "arduino-uno-board",
+  "arduino-sketches": "arduino-uno-board",
+  "arduino-circuit-wiring": "arduino-dht11",
+  "arduino-pin-wiring": "arduino-dht11",
+  "arduino-dht22-lcd": "dht22-module",
   "sketch-polling-main-loop": "arduino-uno-board",
   "ethernet-shield-stacking": "ethernet-cable",
   "breadboard-power-rails": "arduino-dht11",
@@ -198,9 +250,12 @@ export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
   "home-page-probe-fetch": "ethernet-cable",
   "configuring-temperature-feeds": "ethernet-cable",
   "websocket-live-updates": "ethernet-cable",
+  "python-feeds": "ethernet-cable",
+  "data-flow": "ethernet-cable",
 
   // Dashboard / accounts / product
   "history-dashboard-browsing": "desk-workspace",
+  "historical-data": "desk-workspace",
   "csv-export-spreadsheet-analysis": "desk-workspace",
   "charting-with-spreadsheets": "desk-workspace",
   "spotting-data-gaps": "desk-workspace",
@@ -218,12 +273,17 @@ export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
   "esphome-shelly-recipes": "ethernet-cable",
   "garage-door-cold-playbook": "garage-workbench",
   "personal-weather-stations": "cold-weather-road",
+  "accounts-and-dashboard": "desk-workspace",
+  "install-pwa": "desk-workspace",
+  "thermostat-oauth": "ethernet-cable",
 
   // Stack / hosting (atmospheric, not literal)
   "astro-server-side-rendering": "desk-workspace",
   "astro-islands-and-hydration": "desk-workspace",
+  "astro-applications": "desk-workspace",
   "cloudflare-workers-deployment": "ethernet-cable",
   "nextjs-monitoring-dashboards": "desk-workspace",
+  "nextjs-node-applications": "desk-workspace",
   "node-express-api-patterns": "ethernet-cable",
   "comparing-full-stack-options": "desk-workspace",
   "env-secrets-cloudflare": "ethernet-cable",
@@ -239,3 +299,11 @@ export function getAboutHeroPhoto(slug: string): AboutPhoto | undefined {
   const id = aboutHeroPhotoBySlug[slug];
   return id ? aboutPhotos[id] : undefined;
 }
+
+/** Editorial strip picks for hubs (About / Guides / Compare / Stories). */
+export const editorialHubPhotoIds: AboutPhotoId[] = [
+  "garage-workbench",
+  "basement-pex-pipes",
+  "crawlspace",
+  "snow-cabins",
+];
