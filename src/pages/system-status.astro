@@ -39,7 +39,7 @@ const statusErrorMessage =
 ---
 <Layout
   title="System status"
-  description="Live ThermalTrace system health: scheduled alert and history jobs, ingest activity, and whether background crons are running on schedule."
+  description="Live ThermalTrace system health: scheduled alert and history jobs, ingest activity, Cloudflare edge hosting, and whether background crons are running on schedule."
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede"]}
 >
@@ -47,7 +47,7 @@ const statusErrorMessage =
     <PageHeader
       kicker="Status"
       title="System status"
-      lede="Public health summary for scheduled jobs and ingest monitoring. Updated on each page load."
+      lede="Public health for ThermalTrace jobs and ingest—what we measure ourselves. Updated on each page load."
     />
 
     <section class="card">
@@ -129,6 +129,26 @@ const statusErrorMessage =
         <li>Weekly digest and monthly/quarterly report emails</li>
         <li>Sensor reading retention and freeze-map aggregates</li>
         <li>Trial reminders and onboarding drip emails</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Hosting</h2>
+      <p class="mb-3 text-sm">
+        ThermalTrace runs on <strong>Cloudflare’s edge network</strong> (Workers) so the dashboard and ingest APIs stay close to visitors—without you operating a home server.
+        We publish <em>this</em> page’s job and ingest health, not a marketing uptime percentage or Cloudflare’s platform SLA as if it were our own.
+      </p>
+      <ul class="text-sm space-y-2 mb-0">
+        <li>
+          Stack notes:
+          <a class="text-link" href="/about/astro-applications">Astro on Cloudflare</a>
+          ·
+          <a class="text-link" href="/about/cloudflare-workers-deployment">Workers deployment</a>
+        </li>
+        <li>
+          Cloudflare platform incidents:
+          <a class="text-link" href="https://www.cloudflarestatus.com/" target="_blank" rel="noreferrer">cloudflarestatus.com</a>
+        </li>
       </ul>
     </section>
 

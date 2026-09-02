@@ -43,6 +43,11 @@ const aboutHubFaqs = [
     answer:
       "Yes—application and firmware-related repos are linked from this hub so you can inspect, fork, or adapt the stack.",
   },
+  {
+    question: "Where does ThermalTrace run?",
+    answer:
+      "The website and ingest APIs run on Cloudflare’s edge (Workers). Live job and ingest health is on /system-status—we publish measured health, not a marketing uptime percentage. Stack detail: /about/astro-applications.",
+  },
 ];
 const schema = [
   getBreadcrumbSchema(siteUrl, [

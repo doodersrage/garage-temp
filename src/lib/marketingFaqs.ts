@@ -36,6 +36,11 @@ export const marketingFaqs = {
       answer:
         "A native Android app is available in early access on GitHub while Google Play review finishes. You can also use the full web dashboard or install the Progressive Web App. The phone does not sense temperature — it connects to your ThermalTrace account.",
     },
+    {
+      question: "Where is ThermalTrace hosted?",
+      answer:
+        "On Cloudflare’s edge network (Workers), so the site and ingest APIs run close to visitors without you maintaining a VPS. Live job and ingest health is on thermaltrace.dev/system-status—we publish what we measure, not a marketing uptime percentage.",
+    },
   ],
   pricing: [
     {
@@ -63,6 +68,11 @@ export const marketingFaqs = {
       answer:
         "The Pro trial is free. Cancel before it ends and you are not charged. After a trial converts to a paid plan, the current billing period is generally non-refundable. Contact us if a charge looks wrong and we will review it.",
     },
+    {
+      question: "How reliable is ThermalTrace hosting?",
+      answer:
+        "The app runs on Cloudflare Workers at the edge. Check thermaltrace.dev/system-status for live cron and ingest health, and subscribe there for degradation notices. We do not quote Cloudflare’s platform SLA as our own uptime percentage.",
+    },
   ],
   compare: [
     {
@@ -89,6 +99,11 @@ export const marketingFaqs = {
       question: "Why does ThermalTrace require an account?",
       answer:
         "ThermalTrace is hosted so you do not run databases or SMS wiring yourself. A free account (no credit card) attaches your ingest key to your household. You can still dual-run with Home Assistant or MQTT on the LAN—ThermalTrace is the off-site alerts and history layer.",
+    },
+    {
+      question: "Do I need to keep a home server online?",
+      answer:
+        "No. ThermalTrace runs on Cloudflare’s edge; your probes only need outbound HTTPS (push) or a reachable pull URL. Live service health is at thermaltrace.dev/system-status.",
     },
     {
       question: "I already have Govee or a Tempest—do I still need this?",

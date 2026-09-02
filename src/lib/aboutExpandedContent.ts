@@ -310,6 +310,8 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
       { type: "ol", items: ["**Environment variables** for Supabase and Stripe live in Cloudflare dashboard secrets.","**Fetch timeouts** to residential feed URLs must tolerate slow home uplinks.","**Cron or scheduled triggers** may drive <a class=\"text-link\" href=\"/about/supabase-history-inserts\">history inserts</a>."] },
       { type: "h2", text: "Caching interaction" },
       { type: "p", html: "Do not cache authenticated dashboard HTML at the CDN edge. Public home page caching should respect how fresh probes need to be—often aligned with <a class=\"text-link\" href=\"/about/redis-cache-for-feeds\">Redis TTL</a> upstream." },
+      { type: "h2", text: "Reliability for users" },
+      { type: "p", html: "Edge hosting is a trust signal, not a substitute for measured health. ThermalTrace publishes cron and ingest status on <a class=\"text-link\" href=\"/system-status\">system status</a> (with optional email on degradation). Platform-wide Cloudflare incidents are tracked at <a class=\"text-link\" href=\"https://www.cloudflarestatus.com/\" target=\"_blank\" rel=\"noreferrer\">cloudflarestatus.com</a>—we do not repackage Cloudflare’s SLA as a ThermalTrace uptime percentage." },
       { type: "h2", text: "Alternatives" },
       { type: "p", html: "<a class=\"text-link\" href=\"/about/comparing-full-stack-options\">Comparing full-stack options</a> covers Node hosting versus edge Astro." }
   ],

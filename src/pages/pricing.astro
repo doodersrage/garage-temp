@@ -436,6 +436,15 @@ const schema = [
       <PlanComparisonTable highlightTier={currentTier} />
     </section>
 
+    <section class="card">
+      <h2 class="card-title">Hosted on Cloudflare’s edge</h2>
+      <p class="mb-0 text-sm">
+        Dashboards and ingest APIs run on Cloudflare Workers—no home server for you to keep online.
+        For live job and ingest health (not a borrowed uptime badge), see
+        <a class="text-link" href="/system-status">system status</a>.
+      </p>
+    </section>
+
     <FaqSection
       faqs={pricingFaqs}
       lede="Plan limits, upgrades, and billing—answered for freeze-season shoppers."

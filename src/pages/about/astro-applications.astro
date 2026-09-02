@@ -58,7 +58,9 @@ const hero = getAboutHeroPhoto(page.slug);
   <p>
     Cloudflare Workers run the server bundle close to users. Environment secrets (Supabase keys, Stripe,
     SMTP) are injected at deploy time. Image assets pass through Astro’s image pipeline for optimized
-    delivery in about guides and the home page logo.
+    delivery in about guides and the home page logo. For visitors and households who care about reliability,
+    we publish live cron and ingest health on
+    <a class="text-link" href="/system-status">system status</a>—not a borrowed platform uptime badge.
   </p>
 
   <h2>Compared to a pure SPA</h2>
