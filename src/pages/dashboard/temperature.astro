@@ -1,7 +1,7 @@
 ---
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import TempFeedsSettings from "../../components/TempFeedsSettings.astro";
-import TempProbesSettings from "../../components/TempProbesSettings.astro";
+import PullProbeMapper from "../../components/PullProbeMapper";
 import { getAuthFromCookies } from "../../lib/auth";
 import { getUserPreferences } from "../../lib/userPreferences";
 import { checkFeedHealth } from "../../lib/collectHistory";
@@ -928,7 +928,8 @@ const wizardStep =
         </summary>
         <div class="mt-4 space-y-8">
           <TempFeedsSettings feeds={preferences.tempFeeds} redirectTo={redirectTo} />
-          <TempProbesSettings
+          <PullProbeMapper
+            client:visible
             feeds={preferences.tempFeeds}
             probes={preferences.tempProbes}
             redirectTo={redirectTo}

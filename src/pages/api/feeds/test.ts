@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
-import { fetchTempFeed } from "../../../lib/FetchTemps";
+import { discoverFeedProbes, formatProbeReading } from "../../../lib/feedDiscovery";
 import { isValidFeedUrl } from "../../../lib/tempFeedConfig";
 import { requireHouseholdEditor } from "../../../lib/householdAuth";
 import { checkFeedTestRateLimit } from "../../../lib/feedTestLimits";
@@ -47,29 +47,47 @@ export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
     );
   }
 
-  const result = await fetchTempFeed({
-    id: "test",
-    name: "Test feed",
-    url,
-    enabled: true,
-    jsonRoot: body.jsonRoot?.trim() || "temp",
-  });
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!response.ok) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          message: `Feed request failed (${response.status}).`,
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
 
-  if (result.error) {
+    const payload = await response.json();
+    const discovery = discoverFeedProbes(payload, body.jsonRoot?.trim() || "temp");
+    const probeCount = discovery.probes.length;
+    const avg = discovery.probes.find((probe) => probe.key === "avg");
+
     return new Response(
-      JSON.stringify({ ok: false, message: result.error }),
+      JSON.stringify({
+        ok: true,
+        message: `Found ${probeCount} probe${probeCount === 1 ? "" : "s"} (${discovery.format} JSON)${avg?.tempF != null ? `, average ${avg.tempF.toFixed(1)}°F` : ""}.`,
+        format: discovery.format,
+        jsonRoot: discovery.jsonRoot,
+        probes: discovery.probes.map((probe) => ({
+          key: probe.key,
+          suggestedLabel: probe.suggestedLabel,
+          label: probe.suggestedLabel,
+          tempF: probe.tempF,
+          humidity: probe.humidity,
+          visible: probe.visible,
+          source: probe.source,
+          reading: formatProbeReading(probe),
+        })),
+      }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Feed test failed";
+    return new Response(JSON.stringify({ ok: false, message }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   }
-
-  const probeCount = Object.keys(result.probes).length;
-  const avg = result.probes.avg;
-
-  return new Response(
-    JSON.stringify({
-      ok: true,
-      message: `Feed OK — ${probeCount} probe(s) found${avg ? `, average ${avg.f.toFixed(1)}°F` : ""}.`,
-    }),
-    { status: 200, headers: { "Content-Type": "application/json" } },
-  );
 };
