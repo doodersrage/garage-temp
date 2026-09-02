@@ -74,8 +74,8 @@ export async function sendPortfolioAlertsForAllUsers(): Promise<{
         .join("\n");
 
       await notifyUser(userId, email, settings, {
-        title: `Portfolio freeze risk (${atRisk.length} propert${atRisk.length === 1 ? "y" : "ies"})`,
-        body,
+        title: `Properties at risk today (${atRisk.length})`,
+        body: `Landlord digest — ${atRisk.length} propert${atRisk.length === 1 ? "y is" : "ies are"} at or below freeze:\n${body}`,
         kind: "threshold",
       });
 

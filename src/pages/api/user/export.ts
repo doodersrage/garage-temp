@@ -37,6 +37,7 @@ export const GET: APIRoute = async ({ cookies }) => {
       canDownloadCsv: entitlements.canDownloadCsv,
       canUseClaimsPack: entitlements.canUseClaimsPack,
       canCreateShareLinks: entitlements.canCreateShareLinks,
+      canCreateFamilyShareLink: entitlements.canCreateFamilyShareLink,
       canUsePush: entitlements.canUsePush,
       canUseSms: entitlements.canUseSms,
       historyDays: entitlements.historyDays,

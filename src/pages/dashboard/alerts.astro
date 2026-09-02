@@ -152,9 +152,9 @@ const referralRewardDays = Number(
   <ProductAnalyticsTracker events={analyticsEvents} />
   <div class="space-y-6">
     <section class="card">
-      <h2 class="card-title">Alerts & digests</h2>
+      <h2 class="card-title">Alerts</h2>
       <p class="card-subtitle">
-        Get notified when temperatures drop, humidity spikes, feeds go quiet, forecast freeze risk rises, or composite rules match.
+        Start with freeze °F + email under Essentials. Add more channels and rules when you need them.
       </p>
       <p class="mt-0 mb-0 text-sm text-[var(--color-text-muted)]">
         Confirm critical zones with a local reading — alerts can be delayed by sensor lag, network gaps, or channel delivery.
@@ -184,23 +184,23 @@ const referralRewardDays = Number(
           Delivery path confirmed. A few useful next steps while you’re here:
         </p>
         <div class="flex flex-wrap gap-3 mb-0">
-          {entitlements.canCreateShareLinks ? (
-            <a class="btn-primary" href="/dashboard/share/links">Share a live link</a>
+          {entitlements.canCreateShareLinks || entitlements.canCreateFamilyShareLink ? (
+            <a class="btn-primary" href="/dashboard/share/links">Share a live link with family</a>
           ) : (
-            <a class="btn-primary" href="/dashboard/share/links">Share links (Pro)</a>
+            <a class="btn-primary" href="/dashboard/share/links">Share links</a>
           )}
           <a class="btn-secondary" href="/dashboard/history?tab=exports#claims-pack">
             {entitlements.canUseClaimsPack ? "Download claims pack" : "Claims evidence pack"}
           </a>
           {needsPro && (
-            <a class="btn-ghost" href="/dashboard/plans">Add SMS on Pro</a>
+            <a class="btn-ghost" href="/dashboard/plans">Compare plans</a>
           )}
         </div>
       </section>
     )}
 
     {primaryUpgradeFeature && (
-      <UpgradeNudge feature={primaryUpgradeFeature} tier={entitlements.tier} />
+      <UpgradeNudge feature={primaryUpgradeFeature} tier={entitlements.tier} compact />
     )}
 
     {showReferralCard && (

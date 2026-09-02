@@ -107,7 +107,16 @@ export function buildAlertSettingsFromFormData(
       existing.humidityThreshold,
     ),
     rateChangeF: formNumber(formData, "rate_change_f", existing.rateChangeF),
-    outageHours: formNumber(formData, "outage_hours", existing.outageHours),
+    // Unchecked "sensor not reporting" clears the threshold (0 = disabled).
+    // If the checkbox field is absent (older clients / partial forms), keep existing hours.
+    outageHours: formData.has("outage_alerts_enabled")
+      ? formCheckbox(formData, "outage_alerts_enabled")
+        ? Math.max(
+            0.5,
+            formNumber(formData, "outage_hours", existing.outageHours || 2),
+          )
+        : 0
+      : formNumber(formData, "outage_hours", existing.outageHours),
     email: formString(formData, "alert_email", existing.email),
     channelEmail: formCheckbox(formData, "channel_email"),
     channelSms: formCheckbox(formData, "channel_sms") && entitlements.canUseSms,
@@ -263,7 +272,9 @@ export function buildAlertSettingsFromFormData(
       return Number.isFinite(n) && n >= 30 ? Math.floor(n) : existing.dataRetentionDays;
     })(),
     feedUptimeAlertsEnabled: formCheckbox(formData, "feed_uptime_alerts_enabled"),
-    portfolioAlertsEnabled: formCheckbox(formData, "portfolio_alerts_enabled"),
+    portfolioAlertsEnabled: entitlements.canUsePortfolio
+      ? formCheckbox(formData, "portfolio_alerts_enabled")
+      : existing.portfolioAlertsEnabled,
     freezeDrillEnabled: formCheckbox(formData, "freeze_drill_enabled"),
     lastFeedUptimeAlertAt: existing.lastFeedUptimeAlertAt,
     lastPortfolioAlertAt: existing.lastPortfolioAlertAt,

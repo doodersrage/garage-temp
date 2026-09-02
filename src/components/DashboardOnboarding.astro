@@ -35,20 +35,14 @@ const essentialSteps = [
   {
     done: hasDevices,
     href: "/dashboard/temperature",
-    title: "Connect a device or feed",
-    detail: "Dashboard → Devices: add push ingest (ESP/Arduino) or an HTTPS JSON pull feed.",
+    title: "Connect a push device",
+    detail: "Dashboard → Devices: create a push ingest URL for ESP/Arduino (or try without hardware).",
   },
   {
-    done: hasAlertsEnabled,
-    href: "/dashboard/alerts#alert-section-triggers",
-    title: "Set a freeze threshold",
-    detail: "Open Triggers, pick the temperature that should fire before pipes or goods are at risk.",
-  },
-  {
-    done: hasEmailAlerts,
-    href: "/dashboard/alerts#alert-section-channels",
-    title: "Enable email alerts",
-    detail: "Check Email under Channels, confirm your address, and save.",
+    done: hasAlertsEnabled && hasEmailAlerts,
+    href: "/dashboard/alerts#alert-section-essentials",
+    title: "Set freeze °F + email",
+    detail: "Essentials: freeze threshold, email, and optional sensor-dead alerts — then save.",
   },
   {
     done: hasTestAlert,
@@ -120,7 +114,7 @@ const sectionTitle = !essentialDone
     ? "Hardware setup"
     : "Next steps";
 const sectionSubtitle = !essentialDone
-  ? `${completedCount} of ${essentialSteps.length} essentials — device, threshold, email, test`
+  ? `${completedCount} of ${essentialSteps.length} essentials — device, freeze+email, test`
   : !kitDone
     ? `${completedCount} of ${kitSteps.length} hardware steps`
     : `${completedCount} of ${nextSteps.length} optional steps`;

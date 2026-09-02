@@ -17,15 +17,19 @@ const { show, hasRenamed = false } = Astro.props;
         Rename sensors on the device card below
       </li>
       <li class="waiting-ingest-pending">
+        <a class="text-link" href="/dashboard/alerts#alert-section-essentials">Set freeze °F + email</a>
+      </li>
+      <li class="waiting-ingest-pending">
         <a class="text-link" href="/dashboard/alerts#send-test-alert">Send a test freeze alert</a>
       </li>
       <li class="waiting-ingest-pending">
-        <a class="text-link" href="/">Open Home</a> and confirm readings look right
+        <a class="text-link" href="/dashboard/share/links">Share a live link with family</a>
       </li>
     </ol>
     <div class="flex flex-wrap gap-3">
-      <a class="btn-primary" href="/dashboard/alerts#send-test-alert">Send test alert</a>
-      <a class="btn-secondary" href="/dashboard/household">Invite household</a>
+      <a class="btn-primary" href="/dashboard/alerts#alert-section-essentials">Set freeze + email</a>
+      <a class="btn-secondary" href="/dashboard/alerts#send-test-alert">Send test alert</a>
+      <a class="btn-ghost" href="/about/kit-qr-onboarding">Kit QR guide</a>
     </div>
   </section>
 )}

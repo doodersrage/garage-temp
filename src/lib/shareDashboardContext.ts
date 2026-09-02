@@ -87,10 +87,14 @@ export async function loadShareDashboardContext(
             ? "Status page created — copy the link below."
             : url.searchParams.get("status_revoked")
               ? "Status page revoked."
-              : url.searchParams.get("error") === "pro_required"
-                ? "Pro plan required for share links and API keys."
-                : null;
-  const noticeIsError = url.searchParams.get("error") === "pro_required";
+              : url.searchParams.get("error") === "family_limit"
+                ? "You already have a family live link. Revoke it first, or upgrade to Pro for more."
+                : url.searchParams.get("error") === "pro_required"
+                  ? "That option needs Pro. You can still create one family live link on Free."
+                  : url.searchParams.get("error")
+                    ? "Could not update share links."
+                    : null;
+  const noticeIsError = Boolean(url.searchParams.get("error"));
 
   return {
     redirect: null,

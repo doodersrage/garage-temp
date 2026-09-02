@@ -115,9 +115,9 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
   <AlertSettingsNav />
 
   <AlertSettingsPanel
-    id="alert-section-basics"
-    title="Basics"
-    subtitle="Turn alerts on or pause them temporarily without changing your thresholds."
+    id="alert-section-essentials"
+    title="Essentials"
+    subtitle="Freeze threshold, email, sensor-dead alerts, and a weekly summary — enough for most homes."
     collapsible
     open
   >
@@ -126,56 +126,154 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
       <span>Turn on alerts</span>
     </label>
 
-    <h3 class="alert-settings-subheading">Snooze & vacation</h3>
-    <p class="form-hint mb-3">
-      Snooze pauses most alerts for 24h (outage and flood still fire). Vacation suppresses non-critical alerts for 7 days.
-      {settings.snoozeUntil && (
-        <span class="block mt-1">Snoozed until {new Date(settings.snoozeUntil).toLocaleString()}.</span>
-      )}
-      {settings.vacationUntil && (
-        <span class="block mt-1">Vacation until {new Date(settings.vacationUntil).toLocaleString()}.</span>
-      )}
-    </p>
-    <div class="flex flex-wrap gap-2">
-      <button type="button" class="btn-secondary" data-snooze-action="snooze_24">Snooze 24h</button>
-      <button type="button" class="btn-secondary" data-snooze-action="vacation_7">Vacation 7d</button>
-      {settings.snoozeUntil && (
-        <button type="button" class="btn-secondary" data-snooze-action="clear_snooze">Clear snooze</button>
-      )}
-      {settings.vacationUntil && (
-        <button type="button" class="btn-secondary" data-snooze-action="clear_vacation">End vacation</button>
-      )}
-    </div>
-  </AlertSettingsPanel>
-
-  <AlertSettingsPanel
-    id="alert-section-triggers"
-    title="What triggers alerts"
-    subtitle="Core freeze, humidity, flood, outage, and forecast thresholds."
-    collapsible
-    open
-  >
     <div class="config-row-grid mb-4">
       <div class="form-field mb-0">
         <label class="form-label" for="freeze_threshold_f">Freeze below (°F)</label>
         <input class="form-input" type="number" step="0.5" id="freeze_threshold_f" name="freeze_threshold_f" value={settings.freezeThresholdF} />
       </div>
       <div class="form-field mb-0">
-        <label class="form-label" for="humidity_threshold">Humidity above (%)</label>
-        <input class="form-input" type="number" step="1" id="humidity_threshold" name="humidity_threshold" value={settings.humidityThreshold} />
-      </div>
-      <div class="form-field mb-0">
-        <label class="form-label" for="rate_change_f">Rate drop (°F / hour)</label>
-        <input class="form-input" type="number" step="0.5" id="rate_change_f" name="rate_change_f" value={settings.rateChangeF} />
-      </div>
-      <div class="form-field mb-0">
-        <label class="form-label" for="outage_hours">No reading for (hours)</label>
-        <input class="form-input" type="number" step="0.5" id="outage_hours" name="outage_hours" value={settings.outageHours} />
+        <label class="form-label" for="alert_email">Alert email</label>
+        <input
+          class="form-input"
+          type="email"
+          id="alert_email"
+          name="alert_email"
+          value={settings.email ?? userEmail}
+          placeholder={userEmail}
+        />
       </div>
     </div>
+
+    <label class="checkbox-row mb-4">
+      <input
+        type="checkbox"
+        name="channel_email"
+        value="true"
+        checked={settings.channelEmail}
+        data-channel-toggle="email"
+      />
+      <span>Send alerts by email</span>
+    </label>
+
+    <label class="checkbox-row mb-2">
+      <input
+        type="checkbox"
+        name="outage_alerts_enabled"
+        value="true"
+        checked={settings.outageHours > 0}
+      />
+      <span>Alert if a sensor stops reporting</span>
+    </label>
+    <div class="form-field mb-4 max-w-xs">
+      <label class="form-label" for="outage_hours">Quiet for (hours)</label>
+      <input
+        class="form-input"
+        type="number"
+        step="0.5"
+        min="0.5"
+        id="outage_hours"
+        name="outage_hours"
+        value={settings.outageHours > 0 ? settings.outageHours : 2}
+      />
+      <p class="form-hint mb-0">Fires when a device goes silent — often more urgent than a slow temp drop.</p>
+    </div>
+
+    <label class="checkbox-row mb-2">
+      <input
+        type="checkbox"
+        name="forecast_freeze_enabled"
+        value="true"
+        checked={settings.forecastFreezeEnabled}
+        disabled={!entitlements.canUseForecastAlerts}
+      />
+      <span>
+        Cold-snap mode — warn when outdoor forecast may hit freeze
+        {!entitlements.canUseForecastAlerts && (
+          <span class="text-[var(--color-text-muted)]"> (Member)</span>
+        )}
+      </span>
+    </label>
+    <div class="form-field mb-4 max-w-xs">
+      <label class="form-label" for="forecast_hours_ahead">Look-ahead hours</label>
+      <input
+        class="form-input"
+        type="number"
+        min="3"
+        max="48"
+        step="1"
+        id="forecast_hours_ahead"
+        name="forecast_hours_ahead"
+        value={settings.forecastHoursAhead}
+        disabled={!entitlements.canUseForecastAlerts}
+      />
+    </div>
+
+    <label class="checkbox-row mb-4">
+      <input type="checkbox" name="digest_enabled" value="true" checked={settings.digestEnabled} />
+      <span>Weekly email digest (Mondays) — coldest night, leaks, and outages</span>
+    </label>
+
+    {entitlements.canUsePortfolio && (
+      <label class="checkbox-row mb-4">
+        <input
+          type="checkbox"
+          name="portfolio_alerts_enabled"
+          value="true"
+          checked={settings.portfolioAlertsEnabled}
+        />
+        <span>Properties-at-risk digest — email when any property crosses freeze</span>
+      </label>
+    )}
+
     <p class="form-hint mb-4">
-      Flood / leak sensors also notify automatically when wet. Door, motion, power, air quality, level, and energy use custom rules below.
+      Flood / leak sensors notify automatically when wet. Save, then
+      <a class="text-link" href="#send-test-alert">send a test alert</a>.
     </p>
+
+    <details class="alert-settings-nested mb-4">
+      <summary>Snooze & vacation</summary>
+      <div class="alert-settings-nested-body">
+        <p class="form-hint mb-3">
+          Snooze pauses most alerts for 24h (outage and flood still fire). Vacation suppresses non-critical alerts for 7 days.
+          {settings.snoozeUntil && (
+            <span class="block mt-1">Snoozed until {new Date(settings.snoozeUntil).toLocaleString()}.</span>
+          )}
+          {settings.vacationUntil && (
+            <span class="block mt-1">Vacation until {new Date(settings.vacationUntil).toLocaleString()}.</span>
+          )}
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" class="btn-secondary" data-snooze-action="snooze_24">Snooze 24h</button>
+          <button type="button" class="btn-secondary" data-snooze-action="vacation_7">Vacation 7d</button>
+          {settings.snoozeUntil && (
+            <button type="button" class="btn-secondary" data-snooze-action="clear_snooze">Clear snooze</button>
+          )}
+          {settings.vacationUntil && (
+            <button type="button" class="btn-secondary" data-snooze-action="clear_vacation">End vacation</button>
+          )}
+        </div>
+      </div>
+    </details>
+
+    <details class="alert-settings-nested mb-4">
+      <summary>More triggers (humidity, rate, NWS)</summary>
+      <div class="alert-settings-nested-body">
+        <div class="config-row-grid mb-4">
+          <div class="form-field mb-0">
+            <label class="form-label" for="humidity_threshold">Humidity above (%)</label>
+            <input class="form-input" type="number" step="1" id="humidity_threshold" name="humidity_threshold" value={settings.humidityThreshold} />
+          </div>
+          <div class="form-field mb-0">
+            <label class="form-label" for="rate_change_f">Rate drop (°F / hour)</label>
+            <input class="form-input" type="number" step="0.5" id="rate_change_f" name="rate_change_f" value={settings.rateChangeF} />
+          </div>
+        </div>
+        <label class="checkbox-row mb-0">
+          <input type="checkbox" name="nws_freeze_alerts_enabled" value="true" checked={settings.nwsFreezeAlertsEnabled} disabled={!entitlements.canUseNwsAlerts} />
+          <span>NWS official freeze / cold alerts {!entitlements.canUseNwsAlerts && <span class="text-[var(--color-text-muted)]">(Pro)</span>}</span>
+        </label>
+      </div>
+    </details>
 
     {thresholdSensors.length > 0 && (
       <details class="alert-settings-nested mb-4">
@@ -264,24 +362,6 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     )}
 
     <details class="alert-settings-nested">
-      <summary>Forecast freeze risk</summary>
-      <div class="alert-settings-nested-body">
-        <label class="checkbox-row mb-2">
-          <input type="checkbox" name="forecast_freeze_enabled" value="true" checked={settings.forecastFreezeEnabled} disabled={!entitlements.canUseForecastAlerts} />
-          <span>Warn when outdoor forecast may hit freeze threshold {!entitlements.canUseForecastAlerts && <span class="text-[var(--color-text-muted)]">(Member)</span>}</span>
-        </label>
-        <label class="checkbox-row mb-3">
-          <input type="checkbox" name="nws_freeze_alerts_enabled" value="true" checked={settings.nwsFreezeAlertsEnabled} disabled={!entitlements.canUseNwsAlerts} />
-          <span>NWS official freeze / cold alerts for your weather city {!entitlements.canUseNwsAlerts && <span class="text-[var(--color-text-muted)]">(Pro)</span>}</span>
-        </label>
-        <div class="form-field mb-0">
-          <label class="form-label" for="forecast_hours_ahead">Look-ahead hours</label>
-          <input class="form-input" type="number" min="3" max="48" step="1" id="forecast_hours_ahead" name="forecast_hours_ahead" value={settings.forecastHoursAhead} disabled={!entitlements.canUseForecastAlerts} />
-        </div>
-      </div>
-    </details>
-
-    <details class="alert-settings-nested">
       <summary>Device & feed health</summary>
       <div class="alert-settings-nested-body">
         <div class="config-row-grid mb-4">
@@ -306,24 +386,9 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
             <input class="form-input" type="number" id="rssi_threshold" name="rssi_threshold" value={settings.rssiThreshold} />
           </div>
         </div>
-        <label class="checkbox-row mb-3">
+        <label class="checkbox-row mb-0">
           <input type="checkbox" name="feed_uptime_alerts_enabled" value="true" checked={settings.feedUptimeAlertsEnabled} />
           <span>Feed unreachable (hourly check on pull JSON feeds)</span>
-        </label>
-        <label class="checkbox-row mb-0">
-          <input
-            type="checkbox"
-            name="portfolio_alerts_enabled"
-            value="true"
-            checked={settings.portfolioAlertsEnabled}
-            disabled={!entitlements.canUsePortfolio}
-          />
-          <span>
-            Portfolio freeze alerts (any property crosses threshold)
-            {!entitlements.canUsePortfolio && (
-              <span class="text-[var(--color-text-muted)]"> — Pro plan</span>
-            )}
-          </span>
         </label>
       </div>
     </details>
@@ -331,19 +396,14 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
 
   <AlertSettingsPanel
     id="alert-section-channels"
-    title="Channels & destinations"
-    subtitle="Pick how we reach you. Destination fields appear only for enabled channels."
+    title="More channels"
+    subtitle="Add chat apps, SMS, push, or webhooks. Email is configured under Essentials."
     collapsible
-    open
   >
     <p class="form-hint mb-3">
-      Free: email, Discord, Telegram, Slack, Teams, ntfy, Pushover. Pro: SMS, WhatsApp, browser push, outbound webhooks.
+      Email is under Essentials. Here: Discord, Telegram, Slack, Teams, ntfy, Pushover. Pro: SMS, WhatsApp, browser push, outbound webhooks.
     </p>
     <div class="alert-channel-grid mb-4">
-      <label class="checkbox-row mb-0">
-        <input type="checkbox" name="channel_email" value="true" checked={settings.channelEmail} data-channel-toggle="email" />
-        <span>Email</span>
-      </label>
       <label class="checkbox-row mb-0">
         <input type="checkbox" name="channel_discord" value="true" checked={settings.channelDiscord} data-channel-toggle="discord" />
         <span>Discord</span>
@@ -399,14 +459,6 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     )}
 
     <div class="alert-channel-panels">
-      <div class="alert-channel-panel" data-channel-panel="email" hidden={!settings.channelEmail}>
-        <p class="alert-channel-panel-label">Email</p>
-        <div class="form-field mb-0">
-          <label class="form-label" for="alert_email">Alert email</label>
-          <input class="form-input" type="email" id="alert_email" name="alert_email" value={settings.email ?? userEmail} placeholder={userEmail} />
-        </div>
-      </div>
-
       <div class="alert-channel-panel" data-channel-panel="discord" hidden={!settings.channelDiscord}>
         <p class="alert-channel-panel-label">Discord</p>
         <div class="form-field mb-0">
@@ -740,12 +792,11 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     </details>
 
     <details class="alert-settings-nested">
-      <summary>Email reports & digests</summary>
+      <summary>More email reports</summary>
       <div class="alert-settings-nested-body">
-        <label class="checkbox-row mb-3">
-          <input type="checkbox" name="digest_enabled" value="true" checked={settings.digestEnabled} />
-          <span>Weekly email digest (Mondays)</span>
-        </label>
+        <p class="form-hint mb-3">
+          Weekly digest lives under Essentials. These are optional longer reports.
+        </p>
         <label class="checkbox-row mb-3">
           <input type="checkbox" name="monthly_report_enabled" value="true" checked={settings.monthlyReportEnabled} />
           <span>Monthly freeze report (1st of month, HTML attachment)</span>

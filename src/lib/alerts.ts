@@ -623,6 +623,8 @@ export function evaluateOutage(
   now = Date.now(),
 ): string | null {
   if (!settings.enabled) return null;
+  // outageHours <= 0 disables "sensor not reporting" alerts.
+  if (!(settings.outageHours > 0)) return null;
   if (!lastSeenAt) {
     return `${deviceName} has never reported a reading.`;
   }

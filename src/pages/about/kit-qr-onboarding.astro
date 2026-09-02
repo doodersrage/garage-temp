@@ -6,6 +6,15 @@ import { getAboutPage } from "../../lib/aboutPages";
 const page = getAboutPage("kit-qr-onboarding")!;
 ---
 <AboutArticle slug={page.slug} title={page.title} description={page.description}>
+  <h2>Guided kit path</h2>
+  <ol>
+    <li>Create a push device on <a class="text-link" href="/dashboard/temperature">Dashboard → Devices</a>.</li>
+    <li>Copy or scan the ingest QR (visible for 30 minutes after create/rotate).</li>
+    <li>Flash firmware or point Home Assistant at that URL — sensors auto-import on first POST.</li>
+    <li>Open <a class="text-link" href="/dashboard/alerts#alert-section-essentials">Alerts → Essentials</a> for freeze °F + email, then send a test.</li>
+    <li>Optional: <a class="text-link" href="/dashboard/share/links">Share a family live link</a>.</li>
+  </ol>
+
   <h2>What to encode</h2>
   <p>
     After creating or rotating a push key on <a class="text-link" href="/dashboard/temperature">Dashboard → Devices</a>,

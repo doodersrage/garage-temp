@@ -173,21 +173,22 @@ export async function sendWeeklyDigestsForAllUsers(): Promise<{
         eyebrow: "Weekly digest",
         preheader: freezeLine,
         title: "This week at your probes",
-        intro: "Here’s a quick look at the last 7 days of probe readings.",
+        intro: "Here’s a quick look at the last 7 days — coldest night, freeze crossings, and anything else to watch.",
         bullets: [
           freezeLine,
           ...summary,
           ...(byDay.length ? ["Day by day:", ...byDay] : []),
           ...seasonal.map((item) => `${item.title}: ${item.detail}`),
+          "Tip: outage and leak alerts fire separately when sensors go quiet or wet.",
         ],
         cta: { label: "Open history", url: `${siteUrl}/dashboard/history` },
         secondaryCta: {
           label: "Manage digest settings",
-          url: `${siteUrl}/dashboard/alerts`,
+          url: `${siteUrl}/dashboard/alerts#alert-section-essentials`,
         },
         tone: "brand",
         footerNote:
-          "Weekly digests can be turned off under Dashboard → Alerts → Email options.",
+          "Weekly digests can be turned off under Dashboard → Alerts → Essentials.",
       });
 
       await sendDigestEmail(

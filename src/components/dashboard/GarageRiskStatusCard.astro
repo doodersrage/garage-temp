@@ -1,0 +1,50 @@
+---
+import type { GarageRiskStatus } from "../../lib/garageRiskStatus";
+
+interface Props {
+  status: GarageRiskStatus;
+}
+
+const { status } = Astro.props;
+---
+<section
+  class:list={[
+    "card garage-risk-status",
+    `garage-risk-status--${status.level}`,
+  ]}
+  id="garage-risk"
+  aria-labelledby="garage-risk-heading"
+>
+  <p class="garage-risk-eyebrow">Garage status</p>
+  <h2 id="garage-risk-heading" class="card-title garage-risk-title">
+    {status.title}
+  </h2>
+  <p class="card-subtitle mb-4">{status.detail}</p>
+  <a class="btn-primary" href={status.actionHref}>{status.actionLabel}</a>
+</section>
+
+<style>
+  .garage-risk-status {
+    border-left: 4px solid var(--color-border);
+  }
+  .garage-risk-status--ok {
+    border-left-color: var(--color-success, #2f7d4a);
+  }
+  .garage-risk-status--watch {
+    border-left-color: var(--color-warning, #b7791f);
+  }
+  .garage-risk-status--risk,
+  .garage-risk-status--offline {
+    border-left-color: var(--color-danger, #c53030);
+  }
+  .garage-risk-eyebrow {
+    margin: 0 0 0.35rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+  .garage-risk-title {
+    margin-bottom: 0.35rem;
+  }
+</style>

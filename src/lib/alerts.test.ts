@@ -85,6 +85,13 @@ describe("rate and outage alerts", () => {
     );
     expect(msg).toContain("silent");
   });
+
+  it("skips outage when threshold is disabled (0 hours)", () => {
+    const settings = { ...DEFAULT_ALERT_SETTINGS, enabled: true, outageHours: 0 };
+    expect(
+      evaluateOutage(settings, "Garage ESP", null, Date.now()),
+    ).toBeNull();
+  });
 });
 
 describe("ingest payload", () => {

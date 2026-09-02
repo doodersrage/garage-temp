@@ -13,9 +13,9 @@ test.describe("alert settings", () => {
     await signIn(page, "/dashboard/alerts");
     await expect(page.getByRole("heading", { name: /Alerts/i }).first()).toBeVisible();
     await expect(page.getByRole("navigation", { name: /Alert settings sections/i })).toBeVisible();
-    await expect(page.locator("#alert-section-basics")).toBeVisible();
-    await expect(page.locator("#alert-section-triggers")).toBeVisible();
+    await expect(page.locator("#alert-section-essentials")).toBeVisible();
     await expect(page.locator("#alert-section-channels")).toBeVisible();
+    await expect(page.locator("#alert-section-advanced")).toBeVisible();
   });
 
   test("freeze threshold persists after save", async ({ page }) => {
@@ -80,7 +80,8 @@ test.describe("dashboard overview", () => {
     test.skip(!getE2ECredentials(), "Set E2E_TEST_EMAIL and E2E_TEST_PASSWORD");
 
     await signIn(page, "/dashboard");
-    await expect(page.getByRole("heading", { name: /Overview|Status|Getting started/i }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Overview|Status|Getting started|Looking good|Freeze risk|Waiting|Add a probe|Close to freeze|Space looks|Cold snap|Sensor may|night/i }).first()).toBeVisible();
+    await expect(page.locator("#garage-risk")).toBeVisible();
     await expect(page.locator("#status")).toBeVisible();
   });
 });

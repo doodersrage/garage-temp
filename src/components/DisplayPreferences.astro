@@ -104,6 +104,9 @@ const selectValue = !currentId ? "" : isCustom ? "custom" : currentId;
         </div>
 
         <div id="weather-ambient-fields" class="mt-3" hidden={preferences.weatherSource !== "ambient"}>
+          <details class="alert-settings-nested">
+            <summary>Ambient station credentials</summary>
+            <div class="alert-settings-nested-body">
           <div class="form-field mb-3">
             <label class="form-label" for="ambient_weather_mac">Station MAC address</label>
             <input
@@ -130,9 +133,14 @@ const selectValue = !currentId ? "" : isCustom ? "custom" : currentId;
               From your Ambient account → API keys. Stored on your account for outdoor readings only.
             </p>
           </div>
+            </div>
+          </details>
         </div>
 
         <div id="weather-weatherflow-fields" class="mt-3" hidden={preferences.weatherSource !== "weatherflow"}>
+          <details class="alert-settings-nested">
+            <summary>WeatherFlow station credentials</summary>
+            <div class="alert-settings-nested-body">
           <div class="form-field mb-3">
             <label class="form-label" for="weatherflow_station_id">Station ID</label>
             <input
@@ -159,6 +167,8 @@ const selectValue = !currentId ? "" : isCustom ? "custom" : currentId;
               From tempestwx.com → Settings → Data Authorizations → create token.
             </p>
           </div>
+            </div>
+          </details>
         </div>
       </fieldset>
 

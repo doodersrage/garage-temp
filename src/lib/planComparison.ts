@@ -193,8 +193,8 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     id: "share_links",
     category: "Sharing",
     label: "Public share links (live, history, embed)",
-    free: "—",
-    member: "—",
+    free: "1 family live link",
+    member: "1 family live link",
     pro: PRO_LIKE,
     portfolio: PRO_LIKE,
     anchor: "share-links",
@@ -346,8 +346,8 @@ const NUDGE_CONFIG: Record<
   },
   share_links: {
     targetTier: "pro",
-    title: "Share a live view with family",
-    body: "Pro creates read-only share links — live tiles, 7-day history, embed widgets, or metrics scopes.",
+    title: "More share scopes for guests and Grafana",
+    body: "Free already includes one family live link. Pro adds history, metrics, embeds, and never-expire links.",
     anchor: "share-links",
   },
   api_keys: {

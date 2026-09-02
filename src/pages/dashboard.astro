@@ -6,6 +6,8 @@ import DemoPullNudge from "../components/DemoPullNudge.astro";
 import DashboardYoureLive from "../components/DashboardYoureLive.astro";
 import AlertSetupNudge from "../components/dashboard/AlertSetupNudge.astro";
 import DashboardStoryCard from "../components/dashboard/DashboardStoryCard.astro";
+import GarageRiskStatusCard from "../components/dashboard/GarageRiskStatusCard.astro";
+import { computeGarageRiskStatus } from "../lib/garageRiskStatus";
 import { getAuthFromCookies } from "../lib/auth";
 import { getUserPreferences } from "../lib/userPreferences";
 import { fetchGarageTempHistory } from "../lib/garageTempsHistory";
@@ -372,27 +374,41 @@ if (latest.length > 0) analyticsEvents.push({ name: "first_ingest" });
 type OverviewBanner = { id: string; priority: number; show: boolean };
 const overviewBannerQueue: OverviewBanner[] = [
   { id: "lowBattery", priority: 2, show: Boolean(lowBatteryMessage) },
-  { id: "testAlert", priority: 3, show: showTestAlertNudge },
-  { id: "stale", priority: 4, show: staleSensorCount > 0 },
-  { id: "alertSetup", priority: 5, show: showAlertSetupNudge },
-  { id: "freezeMap", priority: 6, show: showFreezeMapOptInNudge },
+  { id: "stale", priority: 3, show: staleSensorCount > 0 },
+  { id: "coldSnap", priority: 4, show: showColdSnapChecklist },
+  { id: "testAlert", priority: 5, show: showTestAlertNudge },
+  { id: "alertSetup", priority: 6, show: showAlertSetupNudge },
   { id: "youreLive", priority: 7, show: showYoureLive },
-  { id: "story", priority: 8, show: showStoryCard },
-  { id: "multiProperty", priority: 9, show: showMultiPropertyNudge },
-  { id: "coldSnap", priority: 10, show: showColdSnapChecklist },
+  { id: "freezeMap", priority: 8, show: showFreezeMapOptInNudge },
+  { id: "story", priority: 9, show: showStoryCard },
+  { id: "multiProperty", priority: 10, show: showMultiPropertyNudge },
   { id: "freezeReadiness", priority: 11, show: true },
-  { id: "upgrade", priority: 12, show: upgradeTarget === "member" || upgradeTarget === "pro" },
+  // Upgrade CTAs stay in "More recommendations" only — never primary.
+  { id: "upgrade", priority: 20, show: upgradeTarget === "member" || upgradeTarget === "pro" },
 ];
 const activeOverviewBanners = overviewBannerQueue
   .filter((banner) => banner.show)
   .sort((a, b) => a.priority - b.priority);
 const primaryBannerIds = new Set(
-  activeOverviewBanners.slice(0, 2).map((banner) => banner.id),
+  activeOverviewBanners.slice(0, 1).map((banner) => banner.id),
 );
 const secondaryBannerIds = new Set(
-  activeOverviewBanners.slice(2).map((banner) => banner.id),
+  activeOverviewBanners.slice(1).map((banner) => banner.id),
 );
 const hasSecondaryBanners = secondaryBannerIds.size > 0;
+
+const garageRisk = computeGarageRiskStatus({
+  hasDevices,
+  hasLiveReading: latest.length > 0,
+  coldestProbeTempF,
+  freezeThresholdF: alertSettings.freezeThresholdF,
+  staleSensorCount,
+  nightsRiskCount,
+  alertsEnabled: hasAlertsEnabled,
+  hasEmailAlerts,
+  outdoorTempF: weatherSnapshot?.temp ?? null,
+  showColdSnapChecklist,
+});
 ---
 <DashboardLayout title="Overview">
   <ProductAnalyticsTracker events={analyticsEvents} />
@@ -432,9 +448,32 @@ const hasSecondaryBanners = secondaryBannerIds.size > 0;
       dismissed={onboardingDismissed}
     />
 
+    <GarageRiskStatusCard status={garageRisk} />
+
     <DemoPullNudge show={showDemoPullNudge} />
 
-    <DashboardAndroidNudge show={hasDevices && latest.length > 0} />
+    <HouseholdSwitcher
+      households={userHouseholds.households}
+      activeHouseholdId={activeHouseholdId}
+    />
+
+    <UnackedAlertsBanner
+      count={unackedAlertCount}
+      showClaimsPackCta={unackedAlertCount > 0}
+    />
+
+    <LowBatteryBanner message={primaryBannerIds.has("lowBattery") ? lowBatteryMessage : null} />
+
+    {primaryBannerIds.has("stale") && staleSensorCount > 0 && (
+      <div class="alert-warning mb-0" role="status">
+        {staleSummary.bannerMessage} —
+        <a href="/" class="text-link ml-1">Check Home</a>
+        {" · "}
+        <a href="/dashboard/temperature" class="text-link">Devices</a>
+        {" · "}
+        <a href="/about/debugging-stale-readings" class="text-link">Debug guide</a>
+      </div>
+    )}
 
     <DashboardYoureLive
       show={primaryBannerIds.has("youreLive")}
@@ -463,28 +502,17 @@ const hasSecondaryBanners = secondaryBannerIds.size > 0;
 
     <DashboardStoryCard show={primaryBannerIds.has("story")} />
 
-    <HouseholdSwitcher
-      households={userHouseholds.households}
-      activeHouseholdId={activeHouseholdId}
+    <ColdSnapChecklistCard
+      show={primaryBannerIds.has("coldSnap")}
+      coldSnapEnabled={alertSettings.forecastFreezeEnabled}
+      canUseForecast={entitlements.canUseForecastAlerts}
     />
 
-    <UnackedAlertsBanner
-      count={unackedAlertCount}
-      showClaimsPackCta={unackedAlertCount > 0}
-    />
-
-    <LowBatteryBanner message={primaryBannerIds.has("lowBattery") ? lowBatteryMessage : null} />
-
-    {primaryBannerIds.has("stale") && staleSensorCount > 0 && (
-      <div class="alert-warning mb-0" role="status">
-        {staleSummary.bannerMessage} —
-        <a href="/" class="text-link ml-1">Check Home</a>
-        {" · "}
-        <a href="/dashboard/temperature" class="text-link">Devices</a>
-        {" · "}
-        <a href="/about/debugging-stale-readings" class="text-link">Debug guide</a>
-      </div>
+    {primaryBannerIds.has("freezeReadiness") && (
+      <FreezeReadinessCard readiness={freezeReadiness} />
     )}
+
+    <DashboardMultiPropertyNudge show={primaryBannerIds.has("multiProperty")} />
 
     {hasSecondaryBanners && (
       <details class="card dashboard-recommendations">
@@ -492,6 +520,7 @@ const hasSecondaryBanners = secondaryBannerIds.size > 0;
           More recommendations ({secondaryBannerIds.size})
         </summary>
         <div class="dashboard-recommendations-body space-y-4">
+          <DashboardAndroidNudge show={hasDevices && latest.length > 0} />
           <DashboardYoureLive
             show={secondaryBannerIds.has("youreLive")}
             hasAlertsEnabled={hasAlertsEnabled}
@@ -515,7 +544,11 @@ const hasSecondaryBanners = secondaryBannerIds.size > 0;
           />
           <DashboardStoryCard show={secondaryBannerIds.has("story")} />
           <DashboardMultiPropertyNudge show={secondaryBannerIds.has("multiProperty")} />
-          <ColdSnapChecklistCard show={secondaryBannerIds.has("coldSnap")} />
+          <ColdSnapChecklistCard
+            show={secondaryBannerIds.has("coldSnap")}
+            coldSnapEnabled={alertSettings.forecastFreezeEnabled}
+            canUseForecast={entitlements.canUseForecastAlerts}
+          />
           {secondaryBannerIds.has("freezeReadiness") && (
             <FreezeReadinessCard readiness={freezeReadiness} />
           )}
@@ -538,27 +571,10 @@ const hasSecondaryBanners = secondaryBannerIds.size > 0;
       </details>
     )}
 
-    {!hasSecondaryBanners && (
-      <>
-        <DashboardMultiPropertyNudge show={primaryBannerIds.has("multiProperty")} />
-        <ColdSnapChecklistCard show={primaryBannerIds.has("coldSnap")} />
-        {primaryBannerIds.has("freezeReadiness") && (
-          <FreezeReadinessCard readiness={freezeReadiness} />
-        )}
-      </>
-    )}
-
     {!canEdit && (
       <p class="alert-warning mt-0 mb-0" role="status">
         View-only access — you can see live data but cannot change devices, alerts, or sharing.
       </p>
-    )}
-
-    {primaryBannerIds.has("upgrade") && upgradeTarget === "member" && (
-      <UpgradeNudge feature="data_retention" tier={entitlements.tier} compact />
-    )}
-    {primaryBannerIds.has("upgrade") && upgradeTarget === "pro" && (
-      <UpgradeNudge feature="sms_alerts" tier={entitlements.tier} compact />
     )}
 
     <section class="dashboard-section" id="status" aria-labelledby="status-heading">

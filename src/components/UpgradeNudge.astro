@@ -41,12 +41,12 @@ const upgradeLabel =
       <input type="hidden" name="plan" value={checkoutPlan} />
       <input type="hidden" name="interval" value="annual" />
       <input type="hidden" name="source" value={checkoutSource} />
-      <button class="btn-primary" type="submit">
+      <button class:list={[compact ? "btn-ghost" : "btn-primary"]} type="submit">
         {upgradeLabel}
       </button>
     </form>
     <button type="button" class="btn-ghost" data-dismiss={nudge.dismissKey}>
-      Dismiss
+      Not now
     </button>
   </div>
 </aside>

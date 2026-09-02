@@ -11,6 +11,9 @@ import { recordHouseholdActivity } from "../../../lib/householdActivity";
 import { formRedirectPath } from "../../../lib/siteUrl";
 import { FLASH_SHARE_TOKEN, setSecretFlash } from "../../../lib/secretFlash";
 
+const FAMILY_MAX_LIVE_LINKS = 1;
+const FAMILY_DEFAULT_EXPIRES_DAYS = 7;
+
 function randomToken(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(24));
   return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -68,10 +71,6 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const blocked = redirectUnlessManager(manager, redirectTo, redirect);
   if (blocked) return blocked;
 
-  if (!entitlements.canCreateShareLinks) {
-    return redirect(`${redirectTo}?error=pro_required`);
-  }
-
   const household = await getOrCreateHouseholdForUser(user.id, user.email);
   if (!household.householdId) {
     return redirect(`${redirectTo}?error=1`);
@@ -80,6 +79,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const supabase = createServerClient();
 
   if (action === "revoke") {
+    if (!entitlements.canCreateShareLinks && !entitlements.canCreateFamilyShareLink) {
+      return redirect(`${redirectTo}?error=pro_required`);
+    }
     const id = formData.get("id")?.toString();
     if (id) {
       await supabase
@@ -91,15 +93,45 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect(`${redirectTo}?revoked=1`);
   }
 
+  const familyOnly =
+    !entitlements.canCreateShareLinks && entitlements.canCreateFamilyShareLink;
+  if (!entitlements.canCreateShareLinks && !entitlements.canCreateFamilyShareLink) {
+    return redirect(`${redirectTo}?error=pro_required`);
+  }
+
   const scopeRaw = formData.get("scope")?.toString() ?? "live";
-  const scope =
+  let scope =
     scopeRaw === "history"
       ? "history"
       : scopeRaw === "metrics"
         ? "metrics"
         : "live";
-  const label = formData.get("label")?.toString().trim() || null;
-  const expiresDays = Number(formData.get("expires_days") ?? 0);
+  let label = formData.get("label")?.toString().trim() || null;
+  let expiresDays = Number(formData.get("expires_days") ?? 0);
+
+  if (familyOnly || formData.get("family_quick") === "1") {
+    scope = "live";
+    label = label || "Family live view";
+    if (!(expiresDays > 0)) {
+      expiresDays = FAMILY_DEFAULT_EXPIRES_DAYS;
+    }
+    // Cap free/member family links at one live view.
+    if (familyOnly) {
+      const { count } = await supabase
+        .from("share_links")
+        .select("id", { count: "exact", head: true })
+        .eq("household_id", household.householdId)
+        .eq("scope", "live");
+      if ((count ?? 0) >= FAMILY_MAX_LIVE_LINKS) {
+        return redirect(`${redirectTo}?error=family_limit`);
+      }
+      // Free/member: never allow never-expire or non-live.
+      expiresDays = Math.min(Math.max(expiresDays, 1), 30);
+    }
+  } else if (!entitlements.canCreateShareLinks) {
+    return redirect(`${redirectTo}?error=pro_required`);
+  }
+
   const expires_at =
     expiresDays > 0
       ? new Date(Date.now() + expiresDays * 24 * 60 * 60 * 1000).toISOString()

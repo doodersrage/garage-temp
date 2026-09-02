@@ -4,16 +4,35 @@ import { COLD_SNAP_CHECKLIST } from "../lib/coldSnapChecklist";
 
 interface Props {
   show: boolean;
+  coldSnapEnabled?: boolean;
+  canUseForecast?: boolean;
 }
 
-const { show } = Astro.props;
+const {
+  show,
+  coldSnapEnabled = false,
+  canUseForecast = false,
+} = Astro.props;
 if (!show) return null;
 ---
-<DashboardCard>
+<DashboardCard id="cold-snap">
   <h2 class="card-title">Cold-snap checklist</h2>
   <p class="card-subtitle mb-4">
     Forecast or outdoor temps look cold. Quick household steps while freeze alerts watch the probes.
   </p>
+  {!coldSnapEnabled && canUseForecast && (
+    <p class="alert-warning mb-4" role="status">
+      Cold-snap mode (forecast freeze alerts) is off.
+      <a class="text-link" href="/dashboard/alerts#alert-section-essentials">Turn it on</a>
+      so you get warned before outdoor lows hit your threshold.
+    </p>
+  )}
+  {!canUseForecast && (
+    <p class="form-hint mb-4">
+      Forecast cold-snap alerts unlock on Member.
+      <a class="text-link" href="/dashboard/plans">Compare plans</a>
+    </p>
+  )}
   <ol class="mb-4 space-y-2 pl-5 text-sm">
     {COLD_SNAP_CHECKLIST.map((item) => (
       <li>{item}</li>
@@ -22,7 +41,7 @@ if (!show) return null;
   <div class="flex flex-wrap gap-3">
     <a class="btn-secondary" href="/freeze-season">Full freeze-season guide</a>
     <a class="btn-ghost" href="/about/cold-snap-playbook">Cold-snap playbook</a>
-    <a class="btn-ghost" href="/about/garage-door-cold-playbook">Door + cold playbook</a>
+    <a class="btn-ghost" href="/dashboard/alerts#alert-section-essentials">Alert essentials</a>
     <a class="btn-ghost" href="/dashboard/alerts#send-test-alert">Send a test alert</a>
   </div>
 </DashboardCard>

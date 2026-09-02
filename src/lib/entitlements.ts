@@ -31,7 +31,10 @@ export type Entitlements = {
   canUseSms: boolean;
   canUsePush: boolean;
   canUseOutboundWebhook: boolean;
+  /** Pro+: unlimited share scopes (live, history, metrics) and never-expire links. */
   canCreateShareLinks: boolean;
+  /** All tiers: one live family share link (expiring). */
+  canCreateFamilyShareLink: boolean;
   canUseClaimsPack: boolean;
   canUsePortfolio: boolean;
   canUseForecastAlerts: boolean;
@@ -58,6 +61,7 @@ function entitlementsFor(tier: PlanTier): Entitlements {
     canUsePush: proOrAbove,
     canUseOutboundWebhook: proOrAbove,
     canCreateShareLinks: proOrAbove,
+    canCreateFamilyShareLink: true,
     canUseClaimsPack: proOrAbove,
     canUsePortfolio: proOrAbove,
     canUseForecastAlerts: memberOrAbove,
