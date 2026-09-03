@@ -42,6 +42,7 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
         slug: "adding-devices",
         alsoIn: ["api"],
       },
+      { href: "/about/esp32-freeze-kit", slug: "esp32-freeze-kit" },
       { href: "/about/dht22-sensor-overview", slug: "dht22-sensor-overview" },
       { href: "/about/arduino-circuit-wiring", slug: "arduino-circuit-wiring" },
       { href: "/about/arduino-sketches", slug: "arduino-sketches" },

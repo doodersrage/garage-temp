@@ -43,11 +43,12 @@ Uno Ethernet samples send the classic `temp` object (`0` / `1` / `avg` with `c`,
 
 ## Checklist
 
-1. Create push device on Devices; download pre-filled sketch (or paste `INGEST_URL`)
-2. Edit `WIFI_*` only
-3. Flash ESP32; watch serial (115200) for `POST 200`
-4. Open Home on thermaltrace.dev
-5. Set freeze alerts under Dashboard → Alerts
+1. Buy ESP32 + waterproof DS18B20 — [parts list](https://thermaltrace.dev/about/esp32-freeze-kit)
+2. Create push device on Devices; download pre-filled sketch (or paste `INGEST_URL`)
+3. Edit `WIFI_*` only
+4. Flash ESP32; watch serial (115200) for `POST 200`
+5. Open Home on thermaltrace.dev
+6. Set freeze alerts under Dashboard → Alerts
 
 ## Uno + Ethernet shield
 

@@ -518,6 +518,15 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
       "Encode the ingest URL on a label so new hardware setup is a single phone scan.",
   },
   {
+    slug: "esp32-freeze-kit",
+    parentSlug: "adding-devices",
+    title: "ESP32 freeze kit parts list",
+    description:
+      "Buy an ESP32 and waterproof DS18B20 that match ThermalTrace’s push-ingest sketches — Adafruit links and Amazon search lists, not a branded drop-ship kit.",
+    summary:
+      "Verified ESP32 + waterproof DS18B20 BOM with stable Adafruit product links and Amazon search shortcuts.",
+  },
+  {
     slug: "esp32-ota-firmware",
     parentSlug: "ingest-and-webhooks",
     title: "ESP32 OTA and battery reporting",

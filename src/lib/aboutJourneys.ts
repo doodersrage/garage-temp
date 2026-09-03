@@ -53,6 +53,7 @@ export const aboutJourneys: AboutJourney[] = [
     ctaLabel: "Add a device",
     steps: [
       { slug: "adding-devices", label: "Add push or pull" },
+      { slug: "esp32-freeze-kit", label: "Buy ESP32 kit" },
       { slug: "ingest-and-webhooks", label: "Ingest API" },
       { slug: "kit-qr-onboarding", label: "Kit QR" },
       { slug: "esp32-web-flash", label: "Flash ESP32" },

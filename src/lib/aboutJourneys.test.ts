@@ -42,6 +42,7 @@ describe("about gap guides", () => {
       "dht22-sensor-overview",
       "ingest-and-webhooks",
       "kit-qr-onboarding",
+      "esp32-freeze-kit",
       "accounts-and-dashboard",
       "install-pwa",
     ]) {

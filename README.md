@@ -84,7 +84,7 @@ docs/               VitePress developer docs (GitHub Pages)
 3. `POST` to `/api/ingest/<key>` — sensor keys **auto-import** on first POST; rename on Devices afterward  
 4. **Overview → Try without hardware** saves the demo pull feed if you have no ESP yet  
 
-Step-by-step: [Adding devices](https://thermaltrace.dev/about/adding-devices) · sample sketches in [`sketches/`](./sketches)
+Step-by-step: [Adding devices](https://thermaltrace.dev/about/adding-devices) · [ESP32 freeze kit BOM](https://thermaltrace.dev/about/esp32-freeze-kit) · sample sketches in [`sketches/`](./sketches)
 
 Pull feeds (HTTPS JSON we fetch): **Devices → Pull feeds** tab — add URL, **Save pull setup**, probes auto-import from the live feed.
 

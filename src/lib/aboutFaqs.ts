@@ -176,6 +176,23 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
         "Usually the ingest URL or onboarding deep link for that device so a phone scan finishes setup without typing long keys.",
     },
   ],
+  "esp32-freeze-kit": [
+    {
+      question: "Does ThermalTrace sell an ESP32 kit?",
+      answer:
+        "No. ThermalTrace is software. Buy an ESP32 and a waterproof DS18B20 from Adafruit or Amazon, then download a pre-filled ingest sketch from Dashboard → Devices. Parts list: thermaltrace.dev/about/esp32-freeze-kit.",
+    },
+    {
+      question: "Is a DHT11 starter kit enough for pipe freeze?",
+      answer:
+        "Not by itself. DHT11 is weak below freezing and usually not waterproof. Use a waterproof DS18B20 for pipes; keep DHT22 for shop air and humidity if you want RH.",
+    },
+    {
+      question: "Do I need the Adafruit board specifically?",
+      answer:
+        "No. Any ESP32 DevKit that runs Arduino IDE or MicroPython works with the ThermalTrace sketches. Adafruit links are stable reference SKUs; Amazon DevKit searches are fine for cost.",
+    },
+  ],
   "esp32-ota-firmware": [
     {
       question: "Can ESP32 devices update firmware while posting to ThermalTrace?",

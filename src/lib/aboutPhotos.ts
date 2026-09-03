@@ -282,6 +282,7 @@ export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
   "adding-devices": "ethernet-cable",
   "mqtt-bridge": "ethernet-cable",
   "kit-qr-onboarding": "ethernet-cable",
+  "esp32-freeze-kit": "arduino-uno-board",
   "esp32-ota-firmware": "arduino-uno-board",
   "esp32-web-flash": "arduino-uno-board",
 
