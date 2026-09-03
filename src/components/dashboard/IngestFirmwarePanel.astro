@@ -51,14 +51,14 @@ const esphomeHref = firmwareDownloadHref(esphomeYaml);
 
   <ol class="waiting-ingest-checklist ingest-firmware-checklist">
     <li>
-      Install <strong>ESP32</strong> (or ESP8266) board support in Arduino IDE / PlatformIO — not the Uno Ethernet samples.
+      Install <strong>ESP32</strong> (or ESP8266) board support in Arduino IDE / PlatformIO, not the Uno Ethernet samples.
     </li>
     <li>
       Libraries: <code>OneWire</code>, <code>DallasTemperature</code> (Library Manager). MicroPython needs
       <code>onewire</code> / <code>ds18x20</code> (usually bundled).
     </li>
     <li>Edit <code>WIFI_SSID</code> / <code>WIFI_PASS</code> in the downloaded file, then flash over USB.</li>
-    <li>Serial Monitor at <strong>115200</strong> baud — expect <code>WiFi ok</code> then <code>POST 200</code>.</li>
+    <li>Serial Monitor at <strong>115200</strong> baud: expect <code>WiFi ok</code> then <code>POST 200</code>.</li>
   </ol>
 
   <div class="flex flex-wrap gap-2 mb-4">

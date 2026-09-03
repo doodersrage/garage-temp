@@ -130,7 +130,7 @@ export function buildDoorTempSummary(
       title: "Door open now",
       detail:
         rate != null && rate < 0
-          ? `${labels} — space falling ~${Math.abs(rate).toFixed(1)}°F/h while open.`
+          ? `${labels}: space falling ~${Math.abs(rate).toFixed(1)}°F/h while open.`
           : `${labels} still open (${formatDurationMs(
               Date.now() - Date.parse(openNow[0]!.openedAt),
             )}).`,
@@ -497,7 +497,7 @@ export function buildPowerTempSummary(
       title: "Power off now",
       detail:
         rate != null && rate < 0
-          ? `${labels} Off — space falling ~${Math.abs(rate).toFixed(1)}°F/h.`
+          ? `${labels} Off: space falling ~${Math.abs(rate).toFixed(1)}°F/h.`
           : `${labels} currently Off.`,
       tone: "warning",
     };
@@ -531,14 +531,14 @@ export function buildMotionSummary(sessions: DoorOpenSession[]): InsightCallout 
   if (minutes >= 30) {
     return {
       title: "Recent activity",
-      detail: `Motion sensors active ~${Math.round(minutes)} min in the last 24 hours — useful when correlating door opens.`,
+      detail: `Motion sensors active ~${Math.round(minutes)} min in the last 24 hours: useful when correlating door opens.`,
       tone: "info",
     };
   }
   if (sessions.length > 0 && minutes < 5) {
     return {
       title: "Quiet space",
-      detail: "Little motion in the last 24 hours — empty garages stay colder overnight.",
+      detail: "Little motion in the last 24 hours: empty garages stay colder overnight.",
       tone: "info",
     };
   }

@@ -25,7 +25,7 @@ export function listLowBatteryDevices(
 export function lowBatteryBannerMessage(devices: LowBatteryDevice[]): string {
   if (devices.length === 0) return "";
   if (devices.length === 1) {
-    return `${devices[0]!.name} battery is ${devices[0]!.batteryPct}% — charge or replace before it stops posting.`;
+    return `${devices[0]!.name} battery is ${devices[0]!.batteryPct}%: charge or replace before it stops posting.`;
   }
   const names = devices
     .slice(0, 3)

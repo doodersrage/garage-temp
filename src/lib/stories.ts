@@ -118,12 +118,12 @@ export const stories: Story[] = [
       {
         question: "Is ThermalTrace only for cold?",
         answer:
-          "No — thresholds work both ways. Freeze is the headline risk for garages; heat matters for closets and workshops.",
+          "No: thresholds work both ways. Freeze is the headline risk for garages; heat matters for closets and workshops.",
       },
       {
         question: "How did Home Assistant fit?",
         answer:
-          "Pro outbound webhooks POST alert JSON into Home Assistant. An automation switched a smart plug when closet temp stayed elevated. Today you can also use the official HACS integration for share-link sensors and snooze services — see thermaltrace.dev/integrations/home-assistant.",
+          "Pro outbound webhooks POST alert JSON into Home Assistant. An automation switched a smart plug when closet temp stayed elevated. Today you can also use the official HACS integration for share-link sensors and snooze services, see thermaltrace.dev/integrations/home-assistant.",
       },
     ],
   },
@@ -160,7 +160,7 @@ export const stories: Story[] = [
       {
         question: "Attached garages still freeze?",
         answer:
-          "Yes — especially against exterior walls and leaky doors. ‘Attached’ is not the same as ‘conditioned.’",
+          "Yes, especially against exterior walls and leaky doors. ‘Attached’ is not the same as ‘conditioned.’",
       },
     ],
   },
@@ -241,17 +241,17 @@ export const stories: Story[] = [
     slug: "water-heater-pad-leak",
     path: "/stories/water-heater-pad-leak",
     headline: "Water heater pad leak case study",
-    title: "The pad went wet at 3 a.m. — not the freeze night",
+    title: "The pad went wet at 3 a.m., not the freeze night",
     description:
       "How a Wisconsin household used a ThermalTrace flood contact under a garage water heater to catch a slow drip before it soaked the slab and ruined stored boxes.",
-    quote: "The pad went wet at 3 a.m. — not the freeze night",
+    quote: "The pad went wet at 3 a.m., not the freeze night",
     location: "Madison, WI",
     datePublished: "2026-03-08",
     ogImage: "/og-story-freeze.jpg",
     photoId: "basement-pex-pipes",
     setup: [
       "ESP32 already pushing garage temp; added a cheap wet/dry contact on the heater pan",
-      "Ingest kind flood — auto-alerts when wet (no custom rule)",
+      "Ingest kind flood: auto-alerts when wet (no custom rule)",
       "Email + Pro SMS; freeze threshold still watching the same bay",
     ],
     timeline: [
@@ -265,7 +265,7 @@ export const stories: Story[] = [
       {
         question: "Do flood alerts need a custom rule?",
         answer:
-          "No — when alerts are enabled, wet flood/leak contacts notify automatically. Use Rules → flood only to combine with door or temp conditions.",
+          "No, when alerts are enabled, wet flood/leak contacts notify automatically. Use Rules → flood only to combine with door or temp conditions.",
       },
       {
         question: "Where should the contact sit?",

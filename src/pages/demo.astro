@@ -49,13 +49,13 @@ const schema = [
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
   ogImage="/og-dashboard.jpg"
-  ogImageAlt="ThermalTrace live probe temperature curves — no account required"
+  ogImageAlt="ThermalTrace live probe temperature curves, no account required"
 >
   <div class="page-shell page-stack">
     <PageHeader
-      kicker="Try it — no account"
+      kicker="Try it (no account)"
       title="Demos: simulator + live feed"
-      lede="Cause a freeze event in the interactive probe simulator, or watch real demo probes next to outdoor weather — same ingest path your ESP or Arduino will use for freeze and flood alerts."
+      lede="Cause a freeze event in the interactive probe simulator, or watch real demo probes next to outdoor weather: same ingest path your ESP or Arduino will use for freeze and flood alerts."
     >
       <a slot="actions" class="btn-primary" href="/about/probe-demo?preset=coldSnap">Interactive simulator</a>
       <a slot="actions" class="btn-secondary" href="#live-feed">Live readings</a>
@@ -70,27 +70,27 @@ const schema = [
       <ul class="demo-paths text-sm space-y-3 mb-0">
         <li>
           <strong><a class="text-link" href="/about/probe-demo">Interactive probe simulator</a></strong>
-          {" — "}
+          {": "}
           Hands-on (best first stop). Tweak door open/closed, sun load, outdoor air, and freeze threshold. Cause a cold snap; watch multi-zone bars and push/pull JSON update.
         </li>
         <li>
           <strong><a class="text-link" href="#live-feed">Live demo feed</a></strong>
-          {" — "}
+          {": "}
           Observational. Real demo probes refresh here on the production ingest path. Best when you want “is this fake?” answered with live numbers.
         </li>
         <li>
           <strong><a class="text-link" href="/about/kit-qr-onboarding">Kit QR onboarding</a></strong>
-          {" — "}
+          {": "}
           Hardware path. After you create a push device, scan the ingest QR (or print it on a kit label) so firmware can POST temperature, flood, and other sensor kinds without typing the key.
         </li>
       </ul>
     </section>
 
     <section class="card demo-sim-promo" aria-labelledby="demo-sim-title">
-      <h2 class="card-title" id="demo-sim-title">Cause the change — interactive simulator</h2>
+      <h2 class="card-title" id="demo-sim-title">Cause the change: interactive simulator</h2>
       <p class="card-subtitle mb-4">
         Presets for cold snap, door draft, and sun load reuse the same Overview space-status helper as production.
-        Open the bay door and watch the door zone diverge from the workbench — that’s why multi-probe placement matters.
+        Open the bay door and watch the door zone diverge from the workbench: that’s why multi-probe placement matters.
       </p>
       <div class="flex flex-wrap gap-3">
         <a class="btn-primary" href="/about/probe-demo?preset=doorDraft">Try door draft</a>
@@ -104,7 +104,7 @@ const schema = [
     <section class="card" id="live-feed" aria-labelledby="live-feed-title">
       <h2 class="card-title" id="live-feed-title">Live demo feed</h2>
       <p class="card-subtitle mb-4">
-        Real demo probe readings and outdoor weather — not a mockup. Prefer to manipulate variables yourself?
+        Real demo probe readings and outdoor weather, not a mockup. Prefer to manipulate variables yourself?
         {" "}
         <a class="text-link" href="/about/probe-demo">Open the interactive simulator</a>.
       </p>
@@ -116,14 +116,14 @@ const schema = [
 
     <ProductScreenshot
       shot="insights"
-      caption="Same product UI after you connect hardware — Insights with freeze threshold, flood/level card, and nights-at-risk."
+      caption="Same product UI after you connect hardware. Insights with freeze threshold, flood/level card, and nights-at-risk."
     />
 
     <section class="demo-freeze" aria-labelledby="demo-freeze-title">
       <div class="demo-freeze-copy">
         <h2 class="demo-freeze-title" id="demo-freeze-title">Same data that fires freeze and flood alerts</h2>
         <p class="demo-freeze-lede">
-          When a probe crosses your threshold, ThermalTrace can reach you on email, Discord, Telegram, Slack — and on Pro, SMS and browser push. Wet flood/leak contacts auto-alert on the same stack. Set the line once; test it before the next cold night.
+          When a probe crosses your threshold, ThermalTrace can reach you on email, Discord, Telegram, Slack, and on Pro, SMS and browser push. Wet flood/leak contacts auto-alert on the same stack. Set the line once; test it before the next cold night.
         </p>
         <ul class="demo-freeze-channels" aria-label="Alert channels">
           <li>Email · Discord · Telegram · Slack</li>
@@ -131,7 +131,7 @@ const schema = [
           <li>Leak / flood sensors alert automatically when wet</li>
         </ul>
         <div class="demo-freeze-actions">
-          <a class="btn-primary" href="/register?next=/dashboard/temperature">Start free — open Devices</a>
+          <a class="btn-primary" href="/register?next=/dashboard/temperature">Start free: open Devices</a>
           <a class="btn-secondary" href="/stories/water-heater-pad-leak">Flood/leak story</a>
           <a class="btn-ghost" href="/about/alert-channel-cookbook">Channel cookbook</a>
         </div>
@@ -151,7 +151,7 @@ const schema = [
       <div class="home-steps-intro">
         <h2 class="home-steps-title" id="demo-steps-title">Your kit next</h2>
         <p class="home-steps-lede">
-          Free account, no credit card — from blank dashboard to a live curve in one sitting.
+          Free account, no credit card, from blank dashboard to a live curve in one sitting.
           Physical kits can use
           {" "}
           <a class="text-link" href="/about/kit-qr-onboarding">kit QR onboarding</a>
@@ -174,7 +174,7 @@ const schema = [
           <div>
             <h3 class="home-step-title">POST JSON</h3>
             <p class="home-step-copy">
-              POST to <code>/api/ingest/&lt;key&gt;</code>. Sensors auto-import on first POST — rename on Devices afterward.
+              POST to <code>/api/ingest/&lt;key&gt;</code>. Sensors auto-import on first POST: rename on Devices afterward.
             </p>
           </div>
         </li>
@@ -189,7 +189,7 @@ const schema = [
         </li>
       </ol>
       <div class="home-steps-actions">
-        <a class="btn-primary" href="/register?next=/dashboard/temperature">Start free — open Devices</a>
+        <a class="btn-primary" href="/register?next=/dashboard/temperature">Start free: open Devices</a>
         <a class="btn-secondary" href="/about/adding-devices">Adding devices guide</a>
         <a class="btn-ghost" href="/about/kit-qr-onboarding">Kit QR walkthrough</a>
       </div>
@@ -220,11 +220,11 @@ const schema = [
       <ul class="demo-explore-list">
         <li>
           <a class="text-link" href="/about/probe-demo">Interactive probe simulator</a>
-          <span class="demo-explore-hint">Primary hands-on demo — door, sun, outdoor, freeze threshold</span>
+          <span class="demo-explore-hint">Primary hands-on demo: door, sun, outdoor, freeze threshold</span>
         </li>
         <li>
           <a class="text-link" href="/freeze-map">Community freeze map</a>
-          <span class="demo-explore-hint">Opt-in city aggregates — no account required</span>
+          <span class="demo-explore-hint">Opt-in city aggregates, no account required</span>
         </li>
         <li>
           <a class="text-link" href="/about/kit-qr-onboarding">Kit QR onboarding</a>
@@ -239,7 +239,7 @@ const schema = [
 
     <FaqSection
       faqs={demoFaqs}
-      lede="Demo-specific answers — for plans and product basics see Pricing or the homepage FAQ."
+      lede="Demo-specific answers, for plans and product basics see Pricing or the homepage FAQ."
     />
   </div>
 </Layout>

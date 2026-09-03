@@ -4,7 +4,7 @@ export const COLD_SNAP_CHECKLIST: string[] = [
   "Drip faucets on exterior walls if supply lines run through cold spaces.",
   "Check door seals (garage, shop, crawlspace access) and close any propped-open doors.",
   "Insulate outdoor spigots and disconnect garden hoses.",
-  "Confirm freeze alerts are on — send a test if you have not lately.",
+  "Confirm freeze alerts are on, send a test if you have not lately.",
   "Verify a probe sits in the coldest corner near pipes or stored goods.",
 ];
 

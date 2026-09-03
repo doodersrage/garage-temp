@@ -20,7 +20,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return new Response(
       JSON.stringify({
         ok: false,
-        error: `Too many reveal attempts — try again in ${rate.retryAfterSec ?? 60} seconds.`,
+        error: `Too many reveal attempts. Try again in ${rate.retryAfterSec ?? 60} seconds.`,
       }),
       {
         status: 429,
@@ -74,7 +74,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return new Response(
       JSON.stringify({
         ok: false,
-        error: "No recoverable key for this device — rotate to generate a new one.",
+        error: "No recoverable key for this device. Rotate to generate a new one.",
       }),
       { status: 404, headers: { "Content-Type": "application/json" } },
     );

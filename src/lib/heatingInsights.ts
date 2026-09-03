@@ -86,7 +86,7 @@ export function buildHeatingInsights(options: {
   if (latest.tempf <= options.freezeThresholdF + 5) {
     insights.push({
       label: "Near freeze threshold",
-      detail: `Current ${latest.tempf.toFixed(1)}°F — threshold is ${options.freezeThresholdF}°F.`,
+      detail: `Current ${latest.tempf.toFixed(1)}°F: threshold is ${options.freezeThresholdF}°F.`,
       severity: latest.tempf <= options.freezeThresholdF ? "warning" : "info",
     });
   }
@@ -95,7 +95,7 @@ export function buildHeatingInsights(options: {
     const margin = latest.tempf - options.freezeThresholdF;
     insights.push({
       label: "Cold snap outside",
-      detail: `Outdoor ${options.outdoorTempF.toFixed(0)}°F — ${margin.toFixed(0)}°F margin above your freeze alert.`,
+      detail: `Outdoor ${options.outdoorTempF.toFixed(0)}°F: ${margin.toFixed(0)}°F margin above your freeze alert.`,
       severity: margin <= 8 ? "warning" : "info",
     });
   }
@@ -106,7 +106,7 @@ export function buildHeatingInsights(options: {
     if (margin <= 5) {
       insights.push({
         label: "Condensation risk",
-        detail: `Dew point ~${dewPoint.toFixed(0)}°F — air is within ${Math.max(0, margin).toFixed(0)}°F of saturating. Cold slabs and tools can sweat even if the probe is warmer.`,
+        detail: `Dew point ~${dewPoint.toFixed(0)}°F: air is within ${Math.max(0, margin).toFixed(0)}°F of saturating. Cold slabs and tools can sweat even if the probe is warmer.`,
         severity: margin <= 2 ? "warning" : "info",
       });
     }
@@ -132,7 +132,7 @@ export function buildHeatingInsights(options: {
     if (latest.tempf <= options.freezeThresholdF && houseTempF > options.freezeThresholdF + 10) {
       insights.push({
         label: "Warm house, cold probe",
-        detail: `Probe is at or below ${options.freezeThresholdF}°F while the house reads ${houseTempF.toFixed(0)}°F — expected for an unheated shop, garage, or attic.`,
+        detail: `Probe is at or below ${options.freezeThresholdF}°F while the house reads ${houseTempF.toFixed(0)}°F: expected for an unheated shop, garage, or attic.`,
         severity: "info",
       });
     }
@@ -140,7 +140,7 @@ export function buildHeatingInsights(options: {
     if (thermostat && isThermostatHeating(thermostat.hvacMode) && latest.tempf < houseTempF - 15) {
       insights.push({
         label: "HVAC heating",
-        detail: `Furnace is on (house ${houseTempF.toFixed(0)}°F) but the monitored space is unconditioned — it will stay colder than living areas.`,
+        detail: `Furnace is on (house ${houseTempF.toFixed(0)}°F) but the monitored space is unconditioned: it will stay colder than living areas.`,
         severity: "info",
       });
     }

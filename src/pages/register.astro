@@ -20,14 +20,14 @@ const signInHref = `/signin?${signInParams.toString()}`;
 
 <Layout
   title="Register"
-  description="Create a free ThermalTrace account — no credit card. Connect ESP/Arduino probes, freeze and flood/leak alerts, and history for your household."
+  description="Create a free ThermalTrace account, no credit card. Connect ESP/Arduino probes, freeze and flood/leak alerts, and history for your household."
   noindex
 >
   <div class="auth-page">
     <header class="auth-intro page-header">
       <h1 class="page-header-title">Create your account</h1>
       <p class="page-header-lede">
-        Free forever — no credit card. After signup you’ll land on Devices to connect your first probe or wet-contact alert path.
+        Free forever, no credit card. After signup you’ll land on Devices to connect your first probe or wet-contact alert path.
       </p>
       <p class="form-hint mt-2 mb-0">
         Prefer a look first?
@@ -38,7 +38,7 @@ const signInHref = `/signin?${signInParams.toString()}`;
     <div class="form-panel">
       {refCode && (
         <p class="form-hint mb-4">
-          Referral code <strong>{refCode}</strong> applied — Pro trial includes an extra 7 days.
+          Referral code <strong>{refCode}</strong> applied. Pro trial includes an extra 7 days.
         </p>
       )}
       {errorMessage && (

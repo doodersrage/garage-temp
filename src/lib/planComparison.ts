@@ -317,7 +317,7 @@ const NUDGE_CONFIG: Record<
   csv_export: {
     targetTier: "member",
     title: "Export history as CSV",
-    body: "Member unlocks CSV download of your retained readings — handy for insurance docs and HVAC tuning.",
+    body: "Member unlocks CSV download of your retained readings, handy for insurance docs and HVAC tuning.",
     anchor: "csv-export",
   },
   history_charts: {
@@ -329,7 +329,7 @@ const NUDGE_CONFIG: Record<
   sms_alerts: {
     targetTier: "pro",
     title: "Get freeze and leak alerts by SMS",
-    body: "Pro adds Twilio SMS — critical when email isn't fast enough during a cold snap or a wet contact.",
+    body: "Pro adds Twilio SMS, critical when email isn't fast enough during a cold snap or a wet contact.",
     anchor: "sms-alerts",
   },
   push_alerts: {
@@ -371,7 +371,7 @@ const NUDGE_CONFIG: Record<
   device_limit: {
     targetTier: "pro",
     title: "Need more push devices?",
-    body: `Free allows ${FREE_MAX_DEVICES} push devices per property, Member ${MEMBER_MAX_DEVICES}, Pro ${PRO_MAX_DEVICES} — upgrade when you outgrow the limit.`,
+    body: `Free allows ${FREE_MAX_DEVICES} push devices per property, Member ${MEMBER_MAX_DEVICES}, Pro ${PRO_MAX_DEVICES}: upgrade when you outgrow the limit.`,
     anchor: "push_devices",
   },
   data_retention: {
@@ -395,7 +395,7 @@ const NUDGE_CONFIG: Record<
   multi_property: {
     targetTier: "pro",
     title: "Monitoring a second property?",
-    body: `Pro supports up to ${PRO_MAX_OWNED_HOUSEHOLDS} owned properties — vacation home, rental unit, or workshop.`,
+    body: `Pro supports up to ${PRO_MAX_OWNED_HOUSEHOLDS} owned properties: vacation home, rental unit, or workshop.`,
     anchor: "multi-property",
   },
   portfolio_scale: {

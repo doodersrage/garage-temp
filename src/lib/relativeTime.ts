@@ -1,9 +1,9 @@
 /** Relative time helpers for sensor / device freshness UI. */
 
-/** Soft warning for live cards — probe likely missed a few posts. */
+/** Soft warning for live cards: probe likely missed a few posts. */
 export const LAG_MS = 30 * 60 * 1000; // 30 minutes
 
-/** Hard stale — treat as offline for status / share pages. */
+/** Hard stale: treat as offline for status / share pages. */
 export const STALE_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 export type RelativeAge = {

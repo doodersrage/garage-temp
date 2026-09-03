@@ -76,15 +76,15 @@ export async function loadShareDashboardContext(
   const newApiKey = consumeSecretFlash(cookies, FLASH_API_KEY);
 
   const notice = url.searchParams.get("created")
-    ? "Share link created — copy it below to send to family."
+    ? "Share link created, copy it below to send to family."
     : url.searchParams.get("revoked")
       ? "Share link revoked."
       : url.searchParams.get("api_key_created")
-        ? "API key created — copy it now; it will not be shown again."
+        ? "API key created, copy it now; it will not be shown again."
         : url.searchParams.get("api_key_revoked")
           ? "API key revoked."
           : url.searchParams.get("status_created")
-            ? "Status page created — copy the link below."
+            ? "Status page created, copy the link below."
             : url.searchParams.get("status_revoked")
               ? "Status page revoked."
               : url.searchParams.get("error") === "family_limit"

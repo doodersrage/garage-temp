@@ -11,7 +11,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "What temperature probes work with ThermalTrace?",
       answer:
-        "Any sensor that can publish temperature (and optional humidity) as JSON—commonly DHT22, DS18B20, or similar on Arduino/ESP32. Map probe indexes in the dashboard after ingest.",
+        "Any sensor that can publish temperature (and optional humidity) as JSON: commonly DHT22, DS18B20, or similar on Arduino/ESP32. Map probe indexes in the dashboard after ingest.",
     },
     {
       question: "How many probes do I need in a garage, workshop, or similar space?",
@@ -35,14 +35,14 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Can I export readings to a spreadsheet?",
       answer:
-        "Yes on Member and Pro—download CSV from History and open it in Excel or Google Sheets for freeze audits and seasonal comparisons.",
+        "Yes on Member and Pro: download CSV from History and open it in Excel or Google Sheets for freeze audits and seasonal comparisons.",
     },
   ],
   "arduino-sketches": [
     {
       question: "Where are sample Arduino sketches?",
       answer:
-        "In the thermaltrace GitHub repo under sketches/, plus the Arduino guides in About. ESP32 samples POST HTTPS directly. Uno + W5100 Ethernet uses ethernet_dht22_ingest (classic temp JSON on A4/A5) plus a LAN HTTP→HTTPS relay — the shield cannot TLS to thermaltrace.dev.",
+        "In the thermaltrace GitHub repo under sketches/, plus the Arduino guides in About. ESP32 samples POST HTTPS directly. Uno + W5100 Ethernet uses ethernet_dht22_ingest (classic temp JSON on A4/A5) plus a LAN HTTP→HTTPS relay: the shield cannot TLS to thermaltrace.dev.",
     },
   ],
   "arduino-pin-wiring": [
@@ -56,14 +56,14 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Do I need an LCD if I use ThermalTrace?",
       answer:
-        "No—the cloud dashboard is enough. A local LCD is optional for workshop visibility when Wi‑Fi is down.",
+        "No: the cloud dashboard is enough. A local LCD is optional for workshop visibility when Wi‑Fi is down.",
     },
   ],
   "dht22-sensor-overview": [
     {
       question: "How accurate is a DHT22 in a garage or workshop?",
       answer:
-        "Roughly ±0.5 °C and a few percent RH in stable air. Drafts and door openings create real spikes—not always sensor error. Compare zones before replacing hardware.",
+        "Roughly ±0.5 °C and a few percent RH in stable air. Drafts and door openings create real spikes, not always sensor error. Compare zones before replacing hardware.",
     },
     {
       question: "How often should firmware poll the DHT22?",
@@ -73,7 +73,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Can one DHT22 cover a whole garage, attic, or shop?",
       answer:
-        "One sensor hides gradients. Door bays, north walls, and workbenches often differ by several degrees—use multiple probes when freeze risk or tools matter.",
+        "One sensor hides gradients. Door bays, north walls, and workbenches often differ by several degrees, use multiple probes when freeze risk or tools matter.",
     },
   ],
   "dht22-data-line-wiring": [
@@ -104,7 +104,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "How do quiet hours interact with freeze alerts?",
       answer:
-        "You can suppress routine noise overnight while still delivering freeze, flood, and forecast alerts—keep bypass enabled for critical kinds.",
+        "You can suppress routine noise overnight while still delivering freeze, flood, and forecast alerts, keep bypass enabled for critical kinds.",
     },
   ],
   "alert-channel-cookbook": [
@@ -159,7 +159,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Why don’t readings show on Home after ingest succeeds?",
       answer:
-        "POST JSON first — sensor keys auto-import on Devices. If Home is still empty, confirm the device received a POST and check Devices → Device health. Pull feeds: correct JSON root (default temp) unless the URL returns SenML or Home Assistant REST JSON, which auto-detect.",
+        "POST JSON first: sensor keys auto-import on Devices. If Home is still empty, confirm the device received a POST and check Devices → Device health. Pull feeds: correct JSON root (default temp) unless the URL returns SenML or Home Assistant REST JSON, which auto-detect.",
     },
   ],
   "json-probe-output-schema": [
@@ -197,7 +197,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Can ESP32 devices update firmware while posting to ThermalTrace?",
       answer:
-        "Yes—run OTA on your LAN for firmware, and keep push ingest posting readings to the cloud API. Battery and RSSI fields are optional in the payload. Download a pre-filled sketch from Dashboard → Devices for the first USB flash.",
+        "Yes: run OTA on your LAN for firmware, and keep push ingest posting readings to the cloud API. Battery and RSSI fields are optional in the payload. Download a pre-filled sketch from Dashboard → Devices for the first USB flash.",
     },
     {
       question: "Do I need to recompile when my Wi‑Fi password changes?",
@@ -209,7 +209,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Is there a browser flasher built into ThermalTrace?",
       answer:
-        "No hosted one-click .bin flasher — your ingest URL is per device. Download a pre-filled .ino/.py from Devices, then flash with Arduino IDE, PlatformIO, Thonny, or Espressif’s esptool-js if you already built a binary. Guide: thermaltrace.dev/about/esp32-web-flash.",
+        "No hosted one-click .bin flasher: your ingest URL is per device. Download a pre-filled .ino/.py from Devices, then flash with Arduino IDE, PlatformIO, Thonny, or Espressif’s esptool-js if you already built a binary. Guide: thermaltrace.dev/about/esp32-web-flash.",
     },
   ],
   "install-pwa": [
@@ -244,26 +244,26 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "What did the probe case study conclude?",
       answer:
-        "Multi-zone probes plus freeze thresholds catch cold events single sensors miss—especially near doors and uninsulated walls during polar snaps.",
+        "Multi-zone probes plus freeze thresholds catch cold events single sensors miss, especially near doors and uninsulated walls during polar snaps.",
     },
   ],
   "multi-zone-garage-layout": [
     {
       question: "Where should I place probes for freeze risk?",
       answer:
-        "Prioritize the coldest expected zones: north walls, door tracks, and exterior corners—not only the workbench where you stand.",
+        "Prioritize the coldest expected zones: north walls, door tracks, and exterior corners, not only the workbench where you stand.",
     },
   ],
   "probe-demo": [
     {
       question: "Is the probe demo real hardware?",
       answer:
-        "No — it simulates three zones so you can see how outdoor air, sun load, door state, and freeze threshold change readings and JSON, the same shapes Devices and Overview use.",
+        "No: it simulates three zones so you can see how outdoor air, sun load, door state, and freeze threshold change readings and JSON, the same shapes Devices and Overview use.",
     },
     {
       question: "Does switching Garage / Workshop / Attic / Crawlspace change the model?",
       answer:
-        "Yes. Each space has its own baseline offset, sun sensitivity (attics amplify heat load; crawlspaces mute it), door-mix strength, and zone labels. It is not a label-only swap — try Sun load on Attic vs Crawlspace to feel the difference.",
+        "Yes. Each space has its own baseline offset, sun sensitivity (attics amplify heat load; crawlspaces mute it), door-mix strength, and zone labels. It is not a label-only swap, try Sun load on Attic vs Crawlspace to feel the difference.",
     },
     {
       question: "What is the difference between push and pull JSON?",
@@ -323,7 +323,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Where are my Ambient/WeatherFlow keys stored?",
       answer:
-        "In your account metadata (Dashboard → Settings), same as display preferences — not in the public git repo.",
+        "In your account metadata (Dashboard → Settings), same as display preferences, not in the public git repo.",
     },
   ],
 };

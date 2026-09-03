@@ -11,7 +11,7 @@ const { siteUrl, rewardDays = 0 } = Astro.props;
 <DashboardCard id="referral-card">
   <h2 class="card-title">Gift a winter of monitoring</h2>
   <p class="card-subtitle mb-4">
-    Share your link — new signups get <strong>7 extra days</strong> on Pro trial.
+    Share your link: new signups get <strong>7 extra days</strong> on Pro trial.
     {rewardDays > 0
       ? ` You have ${rewardDays} bonus trial day${rewardDays === 1 ? "" : "s"} from successful referrals.`
       : " You earn +7 trial days when a referred friend subscribes to Pro."}
@@ -38,7 +38,7 @@ const { siteUrl, rewardDays = 0 } = Astro.props;
         statsEl.textContent =
           data.signupCount > 0
             ? `${data.signupCount} friend${data.signupCount === 1 ? "" : "s"} joined via your link.`
-            : "No signups yet — share the link above.";
+            : "No signups yet, share the link above.";
       }
       if (btn instanceof HTMLButtonElement) {
         btn.disabled = false;

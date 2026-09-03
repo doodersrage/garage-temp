@@ -16,7 +16,7 @@ const { canManage, options, selectedSensorId, saved, error } = Astro.props;
   <h2 class="card-title">Indoor reference</h2>
   <p class="card-subtitle mb-4">
   Pick a temperature probe to represent <strong>house</strong> indoor air when you do not have
-  Nest connected — for example a hallway ESP32 or a reading pushed from Home Assistant
+  Nest connected, for example a hallway ESP32 or a reading pushed from Home Assistant
   (Ecobee, Honeywell, etc.). Overview and history charts use this for house–probe context.
   </p>
   {saved && (
@@ -35,7 +35,7 @@ const { canManage, options, selectedSensorId, saved, error } = Astro.props;
           id="indoor-reference-sensor"
           name="sensor_id"
         >
-          <option value="">None — use thermostat only</option>
+          <option value="">None, use thermostat only</option>
           {options.map((option) => (
             <option
               value={option.sensorId}
@@ -57,7 +57,7 @@ const { canManage, options, selectedSensorId, saved, error } = Astro.props;
   )}
   {options.length === 0 && canManage && (
     <p class="mt-4 mb-0 text-sm text-[var(--color-text-muted)]">
-      Add a temperature sensor first — for example push from Home Assistant with
+      Add a temperature sensor first, for example push from Home Assistant with
       <code class="text-xs">thermaltrace.push</code> or an ESP in the hallway.
       See <a class="text-link" href="/integrations/home-assistant#indoor-temperature">HA indoor temperature guide</a>.
     </p>

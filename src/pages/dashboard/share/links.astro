@@ -26,21 +26,21 @@ const analyticsEvents = Astro.url.searchParams.get("created")
   ? [{ name: "family_share_created" as const }]
   : [];
 ---
-<DashboardLayout title="Share — Links">
+<DashboardLayout title="Share. Links">
   <ProductAnalyticsTracker events={analyticsEvents} />
   <ShareNav active="links">
     <div class="space-y-6">
       <section class="card">
         <h2 class="card-title">Share with family</h2>
         <p class="card-subtitle">
-          One-click live view — no household invite required. Anyone with the link can see live sensors.
+          One-click live view, no household invite required. Anyone with the link can see live sensors.
         </p>
         {notice && (
           <p class:list={[noticeIsError ? "alert-warning" : "alert-success", "mt-4"]}>{notice}</p>
         )}
         {!canManage && (
           <p class="alert-warning mt-4 mb-0" role="status">
-            View-only — you cannot create or revoke share links.
+            View-only: you cannot create or revoke share links.
           </p>
         )}
       </section>
@@ -95,7 +95,7 @@ const analyticsEvents = Astro.url.searchParams.get("created")
             <p class="card-subtitle mb-4">
               Live sensors, expires in 7 days. Revoke anytime.
               {!entitlements.canCreateShareLinks && (
-                <> Free includes one live family link — Pro adds history, metrics, and never-expire.</>
+                <> Free includes one live family link. Pro adds history, metrics, and never-expire.</>
               )}
             </p>
             <button class="btn-primary" type="submit">Create family live link</button>
@@ -230,7 +230,7 @@ const analyticsEvents = Astro.url.searchParams.get("created")
         <section class="card">
           <h2 class="card-title">Public status pages</h2>
           <p class="card-subtitle mb-4">
-            Minimal read-only status board at <code>/status/&lt;token&gt;</code> — no login required.
+            Minimal read-only status board at <code>/status/&lt;token&gt;</code>, no login required.
             Embed a live SVG badge at <code>/badge/status/&lt;token&gt;.svg</code> on property pages or tenant portals.
           </p>
           {statusToken && (

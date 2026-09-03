@@ -14,7 +14,7 @@ const age = formatRelativeAge(energy.at);
 <DashboardCard>
   <h2 class="card-title">Power draw</h2>
   <p class="card-subtitle mb-3">
-    {energy.label} — heater / load proxy from energy sensor.
+    {energy.label}: heater / load proxy from energy sensor.
   </p>
   <p class="stat-value m-0">{energy.latestW.toFixed(0)} W</p>
   <p class="m-0 mt-1 text-sm text-[var(--color-text-muted)]">
@@ -22,8 +22,7 @@ const age = formatRelativeAge(energy.at);
   </p>
   {coolingRateFPerHour != null && coolingRateFPerHour < -0.5 && energy.latestW < 50 && (
     <p class="alert-warning mt-3 mb-0 text-sm">
-      Space cooling ~{Math.abs(coolingRateFPerHour).toFixed(1)}°F/h while power is low —
-      heater may be off or undersized.
+      Space cooling ~{Math.abs(coolingRateFPerHour).toFixed(1)}°F/h while power is low.      heater may be off or undersized.
     </p>
   )}
   {coolingRateFPerHour != null && coolingRateFPerHour > 0.3 && energy.latestW > 200 && (

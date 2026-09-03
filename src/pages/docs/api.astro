@@ -62,7 +62,7 @@ const mqttCurl = `curl -X POST "${siteUrl}/api/ingest/mqtt" \\
     <PageHeader
       kicker="HTTP API"
       title="API documentation"
-      lede={`Practical quick reference for integrators — curl examples, auth, rate limits (~${maxKb}KB / ~${INGEST_RATE_LIMIT_MAX} req/min/device for ingest), and common errors. Download the OpenAPI spec for the full machine-readable contract; VitePress developer docs cover longer walkthroughs.`}
+      lede={`Practical quick reference for integrators: curl examples, auth, rate limits (~${maxKb}KB / ~${INGEST_RATE_LIMIT_MAX} req/min/device for ingest), and common errors. Download the OpenAPI spec for the full machine-readable contract; VitePress developer docs cover longer walkthroughs.`}
     >
       <a slot="actions" class="btn-primary" href="/openapi.yaml" download>Download openapi.yaml</a>
       <a slot="actions" class="btn-secondary" href="/dashboard/share">Manage API keys</a>
@@ -197,7 +197,7 @@ const mqttCurl = `curl -X POST "${siteUrl}/api/ingest/mqtt" \\
     <section class="card" id="inbound">
       <h2 class="card-title">POST /api/inbound/&lt;token&gt;</h2>
       <p class="card-subtitle mb-4">
-        Pro inbound webhooks for Home Assistant / Zapier / Make — actions such as <code>snooze</code>, <code>vacation</code>, <code>status</code>.
+        Pro inbound webhooks for Home Assistant / Zapier / Make: actions such as <code>snooze</code>, <code>vacation</code>, <code>status</code>.
         Create the token under Dashboard → Share. Optional HMAC via signing secret (<code>X-GarageTemp-Signature</code>).
       </p>
       <pre class="text-xs overflow-x-auto mb-3 p-4 rounded-lg bg-[var(--color-surface-muted)]"><code>{inboundCurl}</code></pre>
@@ -222,10 +222,10 @@ const mqttCurl = `curl -X POST "${siteUrl}/api/ingest/mqtt" \\
       <h2 class="card-title">Session cookie routes (dashboard)</h2>
       <ul class="text-sm space-y-3 mb-0">
         <li>
-          <strong>POST /api/user/pull-setup</strong> — save pull feeds and probe labels in one step (Devices → Pull feeds). Not for firmware; requires a signed-in browser session.
+          <strong>POST /api/user/pull-setup</strong>: save pull feeds and probe labels in one step (Devices → Pull feeds). Not for firmware; requires a signed-in browser session.
         </li>
         <li>
-          <strong>POST /api/devices/reveal-ingest-key</strong> — recover a push device’s ingest key when the deployment has
+          <strong>POST /api/devices/reveal-ingest-key</strong>: recover a push device’s ingest key when the deployment has
           <code>INGEST_KEY_ENCRYPTION_SECRET</code> configured (encrypted vault). Keys are shown briefly at create time; if you dismiss that callout, Reveal can decrypt the stored vault copy for owners/managers.
           Rate-limited (~10/hour/user) and written to household activity. Without the vault secret, rotate the key instead.
         </li>
@@ -249,23 +249,23 @@ const mqttCurl = `curl -X POST "${siteUrl}/api/ingest/mqtt" \\
       <ul class="text-sm space-y-2 mb-0">
         <li>
           <a class="text-link" href="/about/ingest-and-webhooks">Ingest &amp; webhooks guide</a>
-          — payload shapes, HA blueprints, and alert channels
+          payload shapes, HA blueprints, and alert channels
         </li>
         <li>
           <a class="text-link" href="/about/json-probe-output-schema">JSON probe schema</a>
-          — stable keys for dashboard mapping
+          stable keys for dashboard mapping
         </li>
         <li>
           <a class="text-link" href="/integrations">Integrations hub</a>
-          — HACS, MQTT, Grafana, Zapier
+          HACS, MQTT, Grafana, Zapier
         </li>
         <li>
           <a class="text-link" href="/pricing">Plans &amp; pricing</a>
-          — Free ingest + family live share JSON; Pro for metrics API keys, expanded share scopes, and inbound webhooks
+          Free ingest + family live share JSON; Pro for metrics API keys, expanded share scopes, and inbound webhooks
         </li>
         <li>
           <a class="text-link" href={`${DEV_DOCS_BASE}/`} target="_blank" rel="noreferrer">Extended developer docs ↗</a>
-          — VitePress on GitHub Pages
+          VitePress on GitHub Pages
         </li>
       </ul>
     </section>

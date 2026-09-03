@@ -24,7 +24,7 @@ export const FALSE_ALARM_TIPS: FalseAlarmHint[] = [
     id: "unplugged",
     title: "Stale often means unplugged",
     detail:
-      "If a probe goes quiet for hours, treat it as power/Wi‑Fi first — not a freeze. Enable outage alerts and confirm the ESP still POSTs from Devices.",
+      "If a probe goes quiet for hours, treat it as power/Wi‑Fi first, not a freeze. Enable outage alerts and confirm the ESP still POSTs from Devices.",
     href: "/about/debugging-stale-readings",
     hrefLabel: "Stale readings guide",
   },
@@ -40,7 +40,7 @@ export const FALSE_ALARM_TIPS: FalseAlarmHint[] = [
     id: "snooze",
     title: "Snooze while you fix it",
     detail:
-      "Working in a cold bay? Snooze 4–24 hours so threshold noise stops while you weatherstrip, drip faucets, or reseat the probe — forecast and flood alerts still get through on vacation mode.",
+      "Working in a cold bay? Snooze 4–24 hours so threshold noise stops while you weatherstrip, drip faucets, or reseat the probe: forecast and flood alerts still get through on vacation mode.",
   },
 ];
 
@@ -56,7 +56,7 @@ export const FLOOD_FALSE_ALARM_TIPS: FalseAlarmHint[] = [
     id: "sump_cycle",
     title: "Sump duty cycle ≠ leak",
     detail:
-      "Rising sump level during a storm is normal. Use a flood/leak contact for standing water, and a custom level_above rule only if you want pump-failure early warning — not every pump cycle.",
+      "Rising sump level during a storm is normal. Use a flood/leak contact for standing water, and a custom level_above rule only if you want pump-failure early warning, not every pump cycle.",
     href: "/dashboard/alerts#alert-section-rules",
     hrefLabel: "Alert rules",
   },
@@ -71,7 +71,7 @@ export const FLOOD_FALSE_ALARM_TIPS: FalseAlarmHint[] = [
 export function staleProbeDetail(staleCount: number): string {
   const n = Math.max(1, staleCount);
   const probe = n === 1 ? "probe looks" : "probes look";
-  return `${n} ${probe} stale — likely unplugged, offline Wi‑Fi, or a dead battery. Check power and Devices before treating it as a freeze.`;
+  return `${n} ${probe} stale: likely unplugged, offline Wi‑Fi, or a dead battery. Check power and Devices before treating it as a freeze.`;
 }
 
 export function likelyFalseAlarmFromStale(staleSensorCount: number): boolean {
@@ -81,5 +81,5 @@ export function likelyFalseAlarmFromStale(staleSensorCount: number): boolean {
 export function wetFloodDetail(wetCount: number): string {
   const n = Math.max(1, wetCount);
   const sensor = n === 1 ? "flood/leak sensor is" : "flood/leak sensors are";
-  return `${n} ${sensor} wet right now — flood alerts bypass snooze and vacation. Check the pan, sump, or supply line.`;
+  return `${n} ${sensor} wet right now: flood alerts bypass snooze and vacation. Check the pan, sump, or supply line.`;
 }

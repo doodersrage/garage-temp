@@ -89,7 +89,7 @@ const alertNotice = Astro.url.searchParams.get("alert_saved")
         : `Test alert sent via ${sentChannels || "your enabled channels"}.`
       : Astro.url.searchParams.get("test_error")
         ? testReason === "incomplete"
-          ? "No channels could send — enable a channel and fill in its destination, then try again."
+          ? "No channels could send: enable a channel and fill in its destination, then try again."
           : testReason === "none"
             ? "No alert channels are enabled. Turn on at least one channel, save, then retry."
             : "Could not send test alert. Check channel settings and try again."
@@ -168,7 +168,7 @@ const referralRewardDays = Number(
         Start with freeze °F + email under Essentials. Add more channels and rules when you need them.
       </p>
       <p class="mt-0 mb-0 text-sm text-[var(--color-text-muted)]">
-        Confirm critical zones with a local reading — alerts can be delayed by sensor lag, network gaps, or channel delivery.
+        Confirm critical zones with a local reading: alerts can be delayed by sensor lag, network gaps, or channel delivery.
       </p>
       <p class="mt-0 mb-0 text-sm text-[var(--color-text-muted)]">
         Status: <strong>{alertSettings.enabled ? "On" : "Off"}</strong>

@@ -44,7 +44,7 @@ const essentialSteps = [
     done: hasAlertsEnabled && hasEmailAlerts,
     href: "/dashboard/alerts#alert-section-essentials",
     title: "Set freeze °F + email",
-    detail: "Step 2 of 3: freeze threshold, email, and optional sensor-dead alerts — then save.",
+    detail: "Step 2 of 3: freeze threshold, email, and optional sensor-dead alerts, then save.",
   },
   {
     done: hasTestAlert,
@@ -81,7 +81,7 @@ const nextSteps = [
     required: false,
     href: "/dashboard/temperature",
     title: "Add a flood / leak contact",
-    detail: "Wet/dry under a water heater or sump auto-alerts when wet — same ingest path as your temp probe.",
+    detail: "Wet/dry under a water heater or sump auto-alerts when wet, same ingest path as your temp probe.",
   },
   {
     done: hasHistory,
@@ -109,7 +109,7 @@ const nextSteps = [
     required: false,
     href: "/android",
     title: "Android companion",
-    detail: "Optional phone app for live probes and alerts — phone is not a sensor.",
+    detail: "Optional phone app for live probes and alerts: phone is not a sensor.",
   },
 ];
 
@@ -130,7 +130,7 @@ const sectionTitle = !essentialDone
     ? "Hardware setup"
     : "Next steps";
 const sectionSubtitle = !essentialDone
-  ? `${completedCount} of ${essentialSteps.length} essentials — device, freeze+email, test`
+  ? `${completedCount} of ${essentialSteps.length} essentials: device, freeze+email, test`
   : !kitDone
     ? `${completedCount} of ${kitSteps.length} hardware steps`
     : `${completedCount} of ${nextSteps.length} optional steps`;

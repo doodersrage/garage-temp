@@ -15,7 +15,7 @@ import {
 
 const SUCCESS_BODY = {
   success: true,
-  message: "Thanks — we got your message. We usually reply within 1–2 business days.",
+  message: "Thanks, we got your message. We usually reply within 1–2 business days.",
 };
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {

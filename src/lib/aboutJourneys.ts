@@ -14,7 +14,7 @@ export type AboutJourney = {
   steps: AboutJourneyStep[];
 };
 
-/** Job-based paths on the about hub — intent first, topics second. */
+/** Job-based paths on the about hub: intent first, topics second. */
 export const aboutJourneys: AboutJourney[] = [
   {
     id: "winter-pipes",

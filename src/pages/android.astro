@@ -49,8 +49,8 @@ const schema = [
 ].filter(Boolean) as Record<string, unknown>[];
 
 const description = playStoreLive
-  ? `${BRAND_NAME} Android companion on Google Play — live probes, freeze and flood alerts, MFA, and household tools for your existing account. Phone is not a sensor.`
-  : `${BRAND_NAME} Android companion — early access via GitHub while Google Play review finishes. Live probes, freeze and flood alerts, MFA, and household tools for your existing account. Phone is not a sensor.`;
+  ? `${BRAND_NAME} Android companion on Google Play, live probes, freeze and flood alerts, MFA, and household tools for your existing account. Phone is not a sensor.`
+  : `${BRAND_NAME} Android companion: early access via GitHub while Google Play review finishes. Live probes, freeze and flood alerts, MFA, and household tools for your existing account. Phone is not a sensor.`;
 ---
 <Layout
   title="Android app"
@@ -64,8 +64,8 @@ const description = playStoreLive
       kicker={playStoreLive ? "Google Play" : "Early access · Google Play in review"}
       title="ThermalTrace for Android"
       lede={playStoreLive
-        ? "Native companion on Google Play — live readings, history, freeze/flood alerts, devices, MFA, and household tools for your ThermalTrace account."
-        : "Native companion for your ThermalTrace account—live readings, history, freeze/flood alerts, devices, MFA, and household tools. Build from source or sideload while the Play listing is pending."}
+        ? "Native companion on Google Play, live readings, history, freeze/flood alerts, devices, MFA, and household tools for your ThermalTrace account."
+        : "Native companion for your ThermalTrace account, live readings, history, freeze/flood alerts, devices, MFA, and household tools. Build from source or sideload while the Play listing is pending."}
     >
       {playStoreLive ? (
         <a slot="actions" class="btn-primary" href={playStoreUrl} target="_blank" rel="noreferrer">
@@ -93,7 +93,7 @@ const description = playStoreLive
         class="w-full h-auto block"
       />
       <figcaption class="px-4 py-3 text-sm text-[var(--color-text-muted)]">
-        DIY install vibe — phone and laptop as companions to your own probes. Screens in this
+        DIY install vibe: phone and laptop as companions to your own probes. Screens in this
         illustration are stylized, not a product screenshot.
       </figcaption>
     </figure>
@@ -131,7 +131,7 @@ const description = playStoreLive
           The open-source app at
           <a class="text-link" href={ANDROID_REPO} target="_blank" rel="noreferrer">thermaltrace-android</a>
           matches production: sign-in (including MFA / YubiKey OTP), home readings, alerts, devices, history, and portfolio view.
-          Clone the repo, open in Android Studio, and run on your phone—or download a CI-built debug APK from GitHub Actions artifacts.
+          Clone the repo, open in Android Studio, and run on your phone, or download a CI-built debug APK from GitHub Actions artifacts.
         </p>
         <ol class="text-sm space-y-2 pl-5 list-decimal mb-0">
           <li>
@@ -154,7 +154,7 @@ const description = playStoreLive
     <section class="card">
       <h2 class="card-title">While Play review is pending</h2>
       <p class="card-subtitle mb-4">
-        Use the full web product now—the Android app will attach to the same account when the listing goes live.
+        Use the full web product now: the Android app will attach to the same account when the listing goes live.
       </p>
       <ol class="text-sm space-y-2 pl-5 list-decimal mb-4">
         <li>
@@ -174,7 +174,7 @@ const description = playStoreLive
         <li>
           Prefer a launch email?
           <a class="text-link" href="/contact?topic=android">Tell us you’re waiting on Play</a>
-          — we read every message.
+          we read every message.
         </li>
       </ol>
       <p class="mb-0 text-sm text-[var(--color-text-muted)]">

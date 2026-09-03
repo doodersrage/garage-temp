@@ -21,7 +21,7 @@ const hero = getAboutPhoto("desk-workspace");
   <p>
     Creating an account unlocks personalization, devices, history, alerts, and optional paid features.
     The dashboard groups tools so you can watch live sensors, manage hardware, invite household members,
-    and—when permitted—administer users or contact submissions.
+    and, when permitted: administer users or contact submissions.
   </p>
 
   <ProductScreenshot
@@ -39,8 +39,8 @@ const hero = getAboutPhoto("desk-workspace");
   <h2>Getting started checklist</h2>
   <p>
     The overview dashboard shows a short checklist: create a device or feed, confirm live readings, then
-    optional steps for alerts and household invites. When core and optional steps are done—or you dismiss
-    it—the checklist hides; use <strong>Show checklist</strong> to bring it back.
+    optional steps for alerts and household invites. When core and optional steps are done, or you dismiss
+    it: the checklist hides; use <strong>Show checklist</strong> to bring it back.
   </p>
 
   <h2>Overview (Simple vs Insights)</h2>
@@ -52,11 +52,11 @@ const hero = getAboutPhoto("desk-workspace");
     shop, or crawlspace is projected to hit your freeze threshold, using the space's lag vs the outdoor forecast.
     Toggle <strong>Insights</strong> for nights-at-risk, week compare, heating insights, door
     and power correlation, motion, battery/RSSI trends, air quality, energy, and flood/level. The 7-day probe
-    chart can show humidity % and dew point (°F) when readings include RH — same controls appear on History.
+    chart can show humidity % and dew point (°F) when readings include RH, same controls appear on History.
   </p>
   <ProductScreenshot
     shot="overview-status"
-    caption="Status strip — freeze margin, indoor−outdoor ΔT, probe spread, condensation, and feed health."
+    caption="Status strip: freeze margin, indoor−outdoor ΔT, probe spread, condensation, and feed health."
   />
 
   <h2>Devices &amp; sensors</h2>
@@ -64,12 +64,12 @@ const hero = getAboutPhoto("desk-workspace");
     Under <a class="text-link" href="/dashboard/temperature">Devices</a> you can:
   </p>
   <ul>
-    <li><strong>Push devices</strong> — ESP/Arduino POSTs JSON to a unique ingest URL. Copy the key from the 30-minute callout; use <strong>Reveal ingest key</strong> or <strong>Rotate key</strong> later. Sensors auto-import on first POST; rename labels on Devices afterward.</li>
-    <li><strong>Pull feeds</strong> — <strong>Pull feeds</strong> tab: HTTPS JSON URLs we fetch every 15 minutes. <strong>Save pull setup</strong> auto-imports probe keys; SenML and Home Assistant REST JSON auto-detect when the root is missing.</li>
+    <li><strong>Push devices</strong>. ESP/Arduino POSTs JSON to a unique ingest URL. Copy the key from the 30-minute callout; use <strong>Reveal ingest key</strong> or <strong>Rotate key</strong> later. Sensors auto-import on first POST; rename labels on Devices afterward.</li>
+    <li><strong>Pull feeds</strong>: <strong>Pull feeds</strong> tab: HTTPS JSON URLs we fetch every 15 minutes. <strong>Save pull setup</strong> auto-imports probe keys; SenML and Home Assistant REST JSON auto-detect when the root is missing.</li>
   </ul>
   <ProductScreenshot
     shot="devices"
-    caption="Devices hub — push ingest, pull feeds, Home Assistant, MQTT, and device health."
+    caption="Devices hub: push ingest, pull feeds, Home Assistant, MQTT, and device health."
   />
   <p>
     Step-by-step: <a class="text-link" href="/about/adding-devices">Adding push and pull devices</a>.
@@ -96,7 +96,7 @@ const hero = getAboutPhoto("desk-workspace");
     Owners and managers see a <strong>Recent activity</strong> log on
     <a class="text-link" href="/dashboard/household">Household</a> and
     <a class="text-link" href="/dashboard/share/integrations">Share → Integrations</a>
-    — share links, alert saves, device transfers, and <strong>ingest key reveals</strong> (audited when someone uses Reveal ingest key).
+    share links, alert saves, device transfers, and <strong>ingest key reveals</strong> (audited when someone uses Reveal ingest key).
   </p>
 
   <h2>Alerts</h2>
@@ -104,12 +104,12 @@ const hero = getAboutPhoto("desk-workspace");
     Start with <a class="text-link" href="/dashboard/alerts#alert-section-essentials">Alerts → Essentials</a>
     (freeze °F + email). After your first ingest POST, Devices can also save essentials inline without leaving
     the setup flow. Free plans include email and Discord; Pro unlocks SMS, browser push, and outbound webhooks.
-    Enable a channel only when its destination is filled in—incomplete channels are skipped. Use
+    Enable a channel only when its destination is filled in: incomplete channels are skipped. Use
     <strong>Send test now</strong> to see which channels actually fired.
   </p>
   <ProductScreenshot
     shot="history-chart"
-    caption="History curves with freeze line — humidity and dew point overlay when RH is present."
+    caption="History curves with freeze line: humidity and dew point overlay when RH is present."
   />
 
   <h2>Households &amp; share links</h2>
@@ -122,9 +122,9 @@ const hero = getAboutPhoto("desk-workspace");
 
   <h2>Plans</h2>
   <ul>
-    <li><strong>Free</strong> — live sensors, devices (limited), history browse, email/Discord alerts, one family live share link.</li>
-    <li><strong>Member</strong> — CSV export.</li>
-    <li><strong>Pro</strong> — higher device limits, SMS, push, outbound webhooks, expanded share scopes, claims evidence pack.</li>
+    <li><strong>Free</strong>, live sensors, devices (limited), history browse, email/Discord alerts, one family live share link.</li>
+    <li><strong>Member</strong>. CSV export.</li>
+    <li><strong>Pro</strong>: higher device limits, SMS, push, outbound webhooks, expanded share scopes, claims evidence pack.</li>
   </ul>
   <p>
     Upgrade from the Plans card on the dashboard or Alerts page.
@@ -132,16 +132,16 @@ const hero = getAboutPhoto("desk-workspace");
 
   <h2>Admin-only tools</h2>
   <ul>
-    <li><strong>User manager</strong> — review accounts and grant or revoke admin membership.</li>
-    <li><strong>Contact submissions</strong> — read messages from the public contact form.</li>
-    <li><strong>Jobs</strong> — operational job visibility when enabled.</li>
+    <li><strong>User manager</strong>: review accounts and grant or revoke admin membership.</li>
+    <li><strong>Contact submissions</strong>: read messages from the public contact form.</li>
+    <li><strong>Jobs</strong>: operational job visibility when enabled.</li>
   </ul>
 
   <h2>Suggested first path</h2>
   <ol>
     <li><a class="text-link" href="/register?next=/dashboard/temperature">Create an account</a>.</li>
     <li>One-click <strong>Create push device</strong> under <a class="text-link" href="/dashboard/temperature">Devices</a> (named Workshop probe by default).</li>
-    <li>POST a reading — sensors auto-import — then set freeze °F + email on Devices or Essentials.</li>
+    <li>POST a reading: sensors auto-import, then set freeze °F + email on Devices or Essentials.</li>
     <li>Confirm Overview space status and Status metrics, optionally invite household members, and share a family live link.</li>
   </ol>
 </AboutArticle>

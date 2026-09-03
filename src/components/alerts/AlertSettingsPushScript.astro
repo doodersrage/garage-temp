@@ -54,7 +54,7 @@ const { vapidPublicKey } = Astro.props;
           if (btn) btn.textContent = "Re-enable / refresh push";
           if (hint) {
             hint.textContent = server.channelEnabled
-              ? "Push channel is on — test from below (browser + Android)."
+              ? "Push channel is on: test from below (browser + Android)."
               : 'Check "Push (browser + Android)" under channels above, save settings, then send a test.';
           }
         } else if (permission === "granted") {
@@ -66,11 +66,11 @@ const { vapidPublicKey } = Astro.props;
         }
 
         if (server && !server.vapidConfigured && hint) {
-          hint.textContent = "Server VAPID keys are missing — browser push cannot send until configured.";
+          hint.textContent = "Server VAPID keys are missing: browser push cannot send until configured.";
         }
         if (server && server.fcmTokenCount > 0 && !server.channelEnabled && hint) {
           hint.textContent =
-            'Android app is registered — check "Push (browser + Android)", save, then test.';
+            'Android app is registered: check "Push (browser + Android)", save, then test.';
         }
       } catch {
         status.textContent = "Could not read push status.";
@@ -112,7 +112,7 @@ const { vapidPublicKey } = Astro.props;
         }
         if (hint) {
           hint.textContent =
-            'The "Push (browser + Android)" channel was checked — click Save alert settings before testing.';
+            'The "Push (browser + Android)" channel was checked: click Save alert settings before testing.';
         }
         if (btn) btn.textContent = "Re-enable / refresh push";
       } catch (e) {

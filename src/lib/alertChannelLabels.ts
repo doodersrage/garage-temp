@@ -19,7 +19,7 @@ export const ALERT_CHANNEL_LABELS: Record<string, string> = {
   not_entitled: "plan upgrade required",
   push_not_configured: "push (VAPID keys missing on server)",
   push_no_subscription: "push (subscribe this browser first)",
-  push_delivery_failed: "push (delivery failed — re-subscribe)",
+  push_delivery_failed: "push (delivery failed: re-subscribe)",
   push_load_failed: "push (could not load subscriptions)",
   push_send_failed: "push (send error)",
   sms_not_configured: "SMS (Twilio not configured on server)",

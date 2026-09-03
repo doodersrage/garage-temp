@@ -96,7 +96,7 @@ function nestFetchFailureMessage(
   if (result.reason === "network") {
     return {
       fetchError: "network",
-      fetchHint: "Could not reach Google Nest — try again in a minute.",
+      fetchHint: "Could not reach Google Nest, try again in a minute.",
     };
   }
   if (result.errorCode === "sdm_api_disabled") {
@@ -110,12 +110,12 @@ function nestFetchFailureMessage(
   if (result.errorCode === "api_auth") {
     return {
       fetchError: "api_auth",
-      fetchHint: "Nest authorization may have expired — try Disconnect, then Connect again.",
+      fetchHint: "Nest authorization may have expired, try Disconnect, then Connect again.",
     };
   }
   return {
     fetchError: "api_error",
-    fetchHint: "Nest returned an error — try again or reconnect.",
+    fetchHint: "Nest returned an error, try again or reconnect.",
   };
 }
 
@@ -235,7 +235,7 @@ export async function fetchThermostatContextWithStatus(
       : {
           snapshot: null,
           fetchError: "api_error",
-          fetchHint: "Could not reach Ecobee — try again or reconnect.",
+          fetchHint: "Could not reach Ecobee, try again or reconnect.",
         };
   }
 
@@ -270,7 +270,7 @@ export function formatThermostatMode(mode: string | null): string | null {
   return mode.charAt(0).toUpperCase() + mode.slice(1).toLowerCase();
 }
 
-/** Overview Status metric — whole °F when available. */
+/** Overview Status metric: whole °F when available. */
 export function formatThermostatMetricValue(snapshot: ThermostatSnapshot): string {
   return snapshot.ambientTempF != null ? `${snapshot.ambientTempF.toFixed(0)}°F` : "—";
 }

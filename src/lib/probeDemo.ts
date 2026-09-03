@@ -34,7 +34,7 @@ export type DemoSpaceConfig = {
   /** How hard an open door/hatch mixes outdoor air into zone index 1 (0–1). */
   doorMixStrength: number;
   doorLabel: string;
-  /** Short note shown under the space selector — thermal model differs by space. */
+  /** Short note shown under the space selector: thermal model differs by space. */
   modelHint: string;
   probes: Array<{ key: string; label: string; ingestKey: string }>;
 };
@@ -128,7 +128,7 @@ export const DEMO_PRESETS: Record<
   },
   doorDraft: {
     label: "Door draft",
-    hint: "Open door pulls outdoor air into one zone — watch the door/entry bar drop vs the others",
+    hint: "Open door pulls outdoor air into one zone: watch the door/entry bar drop vs the others",
     controls: { outdoorF: 22, sunIntensity: 15, doorOpen: true, freezeThresholdF: 34 },
   },
   sunny: {
@@ -189,7 +189,7 @@ export function computeDemoProbes(controls: DemoControls): DemoProbe[] {
   });
 }
 
-/** Door/entry vs warmest other zone — used for the “placement matters” callout. */
+/** Door/entry vs warmest other zone: used for the “placement matters” callout. */
 export function doorDraftSpreadF(probes: DemoProbe[]): number | null {
   if (probes.length < 2) return null;
   const door = probes.find((p) => p.key === "1");

@@ -22,7 +22,7 @@ export function buildThermalRunway(input: {
 
   const annotations: string[] = [];
   if (input.doorOpenNearby) {
-    annotations.push("A door sensor is open — expect faster heat loss until it closes.");
+    annotations.push("A door sensor is open: expect faster heat loss until it closes.");
   }
 
   let forecastAdjustedHours: number | null = null;
@@ -33,7 +33,7 @@ export function buildThermalRunway(input: {
   ) {
     const ahead = input.forecastHoursAhead ?? 24;
     annotations.push(
-      `Forecast low ~${input.forecastMinTempF.toFixed(1)}°F in the next ${ahead}h — outdoor cold may accelerate indoor cooling.`,
+      `Forecast low ~${input.forecastMinTempF.toFixed(1)}°F in the next ${ahead}h: outdoor cold may accelerate indoor cooling.`,
     );
     if (base.hours != null && base.hours > 0) {
       forecastAdjustedHours = Math.min(base.hours, ahead);

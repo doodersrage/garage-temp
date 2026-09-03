@@ -13,7 +13,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "temperature-probes",
     title: "Temperature probe case study",
     description:
-      "How two DHT22 probes in a real garage became a reliable monitoring system—from first breadboard to JSON feeds and dashboard charts.",
+      "How two DHT22 probes in a real garage became a reliable monitoring system, from first breadboard to JSON feeds and dashboard charts.",
     summary:
       "Real-world build story: placement decisions, firmware iterations, and what the data showed after deployment.",
   },
@@ -63,7 +63,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "infiltration-wind-drafts",
     parentSlug: "temperature-changes",
     title: "Infiltration, wind, and drafts",
-    description: "Learn how air leaks and wind pressure move garage air—and probe temperatures—even when the main door stays shut on a cold night.",
+    description: "Learn how air leaks and wind pressure move garage air, and probe temperatures, even when the main door stays shut on a cold night.",
     summary: "Chronic leaks versus door events, and what probes reveal about draft paths.",
   },
   {
@@ -154,14 +154,14 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "dht22-data-line-wiring",
     parentSlug: "arduino-pin-wiring",
     title: "DHT22 data line wiring",
-    description: "Wire each DHT22 with its own GPIO, 10 kΩ pull-up, and shared ground—and route cables away from door motors and noisy loads to cut read errors.",
+    description: "Wire each DHT22 with its own GPIO, 10 kΩ pull-up, and shared ground, and route cables away from door motors and noisy loads to cut read errors.",
     summary: "One data pin per probe with proper pull-up and length limits.",
   },
   {
     slug: "spi-pins-ethernet-reserved",
     parentSlug: "arduino-pin-wiring",
     title: "SPI pins reserved for Ethernet",
-    description: "Which Arduino pins a W5100 Ethernet shield reserves for SPI—and which GPIO stay free for LiquidCrystal and DHT22 probes.",
+    description: "Which Arduino pins a W5100 Ethernet shield reserves for SPI, and which GPIO stay free for LiquidCrystal and DHT22 probes.",
     summary: "Avoid pin conflicts between the Ethernet stack and local peripherals.",
   },
   {
@@ -196,7 +196,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "redis-cache-for-feeds",
     parentSlug: "python-feeds",
     title: "Redis cache for feeds",
-    description: "Cache Arduino probe JSON in Redis so every ThermalTrace page view does not hammer your home uplink—TTL, stale-while-revalidate, recovery.",
+    description: "Cache Arduino probe JSON in Redis so every ThermalTrace page view does not hammer your home uplink. TTL, stale-while-revalidate, recovery.",
     summary: "TTL tuning, stale-while-revalidate behavior, and restart recovery.",
   },
   {
@@ -245,7 +245,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "comparing-full-stack-options",
     parentSlug: "nextjs-node-applications",
     title: "Comparing full-stack options",
-    description: "Choose among Astro, Next.js, and standalone Node for space monitoring—SSR, auth, billing, and hardware ingest trade-offs explained.",
+    description: "Choose among Astro, Next.js, and standalone Node for space monitoring. SSR, auth, billing, and hardware ingest trade-offs explained.",
     summary: "Trade-offs for SSR, auth, billing, and hardware integration.",
   },
   {
@@ -259,14 +259,14 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "supabase-history-inserts",
     parentSlug: "data-flow",
     title: "Supabase history inserts",
-    description: "Understand when signed-in ThermalTrace loads persist probe rows with timestamps, labels, and humidity—and what guests never store.",
+    description: "Understand when signed-in ThermalTrace loads persist probe rows with timestamps, labels, and humidity, and what guests never store.",
     summary: "What triggers a save, what is stored per probe, and guest behavior.",
   },
   {
     slug: "debugging-stale-readings",
     parentSlug: "data-flow",
     title: "Debugging stale readings",
-    description: "Trace stale or missing probe readings from firmware through relay cache to ThermalTrace dashboard mapping—with a curl and auth checklist.",
+    description: "Trace stale or missing probe readings from firmware through relay cache to ThermalTrace dashboard mapping, with a curl and auth checklist.",
     summary: "Checklist for curl, cache, auth, and key typos in order.",
   },
   {
@@ -288,7 +288,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "accounts-and-dashboard",
     title: "Configuring temperature feeds",
     description:
-      "Add HTTPS pull-feed URLs, set the JSON root key, map probe labels, and verify Home updates—complement to the adding-devices walkthrough.",
+      "Add HTTPS pull-feed URLs, set the JSON root key, map probe labels, and verify Home updates: complement to the adding-devices walkthrough.",
     summary: "Pull-feed URLs, JSON root key, probe labels, and troubleshooting.",
   },
   {
@@ -302,7 +302,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "humidity-condensation-basics",
     parentSlug: "temperature-probes",
     title: "Humidity and condensation basics",
-    description: "How relative humidity, dew point, and cold surfaces interact in unheated spaces—and what DHT22 probes can and cannot tell you.",
+    description: "How relative humidity, dew point, and cold surfaces interact in unheated spaces, and what DHT22 probes can and cannot tell you.",
     summary: "Dew point math in plain language and why air temperature alone misses condensation risk.",
   },
   {
@@ -317,7 +317,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "temperature-changes",
     title: "Thermal mass and concrete slabs",
     description: "Why floor slabs lag outdoor swings, store heat, and make probes near the ground read differently from chest-height sensors.",
-    summary: "Concrete buffers day-night cycles—expect delayed peaks and cold floors after warm afternoons.",
+    summary: "Concrete buffers day-night cycles: expect delayed peaks and cold floors after warm afternoons.",
   },
   {
     slug: "hvac-duct-influence",
@@ -338,7 +338,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "historical-data",
     title: "Spotting data gaps in history",
     description: "Recognize missing inserts, feed outages, and reboot gaps in dashboard charts before they skew freeze audits.",
-    summary: "Flat lines, stair-steps, and empty ranges usually mean collection stopped—not stable weather.",
+    summary: "Flat lines, stair-steps, and empty ranges usually mean collection stopped, not stable weather.",
   },
   {
     slug: "charting-with-spreadsheets",
@@ -380,14 +380,14 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "arduino-circuit-wiring",
     title: "Enclosure ventilation for electronics",
     description: "Ventilate project boxes so the LCD, Ethernet shield, and regulators stay cool without cooking remote probe air samples.",
-    summary: "MCU enclosures need airflow; probe boxes need breathable vents—do not treat them the same.",
+    summary: "MCU enclosures need airflow; probe boxes need breathable vents: do not treat them the same.",
   },
   {
     slug: "backlight-pwm-options",
     parentSlug: "arduino-pin-wiring",
     title: "LCD backlight PWM options",
     description: "Dim the 16×2 LCD backlight with a transistor, PWM pin, or timed shutdown to reduce glare and power draw overnight.",
-    summary: "Backlight control is separate from LiquidCrystal data pins—wire it deliberately.",
+    summary: "Backlight control is separate from LiquidCrystal data pins: wire it deliberately.",
   },
   {
     slug: "jumper-wire-standards",
@@ -429,7 +429,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "python-feeds",
     title: "Health check endpoints for relays",
     description: "Expose liveness and readiness routes so Docker, uptime robots, and you know when cache or upstream probes fail.",
-    summary: "/health should mean more than 'Python process running'—verify Redis and last good upstream fetch.",
+    summary: "/health should mean more than 'Python process running': verify Redis and last good upstream fetch.",
   },
   {
     slug: "middleware-auth-patterns",
@@ -442,7 +442,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "env-secrets-cloudflare",
     parentSlug: "astro-applications",
     title: "Environment secrets on Cloudflare",
-    description: "Store Supabase keys, Stripe secrets, and feed defaults in Cloudflare dashboard vars—not in the git tree.",
+    description: "Store Supabase keys, Stripe secrets, and feed defaults in Cloudflare dashboard vars, not in the git tree.",
     summary: "Wrangler secrets and encrypted vars keep production keys off laptops and out of logs.",
   },
   {
@@ -456,7 +456,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     slug: "websocket-live-updates",
     parentSlug: "nextjs-node-applications",
     title: "WebSocket live updates in monitoring UIs",
-    description: "When push-based probe updates beat SSR polling for dashboard freshness—and what this Astro site does instead.",
+    description: "When push-based probe updates beat SSR polling for dashboard freshness, and what this Astro site does instead.",
     summary: "WebSockets shine for sub-minute live tiles; HTTP caching fits public home page scale.",
   },
   {
@@ -471,20 +471,20 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "data-flow",
     title: "Weather API parallel data path",
     description: "Fetch outdoor forecast and conditions alongside probe JSON for context on the home page or CSV merges.",
-    summary: "External weather data explains garage swings driven by outdoor humidity and wind—not just door events.",
+    summary: "External weather data explains garage swings driven by outdoor humidity and wind, not just door events.",
   },
   {
     slug: "cookie-session-lifecycle",
     parentSlug: "data-flow",
     title: "Cookie and session lifecycle",
-    description: "How Supabase auth cookies are set, refreshed, and cleared—and why signed-out home loads skip history inserts.",
+    description: "How Supabase auth cookies are set, refreshed, and cleared, and why signed-out home loads skip history inserts.",
     summary: "Session cookies tie browser identity to Supabase rows for feeds and saved history.",
   },
   {
     slug: "caching-feed-responses",
     parentSlug: "data-flow",
     title: "Caching feed responses end to end",
-    description: "Where Redis, CDN, and in-memory caches sit between Arduino JSON and the browser—and TTL tuning per layer.",
+    description: "Where Redis, CDN, and in-memory caches sit between Arduino JSON and the browser, and TTL tuning per layer.",
     summary: "Multiple cache layers prevent hammering home uplink while keeping readings fresh enough.",
   },
   {
@@ -522,7 +522,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "adding-devices",
     title: "ESP32 freeze kit parts list",
     description:
-      "Buy an ESP32 and waterproof DS18B20 that match ThermalTrace’s push-ingest sketches — Adafruit links and Amazon search lists, not a branded drop-ship kit.",
+      "Buy an ESP32 and waterproof DS18B20 that match ThermalTrace’s push-ingest sketches. Adafruit links and Amazon search lists, not a branded drop-ship kit.",
     summary:
       "Verified ESP32 + waterproof DS18B20 BOM with stable Adafruit product links and Amazon search shortcuts.",
   },
@@ -540,7 +540,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "adding-devices",
     title: "ESP32 flashing options",
     description:
-      "Flash ThermalTrace ESP32 probes with Arduino IDE, PlatformIO, MicroPython, or Espressif’s web esptool — after downloading a pre-filled sketch from Devices.",
+      "Flash ThermalTrace ESP32 probes with Arduino IDE, PlatformIO, MicroPython, or Espressif’s web esptool, after downloading a pre-filled sketch from Devices.",
     summary:
       "No hosted one-click binary flasher: download a personalized sketch, then flash with IDE, PlatformIO, or esptool-js.",
   },
@@ -558,7 +558,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "accounts-and-dashboard",
     title: "Cold-snap alert playbook",
     description:
-      "What to do before, during, and after a freeze alert—thresholds, quiet hours, acknowledgement, and escalation.",
+      "What to do before, during, and after a freeze alert: thresholds, quiet hours, acknowledgement, and escalation.",
     summary:
       "A practical checklist so freeze alerts turn into action instead of noise.",
   },
@@ -567,7 +567,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "accounts-and-dashboard",
     title: "Alert channel cookbook",
     description:
-      "Enable email, chat, SMS, push, and webhooks—fill destinations, test delivery, and escalate when unacked.",
+      "Enable email, chat, SMS, push, and webhooks: fill destinations, test delivery, and escalate when unacked.",
     summary:
       "Pick channels that match how your household actually wakes up for cold snaps.",
   },
@@ -587,7 +587,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     description:
       "Simulate multi-zone temperatures with freeze threshold, space status, and push/pull JSON like production Devices and Overview.",
     summary:
-      "Garage, workshop, attic, or crawlspace — watch freeze and leak risk and ingest JSON update live.",
+      "Garage, workshop, attic, or crawlspace: watch freeze and leak risk and ingest JSON update live.",
   },
   {
     slug: "esphome-shelly-recipes",
@@ -596,14 +596,14 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     description:
       "Post temperature, humidity, and door contact readings from ESPHome or Shelly firmware to ThermalTrace push ingest without custom Arduino sketches.",
     summary:
-      "Copy-paste HTTP POST recipes for common LAN sensors — dual-run with Home Assistant MQTT.",
+      "Copy-paste HTTP POST recipes for common LAN sensors: dual-run with Home Assistant MQTT.",
   },
   {
     slug: "garage-door-cold-playbook",
     parentSlug: "accounts-and-dashboard",
     title: "Garage door + cold alert playbook",
     description:
-      "Alert when a bay door stays open while temperatures drop — door contact ingest, combined alert rules, and household response steps.",
+      "Alert when a bay door stays open while temperatures drop: door contact ingest, combined alert rules, and household response steps.",
     summary:
       "Stop heat loss and freeze risk when a garage door is left open on a cold night.",
   },
@@ -612,9 +612,9 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "ingest-and-webhooks",
     title: "Home Assistant notify recipes",
     description:
-      "Route ThermalTrace freeze and leak alerts into Home Assistant notify, TTS, and mobile push — outbound webhooks, HACS services, and inbound snooze.",
+      "Route ThermalTrace freeze and leak alerts into Home Assistant notify, TTS, and mobile push: outbound webhooks, HACS services, and inbound snooze.",
     summary:
-      "Local voice and phone notify when freeze or leak risk hits — dual-run with ThermalTrace email/SMS.",
+      "Local voice and phone notify when freeze or leak risk hits: dual-run with ThermalTrace email/SMS.",
   },
   {
     slug: "personal-weather-stations",
@@ -623,6 +623,6 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     description:
       "Use your backyard Ambient Weather or WeatherFlow Tempest station for outdoor context, NWS alerts, and forecast freeze risk instead of a distant OpenWeather city.",
     summary:
-      "Point ThermalTrace at the station on your property — better yard-level freeze context.",
+      "Point ThermalTrace at the station on your property: better yard-level freeze context.",
   },
 ];

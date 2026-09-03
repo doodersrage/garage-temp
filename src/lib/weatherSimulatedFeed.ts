@@ -250,12 +250,12 @@ export function formatExampleFeedResponse(
     probe_labels: payload.probeLabels,
     formats: {
       native: "Nested temp object (default pull + classic push)",
-      senml: "RFC 8428 SenML JSON array — auto-detected on ingest and pull",
-      homeassistant: "Home Assistant REST sensor { state, attributes } — auto-detected",
+      senml: "RFC 8428 SenML JSON array: auto-detected on ingest and pull",
+      homeassistant: "Home Assistant REST sensor { state, attributes }: auto-detected",
     },
     usage: {
       pull:
-        "Dashboard → Devices → Pull feeds tab → paste feed URL, JSON root temp (or use SenML/HA JSON directly). Save pull setup — probe keys auto-import.",
+        "Dashboard → Devices → Pull feeds tab → paste feed URL, JSON root temp (or use SenML/HA JSON directly). Save pull setup: probe keys auto-import.",
       push:
         "POST native ingest, SenML array, or HA state JSON to /api/ingest/<your-device-key>.",
     },

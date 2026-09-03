@@ -14,7 +14,7 @@ export function formatTemperature(
   return `${tempF.toFixed(decimals)}°F`;
 }
 
-/** Live tile °F — hundredths avoid float junk overflow in compact cards. */
+/** Live tile °F: hundredths avoid float junk overflow in compact cards. */
 export function formatLiveTempF(tempF: number, decimals = 2): string {
   if (!Number.isFinite(tempF)) return "—";
   return `${tempF.toFixed(decimals)}°F`;

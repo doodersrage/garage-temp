@@ -4,7 +4,7 @@ export type GuideHubLink = {
   href: string;
   label: string;
   summary: string;
-  /** Other hub category ids — shown as intentional cross-refs, not duplicate listings. */
+  /** Other hub category ids: shown as intentional cross-refs, not duplicate listings. */
   alsoIn?: string[];
 };
 
@@ -103,7 +103,7 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
         href: "/integrations/home-assistant",
         label: "Home Assistant (HACS)",
         summary:
-          "Official custom integration — share-link sensors, snooze/vacation services, optional push ingest.",
+          "Official custom integration: share-link sensors, snooze/vacation services, optional push ingest.",
         alsoIn: ["api"],
       },
       {

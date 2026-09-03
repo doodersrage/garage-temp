@@ -34,7 +34,7 @@ export function computeGarageRiskStatus(input: {
     return {
       level: "watch",
       title: "Add a probe to start",
-      detail: "Create a push device, then POST a reading — or try the demo feed without hardware.",
+      detail: "Create a push device, then POST a reading, or try the demo feed without hardware.",
       actionLabel: "Connect a device",
       actionHref: "/dashboard/temperature",
     };
@@ -119,7 +119,7 @@ export function computeGarageRiskStatus(input: {
         input.nightsRiskCount > 0
           ? `${input.nightsRiskCount} night${input.nightsRiskCount === 1 ? "" : "s"} at freeze risk`
           : "Cold snap ahead",
-      detail: "Outdoor conditions look cold — run the checklist and confirm forecast alerts are on.",
+      detail: "Outdoor conditions look cold: run the checklist and confirm forecast alerts are on.",
       actionLabel: "Cold-snap checklist",
       actionHref: "#cold-snap",
     };
@@ -128,9 +128,9 @@ export function computeGarageRiskStatus(input: {
   if (!input.alertsEnabled || !input.hasEmailAlerts) {
     return {
       level: "watch",
-      title: "Space looks fine — finish alerts",
+      title: "Space looks fine: finish alerts",
       detail:
-        "Turn on alerts and email so freeze and flood reach you — wet contacts auto-notify once alerts are on.",
+        "Turn on alerts and email so freeze and flood reach you: wet contacts auto-notify once alerts are on.",
       actionLabel: "Set freeze + email",
       actionHref: "/dashboard/alerts#alert-section-essentials",
     };
@@ -145,7 +145,7 @@ export function computeGarageRiskStatus(input: {
     return {
       level: "watch",
       title: "Close to freeze threshold",
-      detail: `Coldest probe ${input.coldestProbeTempF!.toFixed(1)}°F — within 5°F of ${input.freezeThresholdF}°F.`,
+      detail: `Coldest probe ${input.coldestProbeTempF!.toFixed(1)}°F, within 5°F of ${input.freezeThresholdF}°F.`,
       actionLabel: "View Home",
       actionHref: "/",
     };
@@ -154,7 +154,7 @@ export function computeGarageRiskStatus(input: {
   return {
     level: "ok",
     title: "Looking good",
-    detail: "Probes are reporting — nothing at freeze threshold, no wet flood contacts.",
+    detail: "Probes are reporting: nothing at freeze threshold, no wet flood contacts.",
     actionLabel: "View Home",
     actionHref: "/",
   };

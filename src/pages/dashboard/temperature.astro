@@ -97,7 +97,7 @@ const indoorRefSaved = Astro.url.searchParams.get("indoor_ref_saved") === "1";
 const indoorRefErrorCode = Astro.url.searchParams.get("indoor_ref_error");
 const indoorRefError =
   indoorRefErrorCode === "save_failed"
-    ? "Couldn't save the indoor reference — try again."
+    ? "Couldn't save the indoor reference, try again."
     : indoorRefErrorCode === "forbidden"
       ? "You don't have permission to change this setting."
       : indoorRefErrorCode === "no_household"
@@ -134,7 +134,7 @@ const deviceNotice =
           ? "Sensor deleted."
           : Astro.url.searchParams.get("feeds_saved") || Astro.url.searchParams.get("pull_saved")
             ? Astro.url.searchParams.get("probes_discovered")
-              ? `Pull setup saved — imported ${Astro.url.searchParams.get("probes_discovered")} probe key(s). Rename below if needed.`
+              ? `Pull setup saved: imported ${Astro.url.searchParams.get("probes_discovered")} probe key(s). Rename below if needed.`
               : "Pull setup saved."
             : Astro.url.searchParams.get("probes_saved")
               ? "Probe labels saved."
@@ -150,7 +150,7 @@ const deviceNotice =
                     : noticeParam === "device_limit"
                       ? `Push device limit reached (${entitlements.maxDevices} per property). Upgrade to add more.`
                       : noticeParam === "viewer"
-                        ? "View-only access — you cannot change devices or feeds."
+                        ? "View-only access: you cannot change devices or feeds."
                       : noticeParam === "1" || noticeParam === "true"
                         ? "Could not complete that device action. Check the form and try again."
                         : noticeParam
@@ -435,7 +435,7 @@ const firmwareSensors =
       <section class="card alert-success" id="receiving-data">
         <h2 class="card-title">Receiving data</h2>
         <p class="mb-4">
-          Ingest looks healthy — readings are showing up.
+          Ingest looks healthy: readings are showing up.
         </p>
         <div class="flex flex-wrap gap-3">
           <a class="btn-primary" href="/dashboard">Overview</a>
@@ -459,7 +459,7 @@ const firmwareSensors =
               : "Next: verify ingest"}
         </h2>
         <p class="card-subtitle mb-4">
-          Point firmware at your ingest URL and POST JSON. Sensors auto-import on first POST — rename later if you want.
+          Point firmware at your ingest URL and POST JSON. Sensors auto-import on first POST: rename later if you want.
         </p>
 
         {ingestUrl && (
@@ -493,8 +493,8 @@ const firmwareSensors =
             First ingest POST
             <span class="waiting-ingest-status" data-waiting-status>
               {neverSeenWithSensors || waitingPushNoSensors.length > 0
-                ? " — listening…"
-                : " — send a test POST"}
+                ? ": listening…"
+                : ", send a test POST"}
             </span>
           </li>
         </ol>
@@ -541,12 +541,12 @@ const firmwareSensors =
       <section class="card" id="device-setup-wizard">
         <h2 class="card-title">Device setup</h2>
         <p class="card-subtitle mb-4">
-          Step {wizardStep} of 2 — create a push device, POST JSON (sensors auto-import), then verify readings.
+          Step {wizardStep} of 2: create a push device, POST JSON (sensors auto-import), then verify readings.
         </p>
         <ol class="waiting-ingest-checklist mb-4">
           <li class:list={[wizardStep > 1 && "waiting-ingest-done"]}>Create push device</li>
           <li class:list={[wizardStep >= 2 && "waiting-ingest-pending"]}>
-            POST JSON — sensors auto-import; rename afterward if needed
+            POST JSON: sensors auto-import; rename afterward if needed
           </li>
         </ol>
         <a class="btn-ghost" href="/dashboard/temperature?view=all&tab=push">Show all device settings</a>
@@ -687,7 +687,7 @@ const firmwareSensors =
     <section class:list={["card", activeTab !== "push" && "hidden"]} id="push-devices">
       <h2 class="card-title">Push from ESP / Arduino</h2>
       <p class="card-subtitle">
-        Your device POSTs readings to an ingest URL. Keys auto-import on first POST — manual mapping is optional.
+        Your device POSTs readings to an ingest URL. Keys auto-import on first POST: manual mapping is optional.
         Limit: {entitlements.maxDevices} devices per property ({entitlements.tier}).
         See <a class="text-link" href="/about/ingest-and-webhooks">ingest docs</a>
         {" · "}
@@ -697,7 +697,7 @@ const firmwareSensors =
       {!ingestKeyVaultLive && pushDevices.length > 0 && canEdit && (
         <p class="alert-warning mb-4" role="status">
           Ingest key recovery (Reveal) is not enabled on this deployment. Copy the key from the 30-minute
-          callout when you create or <strong>Rotate key</strong> on a device card — there is nothing to decrypt later.
+          callout when you create or <strong>Rotate key</strong> on a device card, there is nothing to decrypt later.
         </p>
       )}
 
@@ -715,7 +715,7 @@ const firmwareSensors =
           <input type="hidden" name="name" value="Workshop probe" />
           <button class="btn-primary" type="submit">Create push device</button>
           <span class="text-sm text-[var(--color-text-muted)]">
-            Named “Workshop probe” — rename anytime after.
+            Named “Workshop probe”: rename anytime after.
           </span>
         </form>
       ) : canEdit && devices.length === 0 ? (
@@ -724,7 +724,7 @@ const firmwareSensors =
         </p>
       ) : (
         <p class="text-sm text-[var(--color-text-muted)] mb-0">
-          View-only access — device creation is disabled.
+          View-only access: device creation is disabled.
         </p>
       )}
 
@@ -781,7 +781,7 @@ const firmwareSensors =
                   {seen.label === "never seen" && (
                     <p class="m-0 mt-1 text-sm text-[var(--color-text-muted)]">
                       {device.sensors.length === 0
-                        ? "No POSTs yet — first JSON POST auto-imports sensor keys."
+                        ? "No POSTs yet: first JSON POST auto-imports sensor keys."
                         : (
                           <>
                             Waiting for first POST with keys{" "}
@@ -881,7 +881,7 @@ const firmwareSensors =
 
               {device.sensors.length === 0 ? (
                 <p class="mt-3 mb-0 text-sm text-[var(--color-text-muted)]">
-                  No sensors yet — they appear automatically after your first POST. Use Advanced below only if you
+                  No sensors yet: they appear automatically after your first POST. Use Advanced below only if you
                   need to pre-map keys.
                 </p>
               ) : (
@@ -1013,7 +1013,7 @@ const firmwareSensors =
           <div class="mt-4 space-y-4">
           <div>
             <p class="card-subtitle mb-0 mt-1">
-              Optional — skip this if you already POST JSON and let auto-import handle keys.
+              Optional: skip this if you already POST JSON and let auto-import handle keys.
             </p>
           </div>
 
@@ -1022,7 +1022,7 @@ const firmwareSensors =
             <input type="hidden" name="redirect" value={redirectTo} />
             <p class="m-0 mb-3 text-sm font-medium">Quick add: temperature + humidity pair</p>
             <p class="card-subtitle mt-0 mb-3">
-              Same JSON key for both (e.g. <code>0</code> or <code>temp1</code>) — the usual DHT-style probe.
+              Same JSON key for both (e.g. <code>0</code> or <code>temp1</code>): the usual DHT-style probe.
             </p>
             <div class="sensor-map-primary">
               <div class="form-field mb-0">
@@ -1117,7 +1117,7 @@ const firmwareSensors =
         <div>
           <h2 class="card-title">Pull JSON feeds</h2>
           <p class="card-subtitle mb-0">
-            HTTPS JSON we fetch on a schedule. Probe keys auto-import when you save — rename below if needed.
+            HTTPS JSON we fetch on a schedule. Probe keys auto-import when you save: rename below if needed.
           </p>
         </div>
 
@@ -1137,7 +1137,7 @@ const firmwareSensors =
     ) : (
       <section class="card">
         <p class="mb-0 text-sm text-[var(--color-text-muted)]">
-          View-only access — feed and probe settings are hidden.
+          View-only access: feed and probe settings are hidden.
         </p>
       </section>
     )}
@@ -1146,7 +1146,7 @@ const firmwareSensors =
       <details class="card">
         <summary class="card-title cursor-pointer">Other ways to connect</summary>
         <p class="card-subtitle mb-4">
-          Pull JSON feeds, Nest/Ecobee, MQTT bridge, and Home Assistant — open when you need them.
+          Pull JSON feeds, Nest/Ecobee, MQTT bridge, and Home Assistant, open when you need them.
         </p>
         <div class="flex flex-wrap gap-3">
           <a class="btn-secondary" href="/dashboard/temperature?tab=pull">Pull feeds & thermostats</a>
@@ -1266,11 +1266,11 @@ const firmwareSensors =
             : new Date().toLocaleTimeString();
           if (metaEl) {
             metaEl.textContent = payload.waiting
-              ? `Still waiting — last check ${checked}. Auto-checking every 5 seconds.`
+              ? `Still waiting: last check ${checked}. Auto-checking every 5 seconds.`
               : `Last check ${checked}.`;
           }
           if (!payload.waiting && (payload.seenCount > 0 || payload.latestCount > 0)) {
-            if (statusEl) statusEl.textContent = " — received!";
+            if (statusEl) statusEl.textContent = ": received!";
             if (stepEl) {
               stepEl.classList.remove("waiting-ingest-pending");
               stepEl.classList.add("waiting-ingest-done");
@@ -1282,9 +1282,9 @@ const firmwareSensors =
             window.location.replace(url.pathname + "?" + url.searchParams.toString());
             return;
           }
-          if (statusEl) statusEl.textContent = " — listening…";
+          if (statusEl) statusEl.textContent = ": listening…";
         } catch {
-          if (metaEl) metaEl.textContent = "Could not check status — try Check now.";
+          if (metaEl) metaEl.textContent = "Could not check status, try Check now.";
         } finally {
           inFlight = false;
         }

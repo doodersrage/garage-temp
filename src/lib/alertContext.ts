@@ -61,7 +61,7 @@ export async function buildFreezeAlertContext(input: {
     const runwayLine = formatRunwayAlertSuffix(runway);
     if (runwayLine) parts.push(runwayLine);
   } else if (doorOpenNearby) {
-    parts.push("A door sensor is open — expect faster heat loss until it closes.");
+    parts.push("A door sensor is open. Expect faster heat loss until it closes.");
   }
 
   return parts.length > 0 ? parts.join("\n\n") : null;

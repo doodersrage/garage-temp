@@ -12,7 +12,7 @@ const label = !known
   ? "System status"
   : healthy
     ? "All systems operational"
-    : "Degraded — see status";
+    : "Degraded, see status";
 ---
 <a
   class:list={["home-status", known && !healthy && "home-status-warn"]}

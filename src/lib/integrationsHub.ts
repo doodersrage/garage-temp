@@ -31,7 +31,7 @@ export const INTEGRATION_CARDS: IntegrationCard[] = [
     id: "home-assistant",
     title: "Home Assistant (HACS)",
     summary:
-      "Official custom integration — share-link sensors, snooze/vacation services, optional push ingest. Dual-run with MQTT on your LAN.",
+      "Official custom integration: share-link sensors, snooze/vacation services, optional push ingest. Dual-run with MQTT on your LAN.",
     href: HA_INTEGRATION_PAGE,
     tier: "Family live link (Free) · Pro for history/metrics + inbound",
     cta: "Install guide",
@@ -52,13 +52,13 @@ export const INTEGRATION_CARDS: IntegrationCard[] = [
   {
     id: "webhooks",
     title: "Alert & reading webhooks",
-    summary: "Pro webhooks go both ways — configure in Dashboard → Alerts / Share.",
+    summary: "Pro webhooks go both ways: configure in Dashboard → Alerts / Share.",
     href: "/about/ingest-and-webhooks",
     tier: "Pro",
     cta: "In-app guide",
     bullets: [
-      "Outbound — alert POSTs (optional HMAC) and high-volume reading webhooks on ingest",
-      "Inbound — snooze / vacation / status endpoints for HA, Zapier, or Make",
+      "Outbound: alert POSTs (optional HMAC) and high-volume reading webhooks on ingest",
+      "Inbound: snooze / vacation / status endpoints for HA, Zapier, or Make",
     ],
     secondaryHref: `${DEV_DOCS_BASE}/integrations/webhooks`,
     secondaryLabel: "Payload reference",
@@ -91,7 +91,7 @@ export const INTEGRATION_CARDS: IntegrationCard[] = [
     id: "esphome-shelly",
     title: "ESPHome & Shelly",
     summary:
-      "HTTP POST recipes for DHT/BME probes and Shelly door contacts — no custom Arduino firmware required.",
+      "HTTP POST recipes for DHT/BME probes and Shelly door contacts, no custom Arduino firmware required.",
     href: "/about/esphome-shelly-recipes",
     cta: "LAN sensor recipes",
   },
@@ -115,7 +115,7 @@ export const INTEGRATION_CARDS: IntegrationCard[] = [
     id: "freeze-map-embed",
     title: "Freeze map embed & badge",
     summary:
-      "Drop the public opt-in freeze-risk map into a blog, Home Assistant dashboard, or README — iframe embed plus Markdown badge.",
+      "Drop the public opt-in freeze-risk map into a blog, Home Assistant dashboard, or README: iframe embed plus Markdown badge.",
     href: "/freeze-map#embed",
     tier: "Public (opt-in aggregates)",
     cta: "Embed & badge",

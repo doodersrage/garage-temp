@@ -72,7 +72,7 @@ export function computeFreezeReadiness(input: {
       ok: alertSettings.enabled,
       hint: alertSettings.enabled
         ? undefined
-        : "Turn alerts on under Dashboard → Alerts — flood/leak contacts notify automatically when wet.",
+        : "Turn alerts on under Dashboard → Alerts: flood/leak contacts notify automatically when wet.",
     },
     {
       id: "channel",
@@ -98,7 +98,7 @@ export function computeFreezeReadiness(input: {
       ok: hasFloodSensor,
       hint: hasFloodSensor
         ? undefined
-        : "Add a wet/dry contact under a water heater, laundry, or sump — ingest kind flood auto-alerts when wet.",
+        : "Add a wet/dry contact under a water heater, laundry, or sump: ingest kind flood auto-alerts when wet.",
     },
     {
       id: "fresh",
@@ -123,7 +123,7 @@ export function computeFreezeReadiness(input: {
       label: "Not muted by vacation mode",
       ok: !vacationOn,
       hint: vacationOn
-        ? "Vacation suppresses threshold noise — flood and forecast still fire. Clear vacation under Alerts when you are home."
+        ? "Vacation suppresses threshold noise: flood and forecast still fire. Clear vacation under Alerts when you are home."
         : undefined,
     },
     {

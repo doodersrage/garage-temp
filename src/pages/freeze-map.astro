@@ -106,7 +106,7 @@ function trendDeltaLabel(values: number[]): string {
 ---
 <Layout
   title="Freeze-risk map"
-  description="See city-level freeze risk from ThermalTrace probe households—then track your own unheated space for free. Opt-in, anonymized community map."
+  description="See city-level freeze risk from ThermalTrace probe households, then track your own unheated space for free. Opt-in, anonymized community map."
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
@@ -114,7 +114,7 @@ function trendDeltaLabel(values: number[]): string {
     <PageHeader
       kicker="Community"
       title="Freeze-risk map"
-      lede="See whether your metro’s indoor probes are running cold this week—then start tracking your own garage, crawlspace, or shop for free. City averages only; no addresses or device names."
+      lede="See whether your metro’s indoor probes are running cold this week, then start tracking your own garage, crawlspace, or shop for free. City averages only; no addresses or device names."
     >
       <a slot="actions" class="btn-primary" href={optInHref}>{optInLabel}</a>
       {!user && (
@@ -127,11 +127,11 @@ function trendDeltaLabel(values: number[]): string {
 
     {isSeed ? (
       <p class="alert-warning mt-0" role="status">
-        <strong>Showing sample data</strong> — live city readings appear once enough households opt in
+        <strong>Showing sample data</strong>, live city readings appear once enough households opt in
         ({FREEZE_MAP_SAMPLE_FLOOR}+ probes per city).
         {" "}
         {optInCount === 0
-          ? "No households have opted in yet — be the first in your metro."
+          ? "No households have opted in yet: be the first in your metro."
           : optInCount === 1
             ? "1 household has opted in so far."
             : `${optInCount} households have opted in so far.`}
@@ -166,7 +166,7 @@ function trendDeltaLabel(values: number[]): string {
               return (
                 <li>
                   <strong>{row.city_label}</strong>
-                  {" — "}
+                  {": "}
                   {row.sample_count}/{FREEZE_MAP_SAMPLE_FLOOR} households
                   {needed > 0
                     ? ` · ${needed} more to go live`
@@ -177,7 +177,7 @@ function trendDeltaLabel(values: number[]): string {
           </ul>
         ) : (
           <p class="text-sm text-[var(--color-text-muted)] mb-4">
-            No sparse live cities yet — the next opted-in metros will show up here as they approach the floor.
+            No sparse live cities yet: the next opted-in metros will show up here as they approach the floor.
           </p>
         )}
         <a class="btn-secondary" href={optInHref}>{optInLabel}</a>
@@ -191,7 +191,7 @@ function trendDeltaLabel(values: number[]): string {
           {coldest.map((row, i) => (
             <li>
               <strong>#{i + 1} {row.city_label}</strong>
-              {" — "}
+              {": "}
               min {row.min_temp_f?.toFixed(1)}°F
               {row.avg_temp_f != null ? ` · avg ${row.avg_temp_f.toFixed(1)}°F` : ""}
               {" · "}
@@ -369,7 +369,7 @@ function trendDeltaLabel(values: number[]): string {
                             <span class="text-xs text-[var(--color-text-muted)]">{delta}</span>
                           </span>
                         ) : (
-                          <span class="text-[var(--color-text-muted)]" title="Needs more snapshots">—</span>
+                          <span class="text-[var(--color-text-muted)]" title="Needs more snapshots">: </span>
                         )}
                       </td>
                       <td>{row.sample_count}</td>

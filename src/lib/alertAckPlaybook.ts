@@ -106,13 +106,13 @@ export async function executeAlertAckPlaybook(input: {
 
   const messages: Record<AckPlaybookAction, string> = {
     ack: "Alert marked as handled.",
-    snooze_1h: "Alert handled — freeze alerts snoozed for 1 hour.",
-    snooze_4h: "Alert handled — freeze alerts snoozed for 4 hours.",
-    snooze_24h: "Alert handled — freeze alerts snoozed for 24 hours.",
+    snooze_1h: "Alert handled: freeze alerts snoozed for 1 hour.",
+    snooze_4h: "Alert handled: freeze alerts snoozed for 4 hours.",
+    snooze_24h: "Alert handled: freeze alerts snoozed for 24 hours.",
     false_alarm:
-      "Marked as false alarm — alerts snoozed 24h. Check probe placement if this keeps happening.",
-    notify_tenant: "Alert handled — tenant contact emailed.",
-    webhook_ping: "Alert handled — outbound webhook notified.",
+      "Marked as false alarm: alerts snoozed 24h. Check probe placement if this keeps happening.",
+    notify_tenant: "Alert handled: tenant contact emailed.",
+    webhook_ping: "Alert handled: outbound webhook notified.",
   };
 
   return { ok: true, message: messages[input.action] };

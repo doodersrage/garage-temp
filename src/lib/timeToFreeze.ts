@@ -51,8 +51,8 @@ export function estimateTimeToFreeze(
       rateFPerHour,
       message:
         rateFPerHour > 0.1
-          ? "Temperature is rising — no freeze risk from current trend."
-          : "Temperature is stable — trend does not suggest imminent freeze.",
+          ? "Temperature is rising, no freeze risk from current trend."
+          : "Temperature is stable: trend does not suggest imminent freeze.",
     };
   }
 
@@ -61,7 +61,7 @@ export function estimateTimeToFreeze(
   return {
     hours,
     rateFPerHour,
-    message: `Cooling ~${Math.abs(rateFPerHour).toFixed(1)}°F/hr — roughly ${formatDurationHours(hours)} until ${freezeThresholdF}°F at this rate.`,
+    message: `Cooling ~${Math.abs(rateFPerHour).toFixed(1)}°F/hr: roughly ${formatDurationHours(hours)} until ${freezeThresholdF}°F at this rate.`,
   };
 }
 

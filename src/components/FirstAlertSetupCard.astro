@@ -25,13 +25,13 @@ const redirectTo = "/dashboard/temperature";
   <section class="card" id="first-alert-setup">
     <h2 class="card-title">Set your first cold + water alert</h2>
     <p class="card-subtitle mb-4">
-      One threshold and an email — no need to leave Devices. Wet flood/leak contacts auto-alert once alerts are on (and bypass snooze/vacation).
+      One threshold and an email, no need to leave Devices. Wet flood/leak contacts auto-alert once alerts are on (and bypass snooze/vacation).
       Add Telegram, Discord, and more later.
     </p>
     {alertSaved && !testError && (
       <p class="alert-success mt-0 mb-4">
         {testSent
-          ? "Cold + water alert saved and test sent — check your inbox."
+          ? "Cold + water alert saved and test sent, check your inbox."
           : "Cold + water alert saved."}
       </p>
     )}

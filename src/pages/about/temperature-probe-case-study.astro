@@ -14,7 +14,7 @@ const page = getAboutPage("temperature-probe-case-study")!;
   description={page.description}
   heroImage={tempProbeV2}
   heroAlt="Second revision garage temperature probe controller with Ethernet connectivity and multiple sensor inputs"
-  heroCaption="Revision two of the ThermalTrace probe board—Ethernet, LCD, and dual DHT22 inputs."
+  heroCaption="Revision two of the ThermalTrace probe board. Ethernet, LCD, and dual DHT22 inputs."
 >
   <p>
     This case study follows the temperature probe build that powers ThermalTrace: why a
@@ -25,7 +25,7 @@ const page = getAboutPage("temperature-probe-case-study")!;
 
   <h2>The challenge</h2>
   <p>
-    The goal was practical, not academic—know whether an attached garage was approaching freeze risk,
+    The goal was practical, not academic: know whether an attached garage was approaching freeze risk,
     whether humidity was creeping high enough to rust tools, and whether conditions differed near the
     door versus the back wall. Consumer weather apps only report outside air at the nearest station,
     which can differ by ten degrees or more from an insulated garage interior on a sunny winter afternoon.
@@ -86,7 +86,7 @@ const page = getAboutPage("temperature-probe-case-study")!;
       <code>temp</code> JSON keys before the board left the desk.
     </li>
     <li>
-      <strong>Revision one in the garage:</strong> Proved multi-probe gradients were real—the door zone
+      <strong>Revision one in the garage:</strong> Proved multi-probe gradients were real: the door zone
       routinely diverged from the north wall on commute schedules.
     </li>
     <li>
@@ -110,7 +110,7 @@ const page = getAboutPage("temperature-probe-case-study")!;
   <ul>
     <li>Door-adjacent temperature could swing 8–12 °F within minutes of opening the overhead door while the back wall moved modestly.</li>
     <li>Overnight lows near the north wall tracked freeze risk more reliably than outdoor forecasts alone.</li>
-    <li>Humidity rose after sustained cold spells when the slab was slow to warm—useful for deciding when to run a dehumidifier.</li>
+    <li>Humidity rose after sustained cold spells when the slab was slow to warm: useful for deciding when to run a dehumidifier.</li>
     <li>The computed average smoothed noise for history charts while per-probe cards on the home page preserved zone detail.</li>
   </ul>
   <p>
@@ -124,7 +124,7 @@ const page = getAboutPage("temperature-probe-case-study")!;
   <ul>
     <li><strong>Placement beats sensor cost:</strong> A well-mounted DHT22 outperformed a poorly placed premium sensor every time.</li>
     <li><strong>Label zones in software:</strong> Stable JSON keys with dashboard labels kept firmware and website loosely coupled.</li>
-    <li><strong>Expect gaps:</strong> Reboots and network blips create short gaps—distinguish them from misconfiguration using the stale-reading guides.</li>
+    <li><strong>Expect gaps:</strong> Reboots and network blips create short gaps: distinguish them from misconfiguration using the stale-reading guides.</li>
     <li><strong>Build for iteration:</strong> Revision one on a breadboard saved a ladder trip when pin assignments changed.</li>
   </ul>
 

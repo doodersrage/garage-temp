@@ -13,7 +13,7 @@ export function scorePropertyHealth(property: PropertySnapshot, nowMs = Date.now
     return {
       score: 20,
       label: "offline",
-      detail: "No devices — add a probe",
+      detail: "No devices, add a probe",
     };
   }
 
@@ -51,7 +51,7 @@ export function scorePropertyHealth(property: PropertySnapshot, nowMs = Date.now
     return {
       score: 45,
       label: "watch",
-      detail: "Probe data stale — check power/Wi‑Fi",
+      detail: "Probe data stale, check power/Wi‑Fi",
     };
   }
 
@@ -70,7 +70,7 @@ export function scorePropertyHealth(property: PropertySnapshot, nowMs = Date.now
   return {
     score: 95,
     label: "healthy",
-    detail: "Reporting — above freeze, dry flood contacts",
+    detail: "Reporting, above freeze, dry flood contacts",
   };
 }
 

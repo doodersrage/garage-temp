@@ -54,7 +54,7 @@ const propertyFaqs: AboutFaqItem[] = [
   {
     question: "What happens when a tenant or manager leaves?",
     answer:
-      "Remove them from the household under Dashboard → Household. Their membership is deleted immediately — they lose access to that property's devices, alerts, and history, and they never had billing access to begin with. Pending invites can be revoked the same way before they're accepted.",
+      "Remove them from the household under Dashboard → Household. Their membership is deleted immediately: they lose access to that property's devices, alerts, and history, and they never had billing access to begin with. Pending invites can be revoked the same way before they're accepted.",
   },
   {
     question: "Do I need a separate ThermalTrace account per property?",
@@ -69,7 +69,7 @@ const propertyFaqs: AboutFaqItem[] = [
   {
     question: "Why does the claims pack matter for rentals?",
     answer:
-      "After freeze or leak damage in a vacant or tenant-occupied unit, insurers and liability questions often turn on when you knew and what you were monitoring. The Pro/Portfolio claims pack turns probe history and alert timelines into a verifiable report you can download or email to an adjuster — documentation for claims, disputes, and carrier conversations.",
+      "After freeze or leak damage in a vacant or tenant-occupied unit, insurers and liability questions often turn on when you knew and what you were monitoring. The Pro/Portfolio claims pack turns probe history and alert timelines into a verifiable report you can download or email to an adjuster: documentation for claims, disputes, and carrier conversations.",
   },
 ];
 
@@ -94,28 +94,27 @@ const schema = [
       lede="A vacant rental and a ten-unit portfolio don't share the same monitoring problem. ThermalTrace rolls every property you own into one freeze-risk view, keeps insurance-ready history when something fails, lets on-site managers handle devices without seeing billing, and prices Portfolio for that scale."
     >
       <a slot="actions" class="btn-primary" href={user ? "/dashboard/portfolio" : "/register?next=/dashboard/temperature"}>
-        {user ? "Open portfolio dashboard" : "Start free — add your first property"}
+        {user ? "Open portfolio dashboard" : "Start free, add your first property"}
       </a>
       <a slot="actions" class="btn-secondary" href="/pricing#portfolio">
-        {portfolioConfigured ? `Portfolio — ${portfolioAnnual ?? portfolioMonthly}` : "See Portfolio pricing"}
+        {portfolioConfigured ? `Portfolio: ${portfolioAnnual ?? portfolioMonthly}` : "See Portfolio pricing"}
       </a>
     </PageHeader>
 
     <ProductScreenshot
       shot="portfolio"
-      caption="Portfolio dashboard — at-risk properties, min temps, device counts, and property-manager roles in one table."
+      caption="Portfolio dashboard: at-risk properties, min temps, device counts, and property-manager roles in one table."
     />
 
     <section class="card">
       <h2 class="card-title">Documented proof when a vacant unit fails</h2>
       <p class="card-subtitle mb-4">
-        A burst pipe in an empty rental can sit unnoticed for days. Landlords and managers need alerts when it starts —
-        and a paper trail afterward for insurance, tenants, and liability questions.
+        A burst pipe in an empty rental can sit unnoticed for days. Landlords and managers need alerts when it starts.        and a paper trail afterward for insurance, tenants, and liability questions.
       </p>
       <ul class="text-sm space-y-2 mb-4">
-        <li><strong>Claims / insurance evidence pack</strong> — freeze-exposure hours, probe tables, and alert timelines you can download or email to an adjuster. Built for rental claims and disputes, not just a homeowner near-miss.</li>
-        <li><strong>Per-property history</strong> — each unit keeps its own thresholds and readings so you can show what that space was doing before the loss.</li>
-        <li><strong>Portfolio alert digest</strong> — one rollup when any property needs attention, instead of checking units one by one.</li>
+        <li><strong>Claims / insurance evidence pack</strong>: freeze-exposure hours, probe tables, and alert timelines you can download or email to an adjuster. Built for rental claims and disputes, not just a homeowner near-miss.</li>
+        <li><strong>Per-property history</strong>, each unit keeps its own thresholds and readings so you can show what that space was doing before the loss.</li>
+        <li><strong>Portfolio alert digest</strong>, one rollup when any property needs attention, instead of checking units one by one.</li>
       </ul>
       <p class="mb-0">
         <a class="btn-secondary" href="/claims-pack">See the claims pack</a>
@@ -128,11 +127,11 @@ const schema = [
         This isn't a roadmap item -- it's live functionality every Pro and Portfolio account can use today.
       </p>
       <ul class="text-sm space-y-2 mb-0">
-        <li><strong>Cross-property risk dashboard</strong> — every property you own in one table: current risk, minimum recent temperature vs. your freeze threshold, device count, last reading.</li>
-        <li><strong>Portfolio-wide alert digest</strong> — a rollup notification when any property in your portfolio needs attention, instead of watching each one separately.</li>
-        <li><strong>Property-manager logins</strong> — invite on-site staff or contractors to manage devices and alert settings for one property, with no access to your billing or the rest of your portfolio.</li>
-        <li><strong>Claims / insurance evidence pack</strong> — verifiable monitoring history for adjusters, carriers, and liability conversations after freeze or leak damage.</li>
-        <li><strong>Per-property everything else</strong> — each property gets its own device limit, alert thresholds, and history, exactly like a standalone ThermalTrace account would.</li>
+        <li><strong>Cross-property risk dashboard</strong>, every property you own in one table: current risk, minimum recent temperature vs. your freeze threshold, device count, last reading.</li>
+        <li><strong>Portfolio-wide alert digest</strong>: a rollup notification when any property in your portfolio needs attention, instead of watching each one separately.</li>
+        <li><strong>Property-manager logins</strong>: invite on-site staff or contractors to manage devices and alert settings for one property, with no access to your billing or the rest of your portfolio.</li>
+        <li><strong>Claims / insurance evidence pack</strong>: verifiable monitoring history for adjusters, carriers, and liability conversations after freeze or leak damage.</li>
+        <li><strong>Per-property everything else</strong>, each property gets its own device limit, alert thresholds, and history, exactly like a standalone ThermalTrace account would.</li>
       </ul>
     </section>
 
@@ -140,11 +139,11 @@ const schema = [
       <h2 class="card-title">Built for the people who actually run these</h2>
       <ul class="text-sm space-y-3 mb-0">
         <li>
-          <strong>Small landlords &amp; property managers</strong> — units you don't live in, staff turnover, and ROI that has to beat one unnoticed freeze claim.
+          <strong>Small landlords &amp; property managers</strong>: units you don't live in, staff turnover, and ROI that has to beat one unnoticed freeze claim.
           Manager logins keep on-site access scoped; remove someone and their access ends immediately.
         </li>
         <li>
-          <strong>Vacation-rental owners</strong> — cabins and short-term stays sit empty between guests. Watch pipes and spaces during vacancy gaps without giving cleaners or co-hosts billing access.
+          <strong>Vacation-rental owners</strong>: cabins and short-term stays sit empty between guests. Watch pipes and spaces during vacancy gaps without giving cleaners or co-hosts billing access.
           Start on Pro for a handful of places; move to Portfolio when the property count outgrows a personal plan.
         </li>
       </ul>
@@ -153,8 +152,7 @@ const schema = [
     <section class="card" id="portfolio-pricing">
       <h2 class="card-title">Pro vs. Portfolio</h2>
       <p class="mb-4 text-sm">
-        Pro already includes the portfolio dashboard and up to {PRO_MAX_OWNED_HOUSEHOLDS} owned properties —
-        plenty for a couple of rentals or a vacation home alongside your main house.
+        Pro already includes the portfolio dashboard and up to {PRO_MAX_OWNED_HOUSEHOLDS} owned properties.        plenty for a couple of rentals or a vacation home alongside your main house.
         Portfolio is for real scale: up to {PORTFOLIO_MAX_OWNED_HOUSEHOLDS} properties, property-manager logins,
         and pricing that reflects a business running many units rather than one person with one house.
       </p>

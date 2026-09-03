@@ -8,7 +8,7 @@ const HOUSEHOLD_ERROR_MESSAGES: Record<string, string> = {
   cannot_leave_owner: "Household owners cannot leave. Transfer ownership or delete the household instead.",
   manager_required:
     "Only household owners and full members can manage invites, share links, and billing integrations.",
-  viewer: "View-only — you cannot change settings on this account.",
+  viewer: "View-only. You cannot change settings on this account.",
   property_limit:
     "You've reached the owned-property limit for your plan. Upgrade to unlock more households.",
   portfolio_required:

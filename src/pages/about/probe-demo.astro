@@ -17,7 +17,7 @@ import "../../styles/about.css";
 
 const title = "Interactive probe demo";
 const description =
-  `Simulate multi-zone temperatures in ${BRAND_SPACES}. Adjust outdoor air, sun load, door state, and freeze threshold — see the same space-status logic and push/pull JSON shapes ThermalTrace uses in production.`;
+  `Simulate multi-zone temperatures in ${BRAND_SPACES}. Adjust outdoor air, sun load, door state, and freeze threshold, see the same space-status logic and push/pull JSON shapes ThermalTrace uses in production.`;
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/about/probe-demo");
@@ -82,7 +82,7 @@ const schema = [
 
     <AboutCcFigure
       photoId="garage-workbench"
-      caption="Real workbench context — in the simulator above, the warmest zone is the workbench/tool-bench pocket. A probe only there can look fine while the door zone is already near freeze."
+      caption="Real workbench context, in the simulator above, the warmest zone is the workbench/tool-bench pocket. A probe only there can look fine while the door zone is already near freeze."
     />
 
     <FaqSection faqs={faqs} title="Probe demo FAQ" />

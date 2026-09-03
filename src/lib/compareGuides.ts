@@ -21,17 +21,17 @@ export const compareGuides: CompareGuide[] = [
     title: "ThermalTrace vs DIY MQTT",
     headline: "ThermalTrace vs DIY MQTT + Node-RED",
     description:
-      "Compare ThermalTrace freeze and leak alerts to a self-hosted MQTT, Node-RED, and cron stack—ops burden, SMS, history, and household sharing.",
+      "Compare ThermalTrace freeze and leak alerts to a self-hosted MQTT, Node-RED, and cron stack: ops burden, SMS, history, and household sharing.",
     competitor: "DIY MQTT / Node-RED",
     summary:
-      "DIY MQTT is powerful if you enjoy running brokers, dashboards, and alert scripts. ThermalTrace is the same outcome—live probes, freeze and leak alerts, history—without babysitting the stack at 2 a.m.",
+      "DIY MQTT is powerful if you enjoy running brokers, dashboards, and alert scripts. ThermalTrace is the same outcome, live probes, freeze and leak alerts, history, without babysitting the stack at 2 a.m.",
     lede:
       "A Mosquitto broker, Node-RED flows, and a cron job can freeze-alert a garage. The cost is patching, TLS, Twilio, and a Pi that has to stay up. ThermalTrace is the hosted alerts and history layer: keep MQTT on the LAN if you want, bridge readings over HTTPS, and let household freeze and leak channels live in the cloud.",
     photoId: "ethernet-cable",
     whenThermalTrace: [
       "You want freeze and leak SMS/email/push without wiring Twilio yourself",
       "Household members need access without VPN to your Pi",
-      "You still use ESP/Arduino—HTTPS ingest or MQTT→HTTP bridge",
+      "You still use ESP/Arduino. HTTPS ingest or MQTT→HTTP bridge",
     ],
     whenOther: [
       "You already run a hardened MQTT + Grafana stack and like maintaining it",
@@ -52,10 +52,10 @@ export const compareGuides: CompareGuide[] = [
     title: "ThermalTrace vs Govee",
     headline: "ThermalTrace vs Govee sensors",
     description:
-      "Govee (and similar SmartThings-style consumer hubs) vs ThermalTrace for freeze and leak monitoring in unheated spaces—alerts, ESP ingest, multi-probe zones, and export.",
+      "Govee (and similar SmartThings-style consumer hubs) vs ThermalTrace for freeze and leak monitoring in unheated spaces: alerts, ESP ingest, multi-probe zones, and export.",
     competitor: "Govee",
     summary:
-      "Govee—and consumer hubs like SmartThings—are great for cheap room sensors and a polished phone app. ThermalTrace is built for freeze and leak workflows in garages, workshops, attics, and shops: your own ESP probes, household alerts, and history you can export.",
+      "Govee, and consumer hubs like SmartThings: are great for cheap room sensors and a polished phone app. ThermalTrace is built for freeze and leak workflows in garages, workshops, attics, and shops: your own ESP probes, household alerts, and history you can export.",
     lede:
       "Govee hygrometers (and SmartThings-style hubs that absorb the same class of Bluetooth/Wi-Fi pods) win on price and a friendly phone app for bedrooms and closets. They are weaker in a detached garage or shop: Bluetooth range, vendor lock-in, and alerts that mostly stay in-app. ThermalTrace assumes you bring an ESP32, then gives household freeze and leak routing and a season of exportable history.",
     photoId: "garage-workbench",
@@ -83,12 +83,12 @@ export const compareGuides: CompareGuide[] = [
     title: "ThermalTrace vs Tempest",
     headline: "ThermalTrace vs WeatherFlow Tempest",
     description:
-      "Outdoor weather stations like Tempest vs ThermalTrace indoor probes—when you need pipe freeze alerts where the water actually is.",
+      "Outdoor weather stations like Tempest vs ThermalTrace indoor probes, when you need pipe freeze alerts where the water actually is.",
     competitor: "WeatherFlow Tempest",
     summary:
-      "Tempest shines at yard weather—wind, rain, outdoor temp. Pipe freeze risk lives indoors. ThermalTrace watches the garage, crawlspace, or shop where the plumbing is.",
+      "Tempest shines at yard weather: wind, rain, outdoor temp. Pipe freeze risk lives indoors. ThermalTrace watches the garage, crawlspace, or shop where the plumbing is.",
     lede:
-      "A Tempest on the roof tells you outdoor air, wind, and rain with excellent fidelity. Pipes freeze where the water is—usually a garage, crawlspace, or shop the station never sees. Use Tempest for yard weather and ThermalTrace for the indoor probe that sits by the plumbing.",
+      "A Tempest on the roof tells you outdoor air, wind, and rain with excellent fidelity. Pipes freeze where the water is, usually a garage, crawlspace, or shop the station never sees. Use Tempest for yard weather and ThermalTrace for the indoor probe that sits by the plumbing.",
     photoId: "cold-weather-road",
     whenThermalTrace: [
       "You need indoor / unheated-space probe temps for pipe risk",
@@ -105,7 +105,7 @@ export const compareGuides: CompareGuide[] = [
       { capability: "Probe location", thermaltrace: "Garage, crawlspace, closet", other: "Roof / yard" },
       { capability: "Freeze alerts on pipes", thermaltrace: "Direct + hours-until-freeze clock", other: "Infer from outdoor only" },
       { capability: "DIY ESP ingest", thermaltrace: "Yes", other: "N/A" },
-      { capability: "Complements the other?", thermaltrace: "Yes — use both", other: "Yes — outdoor context" },
+      { capability: "Complements the other?", thermaltrace: "Yes, use both", other: "Yes: outdoor context" },
     ],
   },
   {
@@ -133,11 +133,11 @@ export const compareGuides: CompareGuide[] = [
     ],
     rows: [
       { capability: "Primary job", thermaltrace: "Freeze/leak monitoring for any space", other: "HVAC control for conditioned space" },
-      { capability: "Sees an unheated garage/crawlspace", thermaltrace: "Yes — dedicated probe", other: "No — unconditioned spaces aren't on the loop" },
+      { capability: "Sees an unheated garage/crawlspace", thermaltrace: "Yes: dedicated probe", other: "No: unconditioned spaces aren't on the loop" },
       { capability: "Freeze/leak alerts (SMS, push, email)", thermaltrace: "Yes, plus remaining-hours time-to-freeze", other: "No" },
       { capability: "Shows thermostat reading on freeze alerts", thermaltrace: "Yes, if connected (Pro)", other: "N/A" },
       { capability: "Controls heating schedules", thermaltrace: "No", other: "Yes" },
-      { capability: "Complements the other?", thermaltrace: "Yes — connect both", other: "Yes — connect both" },
+      { capability: "Complements the other?", thermaltrace: "Yes: connect both", other: "Yes: connect both" },
     ],
   },
   {
@@ -165,11 +165,11 @@ export const compareGuides: CompareGuide[] = [
     ],
     rows: [
       { capability: "Primary job", thermaltrace: "Freeze/leak monitoring for any space", other: "HVAC control for conditioned space" },
-      { capability: "Sees an unheated garage/crawlspace", thermaltrace: "Yes — dedicated probe", other: "No — unconditioned spaces aren't on the loop" },
+      { capability: "Sees an unheated garage/crawlspace", thermaltrace: "Yes: dedicated probe", other: "No: unconditioned spaces aren't on the loop" },
       { capability: "Freeze/leak alerts (SMS, push, email)", thermaltrace: "Yes, plus remaining-hours time-to-freeze", other: "No" },
       { capability: "Shows thermostat reading on freeze alerts", thermaltrace: "Yes, if connected (Pro)", other: "N/A" },
       { capability: "Controls heating schedules", thermaltrace: "No", other: "Yes" },
-      { capability: "Complements the other?", thermaltrace: "Yes — connect both", other: "Yes — connect both" },
+      { capability: "Complements the other?", thermaltrace: "Yes: connect both", other: "Yes: connect both" },
     ],
   },
 ];

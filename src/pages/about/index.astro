@@ -41,12 +41,12 @@ const aboutHubFaqs = [
   {
     question: "Is ThermalTrace open source?",
     answer:
-      "Yes—application and firmware-related repos are linked from this hub so you can inspect, fork, or adapt the stack.",
+      "Yes: application and firmware-related repos are linked from this hub so you can inspect, fork, or adapt the stack.",
   },
   {
     question: "Where does ThermalTrace run?",
     answer:
-      "The website and ingest APIs run on Cloudflare’s edge (Workers). Live job and ingest health is on /system-status—we publish measured health, not a marketing uptime percentage. Stack detail: /about/astro-applications.",
+      "The website and ingest APIs run on Cloudflare’s edge (Workers). Live job and ingest health is on /system-status: we publish measured health, not a marketing uptime percentage. Stack detail: /about/astro-applications.",
   },
 ];
 const schema = [
@@ -102,7 +102,7 @@ const featuredSearchIndex = buildAboutSearchIndex(featuredPages);
           <h2 class="about-probe-hero-title">Three probes, one space</h2>
           <p class="about-probe-hero-lede">
             Watch temperature and humidity shift as sun load, outdoor air, and airflow change
-            conditions zone by zone—just like the live JSON feed.
+            conditions zone by zone, just like the live JSON feed.
           </p>
         </div>
         <AboutProbeActivity client:visible />
@@ -127,7 +127,7 @@ const featuredSearchIndex = buildAboutSearchIndex(featuredPages);
         <li>
           <a class="about-repos-link" target="_blank" rel="noreferrer" href="https://github.com/doodersrage/thermaltrace">
             <strong>thermaltrace</strong>
-            <span>This website (Astro on Cloudflare) — includes sample sensor sketches</span>
+            <span>This website (Astro on Cloudflare): includes sample sensor sketches</span>
           </a>
         </li>
         <li>

@@ -28,12 +28,12 @@ Freeze season checklist: ${siteUrl}/freeze-season
 
 Happy to answer hardware / Home Assistant webhook questions.`;
 
-const homeAssistant = `**ThermalTrace** — hosted freeze + flood/leak monitoring for ESPHome & DIY probes (garage, crawlspace, attic, shop).
+const homeAssistant = `**ThermalTrace**: hosted freeze + flood/leak monitoring for ESPHome & DIY probes (garage, crawlspace, attic, shop).
 
 - Official HACS integration: ${siteUrl}/integrations/home-assistant
 - HTTPS ingest (device key); optional MQTT→HTTP bridge if you already run Mosquitto/HA
 - Free family live share link for HA polling; Pro expands scopes + SMS / push / webhooks
-- Free plan, no credit card — ${siteUrl}/register?next=/dashboard/temperature
+- Free plan, no credit card: ${siteUrl}/register?next=/dashboard/temperature
 - Interactive probe simulator: ${siteUrl}/about/probe-demo
 - Public community freeze map: ${siteUrl}/freeze-map
 - Embed: \`${siteUrl}/embed/freeze-map?compact=1\`
@@ -75,14 +75,14 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
 ---
 <Layout
   title="Share kit"
-  description="Public ThermalTrace word-of-mouth kit: steal these Reddit, Home Assistant, HN, and Bluesky blurbs for freeze and flood/leak monitoring — tweak the voice, keep the links."
+  description="Public ThermalTrace word-of-mouth kit: steal these Reddit, Home Assistant, HN, and Bluesky blurbs for freeze and flood/leak monitoring: tweak the voice, keep the links."
   schema={schema}
 >
   <div class="page-shell page-stack">
     <PageHeader
       kicker="Word of mouth"
       title="Share kit"
-      lede="ThermalTrace grows by people posting in communities that already care about freeze risk, wet basements, and unconditioned spaces. This page is public on purpose — steal the copy, tweak it so it sounds like you, and ship it."
+      lede="ThermalTrace grows by people posting in communities that already care about freeze risk, wet basements, and unconditioned spaces. This page is public on purpose: steal the copy, tweak it so it sounds like you, and ship it."
     >
       <a slot="actions" class="btn-secondary" href="/freeze-map#embed">Freeze map embeds</a>
       <a slot="actions" class="btn-ghost" href="/stories">Customer stories</a>
@@ -91,14 +91,13 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
     <section class="card share-kit-framing" aria-labelledby="share-kit-why">
       <h2 class="card-title" id="share-kit-why">Why this is on the main site</h2>
       <p class="card-subtitle mb-3">
-        Open-source projects often hide launch blurbs in private notes. We publish ours so anyone —
-        including you — can help spread the word without inventing messaging from scratch. If you
+        Open-source projects often hide launch blurbs in private notes. We publish ours so anyone.        including you: can help spread the word without inventing messaging from scratch. If you
         find a post that matches a template here, that’s expected: the founder (and hopefully the
         community) is using the same kit.
       </p>
       <p class="mb-0 text-sm text-[var(--color-text-muted)]">
         Please don’t spam. Prefer communities where DIY probes, Home Assistant, or cold-weather
-        home maintenance are on-topic — and edit the blurbs so they fit the thread.
+        home maintenance are on-topic, and edit the blurbs so they fit the thread.
       </p>
     </section>
 
@@ -172,7 +171,7 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
       </button>
       <span class="sr-only" data-copy-status="share-hn-title" aria-live="polite"></span>
       <p class="card-subtitle mb-3">
-        Comment body — story first, then links. HN rewards specifics over a generic tagline.
+        Comment body: story first, then links. HN rewards specifics over a generic tagline.
       </p>
       <textarea class="form-textarea font-mono text-xs" id="share-hn" rows="16" readonly>{hackerNews}</textarea>
       <button type="button" class="btn-secondary mt-2" data-copy-target="share-hn" data-copy-label="Copy body">
@@ -184,8 +183,7 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
     <section class="card">
       <h2 class="card-title">Discord / chat</h2>
       <p class="card-subtitle mb-3">
-        Fit for ESPHome / DIY / maker Discord showcases and “what are you working on” channels —
-        not cold DMs. Prefer a thread where people already talk freeze risk, HVAC, or probe hardware.
+        Fit for ESPHome / DIY / maker Discord showcases and “what are you working on” channels.        not cold DMs. Prefer a thread where people already talk freeze risk, HVAC, or probe hardware.
       </p>
       <textarea class="form-textarea font-mono text-xs" id="share-discord" rows="7" readonly>{discord}</textarea>
       <button type="button" class="btn-secondary mt-2" data-copy-target="share-discord" data-copy-label="Copy">
@@ -209,20 +207,20 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
     <section class="card">
       <h2 class="card-title">Deep links worth including</h2>
       <ul class="text-sm space-y-2 mb-0">
-        <li><a class="text-link" href="/about/probe-demo">/about/probe-demo</a> — interactive simulator (strongest no-account hook)</li>
-        <li><a class="text-link" href="/demo">/demo</a> — live readings + simulator promo</li>
-        <li><a class="text-link" href="/register?next=/dashboard/temperature">/register</a> — free, no card → Devices</li>
-        <li><a class="text-link" href="/freeze-map">/freeze-map</a> — opt-in city aggregates</li>
-        <li><a class="text-link" href="/freeze-season">/freeze-season</a> — seasonal checklist</li>
-        <li><a class="text-link" href="/integrations/home-assistant">/integrations/home-assistant</a> — HACS</li>
-        <li><a class="text-link" href="/about/mqtt-bridge">MQTT bridge</a> — Mosquitto/HA local, mirror over HTTPS</li>
-        <li><a class="text-link" href="/stories/pipe-near-miss">/stories/pipe-near-miss</a> — Columbus near-miss story</li>
-        <li><a class="text-link" href="/stories/crawlspace-pipe-watch">/stories/crawlspace-pipe-watch</a> — crawlspace case study</li>
-        <li><a class="text-link" href="/stories/detached-garage-winter">/stories/detached-garage-winter</a> — detached garage case study</li>
-        <li><a class="text-link" href="/stories/water-heater-pad-leak">/stories/water-heater-pad-leak</a> — flood/leak pad case study</li>
-        <li><a class="text-link" href="/gift">/gift</a> — gift a winter of monitoring</li>
-        <li><a class="text-link" href="/stories">/stories</a> — more case studies</li>
-        <li><a class="text-link" href="/android">/android</a> — Play app waitlist angle</li>
+        <li><a class="text-link" href="/about/probe-demo">/about/probe-demo</a>: interactive simulator (strongest no-account hook)</li>
+        <li><a class="text-link" href="/demo">/demo</a>, live readings + simulator promo</li>
+        <li><a class="text-link" href="/register?next=/dashboard/temperature">/register</a>: free, no card → Devices</li>
+        <li><a class="text-link" href="/freeze-map">/freeze-map</a>: opt-in city aggregates</li>
+        <li><a class="text-link" href="/freeze-season">/freeze-season</a>: seasonal checklist</li>
+        <li><a class="text-link" href="/integrations/home-assistant">/integrations/home-assistant</a>. HACS</li>
+        <li><a class="text-link" href="/about/mqtt-bridge">MQTT bridge</a>. Mosquitto/HA local, mirror over HTTPS</li>
+        <li><a class="text-link" href="/stories/pipe-near-miss">/stories/pipe-near-miss</a>. Columbus near-miss story</li>
+        <li><a class="text-link" href="/stories/crawlspace-pipe-watch">/stories/crawlspace-pipe-watch</a>: crawlspace case study</li>
+        <li><a class="text-link" href="/stories/detached-garage-winter">/stories/detached-garage-winter</a>: detached garage case study</li>
+        <li><a class="text-link" href="/stories/water-heater-pad-leak">/stories/water-heater-pad-leak</a>: flood/leak pad case study</li>
+        <li><a class="text-link" href="/gift">/gift</a>: gift a winter of monitoring</li>
+        <li><a class="text-link" href="/stories">/stories</a>, more case studies</li>
+        <li><a class="text-link" href="/android">/android</a>. Play app waitlist angle</li>
       </ul>
     </section>
 
@@ -230,7 +228,7 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
       <h2 class="card-title">Contribute &amp; operators</h2>
       <p class="card-subtitle mb-4">
         Separate from the copy-paste kit: repo docs for people shipping code, HACS, or self-hosted
-        operators — not generic visitor marketing.
+        operators, not generic visitor marketing.
       </p>
       <ul class="text-sm space-y-2 mb-0">
         <li>
@@ -240,7 +238,7 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
             target="_blank"
             rel="noreferrer"
           >CONTRIBUTING.md ↗</a>
-          — how to open PRs and run the project locally
+          how to open PRs and run the project locally
         </li>
         <li>
           <a
@@ -249,7 +247,7 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
             target="_blank"
             rel="noreferrer"
           >Operator checklist ↗</a>
-          — founder/operator todo (Play Store, Nest/Ecobee, HACS default listing). Useful if you’re
+          founder/operator todo (Play Store, Nest/Ecobee, HACS default listing). Useful if you’re
           self-hosting or contributing to launch plumbing; not a share blurb.
         </li>
         <li>
@@ -259,7 +257,7 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
             target="_blank"
             rel="noreferrer"
           >HA forum long-form draft ↗</a>
-          — longer than the textarea above when you need a full forum post
+          longer than the textarea above when you need a full forum post
         </li>
         <li>
           <a
@@ -268,7 +266,7 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
             target="_blank"
             rel="noreferrer"
           >Discord / social announcement draft ↗</a>
-          — alternate longer chat copy
+          alternate longer chat copy
         </li>
       </ul>
     </section>

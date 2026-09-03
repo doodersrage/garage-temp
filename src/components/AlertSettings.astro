@@ -106,7 +106,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
 ---
 {!canEdit && (
   <p class="alert-warning mb-4" role="status">
-    View-only — alert settings cannot be changed on this account.
+    View-only: alert settings cannot be changed on this account.
   </p>
 )}
 <p class="alert-success mt-0 mb-4 hidden" id="alert-action-status" role="status"></p>
@@ -123,14 +123,14 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
   {essentialsFirst && (
     <p class="alert-success mt-0 mb-4" role="status">
       Start with <strong>Essentials</strong> (freeze °F + email), save, then send a test alert.
-      More channels and automation unlock in the sections below after that — or expand them anytime.
+      More channels and automation unlock in the sections below after that, or expand them anytime.
     </p>
   )}
 
   <AlertSettingsPanel
     id="alert-section-essentials"
     title="Essentials"
-    subtitle="Freeze threshold, email, sensor-dead alerts, and a weekly summary — enough for most homes."
+    subtitle="Freeze threshold, email, sensor-dead alerts, and a weekly summary, enough for most homes."
     collapsible
     open
   >
@@ -188,7 +188,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
         name="outage_hours"
         value={settings.outageHours > 0 ? settings.outageHours : 2}
       />
-      <p class="form-hint mb-0">Fires when a device goes silent — often more urgent than a slow temp drop.</p>
+      <p class="form-hint mb-0">Fires when a device goes silent, often more urgent than a slow temp drop.</p>
     </div>
 
     <label class="checkbox-row mb-2">
@@ -200,7 +200,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
         disabled={!entitlements.canUseForecastAlerts}
       />
       <span>
-        Cold-snap mode — warn when outdoor forecast may hit freeze
+        Cold-snap mode: warn when outdoor forecast may hit freeze
         {!entitlements.canUseForecastAlerts && (
           <span class="text-[var(--color-text-muted)]"> (Member)</span>
         )}
@@ -228,7 +228,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
         value="true"
         checked={settings.runwayAlertEnabled}
       />
-      <span>Time-to-freeze remaining-hours — alert before the probe crosses freeze</span>
+      <span>Time-to-freeze remaining-hours: alert before the probe crosses freeze</span>
     </label>
     <p class="form-hint mb-4">
       Uses this space’s lag vs the outdoor forecast when weather location is set; otherwise a cooling-rate clock.
@@ -242,7 +242,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
         value="true"
         checked={settings.digestEnabled}
       />
-      <span>Weekly email digest (Mondays) — coldest night, leaks, and outages</span>
+      <span>Weekly email digest (Mondays): coldest night, leaks, and outages</span>
     </label>
 
     {entitlements.canUsePortfolio && (
@@ -253,7 +253,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
           value="true"
           checked={settings.portfolioAlertsEnabled}
         />
-        <span>Properties-at-risk digest — email when any property crosses freeze</span>
+        <span>Properties-at-risk digest: email when any property crosses freeze</span>
       </label>
     )}
 
@@ -629,7 +629,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
       <span>
         Still send critical freeze/flood/forecast via SMS (Pro)
         {!entitlements.canUseSms && (
-          <> — <a class="text-link" href="/dashboard#plans">Upgrade</a></>
+          <>: <a class="text-link" href="/dashboard#plans">Upgrade</a></>
         )}
       </span>
     </label>
@@ -661,7 +661,7 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
     <button type="button" class="btn-secondary mb-4" id="add-alert-rule">Add rule</button>
 
     <h3 class="alert-settings-subheading">Alert playbooks</h3>
-    <p class="form-hint mb-3">Follow-up steps after the initial alert — e.g. SMS 15 minutes later if still unacknowledged.</p>
+    <p class="form-hint mb-3">Follow-up steps after the initial alert: e.g. SMS 15 minutes later if still unacknowledged.</p>
     <div id="alert-playbooks-list" class="space-y-3 mb-3"></div>
     <button type="button" class="btn-secondary mb-4" id="add-playbook-step">Add step</button>
     <textarea

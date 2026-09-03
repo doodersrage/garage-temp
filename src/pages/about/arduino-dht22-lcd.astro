@@ -29,8 +29,8 @@ const sectionParent = {
   <p>
     Each DHT22 exposes temperature and relative humidity over a single-wire data protocol. Because each
     sensor has its own data pin (A4 and A5 in this build), the sketch can poll them sequentially without
-    bus collisions. That is why the LCD shows two distinct pairs—such as 21.75 °C with 71.15% humidity
-    on one line and a different temperature on the next—rather than a single averaged local value.
+    bus collisions. That is why the LCD shows two distinct pairs: such as 21.75 °C with 71.15% humidity
+    on one line and a different temperature on the next, rather than a single averaged local value.
   </p>
   <p>
     On the website, those same probes map to JSON keys (for example <code>0</code>, <code>1</code>, and
@@ -40,9 +40,9 @@ const sectionParent = {
 
   <h2>Three-wire sensor connections</h2>
   <ul>
-    <li><strong>Data</strong> — one digital pin per sensor, with a pull-up resistor as recommended by the DHT22 datasheet.</li>
-    <li><strong>VCC</strong> — 5 V from the breadboard rail (stable supply matters for consistent readings).</li>
-    <li><strong>GND</strong> — common ground with the Arduino, LCD, and Ethernet shield.</li>
+    <li><strong>Data</strong>, one digital pin per sensor, with a pull-up resistor as recommended by the DHT22 datasheet.</li>
+    <li><strong>VCC</strong>: 5 V from the breadboard rail (stable supply matters for consistent readings).</li>
+    <li><strong>GND</strong>: common ground with the Arduino, LCD, and Ethernet shield.</li>
   </ul>
   <p>
     Long cable runs to remote probe locations may need twisted pairs or shielding; the workshop build keeps
@@ -56,14 +56,14 @@ const sectionParent = {
     screen looks blank after upload, adjust contrast before debugging code.
   </p>
   <p>
-    Four-bit mode (D4–D7 only) reduces pin usage compared with eight-bit wiring—important when Ethernet
+    Four-bit mode (D4–D7 only) reduces pin usage compared with eight-bit wiring: important when Ethernet
     already consumes SPI pins and two DHT22 data lines are allocated.
   </p>
 
   <h2>Backlight control</h2>
   <p>
     Driving the backlight from pin 7 through a transistor keeps current draw off the Arduino pin itself.
-    Firmware can dim or flash the backlight for warnings—useful when a probe reads below freezing—without
+    Firmware can dim or flash the backlight for warnings: useful when a probe reads below freezing: without
     blocking network serving.
   </p>
 

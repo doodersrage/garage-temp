@@ -14,7 +14,7 @@ const { canEdit, settings, householdId } = Astro.props;
   <DashboardCard id="tenant-relay">
     <h2 class="card-title">Tenant / on-site contact</h2>
     <p class="card-subtitle mb-4">
-      Property managers can email an on-site tenant when a freeze alert needs action — without sharing dashboard login.
+      Property managers can email an on-site tenant when a freeze alert needs action, without sharing dashboard login.
     </p>
     <form action="/api/household/tenant-notify" method="post" class="config-row-grid mb-0">
       <input type="hidden" name="household_id" value={householdId} />

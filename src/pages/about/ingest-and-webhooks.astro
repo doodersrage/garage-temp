@@ -65,14 +65,14 @@ Content-Type: application/json</code></pre>
     Sample MicroPython and Arduino sketches for DS18B20 / MAX31855 / MAX6675, plus Uno + W5100
     (<code>ethernet_dht22_ingest</code>, classic <code>temp</code> JSON):
     <a class="text-link" href="https://github.com/doodersrage/thermaltrace/tree/main/sketches" target="_blank" rel="noreferrer">sketches/</a>.
-    The Ethernet shield cannot TLS — pair it with
+    The Ethernet shield cannot TLS: pair it with
     <a class="text-link" href="https://github.com/doodersrage/thermaltrace/blob/main/sketches/relay/push_https_forward.py" target="_blank" rel="noreferrer"><code>push_https_forward.py</code></a>
     on a LAN host.
   </p>
 
   <h3>SenML (RFC 8428)</h3>
   <p>
-    If your firmware or gateway already publishes SenML JSON, POST the array directly — no wrapper object required.
+    If your firmware or gateway already publishes SenML JSON, POST the array directly, no wrapper object required.
     ThermalTrace auto-detects SenML when native <code>temp</code> / <code>sensors[]</code> shapes are absent.
     Temperature uses unit <code>Cel</code> or <code>degF</code>; humidity uses <code>%RH</code>. Probe keys come from the SenML name (last path segment).
   </p>
@@ -89,7 +89,7 @@ Content-Type: application/json</code></pre>
 
   <h3>Home Assistant REST sensor JSON</h3>
   <p>
-    A single REST sensor response — <code>state</code> plus <code>attributes.unit_of_measurement</code> — is also auto-detected on push ingest and pull feeds.
+    A single REST sensor response: <code>state</code> plus <code>attributes.unit_of_measurement</code>: is also auto-detected on push ingest and pull feeds.
     Map probe key <code>state</code> (or the entity suffix for multi-entity payloads) on Devices.
   </p>
   <pre><code>{`{
@@ -151,7 +151,7 @@ Content-Type: application/json</code></pre>
     (or a Cloudflare Tunnel / Nabu Casa URL). Verify <code>X-Signature</code> in a template condition if you set a secret.
   </p>
   <p>
-    For MQTT, have Home Assistant (or Node-RED) receive the webhook and publish to your broker—that keeps MQTT local
+    For MQTT, have Home Assistant (or Node-RED) receive the webhook and publish to your broker, that keeps MQTT local
     while ThermalTrace stays on HTTPS. The blueprint includes an optional MQTT topic input for that path.
   </p>
 
@@ -190,19 +190,19 @@ Authorization: Bearer gtm_…</code></pre>
   <ul>
     <li>
       <a class="text-link" href="/docs/api">HTTP API documentation</a>
-      — OpenAPI download, ingest, metrics, and inbound webhooks
+      OpenAPI download, ingest, metrics, and inbound webhooks
     </li>
     <li>
       <a class="text-link" href="/about/kit-qr-onboarding">Kit QR onboarding</a>
-      — encode your ingest URL on a hardware sticker
+      encode your ingest URL on a hardware sticker
     </li>
     <li>
       <a class="text-link" href="/about/esp32-ota-firmware">ESP32 OTA and battery reporting</a>
-      — firmware updates plus <code>battery</code> / <code>rssi</code> fields
+      firmware updates plus <code>battery</code> / <code>rssi</code> fields
     </li>
     <li>
       <a class="text-link" href="/about/zapier-make-recipes">Zapier and Make.com recipes</a>
-      — outbound alert webhooks and inbound snooze automations
+      outbound alert webhooks and inbound snooze automations
     </li>
   </ul>
 </AboutArticle>

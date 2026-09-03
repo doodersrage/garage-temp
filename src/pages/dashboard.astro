@@ -686,8 +686,7 @@ const garageRisk = computeGarageRiskStatus({
 
     {primaryBannerIds.has("stale") && staleSensorCount > 0 && (
       <div class="alert-warning mb-0" role="status">
-        {staleSummary.bannerMessage} —
-        <a href="/" class="text-link ml-1">Check Home</a>
+        {staleSummary.bannerMessage}.        <a href="/" class="text-link ml-1">Check Home</a>
         {" · "}
         <a href="/dashboard/temperature" class="text-link">Devices</a>
         {" · "}
@@ -781,8 +780,7 @@ const garageRisk = computeGarageRiskStatus({
           )}
           {secondaryBannerIds.has("stale") && staleSensorCount > 0 && (
             <div class="alert-warning mb-0" role="status">
-              {staleSummary.bannerMessage} —
-              <a href="/" class="text-link ml-1">Check Home</a>
+              {staleSummary.bannerMessage}.              <a href="/" class="text-link ml-1">Check Home</a>
               {" · "}
               <a href="/dashboard/temperature" class="text-link">Devices</a>
             </div>
@@ -797,8 +795,8 @@ const garageRisk = computeGarageRiskStatus({
         <h2 class="card-title" id="empty-overview-cta-title">Get a reading on this Overview</h2>
         <p class="card-subtitle mb-4">
           {hasDevices
-            ? "You have a device — POST JSON once (or fetch a pull feed) so sensors appear here, then set freeze + email."
-            : "Create a push device for ESP/Arduino, or try the demo feed — then set freeze + email under Alerts."}
+            ? "You have a device. POST JSON once (or fetch a pull feed) so sensors appear here, then set freeze + email."
+            : "Create a push device for ESP/Arduino, or try the demo feed, then set freeze + email under Alerts."}
         </p>
         <div class="flex flex-wrap gap-3">
           <a class="btn-primary" href="/dashboard/temperature">Open Devices</a>
@@ -816,7 +814,7 @@ const garageRisk = computeGarageRiskStatus({
 
     {!canEdit && (
       <p class="alert-warning mt-0 mb-0" role="status">
-        View-only access — you can see live data but cannot change devices, alerts, or sharing.
+        View-only access: you can see live data but cannot change devices, alerts, or sharing.
       </p>
     )}
 

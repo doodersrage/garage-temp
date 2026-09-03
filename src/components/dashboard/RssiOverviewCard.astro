@@ -11,7 +11,7 @@ const { rows } = Astro.props;
 {rows.length > 0 && (
   <DashboardCard>
     <h2 class="card-title">Signal strength</h2>
-    <p class="card-subtitle mb-4">RSSI from recent device meta — weak links drop readings first.</p>
+    <p class="card-subtitle mb-4">RSSI from recent device meta: weak links drop readings first.</p>
     <ul class="space-y-2 mb-0">
       {rows.map((row) => (
         <li class="text-sm flex flex-wrap justify-between gap-2">

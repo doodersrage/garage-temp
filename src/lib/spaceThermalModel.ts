@@ -332,7 +332,7 @@ export function buildTimeToFreezeProjection(input: {
         new Date(nowMs),
       );
       const doorNote = input.doorOpenNearby
-        ? " A door is open — heat loss will be faster until it closes."
+        ? " A door is open: heat loss will be faster until it closes."
         : "";
       return {
         hours: projected.hours,
@@ -432,7 +432,7 @@ export function evaluateRunwayAlert(
   const clock = projection.hitsAtLabel ? ` around ${projection.hitsAtLabel}` : "";
   const hoursLabel =
     projection.hours != null ? formatDurationHours(projection.hours) : "a few hours";
-  return `This space is projected to hit ${settings.freezeThresholdF}°F${clock} (in ${hoursLabel}). Drip faucets or turn on heat now — you still have a window before the probe crosses freeze.`;
+  return `This space is projected to hit ${settings.freezeThresholdF}°F${clock} (in ${hoursLabel}). Drip faucets or turn on heat now: you still have a window before the probe crosses freeze.`;
 }
 
 export function timeToFreezeApiPayload(projection: TimeToFreezeProjection) {

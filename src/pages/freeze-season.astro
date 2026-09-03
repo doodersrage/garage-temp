@@ -56,10 +56,10 @@ const schema = [
     <PageHeader
       kicker="Seasonal"
       title={seasonLabel}
-      lede="Pipe freezes happen in spaces you do not walk through every hour. Put a probe where the water is, set a threshold a few degrees above 32°F, and get a clock for when this space hits freeze — plus an alert while you still have hours to act."
+      lede="Pipe freezes happen in spaces you do not walk through every hour. Put a probe where the water is, set a threshold a few degrees above 32°F, and get a clock for when this space hits freeze, plus an alert while you still have hours to act."
     >
       <a slot="actions" class="btn-primary" href={user ? "/dashboard/alerts#alert-section-essentials" : "/register?next=/dashboard/temperature"}>
-        {user ? "Open alert essentials" : "Start free — connect a probe"}
+        {user ? "Open alert essentials" : "Start free: connect a probe"}
       </a>
       <a slot="actions" class="btn-secondary" href="/freeze-map">Community freeze map</a>
     </PageHeader>
@@ -87,7 +87,7 @@ const schema = [
         <ul class="text-sm space-y-2 mb-0">
           {coldest.map((row) => (
             <li>
-              <strong>{row.city_label}</strong> — min {row.min_temp_f?.toFixed(1)}°F
+              <strong>{row.city_label}</strong>: min {row.min_temp_f?.toFixed(1)}°F
             </li>
           ))}
         </ul>
@@ -101,7 +101,7 @@ const schema = [
       <h2 class="card-title">Why indoor probes beat outdoor weather alone</h2>
       <p class="mb-4 text-sm">
         A Tempest or airport reading says how cold the yard is. Your pipes care about the unheated bay,
-        the leaky door, and the failed space heater. ThermalTrace watches that space — and can sit next to
+        the leaky door, and the failed space heater. ThermalTrace watches that space, and can sit next to
         outdoor weather on your dashboard for context.
       </p>
       <div class="flex flex-wrap gap-3">

@@ -56,7 +56,7 @@ const opsDiscordConfigured = Boolean(
   <div class="space-y-6">
     <section class="card animate-slide-in-left">
       <h2 class="card-title">Ops & conversion</h2>
-      <p class="card-subtitle mb-0">{user.email} — health, checkout funnel, pricing audit, and email tests.</p>
+      <p class="card-subtitle mb-0">{user.email}: health, checkout funnel, pricing audit, and email tests.</p>
       {emailTestOk && (
         <p class="alert-success mt-4 mb-0" role="status">Test email sent to {user.email}.</p>
       )}
@@ -65,7 +65,7 @@ const opsDiscordConfigured = Boolean(
       )}
       {priceMismatches.length > 0 && (
         <p class="alert-warning mt-4 mb-0" role="alert">
-          {priceMismatches.length} Stripe display price(s) do not match live Stripe amounts — update Worker `STRIPE_DISPLAY_*` secrets.
+          {priceMismatches.length} Stripe display price(s) do not match live Stripe amounts: update Worker `STRIPE_DISPLAY_*` secrets.
         </p>
       )}
     </section>
@@ -75,7 +75,7 @@ const opsDiscordConfigured = Boolean(
       <ol class="text-sm space-y-2 mb-0 list-decimal pl-5">
         <li>Scan <strong>Platform health</strong> and recent page errors below.</li>
         <li>Confirm Stripe display audit shows Match for all four prices.</li>
-        <li>Review checkout funnel sources — double down on winning nudges.</li>
+        <li>Review checkout funnel sources: double down on winning nudges.</li>
         <li>Send one drip/trial email smoke test after template changes.</li>
         <li>
           Verify Twilio + VAPID secrets
@@ -271,7 +271,7 @@ const opsDiscordConfigured = Boolean(
 
     <section class="card">
       <h2 class="card-title">Checkout funnel (30 days)</h2>
-      <p class="card-subtitle mb-4">Stripe checkout sessions started — includes upgrade nudge sources.</p>
+      <p class="card-subtitle mb-4">Stripe checkout sessions started: includes upgrade nudge sources.</p>
       <div class="stat-grid mb-4">
         <article class="stat-item">
           <span class="stat-label">Checkouts started</span>

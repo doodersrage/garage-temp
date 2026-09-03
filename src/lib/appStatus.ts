@@ -50,7 +50,7 @@ export async function fetchAppStatus(): Promise<AppStatus> {
     latest.status === "success" &&
     !historyPollStale;
 
-  /** Informational rate-limit hits — does not flip the page to degraded by itself. */
+  /** Informational rate-limit hits: does not flip the page to degraded by itself. */
   const ingestRateLimitElevated = ingestAbuseCount > 0;
 
   return {
@@ -72,7 +72,7 @@ export type AppStatusSummary = {
   healthy: boolean;
 };
 
-/** Latest cron health only — safe for the public homepage chip. */
+/** Latest cron health only: safe for the public homepage chip. */
 export async function fetchAppStatusSummary(): Promise<AppStatusSummary | null> {
   try {
     const lastHistoryPollAt = await fetchLastSuccessfulCollectHistory();

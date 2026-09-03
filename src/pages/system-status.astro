@@ -20,9 +20,9 @@ const bannerTone = !status.healthy
     ? "warning"
     : "success";
 const bannerTitle = !status.healthy
-  ? "Degraded — investigating"
+  ? "Degraded: investigating"
   : status.ingestRateLimitElevated
-    ? "Operational — elevated ingest rate limits"
+    ? "Operational: elevated ingest rate limits"
     : "All systems operational";
 const bannerDetail = !status.healthy
   ? [
@@ -70,7 +70,7 @@ const statusErrorMessage =
     <PageHeader
       kicker="Status"
       title="System status"
-      lede="Public health for ThermalTrace jobs and ingest—what we measure ourselves. Updated on each page load."
+      lede="Public health for ThermalTrace jobs and ingest: what we measure ourselves. Updated on each page load."
     />
 
     <section class="card" aria-live="polite">
@@ -138,12 +138,11 @@ const statusErrorMessage =
       </p>
       {status.healthy ? (
         <p class="mb-0 text-sm">
-          No incidents recorded yet. When we publish a resolved incident (date, impact, recovery), it will appear here —
-          until then, treat the live banner and recent cron table as the source of truth.
+          No incidents recorded yet. When we publish a resolved incident (date, impact, recovery), it will appear here.          until then, treat the live banner and recent cron table as the source of truth.
         </p>
       ) : (
         <div class="alert-warning mt-0 mb-0" role="status">
-          <p class="m-0 font-semibold">Open — service degraded</p>
+          <p class="m-0 font-semibold">Open: service degraded</p>
           <p class="m-0 text-sm mt-1">{bannerDetail}</p>
           <p class="m-0 text-sm mt-2 text-[var(--color-text-muted)]">
             Started around this page load ({new Date(status.checkedAt).toLocaleString()}). Status subscribers are notified on degrade and recovery.
@@ -198,7 +197,7 @@ const statusErrorMessage =
     <section class="card">
       <h2 class="card-title">Hosting</h2>
       <p class="mb-3 text-sm">
-        ThermalTrace runs on <strong>Cloudflare’s edge network</strong> (Workers) so the dashboard and ingest APIs stay close to visitors—without you operating a home server.
+        ThermalTrace runs on <strong>Cloudflare’s edge network</strong> (Workers) so the dashboard and ingest APIs stay close to visitors, without you operating a home server.
         We publish <em>this</em> page’s job and ingest health, not a marketing uptime percentage or Cloudflare’s platform SLA as if it were our own.
       </p>
       <ul class="text-sm space-y-2 mb-0">
@@ -245,7 +244,7 @@ const statusErrorMessage =
       )}
       {!subscribed && !confirmed && (
         <form action="/api/status/subscribe" method="post" class="mt-4">
-          {/* Honeypot — visually hidden; bots that fill "company" are rejected server-side. */}
+          {/* Honeypot: visually hidden; bots that fill "company" are rejected server-side. */}
           <div class="sr-only" aria-hidden="true">
             <label for="status-subscribe-company">Company</label>
             <input type="text" id="status-subscribe-company" name="company" tabindex="-1" autocomplete="off" />

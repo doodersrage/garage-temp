@@ -55,7 +55,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     const result = await sendWebPushToUser(user.id, {
       title: "[Test] ThermalTrace push",
-      body: "Channel smoke test — browser push is working.",
+      body: "Channel smoke test: browser push is working.",
     });
 
     if (result.delivered <= 0) {

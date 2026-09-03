@@ -5,7 +5,7 @@
     <p class="text-sm text-[var(--color-text-muted)] mb-1">On your phone today</p>
     <h2 class="card-title" id="pwa-title">Install the web app (PWA)</h2>
     <p class="card-subtitle mb-3">
-      Add ThermalTrace to your home screen in Chrome or Safari. Same account as the dashboard — live readings and alerts without waiting on Play.
+      Add ThermalTrace to your home screen in Chrome or Safari. Same account as the dashboard, live readings and alerts without waiting on Play.
     </p>
     <ol class="home-pwa-steps">
       <li>Open thermaltrace.dev in Chrome (Android) or Safari (iPhone).</li>
@@ -45,7 +45,7 @@
         status.textContent =
           choice.outcome === "accepted"
             ? "Install started."
-            : "Install dismissed — the step-by-step guide still works.";
+            : "Install dismissed: the step-by-step guide still works.";
       }
       deferredPrompt = null;
       if (btn) btn.hidden = true;

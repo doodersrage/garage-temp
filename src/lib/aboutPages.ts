@@ -13,7 +13,7 @@ export const coreAboutPages: AboutPage[] = [
     slug: "temperature-probes",
     title: "Temperature probes and their uses",
     description:
-      "How temperature probes work in garages, workshops, attics, crawlspaces, and shops—where they are placed, and why multiple sensors improve reliability.",
+      "How temperature probes work in garages, workshops, attics, crawlspaces, and shops, where they are placed, and why multiple sensors improve reliability.",
     summary:
       "Probe types, placement strategies, and why averaging multiple sensors matters in unheated spaces.",
   },
@@ -109,7 +109,7 @@ export const coreAboutPages: AboutPage[] = [
     slug: "ingest-and-webhooks",
     title: "Ingest API and alert webhooks",
     description:
-      "Push sensor readings into ThermalTrace with the ingest API — native JSON, SenML, or Home Assistant REST — and send alerts to Discord, IFTTT, or Home Assistant.",
+      "Push sensor readings into ThermalTrace with the ingest API: native JSON, SenML, or Home Assistant REST, and send alerts to Discord, IFTTT, or Home Assistant.",
     summary:
       "Device API keys, typed sensor payloads, SenML and HA REST auto-detect, outbound HMAC webhooks, and Pro alert channels.",
   },
@@ -135,7 +135,7 @@ export const coreAboutPages: AboutPage[] = [
     description:
       "Keep Mosquitto or Home Assistant MQTT on your LAN and mirror readings to ThermalTrace over HTTPS for household freeze and leak alerts and history.",
     summary:
-      "POST /api/ingest/mqtt, Home Assistant rest_command, and Node-RED flow — dual-run without exposing your broker.",
+      "POST /api/ingest/mqtt, Home Assistant rest_command, and Node-RED flow: dual-run without exposing your broker.",
   },
   {
     slug: "install-pwa",

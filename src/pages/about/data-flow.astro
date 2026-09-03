@@ -25,7 +25,7 @@ const hero = getAboutPhoto("ethernet-cable");
     when debugging stale readings, missing probes, or history gaps.
   </p>
 
-  <h2>Step 1 — Sensing in the space</h2>
+  <h2>Step 1. Sensing in the space</h2>
   <p>
     Probes measure temperature and humidity. The Arduino sketch polls them every few seconds, discards
     obvious outliers, and prepares an in-memory JSON structure. Details:
@@ -35,10 +35,10 @@ const hero = getAboutPhoto("ethernet-cable");
 
   <AboutCcFigure photoId="arduino-dht11" />
 
-  <h2>Step 2 — Publishing JSON</h2>
+  <h2>Step 2. Publishing JSON</h2>
   <p>
     The board or a nearby relay exposes HTTPS JSON. A Python FastAPI service may cache responses in Redis
-    so the wider internet never hits the residential uplink directly—see
+    so the wider internet never hits the residential uplink directly: see
     <a class="text-link" href="/about/python-feeds">Python scripts and feeds</a>.
   </p>
 
@@ -53,21 +53,21 @@ const hero = getAboutPhoto("ethernet-cable");
     <figcaption>Live feed payload shape consumed by the website after leaving the local network.</figcaption>
   </figure>
 
-  <h2>Step 3 — Website fetch and display</h2>
+  <h2>Step 3. Website fetch and display</h2>
   <p>
     When you load the home page, server code retrieves each configured feed URL, parses probe keys, and
     renders stat cards. Signed-in users load feed and probe mappings from Supabase instead of defaults.
     Weather data follows a parallel path via OpenWeather using your optional city override.
   </p>
 
-  <h2>Step 4 — Persisting history</h2>
+  <h2>Step 4. Persisting history</h2>
   <p>
     If you are authenticated, successful probe reads insert rows into Supabase with feed name, probe label,
     key, temperatures, humidity, and timestamp. Guests still see live data but do not append history.
     Learn more in <a class="text-link" href="/about/historical-data">historical data usage</a>.
   </p>
 
-  <h2>Step 5 — Dashboard and export</h2>
+  <h2>Step 5. Dashboard and export</h2>
   <p>
     The history table paginates those rows. CSV export streams the full set for admins and subscribers.
     Stripe webhooks maintain membership in the export-capable group. Account tools are described in
@@ -76,10 +76,10 @@ const hero = getAboutPhoto("ethernet-cable");
 
   <h2>Failure points to check</h2>
   <ol>
-    <li>Probe wiring or power — serial logs on the Arduino.</li>
-    <li>Home network or certificate — curl the feed URL from a laptop on LTE.</li>
-    <li>Relay cache stale — restart upstream pull in fast-api-relay.</li>
-    <li>Dashboard mapping — probe key typos hide readings even when JSON is valid.</li>
-    <li>Auth cookies — history saves only for signed-in sessions.</li>
+    <li>Probe wiring or power: serial logs on the Arduino.</li>
+    <li>Home network or certificate: curl the feed URL from a laptop on LTE.</li>
+    <li>Relay cache stale: restart upstream pull in fast-api-relay.</li>
+    <li>Dashboard mapping: probe key typos hide readings even when JSON is valid.</li>
+    <li>Auth cookies: history saves only for signed-in sessions.</li>
   </ol>
 </AboutArticle>

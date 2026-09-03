@@ -14,7 +14,7 @@ const failed = readiness.checks.filter((c) => !c.ok);
 <DashboardCard id="freeze-readiness">
   <h2 class="card-title">Property readiness</h2>
   <p class="card-subtitle mb-3">
-    Score from freeze alerts, flood contacts, vacation mute, batteries, and weather — run this before cold season or a wet season.
+    Score from freeze alerts, flood contacts, vacation mute, batteries, and weather: run this before cold season or a wet season.
   </p>
   <p class:list={["text-2xl font-bold mb-3", tone]}>{readiness.score}%</p>
   <ul class="text-sm space-y-1 mb-4">

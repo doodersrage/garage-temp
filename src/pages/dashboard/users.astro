@@ -61,7 +61,7 @@ if (users.totalPages > 0 && pageParam > users.totalPages) {
         <ul class="space-y-2 text-sm mb-0">
           {referralStats.topReferrers.map((row) => (
             <li>
-              <code>{row.userId.slice(0, 8)}…</code> — {row.count} signup{row.count === 1 ? "" : "s"}
+              <code>{row.userId.slice(0, 8)}…</code>: {row.count} signup{row.count === 1 ? "" : "s"}
             </li>
           ))}
         </ul>
