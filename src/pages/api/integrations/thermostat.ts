@@ -35,8 +35,12 @@ export const GET: APIRoute = async ({ cookies, request, site }) => {
         configured,
         connections: [],
         connect_urls: {
-          nest: `${siteUrl}/api/integrations/nest/connect`,
-          ecobee: `${siteUrl}/api/integrations/ecobee/connect`,
+          ...(configured.nest
+            ? { nest: `${siteUrl}/api/integrations/nest/connect` }
+            : {}),
+          ...(configured.ecobee
+            ? { ecobee: `${siteUrl}/api/integrations/ecobee/connect` }
+            : {}),
         },
       }),
       { status: 200, headers: { "Content-Type": "application/json" } },
@@ -69,14 +73,22 @@ export const GET: APIRoute = async ({ cookies, request, site }) => {
       })),
       connect_urls: canConnect
         ? {
-            nest: `${siteUrl}/api/integrations/nest/connect?mobile=1`,
-            ecobee: `${siteUrl}/api/integrations/ecobee/connect?mobile=1`,
+            ...(configured.nest
+              ? { nest: `${siteUrl}/api/integrations/nest/connect?mobile=1` }
+              : {}),
+            ...(configured.ecobee
+              ? { ecobee: `${siteUrl}/api/integrations/ecobee/connect?mobile=1` }
+              : {}),
           }
         : null,
       disconnect_urls: canConnect
         ? {
-            nest: `${siteUrl}/api/integrations/nest/disconnect`,
-            ecobee: `${siteUrl}/api/integrations/ecobee/disconnect`,
+            ...(configured.nest
+              ? { nest: `${siteUrl}/api/integrations/nest/disconnect` }
+              : {}),
+            ...(configured.ecobee
+              ? { ecobee: `${siteUrl}/api/integrations/ecobee/disconnect` }
+              : {}),
           }
         : null,
     }),
