@@ -154,7 +154,7 @@ export const aboutPhotos: Record<AboutPhotoId, AboutPhoto> = {
     id: "server-rack",
     image: serverRack,
     alt: "Rows of lit server racks in a dense data-center aisle",
-    caption: "Closets and homelab racks need high-temp watch as much as garages need freeze alerts.",
+    caption: "Closets and homelab racks need high-temp watch as much as garages need freeze and leak alerts.",
     credit: "Photo: Carl Lender / Flickr — CC BY 2.0",
     license: "CC BY 2.0",
     sourceUrl: "https://commons.wikimedia.org/wiki/File:Server_Room_(22397102849).jpg",

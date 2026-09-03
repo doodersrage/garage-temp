@@ -41,7 +41,7 @@ export function buildTrialReminderEmail(options: {
       "Billing is managed in the Stripe customer portal from your dashboard — no surprise lockout if you renew before the trial ends.",
     ],
     bullets: [
-      "SMS and push freeze alerts",
+      "SMS and push freeze and leak alerts",
       "Public share links and embeds",
       "Outbound webhooks and higher device limits",
     ],

@@ -1,6 +1,6 @@
 ---
 /**
- * Empty / first-device path on Devices — guided ESP → reading → freeze alert,
+ * Empty / first-device path on Devices — guided ESP → reading → freeze/leak alert,
  * with other connect paths available but de-emphasized.
  */
 interface Props {
@@ -13,9 +13,9 @@ interface Props {
 const { canEdit, atDeviceLimit, redirectTo, nestEntitled } = Astro.props;
 ---
 <section class="card devices-first-run" id="devices-first-run" aria-labelledby="devices-first-run-title">
-  <h2 class="card-title" id="devices-first-run-title">Get your first freeze alert</h2>
+  <h2 class="card-title" id="devices-first-run-title">Get your first freeze or leak alert</h2>
   <p class="card-subtitle mb-4">
-    Three steps: create a push device, POST one reading, set freeze °F + email. Other paths are below.
+    Three steps: create a push device, POST one reading, set freeze °F + email. A flood/leak contact on the same device auto-alerts when wet. Other paths are below.
   </p>
 
   <ol class="devices-guide" aria-label="Guided first-run">

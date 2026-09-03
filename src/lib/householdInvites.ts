@@ -192,7 +192,7 @@ export async function sendInviteEmail(
       eyebrow: "Household invite",
       preheader: `${who} invited you to share probe sensors on ThermalTrace.`,
       title: `You're invited to ${householdName}`,
-      intro: `${who} wants to share live probes and freeze alerts with you on ThermalTrace.`,
+      intro: `${who} wants to share live probes, freeze alerts, and leak contacts with you on ThermalTrace.`,
       paragraphs: [
         "Accept the invite with this email address (sign in or register). The link expires in 7 days.",
       ],

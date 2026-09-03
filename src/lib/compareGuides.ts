@@ -21,15 +21,15 @@ export const compareGuides: CompareGuide[] = [
     title: "ThermalTrace vs DIY MQTT",
     headline: "ThermalTrace vs DIY MQTT + Node-RED",
     description:
-      "Compare ThermalTrace freeze alerts to a self-hosted MQTT, Node-RED, and cron stack—ops burden, SMS, history, and household sharing.",
+      "Compare ThermalTrace freeze and leak alerts to a self-hosted MQTT, Node-RED, and cron stack—ops burden, SMS, history, and household sharing.",
     competitor: "DIY MQTT / Node-RED",
     summary:
-      "DIY MQTT is powerful if you enjoy running brokers, dashboards, and alert scripts. ThermalTrace is the same outcome—live probes, freeze alerts, history—without babysitting the stack at 2 a.m.",
+      "DIY MQTT is powerful if you enjoy running brokers, dashboards, and alert scripts. ThermalTrace is the same outcome—live probes, freeze and leak alerts, history—without babysitting the stack at 2 a.m.",
     lede:
-      "A Mosquitto broker, Node-RED flows, and a cron job can freeze-alert a garage. The cost is patching, TLS, Twilio, and a Pi that has to stay up. ThermalTrace is the hosted alerts and history layer: keep MQTT on the LAN if you want, bridge readings over HTTPS, and let household freeze channels live in the cloud.",
+      "A Mosquitto broker, Node-RED flows, and a cron job can freeze-alert a garage. The cost is patching, TLS, Twilio, and a Pi that has to stay up. ThermalTrace is the hosted alerts and history layer: keep MQTT on the LAN if you want, bridge readings over HTTPS, and let household freeze and leak channels live in the cloud.",
     photoId: "ethernet-cable",
     whenThermalTrace: [
-      "You want freeze SMS/email/push without wiring Twilio yourself",
+      "You want freeze and leak SMS/email/push without wiring Twilio yourself",
       "Household members need access without VPN to your Pi",
       "You still use ESP/Arduino—HTTPS ingest or MQTT→HTTP bridge",
     ],
@@ -40,7 +40,7 @@ export const compareGuides: CompareGuide[] = [
     ],
     rows: [
       { capability: "Broker / server upkeep", thermaltrace: "Hosted (no Mosquitto to patch)", other: "You patch Mosquitto/HA" },
-      { capability: "Freeze alerts", thermaltrace: "Built-in channels + remaining-hours clock", other: "Node-RED + Twilio/email" },
+      { capability: "Freeze and leak alerts", thermaltrace: "Built-in channels + remaining-hours freeze clock", other: "Node-RED + Twilio/email" },
       { capability: "ESP ingest", thermaltrace: "HTTPS device key or MQTT bridge", other: "MQTT topic design" },
       { capability: "History & CSV", thermaltrace: "On paid plans", other: "Influx/Postgres you manage" },
       { capability: "Share with family", thermaltrace: "Household invites", other: "VPN or reverse proxy" },
@@ -52,16 +52,16 @@ export const compareGuides: CompareGuide[] = [
     title: "ThermalTrace vs Govee",
     headline: "ThermalTrace vs Govee sensors",
     description:
-      "Govee (and similar SmartThings-style consumer hubs) vs ThermalTrace for freeze monitoring in unheated spaces—alerts, ESP ingest, multi-probe zones, and export.",
+      "Govee (and similar SmartThings-style consumer hubs) vs ThermalTrace for freeze and leak monitoring in unheated spaces—alerts, ESP ingest, multi-probe zones, and export.",
     competitor: "Govee",
     summary:
-      "Govee—and consumer hubs like SmartThings—are great for cheap room sensors and a polished phone app. ThermalTrace is built for freeze workflows in garages, workshops, attics, and shops: your own ESP probes, household alerts, and history you can export.",
+      "Govee—and consumer hubs like SmartThings—are great for cheap room sensors and a polished phone app. ThermalTrace is built for freeze and leak workflows in garages, workshops, attics, and shops: your own ESP probes, household alerts, and history you can export.",
     lede:
-      "Govee hygrometers (and SmartThings-style hubs that absorb the same class of Bluetooth/Wi-Fi pods) win on price and a friendly phone app for bedrooms and closets. They are weaker in a detached garage or shop: Bluetooth range, vendor lock-in, and alerts that mostly stay in-app. ThermalTrace assumes you bring an ESP32, then gives household freeze routing and a season of exportable history.",
+      "Govee hygrometers (and SmartThings-style hubs that absorb the same class of Bluetooth/Wi-Fi pods) win on price and a friendly phone app for bedrooms and closets. They are weaker in a detached garage or shop: Bluetooth range, vendor lock-in, and alerts that mostly stay in-app. ThermalTrace assumes you bring an ESP32, then gives household freeze and leak routing and a season of exportable history.",
     photoId: "garage-workbench",
     whenThermalTrace: [
       "You want ESP/Arduino probes you control (not only vendor pods)",
-      "Freeze alerts need SMS, webhooks, or household routing",
+      "Freeze and leak alerts need SMS, webhooks, or household routing",
       "You care about CSV/history across a whole cold season",
     ],
     whenOther: [

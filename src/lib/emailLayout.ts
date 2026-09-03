@@ -80,7 +80,7 @@ export function buildBrandedEmailText(content: BrandedEmailContent): string {
     lines.push(`${content.secondaryCta.label}: ${content.secondaryCta.url}`);
     lines.push("");
   }
-  lines.push(content.footerNote ?? "ThermalTrace — live probe curves, freeze alerts, and history.");
+  lines.push(content.footerNote ?? "ThermalTrace — live probe curves, freeze and flood/leak alerts, and history.");
   const siteUrl = resolveSiteUrl(null);
   lines.push(`${siteUrl}/dashboard`);
   return lines.join("\n").trim() + "\n";

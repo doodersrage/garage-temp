@@ -56,7 +56,7 @@ const featuredStory = getStory("pipe-near-miss")!;
   softwareApplication
   speakableSelectors={[".home-hero-brand", ".home-hero-promise", ".home-hero-lead", ".faq-answer"]}
   ogImage="/og-dashboard.jpg"
-  ogImageAlt="ThermalTrace live telemetry graph — probe curves with humidity, dew point, and freeze alerts"
+  ogImageAlt="ThermalTrace live telemetry graph — probe curves with humidity, dew point, freeze alerts, and flood/wet contacts"
 >
 	{!isAuthenticated ? (
 		<div class="home-marketing">
@@ -67,7 +67,7 @@ const featuredStory = getStory("pipe-near-miss")!;
 						<BrandMark as="h1" class="home-hero-brand" mark />
 						<p class="home-hero-promise">Know before your pipes freeze or your space floods.</p>
 						<p class="home-hero-lead">
-							Monitor your garage, workshop, cabin, or other vulnerable spaces with sensors you build—and get alerted when temperatures become dangerous.
+							Monitor your garage, workshop, cabin, or other vulnerable spaces with sensors you build—and get alerted when temperatures drop or a leak contact goes wet.
 						</p>
 						<div class="home-hero-actions">
 							<a class="btn-primary home-hero-cta-primary" href="/about/probe-demo">Try probe simulator</a>
@@ -100,7 +100,7 @@ const featuredStory = getStory("pipe-near-miss")!;
 							class="home-hero-visual-img home-hero-visual-img--dashboard"
 						/>
 						<figcaption class="home-hero-visual-caption">
-							Real ThermalTrace dashboard — probe curves with your freeze threshold, not a mockup.
+							Real ThermalTrace dashboard — probe curves, freeze threshold, and flood/wet contacts, not a mockup.
 							{" "}
 							<a class="text-link" href="/about/probe-demo">Try the interactive simulator</a>
 							{" · "}

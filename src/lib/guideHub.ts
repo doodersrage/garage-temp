@@ -66,6 +66,11 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
         label: "Freeze case study",
         summary: "How a probe curve caught a cold night before pipes froze.",
       },
+      {
+        href: "/stories/water-heater-pad-leak",
+        label: "Leak case study",
+        summary: "How a wet contact under a garage water heater caught a drip before it soaked the slab.",
+      },
     ],
   },
   {
@@ -110,7 +115,7 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
       {
         href: "/compare/diy-mqtt",
         label: "vs DIY MQTT",
-        summary: "When hosted freeze alerts beat self-hosting Mosquitto and cron.",
+        summary: "When hosted freeze and leak alerts beat self-hosting Mosquitto and cron.",
       },
     ],
   },

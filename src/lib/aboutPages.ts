@@ -117,7 +117,7 @@ export const coreAboutPages: AboutPage[] = [
     slug: "thermostat-oauth",
     title: "Nest & Ecobee thermostat OAuth (operators)",
     description:
-      "Enable Nest and Ecobee OAuth on your ThermalTrace deployment so Pro households can connect thermostats for indoor context on freeze alerts.",
+      "Enable Nest and Ecobee OAuth on your ThermalTrace deployment so Pro households can connect thermostats for indoor context on freeze and leak alerts.",
     summary:
       "Device Access Console, Ecobee developer app, redirect URIs, and Worker secrets for NEST_* and ECOBEE_CLIENT_ID.",
   },
@@ -133,7 +133,7 @@ export const coreAboutPages: AboutPage[] = [
     slug: "mqtt-bridge",
     title: "MQTT bridge recipe",
     description:
-      "Keep Mosquitto or Home Assistant MQTT on your LAN and mirror readings to ThermalTrace over HTTPS for household freeze alerts and history.",
+      "Keep Mosquitto or Home Assistant MQTT on your LAN and mirror readings to ThermalTrace over HTTPS for household freeze and leak alerts and history.",
     summary:
       "POST /api/ingest/mqtt, Home Assistant rest_command, and Node-RED flow — dual-run without exposing your broker.",
   },
@@ -141,7 +141,7 @@ export const coreAboutPages: AboutPage[] = [
     slug: "install-pwa",
     title: "Install as an app (PWA)",
     description:
-      "Install ThermalTrace as a PWA on desktop, Android, or iOS for faster dashboard access and optional Pro browser push freeze alerts.",
+      "Install ThermalTrace as a PWA on desktop, Android, or iOS for faster dashboard access and optional Pro browser push freeze and leak alerts.",
     summary:
       "Desktop, Android, and iOS install steps, plus Web Push limits on Apple devices.",
   },

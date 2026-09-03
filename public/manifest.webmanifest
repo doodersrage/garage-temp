@@ -1,7 +1,7 @@
 {
   "name": "ThermalTrace",
   "short_name": "ThermalTrace",
-  "description": "Open-source dashboard to track, log, and analyze temperature probe curves — with live readings, freeze alerts, and history.",
+  "description": "Open-source dashboard to track, log, and analyze temperature probe curves — with live readings, freeze and flood/leak alerts, and history.",
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",

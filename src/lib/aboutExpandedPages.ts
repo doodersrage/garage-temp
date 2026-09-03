@@ -549,7 +549,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "ingest-and-webhooks",
     title: "Zapier and Make.com recipes",
     description:
-      "Connect ThermalTrace outbound alert webhooks and inbound snooze actions to Zapier or Make.com for no-code freeze and vacation automations.",
+      "Connect ThermalTrace outbound alert webhooks and inbound snooze actions to Zapier or Make.com for no-code freeze, leak, and vacation automations.",
     summary:
       "Route alerts to Zapier/Make and pause notifications from other smart-home flows.",
   },
@@ -587,7 +587,7 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     description:
       "Simulate multi-zone temperatures with freeze threshold, space status, and push/pull JSON like production Devices and Overview.",
     summary:
-      "Garage, workshop, attic, or crawlspace — watch freeze risk and ingest JSON update live.",
+      "Garage, workshop, attic, or crawlspace — watch freeze and leak risk and ingest JSON update live.",
   },
   {
     slug: "esphome-shelly-recipes",
@@ -612,9 +612,9 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     parentSlug: "ingest-and-webhooks",
     title: "Home Assistant notify recipes",
     description:
-      "Route ThermalTrace freeze alerts into Home Assistant notify, TTS, and mobile push — outbound webhooks, HACS services, and inbound snooze.",
+      "Route ThermalTrace freeze and leak alerts into Home Assistant notify, TTS, and mobile push — outbound webhooks, HACS services, and inbound snooze.",
     summary:
-      "Local voice and phone notify when freeze risk hits — dual-run with ThermalTrace email/SMS.",
+      "Local voice and phone notify when freeze or leak risk hits — dual-run with ThermalTrace email/SMS.",
   },
   {
     slug: "personal-weather-stations",

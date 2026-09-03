@@ -11,4 +11,4 @@ export const BRAND_POSITIONING = "Garage & workshop sensor monitoring";
 export const BRAND_TAGLINE = `Track, log, and analyze sensors in ${BRAND_SPACES}.`;
 /** Definition-first for SEO/AEO meta defaults. */
 export const BRAND_DESCRIPTION =
-  `ThermalTrace is open-source garage and workshop monitoring for ${BRAND_SPACES}—freeze-aware alerts, ESP/Arduino or JSON ingest, live curves, and exportable history before pipes and storage take damage.`;
+  `ThermalTrace is open-source garage and workshop monitoring for ${BRAND_SPACES}—freeze and flood/leak alerts, ESP/Arduino or JSON ingest, live curves, and exportable history before pipes, pads, and storage take damage.`;

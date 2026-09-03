@@ -67,6 +67,6 @@ Import [`/nodered/mqtt-to-thermaltrace.json`](https://thermaltrace.dev/nodered/m
 
 ## Dual-run tip
 
-Keep local automations on MQTT. Use ThermalTrace for household freeze SMS/email, history, and share links—without exposing the broker to the internet.
+Keep local automations on MQTT. Use ThermalTrace for household freeze and leak SMS/email, history, and share links—without exposing the broker to the internet.
 
 Product walkthrough: [Adding devices](https://thermaltrace.dev/about/adding-devices#mqtt-bridge) · Compare: [vs DIY MQTT](https://thermaltrace.dev/compare/diy-mqtt)

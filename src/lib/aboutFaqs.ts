@@ -294,7 +294,7 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
     {
       question: "Do I need to stop using Home Assistant MQTT?",
       answer:
-        "No. Many households dual-run: Mosquitto locally for automations, plus HTTPS push ingest for ThermalTrace freeze SMS and history.",
+        "No. Many households dual-run: Mosquitto locally for automations, plus HTTPS push ingest for ThermalTrace freeze and leak SMS and history.",
     },
     {
       question: "Which Shelly models work?",

@@ -35,7 +35,7 @@ const schema = [
 ---
 <Layout
   title="Home Assistant integration"
-  description="Official ThermalTrace HACS integration for Home Assistant — auto-create sensors from share links, snooze freeze alerts, push readings, and dual-run with MQTT on your LAN."
+  description="Official ThermalTrace HACS integration for Home Assistant — auto-create sensors from share links, snooze freeze and leak alerts, push readings, and dual-run with MQTT on your LAN."
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
@@ -43,7 +43,7 @@ const schema = [
     <PageHeader
       kicker="HACS integration"
       title="ThermalTrace in Home Assistant"
-      lede="Install the official custom integration, paste a share-link token (Free includes one family live link; Pro adds history/metrics and inbound webhooks), and get temperature, humidity, door, and leak entities — plus optional snooze, vacation, and push services. Keep Mosquitto local; use ThermalTrace for household freeze SMS, history, and off-site alerts."
+      lede="Install the official custom integration, paste a share-link token (Free includes one family live link; Pro adds history/metrics and inbound webhooks), and get temperature, humidity, door, and leak entities — plus optional snooze, vacation, and push services. Keep Mosquitto local; use ThermalTrace for household freeze and leak SMS, history, and off-site alerts."
     >
       <a slot="actions" class="btn-primary" href={HACS_REPO_URL} target="_blank" rel="noreferrer">
         HACS repo on GitHub
@@ -112,8 +112,8 @@ const schema = [
         </li>
         <li>
           <strong>Polling</strong> — HACS defaults to every 5 minutes (60–3600 s configurable). That is fine for dashboards; for
-          time-critical freeze thresholds prefer <strong>native push ingest</strong> (ESP/Arduino → ThermalTrace) so alerts fire on
-          the reading, not after the next HA poll. Dual-run is normal: push for freeze SMS, HACS for local entities.
+          time-critical freeze thresholds and wet contacts prefer <strong>native push ingest</strong> (ESP/Arduino → ThermalTrace) so alerts fire on
+          the reading, not after the next HA poll. Dual-run is normal: push for freeze and leak SMS, HACS for local entities.
         </li>
         <li>
           <strong>Services</strong> (optional inbound webhook + secret from Dashboard → Share):
@@ -215,7 +215,7 @@ const schema = [
     <section class="card">
       <h2 class="card-title">Dual-run with MQTT (usual pattern)</h2>
       <p class="card-subtitle mb-4">
-        ThermalTrace is not an MQTT broker. Most homelabbers keep Mosquitto / ESPHome / HA MQTT on the LAN and mirror selected topics over HTTPS when they want cloud freeze alerts and history.
+        ThermalTrace is not an MQTT broker. Most homelabbers keep Mosquitto / ESPHome / HA MQTT on the LAN and mirror selected topics over HTTPS when they want cloud freeze and leak alerts and history.
       </p>
       <ul class="text-sm space-y-2 mb-0">
         <li>
@@ -262,7 +262,7 @@ const schema = [
 
     <section class="card">
       <h2 class="card-title">Example automation</h2>
-      <p class="card-subtitle mb-4">Snooze ThermalTrace freeze alerts while a door is open for maintenance:</p>
+      <p class="card-subtitle mb-4">Snooze ThermalTrace freeze and leak alerts while a door is open for maintenance:</p>
       <pre class="text-xs overflow-x-auto mb-0"><code>{`automation:
   - alias: Snooze ThermalTrace while door open
     trigger:

@@ -48,19 +48,20 @@ export const DRIP_STAGES: DripStage[] = [
   {
     id: "day3",
     day: 3,
-    subject: "Turn on freeze alerts before the next cold snap",
+    subject: "Turn on freeze and leak alerts before the next surprise",
     content: (site) => ({
-      eyebrow: "Freeze protection",
-      preheader: "Most unconditioned spaces start alerts around 34°F so you get warning before pipes freeze.",
-      title: "Don’t wait for the cold snap",
+      eyebrow: "Freeze and flood protection",
+      preheader:
+        "Most unconditioned spaces start freeze alerts around 34°F — and wet flood contacts notify automatically once alerts are on.",
+      title: "Don’t wait for the cold snap or a wet pad",
       intro:
-        "ThermalTrace can reach you when temperatures drop toward freezing — email now, plus SMS and push on Pro.",
+        "ThermalTrace can reach you when temperatures drop toward freezing or a leak contact goes wet — email now, plus SMS and push on Pro.",
       paragraphs: [
-        "Set a freeze threshold on your coldest zone, enable the channels you actually check, and send a test while you’re awake.",
+        "Set a freeze threshold on your coldest zone, enable the channels you actually check, and send a test while you’re awake. Add a wet/dry flood contact on a heater pan, laundry, or sump when you have one.",
       ],
       bullets: [
-        "Start near 34–38°F, then tune after you see overnight lows",
-        "Enable quiet-hour bypass for freeze alerts",
+        "Start freeze near 34–38°F, then tune after you see overnight lows",
+        "Enable quiet-hour bypass for freeze and flood alerts",
         "Optional: invite household members so someone else sees the ping",
       ],
       cta: { label: "Configure alerts", url: `${site}/dashboard/alerts` },
@@ -83,7 +84,7 @@ export const DRIP_STAGES: DripStage[] = [
         "Start a 14-day trial from Pricing — cancel anytime from the dashboard billing portal.",
       ],
       bullets: [
-        "SMS and browser push freeze alerts",
+        "SMS and browser push freeze and leak alerts",
         "History, metrics, and never-expire share links plus embeds",
         `Outbound webhooks plus up to ${PRO_MAX_DEVICES} devices per property`,
       ],

@@ -30,4 +30,4 @@ Questions → this channel or GitHub issues on the integration repo.
 
 **One-liner (Bluesky):**
 
-Official ThermalTrace HACS integration — share-link sensors, snooze services, MQTT/ESPHome recipes for freeze monitoring in garages, workshops & crawlspaces. https://thermaltrace.dev/integrations/home-assistant
+Official ThermalTrace HACS integration — share-link sensors, snooze services, MQTT/ESPHome recipes for freeze and leak monitoring in garages, workshops & crawlspaces. https://thermaltrace.dev/integrations/home-assistant

@@ -244,5 +244,5 @@ export function getSiteSchemas(options: {
 
 /** Short definition-style blurb for AEO (answer engines). */
 export function getBrandDefinition(): string {
-  return `${SITE_NAME}: ${BRAND_TAGLINE} Open-source live probe dashboards, freeze alerts, and history for ${BRAND_SPACES}.`;
+  return `${SITE_NAME}: ${BRAND_TAGLINE} Open-source live probe dashboards, freeze and flood/leak alerts, and history for ${BRAND_SPACES}.`;
 }

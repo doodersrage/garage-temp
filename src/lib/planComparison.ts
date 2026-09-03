@@ -328,8 +328,8 @@ const NUDGE_CONFIG: Record<
   },
   sms_alerts: {
     targetTier: "pro",
-    title: "Get freeze alerts by SMS",
-    body: "Pro adds Twilio SMS — critical when email isn't fast enough during cold snaps.",
+    title: "Get freeze and leak alerts by SMS",
+    body: "Pro adds Twilio SMS — critical when email isn't fast enough during a cold snap or a wet contact.",
     anchor: "sms-alerts",
   },
   push_alerts: {

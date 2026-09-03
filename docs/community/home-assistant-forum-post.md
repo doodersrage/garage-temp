@@ -4,13 +4,13 @@ Copy/paste into a new topic on [community.home-assistant.io](https://community.h
 
 ---
 
-**Title:** ThermalTrace — freeze monitoring for garages, workshops & crawlspaces (official HACS integration)
+**Title:** ThermalTrace — freeze and leak monitoring for garages, workshops & crawlspaces (official HACS integration)
 
-**Tags:** `custom-component` `integration` `sensor` `freeze` `garage`
+**Tags:** `custom-component` `integration` `sensor` `freeze` `leak` `garage`
 
 ---
 
-Hi all — we run [ThermalTrace](https://thermaltrace.dev), a hosted dashboard for ESP/Arduino probes in garages, workshops, attics, and crawlspaces — freeze alerts, history, and household sharing. We shipped an **official HACS custom integration** and wanted to share it here.
+Hi all — we run [ThermalTrace](https://thermaltrace.dev), a hosted dashboard for ESP/Arduino probes in garages, workshops, attics, and crawlspaces — freeze and leak alerts, history, and household sharing. We shipped an **official HACS custom integration** and wanted to share it here.
 
 ### What it does
 
@@ -38,7 +38,7 @@ Full guide: https://thermaltrace.dev/integrations/home-assistant
 
 ### Example automation
 
-Snooze freeze alerts while the garage door is open for maintenance:
+Snooze freeze and leak alerts while the garage door is open for maintenance:
 
 ```yaml
 automation:

@@ -42,7 +42,7 @@ export const INTEGRATION_CARDS: IntegrationCard[] = [
     id: "mqtt-bridge",
     title: "MQTT bridge",
     summary:
-      "Keep Mosquitto local; mirror readings over HTTPS JSON push or pull feeds for household freeze alerts and history.",
+      "Keep Mosquitto local; mirror readings over HTTPS JSON push or pull feeds for household freeze and leak alerts and history.",
     href: "/about/mqtt-bridge",
     cta: "Bridge recipe",
     secondaryHref: `${DEV_DOCS_BASE}/integrations/mqtt-bridge`,

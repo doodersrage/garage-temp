@@ -46,7 +46,7 @@ export function resolveOgImageAlt(pathname: string): string {
   const path = pathname.split("?")[0] || "/";
 
   if (path.startsWith("/pricing") || path.startsWith("/compare")) {
-    return `${BRAND_NAME} plans and pricing — Free, Member, Pro, and Portfolio freeze alert tiers`;
+    return `${BRAND_NAME} plans and pricing — Free, Member, Pro, and Portfolio freeze and flood/leak alert tiers`;
   }
   if (path.startsWith("/freeze-map") || path.startsWith("/freeze-season")) {
     return `${BRAND_NAME} opt-in freeze-risk map of city-level probe temperatures`;
@@ -55,13 +55,13 @@ export function resolveOgImageAlt(pathname: string): string {
     return `${BRAND_NAME} live probe temperature curves — no account required`;
   }
   if (path.startsWith("/share-kit")) {
-    return `${BRAND_NAME} share kit — freeze map embeds and community post copy`;
+    return `${BRAND_NAME} share kit — freeze map embeds and freeze/flood community post copy`;
   }
   if (path.startsWith("/about") || path.startsWith("/guides")) {
-    return `${BRAND_NAME} guides for probes, firmware, freeze alerts, and ingest`;
+    return `${BRAND_NAME} guides for probes, firmware, freeze and flood/leak alerts, and ingest`;
   }
   if (path.startsWith("/stories")) {
-    return `${BRAND_NAME} customer story: freeze-risk alert before pipes freeze`;
+    return `${BRAND_NAME} customer stories: freeze-risk and leak alerts before pipes and pads take damage`;
   }
   if (path.startsWith("/docs")) {
     return `${BRAND_NAME} HTTP API — ingest, metrics, webhooks, and OpenAPI`;
@@ -70,10 +70,10 @@ export function resolveOgImageAlt(pathname: string): string {
     return `${BRAND_NAME} Android companion — early access on GitHub while Google Play review finishes`;
   }
   if (path === "/" || path === "") {
-    return `${BRAND_NAME} live telemetry graph — probe curves with humidity, dew point, and freeze alerts`;
+    return `${BRAND_NAME} live telemetry graph — probe curves with humidity, dew point, freeze alerts, and flood/wet contacts`;
   }
 
-  return `${BRAND_NAME} environmental sensor dashboard with live curves and freeze alerts`;
+  return `${BRAND_NAME} environmental sensor dashboard with live curves, freeze alerts, and flood/leak contacts`;
 }
 
 export function absoluteOgImageUrl(siteUrl: string, imagePathOrUrl: string): string {

@@ -112,7 +112,7 @@ export const marketingFaqs = {
     {
       question: "How is ThermalTrace different from a DIY script?",
       answer:
-        "ThermalTrace hosts ingest, history, households, and multi-channel freeze alerts for you. A DIY cron script requires you to run servers, databases, Twilio wiring, and uptime yourself.",
+        "ThermalTrace hosts ingest, history, households, and multi-channel freeze and leak alerts for you. A DIY cron script requires you to run servers, databases, Twilio wiring, and uptime yourself.",
     },
     {
       question: "How does ThermalTrace compare to Govee or SmartThings?",
@@ -127,7 +127,7 @@ export const marketingFaqs = {
     {
       question: "Can I keep Home Assistant or MQTT and still use ThermalTrace?",
       answer:
-        "Yes. Install the official HACS integration (github.com/doodersrage/thermaltrace-home-assistant) for automatic entities from a share link, or keep MQTT on your LAN and mirror with POST /api/ingest/mqtt. Many people dual-run: HA locally, ThermalTrace for household freeze SMS and history. See thermaltrace.dev/integrations/home-assistant.",
+        "Yes. Install the official HACS integration (github.com/doodersrage/thermaltrace-home-assistant) for automatic entities from a share link, or keep MQTT on your LAN and mirror with POST /api/ingest/mqtt. Many people dual-run: HA locally, ThermalTrace for household freeze and leak SMS and history. See thermaltrace.dev/integrations/home-assistant.",
     },
     {
       question: "Why does ThermalTrace require an account?",
@@ -181,7 +181,7 @@ export const marketingFaqs = {
     {
       question: "What should I ask about before contacting support?",
       answer:
-        "Probe wiring, ingest payloads, freeze alerts, and dashboard setup are covered in the guides hub and all articles library. Use this form for account, billing, Android launch notes, or questions the docs do not answer.",
+        "Probe wiring, ingest payloads, freeze and leak alerts, and dashboard setup are covered in the guides hub and all articles library. Use this form for account, billing, Android launch notes, or questions the docs do not answer.",
     },
     {
       question: "Should I use the form or GitHub?",
@@ -233,9 +233,9 @@ export const marketingFaqs = {
         "A live share link works for sensor polling — Free includes one family live link. Pro unlocks history/metrics scopes, never-expire links, and inbound webhook services (snooze, vacation, status) from Dashboard → Share. Push via thermaltrace.push uses any push device ingest key.",
     },
     {
-      question: "Will HACS polling delay freeze alerts?",
+      question: "Will HACS polling delay freeze or leak alerts?",
       answer:
-        "HACS defaults to polling the share link every 5 minutes (configurable). ThermalTrace freeze SMS/email/push still fire from your probe’s push ingest path immediately. Use native ESP/Arduino push (or MQTT→HTTPS bridge) for time-critical thresholds; keep HACS for local entities and automations.",
+        "HACS defaults to polling the share link every 5 minutes (configurable). ThermalTrace freeze and leak SMS/email/push still fire from your probe’s push ingest path immediately. Use native ESP/Arduino push (or MQTT→HTTPS bridge) for time-critical thresholds and wet contacts; keep HACS for local entities and automations.",
     },
     {
       question: "Does Nest or Ecobee OAuth work for indoor context?",
@@ -250,10 +250,10 @@ export const marketingFaqs = {
     {
       question: "Can I use ThermalTrace with MQTT and Home Assistant together?",
       answer:
-        "Yes — the usual pattern keeps Mosquitto/ESPHome on your LAN and mirrors selected topics to ThermalTrace over HTTPS (POST /api/ingest/mqtt). ThermalTrace handles off-site freeze SMS/email and history; HA keeps local automations. Recipe: thermaltrace.dev/about/mqtt-bridge.",
+        "Yes — the usual pattern keeps Mosquitto/ESPHome on your LAN and mirrors selected topics to ThermalTrace over HTTPS (POST /api/ingest/mqtt). ThermalTrace handles off-site freeze and leak SMS/email and history; HA keeps local automations. Recipe: thermaltrace.dev/about/mqtt-bridge.",
     },
     {
-      question: "How do freeze alerts reach Home Assistant?",
+      question: "How do freeze and leak alerts reach Home Assistant?",
       answer:
         "Configure a Pro outbound webhook in ThermalTrace pointing at your HA webhook URL, or import the garage_temp_webhook.yaml blueprint from thermaltrace.dev/ha/garage_temp_webhook.yaml. When you set a webhook signing secret, verify the X-Signature HMAC header before acting on the payload.",
     },
