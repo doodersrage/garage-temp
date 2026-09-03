@@ -1,5 +1,5 @@
 /**
- * Copy helpers for noisy alerts — placement, unplugged probes, and smarter snooze.
+ * Copy helpers for noisy alerts — freeze placement, leak contact bounce, and smarter snooze.
  */
 
 export type FalseAlarmHint = {
@@ -44,6 +44,30 @@ export const FALSE_ALARM_TIPS: FalseAlarmHint[] = [
   },
 ];
 
+/** Tips for wet-contact / sump noise (flood still bypasses snooze). */
+export const FLOOD_FALSE_ALARM_TIPS: FalseAlarmHint[] = [
+  {
+    id: "splash",
+    title: "Splash and condensation bounce",
+    detail:
+      "A contact under a water heater or laundry tub can flicker wet from condensation or a drip that already stopped. Mount on the pan floor away from drip lines, and wipe/dry after a false trip.",
+  },
+  {
+    id: "sump_cycle",
+    title: "Sump duty cycle ≠ leak",
+    detail:
+      "Rising sump level during a storm is normal. Use a flood/leak contact for standing water, and a custom level_above rule only if you want pump-failure early warning — not every pump cycle.",
+    href: "/dashboard/alerts#alert-section-rules",
+    hrefLabel: "Alert rules",
+  },
+  {
+    id: "test_wet",
+    title: "Test with a damp cloth, then dry",
+    detail:
+      "Flood alerts fire automatically when wet (even during vacation). After a placement test, dry the contact so you do not leave a sticky wet state overnight.",
+  },
+];
+
 export function staleProbeDetail(staleCount: number): string {
   const n = Math.max(1, staleCount);
   const probe = n === 1 ? "probe looks" : "probes look";
@@ -52,4 +76,10 @@ export function staleProbeDetail(staleCount: number): string {
 
 export function likelyFalseAlarmFromStale(staleSensorCount: number): boolean {
   return staleSensorCount > 0;
+}
+
+export function wetFloodDetail(wetCount: number): string {
+  const n = Math.max(1, wetCount);
+  const sensor = n === 1 ? "flood/leak sensor is" : "flood/leak sensors are";
+  return `${n} ${sensor} wet right now — flood alerts bypass snooze and vacation. Check the pan, sump, or supply line.`;
 }

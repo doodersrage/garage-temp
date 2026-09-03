@@ -33,6 +33,7 @@ export type ClaimsPackData = {
   devices: ClaimsDeviceSummary[];
   events: AlertEventRow[];
   criticalEvents: AlertEventRow[];
+  floodAlertCount: number;
   readingsCsvUrl: string;
   alertsCsvUrl: string;
   disclaimer: string;
@@ -53,11 +54,16 @@ export function buildClaimsExecutiveSummary(input: {
   freezeHours: FreezeHoursSummary;
   criticalCount: number;
   deviceCount: number;
+  floodAlertCount: number;
 }): string {
   const fromLabel = formatRangeDate(input.rangeFrom);
   const toLabel = formatRangeDate(input.rangeTo);
   const coldest = formatTemp(input.freezeHours.coldestF);
   const hours = input.freezeHours.hoursBelow34.toFixed(1);
+  const floodClause =
+    input.floodAlertCount > 0
+      ? ` Including ${input.floodAlertCount} flood/leak alert${input.floodAlertCount === 1 ? "" : "s"}.`
+      : " No flood/leak alerts in this window.";
   return (
     `For household “${input.householdLabel}” from ${fromLabel} to ${toLabel} (UTC dates), ` +
     `${input.deviceCount} monitored device${input.deviceCount === 1 ? "" : "s"} recorded ` +
@@ -65,7 +71,8 @@ export function buildClaimsExecutiveSummary(input: {
     `Coldest indoor probe reading was ${coldest}; approximately ${hours} hours were at or below the ` +
     `${input.freezeThresholdF}°F household freeze threshold. ` +
     `${input.criticalCount} critical alert event${input.criticalCount === 1 ? "" : "s"} ` +
-    `(freeze / leak / rate / NWS / forecast / time-to-freeze) appear in the timeline below.`
+    `(freeze / leak / rate / NWS / forecast / time-to-freeze) appear in the timeline below.` +
+    floodClause
   );
 }
 
@@ -112,6 +119,7 @@ export function buildClaimsPackData(input: {
   const freezeHours = computeFreezeHours(input.points, input.freezeThresholdF);
   const probes = summarizeProbesForReport(input.points);
   const criticalEvents = filterCriticalAlertEvents(input.events);
+  const floodAlertCount = criticalEvents.filter((e) => e.kind === "flood").length;
 
   return {
     exportedAt: input.exportedAt ?? new Date().toISOString(),
@@ -124,6 +132,7 @@ export function buildClaimsPackData(input: {
     devices: input.devices,
     events: input.events,
     criticalEvents,
+    floodAlertCount,
     readingsCsvUrl: input.readingsCsvUrl,
     alertsCsvUrl: input.alertsCsvUrl,
     disclaimer: CLAIMS_DISCLAIMER,
@@ -135,6 +144,7 @@ export function buildClaimsPackData(input: {
       freezeHours,
       criticalCount: criticalEvents.length,
       deviceCount: input.devices.length,
+      floodAlertCount,
     }),
     adjusterNotes: CLAIMS_ADJUSTER_NOTES,
     verifyUrl: null,
@@ -290,6 +300,7 @@ export function buildClaimsPackHtml(data: ClaimsPackData): string {
         ${statBlock("Total readings", String(data.freezeHours.totalReadings))}
         ${statBlock("Freeze threshold", `${data.freezeThresholdF}°F`)}
         ${statBlock("Critical alerts", String(data.criticalEvents.length), "freeze / leak / rate / NWS / forecast / time-to-freeze")}
+        ${statBlock("Flood / leak alerts", String(data.floodAlertCount), "wet-contact events in window")}
       </div>
     </section>
 

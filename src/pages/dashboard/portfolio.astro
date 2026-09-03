@@ -18,6 +18,7 @@ const { properties, error } = entitlements.canUsePortfolio
   : { properties: [], error: null as string | null };
 const withHealth = attachPropertyHealth(properties);
 const atRisk = withHealth.filter((p) => p.atRisk);
+const floodWet = withHealth.filter((p) => p.floodWet);
 const coldest = [...withHealth]
   .filter((p) => p.minTempF != null)
   .sort((a, b) => (a.minTempF ?? 999) - (b.minTempF ?? 999))
@@ -43,7 +44,7 @@ const vacationProperties = flash.get("properties");
     <section class="card">
       <h2 class="card-title">All properties</h2>
       <p class="card-subtitle mb-0">
-        Cross-property freeze risk and health at a glance
+        Cross-property freeze and flood risk at a glance
         {!entitlements.canUsePortfolio
           ? " — upgrade to Pro to unlock portfolio view and alerts"
           : entitlements.tier === "pro"
@@ -69,7 +70,8 @@ const vacationProperties = flash.get("properties");
           <div>
             <h2 class="card-title">Portfolio health</h2>
             <p class="card-subtitle mb-0">
-              Average score {avgHealth}% · {atRisk.length} at freeze risk · coldest listed below
+              Average score {avgHealth}% · {atRisk.length} at freeze/flood risk
+              {floodWet.length > 0 ? ` · ${floodWet.length} wet` : ""} · coldest listed below
             </p>
           </div>
         </div>
@@ -121,16 +123,20 @@ const vacationProperties = flash.get("properties");
     {atRisk.length > 0 && (
       <DashboardCard>
         <h2 class="card-title text-[var(--color-warning)]">
-          {atRisk.length} propert{atRisk.length === 1 ? "y" : "ies"} at freeze risk today
+          {atRisk.length} propert{atRisk.length === 1 ? "y" : "ies"} at freeze or flood risk today
         </h2>
         <p class="card-subtitle mb-3">
           Portfolio digest emails fire when properties cross freeze — toggle under
           <a class="text-link" href="/dashboard/alerts#alert-section-essentials">Alerts → Essentials</a>.
+          Flood/leak wet contacts auto-alert per property (bypass vacation).
         </p>
         <ul class="m-0 p-0 list-none space-y-2">
           {atRisk.map((p) => (
             <li class="text-sm">
-              <strong>{p.name}</strong> — {p.minTempF?.toFixed(1)}°F (threshold {p.freezeThresholdF}°F)
+              <strong>{p.name}</strong>
+              {p.floodWet
+                ? " — flood/leak wet"
+                : ` — ${p.minTempF?.toFixed(1)}°F (threshold ${p.freezeThresholdF}°F)`}
             </li>
           ))}
         </ul>
@@ -177,7 +183,9 @@ const vacationProperties = flash.get("properties");
                     <button type="submit" class="text-link">{p.name}</button>
                   </form>
                   {p.atRisk && (
-                    <span class="ml-2 text-xs text-[var(--color-warning)]">At risk</span>
+                    <span class="ml-2 text-xs text-[var(--color-warning)]">
+                      {p.floodWet ? "Wet" : "At risk"}
+                    </span>
                   )}
                 </td>
                 <td class="py-2 capitalize">{p.role.replace("_", " ")}</td>

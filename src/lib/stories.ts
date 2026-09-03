@@ -237,6 +237,43 @@ export const stories: Story[] = [
       },
     ],
   },
+  {
+    slug: "water-heater-pad-leak",
+    path: "/stories/water-heater-pad-leak",
+    headline: "Water heater pad leak case study",
+    title: "The pad went wet at 3 a.m. — not the freeze night",
+    description:
+      "How a Wisconsin household used a ThermalTrace flood contact under a garage water heater to catch a slow drip before it soaked the slab and ruined stored boxes.",
+    quote: "The pad went wet at 3 a.m. — not the freeze night",
+    location: "Madison, WI",
+    datePublished: "2026-03-08",
+    ogImage: "/og-story-freeze.jpg",
+    photoId: "basement-pex-pipes",
+    setup: [
+      "ESP32 already pushing garage temp; added a cheap wet/dry contact on the heater pan",
+      "Ingest kind flood — auto-alerts when wet (no custom rule)",
+      "Email + Pro SMS; freeze threshold still watching the same bay",
+    ],
+    timeline: [
+      { time: "3:08 a.m.", detail: "Flood contact reported wet; SMS + email fired while vacation mode was on for a trip." },
+      { time: "3:20 a.m.", detail: "Neighbor with a share link confirmed a drip at the drain valve." },
+      { time: "Morning", detail: "Plumber tightened the valve; slab stayed dry enough that boxes were salvageable." },
+    ],
+    outcome:
+      "Freeze and flood share one ingest path. Vacation muted threshold noise; the wet contact still woke the household.",
+    faqs: [
+      {
+        question: "Do flood alerts need a custom rule?",
+        answer:
+          "No — when alerts are enabled, wet flood/leak contacts notify automatically. Use Rules → flood only to combine with door or temp conditions.",
+      },
+      {
+        question: "Where should the contact sit?",
+        answer:
+          "On the pan floor away from normal condensation drip lines. Test with a damp cloth, then dry so you do not leave a sticky wet state.",
+      },
+    ],
+  },
 ];
 
 export function getStory(slug: string): Story | undefined {

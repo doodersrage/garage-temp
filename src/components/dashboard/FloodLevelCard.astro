@@ -14,9 +14,11 @@ const hasContent =
   overview.levels.length > 0;
 ---
 {hasContent && (
-  <DashboardCard>
+  <DashboardCard id="flood-level">
     <h2 class="card-title">Flood &amp; level</h2>
-    <p class="card-subtitle mb-4">Wet contacts and tank/sump levels (48h).</p>
+    <p class="card-subtitle mb-4">
+      Wet contacts auto-alert when flood sensors report wet (bypasses snooze/vacation). Tank/sump levels need a Rules → level_above condition.
+    </p>
     {overview.floodOpen.length > 0 && (
       <div class="alert-warning mb-3">
         {overview.floodOpen.map((row) => (

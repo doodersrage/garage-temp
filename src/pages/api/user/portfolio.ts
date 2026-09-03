@@ -45,6 +45,7 @@ export const GET: APIRoute = async ({ cookies }) => {
           health_score: health.score,
           health_label: health.label,
           health_detail: health.detail,
+          flood_wet: p.floodWet,
         };
       }),
     }),

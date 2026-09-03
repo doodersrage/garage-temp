@@ -62,13 +62,17 @@ export function computeFreezeReadiness(input: {
 
   const channelOk = alertSettings.enabled && hasConfiguredAlertChannel(alertSettings);
   const vacationOn = isVacationActive(alertSettings, nowMs);
+  const hasFloodSensor = devices.some((d) => d.sensors.some((s) => s.kind === "flood"));
+  const hasLevelSensor = devices.some((d) => d.sensors.some((s) => s.kind === "level"));
 
   const checks: ReadinessCheck[] = [
     {
       id: "alerts_on",
-      label: "Freeze alerts enabled",
+      label: "Alerts enabled (freeze + auto flood)",
       ok: alertSettings.enabled,
-      hint: alertSettings.enabled ? undefined : "Turn alerts on under Dashboard → Alerts.",
+      hint: alertSettings.enabled
+        ? undefined
+        : "Turn alerts on under Dashboard → Alerts — flood/leak contacts notify automatically when wet.",
     },
     {
       id: "channel",
@@ -87,6 +91,14 @@ export function computeFreezeReadiness(input: {
       label: "Push or pull device registered",
       ok: devices.length > 0,
       hint: devices.length > 0 ? undefined : "Add a device under Dashboard → Temperature.",
+    },
+    {
+      id: "flood_sensor",
+      label: "Flood / leak contact registered",
+      ok: hasFloodSensor,
+      hint: hasFloodSensor
+        ? undefined
+        : "Add a wet/dry contact under a water heater, laundry, or sump — ingest kind flood auto-alerts when wet.",
     },
     {
       id: "fresh",
@@ -111,7 +123,7 @@ export function computeFreezeReadiness(input: {
       label: "Not muted by vacation mode",
       ok: !vacationOn,
       hint: vacationOn
-        ? "Vacation mode is suppressing threshold alerts — clear it under Alerts before freeze season."
+        ? "Vacation suppresses threshold noise — flood and forecast still fire. Clear vacation under Alerts when you are home."
         : undefined,
     },
     {
@@ -131,6 +143,19 @@ export function computeFreezeReadiness(input: {
         : "Enable remaining-hours alerts so you hear before the probe crosses freeze.",
     },
   ];
+
+  if (hasLevelSensor) {
+    checks.push({
+      id: "level_rule",
+      label: "Optional: sump/tank level_above rule",
+      ok: (alertSettings.alertRules ?? []).some(
+        (rule) =>
+          rule.enabled !== false &&
+          (rule.all ?? []).some((c) => c.type === "level_above"),
+      ),
+      hint: "Level sensors display on Overview; add a Rules → level_above condition if you want pump-failure early warning.",
+    });
+  }
 
   if (canUseForecast) {
     checks.push({

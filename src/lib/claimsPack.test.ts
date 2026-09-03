@@ -79,6 +79,8 @@ describe("claimsPack", () => {
     expect(pack.probes[0]?.label).toBe("Garage");
     expect(pack.executiveSummary).toMatch(/Main garage/);
     expect(pack.executiveSummary).toMatch(/28\.0°F/);
+    expect(pack.executiveSummary).toMatch(/flood\/leak/i);
+    expect(pack.floodAlertCount).toBe(1);
     expect(pack.adjusterNotes).toMatch(/cover sheet/i);
   });
 

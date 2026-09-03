@@ -38,7 +38,13 @@ describe("computeFreezeReadiness", () => {
         forecastFreezeEnabled: true,
         nwsFreezeAlertsEnabled: true,
       },
-      devices: [{ id: "d1", name: "Garage", sensors: [] } as never],
+      devices: [
+        {
+          id: "d1",
+          name: "Garage",
+          sensors: [{ id: "f1", kind: "flood", label: "Pad" }],
+        } as never,
+      ],
       latest: [{ sensor: { id: "s1", label: "T", kind: "temperature" }, value_num: 40, recorded_at: new Date().toISOString() } as never],
       weatherLocationConfigured: true,
       canUseForecast: true,
@@ -47,6 +53,7 @@ describe("computeFreezeReadiness", () => {
     });
     expect(result.score).toBeGreaterThanOrEqual(85);
     expect(result.ready).toBe(true);
+    expect(result.checks.find((c) => c.id === "flood_sensor")?.ok).toBe(true);
   });
 
   it("fails ready when vacation mode is on", () => {

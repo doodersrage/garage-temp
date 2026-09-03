@@ -61,7 +61,7 @@ const { canEdit, atDeviceLimit, redirectTo, nestEntitled } = Astro.props;
       <div>
         <h3 class="devices-guide-title">Set freeze °F + email, then send a test</h3>
         <p class="devices-guide-copy">
-          Essentials: threshold a few degrees above 32°F, your email, then one test so you trust the path before a real freeze night.
+          Essentials: threshold a few degrees above 32°F, your email, then one test. Flood/leak contacts auto-alert when wet once alerts are on — no separate rule required.
         </p>
         <a class="btn-secondary mt-2 inline-flex" href="/dashboard/alerts#alert-section-essentials">Open alert essentials</a>
       </div>
@@ -71,6 +71,13 @@ const { canEdit, atDeviceLimit, redirectTo, nestEntitled } = Astro.props;
   <details class="devices-other mt-5">
     <summary class="devices-other-summary">Other ways to connect</summary>
     <div class="devices-intent-grid mt-3" role="list">
+      <div class="devices-intent" role="listitem">
+        <h3 class="devices-intent-title">Flood / leak contact</h3>
+        <p class="devices-intent-copy">
+          Same push device can POST a <code>flood</code> bool — wet auto-alerts (bypasses snooze). Optional <code>level</code> for sump %.
+        </p>
+        <a class="btn-secondary" href="/about/ingest-and-webhooks">Ingest kinds</a>
+      </div>
       <div class="devices-intent" role="listitem">
         <h3 class="devices-intent-title">Demo feed</h3>
         <p class="devices-intent-copy">No hardware yet? Pull our public example HTTPS JSON.</p>

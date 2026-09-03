@@ -9,6 +9,7 @@ const base: PropertySnapshot = {
   minTempF: 45,
   freezeThresholdF: 34,
   atRisk: false,
+  floodWet: false,
   lastReadingAt: new Date().toISOString(),
   deviceCount: 1,
 };
@@ -27,6 +28,16 @@ describe("scorePropertyHealth", () => {
       atRisk: true,
     });
     expect(health.label).toBe("at_risk");
+  });
+
+  it("flags wet flood contacts as at_risk", () => {
+    const health = scorePropertyHealth({
+      ...base,
+      floodWet: true,
+      atRisk: true,
+    });
+    expect(health.label).toBe("at_risk");
+    expect(health.detail).toMatch(/wet/i);
   });
 
   it("scores healthy when reporting above threshold", () => {

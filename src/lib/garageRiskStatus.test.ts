@@ -50,6 +50,13 @@ describe("computeGarageRiskStatus", () => {
     expect(status.detail).toMatch(/stale/i);
   });
 
+  it("prioritizes wet flood contacts as risk", () => {
+    const status = computeGarageRiskStatus({ ...base, wetFloodCount: 1 });
+    expect(status.level).toBe("risk");
+    expect(status.title).toMatch(/flood|leak|wet/i);
+    expect(status.actionHref).toBe("#flood-level");
+  });
+
   it("nudges alert setup when space is otherwise fine", () => {
     const status = computeGarageRiskStatus({
       ...base,

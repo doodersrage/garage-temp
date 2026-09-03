@@ -30,6 +30,7 @@ const basePack: ClaimsPackData = {
   readingsCsvUrl: "https://example.com/readings.csv",
   alertsCsvUrl: "https://example.com/alerts.csv",
   disclaimer: "disclaimer text",
+  floodAlertCount: 0,
   executiveSummary: "Executive summary text",
   adjusterNotes: "Adjuster notes text",
 };

@@ -59,12 +59,18 @@ export const GET: APIRoute = async ({ params }) => {
   );
   const minTemp =
     temps.length > 0 ? Math.min(...temps.map((s) => s.value_num as number)) : null;
+  const wetCount = snapshot.sensors.filter(
+    (s) => s.kind === "flood" && s.value_bool === true,
+  ).length;
 
   let status = "ok";
   let color = "#15803d";
   if (snapshot.stale || snapshot.sensorCount === 0) {
     status = "stale";
     color = "#b45309";
+  } else if (wetCount > 0) {
+    status = wetCount === 1 ? "wet" : `${wetCount} wet`;
+    color = "#0369a1";
   } else if (minTemp != null && minTemp <= 34) {
     status = `${minTemp.toFixed(0)}°F risk`;
     color = "#c2410c";
@@ -73,7 +79,7 @@ export const GET: APIRoute = async ({ params }) => {
     color = "#0284c7";
   }
 
-  return new Response(badgeSvg("freeze status", status, color), {
+  return new Response(badgeSvg("status", status, color), {
     headers: {
       "Content-Type": "image/svg+xml; charset=utf-8",
       "Cache-Control": "public, max-age=120",

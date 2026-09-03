@@ -242,9 +242,7 @@ const [
         error: null,
       }),
   showInsights ? loadDoorSessions24h(devices) : Promise.resolve([]),
-  showInsights
-    ? loadFloodLevelOverview(devices)
-    : Promise.resolve({ floodOpen: [], recentFlood: [], levels: [] }),
+  loadFloodLevelOverview(devices),
   showInsights ? loadEnergyOverview(devices) : Promise.resolve(null),
   showInsights ? loadPowerOffSessions24h(devices) : Promise.resolve([]),
   showInsights ? loadMotionSessions24h(devices) : Promise.resolve([]),
@@ -359,6 +357,10 @@ const coldestProbeTempF = (() => {
     .map((row) => row.value_num as number);
   return temps.length > 0 ? Math.min(...temps) : null;
 })();
+
+const wetFloodCount = latest.filter(
+  (row) => row.sensor.kind === "flood" && row.value_bool === true,
+).length;
 
 const coldestProbeMarginF =
   coldestProbeTempF != null
@@ -579,6 +581,7 @@ const garageRisk = computeGarageRiskStatus({
   showColdSnapChecklist,
   hoursUntilFreeze: timeToFreeze.hours,
   hitsAtLabel: timeToFreeze.hitsAtLabel,
+  wetFloodCount,
 });
 ---
 <DashboardLayout title="Overview">
@@ -616,6 +619,7 @@ const garageRisk = computeGarageRiskStatus({
       hasHouseholdMembers={hasHouseholdMembers}
       hasLiveSensors={latest.length > 0}
       hasHousehold={Boolean(household.householdId)}
+      hasFloodSensor={devices.some((d) => d.sensors.some((s) => s.kind === "flood"))}
       dismissed={onboardingDismissed}
     />
 
@@ -1031,9 +1035,12 @@ const garageRisk = computeGarageRiskStatus({
         )}
       </div>
       {!showInsights && (
-        <p class="mt-4 mb-0 text-sm text-[var(--color-text-muted)]">
-          <a class="text-link" href="/dashboard/history">Open History</a> for full charts, CSV export, and claims pack.
-        </p>
+        <>
+          <FloodLevelCard overview={floodLevelOverview} />
+          <p class="mt-4 mb-0 text-sm text-[var(--color-text-muted)]">
+            <a class="text-link" href="/dashboard/history">Open History</a> for full charts, CSV export, and claims pack.
+          </p>
+        </>
       )}
     </section>
   </div>

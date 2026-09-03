@@ -9,6 +9,8 @@ export type PropertySnapshot = {
   minTempF: number | null;
   freezeThresholdF: number;
   atRisk: boolean;
+  /** True when any flood/leak contact reported wet in the recent window. */
+  floodWet: boolean;
   lastReadingAt: string | null;
   deviceCount: number;
 };
@@ -65,24 +67,30 @@ export async function fetchCrossPropertySnapshots(
 
   const allDeviceIds = [...householdIdByDevice.keys()];
   const temperatureSensorIds: string[] = [];
+  const floodSensorIds: string[] = [];
 
   if (allDeviceIds.length > 0) {
     const { data: sensors } = await supabase
       .from("device_sensors")
-      .select("id, device_id")
+      .select("id, device_id, kind")
       .in("device_id", allDeviceIds)
-      .eq("kind", "temperature");
+      .in("kind", ["temperature", "flood"]);
 
     for (const sensor of sensors ?? []) {
-      temperatureSensorIds.push(sensor.id);
+      if (sensor.kind === "flood") {
+        floodSensorIds.push(sensor.id);
+      } else {
+        temperatureSensorIds.push(sensor.id);
+      }
     }
   }
 
   const minTempByHousehold = new Map<string, number>();
   const lastReadingByHousehold = new Map<string, string>();
+  const wetHouseholdIds = new Set<string>();
+  const cutoff = new Date(Date.now() - RECENT_READING_WINDOW_MS).toISOString();
 
   if (temperatureSensorIds.length > 0) {
-    const cutoff = new Date(Date.now() - RECENT_READING_WINDOW_MS).toISOString();
     const { data: readings } = await supabase
       .from("sensor_readings")
       .select("household_id, value_num, recorded_at")
@@ -108,15 +116,39 @@ export async function fetchCrossPropertySnapshots(
     }
   }
 
+  if (floodSensorIds.length > 0) {
+    const { data: floodReadings } = await supabase
+      .from("sensor_readings")
+      .select("household_id, value_bool, recorded_at")
+      .in("household_id", householdIds)
+      .in("sensor_id", floodSensorIds)
+      .eq("value_bool", true)
+      .gte("recorded_at", cutoff)
+      .order("recorded_at", { ascending: false })
+      .limit(RECENT_READING_ROW_CAP);
+
+    for (const row of floodReadings ?? []) {
+      wetHouseholdIds.add(row.household_id);
+      if (row.recorded_at) {
+        const existing = lastReadingByHousehold.get(row.household_id);
+        if (!existing || Date.parse(row.recorded_at) > Date.parse(existing)) {
+          lastReadingByHousehold.set(row.household_id, row.recorded_at);
+        }
+      }
+    }
+  }
+
   const properties: PropertySnapshot[] = households.map((household) => {
     const minTempF = minTempByHousehold.get(household.household_id) ?? null;
+    const floodWet = wetHouseholdIds.has(household.household_id);
     return {
       householdId: household.household_id,
       name: household.name,
       role: household.role,
       minTempF,
       freezeThresholdF: threshold,
-      atRisk: minTempF != null && minTempF <= threshold,
+      atRisk: (minTempF != null && minTempF <= threshold) || floodWet,
+      floodWet,
       lastReadingAt: lastReadingByHousehold.get(household.household_id) ?? null,
       deviceCount: deviceCountByHousehold.get(household.household_id) ?? 0,
     };

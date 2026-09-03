@@ -28,6 +28,14 @@ export function scorePropertyHealth(property: PropertySnapshot, nowMs = Date.now
   const ageMs = nowMs - Date.parse(property.lastReadingAt);
   const stale = !Number.isFinite(ageMs) || ageMs >= STALE_MS;
 
+  if (property.floodWet) {
+    return {
+      score: stale ? 10 : 20,
+      label: "at_risk",
+      detail: "Flood / leak contact wet",
+    };
+  }
+
   if (property.atRisk) {
     return {
       score: stale ? 15 : 25,
@@ -62,7 +70,7 @@ export function scorePropertyHealth(property: PropertySnapshot, nowMs = Date.now
   return {
     score: 95,
     label: "healthy",
-    detail: "Reporting and above threshold",
+    detail: "Reporting — above freeze, dry flood contacts",
   };
 }
 

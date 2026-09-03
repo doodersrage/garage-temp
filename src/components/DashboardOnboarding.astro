@@ -11,6 +11,7 @@ interface Props {
   hasHouseholdMembers?: boolean;
   hasLiveSensors?: boolean;
   hasHousehold?: boolean;
+  hasFloodSensor?: boolean;
   dismissed?: boolean;
 }
 
@@ -24,6 +25,7 @@ const {
   hasHouseholdMembers = false,
   hasLiveSensors = false,
   hasHousehold = false,
+  hasFloodSensor = false,
   dismissed = false,
 } = Astro.props;
 
@@ -74,6 +76,13 @@ const kitSteps = [
 ];
 
 const nextSteps = [
+  {
+    done: hasFloodSensor,
+    required: false,
+    href: "/dashboard/temperature",
+    title: "Add a flood / leak contact",
+    detail: "Wet/dry under a water heater or sump auto-alerts when wet — same ingest path as your temp probe.",
+  },
   {
     done: hasHistory,
     required: true,
