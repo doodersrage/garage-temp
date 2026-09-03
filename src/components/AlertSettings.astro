@@ -235,6 +235,13 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
       Fires inside the look-ahead window above so you can drip faucets or turn on heat while you still have time.
     </p>
 
+    <label class="checkbox-row mb-4">
+      <input
+        type="checkbox"
+        name="digest_enabled"
+        value="true"
+        checked={settings.digestEnabled}
+      />
       <span>Weekly email digest (Mondays) — coldest night, leaks, and outages</span>
     </label>
 

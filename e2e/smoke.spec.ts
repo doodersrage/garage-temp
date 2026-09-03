@@ -102,7 +102,9 @@ test.describe("public smoke", () => {
 
   test("guides hub loads", async ({ page }) => {
     await page.goto("/guides");
-    await expect(page.getByRole("heading", { name: /Set up probes, alerts/i })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Set up probes, freeze\/flood alerts/i }),
+    ).toBeVisible();
     await expect(page.getByRole("heading", { name: "Hardware setup" })).toBeVisible();
   });
 
