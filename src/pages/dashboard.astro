@@ -242,7 +242,35 @@ const [
         error: null,
       }),
   showInsights ? loadDoorSessions24h(devices) : Promise.resolve([]),
-  loadFloodLevelOverview(devices),
+  (() => {
+    if (showInsights) return loadFloodLevelOverview(devices);
+
+    // Simple overview already has `latest` readings; avoid the heavier
+    // 48h flood/level history queries to keep the dashboard fast.
+    const wetFlood = latest
+      .filter((row) => row.sensor.kind === "flood" && row.value_bool === true)
+      .sort((a, b) => Date.parse(b.recorded_at) - Date.parse(a.recorded_at))
+      .slice(0, 4)
+      .map((row) => ({
+        label: row.sensor.label,
+        at: row.recorded_at,
+      }));
+
+    const levels = latest
+      .filter((row) => row.sensor.kind === "level" && row.value_num != null)
+      .map((row) => ({
+        label: row.sensor.label,
+        value: row.value_num as number,
+        at: row.recorded_at,
+        risingPerHour: null as number | null,
+      }));
+
+    return Promise.resolve({
+      floodOpen: [],
+      recentFlood: wetFlood,
+      levels,
+    });
+  })(),
   showInsights ? loadEnergyOverview(devices) : Promise.resolve(null),
   showInsights ? loadPowerOffSessions24h(devices) : Promise.resolve([]),
   showInsights ? loadMotionSessions24h(devices) : Promise.resolve([]),
