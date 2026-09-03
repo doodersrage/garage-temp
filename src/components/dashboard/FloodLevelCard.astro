@@ -8,7 +8,6 @@ interface Props {
 }
 
 const { overview } = Astro.props;
----
 const hasWet =
   overview.floodOpen.length > 0 || overview.recentFlood.length > 0;
 const hasLevels = overview.levels.length > 0;
