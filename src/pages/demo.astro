@@ -44,8 +44,8 @@ const schema = [
 ].filter(Boolean) as Record<string, unknown>[];
 ---
 <Layout
-  title="Live probe temperature demo"
-  description="Try ThermalTrace without an account: interactive probe simulator (cause a cold snap or door draft), plus real live demo probes and outdoor weather on the production ingest path."
+  title="Live probe demo"
+  description="Try ThermalTrace without an account: interactive probe simulator, real live demo probes, and the same freeze/flood alert path your hardware will use."
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
   ogImage="/og-dashboard.jpg"
@@ -55,7 +55,7 @@ const schema = [
     <PageHeader
       kicker="Try it — no account"
       title="Demos: simulator + live feed"
-      lede="Cause a freeze event in the interactive probe simulator, or watch real demo probes next to outdoor weather — same ingest path your ESP or Arduino will use."
+      lede="Cause a freeze event in the interactive probe simulator, or watch real demo probes next to outdoor weather — same ingest path your ESP or Arduino will use for freeze and flood alerts."
     >
       <a slot="actions" class="btn-primary" href="/about/probe-demo?preset=coldSnap">Interactive simulator</a>
       <a slot="actions" class="btn-secondary" href="#live-feed">Live readings</a>
@@ -65,7 +65,7 @@ const schema = [
     <section class="card" aria-labelledby="demo-paths-title">
       <h2 class="card-title" id="demo-paths-title">Three ways to try ThermalTrace</h2>
       <p class="card-subtitle mb-4">
-        Start with the simulator if you want to feel freeze risk respond to you — then confirm with the live feed.
+        Start with the simulator if you want to feel freeze risk respond to you, then confirm with the live feed and auto-wet flood path.
       </p>
       <ul class="demo-paths text-sm space-y-3 mb-0">
         <li>
@@ -81,7 +81,7 @@ const schema = [
         <li>
           <strong><a class="text-link" href="/about/kit-qr-onboarding">Kit QR onboarding</a></strong>
           {" — "}
-          Hardware path. After you create a push device, scan the ingest QR (or print it on a kit label) so firmware can POST without typing the key.
+          Hardware path. After you create a push device, scan the ingest QR (or print it on a kit label) so firmware can POST temperature, flood, and other sensor kinds without typing the key.
         </li>
       </ul>
     </section>
@@ -116,14 +116,14 @@ const schema = [
 
     <ProductScreenshot
       shot="insights"
-      caption="Same product UI after you connect hardware — Insights with freeze threshold and nights-at-risk."
+      caption="Same product UI after you connect hardware — Insights with freeze threshold, flood/level card, and nights-at-risk."
     />
 
     <section class="demo-freeze" aria-labelledby="demo-freeze-title">
       <div class="demo-freeze-copy">
-        <h2 class="demo-freeze-title" id="demo-freeze-title">Same data that fires freeze alerts</h2>
+        <h2 class="demo-freeze-title" id="demo-freeze-title">Same data that fires freeze and flood alerts</h2>
         <p class="demo-freeze-lede">
-          When a probe crosses your threshold, ThermalTrace can reach you on email, Discord, Telegram, Slack — and on Pro, SMS and browser push. Set the line once; test it before the next cold night.
+          When a probe crosses your threshold, ThermalTrace can reach you on email, Discord, Telegram, Slack — and on Pro, SMS and browser push. Wet flood/leak contacts auto-alert on the same stack. Set the line once; test it before the next cold night.
         </p>
         <ul class="demo-freeze-channels" aria-label="Alert channels">
           <li>Email · Discord · Telegram · Slack</li>
@@ -132,7 +132,7 @@ const schema = [
         </ul>
         <div class="demo-freeze-actions">
           <a class="btn-primary" href="/register?next=/dashboard/temperature">Start free — open Devices</a>
-          <a class="btn-secondary" href="/stories/garage-freeze-alert">Freeze alert story</a>
+          <a class="btn-secondary" href="/stories/water-heater-pad-leak">Flood/leak story</a>
           <a class="btn-ghost" href="/about/alert-channel-cookbook">Channel cookbook</a>
         </div>
       </div>
@@ -183,7 +183,7 @@ const schema = [
           <div>
             <h3 class="home-step-title">Watch Home &amp; set alerts</h3>
             <p class="home-step-copy">
-              Confirm live values, set a freeze threshold, and send a test alert before the next cold night.
+              Confirm live values, set a freeze threshold, and know that wet flood/leak contacts auto-alert on the same account.
             </p>
           </div>
         </li>
@@ -207,7 +207,7 @@ const schema = [
         <li>Discord · Telegram · Slack</li>
       </ul>
       <p class="home-compat-note">
-        Keep MQTT on your LAN; mirror to ThermalTrace over HTTPS for household freeze alerts and history.
+        Keep MQTT on your LAN; mirror to ThermalTrace over HTTPS for household freeze/flood alerts and history.
         <a class="text-link" href="/about/mqtt-bridge">MQTT bridge recipe</a>
       </p>
     </section>
@@ -215,7 +215,7 @@ const schema = [
     <section class="demo-explore" aria-labelledby="demo-explore-title">
       <h2 class="demo-explore-title" id="demo-explore-title">Keep exploring</h2>
       <p class="demo-explore-lede">
-        Already triggered a simulated cold snap? Confirm with the live feed, then map a city or kit QR.
+        Already triggered a simulated cold snap? Confirm with the live feed, then try a flood/leak story, map a city, or set up kit QR.
       </p>
       <ul class="demo-explore-list">
         <li>

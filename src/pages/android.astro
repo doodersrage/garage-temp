@@ -49,8 +49,8 @@ const schema = [
 ].filter(Boolean) as Record<string, unknown>[];
 
 const description = playStoreLive
-  ? `${BRAND_NAME} Android companion on Google Play — live probes, freeze alerts, MFA, and household tools for your existing account. Phone is not a sensor.`
-  : `${BRAND_NAME} Android companion — early access via GitHub while Google Play review finishes. Live probes, freeze alerts, MFA, and household tools for your existing account. Phone is not a sensor.`;
+  ? `${BRAND_NAME} Android companion on Google Play — live probes, freeze and flood alerts, MFA, and household tools for your existing account. Phone is not a sensor.`
+  : `${BRAND_NAME} Android companion — early access via GitHub while Google Play review finishes. Live probes, freeze and flood alerts, MFA, and household tools for your existing account. Phone is not a sensor.`;
 ---
 <Layout
   title="Android app"
@@ -64,8 +64,8 @@ const description = playStoreLive
       kicker={playStoreLive ? "Google Play" : "Early access · Google Play in review"}
       title="ThermalTrace for Android"
       lede={playStoreLive
-        ? "Native companion on Google Play — live readings, history, alerts, devices, MFA, and household tools for your ThermalTrace account."
-        : "Native companion for your ThermalTrace account—live readings, history, alerts, devices, MFA, and household tools. Build from source or sideload while the Play listing is pending."}
+        ? "Native companion on Google Play — live readings, history, freeze/flood alerts, devices, MFA, and household tools for your ThermalTrace account."
+        : "Native companion for your ThermalTrace account—live readings, history, freeze/flood alerts, devices, MFA, and household tools. Build from source or sideload while the Play listing is pending."}
     >
       {playStoreLive ? (
         <a slot="actions" class="btn-primary" href={playStoreUrl} target="_blank" rel="noreferrer">
@@ -104,7 +104,7 @@ const description = playStoreLive
         <li>
           <strong>Does:</strong> sign in to your ThermalTrace account, show live curves, history,
           and the same forecast-backed time-to-freeze clock as Overview,
-          manage alerts/devices/household settings, and (on Pro) receive freeze push via Firebase Cloud Messaging.
+          manage alerts/devices/household settings, and (on Pro) receive freeze/flood push via Firebase Cloud Messaging.
         </li>
         <li>
           <strong>Does not:</strong> read temperature from the handset. Your ESP/Arduino (or JSON feeds)

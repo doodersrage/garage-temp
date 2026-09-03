@@ -23,7 +23,7 @@ import { aboutHubPhotoIds } from "../../lib/aboutPhotos";
 
 const title = "About ThermalTrace";
 const description =
-  "Guides on temperature probes, freeze alerts, Arduino firmware, ESP ingest, household sharing, and the monitoring stack behind ThermalTrace.";
+  "Guides on temperature probes, freeze and flood/leak alerts, Arduino firmware, ESP ingest, household sharing, and the monitoring stack behind ThermalTrace.";
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/about");
@@ -31,12 +31,12 @@ const aboutHubFaqs = [
   {
     question: "What is covered in the About guides?",
     answer:
-      "Probe placement, DHT22 and Arduino wiring, freeze thresholds, ingest APIs, household sharing, PWA install, and how ThermalTrace stores and charts readings.",
+      "Probe placement, DHT22 and Arduino wiring, freeze thresholds, flood/leak contacts, ingest APIs, household sharing, PWA install, and how ThermalTrace stores and charts readings.",
   },
   {
     question: "Where should I start?",
     answer:
-      "Pick a job-based journey on this page (freeze protection, wiring, ingest, debugging, or household setup), or search the full guide index.",
+      "Pick a job-based journey on this page (freeze protection, flood/leak setup, wiring, ingest, debugging, or household setup), or search the full guide index.",
   },
   {
     question: "Is ThermalTrace open source?",
@@ -73,7 +73,7 @@ const featuredSearchIndex = buildAboutSearchIndex(featuredPages);
     <PageHeader
       kicker="About"
       title={title}
-      lede="Open-source guides on probes, freeze alerts, firmware, and the stack behind ThermalTrace. Prefer a shorter list? Start on the guides hub."
+      lede="Open-source guides on probes, freeze/flood alerts, firmware, and the stack behind ThermalTrace. Prefer a shorter list? Start on the guides hub."
     >
       <a slot="actions" class="btn-primary" href="/register?next=/dashboard/temperature">Start free</a>
       <a slot="actions" class="btn-secondary" href="/guides">Guides hub</a>

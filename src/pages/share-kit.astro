@@ -18,7 +18,7 @@ const schema = [
   ]),
 ];
 
-const reddit = `I built ThermalTrace for freeze alerts in garages, workshops, and crawlspaces (ESP/Arduino → hosted charts + SMS/email) after one too many “hope the space heater is still on” winters.
+const reddit = `I built ThermalTrace for freeze alerts and wet leak contacts in garages, workshops, and crawlspaces (ESP/Arduino → hosted charts + SMS/email) after one too many “hope the space heater is still on” winters.
 
 Public freeze-risk map (opt-in city aggregates): ${siteUrl}/freeze-map
 Interactive probe simulator (cause a cold snap / door draft): ${siteUrl}/about/probe-demo
@@ -28,7 +28,7 @@ Freeze season checklist: ${siteUrl}/freeze-season
 
 Happy to answer hardware / Home Assistant webhook questions.`;
 
-const homeAssistant = `**ThermalTrace** — hosted freeze monitoring for ESPHome & DIY probes (garage, crawlspace, attic, shop).
+const homeAssistant = `**ThermalTrace** — hosted freeze + flood/leak monitoring for ESPHome & DIY probes (garage, crawlspace, attic, shop).
 
 - Official HACS integration: ${siteUrl}/integrations/home-assistant
 - HTTPS ingest (device key); optional MQTT→HTTP bridge if you already run Mosquitto/HA
@@ -42,16 +42,16 @@ Live demo: ${siteUrl}/demo · Docs: ${siteUrl}/docs/api · Kit QR: ${siteUrl}/ab
 
 const bluesky = `Unheated spaces freeze quietly until they do not.
 
-ThermalTrace: DIY probes → freeze alerts + a public opt-in freeze map.
+ThermalTrace: DIY probes → freeze alerts, wet leak contacts, and a public opt-in freeze map.
 Simulator (no account): ${siteUrl}/about/probe-demo
 Map: ${siteUrl}/freeze-map
 Start free: ${siteUrl}/register?next=/dashboard/temperature`;
 
-const hackerNewsTitle = `Show HN: ThermalTrace – freeze alerts for ESP/Arduino probes in garages and crawlspaces`;
+const hackerNewsTitle = `Show HN: ThermalTrace – freeze + leak alerts for ESP/Arduino probes in garages and crawlspaces`;
 
 const hackerNews = `I built ThermalTrace after one too many winters of “hope the space heater is still on” for an unheated garage/crawlspace.
 
-It’s a hosted dashboard + freeze alerts for DIY probes (ESP32/Arduino → HTTPS JSON ingest). Free plan, no credit card. Sensors auto-import on first POST.
+It’s a hosted dashboard + freeze and flood/leak alerts for DIY probes (ESP32/Arduino → HTTPS JSON ingest). Free plan, no credit card. Sensors auto-import on first POST.
 
 What you can try without signing up:
 - Interactive simulator (open a bay door / trigger a cold snap): ${siteUrl}/about/probe-demo
@@ -64,7 +64,7 @@ Source: https://github.com/doodersrage/thermaltrace
 
 Happy to answer questions about ingest payloads, MQTT→HTTPS bridging, or alert channels.`;
 
-const discord = `Built a hosted freeze-alert dashboard for DIY probes (ESP/Arduino → HTTPS ingest).
+const discord = `Built a hosted freeze/flood alert dashboard for DIY probes (ESP/Arduino → HTTPS ingest).
 
 Interactive simulator (no signup): ${siteUrl}/about/probe-demo
 Live demo feed: ${siteUrl}/demo
@@ -75,14 +75,14 @@ const embed = `<iframe src="${siteUrl}/embed/freeze-map?compact=1" title="Therma
 ---
 <Layout
   title="Share kit"
-  description="Public ThermalTrace word-of-mouth kit: steal these Reddit, Home Assistant, HN, and Bluesky blurbs — tweak the voice, keep the links."
+  description="Public ThermalTrace word-of-mouth kit: steal these Reddit, Home Assistant, HN, and Bluesky blurbs for freeze and flood/leak monitoring — tweak the voice, keep the links."
   schema={schema}
 >
   <div class="page-shell page-stack">
     <PageHeader
       kicker="Word of mouth"
       title="Share kit"
-      lede="ThermalTrace grows by people posting in communities that already care about freeze risk in unconditioned spaces. This page is public on purpose — steal the copy, tweak it so it sounds like you, and ship it."
+      lede="ThermalTrace grows by people posting in communities that already care about freeze risk, wet basements, and unconditioned spaces. This page is public on purpose — steal the copy, tweak it so it sounds like you, and ship it."
     >
       <a slot="actions" class="btn-secondary" href="/freeze-map#embed">Freeze map embeds</a>
       <a slot="actions" class="btn-ghost" href="/stories">Customer stories</a>

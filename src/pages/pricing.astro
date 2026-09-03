@@ -136,7 +136,7 @@ const schema = [
 ---
 <Layout
   title="Plans & pricing"
-  description="Compare ThermalTrace Free, Member, Pro, and Portfolio—device counts, 7-day vs 90-day vs 1-year history, forecast freeze warnings, official NWS alerts, and annual billing savings. Start free; upgrade when winter hits, or scale up to Portfolio for multiple properties."
+  description="Compare ThermalTrace Free, Member, Pro, and Portfolio—device counts, history retention, freeze warnings, flood/leak alerts, official NWS alerts, and annual billing savings. Start free for cold and water monitoring, or scale up to Portfolio for multiple properties."
   schema={schema}
   speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
@@ -144,7 +144,7 @@ const schema = [
     <PageHeader
       kicker="Pricing"
       title="Plans that grow with your probes"
-      lede="Start free to see if ThermalTrace fits. Upgrade to Member for a full cold season of history, or Pro when you want serious alerts, thermostat context, and automation. Need more than a handful of properties or on-site manager logins? Portfolio is below."
+      lede="Start free to see if ThermalTrace fits. Upgrade to Member for a full cold season of history, or Pro when you want serious freeze and flood alerts, thermostat context, and automation. Need more than a handful of properties or on-site manager logins? Portfolio is below."
     >
       {user ? (
         <p class="page-header-meta">
@@ -174,7 +174,7 @@ const schema = [
         </li>
         <li>
           <strong>Member</strong>
-          <span>Track a whole cold season—90-day history, CSV, more devices, forecast freeze warnings.</span>
+          <span>Track a whole cold season—or a wet basement season—90-day history, CSV, more devices, and forecast freeze warnings.</span>
         </li>
         <li>
           <strong>Pro</strong>
@@ -182,7 +182,7 @@ const schema = [
         </li>
         <li>
           <strong>Portfolio</strong>
-          <span>Larger multi-property ops—up to {PORTFOLIO_MAX_OWNED_HOUSEHOLDS} owned properties, cross-property risk view, property-manager logins without billing access.</span>
+          <span>Larger multi-property ops—up to {PORTFOLIO_MAX_OWNED_HOUSEHOLDS} owned properties, cross-property freeze/flood risk view, property-manager logins without billing access.</span>
         </li>
       </ul>
     </section>
