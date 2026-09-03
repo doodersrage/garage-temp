@@ -243,7 +243,12 @@ const [
       }),
   showInsights ? loadDoorSessions24h(devices) : Promise.resolve([]),
   (() => {
-    if (showInsights) return loadFloodLevelOverview(devices);
+    if (showInsights)
+      return loadFloodLevelOverview(devices).catch(() => ({
+        floodOpen: [],
+        recentFlood: [],
+        levels: [],
+      }));
 
     // Simple overview already has `latest` readings; avoid the heavier
     // 48h flood/level history queries to keep the dashboard fast.
