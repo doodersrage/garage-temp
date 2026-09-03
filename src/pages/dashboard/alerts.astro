@@ -5,6 +5,7 @@ import UpgradeNudge from "../../components/UpgradeNudge.astro";
 import PwaInstallCard from "../../components/dashboard/PwaInstallCard.astro";
 import ProductAnalyticsTracker from "../../components/ProductAnalyticsTracker.astro";
 import ReferralCard from "../../components/ReferralCard.astro";
+import FalseAlarmTipsCard from "../../components/dashboard/FalseAlarmTipsCard.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { resolveSiteUrl } from "../../lib/schemaMarkup";
 import { getAlertSettingsForUser, isTwilioConfigured } from "../../lib/notify";
@@ -216,6 +217,9 @@ const referralRewardDays = Number(
     {showReferralCard && (
       <ReferralCard siteUrl={siteUrl} rewardDays={referralRewardDays} />
     )}
+    {canEdit && recentEvents.length > 0 && (
+      <FalseAlarmTipsCard />
+    )}
 
     {canEdit && (
       <section class="card" id="send-test-alert">
@@ -320,8 +324,10 @@ const referralRewardDays = Number(
                           <input type="hidden" name="redirect" value="/dashboard/alerts" />
                           <select class="form-input text-xs py-1" name="action" aria-label="Acknowledge action">
                             <option value="ack">I'm on it</option>
+                            <option value="snooze_1h">Handle & snooze 1h</option>
                             <option value="snooze_4h">Handle & snooze 4h</option>
                             <option value="snooze_24h">Handle & snooze 24h</option>
+                            <option value="false_alarm">False alarm (snooze 24h)</option>
                             {hasTenantRelay && (
                               <option value="notify_tenant">Handle & email tenant</option>
                             )}

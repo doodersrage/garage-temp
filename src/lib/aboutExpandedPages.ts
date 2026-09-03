@@ -608,6 +608,15 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
       "Stop heat loss and freeze risk when a garage door is left open on a cold night.",
   },
   {
+    slug: "home-assistant-notify-recipes",
+    parentSlug: "ingest-and-webhooks",
+    title: "Home Assistant notify recipes",
+    description:
+      "Route ThermalTrace freeze alerts into Home Assistant notify, TTS, and mobile push — outbound webhooks, HACS services, and inbound snooze.",
+    summary:
+      "Local voice and phone notify when freeze risk hits — dual-run with ThermalTrace email/SMS.",
+  },
+  {
     slug: "personal-weather-stations",
     parentSlug: "accounts-and-dashboard",
     title: "Personal weather stations (Ambient & WeatherFlow)",

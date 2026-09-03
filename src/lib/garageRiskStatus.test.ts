@@ -43,6 +43,13 @@ describe("computeGarageRiskStatus", () => {
     expect(computeGarageRiskStatus(base).level).toBe("ok");
   });
 
+  it("treats stale probes as likely unplugged", () => {
+    const status = computeGarageRiskStatus({ ...base, staleSensorCount: 2 });
+    expect(status.level).toBe("watch");
+    expect(status.title).toMatch(/unplugged/i);
+    expect(status.detail).toMatch(/stale/i);
+  });
+
   it("nudges alert setup when space is otherwise fine", () => {
     const status = computeGarageRiskStatus({
       ...base,

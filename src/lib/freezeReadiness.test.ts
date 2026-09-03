@@ -13,7 +13,7 @@ describe("computeFreezeReadiness", () => {
       canUseNws: false,
       hasSentAnyAlert: false,
     });
-    expect(result.score).toBeLessThanOrEqual(50);
+    expect(result.score).toBeLessThanOrEqual(60);
     expect(result.ready).toBe(false);
   });
 
@@ -47,5 +47,27 @@ describe("computeFreezeReadiness", () => {
     });
     expect(result.score).toBeGreaterThanOrEqual(85);
     expect(result.ready).toBe(true);
+  });
+
+  it("fails ready when vacation mode is on", () => {
+    const result = computeFreezeReadiness({
+      alertSettings: {
+        ...DEFAULT_ALERT_SETTINGS,
+        enabled: true,
+        channelEmail: true,
+        email: "a@example.com",
+        vacationUntil: new Date(Date.now() + 86400000).toISOString(),
+        forecastFreezeEnabled: true,
+        nwsFreezeAlertsEnabled: true,
+      },
+      devices: [{ id: "d1", name: "Garage", sensors: [] } as never],
+      latest: [{ sensor: { id: "s1", label: "T", kind: "temperature" }, value_num: 40, recorded_at: new Date().toISOString() } as never],
+      weatherLocationConfigured: true,
+      canUseForecast: true,
+      canUseNws: true,
+      hasSentAnyAlert: true,
+    });
+    expect(result.checks.find((c) => c.id === "vacation_clear")?.ok).toBe(false);
+    expect(result.ready).toBe(false);
   });
 });

@@ -35,6 +35,8 @@ export const INTEGRATION_CARDS: IntegrationCard[] = [
     href: HA_INTEGRATION_PAGE,
     tier: "Family live link (Free) · Pro for history/metrics + inbound",
     cta: "Install guide",
+    secondaryHref: "/about/home-assistant-notify-recipes",
+    secondaryLabel: "Notify / TTS recipes",
   },
   {
     id: "mqtt-bridge",

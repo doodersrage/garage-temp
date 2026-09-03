@@ -1,3 +1,5 @@
+import { staleProbeDetail } from "./falseAlarmHints";
+
 /**
  * Single Overview status: is the monitored space OK, worth watching, or at freeze risk?
  */
@@ -49,8 +51,8 @@ export function computeGarageRiskStatus(input: {
   if (input.staleSensorCount > 0) {
     return {
       level: "watch",
-      title: "Sensor may be offline",
-      detail: `${input.staleSensorCount} probe${input.staleSensorCount === 1 ? "" : "s"} look stale — check power, Wi‑Fi, or outage alerts.`,
+      title: "Probe may be unplugged",
+      detail: staleProbeDetail(input.staleSensorCount),
       actionLabel: "Check devices",
       actionHref: "/dashboard/temperature",
     };

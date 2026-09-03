@@ -36,19 +36,19 @@ const essentialSteps = [
     done: hasDevices,
     href: "/dashboard/temperature",
     title: "Connect a push device",
-    detail: "Dashboard → Devices: create a push ingest URL for ESP/Arduino (or try without hardware).",
+    detail: "Step 1 of 3: create a push ingest URL for ESP/Arduino (or open Devices for demo/HA paths).",
   },
   {
     done: hasAlertsEnabled && hasEmailAlerts,
     href: "/dashboard/alerts#alert-section-essentials",
     title: "Set freeze °F + email",
-    detail: "Essentials: freeze threshold, email, and optional sensor-dead alerts — then save.",
+    detail: "Step 2 of 3: freeze threshold, email, and optional sensor-dead alerts — then save.",
   },
   {
     done: hasTestAlert,
     href: "/dashboard/alerts#send-test-alert",
     title: "Send a test alert",
-    detail: "Confirm delivery once so you trust the path before a real freeze night.",
+    detail: "Step 3 of 3: confirm delivery once so you trust the path before a real freeze night.",
   },
 ];
 

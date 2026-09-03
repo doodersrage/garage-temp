@@ -1,0 +1,12 @@
+---
+export const prerender = false;
+
+import StoryArticle from "../../components/StoryArticle.astro";
+import { getStory } from "../../lib/stories";
+
+const story = getStory("crawlspace-pipe-watch");
+if (!story) {
+  return Astro.redirect("/stories");
+}
+---
+<StoryArticle story={story} />

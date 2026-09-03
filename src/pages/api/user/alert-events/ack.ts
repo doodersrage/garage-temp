@@ -9,8 +9,10 @@ import { getSiteUrl } from "../../../../lib/stripe";
 
 const VALID_ACTIONS = new Set<AckPlaybookAction>([
   "ack",
+  "snooze_1h",
   "snooze_4h",
   "snooze_24h",
+  "false_alarm",
   "notify_tenant",
   "webhook_ping",
 ]);

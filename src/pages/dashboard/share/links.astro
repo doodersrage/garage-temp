@@ -231,6 +231,7 @@ const analyticsEvents = Astro.url.searchParams.get("created")
           <h2 class="card-title">Public status pages</h2>
           <p class="card-subtitle mb-4">
             Minimal read-only status board at <code>/status/&lt;token&gt;</code> — no login required.
+            Embed a live SVG badge at <code>/badge/status/&lt;token&gt;.svg</code> on property pages or tenant portals.
           </p>
           {statusToken && (
             <div class="ingest-key-callout mb-4">
@@ -259,6 +260,11 @@ const analyticsEvents = Astro.url.searchParams.get("created")
                     <strong>{page.label}</strong>
                     <p class="m-0 text-sm break-all">
                       <a href={`${siteUrl}/status/${page.token}`}>{siteUrl}/status/{page.token}</a>
+                    </p>
+                    <p class="m-0 text-xs text-[var(--color-text-muted)] break-all">
+                      Badge: <code>{siteUrl}/badge/status/{page.token}.svg</code>
+                      {" · "}
+                      <a class="text-link" href={`${siteUrl}/badge/status/${page.token}.svg`}>preview</a>
                     </p>
                   </div>
                   <form action="/api/status/manage" method="post">

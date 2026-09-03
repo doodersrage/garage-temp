@@ -816,6 +816,19 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
       { type: "ul", items: ["Use **door open duration** (15–30 min) if short openings should not notify.","Add **rate drop** or forecast triggers for regional cold snaps without relying on the door alone.","Enable SMS or push (Pro) when email is not loud enough at night — see <a class=\"text-link\" href=\"/about/alert-channel-cookbook\">alert channel cookbook</a>."] }
   ],
 
+  "home-assistant-notify-recipes": [
+      { type: "p", html: "ThermalTrace can wake the house through Home Assistant — mobile push, TTS on a speaker, or a light flash — while email/SMS stay as the out-of-band backup. Use these recipes when you already run HA on the LAN." },
+      { type: "h2", text: "Option A — HACS integration (share link)" },
+      { type: "ol", items: ["Create a <strong>family live</strong> or Pro share link under <a class=\"text-link\" href=\"/dashboard/share/links\">Dashboard → Share → Links</a>.","Install the <a class=\"text-link\" href=\"/integrations/home-assistant\">ThermalTrace HACS integration</a> and point it at that URL.","Build an automation on <code>sensor.*_temperature</code> below your freeze threshold that calls <code>notify.mobile_app_…</code> or <code>tts.speak</code>."] },
+      { type: "h2", text: "Option B — outbound alert webhook (Pro)" },
+      { type: "ol", items: ["Enable the outbound webhook under Dashboard → Alerts (Pro).","In HA, create an automation triggered by <code>webhook</code> (or use the HA companion REST notify path).","Map ThermalTrace JSON fields (<code>title</code>, <code>body</code>, <code>kind</code>) into <code>notify</code> or <code>tts.cloud_say</code>."] },
+      { type: "pre", code: "# Example: HA automation sketch (adapt entity ids)\nalias: ThermalTrace freeze → phone + TTS\ntrigger:\n  - platform: webhook\n    webhook_id: thermaltrace_freeze\naction:\n  - service: notify.mobile_app_phone\n    data:\n      title: \"{{ trigger.json.title }}\"\n      message: \"{{ trigger.json.body }}\"\n  - service: tts.speak\n    target:\n      entity_id: media_player.kitchen_display\n    data:\n      message: \"Freeze risk. {{ trigger.json.body }}\"" },
+      { type: "h2", text: "Option C — inbound snooze from HA" },
+      { type: "p", html: "When you are working in a cold bay, call the ThermalTrace inbound webhook (<code>action=snooze</code> or <code>vacation</code>) from an HA script so threshold noise pauses without opening the dashboard. Guide: <a class=\"text-link\" href=\"/about/ingest-and-webhooks\">ingest and webhooks</a>." },
+      { type: "h2", text: "Keep an out-of-band channel" },
+      { type: "p", html: "Local notify fails when the LAN or HA host is down. Keep ThermalTrace email (and Pro SMS/push) enabled so freeze risk still reaches a phone that is not on the same Wi‑Fi." }
+  ],
+
   "personal-weather-stations": [
       { type: "p", html: "OpenWeather city IDs are fine for a rough regional forecast. If you already run an <strong>Ambient Weather</strong> or <strong>WeatherFlow Tempest</strong> station in the yard, ThermalTrace can read outdoor temp/humidity from <em>your</em> property — and use those coordinates for NWS and forecast freeze alerts." },
       { type: "h2", text: "Dashboard → Settings" },
@@ -907,6 +920,7 @@ export const EXPANDED_ABOUT_SLUGS: readonly string[] = [
   "household-sharing-walkthrough",
   "esphome-shelly-recipes",
   "garage-door-cold-playbook",
+  "home-assistant-notify-recipes",
   "personal-weather-stations"
 ] as const;
 

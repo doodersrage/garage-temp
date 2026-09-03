@@ -164,6 +164,79 @@ export const stories: Story[] = [
       },
     ],
   },
+  {
+    slug: "crawlspace-pipe-watch",
+    path: "/stories/crawlspace-pipe-watch",
+    headline: "Crawlspace pipe watch case study",
+    title: "The crawlspace texted before the supply line iced",
+    description:
+      "How a Michigan homeowner used a DS18B20 in the crawlspace with ThermalTrace freeze alerts to catch a drafty vent before supply lines froze.",
+    quote: "The crawlspace texted before the supply line iced",
+    location: "Grand Rapids, MI",
+    datePublished: "2026-02-20",
+    ogImage: "/og-story-freeze.jpg",
+    photoId: "basement-pex-pipes",
+    setup: [
+      "ESP32 + waterproof DS18B20 zip-tied near the main supply run in the crawlspace",
+      "Freeze threshold 36°F with email + Pro SMS",
+      "Share link for a sibling who lives closer and can close the vent",
+    ],
+    timeline: [
+      { time: "Sun 4:05 a.m.", detail: "Crawlspace crossed 35°F after a foundation vent stuck open overnight." },
+      { time: "Sun 4:06 a.m.", detail: "SMS to owner + email; sibling drove over with a flashlight." },
+      { time: "Sun 5:20 a.m.", detail: "Vent closed and insulated; temps climbing before morning low." },
+    ],
+    outcome:
+      "Crawlspaces fail silently. A probe on the pipe run beat a thawed-pipe deductible by hours.",
+    faqs: [
+      {
+        question: "Where should the crawlspace probe go?",
+        answer:
+          "On or near the coldest supply line, not just the access hatch. Pair with a living-space probe if you want comfort context upstairs.",
+      },
+      {
+        question: "Is humidity enough?",
+        answer:
+          "Humidity helps spot moisture, but freeze risk is temperature at the pipes. Use a waterproof probe and a threshold a few degrees above 32°F.",
+      },
+    ],
+  },
+  {
+    slug: "detached-garage-winter",
+    path: "/stories/detached-garage-winter",
+    headline: "Detached garage winter case study",
+    title: "Detached garage, attached anxiety",
+    description:
+      "A Colorado detached-garage household used ThermalTrace email and forecast alerts to catch a failed shop heater before stored goods and a utility sink line froze.",
+    quote: "Detached does not mean disposable",
+    location: "Fort Collins, CO",
+    datePublished: "2026-03-01",
+    ogImage: "/og-story-freeze.jpg",
+    setup: [
+      "Wi-Fi ESP32 on a shelf above the utility sink; second probe near the overhead door",
+      "Member plan with forecast freeze warnings + email",
+      "Vacation mode cleared before a week-long trip",
+    ],
+    timeline: [
+      { time: "Wed forecast", detail: "Forecast alert flagged a Thursday overnight low; owner confirmed heater was on." },
+      { time: "Thu 1:50 a.m.", detail: "Shop crossed 34°F after the heater tripped a GFCI; email fired." },
+      { time: "Thu 2:15 a.m.", detail: "Owner reset the circuit remotely via a smart plug; sink line never iced." },
+    ],
+    outcome:
+      "Detached garages lose heat fast. Forecast + threshold alerts covered both the planning window and the failure night.",
+    faqs: [
+      {
+        question: "Do detached garages need two probes?",
+        answer:
+          "One near pipes or the utility sink is enough to start. A second near the door catches drafts that the back wall never sees.",
+      },
+      {
+        question: "Is Free enough for a detached bay?",
+        answer:
+          "Free email works. Member forecast alerts help when you are traveling and want a heads-up before the overnight low.",
+      },
+    ],
+  },
 ];
 
 export function getStory(slug: string): Story | undefined {

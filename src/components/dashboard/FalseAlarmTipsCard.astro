@@ -1,0 +1,28 @@
+---
+import DashboardCard from "./DashboardCard.astro";
+import { FALSE_ALARM_TIPS } from "../../lib/falseAlarmHints";
+
+interface Props {
+  show?: boolean;
+}
+
+const { show = true } = Astro.props;
+if (!show) return null;
+---
+<DashboardCard id="false-alarm-tips">
+  <h2 class="card-title">Cutting false alarms</h2>
+  <p class="card-subtitle mb-3">
+    Repeat freeze noise is usually placement, a stale/unplugged probe, or a threshold set at 32°F.
+  </p>
+  <ul class="text-sm space-y-3 mb-0">
+    {FALSE_ALARM_TIPS.map((tip) => (
+      <li>
+        <strong>{tip.title}</strong>
+        <span class="block text-[var(--color-text-muted)]">{tip.detail}</span>
+        {tip.href && tip.hrefLabel && (
+          <a class="text-link text-xs" href={tip.href}>{tip.hrefLabel}</a>
+        )}
+      </li>
+    ))}
+  </ul>
+</DashboardCard>

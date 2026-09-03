@@ -36,10 +36,41 @@ export type ClaimsPackData = {
   readingsCsvUrl: string;
   alertsCsvUrl: string;
   disclaimer: string;
+  /** One-paragraph adjuster-facing summary of the window. */
+  executiveSummary: string;
+  /** How an adjuster should use companion CSVs + verification. */
+  adjusterNotes: string;
   /** Set after the pack is persisted as a durable export -- see claimsPackExports.ts. */
   verifyUrl?: string | null;
   contentHash?: string | null;
 };
+
+export function buildClaimsExecutiveSummary(input: {
+  householdLabel: string;
+  rangeFrom: string;
+  rangeTo: string;
+  freezeThresholdF: number;
+  freezeHours: FreezeHoursSummary;
+  criticalCount: number;
+  deviceCount: number;
+}): string {
+  const fromLabel = formatRangeDate(input.rangeFrom);
+  const toLabel = formatRangeDate(input.rangeTo);
+  const coldest = formatTemp(input.freezeHours.coldestF);
+  const hours = input.freezeHours.hoursBelow34.toFixed(1);
+  return (
+    `For household “${input.householdLabel}” from ${fromLabel} to ${toLabel} (UTC dates), ` +
+    `${input.deviceCount} monitored device${input.deviceCount === 1 ? "" : "s"} recorded ` +
+    `${input.freezeHours.totalReadings} temperature reading${input.freezeHours.totalReadings === 1 ? "" : "s"}. ` +
+    `Coldest indoor probe reading was ${coldest}; approximately ${hours} hours were at or below the ` +
+    `${input.freezeThresholdF}°F household freeze threshold. ` +
+    `${input.criticalCount} critical alert event${input.criticalCount === 1 ? "" : "s"} ` +
+    `(freeze / leak / rate / NWS / forecast / time-to-freeze) appear in the timeline below.`
+  );
+}
+
+export const CLAIMS_ADJUSTER_NOTES =
+  "Use this PDF as a cover sheet: confirm the verification code or URL if present, download the companion readings and alert CSVs for the same window, and compare timestamps to any on-site hardware logs. Freeze threshold is a household setting, not a regulatory standard.";
 
 export const CLAIMS_DISCLAIMER =
   "This pack is a monitoring record exported by ThermalTrace for the household's own use. It is not a legal determination, insurance appraisal, or proof of coverage. Adjusters should verify timestamps against original sensor hardware and delivery channels where required.";
@@ -96,6 +127,16 @@ export function buildClaimsPackData(input: {
     readingsCsvUrl: input.readingsCsvUrl,
     alertsCsvUrl: input.alertsCsvUrl,
     disclaimer: CLAIMS_DISCLAIMER,
+    executiveSummary: buildClaimsExecutiveSummary({
+      householdLabel: input.householdLabel,
+      rangeFrom: input.rangeFrom,
+      rangeTo: input.rangeTo,
+      freezeThresholdF: input.freezeThresholdF,
+      freezeHours,
+      criticalCount: criticalEvents.length,
+      deviceCount: input.devices.length,
+    }),
+    adjusterNotes: CLAIMS_ADJUSTER_NOTES,
     verifyUrl: null,
     contentHash: null,
   };
@@ -221,6 +262,16 @@ export function buildClaimsPackHtml(data: ClaimsPackData): string {
     <p class="muted">
       Household: ${escapeHtml(data.householdLabel)} · Window: ${escapeHtml(fromLabel)} → ${escapeHtml(toLabel)} · Exported ${escapeHtml(formatDateTime(data.exportedAt))}
     </p>
+
+    <section>
+      <h2>Executive summary</h2>
+      <p style="font-family: system-ui, sans-serif; font-size: 13px; margin: 0 0 8px;">
+        ${escapeHtml(data.executiveSummary)}
+      </p>
+      <p style="font-family: system-ui, sans-serif; font-size: 12px; color: #4b5563; margin: 0;">
+        ${escapeHtml(data.adjusterNotes)}
+      </p>
+    </section>
 
     <div class="downloads">
       <strong>Companion downloads</strong>

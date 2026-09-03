@@ -7,7 +7,14 @@ import { deliverWebhookPost } from "./webhookDeliveries";
 import { getAlertSettingsForUser } from "./notify";
 import { resolveSiteUrl } from "./schemaMarkup";
 
-export type AckPlaybookAction = "ack" | "snooze_4h" | "snooze_24h" | "notify_tenant" | "webhook_ping";
+export type AckPlaybookAction =
+  | "ack"
+  | "snooze_1h"
+  | "snooze_4h"
+  | "snooze_24h"
+  | "false_alarm"
+  | "notify_tenant"
+  | "webhook_ping";
 
 export type AckPlaybookResult = {
   ok: boolean;
@@ -26,8 +33,9 @@ export async function executeAlertAckPlaybook(input: {
     return { ok: false, message: "Alert event not found." };
   }
 
-  if (input.action === "snooze_4h" || input.action === "snooze_24h") {
-    const hours = input.action === "snooze_4h" ? 4 : 24;
+  if (input.action === "snooze_1h" || input.action === "snooze_4h" || input.action === "snooze_24h" || input.action === "false_alarm") {
+    const hours =
+      input.action === "snooze_1h" ? 1 : input.action === "snooze_4h" ? 4 : 24;
     await snoozeAlertsForUser(input.userId, hours);
   }
 
@@ -98,8 +106,11 @@ export async function executeAlertAckPlaybook(input: {
 
   const messages: Record<AckPlaybookAction, string> = {
     ack: "Alert marked as handled.",
+    snooze_1h: "Alert handled — freeze alerts snoozed for 1 hour.",
     snooze_4h: "Alert handled — freeze alerts snoozed for 4 hours.",
     snooze_24h: "Alert handled — freeze alerts snoozed for 24 hours.",
+    false_alarm:
+      "Marked as false alarm — alerts snoozed 24h. Check probe placement if this keeps happening.",
     notify_tenant: "Alert handled — tenant contact emailed.",
     webhook_ping: "Alert handled — outbound webhook notified.",
   };

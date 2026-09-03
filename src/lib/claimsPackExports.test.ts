@@ -30,6 +30,8 @@ const basePack: ClaimsPackData = {
   readingsCsvUrl: "https://example.com/readings.csv",
   alertsCsvUrl: "https://example.com/alerts.csv",
   disclaimer: "disclaimer text",
+  executiveSummary: "Executive summary text",
+  adjusterNotes: "Adjuster notes text",
 };
 
 describe("computeClaimsPackHash", () => {

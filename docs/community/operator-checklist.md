@@ -44,6 +44,12 @@ Check what's missing locally: `pnpm operator:check`
 ## WebAuthn MFA
 
 - [ ] Re-enable `MFA_WEBAUTHN_UI_ENABLED` in `src/lib/mfaWebAuthnUi.ts` when Supabase Cloud supports WebAuthn MFA
+- **Blocked externally** — do not flip the flag until Supabase documents WebAuthn MFA on the project
+
+## Affiliates (optional commerce)
+
+- [ ] Set `PUBLIC_AMAZON_ASSOCIATE_TAG` / `PUBLIC_ADAFRUIT_AFFILIATE_ID` in Worker secrets if kit BOM commerce should be tagged
+- Unset tags keep clean Amazon/Adafruit URLs; disclosure copy still applies on the freeze-kit page
 
 ## Already done (no action)
 

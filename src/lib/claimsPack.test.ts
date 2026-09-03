@@ -77,6 +77,9 @@ describe("claimsPack", () => {
     expect(pack.freezeHours.hoursBelow34).toBeGreaterThan(0);
     expect(pack.criticalEvents).toHaveLength(2);
     expect(pack.probes[0]?.label).toBe("Garage");
+    expect(pack.executiveSummary).toMatch(/Main garage/);
+    expect(pack.executiveSummary).toMatch(/28\.0°F/);
+    expect(pack.adjusterNotes).toMatch(/cover sheet/i);
   });
 
   it("builds printable html with coldest, disclaimer, and csv links", () => {
@@ -104,6 +107,8 @@ describe("claimsPack", () => {
     expect(html).toContain("https://example.com/alerts.csv");
     expect(html).toContain("Freeze alert");
     expect(html).toContain("Leak detected");
+    expect(html).toContain("Executive summary");
+    expect(html).toContain("cover sheet");
   });
 
   it("escapes html in titles and labels", () => {
