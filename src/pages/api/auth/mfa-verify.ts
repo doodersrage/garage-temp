@@ -25,6 +25,7 @@ import {
   userHasYubiKeyOtpEnrolled,
   verifyYubiKeyOtpWithYubiCloud,
 } from "../../../lib/yubikeyOtp";
+import { maybeRedirectMobileOAuth } from "../../../lib/mobileAuthRedirect";
 
 function buildMfaErrorRedirect(code: string, next?: string | null): string {
   const params = new URLSearchParams({ error: code });
@@ -46,7 +47,7 @@ function jsonResponse(body: Record<string, unknown>, status = 200): Response {
   });
 }
 
-export const POST: APIRoute = async ({ request, cookies, redirect }) => {
+export const POST: APIRoute = async ({ request, cookies, redirect, url }) => {
   const { session, user } = await getAuthFromCookies(cookies);
   const asJson = wantsJson(request);
 
@@ -123,6 +124,13 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         aal: "aal2",
       });
     }
+    const mobileRedirect = await maybeRedirectMobileOAuth(
+      cookies,
+      session.access_token,
+      session.refresh_token,
+      url.origin,
+    );
+    if (mobileRedirect) return mobileRedirect;
     return redirect(safeNext);
   }
 
@@ -249,6 +257,13 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         aal: getAalClaim(session.access_token) ?? "aal1",
       });
     }
+    const mobileRedirect = await maybeRedirectMobileOAuth(
+      cookies,
+      session.access_token,
+      session.refresh_token,
+      url.origin,
+    );
+    if (mobileRedirect) return mobileRedirect;
     return redirect(safeNext);
   }
 
@@ -307,5 +322,12 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       aal: "aal2",
     });
   }
+  const mobileRedirect = await maybeRedirectMobileOAuth(
+    cookies,
+    data.access_token,
+    data.refresh_token,
+    url.origin,
+  );
+  if (mobileRedirect) return mobileRedirect;
   return redirect(safeNext);
 };

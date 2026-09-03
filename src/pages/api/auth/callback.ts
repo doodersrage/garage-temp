@@ -17,8 +17,8 @@ import {
 import { applyReferralForNewUser, isLikelyNewUser } from "../../../lib/referrals";
 import { REGISTER_NEXT_DEVICES } from "../../../lib/registerUrl";
 import {
-  consumeMobileOAuthCookie,
-  redirectMobileOAuthComplete,
+  hasMobileOAuthCookie,
+  maybeRedirectMobileOAuth,
 } from "../../../lib/mobileAuthRedirect";
 import { setAuthCookies } from "../../../lib/auth";
 import { setMfaRequiredCookie, needsMfaStepUp, getAssuranceLevels, createAuthClient } from "../../../lib/mfa";
@@ -73,18 +73,23 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
       : "/dashboard";
   const safeNext = sanitizeNextPath(nextCookie) ?? defaultNext;
 
-  if (consumeMobileOAuthCookie(cookies)) {
+  // Prefer returning to the Android app before any web MFA challenge. The app
+  // runs YubiKey/TOTP itself. Chrome will not follow custom-scheme 302s after
+  // Google security-key auth, so we hand off via HTTPS /app/oauth.
+  if (hasMobileOAuthCookie(cookies)) {
     setAuthCookies(cookies, data.session.access_token, data.session.refresh_token);
-    const authClient = createAuthClient();
-    await authClient.auth.setSession({
+    const stepClient = createAuthClient();
+    await stepClient.auth.setSession({
       access_token: data.session.access_token,
       refresh_token: data.session.refresh_token,
     });
-    const levels = await getAssuranceLevels(authClient);
+    const levels = await getAssuranceLevels(stepClient);
     setMfaRequiredCookie(cookies, needsMfaStepUp(levels));
-    const mobileRedirect = await redirectMobileOAuthComplete(
+    const mobileRedirect = await maybeRedirectMobileOAuth(
+      cookies,
       data.session.access_token,
       data.session.refresh_token,
+      url.origin,
     );
     if (mobileRedirect) return mobileRedirect;
   }

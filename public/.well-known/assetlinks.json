@@ -1,0 +1,22 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "dev.thermaltrace.android",
+      "sha256_cert_fingerprints": [
+        "FF67EBBB981232FD5A0C7C3338DE137F5B8478A5B94B9869BC04BEB639435D19"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "dev.thermaltrace.android",
+      "sha256_cert_fingerprints": [
+        "44D93A098977AE30271231ECAE4919CC7A656EAC7FACF909F94E83A8A68957BF"
+      ]
+    }
+  }
+]

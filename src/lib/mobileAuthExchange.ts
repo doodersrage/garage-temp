@@ -101,4 +101,7 @@ export async function verifyMobileExchangeToken(
 
 export const MOBILE_OAUTH_COOKIE = "mobile_oauth";
 export const MOBILE_APP_SCHEME = "dev.thermaltrace.android";
-export const MOBILE_OAUTH_CALLBACK_PATH = "/oauth";
+/** Host for the custom-scheme return URI (`dev.thermaltrace.android://oauth`). */
+export const MOBILE_OAUTH_HOST = "oauth";
+/** HTTPS App Link path Chrome can open after Google/YubiKey (custom-scheme 302s are blocked). */
+export const MOBILE_OAUTH_HTTPS_PATH = "/app/oauth";

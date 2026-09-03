@@ -1,0 +1,65 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import {
+  buildMobileOAuthCustomUrl,
+  buildMobileOAuthIntentUrl,
+} from "../../lib/mobileAuthRedirect";
+
+const exchange = Astro.url.searchParams.get("exchange")?.trim() ?? "";
+const intentUrl = exchange ? buildMobileOAuthIntentUrl(exchange) : "";
+const customUrl = exchange ? buildMobileOAuthCustomUrl(exchange) : "";
+---
+<Layout
+  title="Return to the Android app"
+  description="Finish ThermalTrace sign-in by returning to the Android app."
+  noindex
+  skipAuth
+>
+  <article class="card max-w-lg mx-auto my-8">
+    {
+      exchange ? (
+        <>
+          <h1 class="card-title">Open ThermalTrace</h1>
+          <p class="card-subtitle">
+            Sign-in finished in the browser. Chrome often stays here after a Google or
+            YubiKey security step — tap the button to return to the app and finish MFA
+            there if needed.
+          </p>
+          <p class="mt-4 mb-2">
+            <a class="btn-primary" id="open-app" href={intentUrl}>Open ThermalTrace</a>
+          </p>
+          <p class="text-sm text-[var(--color-text-muted)] mb-0">
+            If nothing happens, use the phone’s back button to return to the app, or
+            open ThermalTrace from your app drawer.
+          </p>
+          <script is:inline define:vars={{ intentUrl, customUrl }}>
+            (() => {
+              const go = () => {
+                // intent:// is the reliable Chrome handoff after WebAuthn/YubiKey.
+                window.location.href = intentUrl;
+                setTimeout(() => {
+                  // Fallback for browsers that prefer the custom scheme.
+                  window.location.href = customUrl;
+                }, 900);
+              };
+              // Defer slightly so the visible button paints after a security-key flow.
+              setTimeout(go, 250);
+              document.getElementById("open-app")?.addEventListener("click", (event) => {
+                event.preventDefault();
+                go();
+              });
+            })();
+          </script>
+        </>
+      ) : (
+        <>
+          <h1 class="card-title">Missing sign-in token</h1>
+          <p class="card-subtitle mb-0">
+            This page is only used to return to the Android app after Google sign-in. Open
+            ThermalTrace on your phone and try Google again.
+          </p>
+        </>
+      )
+    }
+  </article>
+</Layout>

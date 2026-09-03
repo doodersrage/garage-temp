@@ -16,8 +16,8 @@ import {
   sanitizeNextPath,
 } from "../../../../lib/siteUrl";
 import {
-  consumeMobileOAuthCookie,
-  redirectMobileOAuthComplete,
+  hasMobileOAuthCookie,
+  maybeRedirectMobileOAuth,
 } from "../../../../lib/mobileAuthRedirect";
 import { setAuthCookies } from "../../../../lib/auth";
 import {
@@ -64,7 +64,7 @@ export const GET: APIRoute = async ({ url, cookies, redirect, request, site }) =
       : "/dashboard";
     const safeNext = sanitizeNextPath(nextCookie) ?? defaultNext;
 
-    if (consumeMobileOAuthCookie(cookies)) {
+    if (hasMobileOAuthCookie(cookies)) {
       setAuthCookies(cookies, session.access_token, session.refresh_token);
       const authClient = createAuthClient();
       await authClient.auth.setSession({
@@ -73,9 +73,11 @@ export const GET: APIRoute = async ({ url, cookies, redirect, request, site }) =
       });
       const levels = await getAssuranceLevels(authClient);
       setMfaRequiredCookie(cookies, needsMfaStepUp(levels));
-      const mobileRedirect = await redirectMobileOAuthComplete(
+      const mobileRedirect = await maybeRedirectMobileOAuth(
+        cookies,
         session.access_token,
         session.refresh_token,
+        url.origin,
       );
       if (mobileRedirect) return mobileRedirect;
     }

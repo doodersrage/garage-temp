@@ -20,6 +20,7 @@ Disallow: /invite/
 Disallow: /share/
 Disallow: /status/
 Disallow: /embed/
+Disallow: /app/oauth
 
 # Keep public docs and marketing crawlable
 Allow: /docs/api
