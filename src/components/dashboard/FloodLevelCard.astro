@@ -8,18 +8,20 @@ interface Props {
 }
 
 const { overview } = Astro.props;
-const hasContent =
-  overview.floodOpen.length > 0 ||
-  overview.recentFlood.length > 0 ||
-  overview.levels.length > 0;
 ---
-{hasContent && (
-  <DashboardCard id="flood-level">
-    <h2 class="card-title">Flood &amp; level</h2>
-    <p class="card-subtitle mb-4">
-      Wet contacts auto-alert when flood sensors report wet (bypasses snooze/vacation). Tank/sump levels need a Rules → level_above condition.
-    </p>
-    {overview.floodOpen.length > 0 && (
+const hasWet =
+  overview.floodOpen.length > 0 || overview.recentFlood.length > 0;
+const hasLevels = overview.levels.length > 0;
+---
+<DashboardCard id="flood-level">
+  <h2 class="card-title">Flood &amp; level</h2>
+  <p class="card-subtitle mb-4">
+    Wet contacts auto-alert when flood sensors report wet (bypasses snooze/vacation).
+    Tank/sump levels need a <strong>Rules → level_above</strong> condition.
+  </p>
+
+  {hasWet ? (
+    overview.floodOpen.length > 0 ? (
       <div class="alert-warning mb-3">
         {overview.floodOpen.map((row) => (
           <p class="m-0 mb-1">
@@ -28,40 +30,52 @@ const hasContent =
           </p>
         ))}
       </div>
-    )}
-    {overview.recentFlood.length > 0 && (
-      <ul class="space-y-2 mb-3">
-        {overview.recentFlood.map((row) => (
-          <li class="text-sm">
-            <strong>{row.label}</strong> wet event ·{" "}
-            {new Date(row.at).toLocaleString()}
+    ) : null
+  ) : (
+    <p class="text-sm text-[var(--color-text-muted)] mb-3">
+      No wet flood events right now.
+      Want this alert? Add a wet/dry contact on your heater pan, laundry, or sump.
+      Wet contacts will notify automatically once alerts are enabled.
+    </p>
+  )}
+
+  {overview.recentFlood.length > 0 && (
+    <ul class="space-y-2 mb-3">
+      {overview.recentFlood.map((row) => (
+        <li class="text-sm">
+          <strong>{row.label}</strong> wet event ·{" "}
+          {new Date(row.at).toLocaleString()}
+        </li>
+      ))}
+    </ul>
+  )}
+
+  {hasLevels ? (
+    <ul class="space-y-2 mb-0">
+      {overview.levels.map((row) => {
+        const age = formatRelativeAge(row.at);
+        return (
+          <li class="text-sm flex flex-wrap justify-between gap-2">
+            <span>
+              <strong>{row.label}</strong>
+              {" · "}
+              {row.value.toFixed(1)}
+              {row.risingPerHour != null && Math.abs(row.risingPerHour) >= 0.5 && (
+                <span class="text-[var(--color-text-muted)]">
+                  {" "}
+                  ({row.risingPerHour > 0 ? "+" : ""}
+                  {row.risingPerHour.toFixed(1)}/h)
+                </span>
+              )}
+            </span>
+            <span class="text-[var(--color-text-muted)]">{age.label}</span>
           </li>
-        ))}
-      </ul>
-    )}
-    {overview.levels.length > 0 && (
-      <ul class="space-y-2 mb-0">
-        {overview.levels.map((row) => {
-          const age = formatRelativeAge(row.at);
-          return (
-            <li class="text-sm flex flex-wrap justify-between gap-2">
-              <span>
-                <strong>{row.label}</strong>
-                {" · "}
-                {row.value.toFixed(1)}
-                {row.risingPerHour != null && Math.abs(row.risingPerHour) >= 0.5 && (
-                  <span class="text-[var(--color-text-muted)]">
-                    {" "}
-                    ({row.risingPerHour > 0 ? "+" : ""}
-                    {row.risingPerHour.toFixed(1)}/h)
-                  </span>
-                )}
-              </span>
-              <span class="text-[var(--color-text-muted)]">{age.label}</span>
-            </li>
-          );
-        })}
-      </ul>
-    )}
-  </DashboardCard>
-)}
+        );
+      })}
+    </ul>
+  ) : (
+    <p class="text-sm text-[var(--color-text-muted)] mb-0">
+      No level/sump readings detected. Add a numeric <code>level</code> sensor if you want early warning.
+    </p>
+  )}
+</DashboardCard>
