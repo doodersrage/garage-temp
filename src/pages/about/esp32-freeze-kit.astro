@@ -1,6 +1,9 @@
 ---
 
 import AboutArticle from "../../components/AboutArticle.astro";
+import { Image } from "astro:assets";
+import esp32Wiring from "../../assets/esp32_ds18b20_wiring.svg";
+import { affiliateHref, COMMERCE_LINK_REL } from "../../lib/affiliateLinks";
 import { getAboutPage } from "../../lib/aboutPages";
 import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
 
@@ -8,20 +11,24 @@ const page = getAboutPage("esp32-freeze-kit")!;
 const hero = getAboutHeroPhoto(page.slug);
 
 /** Stable vendor product pages (prefer these over churny Amazon ASINs). */
-const ADAFRUIT_DS18B20 = "https://www.adafruit.com/product/381";
-const ADAFRUIT_DS18B20_HIGH_TEMP = "https://www.adafruit.com/product/642";
-const ADAFRUIT_ESP32_S3_FEATHER = "https://www.adafruit.com/product/5400";
-const ADAFRUIT_HUZZAH32 = "https://www.adafruit.com/product/3591";
+const ADAFRUIT_DS18B20 = affiliateHref("https://www.adafruit.com/product/381");
+const ADAFRUIT_DS18B20_HIGH_TEMP = affiliateHref("https://www.adafruit.com/product/642");
+const ADAFRUIT_ESP32_S3_FEATHER = affiliateHref("https://www.adafruit.com/product/5400");
+const ADAFRUIT_HUZZAH32 = affiliateHref("https://www.adafruit.com/product/3591");
 
 /** Search URLs stay useful when individual ASINs rotate. */
-const AMAZON_ESP32 =
-  "https://www.amazon.com/s?k=ESP32+DevKit+C+USB-C+WiFi";
-const AMAZON_DS18B20 =
-  "https://www.amazon.com/s?k=waterproof+DS18B20+temperature+probe+1m";
-const AMAZON_RESISTOR =
-  "https://www.amazon.com/s?k=4.7k+ohm+resistor+through+hole";
-const AMAZON_BUNDLE =
-  "https://www.amazon.com/s?k=ESP32+DS18B20+waterproof+kit";
+const AMAZON_ESP32 = affiliateHref(
+  "https://www.amazon.com/s?k=ESP32+DevKit+C+USB-C+WiFi",
+);
+const AMAZON_DS18B20 = affiliateHref(
+  "https://www.amazon.com/s?k=waterproof+DS18B20+temperature+probe+1m",
+);
+const AMAZON_RESISTOR = affiliateHref(
+  "https://www.amazon.com/s?k=4.7k+ohm+resistor+through+hole",
+);
+const AMAZON_BUNDLE = affiliateHref(
+  "https://www.amazon.com/s?k=ESP32+DS18B20+waterproof+kit",
+);
 ---
 <AboutArticle
   slug={page.slug}
@@ -63,28 +70,28 @@ const AMAZON_BUNDLE =
           <th scope="row">ESP32 board</th>
           <td>HTTPS push ingest over Wi‑Fi (TLS on-chip)</td>
           <td>
-            <a class="text-link" href={ADAFRUIT_ESP32_S3_FEATHER} target="_blank" rel="noreferrer">Adafruit ESP32-S3 Feather</a>
+            <a class="text-link" href={ADAFRUIT_ESP32_S3_FEATHER} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit ESP32-S3 Feather</a>
             ·
-            <a class="text-link" href={ADAFRUIT_HUZZAH32} target="_blank" rel="noreferrer">HUZZAH32</a>
+            <a class="text-link" href={ADAFRUIT_HUZZAH32} target="_blank" rel={COMMERCE_LINK_REL}>HUZZAH32</a>
             ·
-            <a class="text-link" href={AMAZON_ESP32} target="_blank" rel="noreferrer">Amazon DevKit search</a>
+            <a class="text-link" href={AMAZON_ESP32} target="_blank" rel={COMMERCE_LINK_REL}>Amazon DevKit search</a>
           </td>
         </tr>
         <tr>
           <th scope="row">Waterproof DS18B20</th>
           <td>Pipe / crawlspace probe; works below freezing</td>
           <td>
-            <a class="text-link" href={ADAFRUIT_DS18B20} target="_blank" rel="noreferrer">Adafruit #381</a>
+            <a class="text-link" href={ADAFRUIT_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit #381</a>
             (includes 4.7&nbsp;kΩ)
             ·
-            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel="noreferrer">Amazon probe search</a>
+            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Amazon probe search</a>
           </td>
         </tr>
         <tr>
           <th scope="row">4.7&nbsp;kΩ pull-up</th>
           <td>Required on the 1-Wire data line if the probe pack does not include one</td>
           <td>
-            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel="noreferrer">Amazon resistor search</a>
+            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={COMMERCE_LINK_REL}>Amazon resistor search</a>
           </td>
         </tr>
         <tr>
@@ -98,15 +105,29 @@ const AMAZON_BUNDLE =
 
   <p class="text-sm text-[var(--color-text-muted)]">
     Optional one-box search (verify it includes a waterproof DS18B20, not only DHT11):
-    <a class="text-link" href={AMAZON_BUNDLE} target="_blank" rel="noreferrer">ESP32 + DS18B20 kit search</a>.
+    <a class="text-link" href={AMAZON_BUNDLE} target="_blank" rel={COMMERCE_LINK_REL}>ESP32 + DS18B20 kit search</a>.
     Product ASINs change often — treat Amazon as a parts finder, Adafruit as the reference BOM.
+  </p>
+  <p class="text-sm text-[var(--color-text-muted)]">
+    Buy links may include affiliate tags when configured. ThermalTrace may earn a commission at no extra cost to you.
   </p>
 
   <h2>Wire it</h2>
+  <figure class="about-figure about-figure-svg card overflow-hidden p-0">
+    <Image
+      src={esp32Wiring}
+      alt="Wiring diagram: ESP32 DevKit to waterproof DS18B20 with 4.7 kilohm pull-up on GPIO 4"
+      class="h-auto w-full"
+    />
+    <figcaption>
+      Red → 3.3&nbsp;V, black → GND, yellow/white data → GPIO 4, 4.7&nbsp;kΩ between data and 3.3&nbsp;V
+      (matches <code>ONE_WIRE_PIN</code> default in the sample sketch).
+    </figcaption>
+  </figure>
   <ul>
     <li><strong>Red</strong> (VCC) → ESP32 3.3&nbsp;V</li>
     <li><strong>Black</strong> (GND) → GND</li>
-    <li><strong>Yellow / white</strong> (data) → a free digital GPIO (samples often use GPIO 4)</li>
+    <li><strong>Yellow / white</strong> (data) → GPIO 4 (sample sketch default; any free digital GPIO works if you change the pin)</li>
     <li>4.7&nbsp;kΩ between data and 3.3&nbsp;V</li>
   </ul>
   <p>
@@ -147,7 +168,7 @@ const AMAZON_BUNDLE =
   <p>
     DHT22 still works for shop air + humidity (your Ethernet garage case study). For pipes, prefer DS18B20.
     High-temp PTFE cable:
-    <a class="text-link" href={ADAFRUIT_DS18B20_HIGH_TEMP} target="_blank" rel="noreferrer">Adafruit #642</a>
+    <a class="text-link" href={ADAFRUIT_DS18B20_HIGH_TEMP} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit #642</a>
     if the probe sits near a water heater or heat tape.
   </p>
 

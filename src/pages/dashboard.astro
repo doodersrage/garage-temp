@@ -768,6 +768,9 @@ const garageRisk = computeGarageRiskStatus({
           {showDemoPullNudge && (
             <a class="btn-secondary" href="#demo-pull-nudge">Try demo feed</a>
           )}
+          {!hasDevices && (
+            <a class="btn-secondary" href="/about/esp32-freeze-kit">ESP32 parts list</a>
+          )}
           <a class="btn-ghost" href="/about/probe-demo">Probe simulator</a>
           <a class="btn-ghost" href="/dashboard/alerts#alert-section-essentials">Alert essentials</a>
         </div>

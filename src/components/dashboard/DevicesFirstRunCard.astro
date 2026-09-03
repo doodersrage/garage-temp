@@ -24,16 +24,25 @@ const { canEdit, atDeviceLimit, redirectTo, nestEntitled } = Astro.props;
         Create a push device, download a pre-filled ESP32 sketch, set Wi‑Fi, and POST once — sensors auto-import.
       </p>
       {canEdit && !atDeviceLimit ? (
-        <form action="/api/devices" method="post">
-          <input type="hidden" name="action" value="create_push" />
-          <input type="hidden" name="redirect" value={redirectTo} />
-          <input type="hidden" name="name" value="Workshop probe" />
-          <button class="btn-primary" type="submit">Create push device</button>
-        </form>
+        <div class="flex flex-wrap gap-2">
+          <form action="/api/devices" method="post">
+            <input type="hidden" name="action" value="create_push" />
+            <input type="hidden" name="redirect" value={redirectTo} />
+            <input type="hidden" name="name" value="Workshop probe" />
+            <button class="btn-primary" type="submit">Create push device</button>
+          </form>
+          <a class="btn-ghost" href="/about/esp32-freeze-kit">Parts list</a>
+        </div>
       ) : atDeviceLimit ? (
-        <a class="btn-secondary" href="/dashboard/plans">Upgrade for more devices</a>
+        <div class="flex flex-wrap gap-2">
+          <a class="btn-secondary" href="/dashboard/plans">Upgrade for more devices</a>
+          <a class="btn-ghost" href="/about/esp32-freeze-kit">Parts list</a>
+        </div>
       ) : (
-        <p class="mb-0 text-sm text-[var(--color-text-muted)]">View-only — ask an owner to create a device.</p>
+        <div class="flex flex-wrap gap-2 items-center">
+          <p class="mb-0 text-sm text-[var(--color-text-muted)]">View-only — ask an owner to create a device.</p>
+          <a class="btn-ghost" href="/about/esp32-freeze-kit">Parts list</a>
+        </div>
       )}
     </div>
 
@@ -86,6 +95,8 @@ const { canEdit, atDeviceLimit, redirectTo, nestEntitled } = Astro.props;
     Still exploring placement?
     {" "}
     <a class="text-link" href="/about/probe-demo">Open the interactive probe simulator</a>
+    {" · "}
+    <a class="text-link" href="/about/esp32-freeze-kit">ESP32 freeze kit BOM</a>
     {" · "}
     <a class="text-link" href="/docs/api">HTTP API quick reference</a>
   </p>
