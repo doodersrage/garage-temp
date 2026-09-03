@@ -1,30 +1,64 @@
 ---
 import DashboardCard from "./dashboard/DashboardCard.astro";
+import type { TimeToFreezeProjection } from "../lib/spaceThermalModel";
 
 interface Props {
-  estimate: {
-    hours: number | null;
-    rateFPerHour: number | null;
-    message: string;
-  };
+  projection: TimeToFreezeProjection;
   freezeThresholdF: number;
   useCelsius?: boolean;
 }
 
-const { estimate, freezeThresholdF, useCelsius = false } = Astro.props;
+const { projection, freezeThresholdF, useCelsius = false } = Astro.props;
 const thresholdLabel = useCelsius
   ? `${(((freezeThresholdF - 32) * 5) / 9).toFixed(0)}°C`
   : `${freezeThresholdF}°F`;
+const sourceLabel =
+  projection.source === "forecast_model"
+    ? "Forecast-backed from this space"
+    : projection.source === "trend"
+      ? "Cooling-rate estimate"
+      : projection.source === "already_below"
+        ? "At threshold now"
+        : "Not enough data yet";
+const confidenceLabel =
+  projection.confidence === "high"
+    ? "High confidence"
+    : projection.confidence === "medium"
+      ? "Medium confidence"
+      : "Low confidence";
+const clock =
+  projection.hours === 0
+    ? `At ${thresholdLabel} now`
+    : projection.hitsAtLabel
+      ? `Hits ${thresholdLabel} around ${projection.hitsAtLabel}`
+      : null;
 ---
-<DashboardCard>
+<DashboardCard id="time-to-freeze">
   <h2 class="card-title">Time to freeze</h2>
   <p class="card-subtitle mb-3">
-    Trend-based estimate using recent readings vs your {thresholdLabel} threshold.
+    {sourceLabel} vs your {thresholdLabel} threshold.
   </p>
-  <p class="mb-0 text-sm">{estimate.message}</p>
-  {estimate.hours != null && estimate.hours > 0 && estimate.rateFPerHour != null && (
-    <p class="mt-2 mb-0 text-sm text-muted-foreground">
-      Cooling rate: {Math.abs(estimate.rateFPerHour).toFixed(1)}°F/hr
-    </p>
-  )}
+  {clock ? (
+    <p class="time-to-freeze-clock mb-2">{clock}</p>
+  ) : null}
+  <p class="mb-0 text-sm">{projection.message}</p>
+  <p class="mt-2 mb-0 text-xs text-[var(--color-text-muted)]">
+    {confidenceLabel}
+    {projection.rateFPerHour != null && projection.rateFPerHour < -0.05
+      ? ` · Cooling ${Math.abs(projection.rateFPerHour).toFixed(1)}°F/hr`
+      : ""}
+    {projection.params
+      ? ` · Typical offset ${projection.params.offsetF >= 0 ? "+" : ""}${projection.params.offsetF.toFixed(0)}°F vs outdoor`
+      : ""}
+  </p>
 </DashboardCard>
+
+<style>
+  .time-to-freeze-clock {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+</style>

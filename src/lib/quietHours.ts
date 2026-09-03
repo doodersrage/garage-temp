@@ -64,6 +64,7 @@ function isCriticalNotifyKind(kind: NotifyKind | undefined): boolean {
   return (
     kind === "threshold" ||
     kind === "forecast" ||
+    kind === "runway" ||
     kind === "nws" ||
     kind === "flood"
   );

@@ -40,7 +40,7 @@ export const compareGuides: CompareGuide[] = [
     ],
     rows: [
       { capability: "Broker / server upkeep", thermaltrace: "Hosted (no Mosquitto to patch)", other: "You patch Mosquitto/HA" },
-      { capability: "Freeze alerts", thermaltrace: "Built-in channels", other: "Node-RED + Twilio/email" },
+      { capability: "Freeze alerts", thermaltrace: "Built-in channels + remaining-hours clock", other: "Node-RED + Twilio/email" },
       { capability: "ESP ingest", thermaltrace: "HTTPS device key or MQTT bridge", other: "MQTT topic design" },
       { capability: "History & CSV", thermaltrace: "On paid plans", other: "Influx/Postgres you manage" },
       { capability: "Share with family", thermaltrace: "Household invites", other: "VPN or reverse proxy" },
@@ -72,7 +72,7 @@ export const compareGuides: CompareGuide[] = [
     rows: [
       { capability: "Hardware", thermaltrace: "BYO ESP/Arduino", other: "Govee pods" },
       { capability: "Garage / detached spaces", thermaltrace: "Designed for it", other: "Hit-or-miss range" },
-      { capability: "Alert channels", thermaltrace: "Email, SMS, push, chat, webhooks", other: "Mostly app push" },
+      { capability: "Alert channels", thermaltrace: "Email, SMS, push, chat, webhooks + time-to-freeze clock", other: "Mostly app push" },
       { capability: "Data export", thermaltrace: "CSV / API (paid tiers)", other: "Limited" },
       { capability: "Multi-user household", thermaltrace: "Included", other: "Account sharing awkward" },
     ],
@@ -103,7 +103,7 @@ export const compareGuides: CompareGuide[] = [
     rows: [
       { capability: "Primary job", thermaltrace: "Indoor freeze / space monitoring", other: "Outdoor weather" },
       { capability: "Probe location", thermaltrace: "Garage, crawlspace, closet", other: "Roof / yard" },
-      { capability: "Freeze alerts on pipes", thermaltrace: "Direct", other: "Infer from outdoor only" },
+      { capability: "Freeze alerts on pipes", thermaltrace: "Direct + hours-until-freeze clock", other: "Infer from outdoor only" },
       { capability: "DIY ESP ingest", thermaltrace: "Yes", other: "N/A" },
       { capability: "Complements the other?", thermaltrace: "Yes — use both", other: "Yes — outdoor context" },
     ],
@@ -134,7 +134,7 @@ export const compareGuides: CompareGuide[] = [
     rows: [
       { capability: "Primary job", thermaltrace: "Freeze/leak monitoring for any space", other: "HVAC control for conditioned space" },
       { capability: "Sees an unheated garage/crawlspace", thermaltrace: "Yes — dedicated probe", other: "No — unconditioned spaces aren't on the loop" },
-      { capability: "Freeze/leak alerts (SMS, push, email)", thermaltrace: "Yes", other: "No" },
+      { capability: "Freeze/leak alerts (SMS, push, email)", thermaltrace: "Yes, plus remaining-hours time-to-freeze", other: "No" },
       { capability: "Shows thermostat reading on freeze alerts", thermaltrace: "Yes, if connected (Pro)", other: "N/A" },
       { capability: "Controls heating schedules", thermaltrace: "No", other: "Yes" },
       { capability: "Complements the other?", thermaltrace: "Yes — connect both", other: "Yes — connect both" },
@@ -166,7 +166,7 @@ export const compareGuides: CompareGuide[] = [
     rows: [
       { capability: "Primary job", thermaltrace: "Freeze/leak monitoring for any space", other: "HVAC control for conditioned space" },
       { capability: "Sees an unheated garage/crawlspace", thermaltrace: "Yes — dedicated probe", other: "No — unconditioned spaces aren't on the loop" },
-      { capability: "Freeze/leak alerts (SMS, push, email)", thermaltrace: "Yes", other: "No" },
+      { capability: "Freeze/leak alerts (SMS, push, email)", thermaltrace: "Yes, plus remaining-hours time-to-freeze", other: "No" },
       { capability: "Shows thermostat reading on freeze alerts", thermaltrace: "Yes, if connected (Pro)", other: "N/A" },
       { capability: "Controls heating schedules", thermaltrace: "No", other: "Yes" },
       { capability: "Complements the other?", thermaltrace: "Yes — connect both", other: "Yes — connect both" },

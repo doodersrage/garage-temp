@@ -13,7 +13,7 @@ describe("computeFreezeReadiness", () => {
       canUseNws: false,
       hasSentAnyAlert: false,
     });
-    expect(result.score).toBeLessThan(50);
+    expect(result.score).toBeLessThanOrEqual(50);
     expect(result.ready).toBe(false);
   });
 

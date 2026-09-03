@@ -62,6 +62,7 @@ const ALERT_CHANNELS = [
 const SPACE_ROUTING_KINDS = [
   { id: "threshold", label: "Threshold" },
   { id: "flood", label: "Flood / leak" },
+  { id: "runway", label: "Time to freeze" },
   { id: "forecast", label: "Forecast" },
   { id: "nws", label: "NWS" },
   { id: "rule", label: "Rule" },
@@ -72,6 +73,7 @@ const SPACE_ROUTING_KINDS = [
 const templateKinds = [
   "threshold",
   "flood",
+  "runway",
   "forecast",
   "nws",
   "rate",
@@ -89,6 +91,7 @@ const needsPro =
 const PLAYBOOK_KINDS = [
   { id: "threshold", label: "Threshold" },
   { id: "flood", label: "Flood / leak" },
+  { id: "runway", label: "Time to freeze" },
   { id: "forecast", label: "Forecast" },
   { id: "nws", label: "NWS" },
   { id: "rate", label: "Rate drop" },
@@ -214,12 +217,24 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
         id="forecast_hours_ahead"
         name="forecast_hours_ahead"
         value={settings.forecastHoursAhead}
-        disabled={!entitlements.canUseForecastAlerts}
       />
+      <p class="form-hint mb-0">Window for outdoor cold-snap warnings (Member) and indoor time-to-freeze remaining-hours alerts.</p>
     </div>
 
-    <label class="checkbox-row mb-4">
-      <input type="checkbox" name="digest_enabled" value="true" checked={settings.digestEnabled} />
+    <label class="checkbox-row mb-2">
+      <input
+        type="checkbox"
+        name="runway_alert_enabled"
+        value="true"
+        checked={settings.runwayAlertEnabled}
+      />
+      <span>Time-to-freeze remaining-hours — alert before the probe crosses freeze</span>
+    </label>
+    <p class="form-hint mb-4">
+      Uses this space’s lag vs the outdoor forecast when weather location is set; otherwise a cooling-rate clock.
+      Fires inside the look-ahead window above so you can drip faucets or turn on heat while you still have time.
+    </p>
+
       <span>Weekly email digest (Mondays) — coldest night, leaks, and outages</span>
     </label>
 

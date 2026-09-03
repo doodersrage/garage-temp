@@ -110,6 +110,14 @@ export function computeFreezeReadiness(input: {
         ? undefined
         : "Set outdoor weather in Dashboard → Settings (OpenWeather city, Ambient station, or WeatherFlow).",
     },
+    {
+      id: "runway",
+      label: "Time-to-freeze remaining-hours alerts",
+      ok: alertSettings.runwayAlertEnabled,
+      hint: alertSettings.runwayAlertEnabled
+        ? undefined
+        : "Enable remaining-hours alerts so you hear before the probe crosses freeze.",
+    },
   ];
 
   if (canUseForecast) {

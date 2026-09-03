@@ -126,6 +126,7 @@ export type Database = {
           last_quarterly_report_at: string | null
           last_rate_alert_at: string | null
           last_rssi_alert_at: string | null
+          last_runway_alert_at: string | null
           last_trial_reminder_at: string | null
           monthly_report_enabled: boolean
           ntfy_server: string
@@ -150,6 +151,7 @@ export type Database = {
           reading_webhook_url: string | null
           rssi_alerts_enabled: boolean
           rssi_threshold: number
+          runway_alert_enabled: boolean
           slack_webhook_url: string | null
           sms_phone: string | null
           snooze_until: string | null
@@ -213,6 +215,7 @@ export type Database = {
           last_quarterly_report_at?: string | null
           last_rate_alert_at?: string | null
           last_rssi_alert_at?: string | null
+          last_runway_alert_at?: string | null
           last_trial_reminder_at?: string | null
           monthly_report_enabled?: boolean
           ntfy_server?: string
@@ -237,6 +240,7 @@ export type Database = {
           reading_webhook_url?: string | null
           rssi_alerts_enabled?: boolean
           rssi_threshold?: number
+          runway_alert_enabled?: boolean
           slack_webhook_url?: string | null
           sms_phone?: string | null
           snooze_until?: string | null
@@ -300,6 +304,7 @@ export type Database = {
           last_quarterly_report_at?: string | null
           last_rate_alert_at?: string | null
           last_rssi_alert_at?: string | null
+          last_runway_alert_at?: string | null
           last_trial_reminder_at?: string | null
           monthly_report_enabled?: boolean
           ntfy_server?: string
@@ -324,6 +329,7 @@ export type Database = {
           reading_webhook_url?: string | null
           rssi_alerts_enabled?: boolean
           rssi_threshold?: number
+          runway_alert_enabled?: boolean
           slack_webhook_url?: string | null
           sms_phone?: string | null
           snooze_until?: string | null

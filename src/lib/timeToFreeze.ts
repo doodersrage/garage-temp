@@ -61,11 +61,11 @@ export function estimateTimeToFreeze(
   return {
     hours,
     rateFPerHour,
-    message: `Cooling ~${Math.abs(rateFPerHour).toFixed(1)}°F/hr — roughly ${formatHours(hours)} until ${freezeThresholdF}°F at this rate.`,
+    message: `Cooling ~${Math.abs(rateFPerHour).toFixed(1)}°F/hr — roughly ${formatDurationHours(hours)} until ${freezeThresholdF}°F at this rate.`,
   };
 }
 
-function formatHours(hours: number): string {
+export function formatDurationHours(hours: number): string {
   if (hours < 1) return `${Math.round(hours * 60)} minutes`;
   if (hours < 48) return `${hours.toFixed(1)} hours`;
   return `${(hours / 24).toFixed(1)} days`;

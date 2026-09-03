@@ -25,6 +25,7 @@ import {
   fetchLatestSensorValues,
   fetchRecentBoolReadings,
   getRecentNumericReadings,
+  getRecentNumericReadingSamples,
 } from "./sensorReadings";
 import { isBoolSensorKind, isNumericSensorKind } from "./sensorKinds";
 import {
@@ -51,6 +52,15 @@ import { persistDoorSessions } from "./doorEvents";
 import { createAdminClient } from "./supabase";
 import { getUserEntitlements } from "./entitlements";
 import { buildFreezeAlertContext } from "./alertContext";
+import {
+  buildTimeToFreezeProjection,
+  evaluateRunwayAlert,
+  outdoorPointsFromHourly,
+} from "./spaceThermalModel";
+import {
+  fetchOpenMeteoHourlyWindow,
+  splitOpenMeteoPastAndForecast,
+} from "./openMeteoHistory";
 
 export {
   buildAlertReadingsFromLatestSensors,
@@ -202,6 +212,85 @@ export async function maybeSendForecastFreezeAlert(
   await markCooldown(userId, "last_forecast_alert_at");
 }
 
+export async function maybeSendRunwayAlert(
+  userId: string,
+  email: string | null | undefined,
+  settings: AlertSettings,
+  householdId?: string | null,
+  latestSensors?: import("./sensorReadings").LatestSensorRow[],
+): Promise<void> {
+  if (!settings.enabled || !settings.runwayAlertEnabled) return;
+  if (isAlertCooldownActive(settings.lastRunwayAlertAt)) return;
+
+  const temps = (latestSensors ?? []).filter(
+    (row) =>
+      row.sensor.kind === "temperature" &&
+      row.sensor.visible !== false &&
+      typeof row.value_num === "number" &&
+      Number.isFinite(row.value_num),
+  );
+  if (temps.length === 0) return;
+
+  const coldest = temps.reduce((min, row) =>
+    (row.value_num as number) < (min.value_num as number) ? row : min,
+  );
+  const currentTempF = coldest.value_num as number;
+  if (currentTempF <= settings.freezeThresholdF) return;
+
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const indoorSamples = await getRecentNumericReadingSamples(coldest.sensor.id, since).catch(
+    () => [],
+  );
+
+  let outdoorPast: ReturnType<typeof outdoorPointsFromHourly> = [];
+  let outdoorForecast: ReturnType<typeof outdoorPointsFromHourly> = [];
+  try {
+    const config = await getWeatherConfigForUser(userId);
+    const snapshot = await fetchWeatherSnapshotForConfig(config);
+    if (
+      snapshot?.lat != null &&
+      snapshot.lon != null &&
+      Number.isFinite(snapshot.lat) &&
+      Number.isFinite(snapshot.lon)
+    ) {
+      const hourly = await fetchOpenMeteoHourlyWindow(snapshot.lat, snapshot.lon);
+      const split = splitOpenMeteoPastAndForecast(hourly);
+      outdoorPast = outdoorPointsFromHourly(split.past);
+      outdoorForecast = outdoorPointsFromHourly(split.forecast);
+    }
+  } catch {
+    // Trend fallback still works without outdoor data.
+  }
+
+  const doorOpenNearby =
+    latestSensors?.some(
+      (row) =>
+        row.sensor.kind === "door" &&
+        (row.value_bool === true || row.value_text === "open"),
+    ) ?? false;
+
+  const projection = buildTimeToFreezeProjection({
+    currentTempF,
+    freezeThresholdF: settings.freezeThresholdF,
+    indoorSamples,
+    outdoorPast,
+    outdoorForecast,
+    doorOpenNearby,
+    timeZone: settings.quietHoursTimezone,
+    lookAheadHours: settings.forecastHoursAhead,
+  });
+
+  const message = evaluateRunwayAlert(settings, projection);
+  if (!message) return;
+
+  await notifyUser(userId, email, settings, {
+    title: "Time to freeze",
+    body: message,
+    kind: "runway",
+  });
+  await markCooldown(userId, "last_runway_alert_at");
+}
+
 export async function maybeSendNwsFreezeAlert(
   userId: string,
   email: string | null | undefined,
@@ -295,6 +384,7 @@ export async function maybeSendThresholdAlerts(
   });
   await sendFloodAlertsIfNeeded(userId, email, settings, floodReadings);
   await maybeSendForecastFreezeAlert(userId, email, settings);
+  await maybeSendRunwayAlert(userId, email, settings, householdId, latest);
   await maybeSendNwsFreezeAlert(userId, email, settings);
 }
 

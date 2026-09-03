@@ -18,7 +18,7 @@ Sensors / relays ──push or pull──► Cloudflare Worker (Astro)
 - SSR by default; dashboard uses `DashboardLayout` (sidebar + topbar + main)
 - Prefer Astro components; hydrate Preact only where needed (`client:visible` / `client:load`)
 - Shared chrome under `src/components/dashboard/`
-- **Overview** (`src/pages/dashboard.astro`) loads Simple or Insights mode (`dashboardOverviewMode`). Status metrics and Insights cards are derived in `src/lib/overviewExtras.ts`, `freezeHours.ts`, and `heatingInsights.ts`. Week/history charts (`HistoryChart.tsx`) optionally overlay humidity and dew point from `ChartPoint.humidity`.
+- **Overview** (`src/pages/dashboard.astro`) loads Simple or Insights mode (`dashboardOverviewMode`). Status metrics and Insights cards are derived in `src/lib/overviewExtras.ts`, `freezeHours.ts`, and `heatingInsights.ts`. A forecast-backed **time-to-freeze** clock (`src/lib/spaceThermalModel.ts`) models this unheated space's lag vs outdoor hourly forecast and can alert on remaining hours before the probe crosses freeze. Week/history charts (`HistoryChart.tsx`) optionally overlay humidity and dew point from `ChartPoint.humidity`.
 
 ## Mutations
 
@@ -33,7 +33,7 @@ Sensors / relays ──push or pull──► Cloudflare Worker (Astro)
 - **Households** own devices and memberships (roles: owner, member, viewer, …)
 - **Devices** are push or pull; **sensors** map JSON keys → labels / kinds
 - **Readings** store history; raw rows roll up on a retention schedule
-- **Alert settings** drive freeze / humidity / leak / outage / forecast / channel fan-out (`src/lib/alerts.ts`, `notify.ts`). Shared form parsing: `src/lib/alertSettingsForm.ts`
+- **Alert settings** drive freeze / humidity / leak / outage / forecast / time-to-freeze remaining-hours / channel fan-out (`src/lib/alerts.ts`, `notify.ts`, `spaceThermalModel.ts`). Shared form parsing: `src/lib/alertSettingsForm.ts`
 - Canonical storage is **household devices + sensors + readings** (legacy temp-feed rows auto-migrate into Devices)
 
 ## Background jobs

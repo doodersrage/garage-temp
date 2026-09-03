@@ -20,11 +20,12 @@ ThermalTrace ships in multiple repos. When onboarding UX changes in **this** rep
 
 **Repo:** [github.com/doodersrage/thermaltrace-android](https://github.com/doodersrage/thermaltrace-android) (sibling checkout)
 
-**Status (2026-09):** Consumes live API (`/api/home/readings`, history, alerts, claims). Home already mirrors heating/condensation insights. Full Overview Status strip (freeze hours, probe spread, feed health, power/motion/air/RSSI Insights cards) remains on the **web dashboard** — mention that in Play/README if listing “dashboard parity.”
+**Status (2026-09):** Consumes live API (`/api/home/readings`, history, alerts, claims, `/api/user/home-insights`). Home insights now include `time_to_freeze` (hours, `hits_at`, confidence, source). Home already mirrors heating/condensation insights. Full Overview Status strip (freeze hours, probe spread, feed health, power/motion/air/RSSI Insights cards) remains on the **web dashboard** — mention that in Play/README if listing “dashboard parity.”
 
 **Re-sync when:**
 
 - New dashboard API surfaces users expect in mobile (e.g. pull tab management, reveal key, Overview metric endpoints)
+- `time_to_freeze` on `/api/user/home-insights` — Android should show the clock, not only threshold alerts
 - Play Store listing copy after `PUBLIC_PLAY_STORE_URL` is set
 - Web Overview Insights grow into dedicated mobile screens
 

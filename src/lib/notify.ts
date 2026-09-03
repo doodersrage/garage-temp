@@ -375,6 +375,7 @@ export async function markCooldown(
     | "last_outage_alert_at"
     | "last_rate_alert_at"
     | "last_forecast_alert_at"
+    | "last_runway_alert_at"
     | "last_battery_alert_at"
     | "last_battery_trend_alert_at"
     | "last_rssi_alert_at"
@@ -390,6 +391,7 @@ export async function markCooldown(
       last_outage_alert_at?: string;
       last_rate_alert_at?: string;
       last_forecast_alert_at?: string;
+      last_runway_alert_at?: string;
       last_battery_alert_at?: string;
       last_battery_trend_alert_at?: string;
       last_rssi_alert_at?: string;

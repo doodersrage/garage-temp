@@ -13,6 +13,7 @@ export const CLAIMS_CRITICAL_KINDS = new Set([
   "rate",
   "nws",
   "forecast",
+  "runway",
 ]);
 
 export type ClaimsDeviceSummary = {
@@ -145,7 +146,7 @@ export function buildClaimsPackHtml(data: ClaimsPackData): string {
 
   const criticalRows =
     data.criticalEvents.length === 0
-      ? `<tr><td colspan="4">No freeze, leak, rate, forecast, or NWS alerts in this window.</td></tr>`
+      ? `<tr><td colspan="4">No freeze, leak, rate, forecast, time-to-freeze, or NWS alerts in this window.</td></tr>`
       : data.criticalEvents
           .map(
             (event) => `<tr>
@@ -237,7 +238,7 @@ export function buildClaimsPackHtml(data: ClaimsPackData): string {
         ${statBlock("Readings ≤ threshold", String(data.freezeHours.readingsBelow34))}
         ${statBlock("Total readings", String(data.freezeHours.totalReadings))}
         ${statBlock("Freeze threshold", `${data.freezeThresholdF}°F`)}
-        ${statBlock("Critical alerts", String(data.criticalEvents.length), "freeze / leak / rate / NWS / forecast")}
+        ${statBlock("Critical alerts", String(data.criticalEvents.length), "freeze / leak / rate / NWS / forecast / time-to-freeze")}
       </div>
     </section>
 
@@ -258,7 +259,7 @@ export function buildClaimsPackHtml(data: ClaimsPackData): string {
     </section>
 
     <section>
-      <h2>Critical alerts (freeze / leak / rate / NWS / forecast)</h2>
+      <h2>Critical alerts (freeze / leak / rate / NWS / forecast / time-to-freeze)</h2>
       <table>
         <thead><tr><th>When (UTC)</th><th>Kind</th><th>Title</th><th>Channels sent</th></tr></thead>
         <tbody>${criticalRows}</tbody>

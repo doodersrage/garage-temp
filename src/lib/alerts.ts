@@ -29,6 +29,7 @@ export type NotifyKind =
   | "digest"
   | "generic"
   | "forecast"
+  | "runway"
   | "nws"
   | "flood"
   | "rule"
@@ -58,6 +59,7 @@ const NOTIFY_KINDS = new Set<NotifyKind>([
   "digest",
   "generic",
   "forecast",
+  "runway",
   "nws",
   "flood",
   "rule",
@@ -118,7 +120,9 @@ export type AlertSettings = {
   lastOutageAlertAt: string | null;
   lastRateAlertAt: string | null;
   lastForecastAlertAt: string | null;
+  lastRunwayAlertAt: string | null;
   forecastFreezeEnabled: boolean;
+  runwayAlertEnabled: boolean;
   nwsFreezeAlertsEnabled: boolean;
   lastNwsAlertAt: string | null;
   lastFloodAlertAt: string | null;
@@ -201,7 +205,9 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   lastOutageAlertAt: null,
   lastRateAlertAt: null,
   lastForecastAlertAt: null,
+  lastRunwayAlertAt: null,
   forecastFreezeEnabled: false,
+  runwayAlertEnabled: true,
   nwsFreezeAlertsEnabled: false,
   lastNwsAlertAt: null,
   lastFloodAlertAt: null,
@@ -371,7 +377,12 @@ export function rowToAlertSettings(row: Record<string, unknown> | null | undefin
       typeof row.last_forecast_alert_at === "string"
         ? row.last_forecast_alert_at
         : null,
+    lastRunwayAlertAt:
+      typeof row.last_runway_alert_at === "string"
+        ? row.last_runway_alert_at
+        : null,
     forecastFreezeEnabled: row.forecast_freeze_enabled === true,
+    runwayAlertEnabled: row.runway_alert_enabled !== false,
     nwsFreezeAlertsEnabled: row.nws_freeze_alerts_enabled === true,
     lastNwsAlertAt:
       typeof row.last_nws_alert_at === "string" ? row.last_nws_alert_at : null,
@@ -674,7 +685,9 @@ export function serializeAlertSettings(settings: AlertSettings): Record<string, 
     last_outage_alert_at: settings.lastOutageAlertAt,
     last_rate_alert_at: settings.lastRateAlertAt,
     last_forecast_alert_at: settings.lastForecastAlertAt,
+    last_runway_alert_at: settings.lastRunwayAlertAt,
     forecast_freeze_enabled: settings.forecastFreezeEnabled,
+    runway_alert_enabled: settings.runwayAlertEnabled,
     nws_freeze_alerts_enabled: settings.nwsFreezeAlertsEnabled,
     last_nws_alert_at: settings.lastNwsAlertAt,
     last_flood_alert_at: settings.lastFloodAlertAt,

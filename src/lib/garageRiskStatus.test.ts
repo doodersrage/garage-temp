@@ -29,6 +29,16 @@ describe("computeGarageRiskStatus", () => {
     expect(status.level).toBe("risk");
   });
 
+  it("flags a remaining-hours freeze clock before threshold", () => {
+    const status = computeGarageRiskStatus({
+      ...base,
+      hoursUntilFreeze: 3.2,
+      hitsAtLabel: "4:12 AM",
+    });
+    expect(status.level).toBe("risk");
+    expect(status.detail).toMatch(/4:12 AM/);
+  });
+
   it("returns ok when readings and alerts are healthy", () => {
     expect(computeGarageRiskStatus(base).level).toBe("ok");
   });

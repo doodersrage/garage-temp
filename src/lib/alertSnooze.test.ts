@@ -27,6 +27,7 @@ describe("alert snooze and vacation", () => {
     expect(isVacationActive(settings)).toBe(true);
     expect(shouldSuppressForSnoozeOrVacation(settings, "rate")).toBe(true);
     expect(shouldSuppressForSnoozeOrVacation(settings, "forecast")).toBe(false);
+    expect(shouldSuppressForSnoozeOrVacation(settings, "runway")).toBe(false);
     expect(shouldSuppressForSnoozeOrVacation(settings, "flood")).toBe(false);
   });
 });

@@ -34,7 +34,6 @@ import UpgradeNudge from "../components/UpgradeNudge.astro";
 import { nextUpgradeTier } from "../lib/planComparison";
 import {
   fetchWeekCompare,
-  buildTimeToFreezeFromPoints,
 } from "../lib/dashboardInsights";
 import { fetchGarageTempChartData } from "../lib/garageTempsHistory";
 import { checkFeedHealth } from "../lib/collectHistory";
@@ -54,6 +53,14 @@ import {
 import { isWeatherLocationConfigured } from "../lib/personalWeatherStations";
 import { personalWeatherConfigFromPreferences } from "../lib/userPreferences";
 import { fetchNwsAlerts } from "../lib/nwsAlerts";
+import {
+  buildTimeToFreezeProjection,
+  outdoorPointsFromHourly,
+} from "../lib/spaceThermalModel";
+import {
+  fetchOpenMeteoHourlyWindow,
+  splitOpenMeteoPastAndForecast,
+} from "../lib/openMeteoHistory";
 import {
   buildHeatingInsights,
   estimateHeatingLossRate,
@@ -200,6 +207,7 @@ const [
   energyOverview,
   powerOffSessions,
   motionSessions,
+  outdoorHourly,
 ] = await Promise.all([
   entitlements.canUseThermostatIntegration && household.householdId
     ? listConnectionsForHousehold(household.householdId)
@@ -240,6 +248,9 @@ const [
   showInsights ? loadEnergyOverview(devices) : Promise.resolve(null),
   showInsights ? loadPowerOffSessions24h(devices) : Promise.resolve([]),
   showInsights ? loadMotionSessions24h(devices) : Promise.resolve([]),
+  weatherHasCoords && weatherSnapshot
+    ? fetchOpenMeteoHourlyWindow(weatherSnapshot.lat!, weatherSnapshot.lon!).catch(() => [])
+    : Promise.resolve([]),
 ]);
 
 const [thermostatOverview, houseChartOverlay] = await Promise.all([
@@ -388,10 +399,28 @@ const exportFrom = exportFromDate.toISOString().slice(0, 10);
 const exportTo = exportToDate.toISOString().slice(0, 10);
 
 const useCelsius = preferences.useCelsius;
-const timeToFreeze = buildTimeToFreezeFromPoints(
-  chartWeek.points,
-  alertSettings.freezeThresholdF,
+const outdoorSplit = splitOpenMeteoPastAndForecast(outdoorHourly);
+const doorOpenNearby = latest.some(
+  (row) =>
+    row.sensor.kind === "door" &&
+    (row.value_bool === true || row.value_text === "open"),
 );
+const timeToFreeze = buildTimeToFreezeProjection({
+  currentTempF:
+    coldestProbeTempF ??
+    chartWeek.points.filter((p) => Number.isFinite(p.tempf)).at(-1)?.tempf ??
+    alertSettings.freezeThresholdF + 10,
+  freezeThresholdF: alertSettings.freezeThresholdF,
+  indoorSamples: chartWeek.points
+    .filter((p) => Number.isFinite(p.tempf))
+    .map((p) => ({ at: p.timestamp, tempF: p.tempf })),
+  outdoorPast: outdoorPointsFromHourly(outdoorSplit.past),
+  outdoorForecast: outdoorPointsFromHourly(outdoorSplit.forecast),
+  doorOpenNearby,
+  timeZone: alertSettings.quietHoursTimezone,
+  lookAheadHours: alertSettings.forecastHoursAhead,
+  useCelsius,
+});
 const doorOpenMinutes = doorOpenMinutesFromSessions(doorSessions);
 const doorTempSummary = showInsights
   ? buildDoorTempSummary(
@@ -548,6 +577,8 @@ const garageRisk = computeGarageRiskStatus({
   hasEmailAlerts,
   outdoorTempF: weatherSnapshot?.temp ?? null,
   showColdSnapChecklist,
+  hoursUntilFreeze: timeToFreeze.hours,
+  hitsAtLabel: timeToFreeze.hitsAtLabel,
 });
 ---
 <DashboardLayout title="Overview">
@@ -589,6 +620,13 @@ const garageRisk = computeGarageRiskStatus({
     />
 
     <GarageRiskStatusCard status={garageRisk} />
+    {(hasDevices || chartWeek.points.length > 0) && (
+      <TimeToFreezeCard
+        projection={timeToFreeze}
+        freezeThresholdF={alertSettings.freezeThresholdF}
+        useCelsius={useCelsius}
+      />
+    )}
 
     <DemoPullNudge show={showDemoPullNudge} />
     <ProbeSimulatorNudge show={showProbeSimulatorNudge} />
@@ -937,11 +975,6 @@ const garageRisk = computeGarageRiskStatus({
         </div>
         {showInsights && (
           <aside class="dashboard-insights-side">
-            <TimeToFreezeCard
-              estimate={timeToFreeze}
-              freezeThresholdF={alertSettings.freezeThresholdF}
-              useCelsius={useCelsius}
-            />
             <WeekCompareCard compare={weekCompareResult.compare} useCelsius={useCelsius} />
             {regionalBenchmark && (
               <RegionalBenchmarkCard benchmark={regionalBenchmark} />

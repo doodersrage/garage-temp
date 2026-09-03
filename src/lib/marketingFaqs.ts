@@ -21,7 +21,7 @@ export const marketingFaqs = {
     {
       question: "Does ThermalTrace send freeze alerts?",
       answer:
-        "Yes. Set a freeze threshold and enable channels such as email, Discord, Telegram, Slack, or (on Pro) SMS, WhatsApp, and browser push. Predictive forecast freeze alerts are on Member; official NWS freeze and cold alerts are on Pro. Leak / flood sensors also notify automatically when wet; door, motion, power, and air quality use custom rules. With a Telegram bot webhook, you can reply /status, /snooze, or /vacation from chat.",
+        "Yes. Set a freeze threshold and enable channels such as email, Discord, Telegram, Slack, or (on Pro) SMS, WhatsApp, and browser push. Remaining-hours time-to-freeze alerts fire before the probe crosses freeze, using this space's lag vs the outdoor forecast. Predictive outdoor forecast freeze alerts are on Member; official NWS freeze and cold alerts are on Pro. Leak / flood sensors also notify automatically when wet; door, motion, power, and air quality use custom rules. With a Telegram bot webhook, you can reply /status, /snooze, or /vacation from chat.",
     },
     {
       question: "Is ThermalTrace free?",
@@ -75,7 +75,7 @@ export const marketingFaqs = {
     {
       question: "What is included on the Free plan?",
       answer:
-        `Live readings for temperature, humidity, air quality, doors, leaks, energy, and motion across ${BRAND_SPACES}; 7 days of history; threshold freeze and leak alerts on email and chat-style channels; a limited number of devices; one family live share link; and household sharing so family can watch the same sensors.`,
+        `Live readings for temperature, humidity, air quality, doors, leaks, energy, and motion across ${BRAND_SPACES}; 7 days of history; threshold freeze and leak alerts plus a time-to-freeze clock; email and chat-style channels; a limited number of devices; one family live share link; and household sharing so family can watch the same sensors.`,
     },
     {
       question: "When should I upgrade to Member or Pro?",

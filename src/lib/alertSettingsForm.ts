@@ -54,6 +54,7 @@ const ALERT_SETTINGS_CHECKBOXES = [
   "freeze_drill_enabled",
   "escalation_enabled",
   "forecast_freeze_enabled",
+  "runway_alert_enabled",
   "nws_freeze_alerts_enabled",
   "quiet_hours_enabled",
   "quiet_hours_bypass_freeze",
@@ -154,9 +155,11 @@ export function buildAlertSettingsFromFormData(
     lastOutageAlertAt: existing.lastOutageAlertAt,
     lastRateAlertAt: existing.lastRateAlertAt,
     lastForecastAlertAt: existing.lastForecastAlertAt,
+    lastRunwayAlertAt: existing.lastRunwayAlertAt,
     forecastFreezeEnabled:
       formCheckbox(formData, "forecast_freeze_enabled") &&
       entitlements.canUseForecastAlerts,
+    runwayAlertEnabled: formCheckbox(formData, "runway_alert_enabled"),
     nwsFreezeAlertsEnabled:
       formCheckbox(formData, "nws_freeze_alerts_enabled") &&
       entitlements.canUseNwsAlerts,

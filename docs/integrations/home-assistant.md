@@ -15,7 +15,7 @@ Manual recipes (REST sensor, MQTT bridge) remain in [ingest/home-assistant](/ing
 
 ## Outbound alerts (ThermalTrace → HA)
 
-ThermalTrace does **not** run MQTT inside Cloudflare Workers. For **alerts into HA**, use the outbound HTTPS webhook (Pro):
+ThermalTrace does **not** run MQTT inside Cloudflare Workers. For **alerts into HA**, use the outbound HTTPS webhook (Pro). Alert `kind` may include `runway` when remaining-hours time-to-freeze fires before the probe crosses threshold.
 
 1. Enable **outbound webhook** in Dashboard → Alerts / Share  
 2. Point it at HA: `https://<ha-host>/api/webhook/<id>`  

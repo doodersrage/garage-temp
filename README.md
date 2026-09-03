@@ -35,7 +35,7 @@ ThermalTrace connects probes in a garage, workshop, attic, or similar space, com
 
 - **Live readings** — temperature, humidity, air quality, doors, leaks, power, energy, motion
 - **Overview** — Simple or Insights mode: 7-day probe curves with optional humidity/dew overlays, freeze hours and degree-hours, indoor−outdoor ΔT, probe spread, condensation risk, feed health, plus Insights cards for doors, power, motion, battery/RSSI, and air quality
-- **Alerts** — freeze and leak alerts on every plan; custom rules for doors, power, air quality, and more; email and chat-style channels (SMS, push, webhooks on Pro)
+- **Alerts** — freeze and leak alerts on every plan, plus a forecast-backed time-to-freeze clock that can warn on remaining hours before the probe crosses threshold; custom rules for doors, power, air quality, and more; email and chat-style channels (SMS, push, webhooks on Pro)
 - **History** — charts, YoY overlay (local probe data, or outdoor Open-Meteo estimate when prior-year probes are missing), Member/Pro CSV export; Pro claims evidence pack
 - **Hardware** — push ingest or pull JSON; sketches in [`sketches/`](./sketches)
 - **Households** — invites, viewers, multi-property / Portfolio for landlords; free family live share link; Pro expands share scopes and status pages

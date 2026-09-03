@@ -6,6 +6,7 @@ const SNOOZE_BLOCKED: NotifyKind[] = [
   "digest",
   "generic",
   "forecast",
+  "runway",
   "nws",
   "rule",
   "battery",

@@ -101,10 +101,10 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
     id: "cold_risk",
     category: "Alerts",
     label: "Freeze and cold alerts",
-    free: "Threshold freeze alerts",
-    member: "Threshold + forecast freeze warnings",
-    pro: "Threshold + forecast + official NWS",
-    portfolio: "Threshold + forecast + official NWS",
+    free: "Threshold + time-to-freeze clock",
+    member: "Threshold + indoor time-to-freeze + outdoor forecast",
+    pro: "Threshold + time-to-freeze + forecast + NWS",
+    portfolio: "Threshold + time-to-freeze + forecast + NWS",
     anchor: "cold-risk",
     emphasis: true,
   },
@@ -383,7 +383,7 @@ const NUDGE_CONFIG: Record<
   cold_risk: {
     targetTier: "member",
     title: "Get ahead of freeze nights",
-    body: "Member adds predictive forecast freeze warnings. Pro adds official NWS freeze and cold alerts for the spaces you are protecting.",
+    body: "Every plan has a time-to-freeze clock for this unheated space. Member adds outdoor forecast freeze warnings. Pro adds official NWS freeze and cold alerts.",
     anchor: "cold-risk",
   },
   prometheus: {

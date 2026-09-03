@@ -11,7 +11,7 @@ Pro accounts can enable an **outbound webhook** under Dashboard → Alerts. Each
 }
 ```
 
-`kind` may be `threshold`, `rate`, `outage`, `forecast`, `rule`, `digest`, or `generic`.
+`kind` may be `threshold`, `rate`, `outage`, `forecast`, `runway` (time-to-freeze remaining hours), `rule`, `digest`, or `generic`.
 
 ## HMAC verification
 

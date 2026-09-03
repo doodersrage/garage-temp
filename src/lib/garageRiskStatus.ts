@@ -23,6 +23,8 @@ export function computeGarageRiskStatus(input: {
   hasEmailAlerts: boolean;
   outdoorTempF: number | null;
   showColdSnapChecklist: boolean;
+  hoursUntilFreeze?: number | null;
+  hitsAtLabel?: string | null;
 }): GarageRiskStatus {
   if (!input.hasDevices) {
     return {
@@ -67,6 +69,31 @@ export function computeGarageRiskStatus(input: {
       actionLabel: "Open alerts",
       actionHref: "/dashboard/alerts",
     };
+  }
+
+  const hoursUntil = input.hoursUntilFreeze;
+  if (hoursUntil != null && Number.isFinite(hoursUntil) && hoursUntil > 0) {
+    const clock = input.hitsAtLabel ? ` around ${input.hitsAtLabel}` : "";
+    if (hoursUntil <= 4) {
+      return {
+        level: "risk",
+        title: "Freeze in a few hours",
+        detail: `This space is projected to hit ${input.freezeThresholdF}°F${clock}. Drip faucets or turn on heat while you still have time.`,
+        actionLabel: "Open time to freeze",
+        actionHref: "#time-to-freeze",
+      };
+    }
+    if (hoursUntil <= 12) {
+      return {
+        level: "watch",
+        title: input.hitsAtLabel
+          ? `Freeze around ${input.hitsAtLabel}`
+          : "Freeze later today",
+        detail: `About ${hoursUntil < 10 ? hoursUntil.toFixed(1) : Math.round(hoursUntil)} hours until ${input.freezeThresholdF}°F at this space's lag vs outdoor.`,
+        actionLabel: "Open time to freeze",
+        actionHref: "#time-to-freeze",
+      };
+    }
   }
 
   if (input.showColdSnapChecklist || input.nightsRiskCount > 0) {

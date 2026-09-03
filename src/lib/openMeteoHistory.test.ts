@@ -4,6 +4,7 @@ import {
   openMeteoPointsToChartPoints,
   parseOpenMeteoHourly,
   priorYearWindow,
+  splitOpenMeteoPastAndForecast,
 } from "./openMeteoHistory";
 
 describe("openMeteoHistory", () => {
@@ -39,5 +40,18 @@ describe("openMeteoHistory", () => {
     expect(end.getTime()).toBeLessThan(Date.now());
     expect(end.getTime() - start.getTime()).toBeGreaterThan(6 * 24 * 60 * 60 * 1000);
     expect(Date.now() - end.getTime()).toBeGreaterThan(roughlyOneYearMs - 8 * 24 * 60 * 60 * 1000);
+  });
+
+  it("splits past vs forecast at now", () => {
+    const { past, forecast } = splitOpenMeteoPastAndForecast(
+      [
+        { timestamp: "2026-01-15T00:00:00Z", tempf: 30 },
+        { timestamp: "2026-01-15T02:00:00Z", tempf: 28 },
+      ],
+      Date.parse("2026-01-15T01:00:00.000Z"),
+    );
+    expect(past).toHaveLength(1);
+    expect(forecast).toHaveLength(1);
+    expect(forecast[0]?.tempf).toBe(28);
   });
 });

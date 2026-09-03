@@ -48,7 +48,7 @@ features:
     link: /integrations/grafana
     linkText: Grafana setup
   - title: Architecture
-    details: Astro SSR on Cloudflare Workers, Supabase, households, cron alerts, and Overview Insights metrics.
+    details: Astro SSR on Cloudflare Workers, Supabase, households, cron alerts, Overview Insights, and forecast-backed time-to-freeze.
     link: /guide/architecture
     linkText: How it fits together
   - title: Product guides
