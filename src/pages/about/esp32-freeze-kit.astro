@@ -116,14 +116,14 @@ const AMAZON_BUNDLE = affiliateHref(
       src="/about-illustrations/esp32_ds18b20_wiring.svg"
       alt="Wiring diagram: ESP32 DevKit to waterproof DS18B20 with 4.7 kilohm pull-up on GPIO 4"
       width="680"
-      height="360"
+      height="400"
       class="h-auto w-full"
       loading="lazy"
       decoding="async"
     />
     <figcaption>
-      Red → 3.3&nbsp;V, black → GND, yellow/white data → GPIO 4, 4.7&nbsp;kΩ between data and 3.3&nbsp;V
-      (matches <code>ONE_WIRE_PIN</code> default in the sample sketch).
+      Red → 3.3&nbsp;V, black → GND, yellow/white data → GPIO 4, with a 4.7&nbsp;kΩ pull-up between data and 3.3&nbsp;V.
+      The sample ingest sketch defaults to GPIO 4.
     </figcaption>
   </figure>
   <ul>
