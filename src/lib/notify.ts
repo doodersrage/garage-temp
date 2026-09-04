@@ -3,6 +3,7 @@ import {
   type AlertChannelName,
   type AlertSettings,
   type NotifyKind,
+  DEFAULT_ALERT_SETTINGS,
   alertSettingsToRow,
   getAlertSettingsFromMetadata,
   rowToAlertSettings,
@@ -384,22 +385,100 @@ export async function markCooldown(
 ): Promise<void> {
   const supabase = createServerClient();
   const now = new Date().toISOString();
-  await supabase
+  const patch = { [field]: now, updated_at: now } as {
+    last_alert_sent_at?: string;
+    last_outage_alert_at?: string;
+    last_rate_alert_at?: string;
+    last_forecast_alert_at?: string;
+    last_runway_alert_at?: string;
+    last_battery_alert_at?: string;
+    last_battery_trend_alert_at?: string;
+    last_rssi_alert_at?: string;
+    last_nws_alert_at?: string;
+    last_flood_alert_at?: string;
+    updated_at: string;
+  };
+
+  const { data, error } = await supabase
     .from("alert_settings")
-    .update({ [field]: now, updated_at: now } as {
-      last_alert_sent_at?: string;
-      last_outage_alert_at?: string;
-      last_rate_alert_at?: string;
-      last_forecast_alert_at?: string;
-      last_runway_alert_at?: string;
-      last_battery_alert_at?: string;
-      last_battery_trend_alert_at?: string;
-      last_rssi_alert_at?: string;
-      last_nws_alert_at?: string;
-      last_flood_alert_at?: string;
-      updated_at: string;
-    })
-    .eq("user_id", userId);
+    .update(patch)
+    .eq("user_id", userId)
+    .select("user_id");
+
+  if (error) {
+    console.error("markCooldown update failed:", error.message);
+  }
+  if (data && data.length > 0) return;
+
+  // Update matched 0 rows (missing settings row). Upsert so test alerts still unlock Overview.
+  const { error: upsertError } = await supabase.from("alert_settings").upsert(
+    {
+      user_id: userId,
+      ...alertSettingsToRow(DEFAULT_ALERT_SETTINGS),
+      ...patch,
+    },
+    { onConflict: "user_id" },
+  );
+  if (upsertError) {
+    console.error("markCooldown upsert failed:", upsertError.message);
+  }
+}
+
+/** Cooldown timestamps that prove at least one alert left the system. */
+export function alertSettingsHaveDeliveryTimestamp(settings: AlertSettings): boolean {
+  return Boolean(
+    settings.lastAlertSentAt ||
+      settings.lastOutageAlertAt ||
+      settings.lastRateAlertAt ||
+      settings.lastForecastAlertAt ||
+      settings.lastRunwayAlertAt ||
+      settings.lastFloodAlertAt ||
+      settings.lastNwsAlertAt ||
+      settings.lastBatteryAlertAt ||
+      settings.lastBatteryTrendAlertAt ||
+      settings.lastRssiAlertAt,
+  );
+}
+
+/**
+ * Overview / onboarding treat a delivered test (or any real alert) as done.
+ * If cooldown columns were never written (silent update miss) but alert_events
+ * show a successful send, heal last_alert_sent_at and return true.
+ */
+export async function ensureAlertDeliveryEvidence(
+  userId: string,
+  settings: AlertSettings,
+): Promise<{ hasDelivery: boolean; settings: AlertSettings }> {
+  if (alertSettingsHaveDeliveryTimestamp(settings)) {
+    return { hasDelivery: true, settings };
+  }
+
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("alert_events")
+    .select("channels_sent")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(25);
+
+  if (error) {
+    console.error("ensureAlertDeliveryEvidence failed:", error.message);
+    return { hasDelivery: false, settings };
+  }
+
+  const delivered = (data ?? []).some(
+    (row) => Array.isArray(row.channels_sent) && row.channels_sent.length > 0,
+  );
+  if (!delivered) {
+    return { hasDelivery: false, settings };
+  }
+
+  await markCooldown(userId, "last_alert_sent_at");
+  const healed = await getAlertSettingsForUser(userId);
+  return {
+    hasDelivery: alertSettingsHaveDeliveryTimestamp(healed),
+    settings: healed,
+  };
 }
 
 export async function markEscalation(userId: string): Promise<void> {

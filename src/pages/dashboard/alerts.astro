@@ -8,7 +8,11 @@ import ReferralCard from "../../components/ReferralCard.astro";
 import FalseAlarmTipsCard from "../../components/dashboard/FalseAlarmTipsCard.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { resolveSiteUrl } from "../../lib/schemaMarkup";
-import { getAlertSettingsForUser, isTwilioConfigured } from "../../lib/notify";
+import {
+  ensureAlertDeliveryEvidence,
+  getAlertSettingsForUser,
+  isTwilioConfigured,
+} from "../../lib/notify";
 import { getRuntimeEnv } from "../../lib/runtimeEnv";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { formatRelativeAge } from "../../lib/relativeTime";
@@ -34,7 +38,7 @@ const householdRole = household.householdId
   : null;
 const canEdit = canEditHousehold(householdRole);
 
-const [alertSettings, entitlements, recentEvents, devicesResult, tenantNotify] =
+const [alertSettingsLoaded, entitlements, recentEvents, devicesResult, tenantNotify] =
   await Promise.all([
     getAlertSettingsForUser(user.id, user.user_metadata as Record<string, unknown>),
     getUserEntitlements(user.id),
@@ -46,6 +50,11 @@ const [alertSettings, entitlements, recentEvents, devicesResult, tenantNotify] =
       ? getTenantNotifySettings(household.householdId)
       : Promise.resolve({ email: null, name: null }),
   ]);
+
+const { settings: alertSettings } = await ensureAlertDeliveryEvidence(
+  user.id,
+  alertSettingsLoaded,
+);
 
 const hasTenantRelay = Boolean(tenantNotify.email);
 const hasOutboundWebhook = Boolean(alertSettings.outboundWebhookUrl?.trim());

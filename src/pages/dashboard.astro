@@ -16,7 +16,7 @@ import { getUserPreferences } from "../lib/userPreferences";
 import { fetchUserTempConfig } from "../lib/userTempConfig";
 import { getUserEntitlements } from "../lib/entitlements";
 import { getUserDevicesAsTempConfig, listHouseholdDevices } from "../lib/devices";
-import { getAlertSettingsForUser } from "../lib/notify";
+import { ensureAlertDeliveryEvidence, getAlertSettingsForUser } from "../lib/notify";
 import {
   getOrCreateHouseholdForUser,
   listHouseholdMembers,
@@ -134,7 +134,7 @@ const [
   tempConfig,
   entitlements,
   deviceConfig,
-  alertSettings,
+  alertSettingsLoaded,
   household,
   feedHealth,
   userHouseholds,
@@ -152,6 +152,12 @@ const [
   getUserHouseholdId(user.id),
   countUnacknowledgedAlerts(user.id),
 ]);
+
+// Heal missing last_alert_sent_at when a test (or real) alert already delivered.
+const { settings: alertSettings } = await ensureAlertDeliveryEvidence(
+  user.id,
+  alertSettingsLoaded,
+);
 
 const weatherConfig = personalWeatherConfigFromPreferences(preferences);
 const weatherSnapshot = await fetchWeatherSnapshotForConfig(weatherConfig);
@@ -205,6 +211,10 @@ const lastAlertCandidatesEarly = [
   alertSettings.lastAlertSentAt,
   alertSettings.lastOutageAlertAt,
   alertSettings.lastRateAlertAt,
+  alertSettings.lastForecastAlertAt,
+  alertSettings.lastRunwayAlertAt,
+  alertSettings.lastFloodAlertAt,
+  alertSettings.lastNwsAlertAt,
 ].filter(Boolean) as string[];
 const lastAlertAt =
   lastAlertCandidatesEarly.sort((a, b) => Date.parse(b) - Date.parse(a))[0] ?? null;
