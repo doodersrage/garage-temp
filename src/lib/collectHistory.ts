@@ -110,9 +110,11 @@ export async function collectHistoryForAllUsers(): Promise<{
   usersProcessed: number;
   householdsProcessed: number;
   errors: string[];
+  warnings: string[];
 }> {
   const admin = createAdminClient();
   const errors: string[] = [];
+  const warnings: string[] = [];
   let usersProcessed = 0;
   let householdsProcessed = 0;
 
@@ -193,6 +195,9 @@ export async function collectHistoryForAllUsers(): Promise<{
   for (const message of thermostatResult.errors) {
     errors.push(`thermostat: ${message}`);
   }
+  for (const message of thermostatResult.warnings) {
+    warnings.push(`thermostat: ${message}`);
+  }
 
-  return { usersProcessed, householdsProcessed, errors };
+  return { usersProcessed, householdsProcessed, errors, warnings };
 }

@@ -6,6 +6,11 @@ import { fetchThermostatContextWithStatus } from "./thermostatCorrelation";
 import type { ThermostatSnapshot } from "./thermostatCorrelation";
 import { listHouseholdIdsForCron } from "./households";
 
+/** Upstream blips — log and retry next cron; do not fail collect-history / page ops. */
+export function isTransientThermostatCollectError(error: string | null): boolean {
+  return error === "network";
+}
+
 export type ThermostatSnapshotRow = {
   household_id: string;
   provider: "nest" | "ecobee";
@@ -69,8 +74,10 @@ export async function collectThermostatSnapshotsForAllHouseholds(): Promise<{
   householdsProcessed: number;
   snapshotsSaved: number;
   errors: string[];
+  warnings: string[];
 }> {
   const errors: string[] = [];
+  const warnings: string[] = [];
   let householdsProcessed = 0;
   let snapshotsSaved = 0;
 
@@ -82,7 +89,13 @@ export async function collectThermostatSnapshotsForAllHouseholds(): Promise<{
         ownerUserId,
       );
       if (result.error && result.error !== "snapshot_unavailable") {
-        errors.push(`${householdId}: ${result.error}`);
+        if (isTransientThermostatCollectError(result.error)) {
+          const message = `${householdId}: ${result.error}`;
+          warnings.push(message);
+          console.warn(`thermostat snapshot soft-skip: ${message}`);
+        } else {
+          errors.push(`${householdId}: ${result.error}`);
+        }
       }
       if (result.saved) snapshotsSaved += 1;
       householdsProcessed += 1;
@@ -93,7 +106,7 @@ export async function collectThermostatSnapshotsForAllHouseholds(): Promise<{
     }
   }
 
-  return { householdsProcessed, snapshotsSaved, errors };
+  return { householdsProcessed, snapshotsSaved, errors, warnings };
 }
 
 function chartPointFromSnapshot(

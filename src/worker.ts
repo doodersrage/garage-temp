@@ -67,6 +67,7 @@ async function runCollectHistoryJob(): Promise<void> {
         householdsProcessed: result.householdsProcessed,
         usersProcessed: result.usersProcessed,
         errors: result.errors.slice(0, 20),
+        warnings: result.warnings.slice(0, 20),
       });
       await notifyOps(
         "ThermalTrace job failed: collect-history",
@@ -77,6 +78,12 @@ async function runCollectHistoryJob(): Promise<void> {
         }),
       );
     } else {
+      if (result.warnings.length > 0) {
+        console.warn(
+          "Scheduled history collection soft-skips:",
+          result.warnings.slice(0, 20),
+        );
+      }
       console.info(
         `Scheduled history collection finished: ${result.householdsProcessed} household(s), ${result.usersProcessed} member alert pass(es)`,
       );
@@ -84,6 +91,7 @@ async function runCollectHistoryJob(): Promise<void> {
         householdsProcessed: result.householdsProcessed,
         usersProcessed: result.usersProcessed,
         errors: [],
+        warnings: result.warnings.slice(0, 20),
       });
     }
   } catch (error) {

@@ -86,6 +86,29 @@ describe("fetchNestSnapshot", () => {
     expect(await fetchNestSnapshot("token")).toBeNull();
   });
 
+  it("treats 503 as a transient network failure", async () => {
+    vi.stubEnv("NEST_PROJECT_ID", "nest-project-uuid");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("busy", { status: 503 })));
+    const { fetchNestSnapshotDetailed } = await import("./thermostatCorrelation");
+    const result = await fetchNestSnapshotDetailed("token");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe("network");
+      expect(result.status).toBe(503);
+    }
+  });
+
+  it("treats fetch throws as network failures", async () => {
+    vi.stubEnv("NEST_PROJECT_ID", "nest-project-uuid");
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("timeout")));
+    const { fetchNestSnapshotDetailed } = await import("./thermostatCorrelation");
+    const result = await fetchNestSnapshotDetailed("token");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe("network");
+    }
+  });
+
   it("detects SDM API disabled errors", async () => {
     vi.stubEnv("NEST_PROJECT_ID", "nest-project-uuid");
     vi.stubGlobal(

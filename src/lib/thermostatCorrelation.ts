@@ -150,6 +150,10 @@ export async function fetchNestSnapshotDetailed(
     });
     if (!res.ok) {
       const rawBody = await res.text();
+      // Rate limits and upstream 5xx are transient — cron should soft-skip, not page ops.
+      if (res.status === 429 || res.status >= 500) {
+        return { ok: false, status: res.status, reason: "network" };
+      }
       return {
         ok: false,
         status: res.status,
@@ -175,6 +179,17 @@ export async function fetchNestSnapshot(
 export async function fetchEcobeeSnapshot(
   accessToken: string,
 ): Promise<ThermostatSnapshot | null> {
+  const result = await fetchEcobeeSnapshotDetailed(accessToken);
+  return result.ok ? result.snapshot : null;
+}
+
+export type EcobeeSnapshotResult =
+  | { ok: true; snapshot: ThermostatSnapshot }
+  | { ok: false; reason: "http_error" | "network" };
+
+export async function fetchEcobeeSnapshotDetailed(
+  accessToken: string,
+): Promise<EcobeeSnapshotResult> {
   try {
     const selection = encodeURIComponent(
       JSON.stringify({
@@ -190,7 +205,12 @@ export async function fetchEcobeeSnapshot(
       headers: { Authorization: `Bearer ${accessToken}` },
       signal: AbortSignal.timeout(8000),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      if (res.status === 429 || res.status >= 500) {
+        return { ok: false, reason: "network" };
+      }
+      return { ok: false, reason: "http_error" };
+    }
     const data = (await res.json()) as {
       thermostatList?: Array<{
         runtime?: { actualTemperature?: number; desiredHeat?: number };
@@ -202,13 +222,16 @@ export async function fetchEcobeeSnapshot(
     const actual = thermostat?.runtime?.actualTemperature;
     const desiredHeat = thermostat?.runtime?.desiredHeat;
     return {
-      provider: "ecobee",
-      ambientTempF: actual != null ? actual / 10 : null,
-      heatSetpointF: desiredHeat != null ? desiredHeat / 10 : null,
-      hvacMode: thermostat?.settings?.hvacMode ?? null,
+      ok: true,
+      snapshot: {
+        provider: "ecobee",
+        ambientTempF: actual != null ? actual / 10 : null,
+        heatSetpointF: desiredHeat != null ? desiredHeat / 10 : null,
+        hvacMode: thermostat?.settings?.hvacMode ?? null,
+      },
     };
   } catch {
-    return null;
+    return { ok: false, reason: "network" };
   }
 }
 
@@ -229,18 +252,33 @@ export async function fetchThermostatContextWithStatus(
   }
 
   if (provider === "ecobee") {
-    const snapshot = await fetchEcobeeSnapshot(accessToken);
-    return snapshot
-      ? { snapshot }
-      : {
-          snapshot: null,
-          fetchError: "api_error",
-          fetchHint: "Could not reach Ecobee, try again or reconnect.",
-        };
+    let ecobee = await fetchEcobeeSnapshotDetailed(accessToken);
+    if (ecobee.ok) return { snapshot: ecobee.snapshot };
+    if (ecobee.reason === "network") {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      ecobee = await fetchEcobeeSnapshotDetailed(accessToken);
+      if (ecobee.ok) return { snapshot: ecobee.snapshot };
+      return {
+        snapshot: null,
+        fetchError: "network",
+        fetchHint: "Could not reach Ecobee, try again in a minute.",
+      };
+    }
+    return {
+      snapshot: null,
+      fetchError: "api_error",
+      fetchHint: "Could not reach Ecobee, try again or reconnect.",
+    };
   }
 
   let result = await fetchNestSnapshotDetailed(accessToken);
   if (result.ok) return { snapshot: result.snapshot };
+
+  if (result.reason === "network") {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    result = await fetchNestSnapshotDetailed(accessToken);
+    if (result.ok) return { snapshot: result.snapshot };
+  }
 
   if (result.status === 401 || result.status === 403) {
     const refreshed = await forceRefreshAccessTokenForHousehold(householdId, "nest");
