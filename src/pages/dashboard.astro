@@ -128,7 +128,6 @@ if (!session || !user) {
 }
 
 const overviewMode = getDashboardOverviewMode(user);
-const showInsights = overviewMode === "insights";
 
 const [
   preferences,
@@ -189,6 +188,30 @@ const devices = householdDevicesResult.devices;
 const canEdit = canEditHousehold(householdRole);
 const canExportCsv = entitlements.canDownloadCsv;
 const hasHistory = chartWeek.points.length > 0;
+
+/** Device + freeze email + at least one alert (test counts). Insights wait until this. */
+const hasDevices =
+  tempConfig.hasCustomConfig ||
+  deviceConfig.devices.some((d) => d.source === "push");
+const hasAlertsEnabled = alertSettings.enabled;
+const hasEmailAlerts =
+  alertSettings.enabled &&
+  alertSettings.channelEmail &&
+  Boolean(alertSettings.email?.trim());
+const onboardingDismissed =
+  (user.user_metadata as Record<string, unknown> | undefined)?.onboarding_dismissed ===
+  true;
+const lastAlertCandidatesEarly = [
+  alertSettings.lastAlertSentAt,
+  alertSettings.lastOutageAlertAt,
+  alertSettings.lastRateAlertAt,
+].filter(Boolean) as string[];
+const lastAlertAt =
+  lastAlertCandidatesEarly.sort((a, b) => Date.parse(b) - Date.parse(a))[0] ?? null;
+const essentialDone =
+  hasDevices && hasAlertsEnabled && hasEmailAlerts && Boolean(lastAlertAt);
+const firstRunFocus = canEdit && !onboardingDismissed && !essentialDone;
+const showInsights = !firstRunFocus && overviewMode === "insights";
 
 const weatherHasCoords =
   weatherSnapshot?.lat != null &&
@@ -308,23 +331,12 @@ const houseContext = buildHouseContext({
   devices,
 });
 
-const hasDevices =
-  tempConfig.hasCustomConfig ||
-  deviceConfig.devices.some((d) => d.source === "push");
 const hasSensors =
   preferences.tempProbes.length > 0 ||
   deviceConfig.devices.some(
     (d) => d.source === "push" && d.sensors.length > 0,
   );
-const hasAlertsEnabled = alertSettings.enabled;
-const hasEmailAlerts =
-  alertSettings.enabled &&
-  alertSettings.channelEmail &&
-  Boolean(alertSettings.email?.trim());
 const hasHouseholdMembers = members.members.length > 1;
-const onboardingDismissed =
-  (user.user_metadata as Record<string, unknown> | undefined)?.onboarding_dismissed ===
-  true;
 
 const passwordUpdated = Astro.url.searchParams.get("password") === "updated";
 const prefsSaved = Astro.url.searchParams.get("prefs_saved");
@@ -346,20 +358,14 @@ const showMultiPropertyNudge =
   userHouseholds.households.length === 1 &&
   devices.length > 0 &&
   (entitlements.tier === "pro" || entitlements.tier === "member") &&
-  canEdit;
+  canEdit &&
+  !firstRunFocus;
 const feedIssueCount = feedHealth.statuses.filter((s) => !s.ok).length;
 const sensorCount =
   latest.length > 0
     ? latest.length
     : devices.reduce((sum, d) => sum + d.sensors.length, 0);
 
-const lastAlertCandidates = [
-  alertSettings.lastAlertSentAt,
-  alertSettings.lastOutageAlertAt,
-  alertSettings.lastRateAlertAt,
-].filter(Boolean) as string[];
-const lastAlertAt =
-  lastAlertCandidates.sort((a, b) => Date.parse(b) - Date.parse(a))[0] ?? null;
 const lastAlertAge = formatRelativeAge(lastAlertAt);
 
 const nightsRiskCount = nightsAtRisk.filter((n) => n.atRisk).length;
@@ -507,8 +513,6 @@ const showDemoPullNudge =
 
 const upgradeTarget = nextUpgradeTier(entitlements.tier);
 
-const essentialDone =
-  hasDevices && hasAlertsEnabled && hasEmailAlerts && Boolean(lastAlertAt);
 const hasTestAlert = Boolean(lastAlertAt);
 
 const showProbeSimulatorNudge =
@@ -518,17 +522,19 @@ const showProbeSimulatorNudge =
 
 const showNestConnectNudge =
   canEdit &&
+  !firstRunFocus &&
   thermostatConnections.length === 0 &&
   (latest.length === 0 || !onboardingDismissed) &&
   !showDemoPullNudge;
 
 const showOverviewPwaNudge =
   canEdit &&
+  !firstRunFocus &&
   latest.length > 0 &&
   (onboardingDismissed || essentialDone);
 
 const showAndroidNudge =
-  canEdit && (latest.length > 0 || hasDevices);
+  canEdit && !firstRunFocus && (latest.length > 0 || hasDevices);
 
 const showYoureLive =
   canEdit &&
@@ -554,8 +560,9 @@ const showFreezeMapOptInNudge =
 const showClaimsPackPrompt = showInsights && canEdit && hasHistory;
 const showStoryCard = showSecondaryNudges && canEdit && !showAlertSetupNudge;
 
-/** When there is no live reading yet, don't promote freeze-readiness / upgrade as primary noise. */
+/** Empty or unfinished first-run: keep Overview on device → freeze email → test alert. */
 const prioritizeEmptyOverview = latest.length === 0;
+const prioritizeFirstRun = firstRunFocus || prioritizeEmptyOverview;
 
 const analyticsEvents: Array<{
   name: import("../lib/productAnalytics").ProductEvent;
@@ -575,17 +582,17 @@ type OverviewBanner = { id: string; priority: number; show: boolean };
 const overviewBannerQueue: OverviewBanner[] = [
   { id: "lowBattery", priority: 2, show: Boolean(lowBatteryMessage) },
   { id: "stale", priority: 3, show: staleSensorCount > 0 },
-  { id: "coldSnap", priority: 4, show: showColdSnapChecklist && !prioritizeEmptyOverview },
+  { id: "coldSnap", priority: 4, show: showColdSnapChecklist && !prioritizeFirstRun },
   { id: "testAlert", priority: 5, show: showTestAlertNudge },
   { id: "alertSetup", priority: 6, show: showAlertSetupNudge },
   { id: "youreLive", priority: 7, show: showYoureLive },
   { id: "freezeMap", priority: 8, show: showFreezeMapOptInNudge },
-  { id: "story", priority: 9, show: showStoryCard && !prioritizeEmptyOverview },
+  { id: "story", priority: 9, show: showStoryCard && !prioritizeFirstRun },
   { id: "multiProperty", priority: 10, show: showMultiPropertyNudge },
   {
     id: "freezeReadiness",
-    priority: prioritizeEmptyOverview ? 18 : 11,
-    show: !prioritizeEmptyOverview,
+    priority: prioritizeFirstRun ? 18 : 11,
+    show: !prioritizeFirstRun,
   },
   // Upgrade CTAs stay in "More recommendations" only — never primary.
   { id: "upgrade", priority: 20, show: upgradeTarget === "member" || upgradeTarget === "pro" },
@@ -657,7 +664,7 @@ const garageRisk = computeGarageRiskStatus({
     />
 
     <GarageRiskStatusCard status={garageRisk} />
-    {(hasDevices || chartWeek.points.length > 0) && (
+    {!firstRunFocus && (hasDevices || chartWeek.points.length > 0) && (
       <TimeToFreezeCard
         projection={timeToFreeze}
         freezeThresholdF={alertSettings.freezeThresholdF}
@@ -790,7 +797,54 @@ const garageRisk = computeGarageRiskStatus({
       </details>
     )}
 
-    {prioritizeEmptyOverview && canEdit && (
+    {firstRunFocus && canEdit && (
+      <section class="card" aria-labelledby="first-run-focus-title">
+        <h2 class="card-title" id="first-run-focus-title">
+          {latest.length === 0
+            ? "Get a reading on this Overview"
+            : "Finish the alert path"}
+        </h2>
+        <p class="card-subtitle mb-4">
+          {latest.length === 0
+            ? hasDevices
+              ? "You have a device. POST JSON once (or fetch a pull feed) so sensors appear here, then set freeze + email and send a test."
+              : "Create a push device for ESP/Arduino, or try the demo feed, then set freeze + email and send a test."
+            : !hasEmailAlerts
+              ? "Live probes are in. Set freeze threshold + email under Alerts, then send a test so you trust delivery before a real freeze night."
+              : "Send a test alert once. Insights, Nest, Android nudges, and the full status strip unlock after that."}
+        </p>
+        <div class="flex flex-wrap gap-3">
+          {latest.length === 0 ? (
+            <>
+              <a class="btn-primary" href="/dashboard/temperature">Open Devices</a>
+              {showDemoPullNudge && (
+                <a class="btn-secondary" href="#demo-pull-nudge">Try demo feed</a>
+              )}
+              {!hasDevices && (
+                <a class="btn-secondary" href="/about/esp32-freeze-kit">ESP32 parts list</a>
+              )}
+              <a class="btn-ghost" href="/about/probe-demo">Probe simulator</a>
+            </>
+          ) : !hasEmailAlerts ? (
+            <a class="btn-primary" href="/dashboard/alerts#alert-section-essentials">
+              Alert essentials
+            </a>
+          ) : (
+            <a class="btn-primary" href="/dashboard/alerts#send-test-alert">Send test alert</a>
+          )}
+          {latest.length > 0 && hasEmailAlerts && (
+            <a class="btn-ghost" href="/dashboard/alerts#alert-section-essentials">
+              Review freeze + email
+            </a>
+          )}
+          {latest.length === 0 && (
+            <a class="btn-ghost" href="/dashboard/alerts#alert-section-essentials">Alert essentials</a>
+          )}
+        </div>
+      </section>
+    )}
+
+    {prioritizeEmptyOverview && canEdit && !firstRunFocus && (
       <section class="card" aria-labelledby="empty-overview-cta-title">
         <h2 class="card-title" id="empty-overview-cta-title">Get a reading on this Overview</h2>
         <p class="card-subtitle mb-4">
@@ -821,6 +875,11 @@ const garageRisk = computeGarageRiskStatus({
     <section class="dashboard-section" id="status" aria-labelledby="status-heading">
       <div class="dashboard-section-head">
         <h2 id="status-heading" class="dashboard-section-title">Status</h2>
+        {firstRunFocus && (
+          <p class="dashboard-section-desc mb-0">
+            Essentials only until freeze + email + a test alert are done.
+          </p>
+        )}
       </div>
       <DashboardMetricGrid>
         <MetricCard
@@ -836,20 +895,22 @@ const garageRisk = computeGarageRiskStatus({
           href="/dashboard/temperature"
           tone={staleSensorCount > 0 ? "warning" : "neutral"}
         />
-        <MetricCard
-          label="Feeds"
-          value={feedsValue}
-          href="/dashboard/temperature#pull-feeds"
-          tone={feedIssueCount > 0 ? "warning" : "neutral"}
-        />
+        {!firstRunFocus && (
+          <MetricCard
+            label="Feeds"
+            value={feedsValue}
+            href="/dashboard/temperature#pull-feeds"
+            tone={feedIssueCount > 0 ? "warning" : "neutral"}
+          />
+        )}
         <MetricCard
           label="Alerts"
           value={alertSettings.enabled ? "On" : "Off"}
-          detail={lastAlertAt ? `Last ${lastAlertAge.label}` : null}
+          detail={lastAlertAt ? `Last ${lastAlertAge.label}` : "Send a test"}
           href="/dashboard/alerts"
           tone={alertSettings.enabled ? "success" : "neutral"}
         />
-        {houseContext && (
+        {!firstRunFocus && houseContext && (
           <MetricCard
             label="House"
             value={houseContext.metricValue}
@@ -858,114 +919,118 @@ const garageRisk = computeGarageRiskStatus({
             tone="neutral"
           />
         )}
-        <MetricCard
-          label="Freeze hours (7d)"
-          value={
-            chartWeek.points.length < 2
-              ? "—"
-              : `${freezeHours.hoursBelow34.toFixed(1)} h`
-          }
-          detail={
-            freezeHours.degreeHoursBelow > 0
-              ? `${freezeHours.degreeHoursBelow.toFixed(0)} °F·h below ${alertSettings.freezeThresholdF}°F`
-              : freezeHours.coldestF != null
-                ? `Coldest ${freezeHours.coldestF.toFixed(1)}°F`
-                : `≤ ${alertSettings.freezeThresholdF}°F`
-          }
-          href="/dashboard/history"
-          tone={freezeHours.hoursBelow34 > 0 ? "warning" : "neutral"}
-        />
-        <MetricCard
-          label="Coldest margin"
-          value={
-            coldestProbeMarginF == null
-              ? "—"
-              : `${coldestProbeMarginF >= 0 ? "+" : ""}${coldestProbeMarginF.toFixed(1)}°F`
-          }
-          detail={
-            coldestProbeTempF != null
-              ? `${coldestProbeTempF.toFixed(1)}°F vs ${alertSettings.freezeThresholdF}°F alert`
-              : "No live probe"
-          }
-          href="/"
-          tone={
-            coldestProbeMarginF == null
-              ? "neutral"
-              : coldestProbeMarginF <= 0
-                ? "danger"
-                : coldestProbeMarginF <= 5
+        {!firstRunFocus && (
+          <>
+            <MetricCard
+              label="Freeze hours (7d)"
+              value={
+                chartWeek.points.length < 2
+                  ? "—"
+                  : `${freezeHours.hoursBelow34.toFixed(1)} h`
+              }
+              detail={
+                freezeHours.degreeHoursBelow > 0
+                  ? `${freezeHours.degreeHoursBelow.toFixed(0)} °F·h below ${alertSettings.freezeThresholdF}°F`
+                  : freezeHours.coldestF != null
+                    ? `Coldest ${freezeHours.coldestF.toFixed(1)}°F`
+                    : `≤ ${alertSettings.freezeThresholdF}°F`
+              }
+              href="/dashboard/history"
+              tone={freezeHours.hoursBelow34 > 0 ? "warning" : "neutral"}
+            />
+            <MetricCard
+              label="Coldest margin"
+              value={
+                coldestProbeMarginF == null
+                  ? "—"
+                  : `${coldestProbeMarginF >= 0 ? "+" : ""}${coldestProbeMarginF.toFixed(1)}°F`
+              }
+              detail={
+                coldestProbeTempF != null
+                  ? `${coldestProbeTempF.toFixed(1)}°F vs ${alertSettings.freezeThresholdF}°F alert`
+                  : "No live probe"
+              }
+              href="/"
+              tone={
+                coldestProbeMarginF == null
+                  ? "neutral"
+                  : coldestProbeMarginF <= 0
+                    ? "danger"
+                    : coldestProbeMarginF <= 5
+                      ? "warning"
+                      : "success"
+              }
+            />
+            <MetricCard
+              label="Indoor − outdoor"
+              value={
+                indoorOutdoorDeltaF == null
+                  ? "—"
+                  : `${indoorOutdoorDeltaF >= 0 ? "+" : ""}${indoorOutdoorDeltaF.toFixed(1)}°F`
+              }
+              detail={
+                indoorOutdoorDeltaF == null
+                  ? "Need live probe + weather"
+                  : weatherSnapshot?.temp != null && coldestProbeTempF != null
+                    ? `${coldestProbeTempF.toFixed(0)}°F indoor vs ${weatherSnapshot.temp.toFixed(0)}°F out`
+                    : "ΔT using coldest probe"
+              }
+              href="/"
+              tone={
+                indoorOutdoorDeltaF == null
+                  ? "neutral"
+                  : indoorOutdoorDeltaF < 5
+                    ? "warning"
+                    : "neutral"
+              }
+            />
+            <MetricCard
+              label="Probe spread"
+              value={probeSpread ? `${probeSpread.spreadF.toFixed(1)}°F` : "—"}
+              detail={
+                probeSpread
+                  ? `${probeSpread.coldestF.toFixed(1)}–${probeSpread.warmestF.toFixed(1)}°F · ${probeSpread.probeCount} probes`
+                  : "Need 2+ live temps"
+              }
+              href="/"
+              tone={
+                probeSpread == null
+                  ? "neutral"
+                  : probeSpread.spreadF >= 8
+                    ? "warning"
+                    : "neutral"
+              }
+            />
+            <MetricCard
+              label="Condensation (7d)"
+              value={
+                chartWeek.points.length < 2
+                  ? "—"
+                  : `${condensation.hours.toFixed(1)} h`
+              }
+              detail={
+                condensation.latestMarginF != null
+                  ? `Now ${condensation.latestMarginF.toFixed(1)}°F above dew point`
+                  : "Hours near dew point"
+              }
+              href="/dashboard/history"
+              tone={
+                condensation.hours >= 6 ||
+                (condensation.latestMarginF != null && condensation.latestMarginF <= 2)
                   ? "warning"
-                  : "success"
-          }
-        />
-        <MetricCard
-          label="Indoor − outdoor"
-          value={
-            indoorOutdoorDeltaF == null
-              ? "—"
-              : `${indoorOutdoorDeltaF >= 0 ? "+" : ""}${indoorOutdoorDeltaF.toFixed(1)}°F`
-          }
-          detail={
-            indoorOutdoorDeltaF == null
-              ? "Need live probe + weather"
-              : weatherSnapshot?.temp != null && coldestProbeTempF != null
-                ? `${coldestProbeTempF.toFixed(0)}°F indoor vs ${weatherSnapshot.temp.toFixed(0)}°F out`
-                : "ΔT using coldest probe"
-          }
-          href="/"
-          tone={
-            indoorOutdoorDeltaF == null
-              ? "neutral"
-              : indoorOutdoorDeltaF < 5
-                ? "warning"
-                : "neutral"
-          }
-        />
-        <MetricCard
-          label="Probe spread"
-          value={probeSpread ? `${probeSpread.spreadF.toFixed(1)}°F` : "—"}
-          detail={
-            probeSpread
-              ? `${probeSpread.coldestF.toFixed(1)}–${probeSpread.warmestF.toFixed(1)}°F · ${probeSpread.probeCount} probes`
-              : "Need 2+ live temps"
-          }
-          href="/"
-          tone={
-            probeSpread == null
-              ? "neutral"
-              : probeSpread.spreadF >= 8
-                ? "warning"
-                : "neutral"
-          }
-        />
-        <MetricCard
-          label="Condensation (7d)"
-          value={
-            chartWeek.points.length < 2
-              ? "—"
-              : `${condensation.hours.toFixed(1)} h`
-          }
-          detail={
-            condensation.latestMarginF != null
-              ? `Now ${condensation.latestMarginF.toFixed(1)}°F above dew point`
-              : "Hours near dew point"
-          }
-          href="/dashboard/history"
-          tone={
-            condensation.hours >= 6 ||
-            (condensation.latestMarginF != null && condensation.latestMarginF <= 2)
-              ? "warning"
-              : "neutral"
-          }
-        />
-        {feedUptime && (
-          <MetricCard
-            label="Feed health"
-            value={`${feedUptime.pct.toFixed(0)}%`}
-            detail={`${feedUptime.ok}/${feedUptime.total} feeds reachable now`}
-            href="/dashboard/temperature#pull-feeds"
-            tone={feedUptime.pct < 100 ? "warning" : "success"}
-          />
+                  : "neutral"
+              }
+            />
+            {feedUptime && (
+              <MetricCard
+                label="Feed health"
+                value={`${feedUptime.pct.toFixed(0)}%`}
+                detail={`${feedUptime.ok}/${feedUptime.total} feeds reachable now`}
+                href="/dashboard/temperature#pull-feeds"
+                tone={feedUptime.pct < 100 ? "warning" : "success"}
+              />
+            )}
+          </>
         )}
       </DashboardMetricGrid>
     </section>
@@ -975,12 +1040,14 @@ const garageRisk = computeGarageRiskStatus({
         <div>
           <h2 id="curves-heading" class="dashboard-section-title">Probe curves</h2>
           <p class="dashboard-section-desc">
-            {showInsights
-              ? "Seven-day traces, freeze outlook, and week-over-week change."
-              : "Seven-day temperature trend. Switch to Insights for freeze outlook and comparisons."}
+            {firstRunFocus
+              ? "Seven-day temperature trend. Insights unlock after freeze + email + a test alert."
+              : showInsights
+                ? "Seven-day traces, freeze outlook, and week-over-week change."
+                : "Seven-day temperature trend. Switch to Insights for freeze outlook and comparisons."}
           </p>
         </div>
-        <DashboardOverviewToggle mode={overviewMode} />
+        {!firstRunFocus && <DashboardOverviewToggle mode={overviewMode} />}
       </div>
       <div class="dashboard-insights">
         <div class="dashboard-insights-primary">

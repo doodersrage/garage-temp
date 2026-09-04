@@ -2,10 +2,18 @@
 
 Tasks only **you** can complete — everything else in the HACS/integration pass is shipped.
 
+## Growth (winter focus)
+
+- [ ] Drive `/share-kit`, `/freeze-season`, and `/about/esp32-freeze-kit` before the first hard freeze
+- [ ] Push freeze-map opt-ins so seed cities give way to live aggregates
+- [ ] Optional: set affiliate tags below if kit BOM commerce should be tagged
+- Kit SKU / pre-flash batch is outside this repo (BOM page is ready)
+
 ## Google Play
 
 - [ ] When review clears, set `PUBLIC_PLAY_STORE_URL` in `.env` / Worker secrets and redeploy — `/android` flips to Play CTA automatically
 - [ ] Update marketing copy if needed beyond the env flip
+- [ ] After Play is live, consider iOS (PWA covers Apple users today)
 - **Blocked externally** — no listing URL yet; do not invent a placeholder
 
 ## Nest / Ecobee (status)
@@ -50,6 +58,12 @@ Check what's missing locally: `pnpm operator:check`
 
 - [ ] Set `PUBLIC_AMAZON_ASSOCIATE_TAG` / `PUBLIC_ADAFRUIT_AFFILIATE_ID` in Worker secrets if kit BOM commerce should be tagged
 - Unset tags keep clean Amazon/Adafruit URLs; disclosure copy still applies on the freeze-kit page
+
+## Shipped in product (no operator action)
+
+- Overview **first-run focus**: Insights + full Status strip stay hidden until device + freeze email + a test alert
+- Android **time-to-freeze** clock on Home (consumes `time_to_freeze` from `/api/user/home-insights`)
+- Claims pack page includes adjuster talking points (`/claims-pack`)
 
 ## Already done (no action)
 
