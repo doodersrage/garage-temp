@@ -1,8 +1,6 @@
 ---
 
 import AboutArticle from "../../components/AboutArticle.astro";
-import { Image } from "astro:assets";
-import esp32Wiring from "../../assets/esp32_ds18b20_wiring.svg";
 import { affiliateHref, COMMERCE_LINK_REL } from "../../lib/affiliateLinks";
 import { getAboutPage } from "../../lib/aboutPages";
 import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
@@ -114,10 +112,14 @@ const AMAZON_BUNDLE = affiliateHref(
 
   <h2>Wire it</h2>
   <figure class="about-figure about-figure-svg card overflow-hidden p-0">
-    <Image
-      src={esp32Wiring}
+    <img
+      src="/about-illustrations/esp32_ds18b20_wiring.svg"
       alt="Wiring diagram: ESP32 DevKit to waterproof DS18B20 with 4.7 kilohm pull-up on GPIO 4"
+      width="680"
+      height="360"
       class="h-auto w-full"
+      loading="lazy"
+      decoding="async"
     />
     <figcaption>
       Red → 3.3&nbsp;V, black → GND, yellow/white data → GPIO 4, 4.7&nbsp;kΩ between data and 3.3&nbsp;V
