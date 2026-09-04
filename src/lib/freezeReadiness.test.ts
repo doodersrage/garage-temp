@@ -26,6 +26,12 @@ describe("computeFreezeReadiness", () => {
       }),
     ).toBe(true);
     expect(hasConfiguredAlertChannel(DEFAULT_ALERT_SETTINGS)).toBe(false);
+    expect(
+      hasConfiguredAlertChannel(
+        { ...DEFAULT_ALERT_SETTINGS, channelEmail: true, email: null },
+        "account@example.com",
+      ),
+    ).toBe(true);
   });
 
   it("scores high when core checks pass", () => {

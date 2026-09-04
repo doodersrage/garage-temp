@@ -169,6 +169,17 @@ export type AlertSettings = {
   thresholdSensorScope: ThresholdSensorScope;
 };
 
+/** Prefer saved alert email; fall back to account email (same as notifyUser). */
+export function resolveAlertEmail(
+  settings: Pick<AlertSettings, "email">,
+  fallbackEmail?: string | null,
+): string | null {
+  const fromSettings = settings.email?.trim() || "";
+  if (fromSettings) return fromSettings;
+  const fromFallback = fallbackEmail?.trim() || "";
+  return fromFallback || null;
+}
+
 export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   enabled: false,
   digestEnabled: false,

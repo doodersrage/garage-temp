@@ -298,7 +298,7 @@ export function buildAlertSettingsFromFormData(
 
 export function alertChannelsIncomplete(settings: AlertSettings): boolean {
   return (
-    (settings.channelEmail && !settings.email) ||
+    // Email falls back to the account address at send time; blank is not incomplete.
     (settings.channelDiscord && !settings.discordWebhookUrl) ||
     (settings.channelTelegram &&
       (!settings.telegramBotToken || !settings.telegramChatId)) ||

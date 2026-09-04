@@ -78,6 +78,7 @@ import ColdSnapChecklistCard from "../components/ColdSnapChecklistCard.astro";
 import FreezeReadinessCard from "../components/dashboard/FreezeReadinessCard.astro";
 import { shouldShowColdSnapChecklist } from "../lib/coldSnapChecklist";
 import { computeFreezeReadiness, hasConfiguredAlertChannel } from "../lib/freezeReadiness";
+import { resolveAlertEmail } from "../lib/alerts";
 import { getHouseholdFreezeMapSettings } from "../lib/freezeMap";
 import { fetchRegionalBenchmark } from "../lib/regionalBenchmark";
 import TestAlertNudge from "../components/dashboard/TestAlertNudge.astro";
@@ -203,7 +204,7 @@ const hasAlertsEnabled = alertSettings.enabled;
 const hasEmailAlerts =
   alertSettings.enabled &&
   alertSettings.channelEmail &&
-  Boolean(alertSettings.email?.trim());
+  Boolean(resolveAlertEmail(alertSettings, user.email));
 const onboardingDismissed =
   (user.user_metadata as Record<string, unknown> | undefined)?.onboarding_dismissed ===
   true;
@@ -218,8 +219,12 @@ const lastAlertCandidatesEarly = [
 ].filter(Boolean) as string[];
 const lastAlertAt =
   lastAlertCandidatesEarly.sort((a, b) => Date.parse(b) - Date.parse(a))[0] ?? null;
+/** Live probes or a configured device, alerts on, and a delivered test/real alert. */
 const essentialDone =
-  hasDevices && hasAlertsEnabled && hasEmailAlerts && Boolean(lastAlertAt);
+  (hasDevices || latest.length > 0) &&
+  hasAlertsEnabled &&
+  Boolean(lastAlertAt) &&
+  (hasEmailAlerts || hasConfiguredAlertChannel(alertSettings, user.email));
 const firstRunFocus = canEdit && !onboardingDismissed && !essentialDone;
 const showInsights = !firstRunFocus && overviewMode === "insights";
 

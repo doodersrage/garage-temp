@@ -1,6 +1,6 @@
 import { summarizeStaleSensors, type StaleSensorSummary } from "./sensorFreshness";
 import type { DeviceWithSensors } from "./devices";
-import type { AlertSettings } from "./alerts";
+import { resolveAlertEmail, type AlertSettings } from "./alerts";
 import type { LatestSensorRow } from "./sensorReadings";
 import { listLowBatteryDevices } from "./deviceBatteryUi";
 import { isVacationActive } from "./alertSnooze";
@@ -18,9 +18,13 @@ export type FreezeReadinessResult = {
   ready: boolean;
 };
 
-export function hasConfiguredAlertChannel(alertSettings: AlertSettings): boolean {
+export function hasConfiguredAlertChannel(
+  alertSettings: AlertSettings,
+  fallbackEmail?: string | null,
+): boolean {
   return (
-    (alertSettings.channelEmail && Boolean(alertSettings.email?.trim())) ||
+    (alertSettings.channelEmail &&
+      Boolean(resolveAlertEmail(alertSettings, fallbackEmail))) ||
     (alertSettings.channelSms && Boolean(alertSettings.smsPhone?.trim())) ||
     (alertSettings.channelDiscord && Boolean(alertSettings.discordWebhookUrl?.trim())) ||
     alertSettings.channelPush ||

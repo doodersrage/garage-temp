@@ -1,6 +1,12 @@
 import type { APIRoute } from "astro";
 import { getAuthFromCookies } from "../../../lib/auth";
-import { getAlertSettingsForUser, markCooldown, notifyUser } from "../../../lib/notify";
+import {
+  getAlertSettingsForUser,
+  markCooldown,
+  notifyUser,
+  saveAlertSettingsForUser,
+} from "../../../lib/notify";
+import { resolveAlertEmail } from "../../../lib/alerts";
 import {
   redirectUnlessEditor,
   requireHouseholdEditor,
@@ -49,10 +55,22 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   try {
-    const settings = await getAlertSettingsForUser(
+    let settings = await getAlertSettingsForUser(
       user.id,
       user.user_metadata as Record<string, unknown>,
     );
+
+    // Persist account email when channel is on but destination was left blank
+    // (notifyUser already falls back; Overview used to treat blank as incomplete).
+    const resolvedEmail = resolveAlertEmail(settings, user.email);
+    if (
+      settings.channelEmail &&
+      !settings.email?.trim() &&
+      resolvedEmail
+    ) {
+      settings = { ...settings, email: resolvedEmail };
+      await saveAlertSettingsForUser(user.id, settings);
+    }
 
     const { sent, skipped } = await notifyUser(user.id, user.email, settings, {
       title: "ThermalTrace test alert",

@@ -18,10 +18,50 @@ const { vapidPublicKey } = Astro.props;
     const status = document.getElementById("push-status");
     const hint = document.getElementById("push-hint");
     const pushChannel = document.querySelector('[name="channel_push"]');
+    let autoSubscribeAttempted = false;
 
     async function ensureServiceWorker() {
       await navigator.serviceWorker.register("/sw.js?v=3");
       return navigator.serviceWorker.ready;
+    }
+
+    async function subscribeThisBrowser() {
+      if (!vapidPublicKey) {
+        throw new Error("VAPID public key is not configured on the server");
+      }
+      const reg = await ensureServiceWorker();
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        throw new Error("Notification permission was not granted");
+      }
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+        });
+      }
+      const json = sub.toJSON();
+      const res = await fetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.error || "Server rejected subscription");
+      }
+      if (pushChannel instanceof HTMLInputElement) {
+        pushChannel.checked = true;
+      }
+      if (status) {
+        status.textContent = "Subscribed on this browser. Save alert settings, then send a test.";
+      }
+      if (hint) {
+        hint.textContent =
+          'The "Push (browser + Android)" channel was checked: click Save alert settings before testing.';
+      }
+      if (btn) btn.textContent = "Re-enable / refresh push";
     }
 
     async function refreshPushStatus() {
@@ -58,8 +98,23 @@ const { vapidPublicKey } = Astro.props;
               : 'Check "Push (browser + Android)" under channels above, save settings, then send a test.';
           }
         } else if (permission === "granted") {
-          status.textContent = "Permission granted, but this browser is not subscribed yet.";
-          if (btn) btn.textContent = "Subscribe this browser";
+          // Permission alone is not enough — finish PushManager subscribe + POST to server.
+          if (!autoSubscribeAttempted && vapidPublicKey) {
+            autoSubscribeAttempted = true;
+            status.textContent = "Permission granted — finishing browser subscribe…";
+            try {
+              await subscribeThisBrowser();
+              await refreshPushStatus();
+              return;
+            } catch (e) {
+              status.textContent =
+                "Permission granted, but subscribe failed: " + (e?.message || e);
+              if (btn) btn.textContent = "Subscribe this browser";
+            }
+          } else {
+            status.textContent = "Permission granted, but this browser is not subscribed yet.";
+            if (btn) btn.textContent = "Subscribe this browser";
+          }
         } else {
           status.textContent = "Not enabled on this browser yet.";
           if (btn) btn.textContent = "Enable browser push on this device";
@@ -79,42 +134,7 @@ const { vapidPublicKey } = Astro.props;
 
     btn?.addEventListener("click", async () => {
       try {
-        if (!vapidPublicKey) {
-          throw new Error("VAPID public key is not configured on the server");
-        }
-        const reg = await ensureServiceWorker();
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") {
-          throw new Error("Notification permission was not granted");
-        }
-        let sub = await reg.pushManager.getSubscription();
-        if (!sub) {
-          sub = await reg.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-          });
-        }
-        const json = sub.toJSON();
-        const res = await fetch("/api/push/subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => null);
-          throw new Error(err?.error || "Server rejected subscription");
-        }
-        if (pushChannel instanceof HTMLInputElement) {
-          pushChannel.checked = true;
-        }
-        if (status) {
-          status.textContent = "Subscribed on this browser. Save alert settings, then send a test.";
-        }
-        if (hint) {
-          hint.textContent =
-            'The "Push (browser + Android)" channel was checked: click Save alert settings before testing.';
-        }
-        if (btn) btn.textContent = "Re-enable / refresh push";
+        await subscribeThisBrowser();
       } catch (e) {
         if (status) status.textContent = "Could not enable push: " + (e?.message || e);
         await refreshPushStatus();
