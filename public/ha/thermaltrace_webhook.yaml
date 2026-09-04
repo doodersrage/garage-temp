@@ -19,7 +19,7 @@ blueprint:
     webhook_id:
       name: Webhook ID
       description: Must match the path segment in /api/webhook/<id>
-      default: garage_temp_alerts
+      default: thermaltrace_alerts
       selector:
         text:
     mqtt_topic:

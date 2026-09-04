@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { randomSigningSecret, verifyInboundSignature } from "./inboundSigning";
+import {
+  pickInboundSignatureHeader,
+  randomSigningSecret,
+  verifyInboundSignature,
+} from "./inboundSigning";
 
 async function hmacHex(secret: string, body: string): Promise<string> {
   const key = await crypto.subtle.importKey(
@@ -12,6 +16,28 @@ async function hmacHex(secret: string, body: string): Promise<string> {
   const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(body));
   return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
+
+describe("pickInboundSignatureHeader", () => {
+  it("prefers ThermalTrace over legacy GarageTemp and generic X-Signature", () => {
+    const headers = new Headers({
+      "X-Signature": "generic",
+      "X-GarageTemp-Signature": "legacy",
+      "X-ThermalTrace-Signature": "canonical",
+    });
+    expect(pickInboundSignatureHeader(headers)).toBe("canonical");
+  });
+
+  it("falls back to GarageTemp then X-Signature", () => {
+    expect(
+      pickInboundSignatureHeader(
+        new Headers({ "X-GarageTemp-Signature": "legacy", "X-Signature": "generic" }),
+      ),
+    ).toBe("legacy");
+    expect(pickInboundSignatureHeader(new Headers({ "X-Signature": "generic" }))).toBe(
+      "generic",
+    );
+  });
+});
 
 describe("verifyInboundSignature", () => {
   it("accepts a correctly signed body", async () => {

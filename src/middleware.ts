@@ -12,6 +12,17 @@ import {
 } from "./lib/mfa";
 import { recordServerError } from "./lib/serverErrors";
 import { CANONICAL_HOST, LEGACY_HOSTS } from "./lib/siteConfig";
+import {
+  HA_BLUEPRINT_LEGACY_URL,
+  HA_BLUEPRINT_URL,
+  HA_ENTITIES_LEGACY_URL,
+  HA_ENTITIES_YAML,
+} from "./lib/homeAssistantIntegration";
+
+const LEGACY_STATIC_REDIRECTS: Record<string, string> = {
+  [HA_BLUEPRINT_LEGACY_URL]: HA_BLUEPRINT_URL,
+  [HA_ENTITIES_LEGACY_URL]: HA_ENTITIES_YAML,
+};
 
 function isMfaExemptPath(pathname: string): boolean {
   return (
@@ -40,6 +51,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const dest = new URL(context.url);
     dest.protocol = "https:";
     return context.redirect(dest.toString(), 301);
+  }
+
+  const legacyStatic = LEGACY_STATIC_REDIRECTS[pathname];
+  if (legacyStatic) {
+    return context.redirect(legacyStatic, 301);
   }
 
   let userId: string | null = null;

@@ -12,6 +12,15 @@ async function hmacSha256Hex(secret: string, body: string): Promise<string> {
   return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/** Prefer ThermalTrace header; accept legacy GarageTemp and generic X-Signature. */
+export function pickInboundSignatureHeader(headers: Headers): string | null {
+  return (
+    headers.get("X-ThermalTrace-Signature") ||
+    headers.get("X-GarageTemp-Signature") ||
+    headers.get("X-Signature")
+  );
+}
+
 export async function verifyInboundSignature(
   secret: string | null | undefined,
   rawBody: string,

@@ -1,6 +1,9 @@
 import type { APIRoute } from "astro";
 import { resolveInboundWebhook } from "../../../lib/inboundWebhooks";
-import { verifyInboundSignature } from "../../../lib/inboundSigning";
+import {
+  pickInboundSignatureHeader,
+  verifyInboundSignature,
+} from "../../../lib/inboundSigning";
 import {
   applySnoozeForHouseholdMembers,
   applyVacationForHouseholdMembers,
@@ -34,7 +37,7 @@ export const POST: APIRoute = async ({ params, request }) => {
   const signatureOk = await verifyInboundSignature(
     resolved.signingSecret,
     rawBody,
-    request.headers.get("X-GarageTemp-Signature"),
+    pickInboundSignatureHeader(request.headers),
   );
   if (!signatureOk) {
     return new Response(JSON.stringify({ error: "Invalid signature" }), {

@@ -21,8 +21,9 @@ ThermalTrace does **not** run MQTT inside Cloudflare Workers. For **alerts into 
 2. Point it at HA: `https://<ha-host>/api/webhook/<id>`  
 3. Import the blueprint from the repo  
 
-**Blueprint:** [`public/ha/garage_temp_webhook.yaml`](https://github.com/doodersrage/thermaltrace/blob/main/public/ha/garage_temp_webhook.yaml)  
-Also: [thermaltrace.dev/ha/garage_temp_webhook.yaml](https://thermaltrace.dev/ha/garage_temp_webhook.yaml)
+**Blueprint:** [`public/ha/thermaltrace_webhook.yaml`](https://github.com/doodersrage/thermaltrace/blob/main/public/ha/thermaltrace_webhook.yaml)
+Also: [thermaltrace.dev/ha/thermaltrace_webhook.yaml](https://thermaltrace.dev/ha/thermaltrace_webhook.yaml)
+(Legacy URLs under `/ha/garage_temp_*.yaml` 301 to these paths.)
 
 ### What the blueprint does
 

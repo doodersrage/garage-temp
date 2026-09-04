@@ -201,7 +201,10 @@ export default function LiveTempsPanel({ intervalMs = 30000 }: Props) {
       setSensors(payload.sensors ?? []);
       if (payload.spaces) setSpaces(payload.spaces);
       setUpdatedAt(payload.updatedAt);
-      setOfflineStale(response.headers.get("X-Garage-Temp-Stale") === "1");
+      setOfflineStale(
+        response.headers.get("X-ThermalTrace-Stale") === "1" ||
+          response.headers.get("X-Garage-Temp-Stale") === "1",
+      );
       setError(null);
       setCountdown(intervalMs / 1000);
     } catch (e) {

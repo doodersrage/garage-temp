@@ -30,7 +30,10 @@ export async function sendReadingWebhook(
   const secret = settings.readingWebhookSecret?.trim();
   if (secret) {
     const signature = await hmacSha256Hex(secret, body);
-    headers["X-GarageTemp-Signature"] = `sha256=${signature}`;
+    const headerValue = `sha256=${signature}`;
+    headers["X-ThermalTrace-Signature"] = headerValue;
+    // Legacy alias for existing HA / Zapier verifiers.
+    headers["X-GarageTemp-Signature"] = headerValue;
   }
 
   await deliverWebhookPost(userId, "reading", url, headers, body);

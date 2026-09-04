@@ -130,13 +130,13 @@ Content-Type: application/json</code></pre>
     <a class="text-link" href="/about/mqtt-bridge">MQTT bridge recipe</a>.
   </p>
   <p>
-    <a class="text-link" href="/ha/garage_temp_webhook.yaml" download>Download HA blueprint (YAML)</a>
+    <a class="text-link" href="/ha/thermaltrace_webhook.yaml" download>Download HA blueprint (YAML)</a>
   </p>
   <pre><code>{`automation:
   - alias: ThermalTrace webhook
     trigger:
       - platform: webhook
-        webhook_id: garage_temp_alerts
+        webhook_id: thermaltrace_alerts
         allowed_methods:
           - POST
         local_only: false
@@ -147,7 +147,7 @@ Content-Type: application/json</code></pre>
           message: "{{ trigger.json.body }}"`}</code></pre>
   <p>
     Point your ThermalTrace outbound webhook URL at
-    <code>https://&lt;your-ha-host&gt;/api/webhook/garage_temp_alerts</code>
+    <code>https://&lt;your-ha-host&gt;/api/webhook/thermaltrace_alerts</code>
     (or a Cloudflare Tunnel / Nabu Casa URL). Verify <code>X-Signature</code> in a template condition if you set a secret.
   </p>
   <p>

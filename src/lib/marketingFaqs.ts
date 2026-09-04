@@ -255,7 +255,7 @@ export const marketingFaqs = {
     {
       question: "How do freeze and leak alerts reach Home Assistant?",
       answer:
-        "Configure a Pro outbound webhook in ThermalTrace pointing at your HA webhook URL, or import the garage_temp_webhook.yaml blueprint from thermaltrace.dev/ha/garage_temp_webhook.yaml. When you set a webhook signing secret, verify the X-Signature HMAC header before acting on the payload.",
+        "Configure a Pro outbound webhook in ThermalTrace pointing at your HA webhook URL, or import the thermaltrace_webhook.yaml blueprint from thermaltrace.dev/ha/thermaltrace_webhook.yaml. When you set a webhook signing secret, verify the X-Signature HMAC header before acting on the payload.",
     },
   ],
   android: [

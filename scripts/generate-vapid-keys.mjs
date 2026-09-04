@@ -46,4 +46,4 @@ const privateKey = privateJwk.d;
 console.log("# Add these to .env / Worker secrets (compatible with @block65/webcrypto-web-push)");
 console.log(`VAPID_PUBLIC_KEY=${publicKey}`);
 console.log(`VAPID_PRIVATE_KEY=${privateKey}`);
-console.log("VAPID_SUBJECT=mailto:admin@example.com");
+console.log("VAPID_SUBJECT=mailto:noreply@thermaltrace.dev");

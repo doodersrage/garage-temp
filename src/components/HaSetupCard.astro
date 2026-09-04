@@ -4,6 +4,8 @@ import {
   HACS_REPO_URL,
   HA_INTEGRATION_PAGE,
   HA_DEV_DOCS_INGEST,
+  HA_BLUEPRINT_URL,
+  HA_ENTITIES_YAML,
 } from "../lib/homeAssistantIntegration";
 
 interface Props {
@@ -19,7 +21,7 @@ const { siteUrl = Astro.url.origin, apiKey = null, inboundWebhookUrl = null } =
 const metricsUrl = `${siteUrl}/api/v1/metrics`;
 const restCommandYaml = inboundWebhookUrl
   ? `rest_command:
-  garage_temp_status:
+  thermaltrace_status:
     url: "${inboundWebhookUrl}"
     method: POST
     headers:
@@ -28,7 +30,7 @@ const restCommandYaml = inboundWebhookUrl
   : null;
 
 const prometheusYaml = `scrape_configs:
-  - job_name: garage_temp
+  - job_name: thermaltrace
     metrics_path: /api/v1/metrics
     scheme: ${siteUrl.startsWith("https") ? "https" : "http"}
     static_configs:
@@ -54,18 +56,18 @@ const prometheusYaml = `scrape_configs:
       <a class="text-link" href={HA_DEV_DOCS_INGEST}>Developer docs</a>
     </li>
     <li>
-      <a class="text-link" href="/ha/garage_temp_entities.yaml" download>
+      <a class="text-link" href={HA_ENTITIES_YAML} download>
         Download entity naming YAML
       </a>
     </li>
     <li>
-      <a class="text-link" href="/ha/garage_temp_webhook.yaml" download>
+      <a class="text-link" href={HA_BLUEPRINT_URL} download>
         Download webhook automation YAML
       </a>
     </li>
     <li>
       Blueprint-style import: copy
-      <code class="text-xs break-all">{siteUrl}/ha/garage_temp_webhook.yaml</code>
+      <code class="text-xs break-all">{siteUrl}{HA_BLUEPRINT_URL}</code>
       into HA → Settings → Automations → Create → Import from YAML.
     </li>
     <li>

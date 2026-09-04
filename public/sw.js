@@ -66,6 +66,7 @@ self.addEventListener("fetch", (event) => {
           caches.match(request).then((cached) => {
             if (cached) {
               const stale = cached.clone();
+              stale.headers.set("X-ThermalTrace-Stale", "1");
               stale.headers.set("X-Garage-Temp-Stale", "1");
               return stale;
             }

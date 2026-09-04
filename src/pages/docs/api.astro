@@ -198,7 +198,8 @@ const mqttCurl = `curl -X POST "${siteUrl}/api/ingest/mqtt" \\
       <h2 class="card-title">POST /api/inbound/&lt;token&gt;</h2>
       <p class="card-subtitle mb-4">
         Pro inbound webhooks for Home Assistant / Zapier / Make: actions such as <code>snooze</code>, <code>vacation</code>, <code>status</code>.
-        Create the token under Dashboard → Share. Optional HMAC via signing secret (<code>X-GarageTemp-Signature</code>).
+        Create the token under Dashboard → Share. Optional HMAC via signing secret
+        (<code>X-ThermalTrace-Signature</code>; legacy <code>X-GarageTemp-Signature</code> still accepted).
       </p>
       <pre class="text-xs overflow-x-auto mb-3 p-4 rounded-lg bg-[var(--color-surface-muted)]"><code>{inboundCurl}</code></pre>
       <p class="mb-0 text-sm">

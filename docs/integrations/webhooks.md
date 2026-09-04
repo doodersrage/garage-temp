@@ -26,12 +26,13 @@ Verify before acting on the payload (Home Assistant, Zapier code step, custom wo
 ## Reading webhooks
 
 Separately, Pro can POST **reading** payloads to a URL for every stored snapshot (high volume — use carefully).
+When a signing secret is set, requests include `X-ThermalTrace-Signature` (and the legacy `X-GarageTemp-Signature` alias) as `sha256=<hex>`.
 
 ## Home Assistant
 
 **Recommended:** install the [official HACS integration](https://thermaltrace.dev/integrations/home-assistant). Share-link tokens populate temperature, humidity, door, and leak entities; optional Pro **inbound webhooks** expose `thermaltrace.snooze`, `thermaltrace.vacation`, and `thermaltrace.status` services.
 
-For **alerts into HA** (ThermalTrace → Home Assistant), use a Pro **outbound webhook** URL in Dashboard → Alerts, or import the [garage temp webhook blueprint](https://thermaltrace.dev/ha/garage_temp_webhook.yaml). Verify HMAC with the same secret pattern as inbound calls when configured.
+For **alerts into HA** (ThermalTrace → Home Assistant), use a Pro **outbound webhook** URL in Dashboard → Alerts, or import the [ThermalTrace webhook blueprint](https://thermaltrace.dev/ha/thermaltrace_webhook.yaml). Verify HMAC with the same secret pattern as inbound calls when configured.
 
 ## Zapier / Make
 
