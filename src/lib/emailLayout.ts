@@ -69,7 +69,8 @@ export function buildBrandedEmailText(content: BrandedEmailContent): string {
     lines.push("");
   }
   for (const bullet of content.bullets ?? []) {
-    lines.push(`• ${bullet}`);
+    const trimmed = bullet.trimStart();
+    lines.push(/^[✓○•\-]/.test(trimmed) ? bullet : `• ${bullet}`);
   }
   if (content.bullets?.length) lines.push("");
   if (content.cta) {
@@ -98,8 +99,13 @@ export function buildBrandedEmailHtml(content: BrandedEmailContent): string {
     .join("");
   const bullets =
     content.bullets && content.bullets.length > 0
-      ? `<ul style="margin:0 0 20px;padding:0 0 0 20px;color:${COLORS.steel};font-size:16px;line-height:1.6">${content.bullets
-          .map((item) => `<li style="margin:0 0 8px">${linkifyPlainUrls(item)}</li>`)
+      ? `<ul style="margin:0 0 20px;padding:0;list-style:none;color:${COLORS.steel};font-size:16px;line-height:1.55">${content.bullets
+          .map((item) => {
+            const trimmed = item.trimStart();
+            const alreadyMarked = /^[✓○•\-]/.test(trimmed);
+            const body = alreadyMarked ? linkifyPlainUrls(item) : `• ${linkifyPlainUrls(item)}`;
+            return `<li style="margin:0 0 10px;padding:0">${body}</li>`;
+          })
           .join("")}</ul>`
       : "";
 
@@ -122,7 +128,7 @@ export function buildBrandedEmailHtml(content: BrandedEmailContent): string {
     : "";
 
   const intro = content.intro
-    ? `<p style="margin:0 0 18px;color:${COLORS.text};font-size:17px;line-height:1.55;font-weight:500">${linkifyPlainUrls(content.intro)}</p>`
+    ? `<p style="margin:0 0 18px;color:${COLORS.text};font-size:17px;line-height:1.55;font-weight:500">${linkifyPlainUrls(content.intro).replace(/\n/g, "<br />")}</p>`
     : "";
 
   const footerNote = escapeEmailHtml(

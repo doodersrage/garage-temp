@@ -20,6 +20,28 @@ export function shouldSendFreezeDrill(now = new Date()): boolean {
   return false;
 }
 
+export function buildFreezeDrillEmailParts(input: {
+  score: number;
+  checks: Array<{ ok: boolean; label: string }>;
+  siteUrl: string;
+}) {
+  return brandedEmailParts({
+    eyebrow: "Pre-season freeze drill",
+    preheader: `Readiness score ${input.score}%`,
+    title: "Time for your freeze-season check",
+    intro: "Before the first hard freeze, confirm alerts and probes are ready.",
+    paragraphs: [`Readiness: ${input.score}%`],
+    bullets: input.checks.map((c) => `${c.ok ? "✓" : "○"} ${c.label}`),
+    cta: { label: "Open dashboard", url: `${input.siteUrl}/dashboard` },
+    secondaryCta: {
+      label: "Send test alert",
+      url: `${input.siteUrl}/dashboard/alerts#send-test-alert`,
+    },
+    tone: "brand",
+    footerNote: "Disable pre-season drills in Dashboard → Alerts.",
+  });
+}
+
 export function monthsSince(iso: string | null | undefined, now = Date.now()): number {
   if (!iso) return Infinity;
   const t = Date.parse(iso);
@@ -91,23 +113,14 @@ export async function sendFreezeDrillsForAllUsers(): Promise<{
         hasSentAnyAlert: Boolean(settings.lastAlertSentAt),
       });
 
-      const checklist = readiness.checks
-        .map((c) => `${c.ok ? "✓" : "○"} ${c.label}`)
-        .join("\n");
-
-      const parts = brandedEmailParts({
-        eyebrow: "Pre-season freeze drill",
-        preheader: `Readiness score ${readiness.score}%`,
-        title: "Time for your freeze-season check",
-        intro: `Before the first hard freeze, confirm alerts and probes are ready.\n\nReadiness: ${readiness.score}%\n\n${checklist}`,
-        cta: { label: "Open dashboard", url: `${siteUrl}/dashboard` },
-        secondaryCta: { label: "Send test alert", url: `${siteUrl}/dashboard/alerts#send-test-alert` },
-        tone: "brand",
-        footerNote: "Disable pre-season drills in Dashboard → Alerts.",
+      const parts = buildFreezeDrillEmailParts({
+        score: readiness.score,
+        checks: readiness.checks,
+        siteUrl,
       });
 
       if (user.email) {
-        await sendEmail(user.email, `Freeze readiness ${readiness.score}% — pre-season drill`, parts.text, {
+        await sendEmail(user.email, `Freeze readiness ${readiness.score}%: pre-season drill`, parts.text, {
           html: parts.html,
         });
       }

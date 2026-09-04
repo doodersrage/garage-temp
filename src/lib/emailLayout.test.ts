@@ -33,6 +33,21 @@ describe("emailLayout", () => {
     expect(parts.text).toContain("• One");
     expect(parts.text).toContain("Go: https://example.com/x");
   });
+
+  it("keeps intro line breaks and checklist bullets on their own rows", () => {
+    const html = buildBrandedEmailHtml({
+      title: "Drill",
+      intro: "Lead line.\n\nSecond line.",
+      paragraphs: ["Readiness: 40%"],
+      bullets: ["○ Alerts enabled", "✓ Probes reporting"],
+    });
+    expect(html).toContain("Lead line.<br /><br />Second line.");
+    expect(html).toContain("<ul");
+    expect(html).toContain("list-style:none");
+    expect(html).toMatch(/<li[^>]*>○ Alerts enabled<\/li>/);
+    expect(html).toMatch(/<li[^>]*>✓ Probes reporting<\/li>/);
+    expect(html).not.toContain("○ Alerts enabled ○");
+  });
 });
 
 describe("product email templates", () => {
