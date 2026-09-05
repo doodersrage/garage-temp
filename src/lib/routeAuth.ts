@@ -23,6 +23,8 @@ const protectedApiPrefixes = [
   "/api/ical",
   "/api/auth/update-password",
   "/api/auth/mfa-manage",
+  "/api/pucks",
+  "/api/bays",
 ];
 
 /** Public endpoints that would otherwise match a protected prefix. */

@@ -27,6 +27,9 @@ describe("pathRequiresAuth", () => {
     expect(pathRequiresAuth("/api/ical/outlook")).toBe(true);
     expect(pathRequiresAuth("/api/auth/update-password")).toBe(true);
     expect(pathRequiresAuth("/api/auth/mfa-manage")).toBe(true);
+    expect(pathRequiresAuth("/api/pucks/register")).toBe(true);
+    expect(pathRequiresAuth("/api/pucks/claim/start")).toBe(true);
+    expect(pathRequiresAuth("/api/bays/garage/mood")).toBe(true);
     expect(pathRequiresAuth("/_actions/updateAlertSettings")).toBe(true);
   });
 

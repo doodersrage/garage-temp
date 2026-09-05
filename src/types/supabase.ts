@@ -1217,6 +1217,85 @@ export type Database = {
         }
         Relationships: []
       }
+      puck_claim_pending: {
+        Row: {
+          bay_id: string
+          created_at: string
+          device_id: string
+          expires_at: string
+          nonce_hex: string
+        }
+        Insert: {
+          bay_id: string
+          created_at?: string
+          device_id: string
+          expires_at: string
+          nonce_hex: string
+        }
+        Update: {
+          bay_id?: string
+          created_at?: string
+          device_id?: string
+          expires_at?: string
+          nonce_hex?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "puck_claim_pending_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: true
+            referencedRelation: "pucks"
+            referencedColumns: ["device_id"]
+          },
+        ]
+      }
+      pucks: {
+        Row: {
+          bay_id: string | null
+          created_at: string
+          created_by: string | null
+          device_id: string
+          household_id: string
+          mood_override: string | null
+          mood_override_at: string | null
+          secret_hex: string
+          space_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          bay_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          device_id: string
+          household_id: string
+          mood_override?: string | null
+          mood_override_at?: string | null
+          secret_hex: string
+          space_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bay_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          device_id?: string
+          household_id?: string
+          mood_override?: string | null
+          mood_override_at?: string | null
+          secret_hex?: string
+          space_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pucks_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_subscriptions: {
         Row: {
           auth: string
