@@ -4,14 +4,40 @@ import {
   buildMobileOAuthCustomUrl,
   buildMobileOAuthIntentUrl,
 } from "../../lib/mobileAuthRedirect";
+import {
+  buildBayBuddyOAuthCustomUrl,
+  buildLoopbackOAuthUrl,
+  consumeCompanionLoopbackCookie,
+  getCompanionClientCookie,
+} from "../../lib/companionAuth";
 
 const exchange = Astro.url.searchParams.get("exchange")?.trim() ?? "";
-const intentUrl = exchange ? buildMobileOAuthIntentUrl(exchange) : "";
-const customUrl = exchange ? buildMobileOAuthCustomUrl(exchange) : "";
+const client =
+  Astro.url.searchParams.get("client")?.trim().toLowerCase() ||
+  getCompanionClientCookie(Astro.cookies) ||
+  "android";
+const isBayBuddy = client === "baybuddy";
+
+const loopback = exchange ? consumeCompanionLoopbackCookie(Astro.cookies) : null;
+if (exchange && loopback) {
+  return Astro.redirect(buildLoopbackOAuthUrl(loopback, exchange));
+}
+
+const intentUrl = exchange && !isBayBuddy ? buildMobileOAuthIntentUrl(exchange) : "";
+const customUrl = exchange
+  ? isBayBuddy
+    ? buildBayBuddyOAuthCustomUrl(exchange)
+    : buildMobileOAuthCustomUrl(exchange)
+  : "";
+const openHref = intentUrl || customUrl;
 ---
 <Layout
-  title="Return to the Android app"
-  description="Finish ThermalTrace sign-in by returning to the Android app."
+  title={isBayBuddy ? "Return to Bay Buddy" : "Return to the Android app"}
+  description={
+    isBayBuddy
+      ? "Finish ThermalTrace sign-in by returning to Bay Buddy."
+      : "Finish ThermalTrace sign-in by returning to the Android app."
+  }
   noindex
   skipAuth
 >
@@ -19,30 +45,39 @@ const customUrl = exchange ? buildMobileOAuthCustomUrl(exchange) : "";
     {
       exchange ? (
         <>
-          <h1 class="card-title">Open ThermalTrace</h1>
+          <h1 class="card-title">{isBayBuddy ? "Open Bay Buddy" : "Open ThermalTrace"}</h1>
           <p class="card-subtitle">
-            Sign-in finished in the browser. Chrome often stays here after a Google or
-            YubiKey security step: tap the button to return to the app and finish MFA
-            there if needed.
+            Sign-in finished in the browser.
+            {
+              isBayBuddy
+                ? " If Bay Buddy is waiting, it should pick up automatically. If not, tap the button below."
+                : " Chrome often stays here after a Google or YubiKey security step: tap the button to return to the app and finish MFA there if needed."
+            }
           </p>
           <p class="mt-4 mb-2">
-            <a class="btn-primary" id="open-app" href={intentUrl}>Open ThermalTrace</a>
+            <a class="btn-primary" id="open-app" href={openHref}>
+              {isBayBuddy ? "Open Bay Buddy" : "Open ThermalTrace"}
+            </a>
           </p>
           <p class="text-sm text-[var(--color-text-muted)] mb-0">
-            If nothing happens, use the phone’s back button to return to the app, or
-            open ThermalTrace from your app drawer.
+            {
+              isBayBuddy
+                ? "You can close this tab once Bay Buddy shows your live garage mood."
+                : "If nothing happens, use the phone’s back button to return to the app, or open ThermalTrace from your app drawer."
+            }
           </p>
-          <script is:inline define:vars={{ intentUrl, customUrl }}>
+          <script is:inline define:vars={{ intentUrl, customUrl, isBayBuddy }}>
             (() => {
               const go = () => {
-                // intent:// is the reliable Chrome handoff after WebAuthn/YubiKey.
-                window.location.href = intentUrl;
-                setTimeout(() => {
-                  // Fallback for browsers that prefer the custom scheme.
-                  window.location.href = customUrl;
-                }, 900);
+                if (intentUrl) {
+                  window.location.href = intentUrl;
+                  setTimeout(() => {
+                    if (customUrl) window.location.href = customUrl;
+                  }, 900);
+                  return;
+                }
+                if (customUrl) window.location.href = customUrl;
               };
-              // Defer slightly so the visible button paints after a security-key flow.
               setTimeout(go, 250);
               document.getElementById("open-app")?.addEventListener("click", (event) => {
                 event.preventDefault();
@@ -55,8 +90,11 @@ const customUrl = exchange ? buildMobileOAuthCustomUrl(exchange) : "";
         <>
           <h1 class="card-title">Missing sign-in token</h1>
           <p class="card-subtitle mb-0">
-            This page is only used to return to the Android app after Google sign-in. Open
-            ThermalTrace on your phone and try Google again.
+            {
+              isBayBuddy
+                ? "This page returns you to Bay Buddy after sign-in. Open Bay Buddy and choose Connect again."
+                : "This page is only used to return to the Android app after Google sign-in. Open ThermalTrace on your phone and try Google again."
+            }
           </p>
         </>
       )
