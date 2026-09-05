@@ -20,6 +20,7 @@ import {
   getMarketingFaqSchema,
   type MarketingFaqKey,
 } from "../lib/marketingFaqs";
+import AffiliateDisclosure from "../components/AffiliateDisclosure.astro";
 
 interface Props {
   accessoryId: AccessoryId;
@@ -68,6 +69,8 @@ const schema = [
     </PageHeader>
 
     <slot />
+
+    <AffiliateDisclosure class="mb-0 text-sm text-[var(--color-text-muted)]" />
 
     <section class="card">
       <h2 class="card-title">Related accessories</h2>

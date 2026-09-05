@@ -18,6 +18,7 @@ import AboutProductCta from "./AboutProductCta.astro";
 import AboutJourneyStrip from "./AboutJourneyStrip.astro";
 import AboutPageSections from "./AboutPageSections.astro";
 import AboutConvertBar from "./AboutConvertBar.astro";
+import AffiliateDisclosure from "./AffiliateDisclosure.astro";
 
 interface Props {
   slug: string;
@@ -28,6 +29,8 @@ interface Props {
   heroCaption?: string;
   heroCredit?: string;
   heroCreditHref?: string;
+  /** Show Amazon Associates disclosure (kit / BOM pages with tagged buy links). */
+  commerceDisclosure?: boolean;
   sectionParent?: {
     slug: string;
     title: string;
@@ -43,6 +46,7 @@ const {
   heroCaption,
   heroCredit,
   heroCreditHref,
+  commerceDisclosure = false,
   sectionParent: sectionParentProp,
 } = Astro.props;
 
@@ -141,6 +145,7 @@ const schema = [
 
         <section class="card about-prose">
           <slot />
+          {commerceDisclosure && <AffiliateDisclosure />}
           {faqBlocks.length > 0 && <AboutPageSections sections={faqBlocks} />}
         </section>
 

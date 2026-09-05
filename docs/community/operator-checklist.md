@@ -6,7 +6,6 @@ Tasks only **you** can complete — everything else in the HACS/integration pass
 
 - [ ] Drive `/share-kit`, `/freeze-season`, and `/about/esp32-freeze-kit` before the first hard freeze
 - [ ] Push freeze-map opt-ins so seed cities give way to live aggregates
-- [ ] Optional: set `PUBLIC_AMAZON_ASSOCIATE_TAG` below if kit BOM Amazon links should be tagged
 - Kit SKU / pre-flash batch is outside this repo (BOM page is ready)
 
 ## Google Play
@@ -56,9 +55,9 @@ Check what's missing locally: `pnpm operator:check`
 
 ## Affiliates (optional commerce)
 
-- [x] Set `PUBLIC_AMAZON_ASSOCIATE_TAG` in `.env` / Worker secrets when Amazon Associates is enrolled (`pnpm secrets:push`)
+- [x] Set `PUBLIC_AMAZON_ASSOCIATE_TAG` in `.env` / Worker secrets (`pnpm secrets:push`) — tag live on Worker
 - Adafruit has no affiliate program — do not invent an Adafruit tag; those shop links stay direct
-- Unset Amazon tag keeps clean amazon.com URLs; disclosure copy still applies on kit / BOM pages
+- Unset Amazon tag keeps clean amazon.com URLs; shared disclosure (`AffiliateDisclosure`) covers kit / BOM pages
 
 ## Shipped in product (no operator action)
 

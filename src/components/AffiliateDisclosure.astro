@@ -1,0 +1,13 @@
+---
+/**
+ * FTC affiliate disclosure for pages with Amazon Associates buy links.
+ */
+import { AFFILIATE_DISCLOSURE } from "../lib/affiliateLinks";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = "text-sm text-[var(--color-text-muted)]" } = Astro.props;
+---
+<p class={className}>{AFFILIATE_DISCLOSURE}</p>

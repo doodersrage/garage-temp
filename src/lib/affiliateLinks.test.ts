@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import {
+  AFFILIATE_DISCLOSURE,
   affiliateHref,
   COMMERCE_LINK_REL,
   commerceLinkRel,
@@ -25,6 +26,12 @@ describe("affiliateLinks", () => {
     expect(COMMERCE_LINK_REL).toContain("sponsored");
     expect(COMMERCE_LINK_REL).toContain("noopener");
     expect(EXTERNAL_SHOP_LINK_REL).not.toContain("sponsored");
+  });
+
+  it("exports FTC disclosure copy", () => {
+    expect(AFFILIATE_DISCLOSURE).toMatch(/commission/i);
+    expect(AFFILIATE_DISCLOSURE).toMatch(/Associates/i);
+    expect(AFFILIATE_DISCLOSURE).toMatch(/Adafruit/i);
   });
 
   it("leaves URLs unchanged without an Amazon tag", () => {

@@ -37,6 +37,7 @@ const AMAZON_BUNDLE = affiliateHref(
   heroCaption={hero?.caption}
   heroCredit={hero?.credit}
   heroCreditHref={hero?.sourceUrl}
+  commerceDisclosure
 >
   <p>
     ThermalTrace does not sell hardware. The sketches under
@@ -105,9 +106,6 @@ const AMAZON_BUNDLE = affiliateHref(
     Optional one-box search (verify it includes a waterproof DS18B20, not only DHT11):
     <a class="text-link" href={AMAZON_BUNDLE} target="_blank" rel={commerceLinkRel(AMAZON_BUNDLE)}>ESP32 + DS18B20 kit search</a>.
     Product ASINs change often: treat Amazon as a parts finder, Adafruit as the reference BOM.
-  </p>
-  <p class="text-sm text-[var(--color-text-muted)]">
-    Buy links: Amazon URLs may include an Associates tag when configured. Adafruit links are direct (Adafruit does not run an affiliate program). ThermalTrace may earn a commission from qualifying Amazon purchases at no extra cost to you.
   </p>
 
   <h2>Wire it</h2>

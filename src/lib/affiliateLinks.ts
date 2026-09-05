@@ -12,6 +12,10 @@ export const COMMERCE_LINK_REL = "sponsored noopener noreferrer";
 /** Use on non-affiliate outbound shop links (Adafruit, PJRC, etc.). */
 export const EXTERNAL_SHOP_LINK_REL = "noopener noreferrer";
 
+/** On-page FTC disclosure for kit / BOM pages with Amazon buy links. */
+export const AFFILIATE_DISCLOSURE =
+  "Amazon buy links may include an Associates tag. Adafruit and other vendor links are direct (Adafruit does not run an affiliate program). ThermalTrace may earn a commission from qualifying Amazon purchases at no extra cost to you.";
+
 function cleanTag(value: string | undefined): string | null {
   if (!value) return null;
   const trimmed = value.trim();
