@@ -1,11 +1,16 @@
 /**
- * Optional Amazon Associates / Adafruit affiliate query params for hardware BOM links.
- * When unset, URLs stay clean; commerce links still use sponsored rel for FTC clarity.
+ * Optional Amazon Associates `tag` for hardware BOM buy links.
+ * Adafruit does not run an affiliate program — those links stay clean.
+ * When the Amazon tag is unset, Amazon URLs stay clean too.
  */
 
 import { getRuntimeEnv } from "./runtimeEnv";
 
+/** Use on Amazon Associates links (FTC: sponsored). */
 export const COMMERCE_LINK_REL = "sponsored noopener noreferrer";
+
+/** Use on non-affiliate outbound shop links (Adafruit, PJRC, etc.). */
+export const EXTERNAL_SHOP_LINK_REL = "noopener noreferrer";
 
 function cleanTag(value: string | undefined): string | null {
   if (!value) return null;
@@ -17,13 +22,6 @@ export function getAmazonAssociateTag(): string | null {
   return cleanTag(
     getRuntimeEnv("PUBLIC_AMAZON_ASSOCIATE_TAG") ??
       getRuntimeEnv("AMAZON_ASSOCIATE_TAG"),
-  );
-}
-
-export function getAdafruitAffiliateRef(): string | null {
-  return cleanTag(
-    getRuntimeEnv("PUBLIC_ADAFRUIT_AFFILIATE_ID") ??
-      getRuntimeEnv("ADAFRUIT_AFFILIATE_ID"),
   );
 }
 
@@ -40,21 +38,17 @@ export function withAmazonTag(url: string, tag = getAmazonAssociateTag()): strin
   }
 }
 
-/** Append Adafruit `ada_ref` when configured. */
-export function withAdafruitRef(url: string, ref = getAdafruitAffiliateRef()): string {
-  if (!ref) return url;
+/** `rel` for a shop URL: sponsored only when it is (or will be) an Amazon Associates link. */
+export function commerceLinkRel(url: string): string {
   try {
-    const parsed = new URL(url);
-    if (!/(^|\.)adafruit\.com$/i.test(parsed.hostname)) return url;
-    parsed.searchParams.set("ada_ref", ref);
-    return parsed.toString();
+    if (/(^|\.)amazon\./i.test(new URL(url).hostname)) return COMMERCE_LINK_REL;
   } catch {
-    return url;
+    /* ignore */
   }
+  return EXTERNAL_SHOP_LINK_REL;
 }
 
 export function affiliateHref(url: string): string {
   if (/amazon\./i.test(url)) return withAmazonTag(url);
-  if (/adafruit\.com/i.test(url)) return withAdafruitRef(url);
   return url;
 }

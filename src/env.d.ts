@@ -59,9 +59,6 @@ interface ImportMetaEnv {
   /** Amazon Associates tag for BOM buy links (optional; appended as `tag=`). */
   readonly PUBLIC_AMAZON_ASSOCIATE_TAG?: string;
   readonly AMAZON_ASSOCIATE_TAG?: string;
-  /** Adafruit affiliate ref for BOM buy links (optional; appended as `ada_ref=`). */
-  readonly PUBLIC_ADAFRUIT_AFFILIATE_ID?: string;
-  readonly ADAFRUIT_AFFILIATE_ID?: string;
   /** AES-GCM encryption secret for recoverable push ingest keys (32+ chars recommended). */
   readonly INGEST_KEY_ENCRYPTION_SECRET?: string;
   readonly PROD: boolean;

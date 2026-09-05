@@ -1,6 +1,6 @@
 ---
 import AboutArticle from "../../components/AboutArticle.astro";
-import { affiliateHref, COMMERCE_LINK_REL } from "../../lib/affiliateLinks";
+import { affiliateHref, commerceLinkRel } from "../../lib/affiliateLinks";
 import { getAboutPage } from "../../lib/aboutPages";
 import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
 
@@ -58,25 +58,25 @@ const AMAZON_RESISTOR = affiliateHref(
           <th scope="row">Nucleo-F767ZI</th>
           <td>Cortex-M7, onboard Ethernet MAC + PHY, ST-LINK debugger. No Wi‑Fi module.</td>
           <td>
-            <a class="text-link" href={ST_NUCLEO_F767ZI} target="_blank" rel={COMMERCE_LINK_REL}>ST Nucleo-F767ZI</a>
+            <a class="text-link" href={ST_NUCLEO_F767ZI} target="_blank" rel={commerceLinkRel(ST_NUCLEO_F767ZI)}>ST Nucleo-F767ZI</a>
             ·
-            <a class="text-link" href={AMAZON_NUCLEO} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+            <a class="text-link" href={AMAZON_NUCLEO} target="_blank" rel={commerceLinkRel(AMAZON_NUCLEO)}>Amazon search</a>
           </td>
         </tr>
         <tr>
           <th scope="row">Waterproof DS18B20</th>
           <td>Pipe / crawlspace probe. Data on Arduino <strong>D4</strong> (PF14).</td>
           <td>
-            <a class="text-link" href={ADAFRUIT_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit DS18B20</a>
+            <a class="text-link" href={ADAFRUIT_DS18B20} target="_blank" rel={commerceLinkRel(ADAFRUIT_DS18B20)}>Adafruit DS18B20</a>
             ·
-            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={commerceLinkRel(AMAZON_DS18B20)}>Amazon search</a>
           </td>
         </tr>
         <tr>
           <th scope="row">4.7kΩ resistor</th>
           <td>Pull-up from DS18B20 data to 3.3V. Do not power the probe from the 5V Arduino pin.</td>
           <td>
-            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={COMMERCE_LINK_REL}>Amazon 4.7k search</a>
+            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={commerceLinkRel(AMAZON_RESISTOR)}>Amazon 4.7k search</a>
           </td>
         </tr>
         <tr>

@@ -1,6 +1,6 @@
 ---
 import AccessoryProduct from "../layouts/AccessoryProduct.astro";
-import { affiliateHref, COMMERCE_LINK_REL } from "../lib/affiliateLinks";
+import { affiliateHref, commerceLinkRel } from "../lib/affiliateLinks";
 import { BRAND_NAME } from "../lib/brand";
 
 const LEAK = affiliateHref("https://www.adafruit.com/product/328");
@@ -56,16 +56,16 @@ const AMAZON_LEAK = affiliateHref("https://www.amazon.com/s?k=water+leak+sensor+
             <th scope="row">ESP32 DevKit</th>
             <td>Wi‑Fi HTTPS POST.</td>
             <td>
-              <a class="text-link" href={ESP32} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit ESP32</a>
+              <a class="text-link" href={ESP32} target="_blank" rel={commerceLinkRel(ESP32)}>Adafruit ESP32</a>
             </td>
           </tr>
           <tr>
             <th scope="row">Leak / moisture probes</th>
             <td>Two conductors on the floor; GPIO4 with pull-up, wet pulls low.</td>
             <td>
-              <a class="text-link" href={LEAK} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit</a>
+              <a class="text-link" href={LEAK} target="_blank" rel={commerceLinkRel(LEAK)}>Adafruit</a>
               ·
-              <a class="text-link" href={AMAZON_LEAK} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+              <a class="text-link" href={AMAZON_LEAK} target="_blank" rel={commerceLinkRel(AMAZON_LEAK)}>Amazon search</a>
             </td>
           </tr>
         </tbody>

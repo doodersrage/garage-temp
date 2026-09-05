@@ -1,7 +1,7 @@
 ---
 
 import AboutArticle from "../../components/AboutArticle.astro";
-import { affiliateHref, COMMERCE_LINK_REL } from "../../lib/affiliateLinks";
+import { affiliateHref, commerceLinkRel } from "../../lib/affiliateLinks";
 import { getAboutPage } from "../../lib/aboutPages";
 import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
 
@@ -68,28 +68,28 @@ const AMAZON_BUNDLE = affiliateHref(
           <th scope="row">ESP32 board</th>
           <td>HTTPS push ingest over Wi‑Fi (TLS on-chip)</td>
           <td>
-            <a class="text-link" href={ADAFRUIT_ESP32_S3_FEATHER} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit ESP32-S3 Feather</a>
+            <a class="text-link" href={ADAFRUIT_ESP32_S3_FEATHER} target="_blank" rel={commerceLinkRel(ADAFRUIT_ESP32_S3_FEATHER)}>Adafruit ESP32-S3 Feather</a>
             ·
-            <a class="text-link" href={ADAFRUIT_HUZZAH32} target="_blank" rel={COMMERCE_LINK_REL}>HUZZAH32</a>
+            <a class="text-link" href={ADAFRUIT_HUZZAH32} target="_blank" rel={commerceLinkRel(ADAFRUIT_HUZZAH32)}>HUZZAH32</a>
             ·
-            <a class="text-link" href={AMAZON_ESP32} target="_blank" rel={COMMERCE_LINK_REL}>Amazon DevKit search</a>
+            <a class="text-link" href={AMAZON_ESP32} target="_blank" rel={commerceLinkRel(AMAZON_ESP32)}>Amazon DevKit search</a>
           </td>
         </tr>
         <tr>
           <th scope="row">Waterproof DS18B20</th>
           <td>Pipe / crawlspace probe; works below freezing</td>
           <td>
-            <a class="text-link" href={ADAFRUIT_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit #381</a>
+            <a class="text-link" href={ADAFRUIT_DS18B20} target="_blank" rel={commerceLinkRel(ADAFRUIT_DS18B20)}>Adafruit #381</a>
             (includes 4.7&nbsp;kΩ)
             ·
-            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Amazon probe search</a>
+            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={commerceLinkRel(AMAZON_DS18B20)}>Amazon probe search</a>
           </td>
         </tr>
         <tr>
           <th scope="row">4.7&nbsp;kΩ pull-up</th>
           <td>Required on the 1-Wire data line if the probe pack does not include one</td>
           <td>
-            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={COMMERCE_LINK_REL}>Amazon resistor search</a>
+            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={commerceLinkRel(AMAZON_RESISTOR)}>Amazon resistor search</a>
           </td>
         </tr>
         <tr>
@@ -103,11 +103,11 @@ const AMAZON_BUNDLE = affiliateHref(
 
   <p class="text-sm text-[var(--color-text-muted)]">
     Optional one-box search (verify it includes a waterproof DS18B20, not only DHT11):
-    <a class="text-link" href={AMAZON_BUNDLE} target="_blank" rel={COMMERCE_LINK_REL}>ESP32 + DS18B20 kit search</a>.
+    <a class="text-link" href={AMAZON_BUNDLE} target="_blank" rel={commerceLinkRel(AMAZON_BUNDLE)}>ESP32 + DS18B20 kit search</a>.
     Product ASINs change often: treat Amazon as a parts finder, Adafruit as the reference BOM.
   </p>
   <p class="text-sm text-[var(--color-text-muted)]">
-    Buy links may include affiliate tags when configured. ThermalTrace may earn a commission at no extra cost to you.
+    Buy links: Amazon URLs may include an Associates tag when configured. Adafruit links are direct (Adafruit does not run an affiliate program). ThermalTrace may earn a commission from qualifying Amazon purchases at no extra cost to you.
   </p>
 
   <h2>Wire it</h2>
@@ -170,7 +170,7 @@ const AMAZON_BUNDLE = affiliateHref(
   <p>
     DHT22 still works for shop air + humidity (your Ethernet garage case study). For pipes, prefer DS18B20.
     High-temp PTFE cable:
-    <a class="text-link" href={ADAFRUIT_DS18B20_HIGH_TEMP} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit #642</a>
+    <a class="text-link" href={ADAFRUIT_DS18B20_HIGH_TEMP} target="_blank" rel={commerceLinkRel(ADAFRUIT_DS18B20_HIGH_TEMP)}>Adafruit #642</a>
     if the probe sits near a water heater or heat tape.
   </p>
 

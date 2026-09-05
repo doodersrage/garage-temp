@@ -1,6 +1,6 @@
 ---
 import AccessoryProduct from "../layouts/AccessoryProduct.astro";
-import { affiliateHref, COMMERCE_LINK_REL } from "../lib/affiliateLinks";
+import { affiliateHref, commerceLinkRel } from "../lib/affiliateLinks";
 import { BRAND_NAME } from "../lib/brand";
 import { CLAIM_PUCK_REPO_URL } from "../lib/claimPuck";
 
@@ -53,14 +53,14 @@ const DIFFUSER = affiliateHref("https://www.amazon.com/s?k=LED+diffuser+sheet+ac
             <th scope="row">Waveshare RP2040-Zero</th>
             <td>Claim puck MCU.</td>
             <td>
-              <a class="text-link" href={ZERO} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+              <a class="text-link" href={ZERO} target="_blank" rel={commerceLinkRel(ZERO)}>Amazon search</a>
             </td>
           </tr>
           <tr>
             <th scope="row">Momentary button</th>
             <td>GP4 to GND for claim confirm.</td>
             <td>
-              <a class="text-link" href={BUTTON} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit button</a>
+              <a class="text-link" href={BUTTON} target="_blank" rel={commerceLinkRel(BUTTON)}>Adafruit button</a>
             </td>
           </tr>
           <tr>
@@ -72,7 +72,7 @@ const DIFFUSER = affiliateHref("https://www.amazon.com/s?k=LED+diffuser+sheet+ac
             <th scope="row">LED diffuser (optional)</th>
             <td>Softer mood color for the onboard RGB.</td>
             <td>
-              <a class="text-link" href={DIFFUSER} target="_blank" rel={COMMERCE_LINK_REL}>Amazon diffuser</a>
+              <a class="text-link" href={DIFFUSER} target="_blank" rel={commerceLinkRel(DIFFUSER)}>Amazon diffuser</a>
             </td>
           </tr>
         </tbody>
