@@ -96,6 +96,14 @@ const mqttCurl = `curl -X POST "${siteUrl}/api/ingest/mqtt" \\
               <td>Share / inbound</td>
               <td>Opaque token in the URL path (+ optional HMAC on inbound)</td>
             </tr>
+            <tr>
+              <td>Claim puck / Bay Buddy</td>
+              <td>
+                Companion session: <code>Authorization: Bearer</code> +
+                <code>X-SB-Refresh-Token</code>
+                (<a class="text-link" href="#claim-puck">claim puck</a>)
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -136,6 +144,54 @@ const mqttCurl = `curl -X POST "${siteUrl}/api/ingest/mqtt" \\
       <p class="mb-0 text-sm">
         Full recipe:
         <a class="text-link" href="/about/mqtt-bridge">MQTT bridge guide</a>
+      </p>
+    </section>
+
+    <section class="card" id="claim-puck">
+      <h2 class="card-title">Claim puck (/api/pucks + bay mood)</h2>
+      <p class="card-subtitle mb-4">
+        RP2040-Zero presence key. Companion session auth (same Bearer +
+        <code>X-SB-Refresh-Token</code> headers as Bay Buddy). Product setup:
+        <a class="text-link" href="/claim-puck">/claim-puck</a>.
+      </p>
+      <div class="overflow-x-auto mb-4">
+        <table class="data-table text-sm">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>POST</code></td>
+              <td><code>/api/pucks/register</code></td>
+              <td>Store device id + HMAC secret for the signed-in household</td>
+            </tr>
+            <tr>
+              <td><code>POST</code></td>
+              <td><code>/api/pucks/claim/start</code></td>
+              <td>Issue a nonce for button-confirmed claim</td>
+            </tr>
+            <tr>
+              <td><code>POST</code></td>
+              <td><code>/api/pucks/claim/finish</code></td>
+              <td>Verify <code>HMAC-SHA256(secret, nonce)</code> and bind bay</td>
+            </tr>
+            <tr>
+              <td><code>GET</code></td>
+              <td><code>/api/bays/&lt;bay_id&gt;/mood</code></td>
+              <td>Bay Buddy mood from sensors (or PUT override)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="mb-0 text-sm text-[var(--color-text-muted)]">
+        Firmware + CLI:
+        <a class="text-link" href="https://github.com/doodersrage/thermaltrace-claim-puck" target="_blank" rel="noreferrer">thermaltrace-claim-puck</a>
+        · Desktop claim UI:
+        <a class="text-link" href="/bay-buddy">Bay Buddy</a>
       </p>
     </section>
 

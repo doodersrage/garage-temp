@@ -20,12 +20,24 @@ ThermalTrace ships in multiple repos. When onboarding UX changes in **this** rep
 
 **Repo:** [github.com/doodersrage/thermaltrace-bay-buddy](https://github.com/doodersrage/thermaltrace-bay-buddy)
 
-**Status (2026-09):** Desktop companion (Tauri). Connects via `/api/auth/companion/start` + loopback / custom-scheme OAuth. Product page: [thermaltrace.dev/bay-buddy](https://thermaltrace.dev/bay-buddy).
+**Status (2026-09):** Desktop companion (Tauri). Connects via `/api/auth/companion/start` + loopback / custom-scheme OAuth. Product page: [thermaltrace.dev/bay-buddy](https://thermaltrace.dev/bay-buddy). Claim puck UI claims/follows RP2040-Zero mood lights.
 
 **Re-sync when:**
 
 - Companion OAuth start / exchange / `/app/oauth` client=baybuddy behavior changes
 - Home insights payload shapes Bay Buddy displays (time_to_freeze, door/leak)
+- Claim puck serial / `/api/pucks` / bay mood contract changes
+
+## thermaltrace-claim-puck
+
+**Repo:** [github.com/doodersrage/thermaltrace-claim-puck](https://github.com/doodersrage/thermaltrace-claim-puck)
+
+**Status (2026-09):** CircuitPython firmware + host CLI for RP2040-Zero presence key. Product page: [thermaltrace.dev/claim-puck](https://thermaltrace.dev/claim-puck). API: `/api/pucks/*` + `/api/bays/{bay}/mood`.
+
+**Re-sync when:**
+
+- Claim HMAC protocol or companion auth header requirements change
+- Bay mood vocabulary or derivation rules change
 
 ## thermaltrace-android
 

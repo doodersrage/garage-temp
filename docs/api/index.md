@@ -28,6 +28,19 @@ Machine-readable contract:
 | `POST` | `/api/v1/devices` | Bearer API key | Create push device |
 | `POST` | `/api/inbound/{token}` | Token (+ optional HMAC) | Snooze / vacation / status actions |
 | `GET` | `/api/share/{token}/readings` | Share token | Public JSON readings (Free family live; Pro expands scopes) |
+| `POST` | `/api/pucks/register` | Companion session | Register claim-puck secret |
+| `POST` | `/api/pucks/claim/start` | Companion session | Issue claim nonce |
+| `POST` | `/api/pucks/claim/finish` | Companion session | Verify HMAC and bind bay |
+| `GET` | `/api/bays/{bay_id}/mood` | Companion session | Derived bay mood (Bay Buddy / claim puck) |
+| `PUT` | `/api/bays/{bay_id}/mood` | Companion session | Override mood (demo / test) |
+
+## Claim puck
+
+Physical RP2040-Zero presence key. Product page: [thermaltrace.dev/claim-puck](https://thermaltrace.dev/claim-puck). Firmware: [thermaltrace-claim-puck](https://github.com/doodersrage/thermaltrace-claim-puck).
+
+Auth matches Bay Buddy: `Authorization: Bearer <access>` + `X-SB-Refresh-Token: <refresh>`.
+
+Flow: `register` → `claim/start` → device `CHALLENGE` + button → `claim/finish` → poll `GET /api/bays/{bay}/mood`.
 
 ## Create an API key (Pro)
 

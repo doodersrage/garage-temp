@@ -28,6 +28,7 @@ const STATIC_PUBLIC_PATHS = [
   "/docs/api",
   "/android",
   "/bay-buddy",
+  "/claim-puck",
   "/integrations",
   "/integrations/home-assistant",
   "/stories",

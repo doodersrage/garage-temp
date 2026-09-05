@@ -220,6 +220,28 @@ export const marketingFaqs = {
       answer:
         "openapi.yaml is the source of truth. Longer walkthroughs live at doodersrage.github.io/thermaltrace (ingest, Grafana, webhooks). Product how-tos: thermaltrace.dev/about/ingest-and-webhooks and /about/adding-devices.",
     },
+    {
+      question: "What is the claim puck API?",
+      answer:
+        "Companion-session endpoints under /api/pucks (register, claim/start, claim/finish) plus GET/PUT /api/bays/{bay}/mood. Used by the RP2040-Zero claim puck and Bay Buddy. Setup: thermaltrace.dev/claim-puck. Details on /docs/api#claim-puck.",
+    },
+  ],
+  claimPuck: [
+    {
+      question: "What is a ThermalTrace claim puck?",
+      answer:
+        "A Waveshare RP2040-Zero running claim-puck firmware. It proves physical presence when you claim a bay (button on GP4), then shows Bay Buddy freeze/flood moods on its LED. It is not a temperature probe.",
+    },
+    {
+      question: "Do I need Bay Buddy?",
+      answer:
+        "Bay Buddy is the easiest way to claim and drive the puck after you sign in. You can also use the host CLI in the thermaltrace-claim-puck repo with companion access and refresh tokens.",
+    },
+    {
+      question: "Is this the same as the Claims pack?",
+      answer:
+        "No. Claims pack is a printable insurance evidence PDF on thermaltrace.dev/claims-pack. Claim puck is a hardware presence key and mood light.",
+    },
   ],
   homeAssistant: [
     {
@@ -295,6 +317,11 @@ export const marketingFaqs = {
       question: "Does Bay Buddy replace the web dashboard?",
       answer:
         "No. Devices, alerts, history, claims, and household settings stay on thermaltrace.dev (or the Android app / PWA). Bay Buddy is a mood glance for the bay you already monitor.",
+    },
+    {
+      question: "Can Bay Buddy drive a claim puck?",
+      answer:
+        "Yes. After you connect, the Claim puck panel can register and claim an RP2040-Zero, then drive its LED from /api/bays/{bay}/mood. Setup: thermaltrace.dev/claim-puck.",
     },
   ],
 } as const satisfies Record<string, MarketingFaqItem[]>;

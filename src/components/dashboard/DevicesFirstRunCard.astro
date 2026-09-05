@@ -72,6 +72,16 @@ const { canEdit, atDeviceLimit, redirectTo, nestEntitled } = Astro.props;
     <summary class="devices-other-summary">Other ways to connect</summary>
     <div class="devices-intent-grid mt-3" role="list">
       <div class="devices-intent" role="listitem">
+        <h3 class="devices-intent-title">Claim puck</h3>
+        <p class="devices-intent-copy">
+          RP2040-Zero presence key: claim a bay with a button press, then light freeze/flood moods on the LED via Bay Buddy.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <a class="btn-secondary" href="/claim-puck">Setup guide</a>
+          <a class="btn-ghost" href="/bay-buddy">Bay Buddy</a>
+        </div>
+      </div>
+      <div class="devices-intent" role="listitem">
         <h3 class="devices-intent-title">Flood / leak contact</h3>
         <p class="devices-intent-copy">
           Same push device can POST a <code>flood</code> bool: wet auto-alerts (bypasses snooze). Optional <code>level</code> for sump %.
