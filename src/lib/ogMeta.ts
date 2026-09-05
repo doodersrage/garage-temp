@@ -27,6 +27,14 @@ export function resolveOgImagePath(pathname: string): string {
   ) {
     return "/og-about.jpg";
   }
+  if (
+    path.startsWith("/integrations") ||
+    path.startsWith("/claims-pack") ||
+    path === "/gift" ||
+    path.startsWith("/property-management")
+  ) {
+    return "/og-dashboard.jpg";
+  }
   if (path.startsWith("/freeze-map") || path.startsWith("/freeze-season")) {
     return "/og-freeze-map.jpg";
   }
@@ -73,6 +81,18 @@ export function resolveOgImageAlt(pathname: string): string {
     path.startsWith("/bay-buddy")
   ) {
     return `${BRAND_NAME} hardware accessories: claim puck, mood lights, door/leak contacts, and freeze-kit mounts`;
+  }
+  if (path.startsWith("/integrations")) {
+    return `${BRAND_NAME} integrations: Home Assistant, MQTT bridge, and thermostat context`;
+  }
+  if (path.startsWith("/claims-pack")) {
+    return `${BRAND_NAME} claims evidence pack for freeze and flood insurance documentation`;
+  }
+  if (path === "/gift") {
+    return `${BRAND_NAME} gift / referral: share winter monitoring with a friend`;
+  }
+  if (path.startsWith("/property-management")) {
+    return `${BRAND_NAME} Portfolio plan: multi-property freeze and leak monitoring`;
   }
   if (path.startsWith("/freeze-map") || path.startsWith("/freeze-season")) {
     return `${BRAND_NAME} opt-in freeze-risk map of city-level probe temperatures`;

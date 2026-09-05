@@ -8,6 +8,7 @@ describe("compareGuides", () => {
       expect(guide.lede.length).toBeGreaterThan(guide.summary.length);
       expect(guide.lede).not.toBe(guide.summary);
       expect(guide.rows.length).toBeGreaterThanOrEqual(4);
+      expect(guide.faqs.length).toBeGreaterThanOrEqual(3);
     }
   });
 });

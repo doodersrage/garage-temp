@@ -14,6 +14,9 @@ describe("sitemapPages", () => {
     expect(paths).toContain("/accessories");
     expect(paths).toContain("/alert-beacon");
     expect(paths).toContain("/leak-puck");
+    expect(paths).toContain("/stories/crawlspace-pipe-watch");
+    expect(paths).toContain("/stories/detached-garage-winter");
+    expect(paths).toContain("/stories/water-heater-pad-leak");
     expect(paths).toContain("/privacy");
     expect(paths).toContain("/terms");
   });

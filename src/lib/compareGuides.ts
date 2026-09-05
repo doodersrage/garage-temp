@@ -12,6 +12,7 @@ export type CompareGuide = {
   whenThermalTrace: string[];
   whenOther: string[];
   rows: Array<{ capability: string; thermaltrace: string; other: string }>;
+  faqs: Array<{ question: string; answer: string }>;
 };
 
 export const compareGuides: CompareGuide[] = [
@@ -45,6 +46,23 @@ export const compareGuides: CompareGuide[] = [
       { capability: "History & CSV", thermaltrace: "On paid plans", other: "Influx/Postgres you manage" },
       { capability: "Share with family", thermaltrace: "Household invites", other: "VPN or reverse proxy" },
     ],
+    faqs: [
+      {
+        question: "Can I keep MQTT and still use ThermalTrace?",
+        answer:
+          "Yes. Keep Mosquitto or Home Assistant on your LAN for local automations and bridge selected topics over HTTPS ingest. ThermalTrace is the off-site freeze/leak alerts and history layer.",
+      },
+      {
+        question: "Do I need to run Twilio myself?",
+        answer:
+          "No on ThermalTrace Pro: SMS, push, and chat channels are hosted. DIY MQTT usually means wiring Twilio or email yourself and keeping that stack online.",
+      },
+      {
+        question: "Where is the MQTT bridge recipe?",
+        answer:
+          "thermaltrace.dev/about/mqtt-bridge and the HACS integration at thermaltrace.dev/integrations/home-assistant.",
+      },
+    ],
   },
   {
     slug: "govee",
@@ -76,6 +94,23 @@ export const compareGuides: CompareGuide[] = [
       { capability: "Data export", thermaltrace: "CSV / API (paid tiers)", other: "Limited" },
       { capability: "Multi-user household", thermaltrace: "Included", other: "Account sharing awkward" },
     ],
+    faqs: [
+      {
+        question: "Is ThermalTrace a Govee replacement for bedrooms?",
+        answer:
+          "Not primarily. Govee wins for cheap indoor Bluetooth pods and a polished consumer app. ThermalTrace is for freeze and leak workflows in garages, workshops, and other unheated spaces on hardware you control.",
+      },
+      {
+        question: "Can I use ESP32 instead of Govee pods?",
+        answer:
+          "Yes. ThermalTrace expects BYO ESP/Pico/Arduino (or JSON ingest). That is the point for detached garages where Bluetooth range fails.",
+      },
+      {
+        question: "Which has better freeze alert channels?",
+        answer:
+          "ThermalTrace: email, SMS (Pro), push, chat, and webhooks plus a time-to-freeze clock. Govee alerts are mostly in-app push.",
+      },
+    ],
   },
   {
     slug: "tempest",
@@ -106,6 +141,23 @@ export const compareGuides: CompareGuide[] = [
       { capability: "Freeze alerts on pipes", thermaltrace: "Direct + hours-until-freeze clock", other: "Infer from outdoor only" },
       { capability: "DIY ESP ingest", thermaltrace: "Yes", other: "N/A" },
       { capability: "Complements the other?", thermaltrace: "Yes, use both", other: "Yes: outdoor context" },
+    ],
+    faqs: [
+      {
+        question: "Does Tempest replace an indoor freeze probe?",
+        answer:
+          "No. Tempest measures outdoor yard weather. Pipe freeze risk lives indoors (garage, crawlspace, shop). Use Tempest for outdoor context and ThermalTrace for the probe by the plumbing.",
+      },
+      {
+        question: "Can I use both Tempest and ThermalTrace?",
+        answer:
+          "Yes. Many households keep Tempest for weather and ThermalTrace for space temperature alerts where water actually sits.",
+      },
+      {
+        question: "Will outdoor air alone catch a garage freeze?",
+        answer:
+          "Not reliably. Garages lag outdoor air and can freeze while the yard looks milder, or stay warmer while outdoor air plummets. Probe the space.",
+      },
     ],
   },
   {
@@ -139,6 +191,23 @@ export const compareGuides: CompareGuide[] = [
       { capability: "Controls heating schedules", thermaltrace: "No", other: "Yes" },
       { capability: "Complements the other?", thermaltrace: "Yes: connect both", other: "Yes: connect both" },
     ],
+    faqs: [
+      {
+        question: "Does Nest see my unheated garage?",
+        answer:
+          "Usually no. Nest reports the conditioned space where it (or a Nest Temperature Sensor) is installed. Unheated garages and crawlspaces are off that loop.",
+      },
+      {
+        question: "Can ThermalTrace show Nest readings?",
+        answer:
+          "Yes on Pro when Nest OAuth is connected: freeze alerts and Overview can show house indoor temp and heating status beside your garage probe.",
+      },
+      {
+        question: "Should I replace Nest with ThermalTrace?",
+        answer:
+          "No. Nest runs HVAC; ThermalTrace watches unconditioned spaces. Connect both when you want thermostat context on freeze alerts.",
+      },
+    ],
   },
   {
     slug: "ecobee",
@@ -170,6 +239,23 @@ export const compareGuides: CompareGuide[] = [
       { capability: "Shows thermostat reading on freeze alerts", thermaltrace: "Yes, if connected (Pro)", other: "N/A" },
       { capability: "Controls heating schedules", thermaltrace: "No", other: "Yes" },
       { capability: "Complements the other?", thermaltrace: "Yes: connect both", other: "Yes: connect both" },
+    ],
+    faqs: [
+      {
+        question: "Does Ecobee see my unheated garage?",
+        answer:
+          "Usually no. Ecobee reports conditioned living space (or SmartSensors on that loop), not a detached garage or crawlspace by default.",
+      },
+      {
+        question: "Can ThermalTrace show Ecobee readings?",
+        answer:
+          "Yes on Pro when Ecobee OAuth is available and connected. If Ecobee developer signup is closed, use Home Assistant → ingest → Indoor reference instead.",
+      },
+      {
+        question: "Should I replace Ecobee with ThermalTrace?",
+        answer:
+          "No. Ecobee runs HVAC; ThermalTrace monitors unconditioned spaces. They complement each other.",
+      },
     ],
   },
 ];

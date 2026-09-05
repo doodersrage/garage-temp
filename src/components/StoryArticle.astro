@@ -77,6 +77,7 @@ const schema = [
             widths={[640, 960, 1280]}
             sizes="(max-width: 960px) 100vw, 900px"
             class="w-full h-auto block"
+            fetchpriority="high"
           />
           {(resolvedCaption || resolvedCredit) && (
             <figcaption class="px-4 py-3 text-sm text-[var(--color-text-muted)] flex flex-col gap-1">

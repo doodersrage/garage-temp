@@ -4,6 +4,7 @@ import {
   DEFAULT_ARTICLE_PUBLISHED,
   getArticleSchema,
   getBrandDefinition,
+  getHowToSchema,
   getWebSiteSchema,
 } from "./schemaMarkup";
 
@@ -29,6 +30,24 @@ describe("schemaMarkup", () => {
     });
     expect(article.datePublished).toBe(DEFAULT_ARTICLE_PUBLISHED);
     expect(article.dateModified).toBe(DEFAULT_ARTICLE_MODIFIED);
+  });
+
+  it("builds HowTo schema with ordered steps", () => {
+    const howTo = getHowToSchema({
+      name: "Build a freeze probe",
+      description: "ESP32 + DS18B20",
+      pageUrl: "https://thermaltrace.dev/about/esp32-freeze-kit",
+      steps: [
+        { name: "Buy parts", text: "ESP32 and DS18B20" },
+        {
+          name: "Wire",
+          text: "GPIO 4 with 4.7k pull-up",
+          url: "https://thermaltrace.dev/about/esp32-freeze-kit",
+        },
+      ],
+    });
+    expect(howTo?.["@type"]).toBe("HowTo");
+    expect(howTo?.step).toHaveLength(2);
   });
 
   it("exports a brand definition for AEO", () => {

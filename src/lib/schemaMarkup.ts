@@ -219,6 +219,32 @@ export function getFaqPageSchema(
   };
 }
 
+/** HowTo for multi-step kit / setup guides (e.g. ESP32 freeze kit). */
+export function getHowToSchema(options: {
+  name: string;
+  description: string;
+  pageUrl: string;
+  steps: Array<{ name: string; text: string; url?: string }>;
+  totalTime?: string;
+}) {
+  if (options.steps.length === 0) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: options.name,
+    description: options.description,
+    url: options.pageUrl,
+    ...(options.totalTime ? { totalTime: options.totalTime } : {}),
+    step: options.steps.map((step, index) => ({
+      "@type": "HowToStep",
+      position: index + 1,
+      name: step.name,
+      text: step.text,
+      ...(step.url ? { url: step.url } : {}),
+    })),
+  };
+}
+
 export function getSiteSchemas(options: {
   siteUrl: string;
   pageUrl: string;

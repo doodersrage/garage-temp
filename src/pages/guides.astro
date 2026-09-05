@@ -2,10 +2,12 @@
 import Layout from "../layouts/Layout.astro";
 import PageHeader from "../components/PageHeader.astro";
 import EditorialPhotoStrip from "../components/EditorialPhotoStrip.astro";
+import FaqSection from "../components/FaqSection.astro";
 import { getGuideHubCategories, guideHubCategoryTitle } from "../lib/guideHub";
 import { guidesHubPhotos } from "../lib/aboutPhotos";
 import {
   getBreadcrumbSchema,
+  getFaqPageSchema,
   resolvePageUrl,
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
@@ -13,12 +15,30 @@ import {
 const categories = getGuideHubCategories();
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/guides");
+const guidesFaqs = [
+  {
+    question: "Where should I start?",
+    answer:
+      "Pick a job below: hardware setup (ESP32 freeze kit), freeze/flood alerts, household sharing, or the HTTP API. Or open the full About library.",
+  },
+  {
+    question: "Do you sell hardware kits?",
+    answer:
+      "No. ThermalTrace is software. Buy parts from Adafruit or Amazon using the ESP32 freeze kit BOM and accessories pages, then flash a pre-filled sketch from Devices.",
+  },
+  {
+    question: "Where are customer stories and comparisons?",
+    answer:
+      "Case studies: thermaltrace.dev/stories. Versus DIY MQTT, Govee, Tempest, Nest, and Ecobee: thermaltrace.dev/compare. Home Assistant: thermaltrace.dev/integrations.",
+  },
+];
 const schema = [
   getBreadcrumbSchema(siteUrl, [
     { name: "Home", path: "/" },
     { name: "Guides", path: "/guides" },
   ]),
-];
+  getFaqPageSchema(pageUrl, guidesFaqs),
+].filter(Boolean) as Record<string, unknown>[];
 
 const stripPhotoIds = guidesHubPhotos.map((p) => p.id);
 const stripLabels = guidesHubPhotos.map((p) => p.label);
@@ -28,7 +48,7 @@ const stripHrefs = guidesHubPhotos.map((p) => p.href);
   title="Guides"
   description="ThermalTrace guides by job: hardware setup, freeze and flood/leak alerts, household sharing, and the HTTP API, plus all articles in one library."
   schema={schema}
-  speakableSelectors={[".page-header-title", ".page-header-lede"]}
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
   <div class="page-shell page-stack">
     <PageHeader
@@ -38,6 +58,7 @@ const stripHrefs = guidesHubPhotos.map((p) => p.href);
     >
       <a slot="actions" class="btn-primary" href="/register?next=/dashboard/temperature">Start free</a>
       <a slot="actions" class="btn-secondary" href="/about">All articles</a>
+      <a slot="actions" class="btn-ghost" href="/about/esp32-freeze-kit">ESP32 freeze kit</a>
     </PageHeader>
 
     <EditorialPhotoStrip
@@ -75,5 +96,24 @@ const stripHrefs = guidesHubPhotos.map((p) => p.href);
         </section>
       ))}
     </div>
+
+    <section class="card">
+      <h2 class="card-title">Also useful</h2>
+      <p class="card-subtitle mb-4">
+        Stories, comparisons, and integrations sit beside the how-to library.
+      </p>
+      <div class="flex flex-wrap gap-3 mb-0">
+        <a class="btn-secondary" href="/stories">Customer stories</a>
+        <a class="btn-secondary" href="/compare">Compare alternatives</a>
+        <a class="btn-secondary" href="/integrations">Integrations</a>
+        <a class="btn-ghost" href="/accessories">Accessories</a>
+        <a class="btn-ghost" href="/gift">Gift / referral</a>
+      </div>
+    </section>
+
+    <FaqSection
+      faqs={guidesFaqs}
+      lede="Quick answers before you dive into a category."
+    />
   </div>
 </Layout>

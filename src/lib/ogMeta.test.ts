@@ -22,6 +22,11 @@ describe("ogMeta", () => {
     expect(resolveOgImagePath("/accessories")).toBe("/og-about.jpg");
     expect(resolveOgImagePath("/claim-puck")).toBe("/og-about.jpg");
     expect(resolveOgImagePath("/probe-mount-kit")).toBe("/og-about.jpg");
+    expect(resolveOgImagePath("/integrations/home-assistant")).toBe(
+      "/og-dashboard.jpg",
+    );
+    expect(resolveOgImagePath("/gift")).toBe("/og-dashboard.jpg");
+    expect(resolveOgImagePath("/claims-pack")).toBe("/og-dashboard.jpg");
   });
 
   it("builds absolute image URLs", () => {

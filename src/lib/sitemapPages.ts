@@ -1,4 +1,5 @@
 import { aboutPages } from "./aboutPages";
+import { stories } from "./stories";
 
 /** About slugs that redirect elsewhere — omit from sitemap. */
 const EXCLUDED_ABOUT_SLUGS = new Set(["zapier-integration"]);
@@ -41,10 +42,6 @@ const STATIC_PUBLIC_PATHS = [
   "/integrations",
   "/integrations/home-assistant",
   "/stories",
-  "/stories/garage-freeze-alert",
-  "/stories/cabin-winter-watch",
-  "/stories/server-closet-heat",
-  "/stories/pipe-near-miss",
 ] as const;
 
 /** Pathnames for every public page that should appear in the XML sitemap. */
@@ -52,8 +49,9 @@ export function getPublicSitemapPaths(): string[] {
   const aboutPaths = aboutPages
     .filter((page) => !EXCLUDED_ABOUT_SLUGS.has(page.slug))
     .map((page) => `/about/${page.slug}`);
+  const storyPaths = stories.map((story) => story.path);
 
-  return [...new Set([...STATIC_PUBLIC_PATHS, ...aboutPaths])];
+  return [...new Set([...STATIC_PUBLIC_PATHS, ...storyPaths, ...aboutPaths])];
 }
 
 /** Absolute URLs for @astrojs/sitemap `customPages`. */

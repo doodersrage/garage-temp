@@ -33,6 +33,8 @@ interface Props {
   heroCreditHref?: string;
   /** Show Amazon Associates disclosure (kit / BOM pages with tagged buy links). */
   commerceDisclosure?: boolean;
+  /** Extra JSON-LD graphs (HowTo, etc.). */
+  extraSchemas?: Record<string, unknown>[];
   sectionParent?: {
     slug: string;
     title: string;
@@ -49,6 +51,7 @@ const {
   heroCredit,
   heroCreditHref,
   commerceDisclosure = false,
+  extraSchemas = [],
   sectionParent: sectionParentProp,
 } = Astro.props;
 
@@ -93,6 +96,7 @@ const schema = [
   }),
   getBreadcrumbSchema(siteUrl, breadcrumbs),
   ...(faqSchema ? [faqSchema] : []),
+  ...extraSchemas.filter(Boolean),
 ];
 ---
 <Layout
@@ -131,7 +135,12 @@ const schema = [
 
         {heroImage && (
           <figure class="about-figure card overflow-hidden p-0">
-            <Image src={heroImage} alt={heroAlt ?? title} class="h-full w-full object-cover" />
+            <Image
+              src={heroImage}
+              alt={heroAlt ?? title}
+              class="h-full w-full object-cover"
+              fetchpriority="high"
+            />
             {(heroCaption || heroCredit) && (
               <figcaption>
                 {heroCaption && <span class="about-figure-caption">{heroCaption}</span>}

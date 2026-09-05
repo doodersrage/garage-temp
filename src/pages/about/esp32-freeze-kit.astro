@@ -5,9 +5,16 @@ import { commerceLinkRel } from "../../lib/affiliateLinks";
 import { BOM } from "../../lib/bomLinks";
 import { getAboutPage } from "../../lib/aboutPages";
 import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
+import {
+  getHowToSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../../lib/schemaMarkup";
 
 const page = getAboutPage("esp32-freeze-kit")!;
 const hero = getAboutHeroPhoto(page.slug);
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, `/about/${page.slug}`);
 
 const ADAFRUIT_DS18B20 = BOM.adafruitDs18b20;
 const ADAFRUIT_DS18B20_HIGH_TEMP = BOM.adafruitDs18b20HighTemp;
@@ -17,6 +24,39 @@ const AMAZON_ESP32 = BOM.amazonEsp32DevKit;
 const AMAZON_DS18B20 = BOM.amazonDs18b20;
 const AMAZON_RESISTOR = BOM.amazonResistor4k7;
 const AMAZON_BUNDLE = BOM.amazonEsp32BundleSearch;
+
+const freezeKitHowTo = getHowToSchema({
+  name: "Build an ESP32 freeze probe for ThermalTrace",
+  description: page.description,
+  pageUrl,
+  totalTime: "PT45M",
+  steps: [
+    {
+      name: "Buy the freeze BOM",
+      text: "Get an ESP32 with Wi-Fi, a waterproof DS18B20, and a 4.7kΩ pull-up if the probe pack does not include one. Prefer Adafruit product pages; Amazon /dp/ links are optional alternatives.",
+      url: pageUrl,
+    },
+    {
+      name: "Wire the DS18B20",
+      text: "Connect VCC to 3.3V, GND to GND, and data to GPIO 4 with a 4.7kΩ pull-up between data and 3.3V. Strap the stainless tip to the coldest pipe or north wall.",
+    },
+    {
+      name: "Create a push device",
+      text: "Create a free ThermalTrace account and a push device on Dashboard → Devices, then download the pre-filled Arduino or MicroPython sketch.",
+      url: `${siteUrl}/dashboard/temperature`,
+    },
+    {
+      name: "Flash and verify",
+      text: "Set Wi-Fi credentials, flash the board, and confirm Serial 115200 shows POST 200. Optionally print the kit QR on the enclosure.",
+      url: `${siteUrl}/about/esp32-web-flash`,
+    },
+    {
+      name: "Enable freeze alerts",
+      text: "Set freeze threshold and email under Alerts → Essentials, send a test alert, and optionally enable time-to-freeze remaining-hours warnings.",
+      url: `${siteUrl}/dashboard/alerts#alert-section-essentials`,
+    },
+  ],
+});
 ---
 <AboutArticle
   slug={page.slug}
@@ -28,6 +68,7 @@ const AMAZON_BUNDLE = BOM.amazonEsp32BundleSearch;
   heroCredit={hero?.credit}
   heroCreditHref={hero?.sourceUrl}
   commerceDisclosure
+  extraSchemas={freezeKitHowTo ? [freezeKitHowTo] : []}
 >
   <p>
     ThermalTrace does not sell hardware. The sketches under

@@ -2,8 +2,11 @@
 import Layout from "../layouts/Layout.astro";
 import PageHeader from "./PageHeader.astro";
 import AboutCcFigure from "./AboutCcFigure.astro";
+import FaqSection from "./FaqSection.astro";
 import {
   getBreadcrumbSchema,
+  getFaqPageSchema,
+  resolvePageUrl,
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
 import type { CompareGuide } from "../lib/compareGuides";
@@ -15,19 +18,21 @@ interface Props {
 
 const { guide } = Astro.props;
 const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, guide.path);
 const schema = [
   getBreadcrumbSchema(siteUrl, [
     { name: "Home", path: "/" },
     { name: "Compare", path: "/compare" },
     { name: guide.title, path: guide.path },
   ]),
+  getFaqPageSchema(pageUrl, guide.faqs),
 ].filter(Boolean) as Record<string, unknown>[];
 ---
 <Layout
   title={guide.title}
   description={guide.description}
   schema={schema}
-  speakableSelectors={[".page-header-title", ".page-header-lede"]}
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
   <div class="page-shell page-stack">
     <PageHeader
@@ -87,6 +92,11 @@ const schema = [
         </div>
       </div>
     </section>
+
+    <FaqSection
+      faqs={guide.faqs}
+      lede={`Straight answers for people comparing ThermalTrace to ${guide.competitor}.`}
+    />
 
     <section class="card">
       <h2 class="card-title">Next steps</h2>

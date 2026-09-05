@@ -52,7 +52,7 @@ const featuredStory = getStory("pipe-near-miss")!;
 ---
 
 <Layout
-  title="Garage & workshop monitoring & cold + flood alerts"
+  title="Garage freeze & flood monitoring"
   description={homeDescription}
   schema={schema}
   softwareApplication
@@ -98,6 +98,7 @@ const featuredStory = getStory("pipe-near-miss")!;
 							widths={[480, 720, 960, 1200]}
 							sizes="(max-width: 959px) 100vw, 42vw"
 							class="home-hero-visual-img home-hero-visual-img--dashboard"
+							fetchpriority="high"
 						/>
 						<figcaption class="home-hero-visual-caption">
 							Real ThermalTrace dashboard: probe curves, freeze threshold, and flood/wet contacts, not a mockup.
