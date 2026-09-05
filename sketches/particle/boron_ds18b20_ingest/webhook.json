@@ -1,0 +1,12 @@
+{
+  "event": "thermaltrace_ingest",
+  "url": "https://thermaltrace.dev/api/ingest/YOUR_DEVICE_KEY",
+  "requestType": "POST",
+  "noDefaults": true,
+  "rejectUnauthorized": true,
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "json": "{{SPARK_EVENT_VALUE}}",
+  "notes": "Particle Console → Integrations → New Integration → Webhook. Paste url from Devices download. Device firmware publishes event thermaltrace_ingest with a JSON body {\"temp1\":…}."
+}

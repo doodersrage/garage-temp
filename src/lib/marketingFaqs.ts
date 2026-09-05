@@ -11,12 +11,12 @@ export const marketingFaqs = {
     {
       question: "What is ThermalTrace?",
       answer:
-        `${BRAND_DESCRIPTION} Build with ESP32 or Arduino; ThermalTrace handles the hosted dashboard, history, and household alerts.`,
+        `${BRAND_DESCRIPTION} Build with ESP32, Pico W, or Arduino; ThermalTrace handles the hosted dashboard, history, and household alerts.`,
     },
     {
-      question: "How do I connect ESP32 or Arduino sensors?",
+      question: "How do I connect ESP32, Pico W, or Arduino sensors?",
       answer:
-        "Create a push device under Dashboard → Devices, copy the ingest key from the callout (or use Reveal ingest key later), POST JSON to /api/ingest/<key>, and sensors auto-import on first POST. Step-by-step: thermaltrace.dev/about/adding-devices. No hardware? Try the demo pull quick start on Overview.",
+        "Create a push device under Dashboard → Devices, copy the ingest key from the callout (or use Reveal ingest key later), POST JSON to /api/ingest/<key>, and sensors auto-import on first POST. ESP32, Pico W, and Arduino Ethernet samples live on thermaltrace.dev/about/adding-devices. No hardware? Try the demo pull quick start on Overview.",
     },
     {
       question: "Does ThermalTrace send freeze alerts?",
@@ -230,7 +230,7 @@ export const marketingFaqs = {
     {
       question: "What is a ThermalTrace claim puck?",
       answer:
-        "A Waveshare RP2040-Zero running claim-puck firmware. It proves physical presence when you claim a bay (button on GP4), then shows Bay Buddy freeze/flood moods on its LED. It is not a temperature probe.",
+        "A Waveshare RP2040-Zero running claim-puck firmware. It proves physical presence when you claim a bay (button on GP4), then shows Bay Buddy freeze/flood moods on its LED. It is not a temperature probe. For a Wi‑Fi DS18B20 on Pico W / Pico 2 W, see thermaltrace.dev/about/pico-w-ingest.",
     },
     {
       question: "Do I need Bay Buddy?",

@@ -1,0 +1,185 @@
+---
+import AboutArticle from "../../components/AboutArticle.astro";
+import { affiliateHref, COMMERCE_LINK_REL } from "../../lib/affiliateLinks";
+import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
+
+const page = getAboutPage("pico-w-ingest")!;
+const hero = getAboutHeroPhoto(page.slug);
+
+const ADAFRUIT_PICO_W = affiliateHref("https://www.adafruit.com/product/5526");
+const ADAFRUIT_PICO_2W = affiliateHref("https://www.adafruit.com/product/6087");
+const ADAFRUIT_FEATHER_RP2040_WIFI = affiliateHref("https://www.adafruit.com/product/5546");
+const ADAFRUIT_DS18B20 = affiliateHref("https://www.adafruit.com/product/381");
+const AMAZON_PICO_W = affiliateHref("https://www.amazon.com/s?k=Raspberry+Pi+Pico+W");
+const AMAZON_DS18B20 = affiliateHref(
+  "https://www.amazon.com/s?k=waterproof+DS18B20+temperature+probe+1m",
+);
+const AMAZON_RESISTOR = affiliateHref(
+  "https://www.amazon.com/s?k=4.7k+ohm+resistor+through+hole",
+);
+---
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={hero?.image}
+  heroAlt={hero?.alt}
+  heroCaption={hero?.caption}
+  heroCredit={hero?.credit}
+  heroCreditHref={hero?.sourceUrl}
+>
+  <p>
+    ESP32 is still the default freeze-kit board, but it is not the only Wi‑Fi microcontroller that can
+    POST to ThermalTrace. A <strong>Raspberry Pi Pico W</strong> or <strong>Pico 2 W</strong> speaks HTTPS
+    on-chip, uses the same DS18B20 wiring idea as the ESP sketches, and flashes without Arduino IDE if you
+    prefer CircuitPython’s <code>CIRCUITPY</code> drive.
+  </p>
+  <p>
+    This is a temperature probe. The
+    <a class="text-link" href="/claim-puck">claim puck</a>
+    is a different RP2040 (Waveshare RP2040-Zero) that proves presence over USB. Do not mix those firmwares.
+  </p>
+
+  <h2>Parts</h2>
+  <div class="overflow-x-auto mb-6">
+    <table class="plan-comparison-table">
+      <caption class="sr-only">Parts for a Pico W freeze probe</caption>
+      <thead>
+        <tr>
+          <th scope="col">Part</th>
+          <th scope="col">Why</th>
+          <th scope="col">Buy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Pico W or Pico 2 W</th>
+          <td>On-board CYW43439 Wi‑Fi and TLS. Pico 2 W (RP2350) is the drop-in upgrade.</td>
+          <td>
+            <a class="text-link" href={ADAFRUIT_PICO_W} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit Pico W</a>
+            ·
+            <a class="text-link" href={ADAFRUIT_PICO_2W} target="_blank" rel={COMMERCE_LINK_REL}>Pico 2 W</a>
+            ·
+            <a class="text-link" href={AMAZON_PICO_W} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Feather RP2040 Wi‑Fi (optional)</th>
+          <td>Same CircuitPython APIs, STEMMA / LiPo connector if you already live in Adafruit Feathers.</td>
+          <td>
+            <a class="text-link" href={ADAFRUIT_FEATHER_RP2040_WIFI} target="_blank" rel={COMMERCE_LINK_REL}>Feather RP2040 with CYW43439</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Waterproof DS18B20</th>
+          <td>Pipe / crawlspace probe; works below freezing. Data on <strong>GP4</strong>.</td>
+          <td>
+            <a class="text-link" href={ADAFRUIT_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit DS18B20</a>
+            ·
+            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">4.7kΩ resistor</th>
+          <td>Pull-up from DS18B20 data to 3.3V. Do not power the probe from 5V on a Pico.</td>
+          <td>
+            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={COMMERCE_LINK_REL}>Amazon 4.7k search</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Wiring</h2>
+  <ul>
+    <li>DS18B20 VDD → Pico <strong>3.3V</strong> (not VBUS / 5V)</li>
+    <li>DS18B20 GND → GND</li>
+    <li>DS18B20 data → <strong>GP4</strong>, with 4.7k between data and 3.3V</li>
+  </ul>
+  <p>
+    GP4 is GPIO 4, the same numeric pin the ESP32 sketches use. After the first POST, ThermalTrace imports
+    <code>temp1</code> automatically.
+  </p>
+
+  <h2>1. CircuitPython (recommended)</h2>
+  <ol>
+    <li>
+      Open
+      <a class="text-link" href="/dashboard/temperature">Dashboard → Devices</a>,
+      create a push device, and download <strong>CircuitPython code.py</strong> (ingest URL filled in).
+    </li>
+    <li>
+      Hold <strong>BOOTSEL</strong>, plug in USB, copy the CircuitPython UF2 for Pico W or Pico 2 W onto the
+      RPI-RP2 drive. The board remounts as <code>CIRCUITPY</code>.
+    </li>
+    <li>
+      Install libraries:
+      <code>circup install adafruit_requests adafruit_connection_manager adafruit_ds18x20 adafruit_onewire</code>
+    </li>
+    <li>Set <code>WIFI_SSID</code> / <code>WIFI_PASS</code>, save as <code>code.py</code>.</li>
+    <li>Serial should show <code>wifi ok</code> then <code>POST 200</code>.</li>
+  </ol>
+  <p>
+    Repo sample:
+    <a
+      class="text-link"
+      href="https://github.com/doodersrage/thermaltrace/blob/main/sketches/circuitpython/ds18b20_ingest.py"
+      target="_blank"
+      rel="noreferrer"
+    ><code>sketches/circuitpython/ds18b20_ingest.py</code></a>.
+  </p>
+
+  <h2>2. MicroPython</h2>
+  <p>
+    Flash a Pico W MicroPython UF2, then copy the Devices <strong>MicroPython .py</strong> as
+    <code>main.py</code> (Thonny / mpremote). The same file also runs on ESP32. Pin 4 is GP4.
+  </p>
+
+  <h2>3. Arduino IDE (Earle Philhower core)</h2>
+  <p>
+    Install the <strong>Raspberry Pi Pico/RP2040</strong> package by Earle Philhower, not Arduino’s mbed
+    RP2040 core. Select <strong>Pico W</strong> or <strong>Pico 2 W</strong>, open the downloaded
+    <code>.ino</code>, set Wi‑Fi, flash. Libraries: <code>OneWire</code>, <code>DallasTemperature</code>.
+  </p>
+
+  <h2>What we are not adding (yet)</h2>
+  <p>
+    Anything that can POST HTTPS JSON already works without a first-class sketch: a Linux Raspberry Pi with
+    <code>requests</code>, ESPHome, or a LAN MQTT→HTTP bridge. These families need extra hardware or a
+    gateway, so they stay out of the Devices flash panel:
+  </p>
+  <ul>
+    <li><strong>Pico without W</strong> / RP2040-Zero: no Wi‑Fi. Use Ethernet/ESP-01 plus a TLS relay, or keep the Zero as a claim puck.</li>
+    <li><strong>nRF52 / nRF52840</strong> (XIAO BLE, Feather nRF52840): Bluetooth or Thread, not native Wi‑Fi HTTPS.</li>
+    <li>
+      <strong>STM32 Nucleo-F767ZI</strong> is first-class now:
+      <a class="text-link" href="/about/stm32-zephyr-ingest">Zephyr C + onboard Ethernet</a>
+      (LAN TLS relay, not Arduino, not Python).
+    </li>
+    <li>
+      <strong>CH32V307V-EVT</strong> is first-class now:
+      <a class="text-link" href="/about/ch32v-riscv-ingest">WCHNET C + onboard Ethernet</a>
+      (QingKe RISC-V, LAN TLS relay).
+    </li>
+    <li><strong>Arduino Nano 33 IoT / UNO R4 WiFi</strong>: still Arduino; the ESP/Pico samples already cover TLS Wi‑Fi if you adapt the WiFi library.</li>
+  </ul>
+
+  <h2>Related</h2>
+  <ul>
+    <li><a class="text-link" href="/about/adding-devices">Adding devices</a></li>
+    <li><a class="text-link" href="/about/stm32-zephyr-ingest">STM32 Zephyr ingest</a></li>
+    <li><a class="text-link" href="/about/ch32v-riscv-ingest">CH32V RISC-V ingest</a></li>
+    <li><a class="text-link" href="/about/esp32-freeze-kit">ESP32 freeze kit parts list</a></li>
+    <li><a class="text-link" href="/about/esp32-web-flash">ESP32 flashing options</a></li>
+    <li><a class="text-link" href="/claim-puck">Claim puck (RP2040-Zero, not a probe)</a></li>
+    <li>
+      <a
+        class="text-link"
+        href="https://github.com/doodersrage/thermaltrace/tree/main/sketches"
+        target="_blank"
+        rel="noreferrer"
+      >All sketches ↗</a>
+    </li>
+  </ul>
+</AboutArticle>

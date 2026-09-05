@@ -1,8 +1,11 @@
 """
-DS18B20 → ThermalTrace push ingest (MicroPython / ESP32).
+DS18B20 → ThermalTrace push ingest (MicroPython).
 
+Works on ESP32 / ESP8266 and Raspberry Pi Pico W / Pico 2 W.
 Copy to the board as main.py (or import from boot). Set WIFI and INGEST_URL.
 Requires onewire + ds18x20 modules (usually bundled with MicroPython).
+
+Default: DS18B20 on GPIO4 / GP4 → temp1. 4.7k pull-up to 3.3V.
 """
 
 import json
@@ -11,8 +14,12 @@ import time
 import ds18x20
 import network
 import onewire
-import urequests
 from machine import Pin
+
+try:
+    import urequests as requests
+except ImportError:
+    import requests
 
 WIFI_SSID = "your-wifi"
 WIFI_PASS = "your-password"
@@ -41,10 +48,17 @@ def read_temp_f(ds: ds18x20.DS18X20, rom) -> float:
     return c * 9.0 / 5.0 + 32.0
 
 
+def wifi_rssi(wlan: network.WLAN) -> int:
+    try:
+        return int(wlan.status("rssi"))
+    except (TypeError, ValueError, OSError):
+        return 0
+
+
 def post(temp_f: float, rssi: int) -> None:
     body = json.dumps({"temp1": round(temp_f, 2), "rssi": rssi})
     try:
-        r = urequests.post(
+        r = requests.post(
             INGEST_URL,
             data=body,
             headers={"Content-Type": "application/json"},
@@ -64,7 +78,7 @@ def main() -> None:
     print("found", len(roms), "sensor(s)")
     while True:
         temp_f = read_temp_f(ds, roms[0])
-        post(temp_f, wlan.status("rssi") if hasattr(wlan, "status") else 0)
+        post(temp_f, wifi_rssi(wlan))
         time.sleep(INTERVAL_S)
 
 

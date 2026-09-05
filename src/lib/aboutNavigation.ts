@@ -39,7 +39,7 @@ export const aboutMegaGroups: AboutMegaGroup[] = [
   {
     id: "hardware",
     title: "Hardware & firmware",
-    description: "Arduino sketches, wiring, sensors, and the local LCD.",
+    description: "Arduino, ESP32, Pico W, STM32, CH32V, and AVR assembly firmware, wiring, and the local LCD.",
     coreSlugs: [
       "arduino-sketches",
       "arduino-circuit-wiring",

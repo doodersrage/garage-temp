@@ -1,15 +1,16 @@
 /**
- * MAX6675 thermocouple → ThermalTrace push ingest (Arduino / ESP32).
+ * MAX6675 thermocouple → ThermalTrace push ingest (Arduino: ESP32 / ESP8266 / Pico W).
  *
  * Library: MAX6675 (or Adafruit MAX6675).
+ * Pico W: Earle Philhower Raspberry Pi Pico/RP2040 board package.
  */
 #include <max6675.h>
 
-#if defined(ESP32) || defined(ESP8266)
+#if defined(ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350)
 #include <WiFi.h>
 #include <HTTPClient.h>
 #else
-#error "This sample targets ESP32/ESP8266. Adapt WiFi/HTTP for your board."
+#error "This sample targets ESP32/ESP8266 or Pico W (Earle Philhower core). Adapt WiFi/HTTP for your board."
 #endif
 
 #ifndef WIFI_SSID

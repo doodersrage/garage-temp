@@ -46,7 +46,7 @@ export const aboutJourneys: AboutJourney[] = [
   },
   {
     id: "esp-ingest",
-    title: "Push from ESP / Arduino",
+    title: "Push from ESP / Pico / MCU / AVR asm",
     description:
       "Create a push device, POST so sensors auto-import, and optional OTA / QR stickers.",
     ctaHref: "/about/adding-devices",
@@ -54,6 +54,13 @@ export const aboutJourneys: AboutJourney[] = [
     steps: [
       { slug: "adding-devices", label: "Add push or pull" },
       { slug: "esp32-freeze-kit", label: "Buy ESP32 kit" },
+      { slug: "pico-w-ingest", label: "Or flash Pico W" },
+      { slug: "stm32-zephyr-ingest", label: "Or flash STM32" },
+      { slug: "ch32v-riscv-ingest", label: "Or flash CH32V" },
+      { slug: "avr-asm-ingest", label: "Or AVR assembly" },
+      { slug: "cellular-ingest", label: "Or cellular LTE" },
+      { slug: "teensy41-ingest", label: "Or Teensy 4.1" },
+      { slug: "pic18-ethernet-ingest", label: "Or PIC18 Ethernet" },
       { slug: "ingest-and-webhooks", label: "Ingest API" },
       { slug: "kit-qr-onboarding", label: "Kit QR" },
       { slug: "esp32-web-flash", label: "Flash ESP32" },

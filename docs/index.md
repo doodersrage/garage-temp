@@ -20,7 +20,7 @@ hero:
       link: https://thermaltrace.dev
 features:
   - title: Push ingest
-    details: POST JSON from ESP32, Arduino, or MicroPython. Sensors auto-import on first POST; Reveal ingest key when the operator vault is enabled.
+    details: POST JSON from ESP32, Pico W, STM32, CH32V, AVR assembly, Teensy 4.1, PIC18, Particle Boron, Arduino, CircuitPython, or MicroPython. Sensors auto-import on first POST; Reveal ingest key when the operator vault is enabled.
     link: /ingest/
     linkText: Ingest reference
   - title: Pull feeds
@@ -28,7 +28,7 @@ features:
     link: /ingest/pull-feeds
     linkText: Pull setup
   - title: Sensor sketches
-    details: Drop-in samples for DS18B20, MAX31855, and MAX6675 — Arduino and MicroPython — already in this repo.
+    details: Drop-in samples for DS18B20, MAX31855, and MAX6675 — Arduino, MicroPython, CircuitPython, Zephyr C, WCHNET C, and GNU AVR assembly — already in this repo.
     link: /sketches/
     linkText: Browse sketches
   - title: Home Assistant (HACS)

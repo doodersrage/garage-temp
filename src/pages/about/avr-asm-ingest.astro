@@ -1,0 +1,153 @@
+---
+import AboutArticle from "../../components/AboutArticle.astro";
+import { affiliateHref, COMMERCE_LINK_REL } from "../../lib/affiliateLinks";
+import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
+
+const page = getAboutPage("avr-asm-ingest")!;
+const hero = getAboutHeroPhoto(page.slug);
+
+const ADAFRUIT_UNO = affiliateHref("https://www.adafruit.com/product/50");
+const ADAFRUIT_ETH = affiliateHref("https://www.adafruit.com/product/201");
+const ADAFRUIT_DS18B20 = affiliateHref("https://www.adafruit.com/product/381");
+const AMAZON_UNO = affiliateHref("https://www.amazon.com/s?k=Arduino+Uno+R3");
+const AMAZON_ETH = affiliateHref("https://www.amazon.com/s?k=W5100+Ethernet+shield+Arduino");
+const AMAZON_DS18B20 = affiliateHref(
+  "https://www.amazon.com/s?k=waterproof+DS18B20+temperature+probe+1m",
+);
+const AMAZON_RESISTOR = affiliateHref(
+  "https://www.amazon.com/s?k=4.7k+ohm+resistor+through+hole",
+);
+---
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={hero?.image}
+  heroAlt={hero?.alt}
+  heroCaption={hero?.caption}
+  heroCredit={hero?.credit}
+  heroCreditHref={hero?.sourceUrl}
+>
+  <p>
+    Almost no Ethernet freeze probe <strong>requires</strong> assembly. PADAUK, PIC10F, and ATtiny10 are
+    assembly-first (or assembly-only in practice), but they do not have a TCP stack or the RAM to POST JSON.
+    The path we can actually support is <strong>GNU AVR assembly</strong> on an Arduino
+    <strong>Uno / ATmega328P</strong> plus a <strong>W5100</strong> Ethernet shield: the same garage hardware as
+    <a class="text-link" href="/about/arduino-sketches">Uno Ethernet</a>,
+    without Arduino C.
+  </p>
+  <p>
+    W5100 cannot TLS. This sample uses the same LAN HTTP→HTTPS relay as Uno C, STM32 Zephyr, and CH32V WCHNET.
+  </p>
+
+  <h2>Parts</h2>
+  <div class="overflow-x-auto mb-6">
+    <table class="plan-comparison-table">
+      <caption class="sr-only">Parts for an AVR assembly freeze probe</caption>
+      <thead>
+        <tr>
+          <th scope="col">Part</th>
+          <th scope="col">Why</th>
+          <th scope="col">Buy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Arduino Uno (ATmega328P)</th>
+          <td>16 MHz AVR. Programmed with <code>avr-gcc</code> / <code>avrdude</code>, not the Arduino IDE.</td>
+          <td>
+            <a class="text-link" href={ADAFRUIT_UNO} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit Uno</a>
+            ·
+            <a class="text-link" href={AMAZON_UNO} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">W5100 Ethernet shield</th>
+          <td>SPI socket chip. Same shield as the Arduino Ethernet DHT22 sample.</td>
+          <td>
+            <a class="text-link" href={ADAFRUIT_ETH} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit Ethernet</a>
+            ·
+            <a class="text-link" href={AMAZON_ETH} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Waterproof DS18B20</th>
+          <td>Data on <strong>D7</strong>. Do not use D4: the shield uses D4 as SD chip-select.</td>
+          <td>
+            <a class="text-link" href={ADAFRUIT_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit DS18B20</a>
+            ·
+            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">4.7kΩ resistor</th>
+          <td>Pull-up from DS18B20 data to 5V (Uno is a 5V board).</td>
+          <td>
+            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={COMMERCE_LINK_REL}>Amazon 4.7k search</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Wiring</h2>
+  <ul>
+    <li>DS18B20 VDD → Uno <strong>5V</strong></li>
+    <li>DS18B20 GND → GND</li>
+    <li>DS18B20 data → <strong>D7</strong> (PD7), 4.7k to 5V</li>
+    <li>Ethernet shield seated on the Uno. RJ45 → LAN. USB for flash and 115200 serial.</li>
+  </ul>
+
+  <h2>Build and flash</h2>
+  <ol>
+    <li>
+      Open
+      <a class="text-link" href="/dashboard/temperature">Dashboard → Devices</a>
+      and download <strong>AVR main.S</strong> (ingest path filled in), or copy the <code>ingest_path</code>
+      snippet from the ingest callout.
+    </li>
+    <li>
+      On a LAN host:
+      <pre><code>{`python3 sketches/relay/push_https_forward.py --listen 0.0.0.0:8080 \\
+  --upstream https://thermaltrace.dev`}</code></pre>
+    </li>
+    <li>
+      Set <code>ingest_ip</code> / <code>ingest_port</code> and the Host header string to that machine. Static
+      Uno IP is <code>192.168.1.177</code> in <code>net_cfg</code>.
+    </li>
+    <li>
+      <pre><code>{`cd sketches/avr/atmega328_w5100_ds18b20
+make flash PORT=/dev/ttyACM0`}</code></pre>
+      Or assemble the downloaded <code>main.S</code> with the same <code>avr-gcc -mmcu=atmega328p -nostartfiles -nostdlib</code> flags.
+    </li>
+    <li>Serial 115200: <code>link ok</code>, then <code>POST 200</code>. Sensor key <code>temp1</code> imports on first POST (integer °F).</li>
+  </ol>
+  <p>
+    Repo listing:
+    <a
+      class="text-link"
+      href="https://github.com/doodersrage/thermaltrace/tree/main/sketches/avr/atmega328_w5100_ds18b20"
+      target="_blank"
+      rel="noreferrer"
+    ><code>sketches/avr/atmega328_w5100_ds18b20/</code></a>
+    (<code>main.S</code>, Makefile).
+  </p>
+
+  <h2>What we are not adding</h2>
+  <ul>
+    <li><strong>PADAUK / PIC10F / ATtiny4–10</strong>: assembly-first, but no Ethernet and too little RAM for HTTP.</li>
+    <li><strong>Parallax Propeller PASM / PASM2</strong>: real assembly culture, but Ethernet add-ons vary and there is no one garage shield.</li>
+    <li><strong>PIC18F67J60</strong>: onboard Ethernet, but Microchip’s TCP stack is C, not MPASM.</li>
+    <li><strong>nRF / TI Wi‑Fi in Thumb asm</strong>: the SDKs are C. Hand-written TLS in assembly is not a freeze-kit path.</li>
+  </ul>
+
+  <h2>Related</h2>
+  <ul>
+    <li><a class="text-link" href="/about/adding-devices">Adding devices</a></li>
+    <li><a class="text-link" href="/about/arduino-sketches">Arduino Ethernet (C)</a></li>
+    <li><a class="text-link" href="/about/ch32v-riscv-ingest">CH32V RISC-V ingest</a></li>
+    <li><a class="text-link" href="/about/stm32-zephyr-ingest">STM32 Zephyr ingest</a></li>
+    <li><a class="text-link" href="/about/python-feeds">Python HTTPS relay</a></li>
+  </ul>
+</AboutArticle>

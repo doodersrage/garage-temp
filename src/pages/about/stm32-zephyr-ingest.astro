@@ -1,0 +1,166 @@
+---
+import AboutArticle from "../../components/AboutArticle.astro";
+import { affiliateHref, COMMERCE_LINK_REL } from "../../lib/affiliateLinks";
+import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
+
+const page = getAboutPage("stm32-zephyr-ingest")!;
+const hero = getAboutHeroPhoto(page.slug);
+
+const ST_NUCLEO_F767ZI = affiliateHref(
+  "https://www.st.com/en/evaluation-tools/nucleo-f767zi.html",
+);
+const ADAFRUIT_DS18B20 = affiliateHref("https://www.adafruit.com/product/381");
+const AMAZON_NUCLEO = affiliateHref("https://www.amazon.com/s?k=STM32+Nucleo-F767ZI");
+const AMAZON_DS18B20 = affiliateHref(
+  "https://www.amazon.com/s?k=waterproof+DS18B20+temperature+probe+1m",
+);
+const AMAZON_RESISTOR = affiliateHref(
+  "https://www.amazon.com/s?k=4.7k+ohm+resistor+through+hole",
+);
+---
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={hero?.image}
+  heroAlt={hero?.alt}
+  heroCaption={hero?.caption}
+  heroCredit={hero?.credit}
+  heroCreditHref={hero?.sourceUrl}
+>
+  <p>
+    ESP32 and Pico W cover Wi‑Fi. If you want a different silicon vendor and a toolchain that is neither
+    Arduino nor Python, an <strong>ST Nucleo-F767ZI</strong> running <strong>Zephyr</strong> POSTs the same
+    ingest JSON over onboard Ethernet. C, <code>west</code>, ST-LINK. The Arduino-compatible header is only
+    a pinout: the firmware is not an Arduino sketch.
+  </p>
+  <p>
+    Native HTTPS on Zephyr means baking a CDN CA into the image, which breaks when the edge certificate
+    chain rotates. This sample uses the same LAN HTTP→HTTPS relay as the
+    <a class="text-link" href="/about/arduino-sketches">Uno + W5100</a>
+    path, so Cloudflare can change CAs without a reflash.
+  </p>
+
+  <h2>Parts</h2>
+  <div class="overflow-x-auto mb-6">
+    <table class="plan-comparison-table">
+      <caption class="sr-only">Parts for an STM32 Zephyr freeze probe</caption>
+      <thead>
+        <tr>
+          <th scope="col">Part</th>
+          <th scope="col">Why</th>
+          <th scope="col">Buy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Nucleo-F767ZI</th>
+          <td>Cortex-M7, onboard Ethernet MAC + PHY, ST-LINK debugger. No Wi‑Fi module.</td>
+          <td>
+            <a class="text-link" href={ST_NUCLEO_F767ZI} target="_blank" rel={COMMERCE_LINK_REL}>ST Nucleo-F767ZI</a>
+            ·
+            <a class="text-link" href={AMAZON_NUCLEO} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Waterproof DS18B20</th>
+          <td>Pipe / crawlspace probe. Data on Arduino <strong>D4</strong> (PF14).</td>
+          <td>
+            <a class="text-link" href={ADAFRUIT_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit DS18B20</a>
+            ·
+            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">4.7kΩ resistor</th>
+          <td>Pull-up from DS18B20 data to 3.3V. Do not power the probe from the 5V Arduino pin.</td>
+          <td>
+            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={COMMERCE_LINK_REL}>Amazon 4.7k search</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Ethernet drop</th>
+          <td>DHCP on your LAN. A Pi, NAS, or laptop runs the TLS relay.</td>
+          <td>Any Cat5e patch cable to your switch.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Wiring</h2>
+  <ul>
+    <li>DS18B20 VDD → Nucleo <strong>3.3V</strong></li>
+    <li>DS18B20 GND → GND</li>
+    <li>DS18B20 data → Arduino <strong>D4</strong> (STM32 <strong>PF14</strong>), 4.7k to 3.3V</li>
+    <li>RJ45 → LAN. ST-LINK USB for flash and 115200 serial.</li>
+  </ul>
+
+  <h2>Build and flash</h2>
+  <ol>
+    <li>
+      Open
+      <a class="text-link" href="/dashboard/temperature">Dashboard → Devices</a>
+      and download <strong>Zephyr main.c</strong> (ingest path filled in), or copy the defines from the
+      ingest callout.
+    </li>
+    <li>
+      On a LAN host:
+      <pre><code>{`python3 sketches/relay/push_https_forward.py --listen 0.0.0.0:8080 \\
+  --upstream https://thermaltrace.dev`}</code></pre>
+    </li>
+    <li>Set <code>INGEST_HOST</code> to that machine. Drop the downloaded file over <code>src/main.c</code> if you want the path baked in.</li>
+    <li>
+      From a Zephyr workspace:
+      <pre><code>{`west build -b nucleo_f767zi path/to/sketches/zephyr/ds18b20_ingest
+west flash`}</code></pre>
+    </li>
+    <li>Serial 115200: <code>dhcp ok</code>, then <code>POST 200</code>. Sensor key <code>temp1</code> imports on first POST.</li>
+  </ol>
+  <p>
+    Repo app:
+    <a
+      class="text-link"
+      href="https://github.com/doodersrage/thermaltrace/tree/main/sketches/zephyr/ds18b20_ingest"
+      target="_blank"
+      rel="noreferrer"
+    ><code>sketches/zephyr/ds18b20_ingest/</code></a>
+    (<code>prj.conf</code>, D4 overlay, CMake).
+  </p>
+
+  <h2>Other STM32 boards</h2>
+  <p>
+    Any Zephyr Ethernet target can run the same C if you add a 1-Wire overlay for your GPIO. Nucleo-F429ZI
+    and Nucleo-H743ZI are the usual cousins. A Blue Pill plus W5500 is C as well, but that is Cube HAL +
+    ioLibrary, not this Zephyr app: use the LAN relay the same way.
+  </p>
+
+  <h2>Why not Nordic / TI first?</h2>
+  <ul>
+    <li><strong>nRF52</strong>: Bluetooth or Thread, not native Wi‑Fi HTTPS.</li>
+    <li><strong>nRF9160</strong>: LTE-M works, but a SIM and carrier plan is a worse first freeze kit than a garage Ethernet drop.</li>
+    <li><strong>TI SimpleLink / NXP RW612</strong>: capable Wi‑Fi C SDKs, smaller hobbyist footprint than Nucleo + Zephyr.</li>
+    <li>
+      <strong>CH32V307</strong> is first-class now:
+      <a class="text-link" href="/about/ch32v-riscv-ingest">WCHNET C + onboard Ethernet</a>
+      (QingKe RISC-V, same LAN TLS relay).
+    </li>
+  </ul>
+
+  <h2>Related</h2>
+  <ul>
+    <li><a class="text-link" href="/about/adding-devices">Adding devices</a></li>
+    <li><a class="text-link" href="/about/pico-w-ingest">Raspberry Pi Pico W ingest</a></li>
+    <li><a class="text-link" href="/about/ch32v-riscv-ingest">CH32V RISC-V ingest</a></li>
+    <li><a class="text-link" href="/about/esp32-freeze-kit">ESP32 freeze kit parts list</a></li>
+    <li><a class="text-link" href="/about/python-feeds">Python HTTPS relay</a></li>
+    <li>
+      <a
+        class="text-link"
+        href="https://github.com/doodersrage/thermaltrace/tree/main/sketches"
+        target="_blank"
+        rel="noreferrer"
+      >All sketches ↗</a>
+    </li>
+  </ul>
+</AboutArticle>

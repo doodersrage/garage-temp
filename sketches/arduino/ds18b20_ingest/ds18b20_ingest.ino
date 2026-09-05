@@ -1,17 +1,19 @@
 /**
- * DS18B20 → ThermalTrace push ingest (Arduino / ESP32).
+ * DS18B20 → ThermalTrace push ingest (Arduino: ESP32 / ESP8266 / Pico W).
  *
- * Libraries: OneWire, DallasTemperature, WiFi (ESP), HTTPClient (ESP) or WiFiNINA.
+ * Libraries: OneWire, DallasTemperature, WiFi, HTTPClient.
+ * Pico W / Pico 2 W: install Earle Philhower’s “Raspberry Pi Pico/RP2040” board package
+ * (not the Arduino mbed RP2040 core). GPIO4 is GP4.
  * Set WIFI_SSID, WIFI_PASS, and INGEST_URL (full URL including device key).
  */
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-#if defined(ESP32) || defined(ESP8266)
+#if defined(ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350)
 #include <WiFi.h>
 #include <HTTPClient.h>
 #else
-#error "This sample targets ESP32/ESP8266. Adapt WiFi/HTTP for your board."
+#error "This sample targets ESP32/ESP8266 or Pico W (Earle Philhower core). Adapt WiFi/HTTP for your board."
 #endif
 
 #ifndef WIFI_SSID

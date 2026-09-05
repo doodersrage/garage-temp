@@ -1,0 +1,131 @@
+---
+import AboutArticle from "../../components/AboutArticle.astro";
+import { affiliateHref, COMMERCE_LINK_REL } from "../../lib/affiliateLinks";
+import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
+
+const page = getAboutPage("teensy41-ingest")!;
+const hero = getAboutHeroPhoto(page.slug);
+
+const PJRC_TEENSY = affiliateHref("https://www.pjrc.com/store/teensy41.html");
+const PJRC_ETH = affiliateHref("https://www.pjrc.com/store/ethernet_kit.html");
+const AMAZON_TEENSY = affiliateHref("https://www.amazon.com/s?k=Teensy+4.1");
+const ADAFRUIT_DS18B20 = affiliateHref("https://www.adafruit.com/product/381");
+const AMAZON_DS18B20 = affiliateHref(
+  "https://www.amazon.com/s?k=waterproof+DS18B20+temperature+probe+1m",
+);
+const AMAZON_RESISTOR = affiliateHref(
+  "https://www.amazon.com/s?k=4.7k+ohm+resistor+through+hole",
+);
+const QNETH = "https://github.com/ssilverman/QNEthernet";
+---
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={hero?.image}
+  heroAlt={hero?.alt}
+  heroCaption={hero?.caption}
+  heroCredit={hero?.credit}
+  heroCreditHref={hero?.sourceUrl}
+>
+  <p>
+    PJRC <strong>Teensy 4.1</strong> (NXP i.MX RT1062) with the official Ethernet kit is a fast Cortex-M7
+    garage probe in <strong>Teensyduino + QNEthernet</strong>—not STM32 Zephyr tooling, not WCH MounRiver.
+    DS18B20 on pin 4 → <code>temp1</code>. HTTP to the LAN TLS relay, same CA story as Uno Ethernet.
+  </p>
+
+  <h2>Parts</h2>
+  <div class="overflow-x-auto mb-6">
+    <table class="plan-comparison-table">
+      <caption class="sr-only">Parts for a Teensy 4.1 freeze probe</caption>
+      <thead>
+        <tr>
+          <th scope="col">Part</th>
+          <th scope="col">Why</th>
+          <th scope="col">Buy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Teensy 4.1</th>
+          <td>600 MHz M7, USB flash, onboard Ethernet MAC (needs magnetics kit).</td>
+          <td>
+            <a class="text-link" href={PJRC_TEENSY} target="_blank" rel={COMMERCE_LINK_REL}>PJRC Teensy 4.1</a>
+            ·
+            <a class="text-link" href={AMAZON_TEENSY} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Ethernet kit / MagJack</th>
+          <td>Magnetics + RJ45 wired per PJRC Teensy 4.1 Ethernet docs.</td>
+          <td>
+            <a class="text-link" href={PJRC_ETH} target="_blank" rel={COMMERCE_LINK_REL}>PJRC Ethernet kit</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Waterproof DS18B20</th>
+          <td>Data on <strong>pin 4</strong>, 4.7k to 3.3V.</td>
+          <td>
+            <a class="text-link" href={ADAFRUIT_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit DS18B20</a>
+            ·
+            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">4.7kΩ resistor</th>
+          <td>1-Wire pull-up to 3.3V.</td>
+          <td>
+            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={COMMERCE_LINK_REL}>Amazon 4.7k search</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Wiring</h2>
+  <ul>
+    <li>DS18B20 VDD → <strong>3.3V</strong></li>
+    <li>DS18B20 GND → GND</li>
+    <li>DS18B20 data → <strong>pin 4</strong>, 4.7k to 3.3V</li>
+    <li>Ethernet kit → LAN. USB for Teensyduino flash and Serial 115200</li>
+  </ul>
+
+  <h2>Build and flash</h2>
+  <ol>
+    <li>
+      Open
+      <a class="text-link" href="/dashboard/temperature">Dashboard → Devices</a>
+      and download <strong>Teensy 4.1 .ino</strong> (ingest path filled in).
+    </li>
+    <li>
+      On a LAN host:
+      <pre><code>{`python3 sketches/relay/push_https_forward.py --listen 0.0.0.0:8080 \\
+  --upstream https://thermaltrace.dev`}</code></pre>
+    </li>
+    <li>
+      Install Teensyduino. Add
+      <a class="text-link" href={QNETH} target="_blank" rel="noreferrer">QNEthernet</a>,
+      <code>OneWire</code>, <code>DallasTemperature</code>. Set <code>INGEST_HOST</code>, flash.
+    </li>
+    <li>Serial 115200: <code>link ok</code>, <code>dhcp ok</code>, then <code>POST 200</code>. Sensor key <code>temp1</code> imports on first POST.</li>
+  </ol>
+  <p>
+    Repo listing:
+    <a
+      class="text-link"
+      href="https://github.com/doodersrage/thermaltrace/tree/main/sketches/teensy/teensy41_ds18b20_ingest"
+      target="_blank"
+      rel="noreferrer"
+    ><code>sketches/teensy/teensy41_ds18b20_ingest/</code></a>
+  </p>
+
+  <h2>Related</h2>
+  <ul>
+    <li><a class="text-link" href="/about/adding-devices">Adding devices</a></li>
+    <li><a class="text-link" href="/about/pic18-ethernet-ingest">PIC18F67J60 ingest</a></li>
+    <li><a class="text-link" href="/about/stm32-zephyr-ingest">STM32 Zephyr ingest</a></li>
+    <li><a class="text-link" href="/about/cellular-ingest">Cellular (Particle Boron)</a></li>
+    <li><a class="text-link" href="/about/python-feeds">Python HTTPS relay</a></li>
+  </ul>
+</AboutArticle>

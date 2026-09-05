@@ -73,7 +73,7 @@ src/lib/            Auth, devices, alerts, Stripe, ingest
 src/worker.ts       Cloudflare fetch + scheduled jobs (15-min poll)
 src/actions/        Astro Actions (prefs, alerts, invites)
 supabase/migrations/
-sketches/           Arduino / MicroPython ingest samples
+sketches/           Arduino / MicroPython / CircuitPython / Zephyr / WCHNET / AVR assembly ingest samples
 docs/               VitePress developer docs (GitHub Pages)
 ```
 
@@ -82,9 +82,9 @@ docs/               VitePress developer docs (GitHub Pages)
 1. **[Create a free account](https://thermaltrace.dev/register?next=/dashboard/temperature)** (no credit card)  
 2. **Dashboard → Devices** → create a push device and copy the ingest key from the callout  
 3. `POST` to `/api/ingest/<key>` — sensor keys **auto-import** on first POST; rename on Devices afterward  
-4. **Overview → Try without hardware** saves the demo pull feed if you have no ESP yet  
+4. **Overview → Try without hardware** saves the demo pull feed if you have no ESP or Pico yet  
 
-Step-by-step: [Adding devices](https://thermaltrace.dev/about/adding-devices) · [ESP32 freeze kit BOM](https://thermaltrace.dev/about/esp32-freeze-kit) · sample sketches in [`sketches/`](./sketches)
+Step-by-step: [Adding devices](https://thermaltrace.dev/about/adding-devices) · [ESP32 freeze kit BOM](https://thermaltrace.dev/about/esp32-freeze-kit) · [Pico W ingest](https://thermaltrace.dev/about/pico-w-ingest) · [STM32 Zephyr](https://thermaltrace.dev/about/stm32-zephyr-ingest) · [CH32V RISC-V](https://thermaltrace.dev/about/ch32v-riscv-ingest) · [AVR assembly](https://thermaltrace.dev/about/avr-asm-ingest) · [Teensy 4.1](https://thermaltrace.dev/about/teensy41-ingest) · [PIC18 Ethernet](https://thermaltrace.dev/about/pic18-ethernet-ingest) · [Cellular](https://thermaltrace.dev/about/cellular-ingest) · sample sketches in [`sketches/`](./sketches)
 
 Pull feeds (HTTPS JSON we fetch): **Devices → Pull feeds** tab — add URL, **Save pull setup**, probes auto-import from the live feed.
 

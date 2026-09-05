@@ -1,0 +1,157 @@
+---
+import AboutArticle from "../../components/AboutArticle.astro";
+import { affiliateHref, COMMERCE_LINK_REL } from "../../lib/affiliateLinks";
+import { getAboutPage } from "../../lib/aboutPages";
+import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
+
+const page = getAboutPage("cellular-ingest")!;
+const hero = getAboutHeroPhoto(page.slug);
+
+const PARTICLE_BORON = affiliateHref("https://www.particle.io/wifi/#boron");
+const AMAZON_BORON = affiliateHref("https://www.amazon.com/s?k=Particle+Boron+LTE");
+const ADAFRUIT_DS18B20 = affiliateHref("https://www.adafruit.com/product/381");
+const AMAZON_DS18B20 = affiliateHref(
+  "https://www.amazon.com/s?k=waterproof+DS18B20+temperature+probe+1m",
+);
+const AMAZON_RESISTOR = affiliateHref(
+  "https://www.amazon.com/s?k=4.7k+ohm+resistor+through+hole",
+);
+const BLUES_NOTECARD = affiliateHref("https://blues.io/products/notecard/");
+---
+<AboutArticle
+  slug={page.slug}
+  title={page.title}
+  description={page.description}
+  heroImage={hero?.image}
+  heroAlt={hero?.alt}
+  heroCaption={hero?.caption}
+  heroCredit={hero?.credit}
+  heroCreditHref={hero?.sourceUrl}
+>
+  <p>
+    Cabins, wells, and outbuildings often have power but no garage Wi‑Fi. A
+    <strong>Particle Boron</strong> (or B-Series) LTE board POSTs the same ingest JSON through a
+    <strong>Particle Console webhook</strong>. Cellular dropouts are normal: ThermalTrace already
+    marks probes stale when posts stop, so you do not need an aggressive on-device retry storm.
+  </p>
+  <p>
+    Prefer Blues? A <strong>Notecard</strong> + Notehub route can forward the same JSON; the Boron
+    sketch is the first-class download from Devices.
+  </p>
+
+  <h2>Parts</h2>
+  <div class="overflow-x-auto mb-6">
+    <table class="plan-comparison-table">
+      <caption class="sr-only">Parts for a cellular freeze probe</caption>
+      <thead>
+        <tr>
+          <th scope="col">Part</th>
+          <th scope="col">Why</th>
+          <th scope="col">Buy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Particle Boron / B-Series</th>
+          <td>LTE-M / NB-IoT (region SKU). Nano-SIM or Particle SIM plan required.</td>
+          <td>
+            <a class="text-link" href={PARTICLE_BORON} target="_blank" rel={COMMERCE_LINK_REL}>Particle Boron</a>
+            ·
+            <a class="text-link" href={AMAZON_BORON} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Waterproof DS18B20</th>
+          <td>Pipe / crawlspace probe. Data on <strong>D2</strong>.</td>
+          <td>
+            <a class="text-link" href={ADAFRUIT_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit DS18B20</a>
+            ·
+            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">4.7kΩ resistor</th>
+          <td>Pull-up from DS18B20 data to 3.3V.</td>
+          <td>
+            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={COMMERCE_LINK_REL}>Amazon 4.7k search</a>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Cellular plan</th>
+          <td>Particle cloud + carrier data. Budget for remote sites that only wake hourly.</td>
+          <td>Particle Console billing or your own nano-SIM where the SKU allows it.</td>
+        </tr>
+        <tr>
+          <th scope="row">Optional: Blues Notecard</th>
+          <td>Alternate cellular path via Notehub webhook route (same ingest URL).</td>
+          <td>
+            <a class="text-link" href={BLUES_NOTECARD} target="_blank" rel={COMMERCE_LINK_REL}>Blues Notecard</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Wiring</h2>
+  <ul>
+    <li>DS18B20 VDD → Boron <strong>3V3</strong></li>
+    <li>DS18B20 GND → GND</li>
+    <li>DS18B20 data → <strong>D2</strong>, 4.7k to 3V3</li>
+    <li>USB for flash and 115200 serial; antenna attached before field deploy</li>
+  </ul>
+
+  <h2>Flash and webhook</h2>
+  <ol>
+    <li>
+      Open
+      <a class="text-link" href="/dashboard/temperature">Dashboard → Devices</a>
+      and download <strong>Particle Boron .ino</strong> plus the webhook JSON (ingest URL filled in).
+    </li>
+    <li>
+      Flash with Particle Workbench or Web IDE (Device OS 5+). Libraries:
+      <code>OneWire</code>, <code>spark-dallas-temperature</code>.
+    </li>
+    <li>
+      Console → Integrations → Webhook: event <code>thermaltrace_ingest</code>, POST to your ingest URL,
+      use the downloaded webhook JSON (or set the body to the Particle event value), Content-Type
+      <code>application/json</code>.
+    </li>
+    <li>
+      Serial 115200: <code>publish ok</code>. Webhook history should show HTTP 200. Sensor key
+      <code>temp1</code> imports on first successful POST.
+    </li>
+  </ol>
+  <p>
+    Repo listing:
+    <a
+      class="text-link"
+      href="https://github.com/doodersrage/thermaltrace/tree/main/sketches/particle/boron_ds18b20_ingest"
+      target="_blank"
+      rel="noreferrer"
+    ><code>sketches/particle/boron_ds18b20_ingest/</code></a>
+  </p>
+
+  <h2>Dropouts and stale probes</h2>
+  <p>
+    LTE will miss intervals in weather, roaming, or prepaid outages. Keep posting about once a minute when
+    connected; let
+    <a class="text-link" href="/about/debugging-stale-readings">stale-reading detection</a>
+    and freeze alerts cover silence. Do not burn battery on tight reconnect loops.
+  </p>
+
+  <h2>Related</h2>
+  <ul>
+    <li><a class="text-link" href="/about/adding-devices">Adding devices</a></li>
+    <li><a class="text-link" href="/about/debugging-stale-readings">Debugging stale readings</a></li>
+    <li><a class="text-link" href="/about/teensy41-ingest">Teensy 4.1 Ethernet</a></li>
+    <li><a class="text-link" href="/about/pic18-ethernet-ingest">PIC18F67J60 Ethernet</a></li>
+    <li>
+      <a
+        class="text-link"
+        href="https://github.com/doodersrage/thermaltrace/tree/main/sketches"
+        target="_blank"
+        rel="noreferrer"
+      >All sketches ↗</a>
+    </li>
+  </ul>
+</AboutArticle>

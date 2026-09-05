@@ -2,15 +2,28 @@
 import {
   buildEspHomeHttpRequestSnippet,
   buildWaitingIngestCurl,
-  buildWaitingIngestPayload,
   type WaitingSensorHint,
 } from "../../lib/waitingIngest";
 import {
   buildArduinoEthernetDefinesSnippet,
   buildArduinoHttpClientSnippet,
+  buildPersonalizedDs18b20Circuitpython,
   buildPersonalizedDs18b20Ino,
   buildPersonalizedDs18b20Micropython,
+  buildPersonalizedDs18b20ZephyrC,
+  buildPersonalizedDs18b20Ch32vC,
+  buildPersonalizedDs18b20AvrS,
+  buildPersonalizedDs18b20Pic18C,
+  buildPersonalizedDs18b20TeensyIno,
+  buildPersonalizedDs18b20ParticleIno,
+  buildPersonalizedParticleWebhookJson,
   buildPersonalizedEspHomeYaml,
+  buildZephyrEthernetDefinesSnippet,
+  buildCh32vEthernetDefinesSnippet,
+  buildAvrAsmEthernetDefinesSnippet,
+  buildPic18EthernetDefinesSnippet,
+  buildTeensyEthernetDefinesSnippet,
+  buildParticleCellularSnippet,
   firmwareDownloadHref,
 } from "../../lib/firmwareSketches";
 
@@ -33,16 +46,39 @@ const {
 
 const arduinoSnippet = buildArduinoHttpClientSnippet(ingestUrl, sensors);
 const ethernetSnippet = buildArduinoEthernetDefinesSnippet(ingestUrl);
+const zephyrSnippet = buildZephyrEthernetDefinesSnippet(ingestUrl);
+const ch32vSnippet = buildCh32vEthernetDefinesSnippet(ingestUrl);
+const avrSnippet = buildAvrAsmEthernetDefinesSnippet(ingestUrl);
+const pic18Snippet = buildPic18EthernetDefinesSnippet(ingestUrl);
+const teensySnippet = buildTeensyEthernetDefinesSnippet(ingestUrl);
+const particleSnippet = buildParticleCellularSnippet(ingestUrl);
 const esphomeSnippet = buildEspHomeHttpRequestSnippet(ingestUrl, sensors);
 const esphomeYaml = buildPersonalizedEspHomeYaml(ingestUrl, sensors);
 const curlExample = buildWaitingIngestCurl(origin, sensors, ingestKey);
 const inoSketch = buildPersonalizedDs18b20Ino(ingestUrl);
 const pySketch = buildPersonalizedDs18b20Micropython(ingestUrl);
+const circuitPySketch = buildPersonalizedDs18b20Circuitpython(ingestUrl);
+const zephyrSketch = buildPersonalizedDs18b20ZephyrC(ingestUrl);
+const ch32vSketch = buildPersonalizedDs18b20Ch32vC(ingestUrl);
+const avrSketch = buildPersonalizedDs18b20AvrS(ingestUrl);
+const pic18Sketch = buildPersonalizedDs18b20Pic18C(ingestUrl);
+const teensySketch = buildPersonalizedDs18b20TeensyIno(ingestUrl);
+const particleSketch = buildPersonalizedDs18b20ParticleIno(ingestUrl);
+const particleWebhook = buildPersonalizedParticleWebhookJson(ingestUrl);
 const inoHref = firmwareDownloadHref(inoSketch);
 const pyHref = firmwareDownloadHref(pySketch);
+const circuitPyHref = firmwareDownloadHref(circuitPySketch);
+const zephyrHref = firmwareDownloadHref(zephyrSketch);
+const ch32vHref = firmwareDownloadHref(ch32vSketch);
+const avrHref = firmwareDownloadHref(avrSketch);
+const pic18Href = firmwareDownloadHref(pic18Sketch);
+const teensyHref = firmwareDownloadHref(teensySketch);
+const particleHref = firmwareDownloadHref(particleSketch);
+const particleWebhookHref = firmwareDownloadHref(particleWebhook);
 const esphomeHref = firmwareDownloadHref(esphomeYaml);
 ---
-<section class="ingest-firmware-panel" aria-labelledby="esp32-flash-title">
+<section class="ingest-firmware-panel" aria-labelledby="firmware-flash-title">
+  <h2 class="sr-only" id="firmware-flash-title">Flash firmware</h2>
   <h3 class="ingest-firmware-heading" id="esp32-flash-title">Flash an ESP32</h3>
   <p class="ingest-firmware-lede">
     Download a sketch with your ingest URL already filled in. Set Wi‑Fi, flash, then watch Serial for
@@ -52,6 +88,7 @@ const esphomeHref = firmwareDownloadHref(esphomeYaml);
   <ol class="waiting-ingest-checklist ingest-firmware-checklist">
     <li>
       Install <strong>ESP32</strong> (or ESP8266) board support in Arduino IDE / PlatformIO, not the Uno Ethernet samples.
+      Pico W uses a different download below.
     </li>
     <li>
       Libraries: <code>OneWire</code>, <code>DallasTemperature</code> (Library Manager). MicroPython needs
@@ -120,12 +157,236 @@ const esphomeHref = firmwareDownloadHref(esphomeYaml);
         </div>
         <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{ethernetSnippet}</code></pre>
       </div>
+      <div>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+          <p class="form-label mb-0">STM32 Zephyr Ethernet (HTTP relay)</p>
+          <button type="button" class="btn-ghost text-xs" data-copy={zephyrSnippet} data-copy-label="Copy">
+            Copy
+          </button>
+        </div>
+        <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{zephyrSnippet}</code></pre>
+      </div>
+      <div>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+          <p class="form-label mb-0">CH32V307 WCHNET Ethernet (HTTP relay)</p>
+          <button type="button" class="btn-ghost text-xs" data-copy={ch32vSnippet} data-copy-label="Copy">
+            Copy
+          </button>
+        </div>
+        <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{ch32vSnippet}</code></pre>
+      </div>
+      <div>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+          <p class="form-label mb-0">ATmega328P AVR assembly Ethernet (HTTP relay)</p>
+          <button type="button" class="btn-ghost text-xs" data-copy={avrSnippet} data-copy-label="Copy">
+            Copy
+          </button>
+        </div>
+        <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{avrSnippet}</code></pre>
+      </div>
+      <div>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+          <p class="form-label mb-0">Teensy 4.1 QNEthernet (HTTP relay)</p>
+          <button type="button" class="btn-ghost text-xs" data-copy={teensySnippet} data-copy-label="Copy">
+            Copy
+          </button>
+        </div>
+        <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{teensySnippet}</code></pre>
+      </div>
+      <div>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+          <p class="form-label mb-0">PIC18F67J60 MLA Ethernet (HTTP relay)</p>
+          <button type="button" class="btn-ghost text-xs" data-copy={pic18Snippet} data-copy-label="Copy">
+            Copy
+          </button>
+        </div>
+        <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{pic18Snippet}</code></pre>
+      </div>
+      <div>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+          <p class="form-label mb-0">Particle Boron cellular (Console webhook)</p>
+          <button type="button" class="btn-ghost text-xs" data-copy={particleSnippet} data-copy-label="Copy">
+            Copy
+          </button>
+        </div>
+        <pre class="ingest-key-curl text-xs overflow-x-auto mb-0"><code>{particleSnippet}</code></pre>
+      </div>
     </div>
   </details>
 
+  <h3 class="ingest-firmware-heading ingest-firmware-heading-next" id="pico-flash-title">Flash a Pico W</h3>
+  <p class="ingest-firmware-lede">
+    Raspberry Pi <strong>Pico W</strong> or <strong>Pico 2 W</strong> (RP2040 / RP2350) with the same DS18B20 on
+    <strong>GP4</strong> → <code>temp1</code>. CircuitPython is drag-and-drop onto the <code>CIRCUITPY</code> drive.
+    MicroPython and the Arduino .ino above also compile for Pico W (Earle Philhower core).
+  </p>
+  <ol class="waiting-ingest-checklist ingest-firmware-checklist">
+    <li>Hold BOOTSEL, plug in USB, drop the CircuitPython UF2 for Pico W or Pico 2 W.</li>
+    <li>
+      Install libs: <code>circup install adafruit_requests adafruit_connection_manager adafruit_ds18x20 adafruit_onewire</code>
+    </li>
+    <li>Edit <code>WIFI_SSID</code> / <code>WIFI_PASS</code>, save as <code>code.py</code>, watch Serial for <code>POST 200</code>.</li>
+  </ol>
+  <div class="flex flex-wrap gap-2 mb-4">
+    <a class="btn-secondary" href={circuitPyHref} download="thermaltrace_ds18b20_code.py">
+      Download CircuitPython code.py
+    </a>
+    <a class="btn-ghost" href="/about/pico-w-ingest">Pico W guide</a>
+  </div>
+
+  <h3 class="ingest-firmware-heading ingest-firmware-heading-next" id="stm32-flash-title">Flash an STM32 (Zephyr)</h3>
+  <p class="ingest-firmware-lede">
+    ST <strong>Nucleo-F767ZI</strong> in C on Zephyr: onboard Ethernet, ST-LINK, no Arduino IDE and no Python.
+    Same DS18B20 on Arduino <strong>D4</strong> (PF14) → <code>temp1</code>. HTTP to the LAN TLS relay, like the Uno
+    Ethernet shield.
+  </p>
+  <ol class="waiting-ingest-checklist ingest-firmware-checklist">
+    <li>Install the Zephyr SDK and <code>west</code>. Plug the Nucleo in over ST-LINK USB.</li>
+    <li>
+      Run <code>sketches/relay/push_https_forward.py</code> on a LAN host. Set <code>INGEST_HOST</code> to that
+      machine.
+    </li>
+    <li>
+      <code>west build -b nucleo_f767zi sketches/zephyr/ds18b20_ingest</code> then <code>west flash</code>. Serial
+      <strong>115200</strong>: <code>dhcp ok</code>, then <code>POST 200</code>.
+    </li>
+  </ol>
+  <div class="flex flex-wrap gap-2 mb-4">
+    <a class="btn-secondary" href={zephyrHref} download="thermaltrace_ds18b20_zephyr_main.c">
+      Download Zephyr main.c
+    </a>
+    <a class="btn-ghost" href="/about/stm32-zephyr-ingest">STM32 Zephyr guide</a>
+  </div>
+
+  <h3 class="ingest-firmware-heading ingest-firmware-heading-next" id="ch32v-flash-title">Flash a CH32V (RISC-V)</h3>
+  <p class="ingest-firmware-lede">
+    WCH <strong>CH32V307V-EVT-R1</strong> in C on WCHNET: QingKe RISC-V, onboard 10M Ethernet, MounRiver Studio.
+    Not Arduino, not Python, not Zephyr. DS18B20 on <strong>PB12</strong> → <code>temp1</code>. HTTP to the LAN TLS
+    relay, like Uno / STM32 Ethernet.
+  </p>
+  <ol class="waiting-ingest-checklist ingest-firmware-checklist">
+    <li>Install MounRiver Studio. Open the official EVT <code>ETH/DHCP</code> project. Plug in WCH-Link.</li>
+    <li>
+      Run <code>sketches/relay/push_https_forward.py</code> on a LAN host. Set <code>INGEST_HOST</code> to that
+      machine.
+    </li>
+    <li>
+      Replace <code>User/main.c</code> with the download below, build, flash. Serial <strong>115200</strong>:
+      <code>dhcp ok</code>, then <code>POST 200</code>.
+    </li>
+  </ol>
+  <div class="flex flex-wrap gap-2 mb-4">
+    <a class="btn-secondary" href={ch32vHref} download="thermaltrace_ds18b20_ch32v_main.c">
+      Download CH32V main.c
+    </a>
+    <a class="btn-ghost" href="/about/ch32v-riscv-ingest">CH32V RISC-V guide</a>
+  </div>
+
+  <h3 class="ingest-firmware-heading ingest-firmware-heading-next" id="avr-asm-flash-title">Flash AVR assembly (Uno + W5100)</h3>
+  <p class="ingest-firmware-lede">
+    Arduino <strong>Uno / ATmega328P</strong> in GNU AVR assembly: no Arduino C, no Python. Same W5100 shield and
+    LAN TLS relay as the Uno Ethernet sketch. DS18B20 on <strong>D7</strong> (D4 is the shield’s SD chip-select).
+  </p>
+  <ol class="waiting-ingest-checklist ingest-firmware-checklist">
+    <li>Install <code>avr-gcc</code>, <code>avr-libc</code>, and <code>avrdude</code>. Plug the Uno in over USB.</li>
+    <li>
+      Run <code>sketches/relay/push_https_forward.py</code> on a LAN host. Set <code>ingest_ip</code> to that
+      machine.
+    </li>
+    <li>
+      <code>make flash</code> in <code>sketches/avr/atmega328_w5100_ds18b20/</code>, or assemble the download below.
+      Serial <strong>115200</strong>: <code>link ok</code>, then <code>POST 200</code>.
+    </li>
+  </ol>
+  <div class="flex flex-wrap gap-2 mb-4">
+    <a class="btn-secondary" href={avrHref} download="thermaltrace_ds18b20_avr.S">
+      Download AVR main.S
+    </a>
+    <a class="btn-ghost" href="/about/avr-asm-ingest">AVR assembly guide</a>
+  </div>
+
+  <h3 class="ingest-firmware-heading ingest-firmware-heading-next" id="teensy-flash-title">Flash a Teensy 4.1</h3>
+  <p class="ingest-firmware-lede">
+    PJRC <strong>Teensy 4.1</strong> + Ethernet kit in Teensyduino with <strong>QNEthernet</strong>. DS18B20 on
+    <strong>pin 4</strong> → <code>temp1</code>. HTTP to the LAN TLS relay.
+  </p>
+  <ol class="waiting-ingest-checklist ingest-firmware-checklist">
+    <li>Install Teensyduino. Libraries: <code>QNEthernet</code>, <code>OneWire</code>, <code>DallasTemperature</code>.</li>
+    <li>
+      Run <code>sketches/relay/push_https_forward.py</code> on a LAN host. Set <code>INGEST_HOST</code> to that
+      machine.
+    </li>
+    <li>
+      Flash the download below. Serial <strong>115200</strong>: <code>link ok</code>, then <code>POST 200</code>.
+    </li>
+  </ol>
+  <div class="flex flex-wrap gap-2 mb-4">
+    <a class="btn-secondary" href={teensyHref} download="thermaltrace_ds18b20_teensy41.ino">
+      Download Teensy 4.1 .ino
+    </a>
+    <a class="btn-ghost" href="/about/teensy41-ingest">Teensy 4.1 guide</a>
+  </div>
+
+  <h3 class="ingest-firmware-heading ingest-firmware-heading-next" id="pic18-flash-title">Flash a PIC18F67J60</h3>
+  <p class="ingest-firmware-lede">
+    Microchip <strong>PIC18F67J60</strong> in MPLAB X / XC8 on the classic TCP/IP Stack: onboard Ethernet MAC/PHY.
+    DS18B20 on <strong>RD0</strong> → <code>temp1</code>. HTTP to the LAN TLS relay.
+  </p>
+  <ol class="waiting-ingest-checklist ingest-firmware-checklist">
+    <li>Install MPLAB X + XC8. Open an MLA Ethernet demo for PIC18F67J60.</li>
+    <li>
+      Run <code>sketches/relay/push_https_forward.py</code> on a LAN host. Set <code>INGEST_HOST</code> to that
+      machine.
+    </li>
+    <li>
+      Add the download below, call <code>ThermalTraceAppInit</code> / <code>ThermalTraceAppTask</code> from the demo
+      loop, build, PICkit flash.
+    </li>
+  </ol>
+  <div class="flex flex-wrap gap-2 mb-4">
+    <a class="btn-secondary" href={pic18Href} download="thermaltrace_ds18b20_pic18_main.c">
+      Download PIC18 main.c
+    </a>
+    <a class="btn-ghost" href="/about/pic18-ethernet-ingest">PIC18 Ethernet guide</a>
+  </div>
+
+  <h3 class="ingest-firmware-heading ingest-firmware-heading-next" id="cellular-flash-title">Flash cellular (Particle Boron)</h3>
+  <p class="ingest-firmware-lede">
+    <strong>Particle Boron</strong> / B-Series over LTE: no garage Wi‑Fi. Firmware publishes JSON; a Console webhook
+    POSTs to your HTTPS ingest URL. Stale-probe detection covers dropouts.
+  </p>
+  <ol class="waiting-ingest-checklist ingest-firmware-checklist">
+    <li>Particle Workbench or Web IDE, Device OS 5+. Libraries: <code>OneWire</code>, <code>spark-dallas-temperature</code>.</li>
+    <li>Flash the .ino below. Create a Console webhook from the JSON download (URL already filled).</li>
+    <li>Serial <strong>115200</strong>: <code>publish ok</code>. Confirm HTTP 200 in webhook history.</li>
+  </ol>
+  <div class="flex flex-wrap gap-2 mb-4">
+    <a class="btn-secondary" href={particleHref} download="thermaltrace_ds18b20_boron.ino">
+      Download Particle Boron .ino
+    </a>
+    <a class="btn-secondary" href={particleWebhookHref} download="thermaltrace_particle_webhook.json">
+      Download webhook JSON
+    </a>
+    <a class="btn-ghost" href="/about/cellular-ingest">Cellular guide</a>
+  </div>
+
   <p class="mt-3 mb-0 text-sm text-[var(--color-text-muted)]">
     More help:
-    <a class="text-link" href="/about/esp32-web-flash">Flashing options</a>
+    <a class="text-link" href="/about/esp32-web-flash">ESP32 flashing</a>
+    {" · "}
+    <a class="text-link" href="/about/pico-w-ingest">Pico W ingest</a>
+    {" · "}
+    <a class="text-link" href="/about/stm32-zephyr-ingest">STM32 Zephyr</a>
+    {" · "}
+    <a class="text-link" href="/about/ch32v-riscv-ingest">CH32V RISC-V</a>
+    {" · "}
+    <a class="text-link" href="/about/avr-asm-ingest">AVR assembly</a>
+    {" · "}
+    <a class="text-link" href="/about/teensy41-ingest">Teensy 4.1</a>
+    {" · "}
+    <a class="text-link" href="/about/pic18-ethernet-ingest">PIC18 Ethernet</a>
+    {" · "}
+    <a class="text-link" href="/about/cellular-ingest">Cellular</a>
     {" · "}
     <a class="text-link" href="/about/adding-devices">Adding devices</a>
     {" · "}
@@ -155,6 +416,12 @@ const esphomeHref = firmwareDownloadHref(esphomeYaml);
     margin: 0 0 0.35rem;
     font-size: 1rem;
     font-weight: 700;
+  }
+
+  .ingest-firmware-heading-next {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-border);
   }
 
   .ingest-firmware-lede {

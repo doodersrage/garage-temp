@@ -212,6 +212,125 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
         "No hosted one-click .bin flasher: your ingest URL is per device. Download a pre-filled .ino/.py from Devices, then flash with Arduino IDE, PlatformIO, Thonny, or Espressif’s esptool-js if you already built a binary. Guide: thermaltrace.dev/about/esp32-web-flash.",
     },
   ],
+  "pico-w-ingest": [
+    {
+      question: "Can a Raspberry Pi Pico W post to ThermalTrace?",
+      answer:
+        "Yes. Pico W and Pico 2 W speak HTTPS on-chip. Download CircuitPython code.py (or the MicroPython / Arduino sketch) from Dashboard → Devices, put a DS18B20 on GP4 with a 4.7k pull-up to 3.3V, and watch Serial for POST 200. Guide: thermaltrace.dev/about/pico-w-ingest.",
+    },
+    {
+      question: "Is a Pico W the same as the claim puck?",
+      answer:
+        "No. The claim puck is a Waveshare RP2040-Zero over USB for bay presence and mood LEDs. Pico W is a Wi‑Fi temperature probe. Do not flash claim-puck firmware onto a freeze probe or the reverse.",
+    },
+    {
+      question: "Should I buy Pico W or ESP32?",
+      answer:
+        "ESP32 remains the default freeze kit (cheaper DevKits, ESPHome, OTA samples). Choose Pico W if you already have one, prefer CircuitPython drag-and-drop, or want RP2040/RP2350. Both POST the same ingest JSON.",
+    },
+  ],
+  "stm32-zephyr-ingest": [
+    {
+      question: "Can an STM32 post to ThermalTrace without Arduino or Python?",
+      answer:
+        "Yes. The Nucleo-F767ZI sample is Zephyr C: west build, ST-LINK flash, onboard Ethernet. DS18B20 on Arduino D4 (PF14). HTTP to the LAN TLS relay, same as the Uno W5100 path. Guide: thermaltrace.dev/about/stm32-zephyr-ingest.",
+    },
+    {
+      question: "Why not HTTPS straight from the Nucleo?",
+      answer:
+        "You can, with Zephyr mbedTLS and a baked-in CA. ThermalTrace sits behind Cloudflare, so that CA can change. The LAN relay keeps the MCU on HTTP and lets the Pi/NAS handle TLS, which is the same pattern as Uno Ethernet.",
+    },
+    {
+      question: "Is the Arduino header running Arduino firmware?",
+      answer:
+        "No. D4 is only the Nucleo’s Arduino-layout pin (PF14). The firmware is Zephyr C, not an .ino.",
+    },
+  ],
+  "ch32v-riscv-ingest": [
+    {
+      question: "Can a CH32V post to ThermalTrace without Arduino or Python?",
+      answer:
+        "Yes. The CH32V307V-EVT sample is WCHNET C in MounRiver Studio: drop-in User/main.c on the official ETH/DHCP project, WCH-Link flash, onboard 10M Ethernet. DS18B20 on PB12. HTTP to the LAN TLS relay, same as Uno W5100 and STM32 Zephyr. Guide: thermaltrace.dev/about/ch32v-riscv-ingest.",
+    },
+    {
+      question: "Why not HTTPS straight from the CH32V?",
+      answer:
+        "WCHNET is IPv4 TCP/UDP without a maintained TLS client. ThermalTrace ingest is HTTPS. The LAN relay keeps the MCU on HTTP and lets a Pi/NAS handle TLS, which is the same pattern as Uno Ethernet and STM32 Zephyr.",
+    },
+    {
+      question: "Is this Arduino-CH32 or PlatformIO Arduino?",
+      answer:
+        "No. Some community cores wrap CH32V for Arduino IDE. This sample is vendor C (QingKe RISC-V, WCHNET), not an .ino.",
+    },
+  ],
+  "avr-asm-ingest": [
+    {
+      question: "Do any ThermalTrace boards require assembly language?",
+      answer:
+        "No Ethernet freeze probe requires assembly. PADAUK and PIC10F are assembly-first but cannot POST HTTP. The supported assembly path is GNU AVR on an Uno + W5100: avr-gcc, no Arduino C, DS18B20 on D7, HTTP to the LAN TLS relay. Guide: thermaltrace.dev/about/avr-asm-ingest.",
+    },
+    {
+      question: "Why not put the DS18B20 on D4 like the ESP32 sample?",
+      answer:
+        "The W5100 Ethernet shield uses D4 as SD card chip-select. This firmware holds D4 high and reads the probe on D7.",
+    },
+    {
+      question: "Can I keep using the Arduino Ethernet C sketch instead?",
+      answer:
+        "Yes. sketches/arduino/ethernet_dht22_ingest is the C path on the same shield (DHT22 on A4/A5). Use assembly only if you want to program the 328P without Arduino C.",
+    },
+  ],
+  "cellular-ingest": [
+    {
+      question: "Can a cellular board post to ThermalTrace without Wi‑Fi?",
+      answer:
+        "Yes. The Particle Boron sample publishes JSON on event thermaltrace_ingest; a Particle Console webhook POSTs that body to your HTTPS ingest URL. DS18B20 on D2. Guide: thermaltrace.dev/about/cellular-ingest.",
+    },
+    {
+      question: "What happens when LTE drops?",
+      answer:
+        "Missed intervals are expected. ThermalTrace flags stale probes when posts stop, and freeze alerts still fire on the last known cold reading plus silence. Avoid tight reconnect loops that drain the battery.",
+    },
+    {
+      question: "Is Blues Notecard supported?",
+      answer:
+        "As an alternate path: route Notehub to the same ingest URL. Devices downloads first-class Particle Boron firmware and webhook JSON.",
+    },
+  ],
+  "pic18-ethernet-ingest": [
+    {
+      question: "Can a PIC18F67J60 post to ThermalTrace?",
+      answer:
+        "Yes. Drop-in MLA TCP/IP Stack C in MPLAB X: onboard Ethernet MAC/PHY, DS18B20 on RD0, HTTP to the LAN TLS relay. Guide: thermaltrace.dev/about/pic18-ethernet-ingest.",
+    },
+    {
+      question: "Why not HTTPS from the PIC?",
+      answer:
+        "The classic Microchip TCP/IP Stack does not ship a maintained HTTPS client for Cloudflare. The LAN relay keeps the MCU on HTTP, same as Uno W5100 and STM32 Zephyr.",
+    },
+    {
+      question: "Is this Arduino or XC8?",
+      answer:
+        "XC8 / MPLAB X on the MLA Ethernet demo. Not an Arduino .ino.",
+    },
+  ],
+  "teensy41-ingest": [
+    {
+      question: "Can a Teensy 4.1 post to ThermalTrace?",
+      answer:
+        "Yes. Teensyduino + QNEthernet on Teensy 4.1 with the Ethernet kit: DS18B20 on pin 4, HTTP to the LAN TLS relay. Guide: thermaltrace.dev/about/teensy41-ingest.",
+    },
+    {
+      question: "Why not HTTPS straight from the Teensy?",
+      answer:
+        "You can add TLS libraries, but Cloudflare CAs can change. The LAN relay matches Uno / STM32 / CH32V and avoids baking CAs into the MCU.",
+    },
+    {
+      question: "Do I need the PJRC Ethernet kit?",
+      answer:
+        "Yes for this sample. The Teensy 4.1 has the MAC on-chip; the kit (or equivalent MagJack wiring) provides magnetics and RJ45.",
+    },
+  ],
   "install-pwa": [
     {
       question: "Does the PWA support freeze push alerts?",

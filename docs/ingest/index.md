@@ -44,7 +44,7 @@ Expect HTTP `200` when the key is valid. Keys `temp1` / `door1` appear as sensor
 
 ### Flat keys
 
-Simplest for ESP sketches. Keys become sensor IDs on first POST.
+Simplest for ESP32 / Pico W sketches. Keys become sensor IDs on first POST.
 
 ```json
 {
@@ -151,4 +151,4 @@ Recipes (Home Assistant + Node-RED import): [MQTT bridge](/integrations/mqtt-bri
 - [Sensor sketches](/sketches/)
 - [Pull feeds](/ingest/pull-feeds) (alternative to push)
 - [Home Assistant](/ingest/home-assistant)
-- Product: [Adding devices](https://thermaltrace.dev/about/adding-devices) · [ingest & webhooks](https://thermaltrace.dev/about/ingest-and-webhooks)
+- Product: [Adding devices](https://thermaltrace.dev/about/adding-devices) · [ingest & webhooks](https://thermaltrace.dev/about/ingest-and-webhooks) · [Pico W](https://thermaltrace.dev/about/pico-w-ingest) · [STM32 Zephyr](https://thermaltrace.dev/about/stm32-zephyr-ingest) · [CH32V RISC-V](https://thermaltrace.dev/about/ch32v-riscv-ingest) · [AVR assembly](https://thermaltrace.dev/about/avr-asm-ingest) · [Teensy 4.1](https://thermaltrace.dev/about/teensy41-ingest) · [PIC18 Ethernet](https://thermaltrace.dev/about/pic18-ethernet-ingest) · [Cellular](https://thermaltrace.dev/about/cellular-ingest)

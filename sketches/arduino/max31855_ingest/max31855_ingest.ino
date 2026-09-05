@@ -1,17 +1,18 @@
 /**
- * MAX31855 thermocouple → ThermalTrace push ingest (Arduino / ESP32).
+ * MAX31855 thermocouple → ThermalTrace push ingest (Arduino: ESP32 / ESP8266 / Pico W).
  *
  * Library: Adafruit MAX31855.
  * Wire CS / SCK / MISO to your board; set pins below.
+ * Pico W: Earle Philhower Raspberry Pi Pico/RP2040 board package.
  */
 #include <SPI.h>
 #include <Adafruit_MAX31855.h>
 
-#if defined(ESP32) || defined(ESP8266)
+#if defined(ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350)
 #include <WiFi.h>
 #include <HTTPClient.h>
 #else
-#error "This sample targets ESP32/ESP8266. Adapt WiFi/HTTP for your board."
+#error "This sample targets ESP32/ESP8266 or Pico W (Earle Philhower core). Adapt WiFi/HTTP for your board."
 #endif
 
 #ifndef WIFI_SSID

@@ -545,6 +545,69 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
       "No hosted one-click binary flasher: download a personalized sketch, then flash with IDE, PlatformIO, or esptool-js.",
   },
   {
+    slug: "pico-w-ingest",
+    parentSlug: "adding-devices",
+    title: "Raspberry Pi Pico W ingest",
+    description:
+      "Push DS18B20 readings from a Pico W or Pico 2 W using CircuitPython, MicroPython, or the Arduino-Pico core. Same ThermalTrace HTTPS ingest as ESP32.",
+    summary:
+      "RP2040 / RP2350 Wi‑Fi probes: CircuitPython code.py, MicroPython, or Earle Philhower Arduino, DS18B20 on GP4.",
+  },
+  {
+    slug: "stm32-zephyr-ingest",
+    parentSlug: "adding-devices",
+    title: "STM32 Zephyr ingest",
+    description:
+      "Push DS18B20 readings from an ST Nucleo-F767ZI using Zephyr C and onboard Ethernet. No Arduino IDE, no Python: west, ST-LINK, and the same LAN HTTPS relay as the Uno shield.",
+    summary:
+      "Cortex-M7 Ethernet probe: Zephyr C on Nucleo-F767ZI, DS18B20 on Arduino D4, HTTP to a LAN TLS relay.",
+  },
+  {
+    slug: "ch32v-riscv-ingest",
+    parentSlug: "adding-devices",
+    title: "CH32V RISC-V ingest",
+    description:
+      "Push DS18B20 readings from a WCH CH32V307V-EVT using WCHNET C and onboard Ethernet. QingKe RISC-V, MounRiver Studio, and the same LAN HTTPS relay as the Uno shield.",
+    summary:
+      "RISC-V Ethernet probe: WCHNET C on CH32V307, DS18B20 on PB12, HTTP to a LAN TLS relay.",
+  },
+  {
+    slug: "avr-asm-ingest",
+    parentSlug: "adding-devices",
+    title: "AVR assembly ingest",
+    description:
+      "Push DS18B20 readings from an ATmega328P in GNU AVR assembly with a W5100 Ethernet shield. No Arduino C: avr-gcc, avrdude, and the same LAN HTTPS relay as the Uno Ethernet sketch.",
+    summary:
+      "Uno + W5100 in GNU AVR assembly: DS18B20 on D7, HTTP to a LAN TLS relay, not Arduino C.",
+  },
+  {
+    slug: "cellular-ingest",
+    parentSlug: "adding-devices",
+    title: "Cellular ingest (Particle Boron)",
+    description:
+      "Push DS18B20 readings from a Particle Boron over LTE via a Console webhook. For remote sites without garage Wi‑Fi; stale-probe detection covers cellular dropouts.",
+    summary:
+      "LTE freeze probe: Particle Boron + DS18B20 on D2, Particle webhook to HTTPS ingest.",
+  },
+  {
+    slug: "pic18-ethernet-ingest",
+    parentSlug: "adding-devices",
+    title: "PIC18F67J60 Ethernet ingest",
+    description:
+      "Push DS18B20 readings from a Microchip PIC18F67J60 using the classic TCP/IP Stack in MPLAB X. Onboard Ethernet MAC/PHY and the same LAN HTTPS relay as the Uno shield.",
+    summary:
+      "Microchip Ethernet probe: MLA C on PIC18F67J60, DS18B20 on RD0, HTTP to a LAN TLS relay.",
+  },
+  {
+    slug: "teensy41-ingest",
+    parentSlug: "adding-devices",
+    title: "Teensy 4.1 Ethernet ingest",
+    description:
+      "Push DS18B20 readings from a PJRC Teensy 4.1 with QNEthernet and the Ethernet kit. Fast i.MX RT1062 garage probe using the same LAN HTTPS relay as the Uno shield.",
+    summary:
+      "Teensy 4.1 + QNEthernet: DS18B20 on pin 4, HTTP to a LAN TLS relay.",
+  },
+  {
     slug: "zapier-make-recipes",
     parentSlug: "ingest-and-webhooks",
     title: "Zapier and Make.com recipes",

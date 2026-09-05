@@ -60,7 +60,7 @@ export const compareGuides: CompareGuide[] = [
       "Govee hygrometers (and SmartThings-style hubs that absorb the same class of Bluetooth/Wi-Fi pods) win on price and a friendly phone app for bedrooms and closets. They are weaker in a detached garage or shop: Bluetooth range, vendor lock-in, and alerts that mostly stay in-app. ThermalTrace assumes you bring an ESP32, then gives household freeze and leak routing and a season of exportable history.",
     photoId: "garage-workbench",
     whenThermalTrace: [
-      "You want ESP/Arduino probes you control (not only vendor pods)",
+      "You want ESP, Pico W, STM32, CH32V, or Arduino probes you control (not only vendor pods)",
       "Freeze and leak alerts need SMS, webhooks, or household routing",
       "You care about CSV/history across a whole cold season",
     ],
@@ -70,7 +70,7 @@ export const compareGuides: CompareGuide[] = [
       "Garage Wi-Fi is impossible and Bluetooth range is enough",
     ],
     rows: [
-      { capability: "Hardware", thermaltrace: "BYO ESP/Arduino", other: "Govee pods" },
+      { capability: "Hardware", thermaltrace: "BYO ESP / Pico / Arduino", other: "Govee pods" },
       { capability: "Garage / detached spaces", thermaltrace: "Designed for it", other: "Hit-or-miss range" },
       { capability: "Alert channels", thermaltrace: "Email, SMS, push, chat, webhooks + time-to-freeze clock", other: "Mostly app push" },
       { capability: "Data export", thermaltrace: "CSV / API (paid tiers)", other: "Limited" },

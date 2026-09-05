@@ -43,6 +43,13 @@ describe("about gap guides", () => {
       "ingest-and-webhooks",
       "kit-qr-onboarding",
       "esp32-freeze-kit",
+      "pico-w-ingest",
+      "stm32-zephyr-ingest",
+      "ch32v-riscv-ingest",
+      "avr-asm-ingest",
+      "cellular-ingest",
+      "teensy41-ingest",
+      "pic18-ethernet-ingest",
       "accounts-and-dashboard",
       "install-pwa",
     ]) {

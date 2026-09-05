@@ -285,6 +285,13 @@ export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
   "esp32-freeze-kit": "arduino-uno-board",
   "esp32-ota-firmware": "arduino-uno-board",
   "esp32-web-flash": "arduino-uno-board",
+  "pico-w-ingest": "arduino-uno-board",
+  "stm32-zephyr-ingest": "ethernet-cable",
+  "ch32v-riscv-ingest": "ethernet-cable",
+  "avr-asm-ingest": "ethernet-cable",
+  "cellular-ingest": "arduino-uno-board",
+  "pic18-ethernet-ingest": "ethernet-cable",
+  "teensy41-ingest": "ethernet-cable",
 
   // Relay / network / data path
   "debugging-stale-readings": "ethernet-cable",
