@@ -1,11 +1,12 @@
 ---
 import AccessoryProduct from "../layouts/AccessoryProduct.astro";
-import { affiliateHref, commerceLinkRel } from "../lib/affiliateLinks";
+import { commerceLinkRel } from "../lib/affiliateLinks";
+import { BOM } from "../lib/bomLinks";
 import { BRAND_NAME } from "../lib/brand";
 
-const NFC = affiliateHref("https://www.adafruit.com/product/480");
-const LABELS = affiliateHref("https://www.amazon.com/s?k=waterproof+QR+code+sticker+labels");
-const NFC_AMAZON = affiliateHref("https://www.amazon.com/s?k=NTAG215+NFC+sticker");
+const NFC = BOM.adafruitNfc;
+const LABELS = BOM.amazonQrLabelsSearch;
+const NFC_AMAZON = BOM.amazonNtagSearch;
 ---
 <AccessoryProduct
   accessoryId="kit-labels"

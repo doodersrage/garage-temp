@@ -1,13 +1,14 @@
 ---
 import AccessoryProduct from "../layouts/AccessoryProduct.astro";
-import { affiliateHref, commerceLinkRel } from "../lib/affiliateLinks";
+import { commerceLinkRel } from "../lib/affiliateLinks";
+import { BOM } from "../lib/bomLinks";
 import { BRAND_NAME } from "../lib/brand";
 
-const DS18B20 = affiliateHref("https://www.adafruit.com/product/381");
-const CLIPS = affiliateHref("https://www.amazon.com/s?k=pipe+clamp+cable+tie+mount");
-const ZIP = affiliateHref("https://www.amazon.com/s?k=uv+resistant+zip+ties+8+inch");
-const RESISTOR = affiliateHref("https://www.amazon.com/s?k=4.7k+ohm+resistor+through+hole");
-const PADS = affiliateHref("https://www.amazon.com/s?k=3M+VHB+adhesive+pads+electronics");
+const DS18B20 = BOM.adafruitDs18b20;
+const CLIPS = BOM.amazonPipeMountSearch;
+const ZIP = BOM.amazonZipTiesSearch;
+const RESISTOR = BOM.amazonResistor4k7;
+const PADS = BOM.amazonVhbSearch;
 ---
 <AccessoryProduct
   accessoryId="probe-mount-kit"
@@ -53,6 +54,8 @@ const PADS = affiliateHref("https://www.amazon.com/s?k=3M+VHB+adhesive+pads+elec
             <td>1m+ lead, stainless tip for pipe / crawlspace.</td>
             <td>
               <a class="text-link" href={DS18B20} target="_blank" rel={commerceLinkRel(DS18B20)}>Adafruit DS18B20</a>
+              ·
+              <a class="text-link" href={BOM.amazonDs18b20} target="_blank" rel={commerceLinkRel(BOM.amazonDs18b20)}>Amazon</a>
             </td>
           </tr>
           <tr>

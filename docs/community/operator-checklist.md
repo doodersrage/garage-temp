@@ -58,6 +58,7 @@ Check what's missing locally: `pnpm operator:check`
 - [x] Set `PUBLIC_AMAZON_ASSOCIATE_TAG` in `.env` / Worker secrets (`pnpm secrets:push`) — tag live on Worker
 - Adafruit has no affiliate program — do not invent an Adafruit tag; those shop links stay direct
 - Unset Amazon tag keeps clean amazon.com URLs; shared disclosure (`AffiliateDisclosure`) covers kit / BOM pages
+- Prefer `/dp/{ASIN}` product links in `src/lib/bomLinks.ts`; keep search URLs for niche / commodity parts
 
 ## Shipped in product (no operator action)
 

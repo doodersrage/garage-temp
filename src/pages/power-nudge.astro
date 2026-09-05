@@ -1,10 +1,11 @@
 ---
 import AccessoryProduct from "../layouts/AccessoryProduct.astro";
-import { affiliateHref, commerceLinkRel } from "../lib/affiliateLinks";
+import { commerceLinkRel } from "../lib/affiliateLinks";
+import { BOM } from "../lib/bomLinks";
 import { BRAND_NAME } from "../lib/brand";
 
-const ESP32 = affiliateHref("https://www.adafruit.com/product/3405");
-const OPTOS = affiliateHref("https://www.amazon.com/s?k=USB+power+detector+relay+module");
+const ESP32 = BOM.adafruitEsp32;
+const OPTOS = BOM.amazonPowerDetectorSearch;
 ---
 <AccessoryProduct
   accessoryId="power-nudge"

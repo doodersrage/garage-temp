@@ -1,23 +1,20 @@
 ---
 import AboutArticle from "../../components/AboutArticle.astro";
-import { affiliateHref, commerceLinkRel } from "../../lib/affiliateLinks";
+import { commerceLinkRel } from "../../lib/affiliateLinks";
+import { BOM } from "../../lib/bomLinks";
 import { getAboutPage } from "../../lib/aboutPages";
 import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
 
 const page = getAboutPage("pico-w-ingest")!;
 const hero = getAboutHeroPhoto(page.slug);
 
-const ADAFRUIT_PICO_W = affiliateHref("https://www.adafruit.com/product/5526");
-const ADAFRUIT_PICO_2W = affiliateHref("https://www.adafruit.com/product/6087");
-const ADAFRUIT_FEATHER_RP2040_WIFI = affiliateHref("https://www.adafruit.com/product/5546");
-const ADAFRUIT_DS18B20 = affiliateHref("https://www.adafruit.com/product/381");
-const AMAZON_PICO_W = affiliateHref("https://www.amazon.com/s?k=Raspberry+Pi+Pico+W");
-const AMAZON_DS18B20 = affiliateHref(
-  "https://www.amazon.com/s?k=waterproof+DS18B20+temperature+probe+1m",
-);
-const AMAZON_RESISTOR = affiliateHref(
-  "https://www.amazon.com/s?k=4.7k+ohm+resistor+through+hole",
-);
+const ADAFRUIT_PICO_W = BOM.adafruitPicoW;
+const ADAFRUIT_PICO_2W = BOM.adafruitPico2W;
+const ADAFRUIT_FEATHER_RP2040_WIFI = BOM.adafruitFeatherRp2040Wifi;
+const ADAFRUIT_DS18B20 = BOM.adafruitDs18b20;
+const AMAZON_PICO_W = BOM.amazonPicoW;
+const AMAZON_DS18B20 = BOM.amazonDs18b20;
+const AMAZON_RESISTOR = BOM.amazonResistor4k7;
 ---
 <AboutArticle
   slug={page.slug}
@@ -62,7 +59,7 @@ const AMAZON_RESISTOR = affiliateHref(
             ·
             <a class="text-link" href={ADAFRUIT_PICO_2W} target="_blank" rel={commerceLinkRel(ADAFRUIT_PICO_2W)}>Pico 2 W</a>
             ·
-            <a class="text-link" href={AMAZON_PICO_W} target="_blank" rel={commerceLinkRel(AMAZON_PICO_W)}>Amazon search</a>
+            <a class="text-link" href={AMAZON_PICO_W} target="_blank" rel={commerceLinkRel(AMAZON_PICO_W)}>Amazon</a>
           </td>
         </tr>
         <tr>
@@ -78,14 +75,14 @@ const AMAZON_RESISTOR = affiliateHref(
           <td>
             <a class="text-link" href={ADAFRUIT_DS18B20} target="_blank" rel={commerceLinkRel(ADAFRUIT_DS18B20)}>Adafruit DS18B20</a>
             ·
-            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={commerceLinkRel(AMAZON_DS18B20)}>Amazon search</a>
+            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={commerceLinkRel(AMAZON_DS18B20)}>Amazon</a>
           </td>
         </tr>
         <tr>
           <th scope="row">4.7kΩ resistor</th>
           <td>Pull-up from DS18B20 data to 3.3V. Do not power the probe from 5V on a Pico.</td>
           <td>
-            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={commerceLinkRel(AMAZON_RESISTOR)}>Amazon 4.7k search</a>
+            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={commerceLinkRel(AMAZON_RESISTOR)}>Amazon 4.7k</a>
           </td>
         </tr>
       </tbody>

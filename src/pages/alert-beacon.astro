@@ -1,13 +1,14 @@
 ---
 import AccessoryProduct from "../layouts/AccessoryProduct.astro";
-import { affiliateHref, commerceLinkRel } from "../lib/affiliateLinks";
+import { commerceLinkRel } from "../lib/affiliateLinks";
+import { BOM } from "../lib/bomLinks";
 import { BRAND_NAME } from "../lib/brand";
 import { BAYBUDDY_NAME } from "../lib/bayBuddy";
 import { CLAIM_PUCK_REPO_URL } from "../lib/claimPuck";
 
-const NEOPIXEL = affiliateHref("https://www.adafruit.com/product/1426");
-const RP2040 = affiliateHref("https://www.adafruit.com/product/5698");
-const AMAZON_NEOPIXEL = affiliateHref("https://www.amazon.com/s?k=WS2812+NeoPixel+stick");
+const NEOPIXEL = BOM.adafruitNeopixelStick;
+const RP2040 = BOM.adafruitRp2040;
+const AMAZON_NEOPIXEL = BOM.amazonNeopixelStick;
 ---
 <AccessoryProduct
   accessoryId="alert-beacon"
@@ -61,7 +62,7 @@ const AMAZON_NEOPIXEL = affiliateHref("https://www.amazon.com/s?k=WS2812+NeoPixe
             <td>
               <a class="text-link" href={NEOPIXEL} target="_blank" rel={commerceLinkRel(NEOPIXEL)}>Adafruit stick</a>
               ·
-              <a class="text-link" href={AMAZON_NEOPIXEL} target="_blank" rel={commerceLinkRel(AMAZON_NEOPIXEL)}>Amazon search</a>
+              <a class="text-link" href={AMAZON_NEOPIXEL} target="_blank" rel={commerceLinkRel(AMAZON_NEOPIXEL)}>Amazon</a>
             </td>
           </tr>
           <tr>

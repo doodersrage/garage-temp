@@ -1,23 +1,20 @@
 ---
 import AboutArticle from "../../components/AboutArticle.astro";
-import { affiliateHref, commerceLinkRel } from "../../lib/affiliateLinks";
+import { commerceLinkRel } from "../../lib/affiliateLinks";
+import { BOM } from "../../lib/bomLinks";
 import { getAboutPage } from "../../lib/aboutPages";
 import { getAboutHeroPhoto } from "../../lib/aboutPhotos";
 
 const page = getAboutPage("avr-asm-ingest")!;
 const hero = getAboutHeroPhoto(page.slug);
 
-const ADAFRUIT_UNO = affiliateHref("https://www.adafruit.com/product/50");
-const ADAFRUIT_ETH = affiliateHref("https://www.adafruit.com/product/201");
-const ADAFRUIT_DS18B20 = affiliateHref("https://www.adafruit.com/product/381");
-const AMAZON_UNO = affiliateHref("https://www.amazon.com/s?k=Arduino+Uno+R3");
-const AMAZON_ETH = affiliateHref("https://www.amazon.com/s?k=W5100+Ethernet+shield+Arduino");
-const AMAZON_DS18B20 = affiliateHref(
-  "https://www.amazon.com/s?k=waterproof+DS18B20+temperature+probe+1m",
-);
-const AMAZON_RESISTOR = affiliateHref(
-  "https://www.amazon.com/s?k=4.7k+ohm+resistor+through+hole",
-);
+const ADAFRUIT_UNO = BOM.adafruitUno;
+const ADAFRUIT_ETH = BOM.adafruitEthShield;
+const ADAFRUIT_DS18B20 = BOM.adafruitDs18b20;
+const AMAZON_UNO = BOM.amazonUno;
+const AMAZON_ETH = BOM.amazonEthShield;
+const AMAZON_DS18B20 = BOM.amazonDs18b20;
+const AMAZON_RESISTOR = BOM.amazonResistor4k7;
 ---
 <AboutArticle
   slug={page.slug}
@@ -60,7 +57,7 @@ const AMAZON_RESISTOR = affiliateHref(
           <td>
             <a class="text-link" href={ADAFRUIT_UNO} target="_blank" rel={commerceLinkRel(ADAFRUIT_UNO)}>Adafruit Uno</a>
             ·
-            <a class="text-link" href={AMAZON_UNO} target="_blank" rel={commerceLinkRel(AMAZON_UNO)}>Amazon search</a>
+            <a class="text-link" href={AMAZON_UNO} target="_blank" rel={commerceLinkRel(AMAZON_UNO)}>Amazon</a>
           </td>
         </tr>
         <tr>
@@ -69,7 +66,7 @@ const AMAZON_RESISTOR = affiliateHref(
           <td>
             <a class="text-link" href={ADAFRUIT_ETH} target="_blank" rel={commerceLinkRel(ADAFRUIT_ETH)}>Adafruit Ethernet</a>
             ·
-            <a class="text-link" href={AMAZON_ETH} target="_blank" rel={commerceLinkRel(AMAZON_ETH)}>Amazon search</a>
+            <a class="text-link" href={AMAZON_ETH} target="_blank" rel={commerceLinkRel(AMAZON_ETH)}>Amazon</a>
           </td>
         </tr>
         <tr>
@@ -78,14 +75,14 @@ const AMAZON_RESISTOR = affiliateHref(
           <td>
             <a class="text-link" href={ADAFRUIT_DS18B20} target="_blank" rel={commerceLinkRel(ADAFRUIT_DS18B20)}>Adafruit DS18B20</a>
             ·
-            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={commerceLinkRel(AMAZON_DS18B20)}>Amazon search</a>
+            <a class="text-link" href={AMAZON_DS18B20} target="_blank" rel={commerceLinkRel(AMAZON_DS18B20)}>Amazon</a>
           </td>
         </tr>
         <tr>
           <th scope="row">4.7kΩ resistor</th>
           <td>Pull-up from DS18B20 data to 5V (Uno is a 5V board).</td>
           <td>
-            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={commerceLinkRel(AMAZON_RESISTOR)}>Amazon 4.7k search</a>
+            <a class="text-link" href={AMAZON_RESISTOR} target="_blank" rel={commerceLinkRel(AMAZON_RESISTOR)}>Amazon 4.7k</a>
           </td>
         </tr>
       </tbody>

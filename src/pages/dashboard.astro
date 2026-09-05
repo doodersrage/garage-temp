@@ -155,14 +155,13 @@ const [
   countUnacknowledgedAlerts(user.id),
 ]);
 
-// Heal missing last_alert_sent_at when a test (or real) alert already delivered.
-const { settings: alertSettings } = await ensureAlertDeliveryEvidence(
-  user.id,
-  alertSettingsLoaded,
-);
-
 const weatherConfig = personalWeatherConfigFromPreferences(preferences);
-const weatherSnapshot = await fetchWeatherSnapshotForConfig(weatherConfig);
+
+// Heal alert evidence and resolve weather in parallel (weather only needs preferences).
+const [{ settings: alertSettings }, weatherSnapshot] = await Promise.all([
+  ensureAlertDeliveryEvidence(user.id, alertSettingsLoaded),
+  fetchWeatherSnapshotForConfig(weatherConfig),
+]);
 
 const [
   members,
@@ -318,19 +317,20 @@ const [
   showInsights ? loadEnergyOverview(devices) : Promise.resolve(null),
   showInsights ? loadPowerOffSessions24h(devices) : Promise.resolve([]),
   showInsights ? loadMotionSessions24h(devices) : Promise.resolve([]),
-  weatherHasCoords && weatherSnapshot
+  // Time-to-freeze UI is hidden during first-run — skip OpenMeteo until then.
+  !firstRunFocus && weatherHasCoords && weatherSnapshot
     ? fetchOpenMeteoHourlyWindow(weatherSnapshot.lat!, weatherSnapshot.lon!).catch(() => [])
     : Promise.resolve([]),
 ]);
 
 const [thermostatOverview, houseChartOverlay] = await Promise.all([
-  thermostatConnections[0] && household.householdId
+  !firstRunFocus && thermostatConnections[0] && household.householdId
     ? fetchThermostatContextWithStatus(
         household.householdId,
         thermostatConnections[0].provider,
       )
     : Promise.resolve(null),
-  household.householdId
+  !firstRunFocus && household.householdId
     ? fetchHouseChartOverlay({
         householdId: household.householdId,
         days: 7,
@@ -534,14 +534,16 @@ const hasTestAlert = Boolean(lastAlertAt);
 const showProbeSimulatorNudge =
   canEdit &&
   latest.length === 0 &&
-  !onboardingDismissed;
+  !onboardingDismissed &&
+  !showDemoPullNudge;
 
 const showNestConnectNudge =
   canEdit &&
   !firstRunFocus &&
   thermostatConnections.length === 0 &&
   (latest.length === 0 || !onboardingDismissed) &&
-  !showDemoPullNudge;
+  !showDemoPullNudge &&
+  !showProbeSimulatorNudge;
 
 const showOverviewPwaNudge =
   canEdit &&
@@ -623,7 +625,18 @@ const primaryBannerIds = new Set(
 const secondaryBannerIds = new Set(
   activeOverviewBanners.slice(1).map((banner) => banner.id),
 );
-const hasSecondaryBanners = secondaryBannerIds.size > 0;
+const hasSecondaryBanners =
+  secondaryBannerIds.size > 0 ||
+  showNestConnectNudge ||
+  showOverviewPwaNudge ||
+  showAndroidNudge ||
+  showBayBuddyNudge;
+const secondaryRecommendationCount =
+  secondaryBannerIds.size +
+  (showNestConnectNudge ? 1 : 0) +
+  (showOverviewPwaNudge ? 1 : 0) +
+  (showAndroidNudge ? 1 : 0) +
+  (showBayBuddyNudge ? 1 : 0);
 
 const garageRisk = computeGarageRiskStatus({
   hasDevices,
@@ -691,10 +704,6 @@ const garageRisk = computeGarageRiskStatus({
 
     <DemoPullNudge show={showDemoPullNudge} />
     <ProbeSimulatorNudge show={showProbeSimulatorNudge} />
-    <NestConnectNudge
-      show={showNestConnectNudge}
-      nestEntitled={entitlements.canUseThermostatIntegration}
-    />
 
     <HouseholdSwitcher
       households={userHouseholds.households}
@@ -760,9 +769,13 @@ const garageRisk = computeGarageRiskStatus({
     {hasSecondaryBanners && (
       <details class="card dashboard-recommendations">
         <summary class="dashboard-recommendations-summary">
-          More recommendations ({secondaryBannerIds.size})
+          More recommendations ({secondaryRecommendationCount})
         </summary>
         <div class="dashboard-recommendations-body space-y-4">
+          <NestConnectNudge
+            show={showNestConnectNudge}
+            nestEntitled={entitlements.canUseThermostatIntegration}
+          />
           <OverviewPwaNudge show={showOverviewPwaNudge} />
           <DashboardAndroidNudge show={showAndroidNudge} />
           <DashboardBayBuddyNudge show={showBayBuddyNudge} />

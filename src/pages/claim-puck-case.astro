@@ -1,12 +1,13 @@
 ---
 import AccessoryProduct from "../layouts/AccessoryProduct.astro";
-import { affiliateHref, commerceLinkRel } from "../lib/affiliateLinks";
+import { commerceLinkRel } from "../lib/affiliateLinks";
+import { BOM } from "../lib/bomLinks";
 import { BRAND_NAME } from "../lib/brand";
 import { CLAIM_PUCK_REPO_URL } from "../lib/claimPuck";
 
-const ZERO = affiliateHref("https://www.amazon.com/s?k=Waveshare+RP2040-Zero");
-const BUTTON = affiliateHref("https://www.adafruit.com/product/1119");
-const DIFFUSER = affiliateHref("https://www.amazon.com/s?k=LED+diffuser+sheet+acrylic");
+const ZERO = BOM.amazonRp2040Zero;
+const BUTTON = BOM.adafruitButton;
+const DIFFUSER = BOM.amazonDiffuserSearch;
 ---
 <AccessoryProduct
   accessoryId="claim-puck-case"
@@ -53,7 +54,7 @@ const DIFFUSER = affiliateHref("https://www.amazon.com/s?k=LED+diffuser+sheet+ac
             <th scope="row">Waveshare RP2040-Zero</th>
             <td>Claim puck MCU.</td>
             <td>
-              <a class="text-link" href={ZERO} target="_blank" rel={commerceLinkRel(ZERO)}>Amazon search</a>
+              <a class="text-link" href={ZERO} target="_blank" rel={commerceLinkRel(ZERO)}>Amazon</a>
             </td>
           </tr>
           <tr>

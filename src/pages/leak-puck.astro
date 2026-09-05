@@ -1,11 +1,12 @@
 ---
 import AccessoryProduct from "../layouts/AccessoryProduct.astro";
-import { affiliateHref, commerceLinkRel } from "../lib/affiliateLinks";
+import { commerceLinkRel } from "../lib/affiliateLinks";
+import { BOM } from "../lib/bomLinks";
 import { BRAND_NAME } from "../lib/brand";
 
-const LEAK = affiliateHref("https://www.adafruit.com/product/328");
-const ESP32 = affiliateHref("https://www.adafruit.com/product/3405");
-const AMAZON_LEAK = affiliateHref("https://www.amazon.com/s?k=water+leak+sensor+probe+arduino");
+const LEAK = BOM.adafruitLeak;
+const ESP32 = BOM.adafruitEsp32;
+const AMAZON_LEAK = BOM.amazonLeakSearch;
 ---
 <AccessoryProduct
   accessoryId="leak-puck"
