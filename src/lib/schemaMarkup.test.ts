@@ -5,6 +5,7 @@ import {
   getArticleSchema,
   getBrandDefinition,
   getHowToSchema,
+  getItemListSchema,
   getWebSiteSchema,
 } from "./schemaMarkup";
 
@@ -48,6 +49,19 @@ describe("schemaMarkup", () => {
     });
     expect(howTo?.["@type"]).toBe("HowTo");
     expect(howTo?.step).toHaveLength(2);
+  });
+
+  it("builds ItemList schema for hubs", () => {
+    const list = getItemListSchema({
+      pageUrl: "https://thermaltrace.dev/stories",
+      name: "Stories",
+      items: [
+        { name: "Garage freeze", url: "https://thermaltrace.dev/stories/garage-freeze-alert" },
+        { name: "Cabin", url: "https://thermaltrace.dev/stories/cabin-winter-watch" },
+      ],
+    });
+    expect(list?.["@type"]).toBe("ItemList");
+    expect(list?.numberOfItems).toBe(2);
   });
 
   it("exports a brand definition for AEO", () => {

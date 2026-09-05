@@ -27,6 +27,8 @@ describe("sitemapPages", () => {
     expect(paths).not.toContain("/dashboard/alerts");
     expect(paths).not.toContain("/signin");
     expect(paths).not.toContain("/embed/freeze-map");
+    expect(paths).not.toContain("/about/astro-server-side-rendering");
+    expect(paths).not.toContain("/about/nextjs-monitoring-dashboards");
   });
 
   it("includes traffic pages", () => {

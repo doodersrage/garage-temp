@@ -8,6 +8,7 @@ import { guidesHubPhotos } from "../lib/aboutPhotos";
 import {
   getBreadcrumbSchema,
   getFaqPageSchema,
+  getItemListSchema,
   resolvePageUrl,
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
@@ -32,12 +33,25 @@ const guidesFaqs = [
       "Case studies: thermaltrace.dev/stories. Versus DIY MQTT, Govee, Tempest, Nest, and Ecobee: thermaltrace.dev/compare. Home Assistant: thermaltrace.dev/integrations.",
   },
 ];
+const guideListItems = categories.flatMap((category) =>
+  category.links.map((link) => ({
+    name: link.label,
+    url: resolvePageUrl(siteUrl, link.href),
+  })),
+);
 const schema = [
   getBreadcrumbSchema(siteUrl, [
     { name: "Home", path: "/" },
     { name: "Guides", path: "/guides" },
   ]),
   getFaqPageSchema(pageUrl, guidesFaqs),
+  getItemListSchema({
+    pageUrl,
+    name: "ThermalTrace guides by job",
+    description:
+      "Hardware setup, freeze and flood alerts, household sharing, and API guides.",
+    items: guideListItems,
+  }),
 ].filter(Boolean) as Record<string, unknown>[];
 
 const stripPhotoIds = guidesHubPhotos.map((p) => p.id);

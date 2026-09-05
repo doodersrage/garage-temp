@@ -245,6 +245,30 @@ export function getHowToSchema(options: {
   };
 }
 
+/** ItemList for hub pages (guides categories, stories index). */
+export function getItemListSchema(options: {
+  pageUrl: string;
+  name: string;
+  description?: string;
+  items: Array<{ name: string; url: string }>;
+}) {
+  if (options.items.length === 0) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: options.name,
+    ...(options.description ? { description: options.description } : {}),
+    url: options.pageUrl,
+    numberOfItems: options.items.length,
+    itemListElement: options.items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      url: item.url,
+    })),
+  };
+}
+
 export function getSiteSchemas(options: {
   siteUrl: string;
   pageUrl: string;

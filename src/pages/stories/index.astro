@@ -6,6 +6,7 @@ import EditorialPhotoStrip from "../../components/EditorialPhotoStrip.astro";
 import { storiesHubPhotoIds } from "../../lib/aboutPhotos";
 import {
   getBreadcrumbSchema,
+  getItemListSchema,
   resolvePageUrl,
   resolveSiteUrl,
 } from "../../lib/schemaMarkup";
@@ -21,6 +22,15 @@ const schema = [
     { name: "Home", path: "/" },
     { name: "Customer stories", path: "/stories" },
   ]),
+  getItemListSchema({
+    pageUrl,
+    name: "ThermalTrace customer stories",
+    description,
+    items: stories.map((story) => ({
+      name: story.title,
+      url: resolvePageUrl(siteUrl, story.path),
+    })),
+  }),
 ].filter(Boolean) as Record<string, unknown>[];
 ---
 <Layout

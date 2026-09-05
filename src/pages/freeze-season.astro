@@ -3,6 +3,7 @@ export const prerender = false;
 
 import Layout from "../layouts/Layout.astro";
 import PageHeader from "../components/PageHeader.astro";
+import FaqSection from "../components/FaqSection.astro";
 import {
   listLatestFreezeMapSnapshots,
 } from "../lib/freezeMap";
@@ -14,6 +15,8 @@ import { COLD_SNAP_CHECKLIST } from "../lib/coldSnapChecklist";
 import { getAuthFromCookies } from "../lib/auth";
 import {
   getBreadcrumbSchema,
+  getFaqPageSchema,
+  getHowToSchema,
   resolvePageUrl,
   resolveSiteUrl,
 } from "../lib/schemaMarkup";
@@ -39,18 +42,64 @@ const seasonLabel = inFreezeSeason ? "Freeze season is here" : "Get ready before
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/freeze-season");
+const description =
+  "Set freeze alerts before the cold snap. Live community freeze map, ESP probe ingest, and email (SMS on Pro) when indoor temps drop toward 32°F.";
+
+const freezeSeasonFaqs = [
+  {
+    question: "When is freeze season for ThermalTrace?",
+    answer:
+      "Treat November through March as primary freeze season in most of the contiguous US. Coastal and mountain climates vary; use your coldest nights and NWS freeze warnings as the real signal.",
+  },
+  {
+    question: "Why not rely on outdoor weather alone?",
+    answer:
+      "Outdoor stations measure the yard. Pipes freeze in unheated bays, crawlspaces, and shops that lag outdoor air. Put a probe where the water is, then use outdoor weather for context.",
+  },
+  {
+    question: "What should I do tonight before a cold snap?",
+    answer:
+      "Drip exterior-wall faucets if lines run cold, close propped doors, insulate spigots, confirm freeze alerts with a test, and verify a probe sits in the coldest corner near pipes. Checklist on this page.",
+  },
+  {
+    question: "Where is the ESP32 parts list?",
+    answer:
+      "thermaltrace.dev/about/esp32-freeze-kit — ESP32 + waterproof DS18B20 BOM, wiring, and flash steps.",
+  },
+];
+
+const freezeSeasonHowTo = getHowToSchema({
+  name: "Prepare ThermalTrace for a freeze night",
+  description,
+  pageUrl,
+  totalTime: "PT30M",
+  steps: [
+    ...COLD_SNAP_CHECKLIST.map((text, index) => ({
+      name: `Checklist step ${index + 1}`,
+      text,
+    })),
+    {
+      name: "Opt into the freeze map (optional)",
+      text: "Share anonymized city-level probe samples on the public freeze map so neighbors see regional risk.",
+      url: `${siteUrl}/freeze-map`,
+    },
+  ],
+});
+
 const schema = [
   getBreadcrumbSchema(siteUrl, [
     { name: "Home", path: "/" },
     { name: "Freeze season", path: "/freeze-season" },
   ]),
-];
+  getFaqPageSchema(pageUrl, freezeSeasonFaqs),
+  freezeSeasonHowTo,
+].filter(Boolean) as Record<string, unknown>[];
 ---
 <Layout
   title="Freeze season probe watch"
-  description="Set freeze alerts before the cold snap. Live community freeze map, ESP probe ingest, and email (SMS on Pro) when indoor temps drop toward 32°F."
+  description={description}
   schema={schema}
-  speakableSelectors={[".page-header-title", ".page-header-lede"]}
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
 >
   <div class="page-shell page-stack">
     <PageHeader
@@ -111,5 +160,10 @@ const schema = [
         <a class="btn-ghost" href="/demo">Try the live demo</a>
       </div>
     </section>
+
+    <FaqSection
+      faqs={freezeSeasonFaqs}
+      lede="Seasonal freeze prep for homeowners with probes in cold spaces."
+    />
   </div>
 </Layout>

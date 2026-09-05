@@ -445,6 +445,78 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
         "In your account metadata (Dashboard → Settings), same as display preferences, not in the public git repo.",
     },
   ],
+  "astro-server-side-rendering": [
+    {
+      question: "Does ThermalTrace use Astro SSR?",
+      answer:
+        "Yes. Marketing, about, and dashboard shells render on the Cloudflare Workers edge via the Astro adapter for fast first paint.",
+    },
+    {
+      question: "Is everything static HTML?",
+      answer:
+        "No. Many routes are SSR. Interactive pieces hydrate as islands; see thermaltrace.dev/about/astro-islands-and-hydration.",
+    },
+  ],
+  "astro-islands-and-hydration": [
+    {
+      question: "What is an Astro island on ThermalTrace?",
+      answer:
+        "A small client component (charts, contact form, probe demo) hydrated only where needed, while the surrounding page stays server-rendered.",
+    },
+    {
+      question: "Do I need a full React SPA for monitoring?",
+      answer:
+        "ThermalTrace does not. Prefer SSR + islands for public pages; keep interactivity local. Product home: thermaltrace.dev.",
+    },
+  ],
+  "nextjs-monitoring-dashboards": [
+    {
+      question: "Why is ThermalTrace not built on Next.js?",
+      answer:
+        "Astro on Cloudflare Workers fits edge SSR and light islands for this product. Next.js App Router is a strong alternative for auth-heavy React dashboards — see the comparison notes on this page.",
+    },
+    {
+      question: "Can I still use ThermalTrace with a Next.js site?",
+      answer:
+        "Yes as a customer: probes POST to ThermalTrace ingest regardless of your other apps. ThermalTrace remains the hosted alerts and history layer.",
+    },
+  ],
+  "node-express-api-patterns": [
+    {
+      question: "Does ThermalTrace run Express?",
+      answer:
+        "No. Public APIs and pages run on Cloudflare Workers with Astro routes. Express is discussed here for comparison with long-running Node APIs.",
+    },
+    {
+      question: "Where is the HTTP API?",
+      answer:
+        "thermaltrace.dev/docs/api and openapi.yaml — ingest, metrics, webhooks, and claim-puck endpoints.",
+    },
+  ],
+  "comparing-full-stack-options": [
+    {
+      question: "Which stack does ThermalTrace use?",
+      answer:
+        "Astro SSR on Cloudflare Workers, Supabase for data, and probe ingest over HTTPS. Alternatives (Next, Express) are compared on this page.",
+    },
+    {
+      question: "Should I rebuild ThermalTrace myself?",
+      answer:
+        "Only if you want to own ops. Most homeowners use the hosted product: thermaltrace.dev/pricing.",
+    },
+  ],
+  "relay-security-and-access": [
+    {
+      question: "Do ESP32 freeze probes need a public IP?",
+      answer:
+        "No for push ingest: the board POSTs outbound HTTPS to ThermalTrace. Pull feeds need a reachable HTTPS JSON URL if you use that path.",
+    },
+    {
+      question: "How should I harden a DIY JSON relay?",
+      answer:
+        "Terminate TLS, restrict source IPs when possible, and avoid embedding ingest keys in public repos. Prefer ThermalTrace push keys from Dashboard → Devices.",
+    },
+  ],
   "thermostat-oauth": [
     {
       question: "Which thermostats connect to ThermalTrace?",
