@@ -1,0 +1,86 @@
+---
+import AccessoryProduct from "../layouts/AccessoryProduct.astro";
+import { affiliateHref, COMMERCE_LINK_REL } from "../lib/affiliateLinks";
+import { BRAND_NAME } from "../lib/brand";
+
+const ESP32 = affiliateHref("https://www.adafruit.com/product/3405");
+const OPTOS = affiliateHref("https://www.amazon.com/s?k=USB+power+detector+relay+module");
+---
+<AccessoryProduct
+  accessoryId="power-nudge"
+  faqKey="powerNudge"
+  title="Power outage nudge"
+  description={`USB-mains or UPS sense contact that POSTs power lost/restored to ${BRAND_NAME}. Know when the bay went dark — not a freeze probe.`}
+>
+  <a slot="actions" class="btn-primary" href="/dashboard/temperature">Devices</a>
+  <a slot="actions" class="btn-secondary" href="/about/debugging-stale-readings">Stale readings</a>
+  <a
+    slot="actions"
+    class="btn-ghost"
+    href="https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/power_sense_ingest"
+    target="_blank"
+    rel="noreferrer"
+  >
+    Sketch ↗
+  </a>
+
+  <section class="card">
+    <h2 class="card-title">What it is</h2>
+    <ul class="text-sm space-y-2 mb-0">
+      <li>
+        <strong>Does:</strong> POSTs <code>{"{ \"power1\": true }"}</code> while mains/USB sense is present,
+        <code>false</code> when lost (keys with power/relay import as power sensors).
+      </li>
+      <li>
+        <strong>Does not:</strong> Keep your ESP32 alive through a blackout by itself. Power the reporter from a UPS
+        or always-on circuit if you need an “outage started” POST; otherwise
+        <a class="text-link" href="/about/debugging-stale-readings">stale probe detection</a>
+        covers silence when the freeze probe also dies.
+      </li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="card-title">Parts</h2>
+    <div class="overflow-x-auto">
+      <table class="plan-comparison-table">
+        <caption class="sr-only">Power nudge parts</caption>
+        <thead>
+          <tr>
+            <th scope="col">Part</th>
+            <th scope="col">Why</th>
+            <th scope="col">Buy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">ESP32 on UPS / always-on</th>
+            <td>Must stay up to report mains loss on another circuit.</td>
+            <td>
+              <a class="text-link" href={ESP32} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit ESP32</a>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">USB / mains sense input</th>
+            <td>Opto or relay module: GPIO4 low = power present (active-low in sample).</td>
+            <td>
+              <a class="text-link" href={OPTOS} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="card-title">Setup</h2>
+    <ol class="text-sm space-y-2 pl-5 list-decimal mb-0">
+      <li>Flash <code>sketches/arduino/power_sense_ingest/</code> with Wi‑Fi + ingest URL.</li>
+      <li>Unplug the sensed USB/mains feed; confirm <code>power1</code> flips and POSTs.</li>
+      <li>
+        Combine with freeze probes: outage + cold snap is when pipes are most at risk. Use custom alert rules if you
+        want SMS on power loss alone.
+      </li>
+    </ol>
+  </section>
+</AccessoryProduct>

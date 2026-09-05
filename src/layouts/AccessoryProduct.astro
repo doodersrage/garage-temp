@@ -1,0 +1,98 @@
+---
+/**
+ * Shared chrome for ThermalTrace hardware accessory product pages.
+ */
+import Layout from "./Layout.astro";
+import PageHeader from "./PageHeader.astro";
+import FaqSection from "./FaqSection.astro";
+import {
+  type AccessoryId,
+  accessoriesExcluding,
+  getAccessory,
+} from "../lib/accessories";
+import {
+  getBreadcrumbSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+import {
+  getMarketingFaqs,
+  getMarketingFaqSchema,
+  type MarketingFaqKey,
+} from "../lib/marketingFaqs";
+
+interface Props {
+  accessoryId: AccessoryId;
+  faqKey: MarketingFaqKey;
+  title: string;
+  description: string;
+  kicker?: string;
+  faqTitle?: string;
+  faqLede?: string;
+}
+
+const {
+  accessoryId,
+  faqKey,
+  title,
+  description,
+  kicker = "Hardware accessory",
+  faqTitle = `${title} FAQ`,
+  faqLede = "What it does, what it does not replace, and how it fits ThermalTrace.",
+} = Astro.props;
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const accessory = getAccessory(accessoryId);
+const pageUrl = resolvePageUrl(siteUrl, accessory.path);
+const faqs = getMarketingFaqs(faqKey);
+const related = accessoriesExcluding(accessoryId);
+
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: "Accessories", path: "/accessories" },
+    { name: title, path: accessory.path },
+  ]),
+  getMarketingFaqSchema(pageUrl, faqKey),
+].filter(Boolean) as Record<string, unknown>[];
+---
+<Layout
+  title={title}
+  description={description}
+  schema={schema}
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
+>
+  <div class="page-shell page-stack">
+    <PageHeader kicker={kicker} title={title} lede={description}>
+      <slot name="actions" slot="actions" />
+    </PageHeader>
+
+    <slot />
+
+    <section class="card">
+      <h2 class="card-title">Related accessories</h2>
+      <ul class="text-sm space-y-2 mb-0">
+        {
+          related.map((item) => (
+            <li>
+              <a class="text-link" href={item.path}>
+                {item.name}
+              </a>
+              {" — "}
+              {item.tagline}
+            </li>
+          ))
+        }
+      </ul>
+      <p class="mt-3 mb-0 text-sm">
+        <a class="text-link" href="/accessories">All accessories</a>
+        {" · "}
+        <a class="text-link" href="/claim-puck">Claim puck</a>
+        {" · "}
+        <a class="text-link" href="/about/esp32-freeze-kit">ESP32 freeze kit</a>
+      </p>
+    </section>
+
+    <FaqSection title={faqTitle} faqs={faqs} lede={faqLede} />
+  </div>
+</Layout>

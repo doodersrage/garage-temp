@@ -13,6 +13,9 @@ Each sketch POSTs to your push-device ingest URL. On **Dashboard → Devices**, 
 | [`arduino/ds18b20_ingest`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ds18b20_ingest) | DS18B20 (1-Wire) | Arduino: ESP32, ESP8266, Pico W (+ PlatformIO on ESP) |
 | [`arduino/ds18b20_wifimanager`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ds18b20_wifimanager) | DS18B20 + WiFiManager | Arduino / ESP32 |
 | [`arduino/ethernet_dht22_ingest`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/ethernet_dht22_ingest) | Dual DHT22 + W5100 | Uno Ethernet (HTTP push + LAN pull) |
+| [`arduino/door_contact_ingest`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/door_contact_ingest) | Door reed | Arduino / ESP32 |
+| [`arduino/leak_contact_ingest`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/leak_contact_ingest) | Leak pads | Arduino / ESP32 |
+| [`arduino/power_sense_ingest`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/power_sense_ingest) | Power sense | Arduino / ESP32 |
 | [`arduino/max31855_ingest`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/max31855_ingest) | MAX31855 thermocouple | Arduino: ESP32 / Pico W |
 | [`arduino/max6675_ingest`](https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/max6675_ingest) | MAX6675 thermocouple | Arduino: ESP32 / Pico W |
 | [`micropython/ds18b20_ingest.py`](https://github.com/doodersrage/thermaltrace/blob/main/sketches/micropython/ds18b20_ingest.py) | DS18B20 | MicroPython ESP32 or Pico W |

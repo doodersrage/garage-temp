@@ -56,6 +56,21 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
       { href: "/about/teensy41-ingest", slug: "teensy41-ingest" },
       { href: "/about/pic18-ethernet-ingest", slug: "pic18-ethernet-ingest" },
       { href: "/about/probe-demo", slug: "probe-demo" },
+      {
+        href: "/accessories",
+        label: "Hardware accessories",
+        summary: "Claim puck, alert beacon, door/leak/power contacts, kit labels, mounts.",
+      },
+      {
+        href: "/claim-puck",
+        label: "Claim puck",
+        summary: "RP2040-Zero presence key and bay mood LED.",
+      },
+      {
+        href: "/leak-puck",
+        label: "Leak contact puck",
+        summary: "Water pads that POST wet/dry flood sensors.",
+      },
     ],
   },
   {

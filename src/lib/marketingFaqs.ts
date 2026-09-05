@@ -242,6 +242,97 @@ export const marketingFaqs = {
       answer:
         "No. Claims pack is a printable insurance evidence PDF on thermaltrace.dev/claims-pack. Claim puck is a hardware presence key and mood light.",
     },
+    {
+      question: "Where are other accessories?",
+      answer:
+        "Alert beacon, door/leak/power contacts, kit labels, probe mount kit, and puck case: thermaltrace.dev/accessories.",
+    },
+  ],
+  accessories: [
+    {
+      question: "Do accessories replace a freeze probe?",
+      answer:
+        "No. Accessories are companions (mood lights, claim presence) or contact sensors (door, leak, power) and kit pieces (labels, mounts, cases). Temperature still needs a DS18B20 path such as the ESP32 freeze kit.",
+    },
+    {
+      question: "Which accessory should I buy first?",
+      answer:
+        "After a working freeze probe: claim puck + Bay Buddy for desk moods, or leak puck under a water heater. Kit labels and the probe mount kit help any install.",
+    },
+  ],
+  alertBeacon: [
+    {
+      question: "What is an alert beacon?",
+      answer:
+        "A brighter NeoPixel mood light driven by the same Bay Buddy bay-mood API as the claim puck. It does not sense temperature. Setup: thermaltrace.dev/alert-beacon.",
+    },
+    {
+      question: "Do I still need a claim puck?",
+      answer:
+        "Use a claim puck (or CLI) once to bind the bay. The beacon can share the mood-drive serial path afterward.",
+    },
+  ],
+  doorPuck: [
+    {
+      question: "What does the door contact puck post?",
+      answer:
+        "JSON like {\"door1\":true} when open. Sketch: sketches/arduino/door_contact_ingest. Guide: thermaltrace.dev/door-puck.",
+    },
+    {
+      question: "Will an open door trigger freeze SMS by itself?",
+      answer:
+        "No. Door sensors feed drafty mood and optional custom alert rules. Freeze SMS still comes from temperature thresholds on a probe.",
+    },
+  ],
+  leakPuck: [
+    {
+      question: "What does the leak contact puck post?",
+      answer:
+        "JSON like {\"leak1\":true} when wet. Flood/leak keys auto-alert when wet once alerts are on. Guide: thermaltrace.dev/leak-puck.",
+    },
+    {
+      question: "Can leak and temperature share one device key?",
+      answer:
+        "Yes. POST both temp1 and leak1 on the same ingest URL, or use separate push devices per zone.",
+    },
+  ],
+  powerNudge: [
+    {
+      question: "What does the power outage nudge post?",
+      answer:
+        "JSON like {\"power1\":false} when sensed mains/USB is lost. The reporting ESP32 should stay on a UPS. Guide: thermaltrace.dev/power-nudge.",
+    },
+    {
+      question: "What if the freeze probe loses power too?",
+      answer:
+        "Stale-reading detection covers silence. The power nudge is for an explicit power1 event when the reporter stays online.",
+    },
+  ],
+  kitLabels: [
+    {
+      question: "Does ThermalTrace sell QR stickers?",
+      answer:
+        "No. Download the SVG from Devices after create/rotate, print on waterproof labels, or write the ingest URL to an NFC tag. Guide: thermaltrace.dev/kit-labels.",
+    },
+    {
+      question: "Is NFC safe on a public door?",
+      answer:
+        "No. The tag holds the ingest URL. Keep labels with the kit or inside the utility room; rotate the key if one is lost.",
+    },
+  ],
+  probeMountKit: [
+    {
+      question: "What is the probe mount kit?",
+      answer:
+        "A BOM for zip-ties, pipe clips, adhesive pads, 4.7k pull-up, and waterproof DS18B20 mounting — not a branded drop-ship kit. thermaltrace.dev/probe-mount-kit.",
+    },
+  ],
+  claimPuckCase: [
+    {
+      question: "Do I need a case for the claim puck?",
+      answer:
+        "Optional. A printed enclosure, tactile button, and LED diffuser make the RP2040-Zero desk-safe. Firmware and claim API stay the same. thermaltrace.dev/claim-puck-case.",
+    },
   ],
   homeAssistant: [
     {

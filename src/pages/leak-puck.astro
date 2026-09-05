@@ -1,0 +1,86 @@
+---
+import AccessoryProduct from "../layouts/AccessoryProduct.astro";
+import { affiliateHref, COMMERCE_LINK_REL } from "../lib/affiliateLinks";
+import { BRAND_NAME } from "../lib/brand";
+
+const LEAK = affiliateHref("https://www.adafruit.com/product/328");
+const ESP32 = affiliateHref("https://www.adafruit.com/product/3405");
+const AMAZON_LEAK = affiliateHref("https://www.amazon.com/s?k=water+leak+sensor+probe+arduino");
+---
+<AccessoryProduct
+  accessoryId="leak-puck"
+  faqKey="leakPuck"
+  title="Leak contact puck"
+  description={`Water-contact pads that POST wet/dry flood sensors to ${BRAND_NAME}. Flood/leak contacts auto-alert when wet once alerts are enabled — not a freeze probe.`}
+>
+  <a slot="actions" class="btn-primary" href="/dashboard/temperature">Devices</a>
+  <a slot="actions" class="btn-secondary" href="/dashboard/alerts">Alerts</a>
+  <a
+    slot="actions"
+    class="btn-ghost"
+    href="https://github.com/doodersrage/thermaltrace/tree/main/sketches/arduino/leak_contact_ingest"
+    target="_blank"
+    rel="noreferrer"
+  >
+    Sketch ↗
+  </a>
+
+  <section class="card">
+    <h2 class="card-title">What it is</h2>
+    <ul class="text-sm space-y-2 mb-0">
+      <li>
+        <strong>Does:</strong> POSTs <code>{"{ \"leak1\": true }"}</code> when wet (or
+        <code>flood1</code>). Keys containing leak/flood import as flood sensors.
+      </li>
+      <li>
+        <strong>Does not:</strong> Replace a temperature probe. Place pads under water heaters, softeners,
+        or laundry pans; keep the ESP32 dry and elevated.
+      </li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="card-title">Parts</h2>
+    <div class="overflow-x-auto">
+      <table class="plan-comparison-table">
+        <caption class="sr-only">Leak contact puck parts</caption>
+        <thead>
+          <tr>
+            <th scope="col">Part</th>
+            <th scope="col">Why</th>
+            <th scope="col">Buy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">ESP32 DevKit</th>
+            <td>Wi‑Fi HTTPS POST.</td>
+            <td>
+              <a class="text-link" href={ESP32} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit ESP32</a>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Leak / moisture probes</th>
+            <td>Two conductors on the floor; GPIO4 with pull-up, wet pulls low.</td>
+            <td>
+              <a class="text-link" href={LEAK} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit</a>
+              ·
+              <a class="text-link" href={AMAZON_LEAK} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="card-title">Setup</h2>
+    <ol class="text-sm space-y-2 pl-5 list-decimal mb-0">
+      <li>Create or reuse a push device. Flash <code>sketches/arduino/leak_contact_ingest/</code>.</li>
+      <li>Bridge the pads with a damp cloth to test; expect <code>POST 200</code> and a wet reading.</li>
+      <li>
+        Enable alerts on Devices / Alerts essentials. Flood contacts auto-notify when wet — no separate rule required.
+      </li>
+    </ol>
+  </section>
+</AccessoryProduct>

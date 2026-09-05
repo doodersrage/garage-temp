@@ -1,0 +1,95 @@
+---
+import AccessoryProduct from "../layouts/AccessoryProduct.astro";
+import { affiliateHref, COMMERCE_LINK_REL } from "../lib/affiliateLinks";
+import { BRAND_NAME } from "../lib/brand";
+import { CLAIM_PUCK_REPO_URL } from "../lib/claimPuck";
+
+const ZERO = affiliateHref("https://www.amazon.com/s?k=Waveshare+RP2040-Zero");
+const BUTTON = affiliateHref("https://www.adafruit.com/product/1119");
+const DIFFUSER = affiliateHref("https://www.amazon.com/s?k=LED+diffuser+sheet+acrylic");
+---
+<AccessoryProduct
+  accessoryId="claim-puck-case"
+  faqKey="claimPuckCase"
+  title="Claim puck case"
+  description={`Enclosure, claim button, and optional LED diffuser for the RP2040-Zero ${BRAND_NAME} claim puck — finish the bare-board build.`}
+  kicker="Kit / merch"
+>
+  <a slot="actions" class="btn-primary" href="/claim-puck">Claim puck</a>
+  <a slot="actions" class="btn-secondary" href={CLAIM_PUCK_REPO_URL} target="_blank" rel="noreferrer">
+    Firmware ↗
+  </a>
+  <a slot="actions" class="btn-ghost" href="/alert-beacon">Alert beacon</a>
+
+  <section class="card">
+    <h2 class="card-title">What it is</h2>
+    <ul class="text-sm space-y-2 mb-0">
+      <li>
+        <strong>Does:</strong> Turns the Waveshare RP2040-Zero + GP4 button into a desk-safe presence key with a
+        softer mood glow.
+      </li>
+      <li>
+        <strong>Does not:</strong> Change the claim API. Same firmware and
+        <a class="text-link" href="/bay-buddy">Bay Buddy</a>
+        flow as the naked board.
+      </li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="card-title">Parts</h2>
+    <div class="overflow-x-auto">
+      <table class="plan-comparison-table">
+        <caption class="sr-only">Claim puck case parts</caption>
+        <thead>
+          <tr>
+            <th scope="col">Part</th>
+            <th scope="col">Why</th>
+            <th scope="col">Buy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Waveshare RP2040-Zero</th>
+            <td>Claim puck MCU.</td>
+            <td>
+              <a class="text-link" href={ZERO} target="_blank" rel={COMMERCE_LINK_REL}>Amazon search</a>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Momentary button</th>
+            <td>GP4 to GND for claim confirm.</td>
+            <td>
+              <a class="text-link" href={BUTTON} target="_blank" rel={COMMERCE_LINK_REL}>Adafruit button</a>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">3D-printed or laser case</th>
+            <td>USB cutout, button hole, LED window. Publish your STL next to the firmware repo if you share one.</td>
+            <td>DIY / local print shop.</td>
+          </tr>
+          <tr>
+            <th scope="row">LED diffuser (optional)</th>
+            <td>Softer mood color for the onboard RGB.</td>
+            <td>
+              <a class="text-link" href={DIFFUSER} target="_blank" rel={COMMERCE_LINK_REL}>Amazon diffuser</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="card-title">Build notes</h2>
+    <ol class="text-sm space-y-2 pl-5 list-decimal mb-0">
+      <li>Leave USB clear for claim and mood drive from the host.</li>
+      <li>Debounce is in firmware — a cheap tactile switch is enough.</li>
+      <li>
+        For a brighter hallway light, use an
+        <a class="text-link" href="/alert-beacon">alert beacon</a>
+        NeoPixel stick instead of overdriving the Zero LED.
+      </li>
+    </ol>
+  </section>
+</AccessoryProduct>

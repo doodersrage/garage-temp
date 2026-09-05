@@ -16,6 +16,9 @@ Payload examples match `/about/ingest-and-webhooks` and `/docs/api`.
 | [`arduino/ds18b20_ingest`](arduino/ds18b20_ingest/) | DS18B20 (1-Wire) · GPIO4 / GP4 → `temp1` | Arduino: ESP32, ESP8266, Pico W |
 | [`arduino/ds18b20_wifimanager`](arduino/ds18b20_wifimanager/) | DS18B20 + captive-portal Wi‑Fi | Arduino / ESP32 |
 | [`arduino/ethernet_dht22_ingest`](arduino/ethernet_dht22_ingest/) | Dual DHT22 on A4/A5 · W5100 Ethernet | Arduino Uno + LAN shield (HTTP push + optional pull) |
+| [`arduino/door_contact_ingest`](arduino/door_contact_ingest/) | Door reed · GPIO4 → `door1` | Arduino / ESP32 |
+| [`arduino/leak_contact_ingest`](arduino/leak_contact_ingest/) | Leak pads · GPIO4 → `leak1` | Arduino / ESP32 |
+| [`arduino/power_sense_ingest`](arduino/power_sense_ingest/) | Mains/USB sense · GPIO4 → `power1` | Arduino / ESP32 |
 | [`arduino/max31855_ingest`](arduino/max31855_ingest/) | MAX31855 thermocouple amp | Arduino: ESP32 / Pico W |
 | [`arduino/max6675_ingest`](arduino/max6675_ingest/) | MAX6675 thermocouple amp | Arduino: ESP32 / Pico W |
 | [`micropython/ds18b20_ingest.py`](micropython/ds18b20_ingest.py) | DS18B20 | MicroPython (ESP32 or Pico W) |
@@ -43,6 +46,8 @@ Payload examples match `/about/ingest-and-webhooks` and `/docs/api`.
 **PIC18F67J60 (MLA TCP/IP):** MPLAB X + XC8 drop-in on the classic Microchip Ethernet demo. DS18B20 on **RD0**. Same LAN TLS relay. Guide: [thermaltrace.dev/about/pic18-ethernet-ingest](https://thermaltrace.dev/about/pic18-ethernet-ingest).
 
 **Particle Boron (cellular):** LTE + Console webhook to HTTPS ingest. DS18B20 on **D2**. Stale-probe detection covers dropouts. Guide: [thermaltrace.dev/about/cellular-ingest](https://thermaltrace.dev/about/cellular-ingest).
+
+**Accessories (not freeze probes):** [door](https://thermaltrace.dev/door-puck) / [leak](https://thermaltrace.dev/leak-puck) / [power](https://thermaltrace.dev/power-nudge) contact sketches above; [alert beacon](https://thermaltrace.dev/alert-beacon), [kit labels](https://thermaltrace.dev/kit-labels), [probe mount kit](https://thermaltrace.dev/probe-mount-kit), [claim puck case](https://thermaltrace.dev/claim-puck-case). Hub: [thermaltrace.dev/accessories](https://thermaltrace.dev/accessories).
 
 **Uno + Ethernet shield:** W5100 cannot TLS. Use [`ethernet_dht22_ingest`](arduino/ethernet_dht22_ingest/) (classic `temp` JSON, DHT22 on A4/A5) plus [`relay/push_https_forward.py`](relay/push_https_forward.py) on a LAN host so POSTs reach `https://thermaltrace.dev`. The same sketch can serve pull JSON on port 80.
 
