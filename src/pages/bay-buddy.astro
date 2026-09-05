@@ -1,0 +1,118 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import FaqSection from "../components/FaqSection.astro";
+import { BRAND_NAME } from "../lib/brand";
+import {
+  BAYBUDDY_NAME,
+  BAYBUDDY_RELEASES_URL,
+  BAYBUDDY_REPO_URL,
+  BAYBUDDY_TAGLINE,
+} from "../lib/bayBuddy";
+import {
+  getBreadcrumbSchema,
+  getSoftwareApplicationSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+import { getMarketingFaqs, getMarketingFaqSchema } from "../lib/marketingFaqs";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/bay-buddy");
+const bayBuddyFaqs = getMarketingFaqs("bayBuddy");
+
+const software = getSoftwareApplicationSchema(siteUrl);
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: BAYBUDDY_NAME, path: "/bay-buddy" },
+  ]),
+  {
+    ...software,
+    "@type": ["SoftwareApplication", "DesktopApplication"],
+    name: BAYBUDDY_NAME,
+    operatingSystem: "Windows, macOS, Linux",
+    applicationCategory: "UtilitiesApplication",
+    url: pageUrl,
+    downloadUrl: BAYBUDDY_RELEASES_URL,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: BAYBUDDY_RELEASES_URL,
+    },
+  },
+  getMarketingFaqSchema(pageUrl, "bayBuddy"),
+].filter(Boolean) as Record<string, unknown>[];
+---
+<Layout
+  title={BAYBUDDY_NAME}
+  description={BAYBUDDY_TAGLINE}
+  schema={schema}
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
+>
+  <div class="page-shell page-stack">
+    <PageHeader
+      kicker="Desktop companion"
+      title={BAYBUDDY_NAME}
+      lede={`Not a second dashboard. ${BAYBUDDY_NAME} shows the vibe of one ThermalTrace space: cozy, drafty, shiver, panic, offline, or hero. Devices, alerts, history, and claims stay on ${BRAND_NAME}.`}
+    >
+      <a slot="actions" class="btn-primary" href={BAYBUDDY_RELEASES_URL} target="_blank" rel="noreferrer">
+        Download latest release
+      </a>
+      <a slot="actions" class="btn-secondary" href="/register?next=/dashboard/temperature">
+        Free ThermalTrace account
+      </a>
+      <a slot="actions" class="btn-ghost" href={BAYBUDDY_REPO_URL} target="_blank" rel="noreferrer">
+        Source on GitHub
+      </a>
+    </PageHeader>
+
+    <section class="card">
+      <h2 class="card-title">What it shows</h2>
+      <ul class="text-sm space-y-2 mb-0">
+        <li>
+          <strong>Does:</strong> live garage mood from your existing probes, freeze margin,
+          time-to-freeze, door and leak signals, after you Connect with the same ThermalTrace account.
+        </li>
+        <li>
+          <strong>Does not:</strong> replace Overview, Devices, Alerts, History, or the claims pack.
+          Those stay on thermaltrace.dev (and on the
+          <a class="text-link" href="/android">Android companion</a> / 
+          <a class="text-link" href="/about/install-pwa">PWA</a>).
+        </li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Install</h2>
+      <p class="card-subtitle mb-4">
+        Linux AppImage / deb / rpm, Windows MSI, and macOS DMG ship on GitHub Releases.
+      </p>
+      <ol class="text-sm space-y-2 pl-5 list-decimal mb-4">
+        <li>
+          <a class="text-link" href="/register?next=/dashboard/temperature">Create a free ThermalTrace account</a>
+          and connect at least one probe (or the demo pull feed).
+        </li>
+        <li>
+          <a class="text-link" href={BAYBUDDY_RELEASES_URL} target="_blank" rel="noreferrer">Download Bay Buddy</a>
+          for your OS and install.
+        </li>
+        <li>
+          Click <strong>Connect</strong> in Bay Buddy, sign in on thermaltrace.dev in the browser,
+          and return to the desktop window when the handoff finishes.
+        </li>
+      </ol>
+      <a class="btn-primary" href={BAYBUDDY_RELEASES_URL} target="_blank" rel="noreferrer">
+        Open releases
+      </a>
+    </section>
+
+    <FaqSection
+      title="Bay Buddy FAQ"
+      faqs={bayBuddyFaqs}
+      lede="Desktop companion answers: download, connect, and what stays on the web dashboard."
+    />
+  </div>
+</Layout>

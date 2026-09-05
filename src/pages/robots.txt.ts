@@ -39,6 +39,7 @@ Allow: /privacy
 Allow: /terms
 Allow: /system-status
 Allow: /android
+Allow: /bay-buddy
 Allow: /badge/
 Allow: /openapi.yaml
 

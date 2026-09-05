@@ -27,6 +27,7 @@ const STATIC_PUBLIC_PATHS = [
   "/system-status",
   "/docs/api",
   "/android",
+  "/bay-buddy",
   "/integrations",
   "/integrations/home-assistant",
   "/stories",

@@ -9,6 +9,7 @@ describe("sitemapPages", () => {
     expect(paths).toContain("/guides");
     expect(paths).toContain("/docs/api");
     expect(paths).toContain("/android");
+    expect(paths).toContain("/bay-buddy");
     expect(paths).toContain("/privacy");
     expect(paths).toContain("/terms");
   });

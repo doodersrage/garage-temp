@@ -16,6 +16,17 @@ ThermalTrace ships in multiple repos. When onboarding UX changes in **this** rep
 
 **Canonical product docs:** [thermaltrace.dev/integrations/home-assistant](https://thermaltrace.dev/integrations/home-assistant)
 
+## thermaltrace-bay-buddy
+
+**Repo:** [github.com/doodersrage/thermaltrace-bay-buddy](https://github.com/doodersrage/thermaltrace-bay-buddy)
+
+**Status (2026-09):** Desktop companion (Tauri). Connects via `/api/auth/companion/start` + loopback / custom-scheme OAuth. Product page: [thermaltrace.dev/bay-buddy](https://thermaltrace.dev/bay-buddy).
+
+**Re-sync when:**
+
+- Companion OAuth start / exchange / `/app/oauth` client=baybuddy behavior changes
+- Home insights payload shapes Bay Buddy displays (time_to_freeze, door/leak)
+
 ## thermaltrace-android
 
 **Repo:** [github.com/doodersrage/thermaltrace-android](https://github.com/doodersrage/thermaltrace-android) (sibling checkout)

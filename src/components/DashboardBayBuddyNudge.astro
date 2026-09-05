@@ -1,0 +1,22 @@
+---
+import { BAYBUDDY_NAME } from "../lib/bayBuddy";
+
+interface Props {
+  show: boolean;
+}
+
+const { show } = Astro.props;
+---
+
+{show && (
+  <section class="card" id="bay-buddy-nudge" aria-labelledby="bay-buddy-nudge-title">
+    <h2 class="card-title" id="bay-buddy-nudge-title">{BAYBUDDY_NAME}</h2>
+    <p class="card-subtitle mb-4">
+      Desktop glance for one space: freeze and flood moods without opening the full dashboard.
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a class="btn-secondary" href="/bay-buddy">Get {BAYBUDDY_NAME}</a>
+      <a class="btn-ghost" href="/android">Android companion</a>
+    </div>
+  </section>
+)}

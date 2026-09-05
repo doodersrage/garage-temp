@@ -36,7 +36,7 @@ export const marketingFaqs = {
     {
       question: "Is there a ThermalTrace Android app?",
       answer:
-        "A native Android app is available in early access on GitHub while Google Play review finishes. You can also use the full web dashboard or install the Progressive Web App. The phone does not sense temperature: it connects to your ThermalTrace account.",
+        "A native Android app is available in early access on GitHub while Google Play review finishes. You can also use the full web dashboard or install the Progressive Web App. On the desktop, Bay Buddy is a glanceable freeze/flood mood companion (thermaltrace.dev/bay-buddy). The phone and desktop apps do not sense temperature: they connect to your ThermalTrace account.",
     },
     {
       question: "Where is ThermalTrace hosted?",
@@ -278,6 +278,23 @@ export const marketingFaqs = {
       question: "How do I get notified when the app launches?",
       answer:
         "Use the Contact form with topic=android (linked from /android) and ask for a launch note. We also announce updates on the site and GitHub repos.",
+    },
+  ],
+  bayBuddy: [
+    {
+      question: "What is Bay Buddy?",
+      answer:
+        "Bay Buddy is the ThermalTrace desktop companion (Windows, macOS, Linux). It shows glanceable freeze and flood moods for one space after you sign in with your ThermalTrace account. It is not a second full dashboard.",
+    },
+    {
+      question: "Where do I download Bay Buddy?",
+      answer:
+        "GitHub Releases for thermaltrace-bay-buddy: Linux AppImage/deb/rpm, Windows MSI, and macOS DMG. Start at thermaltrace.dev/bay-buddy.",
+    },
+    {
+      question: "Does Bay Buddy replace the web dashboard?",
+      answer:
+        "No. Devices, alerts, history, claims, and household settings stay on thermaltrace.dev (or the Android app / PWA). Bay Buddy is a mood glance for the bay you already monitor.",
     },
   ],
 } as const satisfies Record<string, MarketingFaqItem[]>;

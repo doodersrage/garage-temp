@@ -2,6 +2,7 @@
 import DashboardLayout from "../layouts/DashboardLayout.astro";
 import DashboardOnboarding from "../components/DashboardOnboarding.astro";
 import DashboardAndroidNudge from "../components/DashboardAndroidNudge.astro";
+import DashboardBayBuddyNudge from "../components/DashboardBayBuddyNudge.astro";
 import DemoPullNudge from "../components/DemoPullNudge.astro";
 import ProbeSimulatorNudge from "../components/dashboard/ProbeSimulatorNudge.astro";
 import NestConnectNudge from "../components/dashboard/NestConnectNudge.astro";
@@ -550,6 +551,7 @@ const showOverviewPwaNudge =
 
 const showAndroidNudge =
   canEdit && !firstRunFocus && (latest.length > 0 || hasDevices);
+const showBayBuddyNudge = showAndroidNudge;
 
 const showYoureLive =
   canEdit &&
@@ -763,6 +765,7 @@ const garageRisk = computeGarageRiskStatus({
         <div class="dashboard-recommendations-body space-y-4">
           <OverviewPwaNudge show={showOverviewPwaNudge} />
           <DashboardAndroidNudge show={showAndroidNudge} />
+          <DashboardBayBuddyNudge show={showBayBuddyNudge} />
           <DashboardYoureLive
             show={secondaryBannerIds.has("youreLive")}
             hasAlertsEnabled={hasAlertsEnabled}
