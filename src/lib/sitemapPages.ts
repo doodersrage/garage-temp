@@ -37,6 +37,7 @@ const STATIC_PUBLIC_PATHS = [
   "/kit-labels",
   "/probe-mount-kit",
   "/claim-puck-case",
+  "/gift",
   "/integrations",
   "/integrations/home-assistant",
   "/stories",

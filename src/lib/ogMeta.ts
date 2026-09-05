@@ -14,6 +14,19 @@ export function resolveOgImagePath(pathname: string): string {
   if (path.startsWith("/pricing") || path.startsWith("/compare")) {
     return "/og-pricing.jpg";
   }
+  if (
+    path.startsWith("/accessories") ||
+    path.startsWith("/claim-puck") ||
+    path.startsWith("/alert-beacon") ||
+    path.startsWith("/door-puck") ||
+    path.startsWith("/leak-puck") ||
+    path.startsWith("/power-nudge") ||
+    path.startsWith("/kit-labels") ||
+    path.startsWith("/probe-mount-kit") ||
+    path.startsWith("/bay-buddy")
+  ) {
+    return "/og-about.jpg";
+  }
   if (path.startsWith("/freeze-map") || path.startsWith("/freeze-season")) {
     return "/og-freeze-map.jpg";
   }
@@ -47,6 +60,19 @@ export function resolveOgImageAlt(pathname: string): string {
 
   if (path.startsWith("/pricing") || path.startsWith("/compare")) {
     return `${BRAND_NAME} plans and pricing: Free, Member, Pro, and Portfolio freeze and flood/leak alert tiers`;
+  }
+  if (
+    path.startsWith("/accessories") ||
+    path.startsWith("/claim-puck") ||
+    path.startsWith("/alert-beacon") ||
+    path.startsWith("/door-puck") ||
+    path.startsWith("/leak-puck") ||
+    path.startsWith("/power-nudge") ||
+    path.startsWith("/kit-labels") ||
+    path.startsWith("/probe-mount-kit") ||
+    path.startsWith("/bay-buddy")
+  ) {
+    return `${BRAND_NAME} hardware accessories: claim puck, mood lights, door/leak contacts, and freeze-kit mounts`;
   }
   if (path.startsWith("/freeze-map") || path.startsWith("/freeze-season")) {
     return `${BRAND_NAME} opt-in freeze-risk map of city-level probe temperatures`;

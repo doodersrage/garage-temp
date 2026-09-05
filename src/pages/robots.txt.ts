@@ -42,6 +42,10 @@ Allow: /android
 Allow: /bay-buddy
 Allow: /badge/
 Allow: /openapi.yaml
+Allow: /llms.txt
+Allow: /gift
+Allow: /accessories
+Allow: /claim-puck
 
 Sitemap: ${sitemapURL.href}
 `;

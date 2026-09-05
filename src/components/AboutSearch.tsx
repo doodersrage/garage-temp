@@ -1,9 +1,11 @@
-import { useMemo, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import type { AboutSearchEntry } from "../lib/aboutSearchIndex";
 
 interface Props {
   pages: AboutSearchEntry[];
   featured?: AboutSearchEntry[];
+  /** Prefill from `/about?q=` (WebSite SearchAction). */
+  initialQuery?: string;
 }
 
 function matchPage(page: AboutSearchEntry, query: string): boolean {
@@ -15,8 +17,25 @@ function matchPage(page: AboutSearchEntry, query: string): boolean {
   );
 }
 
-export default function AboutSearch({ pages, featured = [] }: Props) {
-  const [query, setQuery] = useState("");
+function syncQueryParam(query: string) {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  const trimmed = query.trim();
+  if (trimmed) url.searchParams.set("q", trimmed);
+  else url.searchParams.delete("q");
+  window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+}
+
+export default function AboutSearch({
+  pages,
+  featured = [],
+  initialQuery = "",
+}: Props) {
+  const [query, setQuery] = useState(initialQuery);
+
+  useEffect(() => {
+    syncQueryParam(query);
+  }, [query]);
 
   const results = useMemo(() => {
     const q = query.trim();
@@ -36,6 +55,7 @@ export default function AboutSearch({ pages, featured = [] }: Props) {
         id="about-search-input"
         class="form-input"
         type="search"
+        name="q"
         placeholder="Probe wiring, CSV export, ingest API, alerts…"
         value={query}
         onInput={(e) => setQuery((e.target as HTMLInputElement).value)}

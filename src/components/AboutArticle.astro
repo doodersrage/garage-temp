@@ -4,6 +4,8 @@ import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
 import { aboutPages, getAboutParent } from "../lib/aboutPages";
 import {
+  DEFAULT_ARTICLE_MODIFIED,
+  DEFAULT_ARTICLE_PUBLISHED,
   getArticleSchema,
   getBreadcrumbSchema,
   getFaqPageSchema,
@@ -86,6 +88,8 @@ const schema = [
     headline: title,
     description,
     imageUrl: `${siteUrl}/og-about.jpg`,
+    datePublished: DEFAULT_ARTICLE_PUBLISHED,
+    dateModified: DEFAULT_ARTICLE_MODIFIED,
   }),
   getBreadcrumbSchema(siteUrl, breadcrumbs),
   ...(faqSchema ? [faqSchema] : []),

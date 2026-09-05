@@ -259,6 +259,16 @@ export const marketingFaqs = {
       answer:
         "After a working freeze probe: claim puck + Bay Buddy for desk moods, or leak puck under a water heater. Kit labels and the probe mount kit help any install.",
     },
+    {
+      question: "Where is the freeze kit parts list?",
+      answer:
+        "ESP32 + waterproof DS18B20 BOM with Adafruit and Amazon buy links: thermaltrace.dev/about/esp32-freeze-kit. Accessory catalog: thermaltrace.dev/accessories.",
+    },
+    {
+      question: "Do Amazon buy links include affiliate tags?",
+      answer:
+        "When configured, Amazon URLs may include an Associates tag. Adafruit links stay direct. ThermalTrace may earn a commission from qualifying Amazon purchases at no extra cost to you.",
+    },
   ],
   alertBeacon: [
     {
@@ -270,6 +280,11 @@ export const marketingFaqs = {
       question: "Do I still need a claim puck?",
       answer:
         "Use a claim puck (or CLI) once to bind the bay. The beacon can share the mood-drive serial path afterward.",
+    },
+    {
+      question: "Can the beacon replace Alerts SMS or email?",
+      answer:
+        "No. It is a glanceable mood light. Freeze and flood notifications still come from Dashboard → Alerts channels.",
     },
   ],
   doorPuck: [
@@ -283,6 +298,11 @@ export const marketingFaqs = {
       answer:
         "No. Door sensors feed drafty mood and optional custom alert rules. Freeze SMS still comes from temperature thresholds on a probe.",
     },
+    {
+      question: "Which MCU does the sample use?",
+      answer:
+        "ESP32 with Wi‑Fi HTTPS POST, same path as the freeze kit. Wire a magnetic reed to GPIO4 with the board’s pull-up.",
+    },
   ],
   leakPuck: [
     {
@@ -294,6 +314,11 @@ export const marketingFaqs = {
       question: "Can leak and temperature share one device key?",
       answer:
         "Yes. POST both temp1 and leak1 on the same ingest URL, or use separate push devices per zone.",
+    },
+    {
+      question: "Where should I place the pads?",
+      answer:
+        "Under water heaters, softeners, or laundry pans. Keep the ESP32 dry and elevated; only the contact pads belong on the floor.",
     },
   ],
   powerNudge: [
@@ -307,6 +332,11 @@ export const marketingFaqs = {
       answer:
         "Stale-reading detection covers silence. The power nudge is for an explicit power1 event when the reporter stays online.",
     },
+    {
+      question: "Do I need a custom alert rule?",
+      answer:
+        "Optional. Power sensors can drive custom Alerts rules; otherwise use Overview energy cards and stale probe warnings.",
+    },
   ],
   kitLabels: [
     {
@@ -319,6 +349,11 @@ export const marketingFaqs = {
       answer:
         "No. The tag holds the ingest URL. Keep labels with the kit or inside the utility room; rotate the key if one is lost.",
     },
+    {
+      question: "How long does the on-screen QR last?",
+      answer:
+        "About 30 minutes after create/rotate on Devices. Re-open the callout or download the SVG if it expires. Walkthrough: thermaltrace.dev/about/kit-qr-onboarding.",
+    },
   ],
   probeMountKit: [
     {
@@ -326,12 +361,32 @@ export const marketingFaqs = {
       answer:
         "A BOM for zip-ties, pipe clips, adhesive pads, 4.7k pull-up, and waterproof DS18B20 mounting — not a branded drop-ship kit. thermaltrace.dev/probe-mount-kit.",
     },
+    {
+      question: "Do I still need the ESP32 freeze kit page?",
+      answer:
+        "Yes for board + probe wiring and sketch download. The mount kit is the physical install BOM; the freeze kit is the electronics path: thermaltrace.dev/about/esp32-freeze-kit.",
+    },
+    {
+      question: "Where should the probe tip sit?",
+      answer:
+        "Prefer pipe metal or insulated tip contact over dangling in a sunny doorway. Keep the MCU dry; only the stainless tip belongs in damp crawlspaces.",
+    },
   ],
   claimPuckCase: [
     {
       question: "Do I need a case for the claim puck?",
       answer:
         "Optional. A printed enclosure, tactile button, and LED diffuser make the RP2040-Zero desk-safe. Firmware and claim API stay the same. thermaltrace.dev/claim-puck-case.",
+    },
+    {
+      question: "Does a case change the claim API?",
+      answer:
+        "No. Same Bay Buddy claim flow and /api/pucks endpoints. The case only changes mechanical finish and LED diffusion.",
+    },
+    {
+      question: "What if I want a brighter hallway light?",
+      answer:
+        "Use an alert beacon NeoPixel stick instead of overdriving the Zero’s tiny LED: thermaltrace.dev/alert-beacon.",
     },
   ],
   homeAssistant: [

@@ -13,6 +13,7 @@ import BrandMark from '../components/BrandMark.astro';
 import { getAuthFromCookies } from '../lib/auth';
 import { getUserPreferences } from '../lib/userPreferences';
 import {
+  getBrandDefinition,
   getBreadcrumbSchema,
   resolvePageUrl,
   resolveSiteUrl,
@@ -39,6 +40,7 @@ const schema = [
 ].filter(Boolean) as Record<string, unknown>[];
 
 const homeDescription = BRAND_DESCRIPTION;
+const brandDefinition = getBrandDefinition();
 
 const memberPrice = getMemberPriceDisplay().monthly;
 const proPrice = getProPriceDisplay().monthly;
@@ -66,9 +68,7 @@ const featuredStory = getStory("pipe-near-miss")!;
 						<p class="home-hero-audience">{BRAND_POSITIONING}</p>
 						<BrandMark as="h1" class="home-hero-brand" mark />
 						<p class="home-hero-promise">Know before your pipes freeze or your space floods.</p>
-						<p class="home-hero-lead">
-							Monitor your garage, workshop, cabin, or other vulnerable spaces with sensors you build, and get alerted when temperatures drop or a leak contact goes wet.
-						</p>
+						<p class="home-hero-lead">{brandDefinition}</p>
 						<div class="home-hero-actions">
 							<a class="btn-primary home-hero-cta-primary" href="/about/probe-demo">Try probe simulator</a>
 							<a class="btn-secondary" href="/register?next=/dashboard/temperature">Start free</a>
@@ -324,9 +324,11 @@ const featuredStory = getStory("pipe-near-miss")!;
 					</div>
 					<div class="home-guides-actions">
 						<a class="btn-primary" href="/guides">Open the guides hub</a>
-						<a class="btn-secondary" href="/about">All articles</a>
-						<a class="btn-secondary" href="/about/ingest-and-webhooks">Flood / leak guide</a>
 						<a class="btn-secondary" href="/about/esp32-freeze-kit">ESP32 freeze kit</a>
+						<a class="btn-secondary" href="/accessories">Accessories</a>
+						<a class="btn-secondary" href="/claim-puck">Claim puck</a>
+						<a class="btn-secondary" href="/about/ingest-and-webhooks">Flood / leak guide</a>
+						<a class="btn-ghost" href="/about">All articles</a>
 					</div>
 				</section>
 

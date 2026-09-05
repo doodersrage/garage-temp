@@ -33,6 +33,7 @@ describe("sitemapPages", () => {
     expect(paths).toContain("/share-kit");
     expect(paths).toContain("/stories");
     expect(paths).toContain("/compare/diy-mqtt");
+    expect(paths).toContain("/gift");
   });
 
   it("builds absolute URLs from site origin", () => {

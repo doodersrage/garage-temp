@@ -445,6 +445,57 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
         "In your account metadata (Dashboard → Settings), same as display preferences, not in the public git repo.",
     },
   ],
+  "thermostat-oauth": [
+    {
+      question: "Which thermostats connect to ThermalTrace?",
+      answer:
+        "Nest (Google Device Access / SDM) when Worker secrets are set, and Ecobee when developer signup is open. Guide: thermaltrace.dev/about/thermostat-oauth.",
+    },
+    {
+      question: "Is Nest required for freeze alerts?",
+      answer:
+        "No. Freeze alerts use your probes. Nest/Ecobee add indoor house context on Overview when entitled (Pro).",
+    },
+    {
+      question: "What if Ecobee developer signup is closed?",
+      answer:
+        "Use Home Assistant → ingest → Indoor reference on Dashboard → Devices so house ambient still overlays your week chart.",
+    },
+  ],
+  "mqtt-bridge": [
+    {
+      question: "Do I have to abandon MQTT for ThermalTrace?",
+      answer:
+        "No. Keep Mosquitto/Home Assistant for local automations and POST HTTPS ingest for ThermalTrace freeze/leak alerts and history.",
+    },
+    {
+      question: "What does the MQTT bridge publish?",
+      answer:
+        "It maps broker topics into ThermalTrace ingest JSON (temps, doors, leaks). Details: thermaltrace.dev/about/mqtt-bridge.",
+    },
+    {
+      question: "Is TLS required to thermaltrace.dev?",
+      answer:
+        "Yes for cloud ingest. Local MQTT can stay on your LAN; the bridge or device must HTTPS POST to your ingest URL.",
+    },
+  ],
+  "probe-mounting-enclosures": [
+    {
+      question: "Where should I mount a waterproof DS18B20?",
+      answer:
+        "On pipe metal or in still air away from sunny doors. Leave the epoxy bead uncrushed. Guide: thermaltrace.dev/about/probe-mounting-enclosures.",
+    },
+    {
+      question: "Can the ESP32 live in the crawlspace with the probe?",
+      answer:
+        "Prefer a dry enclosure for the MCU and only run the probe tip into damp areas. Moisture kills boards faster than sensors.",
+    },
+    {
+      question: "Is there a parts list for mounts?",
+      answer:
+        "Yes: zip-ties, clips, pads, and 4.7k notes on thermaltrace.dev/probe-mount-kit, plus the ESP32 freeze kit BOM.",
+    },
+  ],
 };
 
 export function getAboutFaqs(slug: string): AboutFaqItem[] {

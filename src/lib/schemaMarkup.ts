@@ -137,6 +137,11 @@ export function getWebPageSchema(options: {
   return schema;
 }
 
+/** Stable Article dates when a page omits explicit published/modified values. */
+export const DEFAULT_ARTICLE_PUBLISHED = "2025-01-15";
+/** Bump when about / story article corpus is meaningfully reviewed. */
+export const DEFAULT_ARTICLE_MODIFIED = "2026-09-05";
+
 export function getArticleSchema(options: {
   siteUrl: string;
   pageUrl: string;
@@ -158,8 +163,9 @@ export function getArticleSchema(options: {
       "@id": options.pageUrl,
     },
     image: options.imageUrl ? [options.imageUrl] : [`${options.siteUrl}/og-dashboard.jpg`],
-    datePublished: options.datePublished ?? "2024-01-01",
-    dateModified: options.dateModified ?? new Date().toISOString().slice(0, 10),
+    datePublished: options.datePublished ?? DEFAULT_ARTICLE_PUBLISHED,
+    dateModified:
+      options.dateModified ?? options.datePublished ?? DEFAULT_ARTICLE_MODIFIED,
     articleSection: options.articleSection,
     author: {
       "@type": "Organization",

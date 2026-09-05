@@ -7,6 +7,8 @@ import AboutCcFigure from "../../components/AboutCcFigure.astro";
 import { getAboutFaqs } from "../../lib/aboutFaqs";
 import { BRAND_SPACES } from "../../lib/brand";
 import {
+  DEFAULT_ARTICLE_MODIFIED,
+  DEFAULT_ARTICLE_PUBLISHED,
   getArticleSchema,
   getBreadcrumbSchema,
   getFaqPageSchema,
@@ -28,6 +30,8 @@ const schema = [
     pageUrl,
     headline: title,
     description,
+    datePublished: DEFAULT_ARTICLE_PUBLISHED,
+    dateModified: DEFAULT_ARTICLE_MODIFIED,
   }),
   getBreadcrumbSchema(siteUrl, [
     { name: "Home", path: "/" },

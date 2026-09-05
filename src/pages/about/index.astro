@@ -61,6 +61,7 @@ const stats = getAboutStats();
 const featuredPages = getFeaturedAboutPages();
 const searchIndex = buildAboutSearchIndex(aboutPages);
 const featuredSearchIndex = buildAboutSearchIndex(featuredPages);
+const initialSearchQuery = Astro.url.searchParams.get("q")?.trim() ?? "";
 ---
 <Layout
   title="About"
@@ -90,7 +91,12 @@ const featuredSearchIndex = buildAboutSearchIndex(featuredPages);
       <p class="card-subtitle">
         Search {stats.totalCount} articles or browse by learning path below.
       </p>
-      <AboutSearch client:visible pages={searchIndex} featured={featuredSearchIndex} />
+      <AboutSearch
+        client:visible
+        pages={searchIndex}
+        featured={featuredSearchIndex}
+        initialQuery={initialSearchQuery}
+      />
     </section>
 
     <AboutHubNav />
