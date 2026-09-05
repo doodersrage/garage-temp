@@ -1,5 +1,8 @@
 import { defineMiddleware } from "astro:middleware";
-import { getAuthFromCookies } from "./lib/auth";
+import {
+  companionMfaHeaderValue,
+  getAuthFromRequest,
+} from "./lib/auth";
 import { prefersJsonAuthError } from "./lib/authResponse";
 import { pathRequiresAuth } from "./lib/routeAuth";
 import {
@@ -18,6 +21,7 @@ import {
   HA_ENTITIES_LEGACY_URL,
   HA_ENTITIES_YAML,
 } from "./lib/homeAssistantIntegration";
+import type { AstroCookies } from "astro";
 
 const LEGACY_STATIC_REDIRECTS: Record<string, string> = {
   [HA_BLUEPRINT_LEGACY_URL]: HA_BLUEPRINT_URL,
@@ -35,6 +39,19 @@ function isMfaExemptPath(pathname: string): boolean {
     pathname === "/api/auth/update-password" ||
     pathname === "/reset-password"
   );
+}
+
+function isMfaRequired(request: Request, cookies: AstroCookies): boolean {
+  if (companionMfaHeaderValue(request) === "1") return true;
+  return isMfaRequiredCookieSet(cookies);
+}
+
+function isMfaCheckedNotRequiredRequest(
+  request: Request,
+  cookies: AstroCookies,
+): boolean {
+  if (companionMfaHeaderValue(request) === "0") return true;
+  return isMfaCheckedNotRequired(cookies);
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
@@ -62,7 +79,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   try {
     if (pathRequiresAuth(pathname)) {
-      const { session, user } = await getAuthFromCookies(context.cookies);
+      const { session, user } = await getAuthFromRequest(
+        context.request,
+        context.cookies,
+      );
 
       if (!session) {
         if (pathname.startsWith("/api/") && prefersJsonAuthError(context.request)) {
@@ -82,9 +102,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
         if (aal === "aal2") {
           setMfaRequiredCookie(context.cookies, false);
-        } else if (isMfaRequiredCookieSet(context.cookies)) {
+        } else if (isMfaRequired(context.request, context.cookies)) {
           needsMfa = true;
-        } else if (isMfaCheckedNotRequired(context.cookies)) {
+        } else if (isMfaCheckedNotRequiredRequest(context.request, context.cookies)) {
           needsMfa = false;
         } else if (aal === "aal1") {
           needsMfa = await sessionNeedsMfaStepUp(

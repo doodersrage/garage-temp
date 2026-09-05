@@ -7,6 +7,60 @@ export type AuthResult = {
   user: User | null;
 };
 
+/** Native companions (Android / Bay Buddy) send tokens as headers instead of cookies. */
+export const ACCESS_HEADER = "authorization";
+export const REFRESH_HEADER = "x-sb-refresh-token";
+export const MFA_HEADER = "x-sb-mfa-required";
+
+async function sessionFromTokens(
+  accessToken: string,
+  refreshToken: string,
+): Promise<AuthResult> {
+  try {
+    // Fresh client per call -- never the shared `supabase` singleton here.
+    // Auth runs on essentially every request, and Cloudflare Workers can
+    // interleave concurrent requests within one isolate's shared global
+    // scope, so a shared client's setSession() would be a race.
+    const client = createAuthClient();
+    const { data, error } = await client.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+
+    if (error || !data.session) {
+      return { session: null, user: null };
+    }
+
+    return { session: data.session, user: data.user };
+  } catch {
+    return { session: null, user: null };
+  }
+}
+
+function bearerAccessToken(request: Request): string | null {
+  const header = request.headers.get(ACCESS_HEADER);
+  if (!header) return null;
+  const match = /^Bearer\s+(.+)$/i.exec(header.trim());
+  return match?.[1]?.trim() || null;
+}
+
+/**
+ * Resolve the signed-in user from either:
+ * - HttpOnly cookies (web dashboard), or
+ * - Authorization Bearer + X-SB-Refresh-Token (native / desktop companions)
+ */
+export async function getAuthFromRequest(
+  request: Request,
+  cookies: AstroCookies,
+): Promise<AuthResult> {
+  const access = bearerAccessToken(request);
+  const refresh = request.headers.get(REFRESH_HEADER)?.trim();
+  if (access && refresh) {
+    return sessionFromTokens(access, refresh);
+  }
+  return getAuthFromCookies(cookies);
+}
+
 export async function getAuthFromCookies(
   cookies: AstroCookies,
 ): Promise<AuthResult> {
@@ -17,29 +71,16 @@ export async function getAuthFromCookies(
     return { session: null, user: null };
   }
 
-  try {
-    // Fresh client per call -- never the shared `supabase` singleton here.
-    // getAuthFromCookies runs on essentially every request, and Cloudflare
-    // Workers can interleave concurrent requests within one isolate's
-    // shared global scope, so a shared client's setSession() would be a
-    // race: whichever request last called it "wins" the ambient session
-    // that other in-flight requests' auth calls would then silently read.
-    const client = createAuthClient();
-    const { data, error } = await client.auth.setSession({
-      access_token: accessToken.value,
-      refresh_token: refreshToken.value,
-    });
-
-    if (error || !data.session) {
-      clearAuthCookies(cookies);
-      return { session: null, user: null };
-    }
-
-    return { session: data.session, user: data.user };
-  } catch {
+  const result = await sessionFromTokens(accessToken.value, refreshToken.value);
+  if (!result.session) {
     clearAuthCookies(cookies);
-    return { session: null, user: null };
   }
+  return result;
+}
+
+/** MFA gate helpers also honor companion headers. */
+export function companionMfaHeaderValue(request: Request): string | null {
+  return request.headers.get(MFA_HEADER)?.trim() || null;
 }
 
 export function clearAuthCookies(cookies: AstroCookies): void {

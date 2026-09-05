@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getAuthFromCookies } from "../../../lib/auth";
+import { getAuthFromRequest } from "../../../lib/auth";
 import { fetchNwsAlerts } from "../../../lib/nwsAlerts";
 import { getAlertSettingsForUser } from "../../../lib/notify";
 import {
@@ -25,8 +25,8 @@ import {
   splitOpenMeteoPastAndForecast,
 } from "../../../lib/openMeteoHistory";
 
-export const GET: APIRoute = async ({ cookies }) => {
-  const { session, user } = await getAuthFromCookies(cookies);
+export const GET: APIRoute = async ({ cookies, request }) => {
+  const { session, user } = await getAuthFromRequest(request, cookies);
   if (!session || !user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,

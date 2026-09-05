@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getAuthFromCookies } from "../../../lib/auth";
+import { getAuthFromRequest } from "../../../lib/auth";
 import { fetchTemps } from "../../../lib/FetchTemps";
 import { getUserPreferences } from "../../../lib/userPreferences";
 import { buildFeedDisplayGroups } from "../../../lib/tempFeedConfig";
@@ -25,8 +25,8 @@ export type LiveSensorCard = {
   temp?: { f: number; c: number; h: number } | null;
 };
 
-export const GET: APIRoute = async ({ cookies, url }) => {
-  const { session, user } = await getAuthFromCookies(cookies);
+export const GET: APIRoute = async ({ cookies, url, request }) => {
+  const { session, user } = await getAuthFromRequest(request, cookies);
 
   if (!session || !user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
