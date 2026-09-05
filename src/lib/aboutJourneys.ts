@@ -25,7 +25,9 @@ export const aboutJourneys: AboutJourney[] = [
     ctaLabel: "Start free monitoring",
     steps: [
       { slug: "freeze-protection-thresholds", label: "Freeze thresholds" },
+      { slug: "time-to-freeze", label: "Time-to-freeze" },
       { slug: "cold-snap-playbook", label: "Cold-snap playbook" },
+      { slug: "freeze-thaw-flood-playbook", label: "Thaw flood playbook" },
       { slug: "alert-channel-cookbook", label: "Alert channels" },
       { slug: "temperature-probe-case-study", label: "Case study" },
     ],

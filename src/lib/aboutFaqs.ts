@@ -107,6 +107,40 @@ export const aboutFaqsBySlug: Record<string, AboutFaqItem[]> = {
         "You can suppress routine noise overnight while still delivering freeze, flood, and forecast alerts, keep bypass enabled for critical kinds.",
     },
   ],
+  "freeze-thaw-flood-playbook": [
+    {
+      question: "Do I need a custom rule for leak pads?",
+      answer:
+        "No. Once alerts are enabled, wet flood/leak contacts notify automatically. Use Rules → flood only to combine wet with door, temperature, or duration conditions.",
+    },
+    {
+      question: "Does vacation mode mute flood alerts?",
+      answer:
+        "No. Vacation and snooze mute threshold freeze noise; flood and forecast/NWS alerts still deliver so empty-house wet events get through.",
+    },
+    {
+      question: "Where should I place wet contacts for thaw floods?",
+      answer:
+        "Water heater pans, laundry/utility low spots, sump rims, and crawlspace pools where melt water gathers first—not on a dry shelf. See the leak-puck accessory page for the pad BOM pattern.",
+    },
+  ],
+  "time-to-freeze": [
+    {
+      question: "How is time-to-freeze different from a threshold alert?",
+      answer:
+        "A threshold fires when the probe is already at or below your freeze °F. Time-to-freeze estimates remaining hours until that crossing using this space’s lag versus outdoor air.",
+    },
+    {
+      question: "What do Member forecast and Pro NWS add?",
+      answer:
+        "Every plan gets threshold plus the indoor time-to-freeze clock. Member adds outdoor forecast freeze warnings; Pro adds official NWS freeze and cold alerts.",
+    },
+    {
+      question: "Where do I turn time-to-freeze on?",
+      answer:
+        "Dashboard → Alerts → Essentials: set a freeze threshold, enable alerts and a delivery channel, then keep alerts on so remaining-hours warnings can fire. Send a test alert while awake.",
+    },
+  ],
   "alert-channel-cookbook": [
     {
       question: "Which channels work on the free plan?",

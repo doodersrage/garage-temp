@@ -79,7 +79,9 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
     description: "Freeze thresholds, leak alerts, cold-snap playbooks, and notification channels.",
     links: [
       { href: "/about/freeze-protection-thresholds", slug: "freeze-protection-thresholds" },
+      { href: "/about/time-to-freeze", slug: "time-to-freeze" },
       { href: "/about/cold-snap-playbook", slug: "cold-snap-playbook" },
+      { href: "/about/freeze-thaw-flood-playbook", slug: "freeze-thaw-flood-playbook" },
       { href: "/about/garage-door-cold-playbook", slug: "garage-door-cold-playbook" },
       { href: "/about/personal-weather-stations", slug: "personal-weather-stations" },
       { href: "/about/alert-channel-cookbook", slug: "alert-channel-cookbook" },

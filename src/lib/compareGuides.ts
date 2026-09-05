@@ -258,6 +258,56 @@ export const compareGuides: CompareGuide[] = [
       },
     ],
   },
+  {
+    slug: "tempstick",
+    path: "/compare/tempstick",
+    title: "ThermalTrace vs TempStick",
+    headline: "ThermalTrace vs TempStick Wi‑Fi freeze thermometer",
+    description:
+      "Compare ThermalTrace DIY freeze and flood monitoring to TempStick sealed Wi‑Fi thermometers for empty houses, cabins, and unheated garages.",
+    competitor: "TempStick",
+    summary:
+      "TempStick is a sealed battery Wi‑Fi thermometer with an app. ThermalTrace is BYO ESP probes, multi-zone freeze and flood contacts, a time-to-freeze clock, and household alerts you control.",
+    lede:
+      "TempStick (and similar sealed Wi‑Fi freeze thermometers) win when you want zero soldering and a single battery pod with SMS from a vendor app. They are weaker when you need a DS18B20 on a pipe, a wet-contact pad under a water heater, multiple zones, CSV history, or a household that shares one dashboard. ThermalTrace assumes you bring an ESP32 (or similar), then hosts ingest, freeze runway alerts, and flood auto-notify.",
+    photoId: "frozen-thermometer",
+    whenThermalTrace: [
+      "You want pipe-mounted DS18B20 probes, not only ambient air in a battery pod",
+      "You need wet/dry flood contacts plus freeze on the same account",
+      "Household members need shared alerts, CSV/history, or claims evidence",
+      "Detached garage Wi‑Fi works for ESP HTTPS push but Bluetooth pods fail",
+    ],
+    whenOther: [
+      "You refuse DIY hardware and want one sealed pod out of the box",
+      "A single ambient reading and vendor app SMS are enough",
+      "You do not need multi-zone probes, flood pads, or data export",
+    ],
+    rows: [
+      { capability: "Hardware", thermaltrace: "BYO ESP / Pico / Arduino + probes", other: "Sealed battery Wi‑Fi pod" },
+      { capability: "Probe placement", thermaltrace: "Pipe tip, multi-zone, crawlspace", other: "Ambient air at the pod" },
+      { capability: "Flood / leak contacts", thermaltrace: "Yes (auto wet notify)", other: "Usually temp-only" },
+      { capability: "Time-to-freeze clock", thermaltrace: "Yes (space lag vs outdoor)", other: "Threshold / app push" },
+      { capability: "Alert channels", thermaltrace: "Email, SMS, push, chat, webhooks", other: "Vendor app + SMS options" },
+      { capability: "Household / export", thermaltrace: "Invites, share links, CSV (paid)", other: "Account sharing varies" },
+    ],
+    faqs: [
+      {
+        question: "Is TempStick easier to set up than ThermalTrace?",
+        answer:
+          "Yes for a single sealed pod: power it, join Wi‑Fi, use the vendor app. ThermalTrace needs a push device and a flashed ESP sketch, then you own placement and multi-sensor wiring.",
+      },
+      {
+        question: "Can ThermalTrace replace TempStick for cabin freeze watch?",
+        answer:
+          "Yes if you can run Wi‑Fi ESP ingest. You get pipe probes, optional leak pads, a remaining-hours freeze clock, and household channels. Start from the freeze kit BOM and freeze-season checklist.",
+      },
+      {
+        question: "Do I need both?",
+        answer:
+          "Rarely. Pick TempStick for zero-DIY ambient only. Pick ThermalTrace when pipes, floods, multi-zone, or export matter.",
+      },
+    ],
+  },
 ];
 
 export function getCompareGuide(slug: string): CompareGuide | undefined {

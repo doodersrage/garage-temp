@@ -231,6 +231,8 @@ export const aboutPhotos: Record<AboutPhotoId, AboutPhoto> = {
 export const aboutHeroPhotoBySlug: Partial<Record<string, AboutPhotoId>> = {
   // Freeze / alerts / weather / spaces
   "cold-snap-playbook": "frost-window",
+  "freeze-thaw-flood-playbook": "crawlspace",
+  "time-to-freeze": "frozen-thermometer",
   "freeze-protection-thresholds": "basement-pex-pipes",
   "alert-channel-cookbook": "cold-weather-road",
   "seasonal-garage-patterns": "frost-window",
@@ -386,6 +388,7 @@ export const compareHubPhotos: Array<{
   { id: "network-switch", label: "vs DIY MQTT", href: "/compare/diy-mqtt" },
   { id: "home-workshop", label: "vs Govee / SmartThings", href: "/compare/govee" },
   { id: "frozen-thermometer", label: "vs Tempest", href: "/compare/tempest" },
+  { id: "utility-pipes", label: "vs TempStick", href: "/compare/tempstick" },
   { id: "crawlspace", label: "vs Nest / Ecobee", href: "/compare/nest" },
 ];
 

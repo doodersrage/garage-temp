@@ -688,4 +688,22 @@ export const expandedAboutPageMeta: ExpandedAboutPageMeta[] = [
     summary:
       "Point ThermalTrace at the station on your property: better yard-level freeze context.",
   },
+  {
+    slug: "freeze-thaw-flood-playbook",
+    parentSlug: "accounts-and-dashboard",
+    title: "Freeze → thaw flood playbook",
+    description:
+      "Place wet contacts for pipe thaw and ice-melt floods: how auto flood alerts work vs Rules, why vacation mode still fires flood, and what to do when a pad goes wet.",
+    summary:
+      "Companion to cold-snap: catch melt and drip floods under water heaters, laundry, and sumps while freeze season ends.",
+  },
+  {
+    slug: "time-to-freeze",
+    parentSlug: "accounts-and-dashboard",
+    title: "Time-to-freeze explained",
+    description:
+      "Threshold alerts vs remaining-hours freeze runway vs Member outdoor forecast vs Pro NWS: what the lag model uses and how to enable time-to-freeze in Alerts.",
+    summary:
+      "Understand the hours-until-freeze clock so you act before the probe crosses your freeze threshold.",
+  },
 ];

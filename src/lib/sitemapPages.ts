@@ -30,6 +30,7 @@ const STATIC_PUBLIC_PATHS = [
   "/compare/tempest",
   "/compare/nest",
   "/compare/ecobee",
+  "/compare/tempstick",
   "/contact",
   "/privacy",
   "/terms",

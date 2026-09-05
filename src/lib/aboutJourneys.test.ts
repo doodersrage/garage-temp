@@ -18,7 +18,7 @@ describe("aboutJourneys", () => {
   it("returns journey context for cold-snap playbook", () => {
     const matches = getJourneysForSlug("cold-snap-playbook");
     expect(matches.length).toBeGreaterThan(0);
-    expect(matches[0]?.nextStep?.slug).toBe("alert-channel-cookbook");
+    expect(matches[0]?.nextStep?.slug).toBe("freeze-thaw-flood-playbook");
   });
 });
 
@@ -28,6 +28,8 @@ describe("about gap guides", () => {
       "cold-snap-playbook",
       "alert-channel-cookbook",
       "household-sharing-walkthrough",
+      "freeze-thaw-flood-playbook",
+      "time-to-freeze",
     ]) {
       expect(getAboutPage(slug)?.parentSlug).toBe("accounts-and-dashboard");
       expect(getExpandedAboutContent(slug)?.length).toBeGreaterThan(2);

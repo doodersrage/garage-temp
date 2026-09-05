@@ -118,7 +118,7 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
       { type: "h2", text: "Zone-specific rules" },
       { type: "ul", items: ["**Door-adjacent probe:** Expect brief dips; do not treat every spike as emergency.","**Interior / pipe-wall probe:** Tighter threshold; this zone best represents risk.","**Average key:** Useful summary but can hide a cold corner: check individual zones."] },
       { type: "h2", text: "Related monitoring" },
-      { type: "p", html: "Understand drivers with <a class=\"text-link\" href=\"/about/seasonal-garage-patterns\">seasonal patterns</a> and <a class=\"text-link\" href=\"/about/infiltration-wind-drafts\">infiltration</a>. Hardware reliability matters too: <a class=\"text-link\" href=\"/about/dht22-read-errors-retries\">DHT22 retries</a> prevent false alarms from bad reads. Leak / flood sensors notify automatically when wet; door, motion, power, and air quality need a custom rule in Dashboard → Alerts." }
+      { type: "p", html: "Understand drivers with <a class=\"text-link\" href=\"/about/seasonal-garage-patterns\">seasonal patterns</a> and <a class=\"text-link\" href=\"/about/infiltration-wind-drafts\">infiltration</a>. Hardware reliability matters too: <a class=\"text-link\" href=\"/about/dht22-read-errors-retries\">DHT22 retries</a> prevent false alarms from bad reads. Leak / flood sensors notify automatically when wet; door, motion, power, and air quality need a custom rule in Dashboard → Alerts. For remaining-hours runway before the probe crosses freeze, see <a class=\"text-link\" href=\"/about/time-to-freeze\">time-to-freeze</a>." }
   ],
 
   "arduino-ide-setup": [
@@ -754,9 +754,9 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
       { type: "h2", text: "When an alert fires" },
       { type: "ul", items: ["**Acknowledge** it (“I’m on it”) so escalations pause if you use playbooks.","Check the coldest probe and whether a door has been open.","If you cannot respond, escalate to SMS/household members.","Keep quiet-hours bypass on for freeze/forecast so overnight alerts still arrive."] },
       { type: "h2", text: "After the snap" },
-      { type: "p", html: "Review history for overnight lows, adjust the threshold if you were warned too late or too often, and read the <a class=\"text-link\" href=\"/about/temperature-probe-case-study\">probe case study</a> for placement lessons. Invite family with the <a class=\"text-link\" href=\"/about/household-sharing-walkthrough\">household sharing walkthrough</a> so one person is not the only responder." },
+      { type: "p", html: "Review history for overnight lows, adjust the threshold if you were warned too late or too often, and read the <a class=\"text-link\" href=\"/about/temperature-probe-case-study\">probe case study</a> for placement lessons. Invite family with the <a class=\"text-link\" href=\"/about/household-sharing-walkthrough\">household sharing walkthrough</a> so one person is not the only responder. Watch melt and drip risk with the <a class=\"text-link\" href=\"/about/freeze-thaw-flood-playbook\">freeze → thaw flood playbook</a>." },
       { type: "h2", text: "Product checklist" },
-      { type: "ul", items: ["Dashboard → Alerts → Essentials (freeze °F + email)","Dashboard → Alerts → Send a test now","Optional: playbook steps if unacked after N minutes","Optional: household invites + free family live share link"] }
+      { type: "ul", items: ["Dashboard → Alerts → Essentials (freeze °F + email)","Dashboard → Alerts → Send a test now","Optional: playbook steps if unacked after N minutes","Optional: household invites + free family live share link","Optional: enable the <a class=\"text-link\" href=\"/about/time-to-freeze\">time-to-freeze</a> runway before sleep or travel"] }
   ],
 
   "alert-channel-cookbook": [
@@ -814,6 +814,36 @@ export const expandedAboutContent: Record<string, AboutContentBlock[]> = {
       { type: "ol", items: ["Acknowledge the alert so escalations pause if you use playbooks.","Close the door: readings often recover within minutes.","If temperature keeps falling, follow the <a class=\"text-link\" href=\"/about/cold-snap-playbook\">cold-snap playbook</a> (space heaters, faucet drip, household SMS)."] },
       { type: "h2", text: "Tuning tips" },
       { type: "ul", items: ["Use **door open duration** (15–30 min) if short openings should not notify.","Add **rate drop** or forecast triggers for regional cold snaps without relying on the door alone.","Enable SMS or push (Pro) when email is not loud enough at night: see <a class=\"text-link\" href=\"/about/alert-channel-cookbook\">alert channel cookbook</a>."] }
+  ],
+
+  "freeze-thaw-flood-playbook": [
+      { type: "p", html: "Cold snaps crack fittings and thaw cycles dump melt water. Freeze alerts protect pipes; <strong>wet contacts</strong> catch the flood that follows. This playbook is the companion to the <a class=\"text-link\" href=\"/about/cold-snap-playbook\">cold-snap playbook</a>: where to place pads, how auto flood differs from Rules, and why vacation mode still wakes you for water." },
+      { type: "h2", text: "Where thaw floods show up" },
+      { type: "ul", items: ["**Water heater pan / garage heater**: slow drips after a hard freeze or pressure relief event.","**Laundry and utility sinks**: supply lines and drain backups when ice melts.","**Sump pits and crawlspace low spots**: melt and groundwater after outdoor thaw.","**Exterior wall cavities**: ice dams and pipe thaw that soak insulation before you see it upstairs."] },
+      { type: "h2", text: "Place wet contacts" },
+      { type: "ol", items: ["Use a water pad or probe that can POST a <code>flood</code> (or leak-named) bool: see the <a class=\"text-link\" href=\"/leak-puck\">leak contact puck</a> accessory page for the BOM pattern.","Seat the pad where water pools first (pan, floor low point), not on a dry shelf.","Push ingest from the same ESP device as your freeze probe when Wi‑Fi allows, or a second push device.","Confirm the key shows <strong>Dry</strong> on Home before you trust overnight coverage."] },
+      { type: "h2", text: "Auto flood vs Rules" },
+      { type: "ul", items: ["**Auto flood**: once alerts are enabled, wet flood/leak contacts notify on their own. You do not need a custom rule for “sensor wet.”","**Rules → flood**: use only when you want combinations (wet AND door open, wet AND cold, duration filters).","**Door / motion / power**: those kinds still need Rules; they never auto-fire like flood."] },
+      { type: "h2", text: "Vacation and snooze still fire flood" },
+      { type: "p", html: "Vacation mode and short snoozes mute threshold freeze noise while you work in a cold bay. <strong>Flood and forecast/NWS alerts still deliver</strong> so an empty house does not miss a pad going wet. Clear vacation under Alerts when you are home and want full threshold chatter again." },
+      { type: "h2", text: "When a pad goes wet" },
+      { type: "ol", items: ["Acknowledge the alert so playbook escalations pause if you use them.","Shut the nearest supply valve; check the water heater T&amp;P and any ice-dam drip path.","Photograph the wet area and export a claims pack from history if you need carrier evidence: <a class=\"text-link\" href=\"/claims-pack\">claims pack</a>.","Reseat or dry the pad only after the leak is stopped so you do not clear the sensor while water is still flowing."] },
+      { type: "h2", text: "Product checklist" },
+      { type: "ul", items: ["Dashboard → Alerts enabled (freeze + auto flood)","At least one flood/leak key reporting Dry on Home","Test alert from Essentials while pads are dry","Optional: household SMS/push for overnight wet events","Optional: <a class=\"text-link\" href=\"/about/time-to-freeze\">time-to-freeze</a> so freeze runway and flood share the same channels"] }
+  ],
+
+  "time-to-freeze": [
+      { type: "p", html: "A threshold alert fires when a probe already crossed your freeze °F. The <strong>time-to-freeze clock</strong> estimates remaining hours until that space would hit the threshold, using how this unheated zone lags outdoor air. Use it after the kit is live, not as a wiring guide." },
+      { type: "h2", text: "Four layers of cold risk" },
+      { type: "ul", items: ["**Threshold**: probe °F at or below your freeze setting (every plan).","**Time-to-freeze clock**: remaining hours until the threshold at this space’s lag vs outdoor (every plan).","**Member outdoor forecast**: predictive freeze warnings from outdoor forecast inputs.","**Pro NWS**: official National Weather Service freeze and cold alerts for your area."] },
+      { type: "h2", text: "What the lag model uses" },
+      { type: "p", html: "The clock compares indoor probe history to outdoor context and estimates how fast this garage, crawlspace, or shop cools toward your threshold. Short door openings and sensor blips can move the estimate; treat it as a runway, not a stopwatch. Pair placement lessons with <a class=\"text-link\" href=\"/about/freeze-protection-thresholds\">freeze thresholds</a> and the <a class=\"text-link\" href=\"/about/cold-snap-playbook\">cold-snap playbook</a>." },
+      { type: "h2", text: "How to enable in Alerts" },
+      { type: "ol", items: ["Open <a class=\"text-link\" href=\"/dashboard/alerts\">Dashboard → Alerts → Essentials</a>.","Confirm a freeze threshold (°F) and at least one delivery channel (email on Free).","Keep alerts enabled so remaining-hours warnings can fire before the probe crosses freeze.","Send a <strong>test alert</strong> while awake so the household trusts the channel stack."] },
+      { type: "h2", text: "When to act on the runway" },
+      { type: "ul", items: ["**Under ~4 hours**: treat like an imminent freeze: drip faucets, close doors, escalate SMS/household.","**Under ~12 hours**: prep before sleep or travel: verify channels, check the coldest zone.","**Longer runway**: useful planning signal; still confirm thresholds match the coldest pipe-adjacent probe."] },
+      { type: "h2", text: "Related" },
+      { type: "p", html: "After a thaw, watch wet contacts with the <a class=\"text-link\" href=\"/about/freeze-thaw-flood-playbook\">freeze → thaw flood playbook</a>. Plan comparison of forecast vs NWS layers lives on <a class=\"text-link\" href=\"/pricing\">pricing</a>." }
   ],
 
   "home-assistant-notify-recipes": [
@@ -920,6 +950,8 @@ export const EXPANDED_ABOUT_SLUGS: readonly string[] = [
   "household-sharing-walkthrough",
   "esphome-shelly-recipes",
   "garage-door-cold-playbook",
+  "freeze-thaw-flood-playbook",
+  "time-to-freeze",
   "home-assistant-notify-recipes",
   "personal-weather-stations"
 ] as const;
