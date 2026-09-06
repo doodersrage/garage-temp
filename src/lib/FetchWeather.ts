@@ -34,8 +34,19 @@ function cleanEnv(value: unknown): string {
   return String(value ?? "").replace(/\r/g, "").trim();
 }
 
+/** Server-only OpenWeather key (OPENWEATHER_API_KEY preferred; NEXT_PUBLIC_* is legacy fallback). */
+export function getOpenWeatherApiKey(): string {
+  return (
+    cleanEnv(import.meta.env.OPENWEATHER_API_KEY) ||
+    cleanEnv(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY)
+  );
+}
+
 export function getDefaultWeatherCityId(): string {
-  return cleanEnv(import.meta.env.NEXT_PUBLIC_OPENWEATHER_CITY_ID);
+  return (
+    cleanEnv(import.meta.env.OPENWEATHER_CITY_ID) ||
+    cleanEnv(import.meta.env.NEXT_PUBLIC_OPENWEATHER_CITY_ID)
+  );
 }
 
 export function resolveWeatherCityId(cityId?: string | null): string {
@@ -75,7 +86,7 @@ export function normalizeWeatherPayload(raw: Record<string, any>): WeatherSnapsh
 }
 
 export async function fetchWeather(cityId?: string | null): Promise<any | null> {
-  const apiKey = cleanEnv(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY);
+  const apiKey = getOpenWeatherApiKey();
   const city = resolveWeatherCityId(cityId);
 
   if (!apiKey) {
@@ -118,7 +129,7 @@ export async function fetchWeatherSnapshot(
 export async function fetchWeatherForecastRaw(
   cityId?: string | null,
 ): Promise<any | null> {
-  const apiKey = cleanEnv(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY);
+  const apiKey = getOpenWeatherApiKey();
   const city = resolveWeatherCityId(cityId);
 
   if (!apiKey || !city) return null;
@@ -197,7 +208,7 @@ export async function fetchWeatherByCoords(
   lat: number,
   lon: number,
 ): Promise<any | null> {
-  const apiKey = cleanEnv(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY);
+  const apiKey = getOpenWeatherApiKey();
   if (!apiKey || !Number.isFinite(lat) || !Number.isFinite(lon)) return null;
   const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`;
   try {
@@ -215,7 +226,7 @@ export async function fetchWeatherForecastByCoords(
   lat: number,
   lon: number,
 ): Promise<any | null> {
-  const apiKey = cleanEnv(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY);
+  const apiKey = getOpenWeatherApiKey();
   if (!apiKey || !Number.isFinite(lat) || !Number.isFinite(lon)) return null;
   const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`;
   try {

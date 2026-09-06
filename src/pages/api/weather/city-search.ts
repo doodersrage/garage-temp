@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { getOpenWeatherApiKey } from "../../../lib/FetchWeather";
 import { normalizeGeocodeResults } from "../../../lib/weatherCities";
 import { checkWeatherSearchRateLimit } from "../../../lib/weatherSearchLimits";
 
@@ -22,9 +23,7 @@ export const GET: APIRoute = async ({ url, clientAddress }) => {
     });
   }
 
-  const apiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "")
-    .replace(/\r/g, "")
-    .trim();
+  const apiKey = getOpenWeatherApiKey();
   if (!apiKey) {
     return new Response(JSON.stringify({ error: "Weather API not configured" }), {
       status: 500,

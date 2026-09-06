@@ -506,16 +506,16 @@ const rulesJson = JSON.stringify(settings.alertRules ?? []);
           <input class="form-input" type="text" id="telegram_bot_token" name="telegram_bot_token" value={settings.telegramBotToken ?? ""} placeholder="123456:ABC..." autocomplete="off" />
         </div>
         <div class="form-field">
-          <label class="form-label" for="telegram_chat_id">Chat ID</label>
+          <label class="form-label" for="telegram_chat_id">Chat ID (required for commands)</label>
           <input class="form-input" type="text" id="telegram_chat_id" name="telegram_chat_id" value={settings.telegramChatId ?? ""} placeholder="-100..." />
         </div>
         <div class="form-field mb-0">
           <label class="form-label" for="telegram_command_secret">Webhook secret (optional)</label>
           <input class="form-input" type="text" id="telegram_command_secret" name="telegram_command_secret" value={settings.telegramCommandSecret ?? ""} placeholder="random-secret" autocomplete="off" />
           <p class="form-hint mb-0">
-            Prefer <code>setWebhook</code> with <code>secret_token</code> (Telegram sends
-            <code>X-Telegram-Bot-Api-Secret-Token</code>). Legacy URL
-            <code>/api/telegram/webhook?secret=…</code> still works. Commands only accepted from your configured chat id when set: /status [name], /snooze [hours], /vacation [days].
+            Use Telegram <code>setWebhook</code> with <code>secret_token</code> so Telegram sends
+            <code>X-Telegram-Bot-Api-Secret-Token</code> (query <code>?secret=</code> is not accepted).
+            Save a Chat ID above: commands only run from that chat (/status [name], /snooze [hours], /vacation [days]).
           </p>
         </div>
       </div>

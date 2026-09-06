@@ -1,10 +1,11 @@
 import type { APIRoute } from "astro";
+import { getOpenWeatherApiKey } from "../../../../../../../lib/FetchWeather";
 
 const ALLOWED_LAYERS = new Set(["temp_new", "precipitation_new"]);
 
 /**
  * Proxy OpenWeather map tiles so the API key stays server-side.
- * GET /api/weather/tiles/:layer/:z/:x/:y.png
+ * GET /api/weather/tiles/:layer/:z/:x/:y
  */
 export const GET: APIRoute = async ({ params }) => {
   const layer = params.layer?.trim() ?? "";
@@ -16,7 +17,7 @@ export const GET: APIRoute = async ({ params }) => {
     return new Response("Not found", { status: 404 });
   }
 
-  const apiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "").trim();
+  const apiKey = getOpenWeatherApiKey();
   if (!apiKey) {
     return new Response("Weather tiles unavailable", { status: 503 });
   }
@@ -24,7 +25,9 @@ export const GET: APIRoute = async ({ params }) => {
   const upstream = `https://tile.openweathermap.org/map/${layer}/${z}/${x}/${y}.png?appid=${encodeURIComponent(apiKey)}`;
   const res = await fetch(upstream);
   if (!res.ok) {
-    return new Response("Upstream tile error", { status: res.status === 401 ? 502 : res.status });
+    return new Response("Upstream tile error", {
+      status: res.status === 401 ? 502 : res.status,
+    });
   }
 
   const body = await res.arrayBuffer();

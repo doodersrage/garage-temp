@@ -7,15 +7,12 @@ interface Props {
   intervalMs?: number;
   /** Guest marketing home — avoid dashboard-only CTAs */
   guest?: boolean;
-  /** OpenWeather tile key for live temp/precip overlays on the map */
-  owmApiKey?: string | null;
 }
 
 export default function WeatherPanel({
   cityId = null,
   intervalMs = 300000,
   guest = false,
-  owmApiKey = null,
 }: Props) {
   const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -152,7 +149,6 @@ export default function WeatherPanel({
           lat={weather.lat!}
           lon={weather.lon!}
           label={locationLabel}
-          owmApiKey={owmApiKey}
         />
       )}
       <div class="stat-grid">

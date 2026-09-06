@@ -1,8 +1,8 @@
 /**
  * Per-isolate abuse controls for the inbound Telegram command webhook.
  *
- * Auth prefers X-Telegram-Bot-Api-Secret-Token (setWebhook secret_token),
- * with legacy ?secret= still accepted, plus optional chat-id binding.
+ * Auth requires X-Telegram-Bot-Api-Secret-Token (setWebhook secret_token).
+ * Query ?secret= is rejected. Commands require a saved chat-id binding.
  * This limiter slows secret guessing from one client address.
  */
 

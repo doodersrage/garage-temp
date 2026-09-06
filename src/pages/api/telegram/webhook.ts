@@ -45,9 +45,8 @@ async function sendTelegramReply(
   });
 }
 
-function resolveTelegramSecret(request: Request, _url: URL): string {
-  // Prefer Telegram's official secret header only — query ?secret= leaks via
-  // Referer/logs and is no longer accepted.
+function resolveTelegramSecret(request: Request): string {
+  // Header only — query ?secret= is rejected (Referer/log leakage).
   return request.headers.get("X-Telegram-Bot-Api-Secret-Token")?.trim() ?? "";
 }
 
@@ -60,7 +59,7 @@ export const POST: APIRoute = async ({ request, url, clientAddress }) => {
     });
   }
 
-  const secret = resolveTelegramSecret(request, url);
+  const secret = resolveTelegramSecret(request);
   const userId = await resolveUserByTelegramSecret(secret);
   if (!userId) {
     return new Response("Unauthorized", { status: 401 });

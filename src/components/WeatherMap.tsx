@@ -36,8 +36,6 @@ interface Props {
   lat: number;
   lon: number;
   label: string;
-  /** OpenWeather map tiles key (omit to show basemap + marker only). */
-  owmApiKey?: string | null;
   zoom?: number;
 }
 

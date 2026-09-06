@@ -386,10 +386,6 @@ const lastAlertAge = formatRelativeAge(lastAlertAt);
 
 const nightsRiskCount = nightsAtRisk.filter((n) => n.atRisk).length;
 
-const owmApiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "")
-  .replace(/\r/g, "")
-  .trim();
-
 const showColdSnapChecklist = shouldShowColdSnapChecklist({
   nightsRiskCount,
   outdoorTempF: weatherSnapshot?.temp ?? null,
@@ -1105,7 +1101,6 @@ const garageRisk = computeGarageRiskStatus({
               weatherSnapshot={weatherSnapshot}
               weatherHasCoords={weatherHasCoords}
               nwsAlerts={nwsAlerts}
-              owmApiKey={owmApiKey || null}
             />
           )}
         </div>

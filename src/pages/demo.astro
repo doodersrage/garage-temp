@@ -22,9 +22,6 @@ const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/demo");
 const demoFaqs = getMarketingFaqs("demo");
 const appStatus = await fetchAppStatusSummary();
-const owmApiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "")
-  .replace(/\r/g, "")
-  .trim();
 const schema = [
   getBreadcrumbSchema(siteUrl, [
     { name: "Home", path: "/" },
@@ -110,7 +107,7 @@ const schema = [
       </p>
       <div class="home-live" aria-label="Live demo readings">
         <DemoTempsPanel client:visible intervalMs={15000} />
-        <WeatherPanel client:visible cityId={null} guest owmApiKey={owmApiKey || null} />
+        <WeatherPanel client:visible cityId={null} guest />
       </div>
     </section>
 

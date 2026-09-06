@@ -341,9 +341,9 @@ export function findInvalidAlertWebhookUrl(settings: AlertSettings): string | nu
 
 /**
  * Minimum length required for the Telegram command webhook secret. That
- * endpoint (/api/telegram/webhook) authenticates with this shared secret
- * Prefer X-Telegram-Bot-Api-Secret-Token (query ?secret= is rejected).
- * Commands require a saved chat id binding.
+ * endpoint (/api/telegram/webhook) authenticates with this shared secret via
+ * X-Telegram-Bot-Api-Secret-Token only (query ?secret= is rejected). Commands
+ * require a saved chat id binding.
  */
 export const MIN_TELEGRAM_COMMAND_SECRET_LENGTH = 16;
 

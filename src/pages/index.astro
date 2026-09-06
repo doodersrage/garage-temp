@@ -45,9 +45,6 @@ const brandDefinition = getBrandDefinition();
 const memberPrice = getMemberPriceDisplay().monthly;
 const proPrice = getProPriceDisplay().monthly;
 const appStatus = !isAuthenticated ? await fetchAppStatusSummary() : null;
-const owmApiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "")
-  .replace(/\r/g, "")
-  .trim();
 const featuredStory = getStory("pipe-near-miss")!;
 ---
 
@@ -134,7 +131,7 @@ const featuredStory = getStory("pipe-near-miss")!;
 					</p>
 					<div class="home-live" aria-label="Live demo readings">
 						{showGarageTemps && <DemoTempsPanel client:visible />}
-						{showWeather && <WeatherPanel client:visible cityId={null} guest owmApiKey={owmApiKey || null} />}
+						{showWeather && <WeatherPanel client:visible cityId={null} guest />}
 					</div>
 				</section>
 
@@ -349,7 +346,7 @@ const featuredStory = getStory("pipe-near-miss")!;
 			<div class="grid gap-6">
 				{showGarageTemps && <LiveTempsPanel client:visible />}
 				{showWeather && (
-					<WeatherPanel client:visible cityId={preferences?.weatherCityId ?? null} owmApiKey={owmApiKey || null} />
+					<WeatherPanel client:visible cityId={preferences?.weatherCityId ?? null} />
 				)}
 				{!showGarageTemps && !showWeather && (
 					<div class="empty-state">
