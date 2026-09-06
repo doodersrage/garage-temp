@@ -37,11 +37,15 @@ const locationLabel = weatherSnapshot
     </p>
     {weatherHasCoords && weatherSnapshot && weatherSnapshot.lat != null && weatherSnapshot.lon != null && (
       <WeatherMap
-        client:visible
+        client:only="preact"
         lat={weatherSnapshot.lat}
         lon={weatherSnapshot.lon}
         label={locationLabel}
-      />
+      >
+        <div slot="fallback" class="weather-map mb-6">
+          <div class="weather-map-frame freeze-map-frame" aria-hidden="true"></div>
+        </div>
+      </WeatherMap>
     )}
     {nwsAlerts && nwsAlerts.alerts.length > 0 && (
       <div class="alert-warning mb-4">

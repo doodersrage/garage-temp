@@ -94,6 +94,8 @@ jobs:
       - if: env.skip != 'true'
         run: pnpm install --frozen-lockfile
       - if: env.skip != 'true'
+        run: pnpm typecheck
+      - if: env.skip != 'true'
         run: pnpm test
       - if: env.skip != 'true'
         run: pnpm build || (rm -rf node_modules/.vite && pnpm build)
