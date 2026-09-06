@@ -491,6 +491,11 @@ export const marketingFaqs = {
       answer:
         "Yes. Connect opens thermaltrace.dev in your browser, including MFA if enabled, then hands the session back to the app over a localhost callback.",
     },
+    {
+      question: "Does Desktop support notifications and kiosk mode?",
+      answer:
+        "Yes. On Pro, Desktop can raise OS notifications for new alert events while the app is open (Account → Desktop notifications). Kiosk mode fullscreen live readings is available from the top bar for shop displays.",
+    },
   ],
 } as const satisfies Record<string, MarketingFaqItem[]>;
 

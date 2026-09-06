@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getAuthFromCookies } from "../../../lib/auth";
+import { getAuthFromRequest } from "../../../lib/auth";
 import {
   getOrCreateHouseholdForUser,
   isUserInHousehold,
@@ -44,7 +44,7 @@ function randomKey(): string {
 }
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
-  const { user } = await getAuthFromCookies(cookies);
+  const { user } = await getAuthFromRequest(request, cookies);
   if (!user) {
     return redirect("/signin");
   }

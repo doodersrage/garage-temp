@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getAuthFromCookies } from "../../../lib/auth";
+import { getAuthFromRequest } from "../../../lib/auth";
 import {
   getAlertSettingsForUser,
   saveAlertSettingsForUser,
@@ -37,7 +37,7 @@ function jsonResponse(body: Record<string, unknown>, status = 200): Response {
 }
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
-  const { session, user } = await getAuthFromCookies(cookies);
+  const { session, user } = await getAuthFromRequest(request, cookies);
   const asJson = wantsJson(request);
 
   if (!session || !user) {

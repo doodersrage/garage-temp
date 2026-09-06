@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getAuthFromCookies } from "../../../../lib/auth";
+import { getAuthFromRequest } from "../../../../lib/auth";
 import {
   executeAlertAckPlaybook,
   type AckPlaybookAction,
@@ -32,7 +32,7 @@ function parseAction(raw: unknown): AckPlaybookAction {
 }
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
-  const { session, user } = await getAuthFromCookies(cookies);
+  const { session, user } = await getAuthFromRequest(request, cookies);
   if (!session || !user) {
     if (wantsJson(request)) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {

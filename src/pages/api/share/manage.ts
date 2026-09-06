@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getAuthFromCookies } from "../../../lib/auth";
+import { getAuthFromRequest } from "../../../lib/auth";
 import { getOrCreateHouseholdForUser } from "../../../lib/households";
 import { getUserEntitlements } from "../../../lib/entitlements";
 import { createServerClient } from "../../../lib/supabase";
@@ -19,8 +19,8 @@ function randomToken(): string {
   return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export const GET: APIRoute = async ({ cookies }) => {
-  const { user } = await getAuthFromCookies(cookies);
+export const GET: APIRoute = async ({ request, cookies }) => {
+  const { user } = await getAuthFromRequest(request, cookies);
   if (!user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
@@ -57,7 +57,7 @@ export const GET: APIRoute = async ({ cookies }) => {
 };
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
-  const { user } = await getAuthFromCookies(cookies);
+  const { user } = await getAuthFromRequest(request, cookies);
   if (!user) {
     return redirect("/signin");
   }

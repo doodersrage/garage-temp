@@ -1,11 +1,11 @@
 import type { APIRoute } from "astro";
-import { getAuthFromCookies } from "../../../lib/auth";
+import { getAuthFromRequest } from "../../../lib/auth";
 import { fetchCrossPropertySnapshots } from "../../../lib/crossProperty";
 import { getUserEntitlements } from "../../../lib/entitlements";
 import { scorePropertyHealth } from "../../../lib/portfolioHealth";
 
-export const GET: APIRoute = async ({ cookies }) => {
-  const { session, user } = await getAuthFromCookies(cookies);
+export const GET: APIRoute = async ({ request, cookies }) => {
+  const { session, user } = await getAuthFromRequest(request, cookies);
   if (!session || !user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,

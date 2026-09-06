@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getAuthFromCookies } from "../../../lib/auth";
+import { getAuthFromRequest } from "../../../lib/auth";
 import { getUserHouseholdId } from "../../../lib/households";
 import { getAlertSettingsForUser } from "../../../lib/notify";
 import { getUserPreferences } from "../../../lib/userPreferences";
@@ -7,8 +7,8 @@ import { fetchGarageTempHistory, fetchGarageTempChartData } from "../../../lib/g
 import { listHouseholdDevices } from "../../../lib/devices";
 import { getUserEntitlements } from "../../../lib/entitlements";
 
-export const GET: APIRoute = async ({ cookies }) => {
-  const { session, user } = await getAuthFromCookies(cookies);
+export const GET: APIRoute = async ({ request, cookies }) => {
+  const { session, user } = await getAuthFromRequest(request, cookies);
   if (!session || !user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,

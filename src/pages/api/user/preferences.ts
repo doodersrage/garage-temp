@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { createAuthClient } from "../../../lib/supabase";
 import {
-  getAuthFromCookies,
+  getAuthFromRequest,
   setAuthCookies,
 } from "../../../lib/auth";
 import {
@@ -11,7 +11,7 @@ import {
 import { formRedirectPath } from "../../../lib/siteUrl";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
-  const { session, user } = await getAuthFromCookies(cookies);
+  const { session, user } = await getAuthFromRequest(request, cookies);
 
   if (!session || !user) {
     return redirect("/signin");

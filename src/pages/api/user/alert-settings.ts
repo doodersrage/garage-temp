@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getAuthFromCookies } from "../../../lib/auth";
+import { getAuthFromRequest } from "../../../lib/auth";
 import { updateUserAlertSettings } from "../../../lib/alertNotifications";
 import {
   alertChannelsIncomplete,
@@ -18,7 +18,7 @@ import { getUserHouseholdId } from "../../../lib/households";
 import { formRedirectPath } from "../../../lib/siteUrl";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
-  const { session, user } = await getAuthFromCookies(cookies);
+  const { session, user } = await getAuthFromRequest(request, cookies);
 
   if (!session || !user) {
     return redirect("/signin");
