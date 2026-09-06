@@ -1791,7 +1791,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      count_managed_users: { Args: { caller_id: string }; Returns: number }
+      count_managed_users: {
+        Args: { caller_id: string; group_filter?: string | null; search_text?: string | null }
+        Returns: number
+      }
       get_user_household_id: {
         Args: { target_user_id: string }
         Returns: string
@@ -1802,7 +1805,15 @@ export type Database = {
         Returns: boolean
       }
       list_managed_users: {
-        Args: { caller_id: string; page_num?: number; page_size?: number }
+        Args: {
+          caller_id: string
+          group_filter?: string | null
+          page_num?: number
+          page_size?: number
+          search_text?: string | null
+          sort_by?: string | null
+          sort_dir?: string | null
+        }
         Returns: {
           created_at: string
           email: string

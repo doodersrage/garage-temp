@@ -1,14 +1,16 @@
 ---
-import type { PaginatedManagedUsers } from "../lib/userManager";
+import type { PaginatedManagedUsers, ManagedUserListQuery } from "../lib/userManager";
 import {
   formatUserGroups,
   formatUserTimestamp,
+  managedUserListQueryString,
 } from "../lib/userManager";
 import DashboardCard from "./dashboard/DashboardCard.astro";
 
 interface Props {
   users: PaginatedManagedUsers;
   currentUserId: string;
+  query: ManagedUserListQuery;
   basePath?: string;
   status?: string | null;
 }
@@ -16,16 +18,24 @@ interface Props {
 const {
   users,
   currentUserId,
+  query,
   basePath = "/dashboard/users",
   status = null,
 } = Astro.props;
 const { users: rows, page, pageSize, totalCount, totalPages, error } = users;
+const { search, group, sort } = query;
 
 const showingFrom = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
 const showingTo = totalCount === 0 ? 0 : Math.min(page * pageSize, totalCount);
 const prevPage = page > 1 ? page - 1 : null;
 const nextPage = page < totalPages ? page + 1 : null;
-const redirectTo = page > 1 ? `${basePath}?page=${page}` : basePath;
+const listQuery = { search, group, sort };
+const redirectTo = `${basePath}${managedUserListQueryString({ ...listQuery, page })}`;
+const hasFilters = Boolean(search || group || sort !== "created_desc");
+
+function pageHref(next: number): string {
+  return `${basePath}${managedUserListQueryString({ ...listQuery, page: next })}`;
+}
 ---
 
 <DashboardCard>
@@ -50,13 +60,54 @@ const redirectTo = page > 1 ? `${basePath}?page=${page}` : basePath;
     </div>
   )}
 
+  <form class="history-filters" method="get" action={basePath}>
+    <div class="form-field mb-0">
+      <label class="form-label" for="user-search">Search</label>
+      <input
+        class="form-input"
+        type="search"
+        id="user-search"
+        name="q"
+        value={search}
+        placeholder="Email or user id"
+      />
+    </div>
+    <div class="form-field mb-0">
+      <label class="form-label" for="user-group">Group</label>
+      <select class="form-input" id="user-group" name="group">
+        <option value="" selected={group === ""}>All groups</option>
+        <option value="admin" selected={group === "admin"}>Admin</option>
+        <option value="portfolio" selected={group === "portfolio"}>Portfolio</option>
+        <option value="pro" selected={group === "pro"}>Pro</option>
+        <option value="member" selected={group === "member"}>Member</option>
+        <option value="user" selected={group === "user"}>User</option>
+      </select>
+    </div>
+    <div class="form-field mb-0">
+      <label class="form-label" for="user-sort">Sort</label>
+      <select class="form-input" id="user-sort" name="sort">
+        <option value="created_desc" selected={sort === "created_desc"}>Newest first</option>
+        <option value="created_asc" selected={sort === "created_asc"}>Oldest first</option>
+        <option value="email_asc" selected={sort === "email_asc"}>Email A–Z</option>
+        <option value="email_desc" selected={sort === "email_desc"}>Email Z–A</option>
+      </select>
+    </div>
+    <button type="submit" class="btn-secondary self-end">Apply</button>
+    {hasFilters && (
+      <a class="btn-ghost self-end" href={basePath}>Clear</a>
+    )}
+  </form>
+  <p class="preference-hint mb-4">
+    Search matches email or user id. Pro and Portfolio accounts also belong to Member.
+  </p>
+
   {error ? (
     <div class="empty-state">
       <p>Unable to load users: {error}</p>
     </div>
   ) : rows.length === 0 ? (
     <div class="empty-state">
-      <p>No registered users were found.</p>
+      <p>{hasFilters ? "No registered users match these filters." : "No registered users were found."}</p>
     </div>
   ) : (
     <>
@@ -126,13 +177,13 @@ const redirectTo = page > 1 ? `${basePath}?page=${page}` : basePath;
         </p>
         <div class="pagination-controls">
           {prevPage ? (
-            <a class="btn-secondary" href={`${basePath}?page=${prevPage}`}>Previous</a>
+            <a class="btn-secondary" href={pageHref(prevPage)}>Previous</a>
           ) : (
             <span class="btn-secondary pagination-disabled">Previous</span>
           )}
-          <span class="pagination-current">Page {page} of {totalPages}</span>
+          <span class="pagination-current">Page {page} of {Math.max(totalPages, 1)}</span>
           {nextPage ? (
-            <a class="btn-secondary" href={`${basePath}?page=${nextPage}`}>Next</a>
+            <a class="btn-secondary" href={pageHref(nextPage)}>Next</a>
           ) : (
             <span class="btn-secondary pagination-disabled">Next</span>
           )}

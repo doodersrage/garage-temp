@@ -3,7 +3,11 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import UserManager from "../../components/UserManager.astro";
 import { getAuthFromCookies } from "../../lib/auth";
 import { isUserAdmin } from "../../lib/adminAccess";
-import { fetchManagedUsers } from "../../lib/userManager";
+import {
+  fetchManagedUsers,
+  managedUserListQueryString,
+  parseManagedUserListQuery,
+} from "../../lib/userManager";
 import { fetchReferralAdminStats } from "../../lib/referrals";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
@@ -21,17 +25,20 @@ if (!(await isUserAdmin(user.id))) {
 }
 
 const pageParam = Number(Astro.url.searchParams.get("page") ?? "1");
+const listQuery = parseManagedUserListQuery(Astro.url.searchParams);
+const queryString = (page?: number) =>
+  managedUserListQueryString({ ...listQuery, page });
 
 if (pageParam < 1 || Number.isNaN(pageParam)) {
-  return Astro.redirect("/dashboard/users?page=1");
+  return Astro.redirect(`/dashboard/users${queryString(1)}`);
 }
 
-const users = await fetchManagedUsers(user.id, pageParam);
+const users = await fetchManagedUsers(user.id, pageParam, undefined, listQuery);
 const referralStats = await fetchReferralAdminStats();
 const status = Astro.url.searchParams.get("status");
 
 if (users.totalPages > 0 && pageParam > users.totalPages) {
-  return Astro.redirect(`/dashboard/users?page=${users.totalPages}`);
+  return Astro.redirect(`/dashboard/users${queryString(users.totalPages)}`);
 }
 ---
 <DashboardLayout title="User Manager" requireAdmin>
@@ -71,6 +78,7 @@ if (users.totalPages > 0 && pageParam > users.totalPages) {
     <UserManager
       users={users}
       currentUserId={user.id}
+      query={listQuery}
       status={status}
     />
   </div>
