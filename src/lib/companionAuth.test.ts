@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   buildBayBuddyOAuthCustomUrl,
+  buildDesktopOAuthCustomUrl,
   buildLoopbackOAuthUrl,
   isSafeCompanionLoopback,
+  parseCompanionClient,
 } from "./companionAuth";
 
 describe("companionAuth", () => {
@@ -22,5 +24,18 @@ describe("companionAuth", () => {
     expect(buildLoopbackOAuthUrl("http://127.0.0.1:9/oauth", "tok.sig")).toBe(
       "http://127.0.0.1:9/oauth?exchange=tok.sig",
     );
+  });
+
+  it("builds Desktop custom scheme URLs", () => {
+    expect(buildDesktopOAuthCustomUrl("tok.sig")).toBe(
+      "com.thermaltrace.desktop://oauth?exchange=tok.sig",
+    );
+  });
+
+  it("parses companion client ids", () => {
+    expect(parseCompanionClient("desktop")).toBe("desktop");
+    expect(parseCompanionClient("android")).toBe("android");
+    expect(parseCompanionClient("baybuddy")).toBe("baybuddy");
+    expect(parseCompanionClient(null)).toBe("baybuddy");
   });
 });

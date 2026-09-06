@@ -20,13 +20,25 @@ ThermalTrace ships in multiple repos. When onboarding UX changes in **this** rep
 
 **Repo:** [github.com/doodersrage/thermaltrace-bay-buddy](https://github.com/doodersrage/thermaltrace-bay-buddy)
 
-**Status (2026-09):** Desktop companion (Tauri). Connects via `/api/auth/companion/start` + loopback / custom-scheme OAuth. Product page: [thermaltrace.dev/bay-buddy](https://thermaltrace.dev/bay-buddy). Claim puck UI claims/follows RP2040-Zero mood lights.
+**Status (2026-09):** Desktop mood glance (Tauri). Connects via `/api/auth/companion/start` + loopback / custom-scheme OAuth. Product page: [thermaltrace.dev/bay-buddy](https://thermaltrace.dev/bay-buddy). Claim puck UI claims/follows RP2040-Zero mood lights.
 
 **Re-sync when:**
 
 - Companion OAuth start / exchange / `/app/oauth` client=baybuddy behavior changes
 - Home insights payload shapes Bay Buddy displays (time_to_freeze, door/leak)
 - Claim puck serial / `/api/pucks` / bay mood contract changes
+
+## thermaltrace-desktop
+
+**Repo:** [github.com/doodersrage/thermaltrace-desktop](https://github.com/doodersrage/thermaltrace-desktop)
+
+**Status (2026-09):** Full desktop companion dashboard (Tauri). Connects via `/api/auth/companion/start?client=desktop` + loopback OAuth. Product page: [thermaltrace.dev/desktop](https://thermaltrace.dev/desktop). Android-parity screens: Home, History, Alerts, Devices, Household, Share, Account, Portfolio.
+
+**Re-sync when:**
+
+- Companion OAuth start / exchange / `/app/oauth` client=desktop behavior changes
+- Dashboard API shapes used by Android (readings, history, export, share, household)
+- Form POST success query flags for preferences / alert-settings / devices / share change
 
 ## thermaltrace-claim-puck
 

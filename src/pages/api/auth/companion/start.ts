@@ -19,9 +19,9 @@ import {
   setMobileOAuthCookie,
 } from "../../../../lib/mobileAuthRedirect";
 import {
+  parseCompanionClient,
   setCompanionClientCookie,
   setCompanionLoopbackCookie,
-  type CompanionClient,
 } from "../../../../lib/companionAuth";
 
 const VALID_PROVIDERS = ["google", "github", "discord"] as const;
@@ -35,16 +35,15 @@ function oauthProviderOptions(provider: string, redirectTo: string) {
 }
 
 /**
- * Start desktop companion (Bay Buddy) sign-in.
+ * Start companion (Bay Buddy / Desktop / Android) sign-in.
  *
  * Query:
- * - `client=baybuddy` (default)
+ * - `client=baybuddy|desktop|android` (default baybuddy)
  * - `loopback=http://127.0.0.1:PORT/oauth` (required for desktop return)
  * - `provider=google|github|discord` (optional; omit to use email sign-in page)
  */
 export const GET: APIRoute = async ({ url, cookies, redirect, request, site }) => {
-  const clientParam = url.searchParams.get("client")?.trim().toLowerCase() ?? "baybuddy";
-  const client: CompanionClient = clientParam === "android" ? "android" : "baybuddy";
+  const client = parseCompanionClient(url.searchParams.get("client"));
   const loopback = url.searchParams.get("loopback")?.trim() ?? "";
   const provider = url.searchParams.get("provider")?.trim().toLowerCase() ?? "";
 

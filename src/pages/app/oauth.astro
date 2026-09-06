@@ -6,38 +6,70 @@ import {
 } from "../../lib/mobileAuthRedirect";
 import {
   buildBayBuddyOAuthCustomUrl,
+  buildDesktopOAuthCustomUrl,
   buildLoopbackOAuthUrl,
   consumeCompanionLoopbackCookie,
   getCompanionClientCookie,
+  type CompanionClient,
 } from "../../lib/companionAuth";
 
 const exchange = Astro.url.searchParams.get("exchange")?.trim() ?? "";
-const client =
-  Astro.url.searchParams.get("client")?.trim().toLowerCase() ||
+const client = (Astro.url.searchParams.get("client")?.trim().toLowerCase() ||
   getCompanionClientCookie(Astro.cookies) ||
-  "android";
+  "android") as CompanionClient;
 const isBayBuddy = client === "baybuddy";
+const isDesktop = client === "desktop";
 
 const loopback = exchange ? consumeCompanionLoopbackCookie(Astro.cookies) : null;
 if (exchange && loopback) {
   return Astro.redirect(buildLoopbackOAuthUrl(loopback, exchange));
 }
 
-const intentUrl = exchange && !isBayBuddy ? buildMobileOAuthIntentUrl(exchange) : "";
+const intentUrl =
+  exchange && !isBayBuddy && !isDesktop ? buildMobileOAuthIntentUrl(exchange) : "";
 const customUrl = exchange
   ? isBayBuddy
     ? buildBayBuddyOAuthCustomUrl(exchange)
-    : buildMobileOAuthCustomUrl(exchange)
+    : isDesktop
+      ? buildDesktopOAuthCustomUrl(exchange)
+      : buildMobileOAuthCustomUrl(exchange)
   : "";
 const openHref = intentUrl || customUrl;
+
+const title = isBayBuddy
+  ? "Return to Bay Buddy"
+  : isDesktop
+    ? "Return to ThermalTrace Desktop"
+    : "Return to the Android app";
+const description = isBayBuddy
+  ? "Finish ThermalTrace sign-in by returning to Bay Buddy."
+  : isDesktop
+    ? "Finish ThermalTrace sign-in by returning to ThermalTrace Desktop."
+    : "Finish ThermalTrace sign-in by returning to the Android app.";
+const openLabel = isBayBuddy
+  ? "Open Bay Buddy"
+  : isDesktop
+    ? "Open ThermalTrace Desktop"
+    : "Open ThermalTrace";
+const handoffHint = isBayBuddy
+  ? " If Bay Buddy is waiting, it should pick up automatically. If not, tap the button below."
+  : isDesktop
+    ? " If ThermalTrace Desktop is waiting on the loopback handoff, it should finish automatically. If not, this page is a fallback — reopen the app and Connect again."
+    : " Chrome often stays here after a Google or YubiKey security step: tap the button to return to the app and finish MFA there if needed.";
+const closeHint = isBayBuddy
+  ? "You can close this tab once Bay Buddy shows your live garage mood."
+  : isDesktop
+    ? "You can close this tab once ThermalTrace Desktop shows your dashboard."
+    : "If nothing happens, use the phone’s back button to return to the app, or open ThermalTrace from your app drawer.";
+const missingHint = isBayBuddy
+  ? "This page returns you to Bay Buddy after sign-in. Open Bay Buddy and choose Connect again."
+  : isDesktop
+    ? "This page returns you to ThermalTrace Desktop after sign-in. Open the desktop app and choose Connect again."
+    : "This page is only used to return to the Android app after Google sign-in. Open ThermalTrace on your phone and try Google again.";
 ---
 <Layout
-  title={isBayBuddy ? "Return to Bay Buddy" : "Return to the Android app"}
-  description={
-    isBayBuddy
-      ? "Finish ThermalTrace sign-in by returning to Bay Buddy."
-      : "Finish ThermalTrace sign-in by returning to the Android app."
-  }
+  title={title}
+  description={description}
   noindex
   skipAuth
 >
@@ -45,28 +77,20 @@ const openHref = intentUrl || customUrl;
     {
       exchange ? (
         <>
-          <h1 class="card-title">{isBayBuddy ? "Open Bay Buddy" : "Open ThermalTrace"}</h1>
+          <h1 class="card-title">{openLabel}</h1>
           <p class="card-subtitle">
             Sign-in finished in the browser.
-            {
-              isBayBuddy
-                ? " If Bay Buddy is waiting, it should pick up automatically. If not, tap the button below."
-                : " Chrome often stays here after a Google or YubiKey security step: tap the button to return to the app and finish MFA there if needed."
-            }
+            {handoffHint}
           </p>
           <p class="mt-4 mb-2">
             <a class="btn-primary" id="open-app" href={openHref}>
-              {isBayBuddy ? "Open Bay Buddy" : "Open ThermalTrace"}
+              {openLabel}
             </a>
           </p>
           <p class="text-sm text-[var(--color-text-muted)] mb-0">
-            {
-              isBayBuddy
-                ? "You can close this tab once Bay Buddy shows your live garage mood."
-                : "If nothing happens, use the phone’s back button to return to the app, or open ThermalTrace from your app drawer."
-            }
+            {closeHint}
           </p>
-          <script is:inline define:vars={{ intentUrl, customUrl, isBayBuddy }}>
+          <script is:inline define:vars={{ intentUrl, customUrl }}>
             (() => {
               const go = () => {
                 if (intentUrl) {
@@ -90,11 +114,7 @@ const openHref = intentUrl || customUrl;
         <>
           <h1 class="card-title">Missing sign-in token</h1>
           <p class="card-subtitle mb-0">
-            {
-              isBayBuddy
-                ? "This page returns you to Bay Buddy after sign-in. Open Bay Buddy and choose Connect again."
-                : "This page is only used to return to the Android app after Google sign-in. Open ThermalTrace on your phone and try Google again."
-            }
+            {missingHint}
           </p>
         </>
       )

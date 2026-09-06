@@ -4,7 +4,8 @@ export const COMPANION_CLIENT_COOKIE = "companion_client";
 export const COMPANION_LOOPBACK_COOKIE = "companion_loopback";
 
 export const BAYBUDDY_APP_SCHEME = "com.thermaltrace.baybuddy";
-export type CompanionClient = "baybuddy" | "android";
+export const DESKTOP_APP_SCHEME = "com.thermaltrace.desktop";
+export type CompanionClient = "baybuddy" | "android" | "desktop";
 
 /** Only allow loopback HTTP callbacks from the desktop companion. */
 export function isSafeCompanionLoopback(url: string): boolean {
@@ -43,7 +44,9 @@ export function getCompanionClientCookie(
   cookies: AstroCookies,
 ): CompanionClient | null {
   const value = cookies.get(COMPANION_CLIENT_COOKIE)?.value;
-  if (value === "baybuddy" || value === "android") return value;
+  if (value === "baybuddy" || value === "android" || value === "desktop") {
+    return value;
+  }
   return null;
 }
 
@@ -75,8 +78,21 @@ export function buildBayBuddyOAuthCustomUrl(exchange: string): string {
   return `${BAYBUDDY_APP_SCHEME}://oauth?exchange=${encodeURIComponent(exchange)}`;
 }
 
+export function buildDesktopOAuthCustomUrl(exchange: string): string {
+  return `${DESKTOP_APP_SCHEME}://oauth?exchange=${encodeURIComponent(exchange)}`;
+}
+
 export function buildLoopbackOAuthUrl(loopback: string, exchange: string): string {
   const target = new URL(loopback);
   target.searchParams.set("exchange", exchange);
   return target.toString();
+}
+
+export function parseCompanionClient(
+  value: string | null | undefined,
+): CompanionClient {
+  const v = value?.trim().toLowerCase();
+  if (v === "android") return "android";
+  if (v === "desktop") return "desktop";
+  return "baybuddy";
 }

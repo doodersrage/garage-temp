@@ -1,0 +1,117 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import FaqSection from "../components/FaqSection.astro";
+import { BRAND_NAME } from "../lib/brand";
+import {
+  DESKTOP_NAME,
+  DESKTOP_RELEASES_URL,
+  DESKTOP_REPO_URL,
+  DESKTOP_TAGLINE,
+} from "../lib/desktop";
+import {
+  getBreadcrumbSchema,
+  getSoftwareApplicationSchema,
+  resolvePageUrl,
+  resolveSiteUrl,
+} from "../lib/schemaMarkup";
+import { getMarketingFaqs, getMarketingFaqSchema } from "../lib/marketingFaqs";
+
+const siteUrl = resolveSiteUrl(Astro.site);
+const pageUrl = resolvePageUrl(siteUrl, "/desktop");
+const desktopFaqs = getMarketingFaqs("desktop");
+
+const software = getSoftwareApplicationSchema(siteUrl);
+const schema = [
+  getBreadcrumbSchema(siteUrl, [
+    { name: "Home", path: "/" },
+    { name: DESKTOP_NAME, path: "/desktop" },
+  ]),
+  {
+    ...software,
+    "@type": ["SoftwareApplication", "DesktopApplication"],
+    name: DESKTOP_NAME,
+    operatingSystem: "Windows, macOS, Linux",
+    applicationCategory: "UtilitiesApplication",
+    url: pageUrl,
+    downloadUrl: DESKTOP_RELEASES_URL,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: DESKTOP_RELEASES_URL,
+    },
+  },
+  getMarketingFaqSchema(pageUrl, "desktop"),
+].filter(Boolean) as Record<string, unknown>[];
+---
+<Layout
+  title={DESKTOP_NAME}
+  description={DESKTOP_TAGLINE}
+  schema={schema}
+  speakableSelectors={[".page-header-title", ".page-header-lede", ".faq-answer"]}
+>
+  <div class="page-shell page-stack">
+    <PageHeader
+      kicker="Desktop companion"
+      title={DESKTOP_NAME}
+      lede={`Native dashboard for your ${BRAND_NAME} account on Windows, macOS, and Linux. Live probes, history, alerts, devices, household, and share tools — the desktop is not a sensor.`}
+    >
+      <a slot="actions" class="btn-primary" href={DESKTOP_RELEASES_URL} target="_blank" rel="noreferrer">
+        Download latest release
+      </a>
+      <a slot="actions" class="btn-secondary" href="/register?next=/dashboard/temperature">
+        Free ThermalTrace account
+      </a>
+      <a slot="actions" class="btn-ghost" href={DESKTOP_REPO_URL} target="_blank" rel="noreferrer">
+        Source on GitHub
+      </a>
+    </PageHeader>
+
+    <section class="card">
+      <h2 class="card-title">What it does (and does not)</h2>
+      <ul class="text-sm space-y-2 mb-0">
+        <li>
+          <strong>Does:</strong> sign in with your ThermalTrace account, show live readings and
+          time-to-freeze, history charts, alert settings, devices, household, share links, and portfolio.
+        </li>
+        <li>
+          <strong>Does not:</strong> sense temperature from the PC. Probes keep posting to thermaltrace.dev.
+          For a one-space freeze/flood mood glance (and claim puck), use
+          <a class="text-link" href="/bay-buddy">Bay Buddy</a>.
+        </li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Install</h2>
+      <p class="card-subtitle mb-4">
+        Linux AppImage / deb / rpm, Windows MSI, and macOS DMG ship on GitHub Releases.
+      </p>
+      <ol class="text-sm space-y-2 pl-5 list-decimal mb-4">
+        <li>
+          <a class="text-link" href="/register?next=/dashboard/temperature">Create a free ThermalTrace account</a>
+          and connect at least one probe (or the demo pull feed).
+        </li>
+        <li>
+          <a class="text-link" href={DESKTOP_RELEASES_URL} target="_blank" rel="noreferrer">Download ThermalTrace Desktop</a>
+          for your OS and install.
+        </li>
+        <li>
+          Click <strong>Connect</strong>, sign in on thermaltrace.dev in the browser,
+          and return to the desktop window when the handoff finishes.
+        </li>
+      </ol>
+      <a class="btn-primary" href={DESKTOP_RELEASES_URL} target="_blank" rel="noreferrer">
+        Open releases
+      </a>
+    </section>
+
+    <FaqSection
+      title="Desktop FAQ"
+      faqs={desktopFaqs}
+      lede="Desktop companion answers: download, connect, and how it differs from Bay Buddy."
+    />
+  </div>
+</Layout>

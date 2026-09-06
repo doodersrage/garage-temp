@@ -100,7 +100,7 @@ curl -X POST "https://your-domain/api/ingest/YOUR_KEY" \
 
 Guides: [Adding devices](https://thermaltrace.dev/about/adding-devices) · [Push ingest](https://doodersrage.github.io/thermaltrace/ingest/) · [Sketches](./sketches) · [Ingest & webhooks](https://thermaltrace.dev/about/ingest-and-webhooks)
 
-Related repos: [arduino JSON probe](https://github.com/doodersrage/arduino-network-json-temperature-sever) · [Python relay](https://github.com/doodersrage/fast-api-relay) · [Home Assistant integration](https://github.com/doodersrage/thermaltrace-home-assistant) · [Bay Buddy (desktop)](https://github.com/doodersrage/thermaltrace-bay-buddy) · [Claim puck (RP2040-Zero)](https://github.com/doodersrage/thermaltrace-claim-puck) · [Android app](https://github.com/doodersrage/thermaltrace-android)
+Related repos: [arduino JSON probe](https://github.com/doodersrage/arduino-network-json-temperature-sever) · [Python relay](https://github.com/doodersrage/fast-api-relay) · [Home Assistant integration](https://github.com/doodersrage/thermaltrace-home-assistant) · [ThermalTrace Desktop](https://github.com/doodersrage/thermaltrace-desktop) · [Bay Buddy (mood glance)](https://github.com/doodersrage/thermaltrace-bay-buddy) · [Claim puck (RP2040-Zero)](https://github.com/doodersrage/thermaltrace-claim-puck) · [Android app](https://github.com/doodersrage/thermaltrace-android)
 
 ## Contributing
 

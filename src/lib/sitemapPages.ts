@@ -44,6 +44,7 @@ const STATIC_PUBLIC_PATHS = [
   "/docs/api",
   "/android",
   "/bay-buddy",
+  "/desktop",
   "/claim-puck",
   "/accessories",
   "/alert-beacon",

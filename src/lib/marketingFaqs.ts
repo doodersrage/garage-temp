@@ -36,7 +36,7 @@ export const marketingFaqs = {
     {
       question: "Is there a ThermalTrace Android app?",
       answer:
-        "A native Android app is available in early access on GitHub while Google Play review finishes. You can also use the full web dashboard or install the Progressive Web App. On the desktop, Bay Buddy is a glanceable freeze/flood mood companion (thermaltrace.dev/bay-buddy). The phone and desktop apps do not sense temperature: they connect to your ThermalTrace account.",
+        "A native Android app is available in early access on GitHub while Google Play review finishes. You can also use the full web dashboard or install the Progressive Web App. On the desktop, ThermalTrace Desktop is the full companion dashboard (thermaltrace.dev/desktop), and Bay Buddy is a glanceable freeze/flood mood companion (thermaltrace.dev/bay-buddy). The phone and desktop apps do not sense temperature: they connect to your ThermalTrace account.",
     },
     {
       question: "Where is ThermalTrace hosted?",
@@ -462,12 +462,34 @@ export const marketingFaqs = {
     {
       question: "Does Bay Buddy replace the web dashboard?",
       answer:
-        "No. Devices, alerts, history, claims, and household settings stay on thermaltrace.dev (or the Android app / PWA). Bay Buddy is a mood glance for the bay you already monitor.",
+        "No. Devices, alerts, history, claims, and household settings stay on thermaltrace.dev, the Android app / PWA, or ThermalTrace Desktop (thermaltrace.dev/desktop). Bay Buddy is a mood glance for the bay you already monitor.",
     },
     {
       question: "Can Bay Buddy drive a claim puck?",
       answer:
         "Yes. After you connect, the Claim puck panel can register and claim an RP2040-Zero, then drive its LED from /api/bays/{bay}/mood. Setup: thermaltrace.dev/claim-puck.",
+    },
+  ],
+  desktop: [
+    {
+      question: "What is ThermalTrace Desktop?",
+      answer:
+        "ThermalTrace Desktop is the native Windows, macOS, and Linux companion dashboard for your ThermalTrace account. It covers live readings, history, alerts, devices, household, share, and portfolio — the same account as the web and Android apps. The PC is not a sensor.",
+    },
+    {
+      question: "Where do I download ThermalTrace Desktop?",
+      answer:
+        "GitHub Releases for thermaltrace-desktop: Linux AppImage/deb/rpm, Windows MSI, and macOS DMG. Start at thermaltrace.dev/desktop.",
+    },
+    {
+      question: "How is Desktop different from Bay Buddy?",
+      answer:
+        "Bay Buddy is a glanceable freeze/flood mood for one space (and claim puck). ThermalTrace Desktop is the full dashboard client. Keep both if you want a mood glance plus a native dashboard.",
+    },
+    {
+      question: "Will my web account work in ThermalTrace Desktop?",
+      answer:
+        "Yes. Connect opens thermaltrace.dev in your browser, including MFA if enabled, then hands the session back to the app over a localhost callback.",
     },
   ],
 } as const satisfies Record<string, MarketingFaqItem[]>;
