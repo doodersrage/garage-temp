@@ -14,8 +14,8 @@ env:
   SITE_URL: https://example.com
   ORIGIN: https://example.com
   GARAGE_TEMP_FEED_URL: https://example.com/feed.json
-  NEXT_PUBLIC_OPENWEATHER_API_KEY: ci-placeholder
-  NEXT_PUBLIC_OPENWEATHER_CITY_ID: "5128581"
+  OPENWEATHER_API_KEY: ci-placeholder
+  OPENWEATHER_CITY_ID: "5128581"
   TURNSTILE_SITE_KEY: ci-placeholder
   TURNSTILE_SECRET_TOKEN: ci-placeholder
   SMTP_MAIL_FROM: ci@example.com

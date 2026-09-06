@@ -34,19 +34,13 @@ function cleanEnv(value: unknown): string {
   return String(value ?? "").replace(/\r/g, "").trim();
 }
 
-/** Server-only OpenWeather key (OPENWEATHER_API_KEY preferred; NEXT_PUBLIC_* is legacy fallback). */
+/** Server-only OpenWeather key. */
 export function getOpenWeatherApiKey(): string {
-  return (
-    cleanEnv(import.meta.env.OPENWEATHER_API_KEY) ||
-    cleanEnv(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY)
-  );
+  return cleanEnv(import.meta.env.OPENWEATHER_API_KEY);
 }
 
 export function getDefaultWeatherCityId(): string {
-  return (
-    cleanEnv(import.meta.env.OPENWEATHER_CITY_ID) ||
-    cleanEnv(import.meta.env.NEXT_PUBLIC_OPENWEATHER_CITY_ID)
-  );
+  return cleanEnv(import.meta.env.OPENWEATHER_CITY_ID);
 }
 
 export function resolveWeatherCityId(cityId?: string | null): string {

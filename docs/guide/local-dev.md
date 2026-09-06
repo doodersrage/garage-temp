@@ -44,7 +44,6 @@ Configure in `.env` (local) and Cloudflare Worker secrets / vars (production). F
 | `SUPABASE_SERVICE_ROLE_KEY` | Server DB / auth (required with RLS) |
 | `GARAGE_TEMP_FEED_URL` | Default public probe JSON feed (guest Home demo) |
 | `OPENWEATHER_API_KEY` / `OPENWEATHER_CITY_ID` | Outdoor weather (server-only; map tiles via `/api/weather/tiles`) |
-| `NEXT_PUBLIC_OPENWEATHER_*` | Legacy fallbacks if `OPENWEATHER_*` unset |
 | `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_TOKEN` | Bot protection on contact and auth forms |
 | `SMTP_MAIL_FROM` / `SMTP_MAIL_TO` | From address + ops/contact To |
 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | Billing + webhooks |

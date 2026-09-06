@@ -10,10 +10,10 @@
     }
   ],
   "title": "ThermalTrace",
-  "uid": "garage-temp",
+  "uid": "thermaltrace",
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "panels": [
     {
       "type": "timeseries",
@@ -21,8 +21,8 @@
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "garage_temp_fahrenheit",
-          "legendFormat": "{{probe}}",
+          "expr": "thermaltrace_sensor_value{kind=\"temperature\"}",
+          "legendFormat": "{{device}} / {{key}}",
           "refId": "A"
         }
       ],
@@ -34,8 +34,21 @@
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
       "targets": [
         {
-          "expr": "garage_humidity_percent",
-          "legendFormat": "{{probe}}",
+          "expr": "thermaltrace_sensor_value{kind=\"humidity\"}",
+          "legendFormat": "{{device}} / {{key}}",
+          "refId": "A"
+        }
+      ],
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" }
+    },
+    {
+      "type": "timeseries",
+      "title": "Flood / leak",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "expr": "thermaltrace_sensor_value{kind=\"flood\"}",
+          "legendFormat": "{{device}} / {{key}}",
           "refId": "A"
         }
       ],

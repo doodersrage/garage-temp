@@ -30,4 +30,6 @@ scrape_configs:
       credentials: <your-api-key>
 ```
 
+Metrics are a single gauge, `thermaltrace_sensor_value`, with `device`, `key`, and `kind` labels (`temperature`, `humidity`, `flood`, …). The bundled dashboard graphs those kinds.
+
 The in-app Share page also shows a Grafana setup wizard with a filled-in snippet for your key.

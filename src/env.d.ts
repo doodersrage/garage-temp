@@ -9,10 +9,6 @@ interface ImportMetaEnv {
   /** Preferred server-only OpenWeather credentials. */
   readonly OPENWEATHER_API_KEY?: string;
   readonly OPENWEATHER_CITY_ID?: string;
-  /** @deprecated Prefer OPENWEATHER_API_KEY (kept as fallback). */
-  readonly NEXT_PUBLIC_OPENWEATHER_API_KEY?: string;
-  /** @deprecated Prefer OPENWEATHER_CITY_ID (kept as fallback). */
-  readonly NEXT_PUBLIC_OPENWEATHER_CITY_ID?: string;
   readonly AMBIENT_APPLICATION_KEY?: string;
   readonly TURNSTILE_SITE_KEY?: string;
   readonly TURNSTILE_SECRET_TOKEN?: string;
