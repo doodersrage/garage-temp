@@ -6,6 +6,7 @@
 import { readFileSync, writeFileSync, unlinkSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { resolve } from "node:path";
+import { parseEnvFile as parseEnvText } from "./parseEnvFile.mjs";
 
 const SECRET_KEYS = [
   "SUPABASE_URL",
@@ -62,27 +63,6 @@ const SECRET_KEYS = [
   "SENTRY_DSN",
 ];
 
-function parseEnvFile(path) {
-  const text = readFileSync(path, "utf8");
-  const out = {};
-  for (const line of text.split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const eq = trimmed.indexOf("=");
-    if (eq === -1) continue;
-    const key = trimmed.slice(0, eq).trim();
-    let value = trimmed.slice(eq + 1).trim();
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-    out[key] = value;
-  }
-  return out;
-}
-
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const envFileArg = args.find((a) => a.startsWith("--env-file="));
@@ -90,7 +70,7 @@ const envPath = resolve(envFileArg?.split("=")[1] ?? ".env");
 
 let parsed;
 try {
-  parsed = parseEnvFile(envPath);
+  parsed = parseEnvText(readFileSync(envPath, "utf8"));
 } catch (error) {
   console.error(`Could not read ${envPath}:`, error.message);
   process.exit(1);
@@ -100,6 +80,22 @@ const secrets = {};
 for (const key of SECRET_KEYS) {
   const value = parsed[key]?.trim();
   if (value) secrets[key] = value;
+}
+
+const fcmJson = secrets.FCM_SERVICE_ACCOUNT_JSON;
+if (fcmJson) {
+  try {
+    const account = JSON.parse(fcmJson);
+    if (!account?.project_id || !account?.client_email || !account?.private_key) {
+      console.error(
+        "FCM_SERVICE_ACCOUNT_JSON parses but is missing project_id, client_email, or private_key.",
+      );
+      process.exit(1);
+    }
+  } catch (error) {
+    console.error("FCM_SERVICE_ACCOUNT_JSON is not valid JSON after env unquote:", error.message);
+    process.exit(1);
+  }
 }
 
 const missing = SECRET_KEYS.filter((k) => !secrets[k]);

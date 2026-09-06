@@ -25,18 +25,59 @@ export function isFcmConfigured(): boolean {
   return Boolean(resolveServiceAccount());
 }
 
+/** Why FCM is or isn't ready — for Ops diagnostics. */
+export function getFcmConfigStatus(): "configured" | "missing" | "invalid" {
+  const jsonRaw = getRuntimeEnv("FCM_SERVICE_ACCOUNT_JSON");
+  const split =
+    getRuntimeEnv("FCM_PROJECT_ID") &&
+    getRuntimeEnv("FCM_CLIENT_EMAIL") &&
+    getRuntimeEnv("FCM_PRIVATE_KEY");
+  if (!jsonRaw?.trim() && !split) return "missing";
+  return resolveServiceAccount() ? "configured" : "invalid";
+}
+
+function parseServiceAccountJson(jsonRaw: string): Partial<ServiceAccount> | null {
+  let current: unknown = jsonRaw.trim();
+  for (let depth = 0; depth < 4; depth++) {
+    if (typeof current !== "string") {
+      return current && typeof current === "object"
+        ? (current as Partial<ServiceAccount>)
+        : null;
+    }
+    const text = current.trim();
+    if (!text) return null;
+    try {
+      current = JSON.parse(text);
+      continue;
+    } catch {
+      // secrets:push used to strip quotes without unescaping, leaving {\"type\":...}
+      if (!text.includes("\\")) return null;
+      try {
+        current = JSON.parse(`"${text.replace(/\r/g, "\\r").replace(/\n/g, "\\n")}"`);
+        continue;
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
 function resolveServiceAccount(): ServiceAccount | null {
   const jsonRaw = getRuntimeEnv("FCM_SERVICE_ACCOUNT_JSON");
   if (jsonRaw) {
     try {
-      const parsed = JSON.parse(jsonRaw) as Partial<ServiceAccount>;
-      if (parsed.project_id && parsed.client_email && parsed.private_key) {
+      const parsed = parseServiceAccountJson(jsonRaw);
+      if (parsed?.project_id && parsed?.client_email && parsed?.private_key) {
         return {
           project_id: parsed.project_id,
           client_email: parsed.client_email,
           private_key: normalizePem(parsed.private_key),
         };
       }
+      console.error(
+        "FCM_SERVICE_ACCOUNT_JSON is set but missing project_id, client_email, or private_key (or is not valid JSON).",
+      );
     } catch (error) {
       console.error("Invalid FCM_SERVICE_ACCOUNT_JSON:", error);
     }

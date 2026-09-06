@@ -8,8 +8,9 @@ import { auditStripeDisplayPrices } from "../../lib/stripePriceAudit";
 import { getAuthFromCookies } from "../../lib/auth";
 import { isUserAdmin } from "../../lib/adminAccess";
 import { isTwilioConfigured } from "../../lib/notify";
-import { isVapidConfigured } from "../../lib/webPush";
-import { isFcmConfigured } from "../../lib/fcm";
+import { isVapidConfigured, countPushSubscriptions } from "../../lib/webPush";
+import { getFcmConfigStatus } from "../../lib/fcm";
+import { channelTestErrorMessage } from "../../lib/alertChannelLabels";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
@@ -23,9 +24,14 @@ if (!(await isUserAdmin(user.id))) {
 
 const emailTestOk = Astro.url.searchParams.get("email_test") === "1";
 const channelTestOk = Astro.url.searchParams.get("channel_test") === "1";
+const channelKind = Astro.url.searchParams.get("channel_kind");
+const channelError = channelTestErrorMessage(
+  Astro.url.searchParams.get("channel_error"),
+);
 const twilioConfigured = isTwilioConfigured();
 const vapidConfigured = isVapidConfigured();
-const fcmConfigured = isFcmConfigured();
+const fcmStatus = getFcmConfigStatus();
+const pushSubscriptionCount = await countPushSubscriptions(user.id);
 
 const [checkout, status, referrals, serverErrors, priceAudit] = await Promise.all([
   fetchCheckoutAnalyticsAdmin(30, 30),
@@ -61,7 +67,29 @@ const opsDiscordConfigured = Boolean(
         <p class="alert-success mt-4 mb-0" role="status">Test email sent to {user.email}.</p>
       )}
       {channelTestOk && (
-        <p class="alert-success mt-4 mb-0" role="status">Channel smoke test succeeded.</p>
+        <p class="alert-success mt-4 mb-0" role="status">
+          {channelKind === "push"
+            ? "Browser push smoke test delivered."
+            : channelKind === "sms"
+              ? "SMS smoke test delivered."
+              : "Channel smoke test succeeded."}
+        </p>
+      )}
+      {channelError && (
+        <p class="alert-warning mt-4 mb-0" role="alert">
+          Channel smoke test failed: {channelError}.
+          {Astro.url.searchParams.get("channel_error") === "push_no_subscription" && (
+            <>
+              {" "}
+              Open{" "}
+              <a class="text-link" href="/dashboard/alerts#alert-section-channels">
+                Alerts → Channels → Push
+              </a>
+              , click <strong>Enable browser push on this device</strong>, allow notifications, save
+              if needed, then retry.
+            </>
+          )}
+        </p>
       )}
       {priceMismatches.length > 0 && (
         <p class="alert-warning mt-4 mb-0" role="alert">
@@ -236,7 +264,21 @@ const opsDiscordConfigured = Boolean(
         <strong>{vapidConfigured ? "configured" : "not configured"}</strong>
         {" · "}
         FCM:
-        <strong>{fcmConfigured ? "configured" : "not configured"}</strong>.
+        <strong>
+          {fcmStatus === "configured"
+            ? "configured"
+            : fcmStatus === "invalid"
+              ? "invalid JSON"
+              : "not configured"}
+        </strong>
+        {fcmStatus === "invalid" && (
+          <>
+            {" "}
+            (secret is set but not parseable — re-run <code>pnpm secrets:push</code> after the
+            dotenv unquote fix)
+          </>
+        )}
+        .
       </p>
       <div class="flex flex-wrap gap-4 items-end">
         <form action="/api/admin/channel-test" method="post" class="flex flex-wrap gap-2 items-end">
@@ -264,8 +306,15 @@ const opsDiscordConfigured = Boolean(
         </form>
       </div>
       <p class="form-hint mt-3 mb-0">
-        SMS uses your alert phone if the override is blank. Browser push requires this browser to be
-        subscribed under Alerts. Android FCM tokens register from the native app when FCM secrets are set.
+        SMS uses your alert phone if the override is blank. Browser push:
+        {pushSubscriptionCount > 0
+          ? ` ${pushSubscriptionCount} subscription(s) saved for your account.`
+          : " this browser is not subscribed yet."}
+        {" "}
+        Enable under{" "}
+        <a class="text-link" href="/dashboard/alerts#alert-section-channels">Alerts → Push</a>
+        {" "}
+        first. Android FCM tokens register from the native app when FCM secrets are set.
       </p>
     </section>
 

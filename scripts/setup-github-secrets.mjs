@@ -12,6 +12,7 @@
 import { execSync } from "node:child_process";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { parseEnvFile as parseEnvText } from "./parseEnvFile.mjs";
 
 /** Keys needed at `astro build` time for a production Worker bundle. */
 const BUILD_SECRET_KEYS = [
@@ -60,24 +61,7 @@ const BUILD_SECRET_KEYS = [
 ];
 
 function parseEnvFile(path) {
-  const text = readFileSync(path, "utf8");
-  const out = {};
-  for (const line of text.split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const eq = trimmed.indexOf("=");
-    if (eq === -1) continue;
-    const key = trimmed.slice(0, eq).trim();
-    let value = trimmed.slice(eq + 1).trim();
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-    out[key] = value;
-  }
-  return out;
+  return parseEnvText(readFileSync(path, "utf8"));
 }
 
 function setSecret(name, value) {

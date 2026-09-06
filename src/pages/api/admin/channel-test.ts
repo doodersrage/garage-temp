@@ -8,6 +8,14 @@ import {
 } from "../../../lib/notify";
 import { isVapidConfigured, sendWebPushToUser } from "../../../lib/webPush";
 
+function opsRedirect(params: Record<string, string>): Response {
+  const qs = new URLSearchParams(params);
+  return new Response(null, {
+    status: 302,
+    headers: { Location: `/dashboard/ops?${qs.toString()}` },
+  });
+}
+
 export const POST: APIRoute = async ({ request, cookies }) => {
   const { session, user } = await getAuthFromCookies(cookies);
   if (!session || !user || !(await isUserAdmin(user.id))) {
@@ -19,7 +27,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   if (kind === "sms") {
     if (!isTwilioConfigured()) {
-      return new Response("Twilio is not configured", { status: 503 });
+      return opsRedirect({ channel_error: "sms_not_configured" });
     }
 
     const settings = await getAlertSettingsForUser(
@@ -29,9 +37,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const phone =
       formData?.get("phone")?.toString().trim() || settings.smsPhone || null;
     if (!phone) {
-      return new Response("No SMS phone on alert settings or form", {
-        status: 400,
-      });
+      return opsRedirect({ channel_error: "sms_no_phone" });
     }
 
     const ok = await sendTwilioSms(
@@ -39,18 +45,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       "[Test] ThermalTrace SMS channel smoke test",
     );
     if (!ok) {
-      return new Response("Twilio SMS send failed", { status: 500 });
+      return opsRedirect({ channel_error: "sms_send_failed" });
     }
 
-    return new Response(null, {
-      status: 302,
-      headers: { Location: "/dashboard/ops?channel_test=1" },
-    });
+    return opsRedirect({ channel_test: "1", channel_kind: "sms" });
   }
 
   if (kind === "push") {
     if (!isVapidConfigured()) {
-      return new Response("VAPID keys are not configured", { status: 503 });
+      return opsRedirect({ channel_error: "push_not_configured" });
     }
 
     const result = await sendWebPushToUser(user.id, {
@@ -59,17 +62,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
 
     if (result.delivered <= 0) {
-      return new Response(
-        result.skippedReason ?? "Push delivery failed (subscribe this browser first)",
-        { status: 500 },
-      );
+      const reason = result.skippedReason ?? "push_delivery_failed";
+      return opsRedirect({ channel_error: reason });
     }
 
-    return new Response(null, {
-      status: 302,
-      headers: { Location: "/dashboard/ops?channel_test=1" },
-    });
+    return opsRedirect({ channel_test: "1", channel_kind: "push" });
   }
 
-  return new Response("Unknown kind (use sms or push)", { status: 400 });
+  return opsRedirect({ channel_error: "unknown_kind" });
 };

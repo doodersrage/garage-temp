@@ -6,6 +6,12 @@ import { getAuthFromCookies } from "../../lib/auth";
 import { fetchCrossPropertySnapshots } from "../../lib/crossProperty";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { attachPropertyHealth } from "../../lib/portfolioHealth";
+import {
+  PORTFOLIO_SORTS,
+  applyPortfolioListQuery,
+  parsePortfolioListQuery,
+  portfolioListQueryString,
+} from "../../lib/portfolioList";
 
 const { session, user } = await getAuthFromCookies(Astro.cookies);
 if (!session || !user) {
@@ -27,6 +33,33 @@ const avgHealth =
   withHealth.length > 0
     ? Math.round(withHealth.reduce((sum, p) => sum + p.health.score, 0) / withHealth.length)
     : null;
+
+const pageParam = Number(Astro.url.searchParams.get("page") ?? "1");
+const listQuery = parsePortfolioListQuery(Astro.url.searchParams);
+const queryString = (page?: number) =>
+  portfolioListQueryString({ ...listQuery, page });
+const listPath = `/dashboard/portfolio${queryString()}`;
+
+if (pageParam < 1 || Number.isNaN(pageParam)) {
+  return Astro.redirect(`/dashboard/portfolio${queryString(1)}`);
+}
+
+const listed = applyPortfolioListQuery(withHealth, listQuery, pageParam);
+if (listed.totalPages > 0 && pageParam > listed.totalPages) {
+  return Astro.redirect(`/dashboard/portfolio${queryString(listed.totalPages)}`);
+}
+
+const hasFilters = Boolean(
+  listQuery.search || listQuery.status || listQuery.sort !== "name_asc",
+);
+const showingFrom =
+  listed.totalCount === 0 ? 0 : (listed.page - 1) * listed.pageSize + 1;
+const showingTo =
+  listed.totalCount === 0
+    ? 0
+    : Math.min(listed.page * listed.pageSize, listed.totalCount);
+const prevPage = listed.page > 1 ? listed.page - 1 : null;
+const nextPage = listed.page < listed.totalPages ? listed.page + 1 : null;
 
 const flash = Astro.url.searchParams;
 const vacationFlash = flash.get("portfolio_vacation") === "1";
@@ -91,7 +124,7 @@ const vacationProperties = flash.get("properties");
         <div class="mt-4 flex flex-wrap gap-2 items-end">
           <form action="/api/user/portfolio-vacation" method="post" class="flex flex-wrap gap-2 items-end">
             <input type="hidden" name="action" value="vacation" />
-            <input type="hidden" name="redirect" value="/dashboard/portfolio" />
+            <input type="hidden" name="redirect" value={listPath} />
             <div class="form-field mb-0">
               <label class="form-label" for="portfolio-vacation-days">Bulk vacation (days)</label>
               <input
@@ -108,7 +141,7 @@ const vacationProperties = flash.get("properties");
           </form>
           <form action="/api/user/portfolio-vacation" method="post">
             <input type="hidden" name="action" value="clear_vacation" />
-            <input type="hidden" name="redirect" value="/dashboard/portfolio" />
+            <input type="hidden" name="redirect" value={listPath} />
             <button class="btn-ghost" type="submit">Clear vacation everywhere</button>
           </form>
         </div>
@@ -161,6 +194,56 @@ const vacationProperties = flash.get("properties");
           No properties in this portfolio yet, open Household to create or join one.
         </p>
       ) : (
+      <>
+      <form class="history-filters" method="get" action="/dashboard/portfolio">
+        <div class="form-field mb-0">
+          <label class="form-label" for="portfolio-search">Search</label>
+          <input
+            class="form-input"
+            type="search"
+            id="portfolio-search"
+            name="q"
+            value={listQuery.search}
+            placeholder="Property name or id"
+          />
+        </div>
+        <div class="form-field mb-0">
+          <label class="form-label" for="portfolio-status">Status</label>
+          <select class="form-input" id="portfolio-status" name="status">
+            <option value="" selected={listQuery.status === ""}>All statuses</option>
+            <option value="at_risk" selected={listQuery.status === "at_risk"}>At risk</option>
+            <option value="wet" selected={listQuery.status === "wet"}>Wet flood/leak</option>
+            <option value="watch" selected={listQuery.status === "watch"}>Watch</option>
+            <option value="healthy" selected={listQuery.status === "healthy"}>Healthy</option>
+            <option value="offline" selected={listQuery.status === "offline"}>Offline</option>
+          </select>
+        </div>
+        <div class="form-field mb-0">
+          <label class="form-label" for="portfolio-sort">Sort</label>
+          <select class="form-input" id="portfolio-sort" name="sort">
+            {(Object.keys(PORTFOLIO_SORTS) as Array<keyof typeof PORTFOLIO_SORTS>).map((key) => (
+              <option value={key} selected={listQuery.sort === key}>
+                {PORTFOLIO_SORTS[key]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button type="submit" class="btn-secondary self-end">Apply</button>
+        {hasFilters && (
+          <a class="btn-ghost self-end" href="/dashboard/portfolio">Clear</a>
+        )}
+      </form>
+      <p class="preference-hint mb-4">
+        Health summary above stays portfolio-wide. This table filters and sorts the property list.
+      </p>
+      {listed.rows.length === 0 ? (
+        <p class="text-sm text-[var(--color-text-muted)] mb-0">
+          {hasFilters
+            ? "No properties match these filters."
+            : "No properties in this portfolio yet."}
+        </p>
+      ) : (
+      <>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
@@ -174,7 +257,7 @@ const vacationProperties = flash.get("properties");
             </tr>
           </thead>
           <tbody>
-            {withHealth.map((p) => (
+            {listed.rows.map((p) => (
               <tr class="border-t border-[var(--color-border)]">
                 <td class="py-2">
                   <form action="/api/household/switch" method="post" class="inline">
@@ -217,6 +300,29 @@ const vacationProperties = flash.get("properties");
           </tbody>
         </table>
       </div>
+      <div class="pagination">
+        <p class="pagination-summary">
+          Showing {showingFrom}–{showingTo} of {listed.totalCount} properties
+        </p>
+        <div class="pagination-controls">
+          {prevPage ? (
+            <a class="btn-secondary" href={`/dashboard/portfolio${queryString(prevPage)}`}>Previous</a>
+          ) : (
+            <span class="btn-secondary pagination-disabled">Previous</span>
+          )}
+          <span class="pagination-current">
+            Page {listed.page} of {Math.max(listed.totalPages, 1)}
+          </span>
+          {nextPage ? (
+            <a class="btn-secondary" href={`/dashboard/portfolio${queryString(nextPage)}`}>Next</a>
+          ) : (
+            <span class="btn-secondary pagination-disabled">Next</span>
+          )}
+        </div>
+      </div>
+      </>
+      )}
+      </>
       )}
       </>
       ) : (

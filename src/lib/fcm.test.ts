@@ -1,5 +1,23 @@
-import { describe, expect, it, vi } from "vitest";
-import { isStaleFcmError, releaseFcmTokenFromOtherUsers } from "./fcm";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { runtimeEnvStore } = vi.hoisted(() => ({
+  runtimeEnvStore: new Map<string, string>(),
+}));
+
+vi.mock("./runtimeEnv", () => ({
+  getRuntimeEnv: (key: string) => runtimeEnvStore.get(key),
+}));
+
+vi.mock("./supabase", () => ({
+  createAdminClient: vi.fn(),
+}));
+
+import {
+  getFcmConfigStatus,
+  isFcmConfigured,
+  isStaleFcmError,
+  releaseFcmTokenFromOtherUsers,
+} from "./fcm";
 import type { createAdminClient } from "./supabase";
 
 describe("isStaleFcmError", () => {
@@ -40,5 +58,45 @@ describe("releaseFcmTokenFromOtherUsers", () => {
       { method: "eq", args: ["token", "tok-123"] },
       { method: "neq", args: ["user_id", "user-a"] },
     ]);
+  });
+});
+
+describe("FCM_SERVICE_ACCOUNT_JSON parsing", () => {
+  beforeEach(() => {
+    runtimeEnvStore.clear();
+  });
+
+  it("accepts normal service-account JSON", () => {
+    runtimeEnvStore.set(
+      "FCM_SERVICE_ACCOUNT_JSON",
+      JSON.stringify({
+        project_id: "demo",
+        client_email: "svc@demo.iam.gserviceaccount.com",
+        private_key: "-----BEGIN PRIVATE KEY-----\\nABC\\n-----END PRIVATE KEY-----\\n",
+      }),
+    );
+    expect(isFcmConfigured()).toBe(true);
+    expect(getFcmConfigStatus()).toBe("configured");
+  });
+
+  it("accepts over-escaped JSON left by a bad secrets push", () => {
+    const good = JSON.stringify({
+      project_id: "demo",
+      client_email: "svc@demo.iam.gserviceaccount.com",
+      private_key: "-----BEGIN PRIVATE KEY-----\\nABC\\n-----END PRIVATE KEY-----\\n",
+    });
+    runtimeEnvStore.set("FCM_SERVICE_ACCOUNT_JSON", good.replace(/"/g, '\\"'));
+    expect(isFcmConfigured()).toBe(true);
+    expect(getFcmConfigStatus()).toBe("configured");
+  });
+
+  it("reports invalid when JSON cannot be parsed into required fields", () => {
+    runtimeEnvStore.set("FCM_SERVICE_ACCOUNT_JSON", "{not-json");
+    expect(isFcmConfigured()).toBe(false);
+    expect(getFcmConfigStatus()).toBe("invalid");
+  });
+
+  it("reports missing when unset", () => {
+    expect(getFcmConfigStatus()).toBe("missing");
   });
 });

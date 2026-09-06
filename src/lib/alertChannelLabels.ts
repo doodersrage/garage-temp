@@ -37,3 +37,18 @@ export function formatAlertChannelsCsv(raw: string | null | undefined): string {
   if (!raw) return "";
   return formatAlertChannelList(raw.split(",").filter(Boolean));
 }
+
+/** Ops / Alerts smoke-test flash copy for skip and failure codes. */
+export function channelTestErrorMessage(code: string | null | undefined): string | null {
+  if (!code) return null;
+  if (code === "sms_no_phone") {
+    return "No SMS phone on alert settings or the override field.";
+  }
+  if (code === "sms_send_failed") {
+    return "Twilio SMS send failed. Check Twilio credentials and the destination number.";
+  }
+  if (code === "unknown_kind") {
+    return "Unknown channel test kind.";
+  }
+  return ALERT_CHANNEL_LABELS[code] ?? code.replaceAll("_", " ");
+}

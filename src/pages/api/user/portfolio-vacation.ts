@@ -23,6 +23,17 @@ function jsonResponse(body: Record<string, unknown>, status = 200): Response {
   });
 }
 
+function withFlashParams(
+  redirectTo: string,
+  params: Record<string, string | number>,
+): string {
+  const url = new URL(redirectTo, "https://thermaltrace.local");
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(key, String(value));
+  }
+  return `${url.pathname}${url.search}`;
+}
+
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { session, user } = await getAuthFromCookies(cookies);
   const asJson = wantsJson(request);
@@ -61,13 +72,13 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const { households, error } = await listUserHouseholds(user.id);
   if (error) {
     if (asJson) return jsonResponse({ error }, 500);
-    return redirect(`${redirectTo}?vacation_error=1`);
+    return redirect(withFlashParams(redirectTo, { vacation_error: 1 }));
   }
 
   const editable = households.filter((h) => canEditHousehold(h.role));
   if (editable.length === 0) {
     if (asJson) return jsonResponse({ error: "No editable properties" }, 403);
-    return redirect(`${redirectTo}?vacation_error=1`);
+    return redirect(withFlashParams(redirectTo, { vacation_error: 1 }));
   }
 
   let membersTouched = 0;
@@ -88,7 +99,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       });
     }
     return redirect(
-      `${redirectTo}?portfolio_vacation=1&days=${days}&properties=${propertiesTouched}`,
+      withFlashParams(redirectTo, {
+        portfolio_vacation: 1,
+        days,
+        properties: propertiesTouched,
+      }),
     );
   }
 
@@ -106,7 +121,10 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       });
     }
     return redirect(
-      `${redirectTo}?portfolio_vacation_cleared=1&properties=${propertiesTouched}`,
+      withFlashParams(redirectTo, {
+        portfolio_vacation_cleared: 1,
+        properties: propertiesTouched,
+      }),
     );
   }
 
