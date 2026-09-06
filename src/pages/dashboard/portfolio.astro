@@ -7,7 +7,7 @@ import { fetchCrossPropertySnapshots } from "../../lib/crossProperty";
 import { getUserEntitlements } from "../../lib/entitlements";
 import { attachPropertyHealth } from "../../lib/portfolioHealth";
 import {
-  PORTFOLIO_SORTS,
+  PORTFOLIO_SORT_OPTIONS,
   applyPortfolioListQuery,
   parsePortfolioListQuery,
   portfolioListQueryString,
@@ -221,9 +221,9 @@ const vacationProperties = flash.get("properties");
         <div class="form-field mb-0">
           <label class="form-label" for="portfolio-sort">Sort</label>
           <select class="form-input" id="portfolio-sort" name="sort">
-            {(Object.keys(PORTFOLIO_SORTS) as Array<keyof typeof PORTFOLIO_SORTS>).map((key) => (
-              <option value={key} selected={listQuery.sort === key}>
-                {PORTFOLIO_SORTS[key]}
+            {PORTFOLIO_SORT_OPTIONS.map((opt) => (
+              <option value={opt.value} selected={listQuery.sort === opt.value}>
+                {opt.label}
               </option>
             ))}
           </select>

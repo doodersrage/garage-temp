@@ -28,6 +28,14 @@ export const PORTFOLIO_SORTS = {
 
 export type PortfolioSortKey = keyof typeof PORTFOLIO_SORTS;
 
+export const PORTFOLIO_SORT_OPTIONS: Array<{
+  value: PortfolioSortKey;
+  label: string;
+}> = (Object.keys(PORTFOLIO_SORTS) as PortfolioSortKey[]).map((value) => ({
+  value,
+  label: PORTFOLIO_SORTS[value],
+}));
+
 export type PortfolioListQuery = {
   search: string;
   status: PortfolioStatusFilter | "";
