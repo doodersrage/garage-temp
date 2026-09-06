@@ -59,9 +59,6 @@ const mapPins = visible
         : 0,
   }));
 const mapPinsJson = JSON.stringify(mapPins);
-const owmApiKey = String(import.meta.env.NEXT_PUBLIC_OPENWEATHER_API_KEY ?? "")
-  .replace(/\r/g, "")
-  .trim();
 
 const siteUrl = resolveSiteUrl(Astro.site);
 const pageUrl = resolvePageUrl(siteUrl, "/freeze-map");
@@ -219,9 +216,7 @@ function trendDeltaLabel(values: number[]): string {
         <h2 class="card-title">Map</h2>
         <p class="card-subtitle mb-4">
           Pin color reflects freeze-risk share (green = low, red = high).
-          {owmApiKey
-            ? " Toggle OpenWeather temperature or precipitation under the layers control."
-            : " Only cities with coordinates are shown."}
+          Toggle OpenWeather temperature or precipitation under the layers control.
         </p>
         <div id="freeze-map-leaflet" class="weather-map-frame freeze-map-frame" style="height:22rem">
           <div class="loading-state freeze-map-loading" id="freeze-map-loading">
@@ -233,7 +228,7 @@ function trendDeltaLabel(values: number[]): string {
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           crossorigin=""
         />
-        <script is:inline define:vars={{ mapPinsJson, owmApiKey }}>
+        <script is:inline define:vars={{ mapPinsJson }}>
           (() => {
             const pins = JSON.parse(mapPinsJson);
             function init() {
@@ -250,17 +245,15 @@ function trendDeltaLabel(values: number[]): string {
               }).addTo(map);
 
               const overlays = {};
-              if (owmApiKey) {
+              {
                 const owmAttr =
                   'Weather &copy; <a href="https://openweathermap.org/">OpenWeather</a>';
                 overlays["Temperature"] = L.tileLayer(
-                  "https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=" +
-                    encodeURIComponent(owmApiKey),
+                  "/api/weather/tiles/temp_new/{z}/{x}/{y}",
                   { opacity: 0.55, maxZoom: 18, attribution: owmAttr },
                 );
                 overlays["Precipitation"] = L.tileLayer(
-                  "https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=" +
-                    encodeURIComponent(owmApiKey),
+                  "/api/weather/tiles/precipitation_new/{z}/{x}/{y}",
                   { opacity: 0.55, maxZoom: 18, attribution: owmAttr },
                 );
                 overlays["Temperature"].addTo(map);

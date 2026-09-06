@@ -5,6 +5,10 @@ import { listHouseholdDevices } from "../../../../lib/devices";
 import { buildPrometheusText } from "../../../../lib/prometheusMetrics";
 import { fetchHouseholdChartData } from "../../../../lib/garageTempsHistory";
 import { checkShareReadingsRateLimit } from "../../../../lib/shareReadingsLimits";
+import {
+  resolveShareReadingsFormat,
+  shareScopeAllowsMetrics,
+} from "../../../../lib/shareReadingsAccess";
 
 async function resolveShare(token: string) {
   const supabase = createServerClient();
@@ -49,18 +53,22 @@ export const GET: APIRoute = async ({ params, request, url, clientAddress }) => 
     });
   }
 
+  const formatResult = resolveShareReadingsFormat(
+    share.scope,
+    url.searchParams.get("format"),
+  );
+  if (!formatResult.ok) {
+    return new Response(JSON.stringify({ error: formatResult.error }), {
+      status: formatResult.status,
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
+  }
+  const { format } = formatResult;
+
   const readings = await fetchLatestSensorValues(share.household_id);
   const devices = await listHouseholdDevices(share.household_id);
 
-  const format =
-    url.searchParams.get("format") ??
-    (request.headers.get("accept")?.includes("text/plain")
-      ? "prometheus"
-      : share.scope === "metrics"
-        ? "prometheus"
-        : "json");
-
-  if (format === "prometheus" || share.scope === "metrics") {
+  if (format === "prometheus") {
     const body = await buildPrometheusText(share.household_id);
     return new Response(body, {
       status: 200,
@@ -120,10 +128,14 @@ export const GET: APIRoute = async ({ params, request, url, clientAddress }) => 
         space: d.space ?? null,
       })),
       history_points: historyPoints,
-      metrics_urls: {
-        prometheus: `/api/share/${token}/readings?format=prometheus`,
-        grafana: `/api/share/${token}/readings?format=grafana`,
-      },
+      ...(shareScopeAllowsMetrics(share.scope)
+        ? {
+            metrics_urls: {
+              prometheus: `/api/share/${token}/readings?format=prometheus`,
+              grafana: `/api/share/${token}/readings?format=grafana`,
+            },
+          }
+        : {}),
     }),
     {
       status: 200,

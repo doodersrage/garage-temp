@@ -1,11 +1,11 @@
 import { acknowledgeLatestUnackedAlert } from "./alertEvents";
 import { timingSafeEqualHex } from "./timingSafeEqual";
 
-function getAckSecret(): string {
+function getAckSecret(): string | null {
   return (
     import.meta.env.CRON_SECRET?.trim() ||
     import.meta.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
-    "dev-ack-secret"
+    null
   );
 }
 
@@ -22,7 +22,9 @@ async function hmacSha256Hex(secret: string, payload: string): Promise<string> {
 }
 
 export async function signAckPayload(userId: string, expMs: number): Promise<string> {
-  return hmacSha256Hex(getAckSecret(), `${userId}:${expMs}`);
+  const secret = getAckSecret();
+  if (!secret) throw new Error("Ack signing secret not configured");
+  return hmacSha256Hex(secret, `${userId}:${expMs}`);
 }
 
 export async function verifyAckPayload(
@@ -32,7 +34,9 @@ export async function verifyAckPayload(
 ): Promise<boolean> {
   if (!userId || !Number.isFinite(expMs) || !sig) return false;
   if (expMs < Date.now()) return false;
-  const expected = await signAckPayload(userId, expMs);
+  const secret = getAckSecret();
+  if (!secret) return false;
+  const expected = await hmacSha256Hex(secret, `${userId}:${expMs}`);
   return timingSafeEqualHex(expected, sig.toLowerCase());
 }
 

@@ -48,6 +48,7 @@ export async function createClaimsPackExport(
     content_hash: contentHash,
     pack_data: pack,
     generated_by: generatedBy,
+    expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
   });
   if (error) {
     return { token: null, contentHash: null, error: error.message };
@@ -61,8 +62,24 @@ export async function getClaimsPackExportByToken(
   const supabase = createServerClient();
   const { data } = await supabase
     .from("claims_pack_exports")
-    .select("pack_data")
+    .select("pack_data, expires_at, revoked_at")
     .eq("token", token)
     .maybeSingle();
-  return data ? (data.pack_data as ClaimsPackData) : null;
+  if (!data || data.revoked_at) return null;
+  if (data.expires_at && Date.parse(data.expires_at) < Date.now()) return null;
+  return data.pack_data as ClaimsPackData;
+}
+
+export async function revokeClaimsPackExport(
+  householdId: string,
+  token: string,
+): Promise<boolean> {
+  const supabase = createServerClient();
+  const { error } = await supabase
+    .from("claims_pack_exports")
+    .update({ revoked_at: new Date().toISOString() })
+    .eq("household_id", householdId)
+    .eq("token", token)
+    .is("revoked_at", null);
+  return !error;
 }

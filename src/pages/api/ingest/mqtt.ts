@@ -1,4 +1,6 @@
 import type { APIRoute } from "astro";
+import { readJsonBodyWithLimit } from "../../../lib/ingestLimits";
+import { resolveConfiguredSiteUrl } from "../../../lib/siteConfig";
 
 /**
  * MQTT-over-HTTP bridge: POST JSON shaped like an MQTT webhook relay.
@@ -6,8 +8,9 @@ import type { APIRoute } from "astro";
  * or:   { "topic": "...", "message": { "temp1": 42.5 } }
  *
  * Include header `X-Ingest-Key: <device-key>` to route to ingest.
+ * The key is never placed in the forwarded URL path.
  */
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, site }) => {
   const deviceKey = request.headers.get("X-Ingest-Key")?.trim();
   if (!deviceKey) {
     return new Response(JSON.stringify({ error: "Missing X-Ingest-Key header" }), {
@@ -16,15 +19,22 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  let envelope: Record<string, unknown>;
-  try {
-    envelope = await request.json();
-  } catch {
+  const body = await readJsonBodyWithLimit(request);
+  if (!body.ok) {
+    return new Response(JSON.stringify({ error: body.error }), {
+      status: body.status,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  if (!body.payload || typeof body.payload !== "object" || Array.isArray(body.payload)) {
     return new Response(JSON.stringify({ error: "Invalid JSON" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  const envelope = body.payload as Record<string, unknown>;
 
   let payload: Record<string, unknown>;
   if (envelope.message && typeof envelope.message === "object") {
@@ -47,10 +57,15 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  const origin = new URL(request.url).origin;
-  const ingestRes = await fetch(`${origin}/api/ingest/${encodeURIComponent(deviceKey)}`, {
+  // Use configured site origin (not Host-header-controlled request.url) and
+  // pass the ingest key only as a header.
+  const origin = resolveConfiguredSiteUrl(site).replace(/\/$/, "");
+  const ingestRes = await fetch(`${origin}/api/ingest/_`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "X-Ingest-Key": deviceKey,
+    },
     body: JSON.stringify(payload),
   });
 

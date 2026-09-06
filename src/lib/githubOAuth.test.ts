@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { resolveGitHubEmail, type GitHubEmail, type GitHubUser } from "./githubOAuth";
+import {
+  resolveGitHubEmail,
+  userLinkedToGitHub,
+  type GitHubEmail,
+  type GitHubUser,
+} from "./githubOAuth";
 
 const baseUser: GitHubUser = {
   id: 42,
@@ -10,10 +15,23 @@ const baseUser: GitHubUser = {
 };
 
 describe("resolveGitHubEmail", () => {
-  it("prefers the public email on the user object", () => {
+  it("uses user.email only when it appears as verified in the emails list", () => {
+    const emails: GitHubEmail[] = [
+      { email: "public@example.com", primary: true, verified: true },
+    ];
     expect(
-      resolveGitHubEmail({ ...baseUser, email: " public@example.com " }, []),
+      resolveGitHubEmail({ ...baseUser, email: " public@example.com " }, emails),
     ).toBe("public@example.com");
+  });
+
+  it("ignores unverified user.email and falls back to primary verified", () => {
+    const emails: GitHubEmail[] = [
+      { email: "public@example.com", primary: false, verified: false },
+      { email: "primary@example.com", primary: true, verified: true },
+    ];
+    expect(
+      resolveGitHubEmail({ ...baseUser, email: "public@example.com" }, emails),
+    ).toBe("primary@example.com");
   });
 
   it("falls back to primary verified email", () => {
@@ -31,7 +49,48 @@ describe("resolveGitHubEmail", () => {
     expect(resolveGitHubEmail(baseUser, emails)).toBe("verified@example.com");
   });
 
-  it("uses GitHub noreply address when no email is available", () => {
+  it("does not use unverified emails", () => {
+    const emails: GitHubEmail[] = [
+      { email: "unverified@example.com", primary: true, verified: false },
+    ];
+    expect(resolveGitHubEmail(baseUser, emails)).toBe(
+      "42+octocat@users.noreply.github.com",
+    );
+  });
+
+  it("uses GitHub noreply address when no verified email is available", () => {
     expect(resolveGitHubEmail(baseUser, [])).toBe("42+octocat@users.noreply.github.com");
+  });
+});
+
+describe("userLinkedToGitHub", () => {
+  it("accepts app_metadata.provider github", () => {
+    expect(
+      userLinkedToGitHub({ app_metadata: { provider: "github" }, user_metadata: {} }, 42),
+    ).toBe(true);
+  });
+
+  it("accepts providers array containing github", () => {
+    expect(
+      userLinkedToGitHub(
+        { app_metadata: { providers: ["email", "github"] }, user_metadata: {} },
+        42,
+      ),
+    ).toBe(true);
+  });
+
+  it("accepts matching user_metadata.github_id", () => {
+    expect(
+      userLinkedToGitHub({ app_metadata: {}, user_metadata: { github_id: 42 } }, 42),
+    ).toBe(true);
+  });
+
+  it("rejects unrelated accounts", () => {
+    expect(
+      userLinkedToGitHub(
+        { app_metadata: { provider: "email", providers: ["email"] }, user_metadata: {} },
+        42,
+      ),
+    ).toBe(false);
   });
 });

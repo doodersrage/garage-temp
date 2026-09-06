@@ -23,6 +23,8 @@ import {
   setCompanionClientCookie,
   setCompanionLoopbackCookie,
 } from "../../../../lib/companionAuth";
+import { buildMfaChallengeUrl, sessionNeedsMfaStepUp } from "../../../../lib/mfa";
+import { hasValidMfaStepUpProof } from "../../../../lib/mfaStepUpProof";
 
 const VALID_PROVIDERS = ["google", "github", "discord"] as const;
 
@@ -59,9 +61,25 @@ export const GET: APIRoute = async ({ url, cookies, redirect, request, site }) =
   cookies.delete(OAUTH_NEXT_COOKIE, { path: "/" });
   cookies.delete(OAUTH_REF_COOKIE, { path: "/" });
 
-  // Already signed in in this browser — hand session back immediately.
-  const { session } = await getAuthFromCookies(cookies);
+  // Already signed in in this browser — hand session back immediately (after MFA).
+  const { session, user } = await getAuthFromCookies(cookies);
   if (session?.access_token && session.refresh_token) {
+    const needsMfa = await sessionNeedsMfaStepUp(
+      session.access_token,
+      session.refresh_token,
+      user,
+    );
+    if (needsMfa) {
+      const hasProof =
+        !!user?.id &&
+        (await hasValidMfaStepUpProof(request, cookies, user.id));
+      if (!hasProof) {
+        // Return here after MFA; do not mint an exchange token for aal1 MFA sessions.
+        const returnTo = `${url.pathname}${url.search}`;
+        return redirect(buildMfaChallengeUrl(returnTo));
+      }
+    }
+
     const handoff = await redirectMobileOAuthComplete(
       session.access_token,
       session.refresh_token,

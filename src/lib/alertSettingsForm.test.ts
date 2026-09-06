@@ -224,6 +224,14 @@ describe("findInvalidAlertWebhookUrl", () => {
     };
     expect(findInvalidAlertWebhookUrl(settings)).toBe("readingWebhookUrl");
   });
+
+  it("rejects an unsafe ntfy server URL", () => {
+    const settings: AlertSettings = {
+      ...DEFAULT_ALERT_SETTINGS,
+      ntfyServer: "http://127.0.0.1:80",
+    };
+    expect(findInvalidAlertWebhookUrl(settings)).toBe("ntfyServer");
+  });
 });
 
 describe("isWeakTelegramSecret", () => {

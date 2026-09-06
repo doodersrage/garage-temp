@@ -35,13 +35,31 @@ export async function loadShareDashboardContext(
   const entitlements = await getUserEntitlements(user.id);
   const household = await getOrCreateHouseholdForUser(user.id, user.email);
   const supabase = createServerClient();
-  const { data: links } = household.householdId
+  const { data: rawLinks } = household.householdId
     ? await supabase
         .from("share_links")
         .select("id, token, scope, label, expires_at, created_at")
         .eq("household_id", household.householdId)
         .order("created_at", { ascending: false })
     : { data: [] };
+
+  const householdRole = household.householdId
+    ? await getUserHouseholdRole(user.id, household.householdId)
+    : null;
+  const canManage = canManageHousehold(householdRole);
+
+  const links = (rawLinks ?? []).map((link) => {
+    if (canManage) return link;
+    return {
+      id: link.id,
+      scope: link.scope,
+      label: link.label,
+      expires_at: link.expires_at,
+      created_at: link.created_at,
+      token_preview: link.token.slice(-4),
+      token: null as string | null,
+    };
+  });
 
   const apiKeys = household.householdId
     ? await listHouseholdApiKeys(household.householdId)
@@ -63,15 +81,10 @@ export async function loadShareDashboardContext(
     ? await listHouseholdActivity(household.householdId, 15)
     : [];
 
-  const householdRole = household.householdId
-    ? await getUserHouseholdRole(user.id, household.householdId)
-    : null;
-  const canManage = canManageHousehold(householdRole);
-
   const siteUrl = getSiteUrl(request);
   const webhookDeliveries = await listRecentWebhookDeliveries(user.id, 15);
-  const newToken = consumeSecretFlash(cookies, FLASH_SHARE_TOKEN);
-  const statusToken = consumeSecretFlash(cookies, FLASH_STATUS_TOKEN);
+  const newToken = canManage ? consumeSecretFlash(cookies, FLASH_SHARE_TOKEN) : null;
+  const statusToken = canManage ? consumeSecretFlash(cookies, FLASH_STATUS_TOKEN) : null;
   const newHref = newToken ? `${siteUrl}/share/${newToken}` : null;
   const newApiKey = consumeSecretFlash(cookies, FLASH_API_KEY);
 
@@ -101,7 +114,7 @@ export async function loadShareDashboardContext(
     user,
     entitlements,
     household,
-    links: links ?? [],
+    links,
     apiKeys,
     inboundWebhooks,
     statusPages,

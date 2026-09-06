@@ -87,7 +87,6 @@ export default defineConfig({
       'import.meta.env.STRIPE_PRICE_ID_PORTFOLIO': defineProcessEnv('STRIPE_PRICE_ID_PORTFOLIO'),
       'import.meta.env.STRIPE_PRICE_ID_PORTFOLIO_ANNUAL': defineProcessEnv('STRIPE_PRICE_ID_PORTFOLIO_ANNUAL'),
       'import.meta.env.YUBICO_CLIENT_ID': defineProcessEnv('YUBICO_CLIENT_ID'),
-      'import.meta.env.YUBICO_API_KEY': defineProcessEnv('YUBICO_API_KEY'),
     },
     // Pre-warm Astro Actions runtime so Cloudflare prerender doesn't race
     // a mid-build optimizeDeps reload (missing chunk-*.js in CI).
@@ -102,6 +101,8 @@ export default defineConfig({
   },
 
   security: {
+    // Keep false: companion apps and ingest clients often POST without a browser Origin.
+    // Cookie auth relies on SameSite=Lax + Turnstile on public forms.
     checkOrigin: false
   },
 

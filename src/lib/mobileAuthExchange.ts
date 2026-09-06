@@ -1,15 +1,17 @@
 import { timingSafeEqual } from "./timingSafeEqual";
+import { getRuntimeEnv } from "./runtimeEnv";
+import { createServerClient } from "./supabase";
 
 type ExchangePayload = {
   a: string;
   r: string;
   exp: number;
+  jti: string;
 };
 
 function getSecret(): string | null {
   const secret =
-    import.meta.env.CRON_SECRET?.trim() ||
-    import.meta.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+    getRuntimeEnv("MOBILE_EXCHANGE_SECRET") || getRuntimeEnv("CRON_SECRET");
   return secret || null;
 }
 
@@ -58,10 +60,25 @@ export async function createMobileExchangeToken(
   const secret = getSecret();
   if (!secret) return null;
 
+  const jti = crypto.randomUUID();
+  const expMs = Date.now() + 120_000;
+  const expiresAt = new Date(expMs).toISOString();
+
+  const supabase = createServerClient();
+  const { error } = await supabase.from("mobile_oauth_exchanges").insert({
+    jti,
+    expires_at: expiresAt,
+  });
+  if (error) {
+    console.error("Failed to record mobile OAuth exchange jti:", error.message);
+    return null;
+  }
+
   const payload: ExchangePayload = {
     a: accessToken,
     r: refreshToken,
-    exp: Date.now() + 120_000,
+    exp: expMs,
+    jti,
   };
   const payloadStr = JSON.stringify(payload);
   const signature = await sign(payloadStr, secret);
@@ -92,7 +109,27 @@ export async function verifyMobileExchangeToken(
     return null;
   }
 
-  if (!payload.a || !payload.r || !payload.exp || payload.exp < Date.now()) {
+  if (
+    !payload.a ||
+    !payload.r ||
+    !payload.exp ||
+    !payload.jti ||
+    payload.exp < Date.now()
+  ) {
+    return null;
+  }
+
+  // Consume jti (single-use). Missing row or delete failure → reject even if HMAC valid.
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("mobile_oauth_exchanges")
+    .delete()
+    .eq("jti", payload.jti)
+    .gt("expires_at", new Date().toISOString())
+    .select("jti")
+    .maybeSingle();
+
+  if (error || !data?.jti) {
     return null;
   }
 

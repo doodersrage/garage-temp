@@ -119,18 +119,21 @@ export async function completeGitHubOAuth(
   return { user, emails };
 }
 
-/** Pick the best email GitHub exposes for Supabase account creation. */
+/** Pick the best verified email GitHub exposes for Supabase account creation. */
 export function resolveGitHubEmail(user: GitHubUser, emails: GitHubEmail[]): string {
-  if (user.email?.trim()) return user.email.trim();
+  const publicEmail = user.email?.trim();
+  if (publicEmail) {
+    const verifiedPublic = emails.find(
+      (entry) => entry.verified && entry.email?.trim() === publicEmail,
+    );
+    if (verifiedPublic?.email) return verifiedPublic.email.trim();
+  }
 
   const primaryVerified = emails.find((entry) => entry.primary && entry.verified);
   if (primaryVerified?.email) return primaryVerified.email;
 
   const anyVerified = emails.find((entry) => entry.verified);
   if (anyVerified?.email) return anyVerified.email;
-
-  const anyEmail = emails.find((entry) => entry.email?.trim());
-  if (anyEmail?.email) return anyEmail.email.trim();
 
   return `${user.id}+${user.login}@users.noreply.github.com`;
 }
@@ -143,6 +146,22 @@ function isExistingUserError(error: { message?: string; status?: number }): bool
     message.includes("registered") ||
     message.includes("exists")
   );
+}
+
+/** True when an existing Supabase user is already tied to this GitHub identity. */
+export function userLinkedToGitHub(
+  user: Pick<User, "app_metadata" | "user_metadata">,
+  githubUserId: number,
+): boolean {
+  const app = (user.app_metadata ?? {}) as Record<string, unknown>;
+  if (app.provider === "github") return true;
+
+  const providers = app.providers;
+  if (Array.isArray(providers) && providers.includes("github")) return true;
+
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+  const githubId = meta.github_id;
+  return githubId === githubUserId || githubId === String(githubUserId);
 }
 
 /** Create or sign in a Supabase user from a GitHub profile and return a session. */
@@ -173,7 +192,8 @@ export async function establishSessionForGitHubProfile(
     },
   });
 
-  if (createError && !isExistingUserError(createError)) {
+  const existingUser = Boolean(createError && isExistingUserError(createError));
+  if (createError && !existingUser) {
     throw createError;
   }
 
@@ -185,6 +205,15 @@ export async function establishSessionForGitHubProfile(
   const hashedToken = link?.properties?.hashed_token;
   if (linkError || !hashedToken) {
     throw linkError ?? new Error("Could not create sign-in link");
+  }
+
+  if (existingUser) {
+    const linkedUser = link.user;
+    if (!linkedUser || !userLinkedToGitHub(linkedUser, profile.user.id)) {
+      throw new Error(
+        "Refusing GitHub sign-in: that email belongs to an existing account that is not linked to GitHub",
+      );
+    }
   }
 
   const { data: auth, error: authError } = await admin.auth.verifyOtp({

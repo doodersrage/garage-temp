@@ -44,6 +44,13 @@ describe("shouldLoadGoogleAnalytics", () => {
     expect(shouldLoadGoogleAnalytics("/api/contact", { prod: true })).toBe(false);
   });
 
+  it("skips mobile OAuth handoff path", () => {
+    expect(shouldLoadGoogleAnalytics("/app/oauth", { prod: true })).toBe(false);
+    expect(shouldLoadGoogleAnalytics("/app/oauth?exchange=abc", { prod: true })).toBe(
+      false,
+    );
+  });
+
   it("loads on post-checkout success under dashboard", () => {
     expect(
       shouldLoadGoogleAnalytics("/dashboard/history", {

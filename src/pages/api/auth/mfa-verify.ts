@@ -1,4 +1,4 @@
-import type { APIRoute } from "astro";
+import type { APIRoute, AstroCookies } from "astro";
 import { getAuthFromCookies, setAuthCookies } from "../../../lib/auth";
 import {
   createAuthClient,
@@ -7,6 +7,10 @@ import {
   needsMfaStepUp,
   setMfaRequiredCookie,
 } from "../../../lib/mfa";
+import {
+  createMfaStepUpProof,
+  setMfaStepUpCookie,
+} from "../../../lib/mfaStepUpProof";
 import { sanitizeNextPath } from "../../../lib/siteUrl";
 import {
   checkMfaVerifyRateLimit,
@@ -26,6 +30,16 @@ import {
   verifyYubiKeyOtpWithYubiCloud,
 } from "../../../lib/yubikeyOtp";
 import { maybeRedirectMobileOAuth } from "../../../lib/mobileAuthRedirect";
+
+/** Mint step-up proof after successful MFA (needed for YubiKey aal1 path). */
+async function issueMfaStepUpProof(
+  cookies: AstroCookies,
+  userId: string,
+): Promise<string | null> {
+  const token = await createMfaStepUpProof(userId);
+  if (token) setMfaStepUpCookie(cookies, token);
+  return token;
+}
 
 function buildMfaErrorRedirect(code: string, next?: string | null): string {
   const params = new URLSearchParams({ error: code });
@@ -116,12 +130,14 @@ export const POST: APIRoute = async ({ request, cookies, redirect, url }) => {
 
   if (!needsSupabaseStepUp && !needsYubiStepUp) {
     setMfaRequiredCookie(cookies, false);
+    const mfaStepup = await issueMfaStepUpProof(cookies, user.id);
     if (asJson) {
       return jsonResponse({
         ok: true,
         access_token: session.access_token,
         refresh_token: session.refresh_token,
         aal: "aal2",
+        ...(mfaStepup ? { mfa_stepup: mfaStepup } : {}),
       });
     }
     const mobileRedirect = await maybeRedirectMobileOAuth(
@@ -205,11 +221,13 @@ export const POST: APIRoute = async ({ request, cookies, redirect, url }) => {
     clearMfaVerifyFailures(user.id);
     setAuthCookies(cookies, result.accessToken, result.refreshToken);
     setMfaRequiredCookie(cookies, false);
+    const mfaStepup = await issueMfaStepUpProof(cookies, user.id);
     return jsonResponse({
       ok: true,
       access_token: result.accessToken,
       refresh_token: result.refreshToken,
       aal: "aal2",
+      ...(mfaStepup ? { mfa_stepup: mfaStepup } : {}),
     });
   }
 
@@ -249,12 +267,14 @@ export const POST: APIRoute = async ({ request, cookies, redirect, url }) => {
 
     clearMfaVerifyFailures(user.id);
     setMfaRequiredCookie(cookies, false);
+    const mfaStepup = await issueMfaStepUpProof(cookies, user.id);
     if (asJson) {
       return jsonResponse({
         ok: true,
         access_token: session.access_token,
         refresh_token: session.refresh_token,
         aal: getAalClaim(session.access_token) ?? "aal1",
+        ...(mfaStepup ? { mfa_stepup: mfaStepup } : {}),
       });
     }
     const mobileRedirect = await maybeRedirectMobileOAuth(
@@ -314,12 +334,14 @@ export const POST: APIRoute = async ({ request, cookies, redirect, url }) => {
   clearMfaVerifyFailures(user.id);
   setAuthCookies(cookies, data.access_token, data.refresh_token);
   setMfaRequiredCookie(cookies, false);
+  const mfaStepup = await issueMfaStepUpProof(cookies, user.id);
   if (asJson) {
     return jsonResponse({
       ok: true,
       access_token: data.access_token,
       refresh_token: data.refresh_token,
       aal: "aal2",
+      ...(mfaStepup ? { mfa_stepup: mfaStepup } : {}),
     });
   }
   const mobileRedirect = await maybeRedirectMobileOAuth(

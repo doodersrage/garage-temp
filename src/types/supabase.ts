@@ -420,34 +420,40 @@ export type Database = {
         Row: {
           content_hash: string
           created_at: string
+          expires_at: string | null
           generated_by: string | null
           household_id: string
           id: string
           pack_data: Json
           range_from: string
           range_to: string
+          revoked_at: string | null
           token: string
         }
         Insert: {
           content_hash: string
           created_at?: string
+          expires_at?: string | null
           generated_by?: string | null
           household_id: string
           id?: string
           pack_data: Json
           range_from: string
           range_to: string
+          revoked_at?: string | null
           token: string
         }
         Update: {
           content_hash?: string
           created_at?: string
+          expires_at?: string | null
           generated_by?: string | null
           household_id?: string
           id?: string
           pack_data?: Json
           range_from?: string
           range_to?: string
+          revoked_at?: string | null
           token?: string
         }
         Relationships: [
@@ -1642,6 +1648,24 @@ export type Database = {
           stripe_subscription_id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      mobile_oauth_exchanges: {
+        Row: {
+          created_at: string
+          expires_at: string
+          jti: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          jti: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          jti?: string
         }
         Relationships: []
       }

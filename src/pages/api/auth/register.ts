@@ -38,7 +38,7 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
   });
 
   if (error) {
-    return redirect(`/register?error=${encodeURIComponent(error.message)}`);
+    return redirect("/register?error=signup_failed");
   }
 
   if (data.user && refCode) {

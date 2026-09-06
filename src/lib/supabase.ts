@@ -10,7 +10,11 @@ function getAnonKey(): string {
 }
 
 function getServerKey(): string {
-  return import.meta.env.SUPABASE_SERVICE_ROLE_KEY ?? getAnonKey();
+  const serviceRole = import.meta.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  if (!serviceRole) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required for server client");
+  }
+  return serviceRole;
 }
 
 /**

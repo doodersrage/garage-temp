@@ -46,11 +46,13 @@ export function shouldSuppressForSnoozeOrVacation(
 }
 
 export function snoozeUntilFromHours(hours: number, now = Date.now()): string {
-  return new Date(now + hours * 60 * 60 * 1000).toISOString();
+  const clamped = Math.min(Math.max(Number.isFinite(hours) ? hours : 24, 1), 168);
+  return new Date(now + clamped * 60 * 60 * 1000).toISOString();
 }
 
 export function vacationUntilFromDays(days: number, now = Date.now()): string {
-  return new Date(now + days * 24 * 60 * 60 * 1000).toISOString();
+  const clamped = Math.min(Math.max(Number.isFinite(days) ? days : 7, 1), 90);
+  return new Date(now + clamped * 24 * 60 * 60 * 1000).toISOString();
 }
 
 /** Persist snooze on alert_settings for a user (used by ack playbook). */

@@ -45,12 +45,10 @@ async function sendTelegramReply(
   });
 }
 
-function resolveTelegramSecret(request: Request, url: URL): string {
-  const header =
-    request.headers.get("X-Telegram-Bot-Api-Secret-Token")?.trim() ?? "";
-  if (header) return header;
-  // Legacy: query string still accepted so existing setWebhook URLs keep working.
-  return url.searchParams.get("secret")?.trim() ?? "";
+function resolveTelegramSecret(request: Request, _url: URL): string {
+  // Prefer Telegram's official secret header only — query ?secret= leaks via
+  // Referer/logs and is no longer accepted.
+  return request.headers.get("X-Telegram-Bot-Api-Secret-Token")?.trim() ?? "";
 }
 
 export const POST: APIRoute = async ({ request, url, clientAddress }) => {
@@ -87,13 +85,21 @@ export const POST: APIRoute = async ({ request, url, clientAddress }) => {
     });
   }
 
-  // When a chat id is configured for alerts, only accept commands from that chat
-  // so a leaked secret cannot exfiltrate /status to an attacker chat.
-  if (settings.telegramChatId?.trim()) {
-    const expected = settings.telegramChatId.trim();
-    if (!timingSafeEqual(String(chatId), expected)) {
-      return new Response("Unauthorized", { status: 401 });
-    }
+  // Require a bound chat id so a leaked secret cannot exfiltrate /status
+  // to an attacker-controlled chat.
+  const expectedChat = settings.telegramChatId?.trim();
+  if (!expectedChat) {
+    await sendTelegramReply(
+      token,
+      chatId,
+      "Telegram commands are disabled until you save a Chat ID under Alerts.",
+    );
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  if (!timingSafeEqual(String(chatId), expectedChat)) {
+    return new Response("Unauthorized", { status: 401 });
   }
 
   const cmd = (text.split(/\s+/)[0] ?? "").toLowerCase().replace(/@\S+$/, "");

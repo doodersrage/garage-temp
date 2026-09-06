@@ -34,7 +34,12 @@ async function sha256Hex(value: string): Promise<string> {
 }
 
 export const POST: APIRoute = async ({ params, request }) => {
-  const deviceKey = params.deviceKey;
+  const headerKey = request.headers.get("X-Ingest-Key")?.trim() ?? "";
+  const pathKey = params.deviceKey?.trim() ?? "";
+  // Prefer header so bridges need not put secrets in the URL path. Path `_`
+  // is a placeholder when the key is header-only.
+  const deviceKey =
+    headerKey || (pathKey && pathKey !== "_" ? pathKey : "");
   if (!deviceKey) {
     return new Response(JSON.stringify({ error: "Missing device key" }), {
       status: 400,

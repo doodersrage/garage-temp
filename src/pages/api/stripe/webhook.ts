@@ -6,7 +6,10 @@ import {
   upsertUserSubscription,
 } from "../../../lib/stripeSubscriptions";
 import { grantReferrerRewardOnSubscription } from "../../../lib/referrals";
-import { claimStripeWebhookEvent } from "../../../lib/stripeWebhookEvents";
+import {
+  claimStripeWebhookEvent,
+  releaseStripeWebhookEvent,
+} from "../../../lib/stripeWebhookEvents";
 
 export const prerender = false;
 
@@ -132,6 +135,7 @@ export const POST: APIRoute = async ({ request }) => {
         break;
     }
   } catch (error) {
+    await releaseStripeWebhookEvent(event.id);
     const message =
       error instanceof Error ? error.message : "Webhook handler failed";
     return new Response(message, { status: 500 });

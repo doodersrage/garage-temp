@@ -8,11 +8,11 @@ import { pathRequiresAuth } from "./lib/routeAuth";
 import {
   buildMfaChallengeUrl,
   getAalClaim,
-  isMfaCheckedNotRequired,
   isMfaRequiredCookieSet,
   sessionNeedsMfaStepUp,
   setMfaRequiredCookie,
 } from "./lib/mfa";
+import { hasValidMfaStepUpProof } from "./lib/mfaStepUpProof";
 import { recordServerError } from "./lib/serverErrors";
 import { CANONICAL_HOST, LEGACY_HOSTS } from "./lib/siteConfig";
 import {
@@ -41,17 +41,10 @@ function isMfaExemptPath(pathname: string): boolean {
   );
 }
 
+/** Header "1" or cookie "1" force MFA. Never treat client header "0" as clearance. */
 function isMfaRequired(request: Request, cookies: AstroCookies): boolean {
   if (companionMfaHeaderValue(request) === "1") return true;
   return isMfaRequiredCookieSet(cookies);
-}
-
-function isMfaCheckedNotRequiredRequest(
-  request: Request,
-  cookies: AstroCookies,
-): boolean {
-  if (companionMfaHeaderValue(request) === "0") return true;
-  return isMfaCheckedNotRequired(cookies);
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
@@ -102,17 +95,28 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
         if (aal === "aal2") {
           setMfaRequiredCookie(context.cookies, false);
-        } else if (isMfaRequired(context.request, context.cookies)) {
-          needsMfa = true;
-        } else if (isMfaCheckedNotRequiredRequest(context.request, context.cookies)) {
-          needsMfa = false;
-        } else if (aal === "aal1") {
-          needsMfa = await sessionNeedsMfaStepUp(
-            session.access_token,
-            session.refresh_token,
-            user,
-          );
-          setMfaRequiredCookie(context.cookies, needsMfa);
+        } else {
+          const hasStepUp =
+            !!userId &&
+            (await hasValidMfaStepUpProof(
+              context.request,
+              context.cookies,
+              userId,
+            ));
+
+          if (hasStepUp) {
+            needsMfa = false;
+          } else if (isMfaRequired(context.request, context.cookies)) {
+            needsMfa = true;
+          } else if (aal === "aal1") {
+            // Never trust cookie/header "0" alone for aal1 — always re-check.
+            needsMfa = await sessionNeedsMfaStepUp(
+              session.access_token,
+              session.refresh_token,
+              user,
+            );
+            setMfaRequiredCookie(context.cookies, needsMfa);
+          }
         }
 
         if (needsMfa) {
@@ -127,7 +131,28 @@ export const onRequest = defineMiddleware(async (context, next) => {
       }
     }
 
-    return await next();
+    const response = await next();
+    const headers = new Headers(response.headers);
+    if (!headers.has("X-Content-Type-Options")) {
+      headers.set("X-Content-Type-Options", "nosniff");
+    }
+    if (!headers.has("Referrer-Policy")) {
+      headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    }
+    if (!headers.has("X-Frame-Options")) {
+      headers.set("X-Frame-Options", "SAMEORIGIN");
+    }
+    if (!headers.has("Permissions-Policy")) {
+      headers.set(
+        "Permissions-Policy",
+        "camera=(), microphone=(), geolocation=()",
+      );
+    }
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
   } catch (error) {
     // Avoid recursive logging when serving the error page itself.
     if (pathname !== "/500") {

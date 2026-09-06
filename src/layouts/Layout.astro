@@ -38,6 +38,8 @@ interface Props {
   skipAuth?: boolean;
   /** When true, emit noindex,nofollow (error pages, private-ish surfaces). */
   noindex?: boolean;
+  /** Optional Referrer-Policy meta (e.g. no-referrer for token handoff pages). */
+  referrerPolicy?: string;
   /** Include SoftwareApplication JSON-LD (home / product pages). */
   softwareApplication?: boolean;
   /** CSS selectors for SpeakableSpecification on the WebPage schema. */
@@ -58,6 +60,7 @@ const {
   ogImageAlt,
   skipAuth = false,
   noindex = false,
+  referrerPolicy,
   softwareApplication = false,
   speakableSelectors,
   ogType = "website",
@@ -144,6 +147,7 @@ const registerServiceWorker =
 		<meta name="viewport" content="width=device-width" />
 		<meta name="description" content={metaDescription} />
 		{noindex && <meta name="robots" content="noindex, nofollow" />}
+		{referrerPolicy && <meta name="referrer" content={referrerPolicy} />}
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<link rel="apple-touch-icon" href="/icon-192.png" />

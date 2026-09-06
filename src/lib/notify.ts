@@ -117,8 +117,12 @@ async function sendNtfy(
   title: string,
   body: string,
 ): Promise<void> {
+  const base = server.replace(/\/$/, "");
+  if (!isSafeHttpsUrl(base)) {
+    console.error("Refusing to send ntfy notification: unsafe URL");
+    return;
+  }
   try {
-    const base = server.replace(/\/$/, "");
     await fetch(`${base}/${encodeURIComponent(topic)}`, {
       method: "POST",
       headers: {

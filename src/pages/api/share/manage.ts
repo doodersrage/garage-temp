@@ -19,6 +19,12 @@ function randomToken(): string {
   return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+function maskShareLinkToken(token: string) {
+  return {
+    token_preview: token.slice(-4),
+  };
+}
+
 export const GET: APIRoute = async ({ request, cookies }) => {
   const { user } = await getAuthFromRequest(request, cookies);
   if (!user) {
@@ -36,6 +42,9 @@ export const GET: APIRoute = async ({ request, cookies }) => {
     });
   }
 
+  const manager = await requireHouseholdManager(user.id);
+  const canManage = manager.ok;
+
   const supabase = createServerClient();
   const { data, error } = await supabase
     .from("share_links")
@@ -50,7 +59,13 @@ export const GET: APIRoute = async ({ request, cookies }) => {
     });
   }
 
-  return new Response(JSON.stringify({ links: data ?? [] }), {
+  const links = (data ?? []).map((link) => {
+    if (canManage) return link;
+    const { token, ...rest } = link;
+    return { ...rest, ...maskShareLinkToken(token) };
+  });
+
+  return new Response(JSON.stringify({ links }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });

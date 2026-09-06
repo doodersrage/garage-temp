@@ -27,10 +27,18 @@ describe("pathRequiresAuth", () => {
     expect(pathRequiresAuth("/api/ical/outlook")).toBe(true);
     expect(pathRequiresAuth("/api/auth/update-password")).toBe(true);
     expect(pathRequiresAuth("/api/auth/mfa-manage")).toBe(true);
+    expect(pathRequiresAuth("/api/auth/companion/complete")).toBe(true);
+    expect(pathRequiresAuth("/api/integrations/nest/connect")).toBe(true);
+    expect(pathRequiresAuth("/api/integrations/ecobee/callback")).toBe(true);
+    expect(pathRequiresAuth("/api/integrations/thermostat")).toBe(true);
     expect(pathRequiresAuth("/api/pucks/register")).toBe(true);
     expect(pathRequiresAuth("/api/pucks/claim/start")).toBe(true);
     expect(pathRequiresAuth("/api/bays/garage/mood")).toBe(true);
     expect(pathRequiresAuth("/_actions/updateAlertSettings")).toBe(true);
+  });
+
+  it("keeps companion start public so unsigned OAuth can begin", () => {
+    expect(pathRequiresAuth("/api/auth/companion/start")).toBe(false);
   });
 
   it("keeps token-based alert links public", () => {

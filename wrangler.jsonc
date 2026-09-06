@@ -6,7 +6,7 @@
 	],
 	"name": "garage-temp",
 	"main": "./src/worker.ts",
-	"workers_dev": true,
+	"workers_dev": false,
 	"assets": {
 		"directory": "./dist/client",
 		"binding": "ASSETS",

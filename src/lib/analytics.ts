@@ -13,7 +13,7 @@ export const ANALYTICS_CSP_SCRIPT_HOSTS = [
   "https://analytics.ahrefs.com",
 ] as const;
 
-const ANALYTICS_EXCLUDED_PREFIXES = ["/dashboard", "/api/"];
+const ANALYTICS_EXCLUDED_PREFIXES = ["/dashboard", "/api/", "/app/oauth"];
 
 export function resolveGaMeasurementId(
   env?: Pick<ImportMetaEnv, "GA_MEASUREMENT_ID">,

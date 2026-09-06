@@ -23,6 +23,8 @@ const protectedApiPrefixes = [
   "/api/ical",
   "/api/auth/update-password",
   "/api/auth/mfa-manage",
+  "/api/auth/companion",
+  "/api/integrations",
   "/api/pucks",
   "/api/bays",
 ];
@@ -33,6 +35,8 @@ const publicApiExactPaths = new Set([
   "/api/home/demo-temps",
   "/api/home/weather",
   "/api/feeds/example",
+  // Companion start must work before a browser session exists (sets cookies, then OAuth).
+  "/api/auth/companion/start",
 ]);
 
 /** Public API path prefixes (e.g. token-based inbound webhooks). */

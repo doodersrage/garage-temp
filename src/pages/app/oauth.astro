@@ -25,6 +25,9 @@ if (exchange && loopback) {
   return Astro.redirect(buildLoopbackOAuthUrl(loopback, exchange));
 }
 
+Astro.response.headers.set("Cache-Control", "no-store");
+Astro.response.headers.set("Referrer-Policy", "no-referrer");
+
 const intentUrl =
   exchange && !isBayBuddy && !isDesktop ? buildMobileOAuthIntentUrl(exchange) : "";
 const customUrl = exchange
@@ -72,6 +75,7 @@ const missingHint = isBayBuddy
   description={description}
   noindex
   skipAuth
+  referrerPolicy="no-referrer"
 >
   <article class="card max-w-lg mx-auto my-8">
     {

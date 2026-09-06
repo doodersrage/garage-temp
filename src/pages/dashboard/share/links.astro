@@ -155,8 +155,16 @@ const analyticsEvents = Astro.url.searchParams.get("created")
         ) : (
           <ul class="space-y-4">
             {(links ?? []).map((link) => {
-              const href = `${siteUrl}/share/${link.token}`;
-              const isNew = newToken === link.token;
+              const preview =
+                "token_preview" in link && link.token_preview
+                  ? String(link.token_preview)
+                  : link.token
+                    ? link.token.slice(-4)
+                    : "????";
+              const href =
+                canManage && link.token ? `${siteUrl}/share/${link.token}` : null;
+              const maskedHref = `${siteUrl}/share/••••${preview}`;
+              const isNew = Boolean(canManage && newToken && link.token === newToken);
               const expired =
                 Boolean(link.expires_at) &&
                 Date.parse(link.expires_at as string) <= Date.now();
@@ -174,10 +182,14 @@ const analyticsEvents = Astro.url.searchParams.get("created")
                     {isNew && <span class="feed-health-ok ml-2">New</span>}
                     {expired && <span class="feed-health-error ml-2">Expired</span>}
                     <p class="m-0 text-sm break-all">
-                      {expired ? (
-                        <span class="text-[var(--color-text-muted)]">{href}</span>
+                      {href ? (
+                        expired ? (
+                          <span class="text-[var(--color-text-muted)]">{href}</span>
+                        ) : (
+                          <a href={href}>{href}</a>
+                        )
                       ) : (
-                        <a href={href}>{href}</a>
+                        <span class="text-[var(--color-text-muted)]">{maskedHref}</span>
                       )}
                     </p>
                     <p class="m-0 text-sm text-[var(--color-text-muted)]">
@@ -188,19 +200,19 @@ const analyticsEvents = Astro.url.searchParams.get("created")
                           : ` · Expires ${new Date(link.expires_at).toLocaleDateString()}`
                         : " · No expiry"}
                     </p>
-                    {link.scope === "live" && !expired && (
+                    {canManage && link.token && link.scope === "live" && !expired && (
                       <p class="m-0 text-sm break-all text-[var(--color-text-muted)]">
                         Embed: {siteUrl}/embed/{link.token}
                       </p>
                     )}
-                    {link.scope === "metrics" && !expired && (
+                    {canManage && link.token && link.scope === "metrics" && !expired && (
                       <p class="m-0 text-sm break-all text-[var(--color-text-muted)]">
                         Scrape: {siteUrl}/api/share/{link.token}/readings?format=prometheus
                       </p>
                     )}
                   </div>
                   <div class="flex flex-wrap gap-2">
-                    {!expired && (
+                    {canManage && href && !expired && (
                       <button
                         type="button"
                         class="btn-secondary"
@@ -210,14 +222,16 @@ const analyticsEvents = Astro.url.searchParams.get("created")
                         Copy link
                       </button>
                     )}
-                    <form action="/api/share/manage" method="post">
-                      <input type="hidden" name="action" value="revoke" />
-                      <input type="hidden" name="id" value={link.id} />
-                      <input type="hidden" name="redirect" value={redirectTo} />
-                      <button class="btn-ghost" type="submit" onclick="return confirm('Revoke this share link?');">
-                        {expired ? "Remove" : "Revoke"}
-                      </button>
-                    </form>
+                    {canManage && (
+                      <form action="/api/share/manage" method="post">
+                        <input type="hidden" name="action" value="revoke" />
+                        <input type="hidden" name="id" value={link.id} />
+                        <input type="hidden" name="redirect" value={redirectTo} />
+                        <button class="btn-ghost" type="submit" onclick="return confirm('Revoke this share link?');">
+                          {expired ? "Remove" : "Revoke"}
+                        </button>
+                      </form>
+                    )}
                   </div>
                 </li>
               );

@@ -31,3 +31,19 @@ export async function claimStripeWebhookEvent(
   console.error("Failed to record Stripe webhook event id:", error.message);
   return { alreadyProcessed: false };
 }
+
+/**
+ * Release a claimed event id so Stripe can retry after a handler failure.
+ * Without this, a 500 after a successful claim would permanently drop the event.
+ */
+export async function releaseStripeWebhookEvent(eventId: string): Promise<void> {
+  const supabase = createServerClient();
+  const { error } = await supabase
+    .from("stripe_webhook_events")
+    .delete()
+    .eq("id", eventId);
+
+  if (error) {
+    console.error("Failed to release Stripe webhook event id:", error.message);
+  }
+}

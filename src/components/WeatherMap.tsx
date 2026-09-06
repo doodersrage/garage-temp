@@ -80,13 +80,11 @@ export default function WeatherMap({
   lat,
   lon,
   label,
-  owmApiKey = null,
   zoom = 10,
 }: Props) {
   const mapId = useId().replace(/:/g, "");
   const containerId = `weather-map-${mapId}`;
   const mapRef = useRef<LeafletMap | null>(null);
-  const key = owmApiKey?.trim() || "";
 
   useEffect(() => {
     let cancelled = false;
@@ -118,15 +116,16 @@ export default function WeatherMap({
           subdomains: "abc",
         }).addTo(map);
 
-        if (key) {
+        // Same-origin tile proxy keeps the OpenWeather key server-side.
+        {
           const owmAttr =
             'Weather &copy; <a href="https://openweathermap.org/">OpenWeather</a>';
           const tempLayer = L.tileLayer(
-            `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${encodeURIComponent(key)}`,
+            "/api/weather/tiles/temp_new/{z}/{x}/{y}",
             { opacity: 0.55, maxZoom: 18, attribution: owmAttr },
           ).addTo(map);
           const precipLayer = L.tileLayer(
-            `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${encodeURIComponent(key)}`,
+            "/api/weather/tiles/precipitation_new/{z}/{x}/{y}",
             { opacity: 0.55, maxZoom: 18, attribution: owmAttr },
           );
           L.control
@@ -157,7 +156,7 @@ export default function WeatherMap({
       mapRef.current?.remove();
       mapRef.current = null;
     };
-  }, [containerId, key, label, lat, lon, zoom]);
+  }, [containerId, label, lat, lon, zoom]);
 
   return (
     <figure class="weather-map mb-6">
