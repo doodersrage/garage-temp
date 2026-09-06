@@ -175,8 +175,7 @@ export default function WeatherMap({
         </a>
         <span class="text-[var(--color-text-muted)]">
           {" "}
-          · © OpenStreetMap
-          {key ? " · weather © OpenWeather" : ""}
+          · © OpenStreetMap · weather © OpenWeather
         </span>
       </figcaption>
     </figure>
