@@ -56,7 +56,7 @@ describe("aboutPhotos", () => {
   });
 
   it("labels compare hub photos to alternatives", () => {
-    expect(compareHubPhotos).toHaveLength(4);
+    expect(compareHubPhotos).toHaveLength(5);
     for (const item of compareHubPhotos) {
       expect(item.label.length).toBeGreaterThan(3);
       expect(item.href).toMatch(/^\/compare\//);
