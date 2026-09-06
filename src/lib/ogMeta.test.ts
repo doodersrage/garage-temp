@@ -19,6 +19,9 @@ describe("ogMeta", () => {
     );
     expect(resolveOgImagePath("/docs/api")).toBe("/og-api.jpg");
     expect(resolveOgImagePath("/android")).toBe("/og-android.jpg");
+    expect(resolveOgImagePath("/apps")).toBe("/og-android.jpg");
+    expect(resolveOgImagePath("/bay-buddy")).toBe("/og-android.jpg");
+    expect(resolveOgImagePath("/desktop")).toBe("/og-android.jpg");
     expect(resolveOgImagePath("/accessories")).toBe("/og-about.jpg");
     expect(resolveOgImagePath("/claim-puck")).toBe("/og-about.jpg");
     expect(resolveOgImagePath("/probe-mount-kit")).toBe("/og-about.jpg");
@@ -44,5 +47,6 @@ describe("ogMeta", () => {
     expect(resolveOgImageAlt("/demo")).toMatch(/probe temperature curves/i);
     expect(resolveOgImageAlt("/guides")).toMatch(/guides for probes/i);
     expect(resolveOgImageAlt("/claim-puck")).toMatch(/accessories/i);
+    expect(resolveOgImageAlt("/apps")).toMatch(/companion apps/i);
   });
 });

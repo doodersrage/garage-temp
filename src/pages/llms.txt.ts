@@ -26,6 +26,10 @@ ${BRAND_NAME} (${BRAND_TAGLINE}) is open-source software. It does not sell hardw
 - About index: ${siteUrl}/about
 - ESP32 freeze kit BOM: ${siteUrl}/about/esp32-freeze-kit
 - Accessories: ${siteUrl}/accessories
+- Companion apps: ${siteUrl}/apps
+- Android companion: ${siteUrl}/android
+- ThermalTrace Desktop: ${siteUrl}/desktop
+- Bay Buddy: ${siteUrl}/bay-buddy
 - Claim puck: ${siteUrl}/claim-puck
 - Probe simulator: ${siteUrl}/about/probe-demo
 - HTTP API: ${siteUrl}/docs/api
@@ -39,8 +43,6 @@ ${BRAND_NAME} (${BRAND_TAGLINE}) is open-source software. It does not sell hardw
 - Compare alternatives: ${siteUrl}/compare
 - Stories: ${siteUrl}/stories
 - Home Assistant: ${siteUrl}/integrations/home-assistant
-- Android companion: ${siteUrl}/android
-- Bay Buddy: ${siteUrl}/bay-buddy
 - Privacy: ${siteUrl}/privacy
 - Terms: ${siteUrl}/terms
 - GitHub: https://github.com/doodersrage/thermaltrace

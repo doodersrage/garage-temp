@@ -36,7 +36,7 @@ export const marketingFaqs = {
     {
       question: "Is there a ThermalTrace Android app?",
       answer:
-        "A native Android app is available in early access on GitHub while Google Play review finishes. You can also use the full web dashboard or install the Progressive Web App. On the desktop, ThermalTrace Desktop is the full companion dashboard (thermaltrace.dev/desktop), and Bay Buddy is a glanceable freeze/flood mood companion (thermaltrace.dev/bay-buddy). The phone and desktop apps do not sense temperature: they connect to your ThermalTrace account.",
+        "A native Android app is available in early access on GitHub while Google Play review finishes. You can also use the full web dashboard or install the Progressive Web App. Companion clients (Android, Desktop, Bay Buddy, PWA) are listed at thermaltrace.dev/apps. The phone and desktop apps do not sense temperature: they connect to your ThermalTrace account.",
     },
     {
       question: "Where is ThermalTrace hosted?",
@@ -268,6 +268,23 @@ export const marketingFaqs = {
       question: "Do Amazon buy links include affiliate tags?",
       answer:
         "When configured, Amazon URLs may include an Associates tag. Adafruit links stay direct. ThermalTrace may earn a commission from qualifying Amazon purchases at no extra cost to you.",
+    },
+  ],
+  apps: [
+    {
+      question: "Do companion apps measure temperature?",
+      answer:
+        "No. Android, Desktop, Bay Buddy, and the PWA are clients for your ThermalTrace account. ESP/Arduino probes (or HTTPS feeds) push readings; apps sign in and display them.",
+    },
+    {
+      question: "Which app should I install first?",
+      answer:
+        "Phone: Android companion or the PWA. Desk full dashboard: ThermalTrace Desktop. Glanceable freeze/flood mood on a second monitor: Bay Buddy. Catalog: thermaltrace.dev/apps.",
+    },
+    {
+      question: "Where are hardware accessories?",
+      answer:
+        "Claim puck, leak pads, door contacts, and mounts live under thermaltrace.dev/accessories — separate from companion apps.",
     },
   ],
   alertBeacon: [

@@ -40,6 +40,8 @@ Allow: /terms
 Allow: /system-status
 Allow: /android
 Allow: /bay-buddy
+Allow: /desktop
+Allow: /apps
 Allow: /badge/
 Allow: /openapi.yaml
 Allow: /llms.txt

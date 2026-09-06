@@ -8,6 +8,7 @@ describe("sitemapPages", () => {
     expect(paths).toContain("/about/temperature-probes");
     expect(paths).toContain("/guides");
     expect(paths).toContain("/docs/api");
+    expect(paths).toContain("/apps");
     expect(paths).toContain("/android");
     expect(paths).toContain("/bay-buddy");
     expect(paths).toContain("/desktop");

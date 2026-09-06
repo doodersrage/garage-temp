@@ -15,6 +15,14 @@ export function resolveOgImagePath(pathname: string): string {
     return "/og-pricing.jpg";
   }
   if (
+    path.startsWith("/apps") ||
+    path.startsWith("/android") ||
+    path.startsWith("/desktop") ||
+    path.startsWith("/bay-buddy")
+  ) {
+    return "/og-android.jpg";
+  }
+  if (
     path.startsWith("/accessories") ||
     path.startsWith("/claim-puck") ||
     path.startsWith("/alert-beacon") ||
@@ -22,8 +30,7 @@ export function resolveOgImagePath(pathname: string): string {
     path.startsWith("/leak-puck") ||
     path.startsWith("/power-nudge") ||
     path.startsWith("/kit-labels") ||
-    path.startsWith("/probe-mount-kit") ||
-    path.startsWith("/bay-buddy")
+    path.startsWith("/probe-mount-kit")
   ) {
     return "/og-about.jpg";
   }
@@ -70,6 +77,14 @@ export function resolveOgImageAlt(pathname: string): string {
     return `${BRAND_NAME} plans and pricing: Free, Member, Pro, and Portfolio freeze and flood/leak alert tiers`;
   }
   if (
+    path.startsWith("/apps") ||
+    path.startsWith("/android") ||
+    path.startsWith("/desktop") ||
+    path.startsWith("/bay-buddy")
+  ) {
+    return `${BRAND_NAME} companion apps: Android, Desktop, Bay Buddy, and PWA clients for your account`;
+  }
+  if (
     path.startsWith("/accessories") ||
     path.startsWith("/claim-puck") ||
     path.startsWith("/alert-beacon") ||
@@ -77,8 +92,7 @@ export function resolveOgImageAlt(pathname: string): string {
     path.startsWith("/leak-puck") ||
     path.startsWith("/power-nudge") ||
     path.startsWith("/kit-labels") ||
-    path.startsWith("/probe-mount-kit") ||
-    path.startsWith("/bay-buddy")
+    path.startsWith("/probe-mount-kit")
   ) {
     return `${BRAND_NAME} hardware accessories: claim puck, mood lights, door/leak contacts, and freeze-kit mounts`;
   }

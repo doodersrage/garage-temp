@@ -106,6 +106,11 @@ const GUIDE_HUB_DEFS: GuideHubCategoryDef[] = [
       { href: "/about/accounts-and-dashboard", slug: "accounts-and-dashboard" },
       { href: "/about/install-pwa", slug: "install-pwa" },
       {
+        href: "/apps",
+        label: "Companion apps",
+        summary: "Android, Desktop, Bay Buddy, and PWA clients for your account.",
+      },
+      {
         href: "/android",
         label: "Android app (early access)",
         summary: "GitHub build/sideload while Play review finishes; PWA works today.",

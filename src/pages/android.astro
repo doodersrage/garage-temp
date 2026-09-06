@@ -25,6 +25,7 @@ const software = getSoftwareApplicationSchema(siteUrl);
 const schema = [
   getBreadcrumbSchema(siteUrl, [
     { name: "Home", path: "/" },
+    { name: "Apps", path: "/apps" },
     { name: "Android app", path: "/android" },
   ]),
   {
@@ -209,5 +210,9 @@ const description = playStoreLive
       faqs={androidFaqs}
       lede="Straight answers for Play reviewers and homeowners waiting on the listing."
     />
+
+    <p class="mb-0 text-sm">
+      <a class="text-link" href="/apps">← All companion apps</a>
+    </p>
   </div>
 </Layout>
